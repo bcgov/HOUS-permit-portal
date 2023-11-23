@@ -44,5 +44,10 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  gem 'prettier_print', '~> 1.2'
+  gem 'syntax_tree', '~> 6.2'
+  gem 'syntax_tree-haml', '~> 4.0'
+  gem 'syntax_tree-rbs', '~> 1.0'
 end
 
