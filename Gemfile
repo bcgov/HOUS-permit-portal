@@ -51,3 +51,5 @@ group :development do
   gem 'syntax_tree-rbs', '~> 1.0'
 end
 
+
+gem "factory_bot", "~> 6.4"
