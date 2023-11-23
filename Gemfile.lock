@@ -98,6 +98,8 @@ GEM
       ruby2_keywords
     dry-cli (1.0.0)
     erubi (1.12.0)
+    factory_bot (6.4.2)
+      activesupport (>= 5.0.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
     haml (6.2.3)
@@ -247,6 +249,7 @@ GEM
 
 PLATFORMS
   aarch64-linux
+  arm64-darwin-21
   arm64-darwin-22
   x86_64-linux
 
@@ -254,6 +257,7 @@ DEPENDENCIES
   bootsnap
   debug
   dotenv-rails (= 2.8.1)
+  factory_bot (~> 6.4)
   pg (~> 1.1)
   prettier_print (~> 1.2)
   puma (>= 5.0)
@@ -270,4 +274,4 @@ RUBY VERSION
    ruby 3.2.2p53
 
 BUNDLED WITH
-   2.4.22
+   2.4.10
