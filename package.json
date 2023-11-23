@@ -1,0 +1,9 @@
+{
+  "engines": {
+    "node": ">=v20.10.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.2",
+    "vite-plugin-ruby": "^5.0.0"
+  }
+}
