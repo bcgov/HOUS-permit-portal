@@ -5,7 +5,7 @@ export default {
   rubyArrayLiteral: true,
   rubyHashLabel: true,
   rubyModifier: true,
-  rubySingleQuote: true,
+  rubySingleQuote: false,
   rubyToProc: true,
   tabWidth: 2,
   trailingComma: "es5",
