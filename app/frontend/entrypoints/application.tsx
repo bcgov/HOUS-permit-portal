@@ -1,6 +1,6 @@
 // organize-imports-ignore - otherwise, react import is removed
 
-import { ChakraProvider } from "@chakra-ui/react"
+import { ChakraProvider, Flex } from "@chakra-ui/react"
 import { Global } from "@emotion/react"
 import { Navigation } from "../components/domains/navigation"
 import { Provider, setupRootStore } from "../setup/root"
@@ -9,18 +9,29 @@ import theme from "../styles/theme"
 import React from "react"
 import { setupReactotron } from "../setup/reactotron"
 import { createRoot } from "react-dom/client"
+import { useLanguageChange } from "../i18n/use-language-change"
+import { NavBar } from "../components/domains/navigation/nav-bar"
+import "../i18n/i18n"
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
   const root = createRoot(container!)
-  root.render(
-    <ChakraProvider theme={theme}>
-      <Provider value={rootStore}>
-        <Global styles={GlobalStyles} />
-        <Navigation />
-      </Provider>
-    </ChakraProvider>
-  )
+
+  const RootComponent = () => {
+    useLanguageChange()
+    return (
+      <ChakraProvider theme={theme}>
+        <Provider value={rootStore}>
+          <Global styles={GlobalStyles} />
+          <Flex flexDirection="column" minH="100vh" className="outerFlex" bg="gray.200">
+            <NavBar />
+            <Navigation />
+          </Flex>
+        </Provider>
+      </ChakraProvider>
+    )
+  }
+  root.render(<RootComponent />)
 }
 
 document.addEventListener("DOMContentLoaded", () => {
