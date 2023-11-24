@@ -17,11 +17,13 @@ export const SessionStoreModel = types
   }))
   .actions((self) => ({}))
   .actions((self) => ({
-    handleLogin(response, opts = { redirectToRoot: false }) {
+    handleLogin(response) {
       if (response.ok) {
         const user = response.data.data
         self.rootStore.userStore.setCurrentUser(user)
+        return true
       }
+      return false
     },
     handleForgotPasswordRequest: flow(function* (params) {
       const response = yield self.environment.api.requestPasswordReset(params)
@@ -44,7 +46,7 @@ export const SessionStoreModel = types
     }),
     login: flow(function* (email, password) {
       const response: any = yield self.environment.api.login(email, password)
-      self.handleLogin(response)
+      return self.handleLogin(response)
     }),
     logout: flow(function* () {
       const response: any = yield self.environment.api.logout()

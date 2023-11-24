@@ -76,6 +76,7 @@ GEM
       minitest (>= 5.1)
       mutex_m
       tzinfo (~> 2.0)
+    awesome_print (1.9.2)
     base64 (0.2.0)
     bcrypt (3.1.20)
     bigdecimal (3.1.4)
@@ -292,8 +293,10 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-22
 
 DEPENDENCIES
+  awesome_print (~> 1.9)
   blueprinter (~> 0.30.0)
   bootsnap
   debug
