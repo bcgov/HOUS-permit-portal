@@ -40,5 +40,6 @@ export function useMst(): IRootStore {
 
 export function useServerAPI() {
   const store = useContext(RootStoreContext) as IRootStore
+  // @ts-ignore
   return store.environment.api
 }
