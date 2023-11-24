@@ -29,9 +29,18 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+# Authentication
+gem 'devise', '4.9.3'
+gem 'devise-jwt', '0.8.1'
+gem 'devise-jwt-cookie', '0.5.1'
+gem "dry-container", "0.8.0"
+
+gem "blueprinter", "~> 0.30.0"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+  gem "pry-byebug", "~> 3.10.1"
   gem 'rspec-rails', '~> 6.1.0'
 end
 
