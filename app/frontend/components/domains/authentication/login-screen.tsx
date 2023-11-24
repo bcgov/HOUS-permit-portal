@@ -16,6 +16,7 @@ import {
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { CenterContainer } from "../../shared/center-container"
 
@@ -28,8 +29,10 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
     sessionStore: { login },
   } = useMst()
 
+  const navigate = useNavigate()
+
   const onSubmit = (formData) => {
-    login(formData.username, formData.password)
+    if (login(formData.username, formData.password)) navigate("/")
   }
 
   const [showPassword, setShowPassword] = useState(false)
@@ -79,14 +82,18 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
           </Box>
 
           <HStack gap={4}>
-            <Button type="submit">{t("login.login")}</Button>
-            <Button variant="outline">{t("ui.back")}</Button>
+            <Button type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
+              {t("login.login")}
+            </Button>
+            <Button variant="outline" isDisabled={formState.isSubmitting}>
+              {t("ui.back")}
+            </Button>
           </HStack>
 
           <Flex gap={2}>
-            <Link>{t("login.forgotYourPassword")}</Link>
+            <Link>{t("login.forgot")}</Link>
             {" | "}
-            <Link>{t("login.registerForAccount")}</Link>
+            <Link>{t("login.register")}</Link>
           </Flex>
         </Flex>
       </form>
