@@ -34,6 +34,10 @@ export class Api {
     return this.client.post<IUserResponse>("/login", { user: { email, password } })
   }
 
+  async signUp(formData) {
+    return this.client.post<IUserResponse>("/signup", { user: formData })
+  }
+
   async logout() {
     return this.client.delete("/logout")
   }
