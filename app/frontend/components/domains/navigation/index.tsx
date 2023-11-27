@@ -3,10 +3,9 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { FlashMessage } from "../../shared/flash-message"
-
-const LoginScreen = React.lazy(() =>
-  import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
-)
+import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
+import { LoginScreen } from "../authentication/login-screen"
+import { RegisterScreen } from "../authentication/register-screen"
 
 export const Navigation = observer(() => {
   return (
@@ -30,6 +29,8 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
   return (
     <Routes location={location}>
       <Route path="/login" element={<LoginScreen />} />
+      <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+      <Route path="/register" element={<RegisterScreen />} />
       <Route path="/" element={<Heading>Housing Permit Portal!</Heading>} />
     </Routes>
   )

@@ -1,5 +1,5 @@
 import { values } from "mobx"
-import { Instance, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -39,6 +39,9 @@ export const UserStoreModel = types
       self.usersMap.put(user)
       self.currentUser = user.id
     },
+    signUp: flow(function* (formData) {
+      return yield self.environment.api.signUp(formData)
+    }),
   }))
   .actions((self) => ({}))
 

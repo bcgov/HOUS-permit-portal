@@ -15,7 +15,6 @@ export const SessionStoreModel = types
       self.loggedIn = false
     }),
   }))
-  .actions((self) => ({}))
   .actions((self) => ({
     handleLogin(response) {
       if (response.ok) {
