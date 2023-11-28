@@ -37,13 +37,6 @@ export const SessionStoreModel = types
       const response: any = yield self.environment.api.validateToken() // now try to validate this with the server
       self.handleLogin(response)
     }),
-    validateCredentials: flow(function* (email, password) {
-      const response: any = yield self.environment.api.login(email, password)
-      if (response.ok) {
-        if (!self.loggedIn) yield self.environment.api.logout()
-        return response.data.data
-      }
-    }),
     login: flow(function* (email, password) {
       const response: any = yield self.environment.api.login(email, password)
       return self.handleLogin(response)

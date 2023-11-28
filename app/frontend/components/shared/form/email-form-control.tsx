@@ -2,17 +2,18 @@ import { Flex, FormControl, FormControlProps, FormErrorMessage, FormLabel, Input
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { EMAIL_REGEX } from "../../../constants"
 
 interface IEmailFormControlProps extends FormControlProps {
   validate?: boolean
 }
 
-export const EmailFormControl = ({ validate, ...rest }: IEmailFormControlProps) => {
+export const EmailFormControl = ({ ...rest }: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
 
   return (
-    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.email} {...rest}>
+    <FormControl mb={4} isInvalid={!!formState?.errors?.email} {...rest}>
       <FormLabel>{t("auth.emailLabel")}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
@@ -20,7 +21,7 @@ export const EmailFormControl = ({ validate, ...rest }: IEmailFormControlProps) 
             {...register("email", {
               required: true,
               validate: {
-                matchesEmailRegex: (str) => !validate || /\A[^@\s]+@[^@\s]+\z/.test(str) || t("ui.invalidInput"),
+                matchesEmailRegex: (str) => EMAIL_REGEX.test(str) || t("ui.invalidInput"),
               },
             })}
             type={"text"}

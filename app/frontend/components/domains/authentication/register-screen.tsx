@@ -1,7 +1,9 @@
 import {
   Box,
   Button,
+  Center,
   Checkbox,
+  Container,
   Flex,
   FormControl,
   FormHelperText,
@@ -14,10 +16,8 @@ import {
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
-import { CenterContainer } from "../../shared/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
@@ -31,14 +31,14 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
     userStore: { signUp },
   } = useMst()
   const formMethods = useForm({
-    mode: "onSubmit",
+    mode: "onChange",
     defaultValues: { organization: "", certified: false, username: "", password: "", email: "" },
   })
   const { register, handleSubmit, formState, control } = formMethods
 
   const [submitted, setSubmitted] = useState(false)
 
-  const navigate = useNavigate()
+  const { isSubmitting } = formState
 
   const onSubmit = async (formData) => {
     if (await signUp(formData)) {
@@ -47,7 +47,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
   }
 
   return (
-    <CenterContainer>
+    <Center as={Container} maxW="container.md" flex={1}>
       {submitted ? (
         <Box bg="white" p={10}>
           <Text>{t("auth.checkYourEmail")}</Text>
@@ -70,7 +70,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               </Flex>
               <Box border="1px solid" borderColor="border.light" padding={6}>
                 <UsernameFormControl validate autoFocus />
-                <EmailFormControl validate />
+                <EmailFormControl />
                 <FormControl mb={4}>
                   <FormLabel>{t("auth.organizationLabel")}</FormLabel>
                   <Input
@@ -102,15 +102,10 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                 </Flex>
               </Box>
               <HStack gap={4}>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  isLoading={formState.isSubmitting}
-                  loadingText={t("ui.loading")}
-                >
+                <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                   {t("auth.registerButton")}
                 </Button>
-                <BackButton isDisabled={formState.isSubmitting} />
+                <BackButton isDisabled={isSubmitting} />
               </HStack>
               <Box bg="greys.grey03" p={4}>
                 <Flex gap={4} direction="column">
@@ -124,6 +119,6 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
           </form>
         </FormProvider>
       )}
-    </CenterContainer>
+    </Center>
   )
 }

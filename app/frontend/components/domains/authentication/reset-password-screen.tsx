@@ -1,10 +1,9 @@
-import { Button, Flex, HStack, Heading, Input, Text } from "@chakra-ui/react"
+import { Button, Center, Container, Flex, HStack, Heading, Input, Text } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
-import { CenterContainer } from "../../shared/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 
 interface IResetPasswordScreenProps {}
@@ -22,12 +21,14 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
     return urlParams.get("reset_password_token") || ""
   }
 
+  const { isSubmitting } = formState
+
   const onSubmit = async (formData) => {
     resetPassword(formData)
   }
 
   return (
-    <CenterContainer>
+    <Center as={Container} maxW="container.md" flex={1}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...formMethods}>
           <Input hidden={true} {...register("resetPasswordToken")} value={getResetPasswordToken()} />
@@ -48,14 +49,14 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
             <PasswordFormControl validate />
 
             <HStack gap={4}>
-              <Button variant="primary" type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
+              <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("auth.resetPassword")}
               </Button>
-              <BackButton isDisabled={formState.isSubmitting} />
+              <BackButton isDisabled={isSubmitting} />
             </HStack>
           </Flex>
         </FormProvider>
       </form>
-    </CenterContainer>
+    </Center>
   )
 }

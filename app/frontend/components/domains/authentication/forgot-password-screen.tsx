@@ -1,11 +1,10 @@
-import { Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
+import { Button, Center, Container, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
-import { CenterContainer } from "../../shared/center-container"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 
 interface IForgotPasswordScreenProps {}
@@ -21,7 +20,9 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
     mode: "onChange",
     defaultValues: { username },
   })
-  const { register, handleSubmit, formState } = formMethods
+  const { handleSubmit, formState } = formMethods
+
+  const { isSubmitting } = formState
 
   const navigate = useNavigate()
 
@@ -30,7 +31,7 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
   }
 
   return (
-    <CenterContainer>
+    <Center as={Container} maxW="container.md" flex={1}>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex
@@ -48,14 +49,14 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
             </Flex>
             <UsernameFormControl />
             <HStack gap={4}>
-              <Button variant="primary" type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
+              <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("auth.resetPassword")}
               </Button>
-              <BackButton isDisabled={formState.isSubmitting} />
+              <BackButton isDisabled={isSubmitting} />
             </HStack>
           </Flex>
         </form>
       </FormProvider>
-    </CenterContainer>
+    </Center>
   )
 }

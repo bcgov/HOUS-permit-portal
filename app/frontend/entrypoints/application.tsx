@@ -25,7 +25,6 @@ const renderApp = (rootStore) => {
         <Provider value={rootStore}>
           <Global styles={GlobalStyles} />
           <Flex flexDirection="column" minH="100vh" className="outerFlex" bg="greys.grey03">
-            <NavBar />
             <Navigation />
           </Flex>
         </Provider>

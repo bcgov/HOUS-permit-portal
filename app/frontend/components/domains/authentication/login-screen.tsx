@@ -1,11 +1,10 @@
-import { Box, Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Center, Container, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
-import { CenterContainer } from "../../shared/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -14,7 +13,9 @@ interface ILoginScreenProps {}
 
 export const LoginScreen = ({}: ILoginScreenProps) => {
   const { t } = useTranslation()
-  const formMethods = useForm()
+  const formMethods = useForm({
+    mode: "onChange",
+  })
   const { handleSubmit, formState, watch } = formMethods
   const {
     sessionStore: { login },
@@ -24,12 +25,15 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
 
   const navigate = useNavigate()
 
+  const { isSubmitting, errors } = formState
+  const hasErrors = Object.keys(errors).length > 0
+
   const onSubmit = async (formData) => {
     if (await login(formData.username, formData.password)) navigate("/")
   }
 
   return (
-    <CenterContainer>
+    <Center as={Container} maxW="container.md" flex={1}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...formMethods}>
           <Flex
@@ -45,17 +49,22 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
               <Heading>{t("auth.login")}</Heading>
               <Text>{t("auth.loginInstructions")}</Text>
             </Flex>
-
             <Box>
               <UsernameFormControl />
               <PasswordFormControl />
             </Box>
 
             <HStack gap={4}>
-              <Button variant="primary" type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
+              <Button
+                variant="primary"
+                type="submit"
+                isLoading={isSubmitting}
+                loadingText={t("ui.loading")}
+                isDisabled={hasErrors}
+              >
                 {t("auth.login")}
               </Button>
-              <BackButton isDisabled={formState.isSubmitting} />
+              <BackButton isDisabled={isSubmitting} />
             </HStack>
 
             <Flex gap={2}>
@@ -68,6 +77,6 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
           </Flex>
         </FormProvider>
       </form>
-    </CenterContainer>
+    </Center>
   )
 }

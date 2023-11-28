@@ -7,8 +7,8 @@ export const UserModel = types
   .props({
     id: types.identifier,
     email: types.string,
-    // firstName: types.maybeNull(types.string),
-    // lastName: types.maybeNull(types.string),
+    username: types.string,
+    certified: types.boolean,
   })
   .extend(withRootStore())
   .extend(withEnvironment())

@@ -1,13 +1,21 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Button } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
+import { useMst } from "../../../setup/root"
 
-// Used in CSS calculations involving 100vh for vertical centering
-export const NAVBAR_HEIGHT = "64px"
+export const NavBar = observer(() => {
+  const { sessionStore } = useMst()
 
-export const NavBar = () => {
+  const { logout, loggedIn } = sessionStore
+
   return (
-    <Box w="full" h={NAVBAR_HEIGHT}>
+    <Box w="full" h={16} position="sticky" top={0}>
       NAVBAR
+      {loggedIn && (
+        <Button variant="primary" onClick={logout}>
+          LOGOUT
+        </Button>
+      )}
     </Box>
   )
-}
+})

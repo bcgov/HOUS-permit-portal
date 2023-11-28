@@ -4,7 +4,6 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IUser, UserModel } from "../models/user"
-// import { IUser, UserModel } from "../models/user"
 
 export const UserStoreModel = types
   .model("UserStoreModel")
@@ -18,14 +17,6 @@ export const UserStoreModel = types
     get users(): IUser[] {
       //@ts-ignore
       return values(self.usersMap) as IUser[]
-    },
-  }))
-  .views((self) => ({
-    getUser(id) {
-      return self.users.find((u) => u.id == id)
-    },
-    isCurrentUser(user) {
-      return user.id == self.currentUser.id
     },
   }))
   .actions((self) => ({
