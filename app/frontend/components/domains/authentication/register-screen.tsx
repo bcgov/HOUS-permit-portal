@@ -16,6 +16,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { BackButton } from "../../shared/buttons/back-button"
 import { CenterContainer } from "../../shared/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
@@ -101,12 +102,15 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                 </Flex>
               </Box>
               <HStack gap={4}>
-                <Button type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  isLoading={formState.isSubmitting}
+                  loadingText={t("ui.loading")}
+                >
                   {t("auth.registerButton")}
                 </Button>
-                <Button variant="outline" isDisabled={formState.isSubmitting} onClick={() => navigate(-1)}>
-                  {t("ui.back")}
-                </Button>
+                <BackButton isDisabled={formState.isSubmitting} />
               </HStack>
               <Box bg="greys.grey03" p={4}>
                 <Flex gap={4} direction="column">

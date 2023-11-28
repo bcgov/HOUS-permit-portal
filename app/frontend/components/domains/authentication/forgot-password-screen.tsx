@@ -4,6 +4,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { BackButton } from "../../shared/buttons/back-button"
 import { CenterContainer } from "../../shared/center-container"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 
@@ -47,12 +48,10 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
             </Flex>
             <UsernameFormControl />
             <HStack gap={4}>
-              <Button type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
+              <Button variant="primary" type="submit" isLoading={formState.isSubmitting} loadingText={t("ui.loading")}>
                 {t("auth.resetPassword")}
               </Button>
-              <Button variant="outline" isDisabled={formState.isSubmitting} onClick={() => navigate(-1)}>
-                {t("ui.back")}
-              </Button>
+              <BackButton isDisabled={formState.isSubmitting} />
             </HStack>
           </Flex>
         </form>

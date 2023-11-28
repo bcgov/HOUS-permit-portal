@@ -45,7 +45,7 @@ export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlP
 
         <InputRightElement pr={14} py={1}>
           <Divider orientation="vertical" borderLeft="1px solid" borderColor="gray.400" />
-          <Button variant="link" color="utility.link" ml={6} onClick={() => setShowPassword(() => !showPassword)}>
+          <Button variant="link" ml={6} onClick={() => setShowPassword(() => !showPassword)}>
             {showPassword ? t("ui.hide") : t("ui.show")}
           </Button>
         </InputRightElement>

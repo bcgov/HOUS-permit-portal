@@ -61,5 +61,14 @@ export const Button = {
       },
       _disabled: { ...disabledStyles, bg: "transparent" },
     },
+    link: {
+      color: "text.link",
+      fontWeight: "normal",
+      _hover: {
+        textDecoration: "underline",
+        _disabled: { textDecoration: "none" },
+      },
+      _disabled: { ...disabledStyles, bg: "inherit" },
+    },
   },
 }
