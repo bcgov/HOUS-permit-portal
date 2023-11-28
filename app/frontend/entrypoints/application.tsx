@@ -1,11 +1,12 @@
 // organize-imports-ignore - otherwise, react import is removed
 
+import "@bcgov/bc-sans/css/BC_Sans.css"
 import { ChakraProvider } from "@chakra-ui/react"
 import { Global } from "@emotion/react"
 import { Navigation } from "../components/domains/navigation"
 import { Provider, setupRootStore } from "../setup/root"
 import { GlobalStyles } from "../styles"
-import theme from "../styles/theme"
+import { theme } from "../styles/theme"
 import React from "react"
 import { setupReactotron } from "../setup/reactotron"
 import { createRoot } from "react-dom/client"
