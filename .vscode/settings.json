@@ -2,6 +2,7 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.tsdk": "node_modules/typescript/lib",
+  "workbench.editor.labelFormat": "short",
   "[ruby]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   }

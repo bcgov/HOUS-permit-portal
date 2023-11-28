@@ -15,6 +15,8 @@
     "lint-staged": "^11.0.0",
     "prettier": "^3.1.0",
     "prettier-plugin-organize-imports": "^3.2.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "reactotron-apisauce": "^3.0.0",
     "reactotron-mst": "^3.1.4",
     "reactotron-react-js": "^3.3.8",
@@ -23,6 +25,7 @@
     "vite-plugin-ruby": "^5.0.0"
   },
   "dependencies": {
+    "@bcgov/bc-sans": "^2.1.0",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
