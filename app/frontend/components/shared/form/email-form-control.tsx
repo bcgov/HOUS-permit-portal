@@ -20,7 +20,7 @@ export const EmailFormControl = ({ validate, ...rest }: IEmailFormControlProps) 
             {...register("email", {
               required: true,
               validate: {
-                matchesEmailRegex: (str) => !validate || /^\S+@\S+$/.test(str) || t("ui.invalidInput"),
+                matchesEmailRegex: (str) => !validate || /\A[^@\s]+@[^@\s]+\z/.test(str) || t("ui.invalidInput"),
               },
             })}
             type={"text"}
