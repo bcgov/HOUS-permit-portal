@@ -19,6 +19,7 @@ export const SessionStoreModel = types
     handleLogin(response) {
       if (response.ok) {
         const user = response.data.data
+        self.loggedIn = true
         self.rootStore.userStore.setCurrentUser(user)
         return true
       }
@@ -52,6 +53,10 @@ export const SessionStoreModel = types
       if (response.ok) {
         self.resetAuth()
       }
+    }),
+    requestPasswordReset: flow(function* (params) {
+      const response = yield self.environment.api.requestPasswordReset(params)
+      return response.ok
     }),
     resetPassword: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.resetPassword(params))
