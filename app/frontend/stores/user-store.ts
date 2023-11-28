@@ -40,7 +40,8 @@ export const UserStoreModel = types
       self.currentUser = user.id
     },
     signUp: flow(function* (formData) {
-      return yield self.environment.api.signUp(formData)
+      const response = yield self.environment.api.signUp(formData)
+      return response.ok
     }),
   }))
   .actions((self) => ({}))

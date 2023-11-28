@@ -24,7 +24,7 @@ const renderApp = (rootStore) => {
       <ChakraProvider theme={theme}>
         <Provider value={rootStore}>
           <Global styles={GlobalStyles} />
-          <Flex flexDirection="column" minH="100vh" className="outerFlex" bg="gray.200">
+          <Flex flexDirection="column" minH="100vh" className="outerFlex" bg="greys.grey03">
             <NavBar />
             <Navigation />
           </Flex>
