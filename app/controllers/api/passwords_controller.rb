@@ -4,25 +4,19 @@ class Api::PasswordsController < Devise::PasswordsController
   include BaseControllerMethods
   respond_to :json
 
-  # GET /resource/password/new
-  # def new
-  #   super
-  # end
-
   # POST /resource/password
   def create
-    # self.resource = resource_class.send_reset_password_instructions(resource_params)
-    # yield resource if block_given?
-
-    super { |resource| render json: {}, status: :ok and return }
-    # TODO: messaging
-    # super { |resource| render_success({}, 'devise.passwords.send_instructions') and return }
+    self.resource = User.find_by_username(resource_params[:username])
+    if self.resource
+      self.resource.send_reset_password_instructions
+      if successfully_sent?(resource)
+        render json: {}, status: :ok and return
+      else
+        # TODO: messaging
+        render json: {}, status: 400 and return
+      end
+    end
   end
-
-  # GET /resource/password/edit?reset_password_token=abcdef
-  # def edit
-  #   super
-  # end
 
   # PUT /resource/password
   def update
@@ -56,16 +50,7 @@ class Api::PasswordsController < Devise::PasswordsController
 
   protected
 
-  # def resource_params
-  #   params.require(resource_name).permit(:username)
-  # end
-
-  # def after_resetting_password_path_for(resource)
-  #   super(resource)
-  # end
-
-  # The path used after sending reset password instructions
-  # def after_sending_reset_password_instructions_path_for(resource_name)
-  #   super(resource_name)
-  # end
+  def resource_params
+    params.require(:user).permit(:username, :reset_password_token, :password)
+  end
 end
