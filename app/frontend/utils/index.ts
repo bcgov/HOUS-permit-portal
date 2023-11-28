@@ -19,7 +19,3 @@ export const camelizeResponse = (data: { [key: string]: any }) => {
 export const decamelizeRequest = (params: { [key: string]: any }) => {
   return humps.decamelizeKeys(params)
 }
-
-export const isNilOrEmpty = (val) => {
-  return R.isNil(val) || R.isEmpty(val)
-}
