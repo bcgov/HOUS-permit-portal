@@ -20,7 +20,7 @@ export const Button = {
   },
   variants: {
     primary: {
-      color: "white",
+      color: "greys.white",
       borderWidth: 1,
       bg: "theme.blue",
       _hover: { bg: "theme.blueAlt", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
@@ -29,7 +29,7 @@ export const Button = {
       color: "theme.blue",
       borderWidth: 1,
       borderColor: "theme.blue",
-      bg: "white",
+      bg: "greys.white",
       _hover: { bg: "lighten.900", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
     },
     secondary: {

@@ -25,9 +25,12 @@ i18n.use(initReactI18next).init({
           certifiedProfessional: "I am a certified professional",
           passwordTitle: "Set a Password",
           passwordRequirements:
-            "Must be between 8 - 64 characters long, at least 1 uppercase, 1 lowercase, and 1 number.",
+            "Must be between 8 - 64 characters long, at least one uppercase, one lowercase, one special character, and one number.",
           alreadyHaveAccount: "Already have an account?",
           checkYourEmail: "Please check your email inbox for the confirmation email to activate your account.",
+        },
+        landing: {
+          title: "Digital Building Permit Tool",
         },
         ui: {
           back: "Back",

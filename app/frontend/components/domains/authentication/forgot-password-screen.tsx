@@ -28,7 +28,7 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
   const navigate = useNavigate()
 
   const onSubmit = async (formData) => {
-    if (await requestPasswordReset(formData)) navigate("/")
+    if (await requestPasswordReset(formData)) navigate("/login")
   }
 
   return (
@@ -42,7 +42,7 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
             p={10}
             border="solid 1px"
             borderColor="border.light"
-            background="white"
+            bg="greys.white"
           >
             <Flex gap={2} direction="column">
               <Heading>{t("auth.forgotPassword")}</Heading>

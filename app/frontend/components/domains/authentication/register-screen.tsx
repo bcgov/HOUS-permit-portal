@@ -48,7 +48,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
   return (
     <CenterContainer>
       {submitted ? (
-        <Box bg="white" p={10}>
+        <Box bg="greys.white" p={10}>
           <Text>{t("auth.checkYourEmail")}</Text>
         </Box>
       ) : (
@@ -61,7 +61,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               p={10}
               border="solid 1px"
               borderColor="border.light"
-              background="white"
+              bg="greys.white"
             >
               <Flex gap={2} direction="column">
                 <Heading>{t("auth.register")}</Heading>
@@ -69,7 +69,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               </Flex>
               <Box border="1px solid" borderColor="border.light" padding={6}>
                 <UsernameFormControl validate autoFocus />
-                <EmailFormControl />
+                <EmailFormControl validate />
                 <FormControl mb={4}>
                   <FormLabel>{t("auth.organizationLabel")}</FormLabel>
                   <FormHelperText my={1}>{t("auth.organizationHelpText")}</FormHelperText>
@@ -112,7 +112,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                     <Text fontSize="lg" fontWeight="bold">
                       {t("auth.alreadyHaveAccount")}
                     </Text>{" "}
-                    <RouterLink to="/">{t("auth.login")}</RouterLink>
+                    <RouterLink to="/login">{t("auth.login")}</RouterLink>
                   </HStack>
                 </Flex>
               </Box>

@@ -44,7 +44,7 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
             p={10}
             border="solid 1px"
             borderColor="border.light"
-            background="white"
+            bg="greys.white"
           >
             <Flex gap={2} direction="column">
               <Heading>{t("auth.login")}</Heading>

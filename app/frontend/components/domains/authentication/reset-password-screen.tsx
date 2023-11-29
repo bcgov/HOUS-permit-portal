@@ -11,7 +11,7 @@ interface IResetPasswordScreenProps {}
 
 export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
   const { t } = useTranslation()
-  const formMethods = useForm()
+  const formMethods = useForm({ mode: "onChange" })
   const { handleSubmit, formState, register } = formMethods
   const {
     sessionStore: { resetPassword },
@@ -40,7 +40,7 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
             p={10}
             border="solid 1px"
             borderColor="border.light"
-            background="white"
+            bg="greys.white"
           >
             <Flex gap={2} direction="column">
               <Heading>{t("auth.resetPassword")}</Heading>

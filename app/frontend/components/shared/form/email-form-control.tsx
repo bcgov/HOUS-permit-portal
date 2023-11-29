@@ -8,12 +8,12 @@ interface IEmailFormControlProps extends FormControlProps {
   validate?: boolean
 }
 
-export const EmailFormControl = ({ ...rest }: IEmailFormControlProps) => {
+export const EmailFormControl = ({ validate, ...rest }: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
 
   return (
-    <FormControl mb={4} isInvalid={!!formState?.errors?.email} {...rest}>
+    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.email} {...rest}>
       <FormLabel>{t("auth.emailLabel")}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
@@ -21,7 +21,7 @@ export const EmailFormControl = ({ ...rest }: IEmailFormControlProps) => {
             {...register("email", {
               required: true,
               validate: {
-                matchesEmailRegex: (str) => EMAIL_REGEX.test(str) || t("ui.invalidInput"),
+                matchesEmailRegex: (str) => !validate || EMAIL_REGEX.test(str) || t("ui.invalidInput"),
               },
             })}
             type={"text"}

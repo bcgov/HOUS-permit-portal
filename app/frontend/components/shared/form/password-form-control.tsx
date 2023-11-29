@@ -36,7 +36,9 @@ export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlP
               required: true,
               validate: {
                 matchesPasswordRegex: (str) =>
-                  !validate || /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,64}$/.test(str) || t("ui.invalidInput"),
+                  !validate ||
+                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
+                  t("ui.invalidInput"),
               },
             })}
             type={showPassword ? "text" : "password"}
@@ -56,7 +58,7 @@ export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlP
       </InputGroup>
       {validate && (
         <Box mt={4}>
-          <PasswordStrengthBar password={passwordWatch} />
+          <PasswordStrengthBar password={passwordWatch} minLength={8} />
         </Box>
       )}
     </FormControl>
