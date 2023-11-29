@@ -9,12 +9,7 @@ class Api::PasswordsController < Devise::PasswordsController
     self.resource = User.find_by_username(resource_params[:username])
     if self.resource
       self.resource.send_reset_password_instructions
-      if successfully_sent?(resource)
-        render json: {}, status: :ok and return
-      else
-        # TODO: messaging
-        render json: {}, status: 400 and return
-      end
+      render_success({}, "devise.send_paranoid_instructions")
     end
   end
 
@@ -23,21 +18,13 @@ class Api::PasswordsController < Devise::PasswordsController
     super do |resource|
       if resource.errors.empty?
         resource.unlock_access! if unlockable?(resource)
-        if Devise.sign_in_after_reset_password
-          resource.after_database_authentication
-          sign_in(resource_name, resource, store: false)
-        else
-          set_flash_message!(:notice, :updated_not_active)
-        end
         render_success(
           {},
           nil,
           {
             # HACK: pass redirect_url so frontend can redirect with a flash message
             meta: {
-              # TODO: messaging
-              # redirect_url: root_url(frontend_flash_message("devise.passwords.updated", "success", subdomain: "app")),
-              redirect_url: root_url,
+              redirect_url: root_url(frontend_flash_message("devise.password_updated", "success")),
             },
           },
         ) and return

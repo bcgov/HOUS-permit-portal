@@ -40,6 +40,15 @@ en:
         timeout: "Your session expired. Please sign in again to continue."
         unauthenticated: "You need to sign in or sign up before continuing."
         unconfirmed: "You have to confirm your email address before continuing."
+      confirmed:
+        title: "Confirmed"
+        message: "Your email address has been successfully confirmed."
+      send_paranoid_instructions:
+        title: "Check your inbox"
+        message: "If your username exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes."
+      password_updated:
+        title: "Password updated"
+        message: "Your password has been changed successfully."
     user:
       login_error:
         title: Failed to login.
@@ -53,3 +62,9 @@ en:
       authorization_error:
         title: Not authorized.
         message: User is not authorized to perform this aciton.
+      confirmation_success:
+        title: Success
+        message: Your email was successfully confirmed
+      confirmation_error:
+        title: Oops
+        message: "%{error_message}"

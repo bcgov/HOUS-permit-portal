@@ -24,7 +24,7 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
   const { isSubmitting } = formState
 
   const onSubmit = async (formData) => {
-    resetPassword(formData)
+    await resetPassword(formData)
   }
 
   return (

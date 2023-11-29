@@ -8,5 +8,5 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-User.where(email: "user@laterolabs.com", password: "P@ssword1", username: "user@laterolabs.com").first_or_create
-User.where(email: "admin@example.com", password: "P@ssword1", username: "admin@example.com").first_or_create
+User.where(email: "user@laterolabs.com", username: "user@laterolabs.com").first_or_create(password: "P@ssword1")
+User.where(email: "admin@example.com", username: "admin@example.com").first_or_create(password: "P@ssword1")

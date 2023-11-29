@@ -18,20 +18,17 @@ class Api::ConfirmationsController < Devise::ConfirmationsController
     yield resource if block_given?
 
     if resource.errors.empty?
-      # TODO: messaging
-      # redirect_to root_url(frontend_flash_message("user.confirmation_success", "success", subdomain: "app"))
-      redirect_to root_url
+      redirect_to root_url(frontend_flash_message("user.confirmation_success", "success"))
     else
-      redirect_to root_url
-      # redirect_to root_url(
-      #               frontend_flash_message(
-      #                 "user.confirmation_error",
-      #                 "error",
-      #                 message_opts: {
-      #                   error_message: resource.errors.full_messages.join(","),
-      #                 },
-      #               ),
-      #             )
+      redirect_to root_url(
+                    frontend_flash_message(
+                      "user.confirmation_error",
+                      "error",
+                      message_opts: {
+                        error_message: resource.errors.full_messages.join(","),
+                      },
+                    ),
+                  )
     end
   end
 end

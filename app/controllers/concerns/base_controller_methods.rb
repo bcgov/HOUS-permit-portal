@@ -1,6 +1,11 @@
 module BaseControllerMethods
   extend ActiveSupport::Concern
 
+  def frontend_flash_message(message_key, message_type, opts = {})
+    msg = ArbitraryMessageConstruct.message(key: message_key, type: message_type, options: opts[:message_opts]).to_json
+    { flash: msg }
+  end
+
   def render_success(resource, message_key = nil, opts = {})
     opts.reverse_merge!({ blueprint: nil, blueprint_opts: {}, status: 200, meta: {} })
     message =
