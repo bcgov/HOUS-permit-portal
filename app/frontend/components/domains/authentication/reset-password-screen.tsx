@@ -1,9 +1,10 @@
-import { Button, Center, Container, Flex, HStack, Heading, Input, Text } from "@chakra-ui/react"
+import { Button, Flex, HStack, Heading, Input, Text } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 
 interface IResetPasswordScreenProps {}
@@ -28,7 +29,7 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
   }
 
   return (
-    <Center as={Container} maxW="container.md" flex={1}>
+    <CenterContainer>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...formMethods}>
           <Input hidden={true} {...register("resetPasswordToken")} value={getResetPasswordToken()} />
@@ -57,6 +58,6 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
           </Flex>
         </FormProvider>
       </form>
-    </Center>
+    </CenterContainer>
   )
 }

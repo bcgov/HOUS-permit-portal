@@ -1,10 +1,11 @@
-import { Box, Button, Center, Container, Flex, HStack, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -33,7 +34,7 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
   }
 
   return (
-    <Center as={Container} maxW="container.md" flex={1}>
+    <CenterContainer>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...formMethods}>
           <Flex
@@ -77,6 +78,6 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
           </Flex>
         </FormProvider>
       </form>
-    </Center>
+    </CenterContainer>
   )
 }

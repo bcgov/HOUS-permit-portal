@@ -1,10 +1,11 @@
-import { Button, Center, Container, Flex, HStack, Heading, Text } from "@chakra-ui/react"
+import { Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/center-container"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 
 interface IForgotPasswordScreenProps {}
@@ -31,7 +32,7 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
   }
 
   return (
-    <Center as={Container} maxW="container.md" flex={1}>
+    <CenterContainer>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex
@@ -57,6 +58,6 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
           </Flex>
         </form>
       </FormProvider>
-    </Center>
+    </CenterContainer>
   )
 }

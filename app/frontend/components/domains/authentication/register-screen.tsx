@@ -1,9 +1,7 @@
 import {
   Box,
   Button,
-  Center,
   Checkbox,
-  Container,
   Flex,
   FormControl,
   FormHelperText,
@@ -18,6 +16,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
@@ -47,7 +46,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
   }
 
   return (
-    <Center as={Container} maxW="container.md" flex={1}>
+    <CenterContainer>
       {submitted ? (
         <Box bg="white" p={10}>
           <Text>{t("auth.checkYourEmail")}</Text>
@@ -119,6 +118,6 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
           </form>
         </FormProvider>
       )}
-    </Center>
+    </CenterContainer>
   )
 }
