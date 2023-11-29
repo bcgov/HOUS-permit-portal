@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Divider,
   Flex,
@@ -13,6 +14,7 @@ import {
 import React, { useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import PasswordStrengthBar from "react-password-strength-bar"
 
 interface IPasswordFormControlProps extends FormControlProps {
   validate?: boolean
@@ -20,8 +22,9 @@ interface IPasswordFormControlProps extends FormControlProps {
 
 export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlProps) => {
   const [showPassword, setShowPassword] = useState(false)
-  const { register, formState } = useFormContext()
+  const { register, formState, watch } = useFormContext()
   const { t } = useTranslation()
+  const passwordWatch = watch("password")
 
   return (
     <FormControl mb={4} isInvalid={validate && !!formState?.errors?.password} {...rest}>
@@ -37,6 +40,7 @@ export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlP
               },
             })}
             type={showPassword ? "text" : "password"}
+            autoComplete={validate ? "new-password" : "on"}
           />
           {formState?.errors?.password && (
             <FormErrorMessage>{formState?.errors?.password.message as string}</FormErrorMessage>
@@ -50,6 +54,11 @@ export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlP
           </Button>
         </InputRightElement>
       </InputGroup>
+      {validate && (
+        <Box mt={4}>
+          <PasswordStrengthBar password={passwordWatch} />
+        </Box>
+      )}
     </FormControl>
   )
 }

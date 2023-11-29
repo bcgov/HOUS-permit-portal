@@ -18,7 +18,7 @@ export const FlashMessageModel = types
       EFlashMessageStatus.info
     ),
     duration: types.maybeNull(types.number),
-    position: types.optional(types.string, "top-right"),
+    position: types.optional(types.string, "top"),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -35,9 +35,9 @@ export const FlashMessageModel = types
       description: string | null,
       duration: number | null = null,
       isClosable: boolean = true,
-      position: ToastPositionWithLogical = "top-right"
+      position: ToastPositionWithLogical = "top"
     ) {
-      const timeout = duration || status == EFlashMessageStatus.error ? 5000 : 2000
+      const timeout = 5000
       self.status = status
       self.title = title
       self.description = description

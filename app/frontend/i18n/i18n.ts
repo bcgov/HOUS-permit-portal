@@ -14,13 +14,14 @@ i18n.use(initReactI18next).init({
           organizationLabel: "Organization (optional)",
           organizationHelpText: "Lorem Ipsum Organiation help text",
           passwordLabel: "Password",
-          forgotPassword: "Forgot your password?",
+          forgotPassword: "Forgot password?",
           register: "Register for account",
           registerButton: "Register",
           forgotPasswordInstructions:
             "Please fill in your username and we'll send instructions on how to reset your password to the email address associated to your account.",
           resetPassword: "Reset Password",
-          registerInstructions: "Lorem ipsum explain what the account is for and the registration process",
+          registerInstructions:
+            "Please fill out the following registration form to create your account. Ensure all information is accurate and up-to-date.",
           certifiedProfessional: "I am a certified professional",
           passwordTitle: "Set a Password",
           passwordRequirements:

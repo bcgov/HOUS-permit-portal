@@ -6,6 +6,7 @@ export const Button = {
     borderRadius: "sm",
     letterSpacing: "1px",
     lineHeight: "27px",
+    fontWeight: 400,
     px: 3,
     py: 1.5,
     _disabled: { ...disabledStyles },

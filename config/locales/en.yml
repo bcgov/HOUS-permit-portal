@@ -45,7 +45,7 @@ en:
         message: "Your email address has been successfully confirmed."
       send_paranoid_instructions:
         title: "Check your inbox"
-        message: "If your username exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes."
+        message: "Please check your email inbox for instructions on how to proceed. The Email will contain instructions on how to change your password in a few minutes."
       password_updated:
         title: "Password updated"
         message: "Your password has been changed successfully."

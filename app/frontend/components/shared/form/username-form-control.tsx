@@ -25,6 +25,7 @@ export const UsernameFormControl = ({ validate, autoFocus, ...rest }: IUsernameF
               },
             })}
             type={"text"}
+            autoComplete="username"
             autoFocus={autoFocus}
           />
           {formState?.errors?.username && (

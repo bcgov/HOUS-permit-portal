@@ -72,12 +72,12 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                 <EmailFormControl />
                 <FormControl mb={4}>
                   <FormLabel>{t("auth.organizationLabel")}</FormLabel>
+                  <FormHelperText my={1}>{t("auth.organizationHelpText")}</FormHelperText>
                   <Input
                     {...register("organization", {
                       required: false,
                     })}
                   />
-                  <FormHelperText>{t("auth.organizationHelpText")}</FormHelperText>
                 </FormControl>
                 <FormControl>
                   <Controller
@@ -97,7 +97,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                 <Flex gap={4} direction="column">
                   <Heading>{t("auth.passwordTitle")}</Heading>
                   <Text>{t("auth.passwordRequirements")}</Text>
-                  <PasswordFormControl validate />
+                  <PasswordFormControl validate mb={0} />
                 </Flex>
               </Box>
               <HStack gap={4}>
@@ -109,7 +109,9 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               <Box bg="greys.grey03" p={4}>
                 <Flex gap={4} direction="column">
                   <HStack>
-                    <Text fontWeight="bold">{t("auth.alreadyHaveAccount")}</Text>{" "}
+                    <Text fontSize="lg" fontWeight="bold">
+                      {t("auth.alreadyHaveAccount")}
+                    </Text>{" "}
                     <RouterLink to="/">{t("auth.login")}</RouterLink>
                   </HStack>
                 </Flex>
