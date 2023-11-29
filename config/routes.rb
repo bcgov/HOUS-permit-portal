@@ -19,6 +19,8 @@ Rails.application.routes.draw do
                controllers: {
                  sessions: "api/sessions",
                  registrations: "api/registrations",
+                 confirmations: "api/confirmations",
+                 passwords: "api/passwords",
                }
 
     devise_scope :user do
@@ -28,5 +30,6 @@ Rails.application.routes.draw do
 
   root to: "home#index"
 
+  get "/reset-password" => "home#index", :as => :reset_password
   get "/*path", to: "home#index", format: false, constraints: ->(req) { !req.path.include?("/rails") }
 end

@@ -6,6 +6,7 @@ export const Button = {
     borderRadius: "sm",
     letterSpacing: "1px",
     lineHeight: "27px",
+    fontWeight: 400,
     px: 3,
     py: 1.5,
     _disabled: { ...disabledStyles },
@@ -60,6 +61,15 @@ export const Button = {
         _disabled: { ...disabledStyles, bg: "inherit" },
       },
       _disabled: { ...disabledStyles, bg: "transparent" },
+    },
+    link: {
+      color: "text.link",
+      fontWeight: "normal",
+      _hover: {
+        textDecoration: "underline",
+        _disabled: { textDecoration: "none" },
+      },
+      _disabled: { ...disabledStyles, bg: "inherit" },
     },
   },
 }

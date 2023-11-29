@@ -31,6 +31,6 @@ class Api::RegistrationsController < Devise::RegistrationsController
   private
 
   def configure_permitted_params
-    devise_parameter_sanitizer.permit(:sign_up, keys: %i[email])
+    devise_parameter_sanitizer.permit(:sign_up, keys: %i[username email password organization certified])
   end
 end
