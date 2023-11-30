@@ -38,6 +38,12 @@ gem "dry-container", "0.8.0"
 gem "blueprinter", "~> 0.30.0"
 
 gem "awesome_print", "~> 1.9"
+gem "sidekiq", "~> 7.2.0"
+gem "shrine", "~> 3.5.0"
+gem "redis", "~> 5.0.8"
+gem "image_processing", "~> 1.12.2"
+# Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
+gem "aws-sdk-s3", "~> 1.141.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
