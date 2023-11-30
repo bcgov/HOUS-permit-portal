@@ -47,7 +47,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           <Flex
             direction="column"
             p={8}
-            w="468px"
+            maxW="468px"
             bg="theme.blue"
             color="greys.white"
             borderRadius="sm"
@@ -62,22 +62,22 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       </Flex>
       <Container maxW="container.lg" py={16} px={8}>
         <Flex direction="column" gap={20}>
-          <Flex gap={6}>
+          <Flex gap={6} direction={{ base: "column", md: "row" }}>
             <IconBox icon={<UploadIcon h={6} w={6} />}>{t("landing.easilyUpload")}</IconBox>
             <IconBox icon={<CheckCircleIcon h={6} w={6} />}>{t("landing.bestPractices")}</IconBox>
             <IconBox icon={<ClipboardCheckIcon h={6} w={6} />}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
 
-          <Flex gap={10}>
+          <Flex gap={10} direction={{ base: "column", md: "row" }}>
             <Flex direction="column" borderRadius="lg" bg="theme.blueAlt" p={8} gap={6} color="greys.white" flex={1}>
               <Heading fontSize="xl">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
-              <Flex gap={6}>
-                <RouterLinkButton to="/login" rightIcon={<ChevronRightIcon />}>
+              <Flex gap={6} direction={{ base: "column", md: "row" }}>
+                <RouterLinkButton to="/login" rightIcon={<ChevronRightIcon />} w="fit-content">
                   {t("auth.login")}
                 </RouterLinkButton>
-                <RouterLinkButton to="/register" rightIcon={<ChevronRightIcon />}>
+                <RouterLinkButton to="/register" rightIcon={<ChevronRightIcon />} w="fit-content">
                   {t("auth.register")}
                 </RouterLinkButton>
               </Flex>
@@ -95,7 +95,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               <RouterLink to="#">{t("landing.iNeed")}</RouterLink>
             </Flex>
           </Flex>
-          <Flex gap={10}>
+          <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
             <Image src="https://placehold.co/230x150" />
             <Flex direction="column" gap={4}>
               <Heading fontSize="xl">{t("landing.whyUseTitle")}</Heading>
@@ -104,10 +104,12 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           </Flex>
         </Flex>
       </Container>
-      <VStack w="full" gap={2} mb={4}>
-        <Heading fontSize="4xl">{t("landing.iNeedLong")}</Heading>
-        <Text>{t("landing.reqsVary")}</Text>
-      </VStack>
+      <Container maxW="container.lg" px={8}>
+        <VStack w="full" gap={2} mb={4} textAlign="center">
+          <Heading fontSize="4xl">{t("landing.iNeedLong")}</Heading>
+          <Text>{t("landing.reqsVary")}</Text>
+        </VStack>
+      </Container>
       <Flex w="full" bg="greys.grey03">
         <Container maxW="container.lg" py={10} px={8}>
           <Flex direction="column" gap={6}>
@@ -163,7 +165,7 @@ const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
   ]
 
   return (
-    <Flex gap={6}>
+    <Flex gap={6} direction={{ base: "column", md: "row" }}>
       <Flex direction="column" bg="white" flex={1} p={6} gap={4}>
         <Flex direction="column" gap={2}>
           <YellowLineSmall mt={4} />
@@ -200,7 +202,10 @@ const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
             {t("landing.dontSee")} <RouterLink to="#">{t("ui.clickHere")}</RouterLink>
           </Text>
         </Flex>
-        <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }} gap={4}>
+        <Grid
+          templateColumns={{ base: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }}
+          gap={4}
+        >
           {housingtypes.map((type) => (
             <Flex direction="column" key={type.url} textAlign="center" gap={2} p={2}>
               <Image src={type.imageUrl} alt={type.label} objectFit="cover" />

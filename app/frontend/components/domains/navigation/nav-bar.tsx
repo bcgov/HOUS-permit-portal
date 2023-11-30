@@ -10,7 +10,7 @@ export const NavBar = observer(() => {
   const { logout, loggedIn } = sessionStore
 
   return (
-    <Box w="full" h={16} position="sticky" top={0}>
+    <Box w="full" h={16} position="sticky" top={0} bg="greys.white" zIndex={10}>
       NAVBAR{" "}
       {loggedIn ? (
         <Button variant="primary" onClick={logout}>
