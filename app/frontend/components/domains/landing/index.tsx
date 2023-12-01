@@ -1,4 +1,4 @@
-import { CheckCircleIcon, ChevronRightIcon } from "@chakra-ui/icons"
+import { ChevronRightIcon } from "@chakra-ui/icons"
 import {
   Box,
   BoxProps,
@@ -17,12 +17,13 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
+import { IconProp } from "@fortawesome/fontawesome-svg-core"
+import { faCircleCheck, faClipboardCheck, faFileArrowUp } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import i18next from "i18next"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
-import { ClipboardCheckIcon } from "../../shared/base/icons/clipboard-check-icon"
-import { UploadIcon } from "../../shared/base/icons/upload-icon"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
@@ -63,9 +64,9 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Container maxW="container.lg" py={16} px={8}>
         <Flex direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>
-            <IconBox icon={<UploadIcon h={6} w={6} />}>{t("landing.easilyUpload")}</IconBox>
-            <IconBox icon={<CheckCircleIcon h={6} w={6} />}>{t("landing.bestPractices")}</IconBox>
-            <IconBox icon={<ClipboardCheckIcon h={6} w={6} />}>{t("landing.easyToFollow")}</IconBox>
+            <IconBox icon={faFileArrowUp}>{t("landing.easilyUpload")}</IconBox>
+            <IconBox icon={faCircleCheck}>{t("landing.bestPractices")}</IconBox>
+            <IconBox icon={faClipboardCheck}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
 
           <Flex gap={10} direction={{ base: "column", md: "row" }}>
@@ -221,7 +222,7 @@ const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
 }
 
 interface IIconBoxProps extends BoxProps {
-  icon: ReactNode
+  icon: IconProp
   children: ReactNode
 }
 
@@ -229,7 +230,7 @@ const IconBox = ({ icon, children, ...rest }: IIconBoxProps) => {
   return (
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1} {...rest}>
       <Flex gap={4} align="center" h="full">
-        {icon}
+        <FontAwesomeIcon style={{ height: "24px", width: "24px" }} icon={icon} />
         <Text fontSize="md" fontWeight="bold">
           {children}
         </Text>
