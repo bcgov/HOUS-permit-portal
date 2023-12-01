@@ -96,7 +96,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
             </Flex>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
-            <Image src="https://placehold.co/230x150" />
+            <Image src="https://placehold.co/230x150" alt="dont-forget-me" />
             <Flex direction="column" gap={4}>
               <Heading fontSize="xl">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
