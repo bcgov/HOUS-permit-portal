@@ -8,6 +8,7 @@ i18n.use(initReactI18next).init({
       translation: {
         auth: {
           login: "Login",
+          logout: "Logout",
           loginInstructions: "Enter the username for your Digital Building Permit Account below.",
           usernameLabel: "Username",
           emailLabel: "Email address",
@@ -74,12 +75,18 @@ i18n.use(initReactI18next).init({
           back: "Back",
           show: "Show",
           hide: "Hide",
+          search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
           selectPlaceholder: "Select",
           selectApplicable: "Select applicable:",
           clickHere: "Click here",
           feedbackLink: "Tell us what you think",
+        },
+        site: {
+          navBarTitle: "Digital Permit Tool",
+          beta: "Beta",
+          linkHome: "Navigate home",
         },
       },
     },
