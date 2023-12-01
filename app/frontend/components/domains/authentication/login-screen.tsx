@@ -51,7 +51,7 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
               <Text>{t("auth.loginInstructions")}</Text>
             </Flex>
             <Box>
-              <UsernameFormControl />
+              <UsernameFormControl autoFocus />
               <PasswordFormControl />
             </Box>
 
