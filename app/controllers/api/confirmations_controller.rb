@@ -18,9 +18,9 @@ class Api::ConfirmationsController < Devise::ConfirmationsController
     yield resource if block_given?
 
     if resource.errors.empty?
-      redirect_to root_url(frontend_flash_message("user.confirmation_success", "success"))
+      redirect_to login_url(frontend_flash_message("user.confirmation_success", "success"))
     else
-      redirect_to root_url(
+      redirect_to login_url(
                     frontend_flash_message(
                       "user.confirmation_error",
                       "error",

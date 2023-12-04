@@ -31,5 +31,6 @@ Rails.application.routes.draw do
   root to: "home#index"
 
   get "/reset-password" => "home#index", :as => :reset_password
+  get "/login" => "home#index", :as => :login
   get "/*path", to: "home#index", format: false, constraints: ->(req) { !req.path.include?("/rails") }
 end
