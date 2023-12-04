@@ -9,17 +9,23 @@ const baseStyle = definePartsStyle({
     borderRadius: "sm",
     paddingInlineStart: 3,
     paddingInlineEnd: 3,
+    _disabled: {
+      bg: "greys.grey10",
+    },
   },
   _placeholder: { color: "greys.grey01" },
+})
+
+const styles = {
+  baseStyle,
   variants: {
     outline: {
       field: {
-        // TODO: border color overrides not applying
         borderColor: "border.light",
         _hover: { borderColor: "border.base" },
       },
     },
   },
-})
+}
 
-export const Input = defineMultiStyleConfig({ baseStyle })
+export const Input = defineMultiStyleConfig(styles)
