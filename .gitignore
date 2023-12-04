@@ -52,3 +52,6 @@ node_modules
 # https://vitejs.dev/guide/env-and-mode.html#env-files
 *.local
 *.DS_Store
+
+# Ignore auto-generated Spina Tailwind CSS configuration
+/app/assets/config/spina/tailwind.config.js
