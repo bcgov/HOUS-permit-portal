@@ -1,4 +1,3 @@
-import { ChevronRightIcon } from "@chakra-ui/icons"
 import {
   Box,
   BoxProps,
@@ -18,7 +17,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { IconProp } from "@fortawesome/fontawesome-svg-core"
-import { faCircleCheck, faClipboardCheck, faFileArrowUp } from "@fortawesome/free-solid-svg-icons"
+import { faChevronRight, faCircleCheck, faClipboardCheck, faFileArrowUp } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import i18next from "i18next"
 import React, { ReactNode } from "react"
@@ -75,10 +74,18 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                <RouterLinkButton to="/login" rightIcon={<ChevronRightIcon />} w="fit-content">
+                <RouterLinkButton
+                  to="/login"
+                  rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
+                  w="fit-content"
+                >
                   {t("auth.login")}
                 </RouterLinkButton>
-                <RouterLinkButton to="/register" rightIcon={<ChevronRightIcon />} w="fit-content">
+                <RouterLinkButton
+                  to="/register"
+                  rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
+                  w="fit-content"
+                >
                   {t("auth.register")}
                 </RouterLinkButton>
               </Flex>

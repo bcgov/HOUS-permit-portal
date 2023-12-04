@@ -32,4 +32,14 @@ export const colors = {
   darken: {
     100: "rgba(0, 0, 0, 0.1)",
   },
+  semantic: {
+    success: "#2E8540",
+    successLight: "#D7F5DD",
+    error: "#D9292F",
+    errorLight: "#F7E1E3",
+    info: "#38598A",
+    infoLight: "#F6F9FC",
+    warning: "#FCBA19",
+    warningLight: "#FEF2D6",
+  },
 }

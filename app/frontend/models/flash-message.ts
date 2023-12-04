@@ -13,10 +13,7 @@ export const FlashMessageModel = types
     isClosable: types.maybeNull(types.boolean),
     title: types.maybeNull(types.string),
     description: types.maybeNull(types.string),
-    status: types.optional(
-      types.enumeration<EFlashMessageStatus>(Object.values(EFlashMessageStatus)),
-      EFlashMessageStatus.info
-    ),
+    status: types.optional(types.enumeration(Object.values(EFlashMessageStatus)), EFlashMessageStatus.info),
     duration: types.maybeNull(types.number),
     position: types.optional(types.string, "top"),
   })
