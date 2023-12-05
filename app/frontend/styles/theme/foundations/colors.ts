@@ -16,6 +16,7 @@ export const colors = {
     grey02: "#E1DFDD",
     grey03: "#F2F2F2",
     grey04: "#FFFFFF",
+    grey10: "#FAF9F8",
   },
   border: {
     base: "#606060",
