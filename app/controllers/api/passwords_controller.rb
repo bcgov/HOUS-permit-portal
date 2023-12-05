@@ -24,7 +24,7 @@ class Api::PasswordsController < Devise::PasswordsController
           {
             # HACK: pass redirect_url so frontend can redirect with a flash message
             meta: {
-              redirect_url: root_url(frontend_flash_message("devise.password_updated", "success")),
+              redirect_url: login_url(frontend_flash_message("devise.password_updated", "success")),
             },
           },
         ) and return
