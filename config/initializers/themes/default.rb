@@ -20,15 +20,24 @@ Spina::Theme.register do |theme|
   # - Attachment
   # - Option
   # - Repeater
-  theme.parts = [{ name: "text", title: "Body", hint: "Your main content", part_type: "Spina::Parts::Text" }]
+  theme.parts = [
+    { name: "title", title: "Title", hint: "Your main title", part_type: "Spina::Parts::Text" },
+    { name: "body", title: "Body", hint: "Your main content", part_type: "Spina::Parts::Text" },
+    { name: "checklist", title: "Checklist", hint: "Checklist Text", part_type: "Spina::Parts::Text" },
+    { name: "resources", title: "Resources", hint: "Links to other resources", part_type: "Spina::Parts::Text" },
+    { name: "tags", title: "Tags", part_type: "Spina::Parts::Line" },
+    { name: "image", title: "Image", part_type: "Spina::Parts::Image" },
+  ]
 
   # View templates
   # Every page has a view template stored in app/views/my_theme/pages/*
   # You define which parts you want to enable for every view template
   # by referencing them from the theme.parts configuration above.
   theme.view_templates = [
-    { name: "homepage", title: "Homepage", parts: %w[text] },
-    { name: "show", title: "Page", parts: %w[text] },
+    { name: "homepage", title: "Homepage", parts: %w[title body] },
+    { name: "localjurisdiction", title: "Local Jurisdiction", parts: %w[body checklist resources] },
+    { name: "articles", title: "Articles", parts: %w[body] },
+    { name: "article", title: "Article", parts: %w[body tags] },
   ]
 
   # Custom pages
@@ -49,7 +58,7 @@ Spina::Theme.register do |theme|
   # Resources (optional)
   # Think of resources as a collection of pages. They are managed separately in Spina
   # allowing you to separate these pages from the 'main' collection of pages.
-  theme.resources = []
+  theme.resources = [{ name: "articles", label: "Articles", view_template: "article", slug: "articles" }]
 
   # Plugins (optional)
   theme.plugins = []

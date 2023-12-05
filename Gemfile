@@ -38,7 +38,7 @@ gem "dry-container", "0.8.0"
 gem "blueprinter", "~> 0.30.0"
 
 gem "awesome_print", "~> 1.9"
-gem "spina", "~> 2.2"
+gem "spina", "~> 2.17"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
