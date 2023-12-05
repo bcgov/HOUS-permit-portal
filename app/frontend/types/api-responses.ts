@@ -1,13 +1,10 @@
 import { IUser } from "../models/user"
 
-export interface IUserResponse {
-  data: IUser
-  meta: {}
+export interface IApiResponse<TData, TMeta> {
+  data: TData
+  meta: TMeta
 }
 
-export interface IResetPasswordResponse {
-  data: {}
-  meta: {
-    redirectUrl: string
-  }
-}
+export interface IUserResponse extends IApiResponse<IUser, {}> {}
+
+export interface IResetPasswordResponse extends IApiResponse<{}, { redirectUrl: string }> {}
