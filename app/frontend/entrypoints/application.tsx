@@ -12,7 +12,10 @@ import { setupReactotron } from "../setup/reactotron"
 import { createRoot } from "react-dom/client"
 import { useLanguageChange } from "../i18n/use-language-change"
 import { NavBar } from "../components/domains/navigation/nav-bar"
+import { Helmet } from "react-helmet"
+
 import "../i18n/i18n"
+import { useTranslation } from "react-i18next"
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
@@ -20,10 +23,20 @@ const renderApp = (rootStore) => {
 
   const RootComponent = () => {
     useLanguageChange()
+    const { t } = useTranslation()
+
     return (
       <ChakraProvider theme={theme}>
         <Provider value={rootStore}>
           <Global styles={GlobalStyles} />
+          <Helmet>
+            <title>{t("site.title")}</title>
+            <meta name="description" content={t("site.description")} />
+            <meta name="keywords" content={t("site.keywords")} />
+            <meta property="og:title" content={t("site.title")} />
+            <meta property="og:description" content={t("site.description")} />
+            <meta property="og:image" content="/images/logo.svg" />
+          </Helmet>
           <Flex flexDirection="column" minH="100vh" className="outerFlex" bg="greys.grey03">
             <Navigation />
           </Flex>
