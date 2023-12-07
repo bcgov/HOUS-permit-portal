@@ -55,7 +55,9 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
             borderColor="theme.yellow"
             gap={2}
           >
-            <Heading fontSize="2xl">{t("landing.title")}</Heading>
+            <Heading as="h1" fontSize="2xl">
+              {t("landing.title")}
+            </Heading>
             <Text fontSize="lg">{t("landing.intro")}</Text>
           </Flex>
         </Container>
@@ -77,14 +79,12 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
                 <RouterLinkButton
                   to="/login"
                   rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
-                  w="fit-content"
                 >
                   {t("auth.login")}
                 </RouterLinkButton>
                 <RouterLinkButton
                   to="/register"
                   rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
-                  w="fit-content"
                 >
                   {t("auth.register")}
                 </RouterLinkButton>
@@ -151,9 +151,6 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           </VStack>
         </Container>
       </Flex>
-      <Center w="full" h="251px" bg="greys.grey02">
-        FOOTER
-      </Center>
     </Flex>
   )
 }

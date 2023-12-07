@@ -8,6 +8,8 @@ export const colors = {
     blue: "#003366",
     blueAlt: "#38598A",
     blueLight: "#F6F9FC",
+    blueGradient:
+      "var(--Gradient-Blue-Background, linear-gradient(125deg, #142B43 -52.7%, #142B43 -52.68%, #054277 47.38%, #142B43 137.55%));",
     yellow: "#FCBA19",
   },
   greys: {

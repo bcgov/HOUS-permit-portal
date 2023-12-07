@@ -4,8 +4,8 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { CenterContainer } from "../../shared/base/center-container"
 import { BackButton } from "../../shared/buttons/back-button"
-import { CenterContainer } from "../../shared/center-container"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 
 interface IForgotPasswordScreenProps {}

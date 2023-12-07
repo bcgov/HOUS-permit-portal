@@ -8,7 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { useMst } from "../../setup/root"
+import { useMst } from "../../../setup/root"
 
 export const FlashMessage = observer(() => {
   const { uiStore } = useMst()
