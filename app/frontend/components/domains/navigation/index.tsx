@@ -9,6 +9,7 @@ import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
 import { LandingScreen } from "../landing"
+import { PermitApplicationBuilderScreen } from "../permit-application-builder"
 import { NavBar } from "./nav-bar"
 
 export const Navigation = observer(() => {
@@ -53,6 +54,8 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
+          {/*TODO remove test route below*/}
+          <Route path={"/pab"} element={<PermitApplicationBuilderScreen />} />
         </>
       )}
     </Routes>

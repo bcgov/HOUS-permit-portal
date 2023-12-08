@@ -11,7 +11,6 @@ import React from "react"
 import { setupReactotron } from "../setup/reactotron"
 import { createRoot } from "react-dom/client"
 import { useLanguageChange } from "../i18n/use-language-change"
-import { NavBar } from "../components/domains/navigation/nav-bar"
 import "../i18n/i18n"
 
 const renderApp = (rootStore) => {
