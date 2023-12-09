@@ -169,6 +169,14 @@
           ]
         },
         {
+          "label": "Text Field",
+          "applyMaskOn": "change",
+          "tableView": true,
+          "key": "textField",
+          "type": "textfield",
+          "input": true
+        },
+        {
           "legend": "Professionals",
           "key": "fieldSet3",
           "type": "fieldset",

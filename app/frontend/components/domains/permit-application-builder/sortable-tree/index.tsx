@@ -100,6 +100,7 @@ interface Props {
   indentationWidth?: number
   indicator?: boolean
   removable?: boolean
+  dragEndCallback?: (items: TreeItems) => void
 }
 
 export function SortableTree({
@@ -108,6 +109,7 @@ export function SortableTree({
   indicator = false,
   indentationWidth = 50,
   removable,
+  dragEndCallback,
 }: Props) {
   const [items, setItems] = useState(() => defaultItems)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
@@ -183,11 +185,11 @@ export function SortableTree({
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
         <Box as={"ol"}>
-          {flattenedItems.map(({ id, children, collapsed, depth }) => (
+          {flattenedItems.map(({ id, children, collapsed, depth, type, legend, label }) => (
             <SortableTreeItem
               key={id}
               id={id}
-              value={id}
+              value={(legend || label) && type ? `${legend || label} - ${type}` : id}
               depth={id === activeId && projected ? projected.depth : depth}
               indentationWidth={indentationWidth}
               indicator={indicator}
@@ -256,6 +258,7 @@ export function SortableTree({
       const newItems = buildTree(sortedItems)
 
       setItems(newItems)
+      dragEndCallback?.(newItems)
     }
   }
 
