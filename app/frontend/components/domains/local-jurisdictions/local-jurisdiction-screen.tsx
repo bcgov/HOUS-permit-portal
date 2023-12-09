@@ -75,7 +75,7 @@ export const LocalJurisdictionScreen = () => {
   const { localJurisdictionId } = useParams()
 
   return (
-    <Flex direction="column" w="full" bg="greys.white">
+    <Flex as="main" direction="column" w="full" bg="greys.white">
       <BlueTitleBar title={localJurisdiction.name} imageSrc={"/images/local-jurisdiction-bus.svg"} />
       <Show below="md">
         <JurisdictionMap mapPosition={mapPosition} linePositions={linePositions} />
@@ -88,7 +88,7 @@ export const LocalJurisdictionScreen = () => {
                 <JurisdictionMap mapPosition={mapPosition} linePositions={linePositions} />
               </Flex>
             </Show>
-            <Flex flex={1} direction="column" gap={4}>
+            <Flex as="section" flex={1} direction="column" gap={4}>
               <YellowLineSmall mt={4} />
               <Heading>{t("localJurisdiction.title")}</Heading>
               <Text>{t("localJurisdiction.description")}</Text>
@@ -99,13 +99,14 @@ export const LocalJurisdictionScreen = () => {
           </Flex>
           <Flex direction={{ base: "column", md: "row" }} gap={6}>
             <Flex direction="column" flex={3}>
-              <Flex direction="column" gap={2}>
+              <Flex as="section" direction="column" gap={2}>
                 <YellowLineSmall mt={4} />
                 <Heading>{t("localJurisdiction.checklist")}</Heading>
                 <ReadOnlySlate initialValue={exampleSlate} flex={1} />
               </Flex>
             </Flex>
             <Flex
+              as="section"
               direction="column"
               p={6}
               flex={2}
@@ -118,7 +119,7 @@ export const LocalJurisdictionScreen = () => {
               <ReadOnlySlate initialValue={exampleSlate} />
             </Flex>
           </Flex>
-          <Flex direction="column" borderRadius="lg" boxShadow="md">
+          <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
             <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
               <Heading color="greys.white" fontSize="xl">
                 {t("localJurisdiction.contactInfo")}
@@ -147,7 +148,14 @@ interface IContactBoxProps {
 
 const ContactGridItem = ({ contact }: IContactBoxProps) => {
   return (
-    <GridItem colSpan={{ sm: 1, md: 1 }} borderRadius="sm" border="1px solid" borderColor="border.light" p={4}>
+    <GridItem
+      as="section"
+      colSpan={{ sm: 1, md: 1 }}
+      borderRadius="sm"
+      border="1px solid"
+      borderColor="border.light"
+      p={4}
+    >
       <Heading fontSize="lg">{contact.name}</Heading>
       {contact.firstNation && `${contact.firstNation} - `}
       {contact.title}

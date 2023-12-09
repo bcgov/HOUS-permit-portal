@@ -8,7 +8,7 @@ export const LocalJurisdictionIndexScreen = ({}: ILocalJurisdictionIndexScreenPr
   const { t } = useTranslation()
 
   return (
-    <Flex direction="column" w="full" bg="greys.white">
+    <Flex as="main" direction="column" w="full" bg="greys.white">
       TODO: ability to list and search local jursdicitions?
     </Flex>
   )
