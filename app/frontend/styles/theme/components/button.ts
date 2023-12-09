@@ -7,6 +7,7 @@ export const Button = {
     letterSpacing: "1px",
     lineHeight: "27px",
     fontWeight: 400,
+    width: "fit-content",
     px: 3,
     py: 1.5,
     _disabled: { ...disabledStyles },

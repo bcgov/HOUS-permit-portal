@@ -4,6 +4,7 @@ import {
   Container,
   Flex,
   HStack,
+  Heading,
   IconButton,
   Image,
   Menu,
@@ -23,18 +24,22 @@ import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { RouterLink } from "../../shared/navigation/router-link"
 
+export const NAVBAR_HEIGHT = 16
+
 export const NavBar = observer(() => {
   const { t } = useTranslation()
 
   return (
-    <Box w="full" h={16} position="sticky" top={0} bg="greys.white" zIndex={10}>
+    <Box as="nav" w="full" h={NAVBAR_HEIGHT} position="sticky" top={0} bg="greys.white" zIndex={10} shadow="md">
       <Container maxW="container.lg">
         <Flex align="center">
           <RouterLink to="/">
-            <Image alt={t("site.linkHome")} src="images/logo.svg" />
+            <Image alt={t("site.linkHome")} src="/images/logo.svg" />
           </RouterLink>
           <Show above="md">
-            <Text fontSize="2xl">{t("site.navBarTitle")}</Text>
+            <Heading fontSize="2xl" fontWeight="normal">
+              {t("site.navBarTitle")}
+            </Heading>
             <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
               {t("site.beta")}
             </Text>
@@ -78,6 +83,7 @@ const NavBarMenu = observer(() => {
         borderWidth="1px"
         p={3}
         variant="primaryInverse"
+        aria-label="menu dropdown button"
         icon={<FontAwesomeIcon style={{ height: "14px", width: "14px" }} icon={faBars} />}
       />
       <MenuList>

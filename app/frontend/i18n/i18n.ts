@@ -31,7 +31,7 @@ i18n.use(initReactI18next).init({
           checkYourEmail: "Please check your email inbox for the confirmation email to activate your account.",
         },
         landing: {
-          title: "Digital Building Permit Tool",
+          title: "Building Permit Hub",
           intro:
             "Co-created with a variety of pilot local jurisdictions for the people of B.C. to help create more homes faster.",
           easilyUpload: "Easily upload all your required building permitting information such as pdf files",
@@ -83,10 +83,21 @@ i18n.use(initReactI18next).init({
           clickHere: "Click here",
           feedbackLink: "Tell us what you think",
         },
+        localJurisdiction: {
+          title: "Local Housing Permits",
+          description:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+          checklist: "Checklist",
+          lookOut: "Things to look out for",
+          startApplication: "Start a Permit Application",
+          contactInfo: "Contact information",
+          didNotFind: "I didn't find what I was looking for",
+        },
         site: {
-          navBarTitle: "Digital Permit Tool",
+          navBarTitle: "Building Permit Hub",
           beta: "Beta",
           linkHome: "Navigate home",
+          home: "Home",
           title: "Digital Permit Tool",
           description: "Lorem ipsum here is the site description",
           keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
