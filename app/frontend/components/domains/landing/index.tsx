@@ -63,7 +63,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
         </Container>
       </Flex>
       <Container maxW="container.lg" py={16} px={8}>
-        <Flex direction="column" gap={20}>
+        <Flex as="section" direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>
             <IconBox icon={faFileArrowUp}>{t("landing.easilyUpload")}</IconBox>
             <IconBox icon={faCircleCheck}>{t("landing.bestPractices")}</IconBox>
@@ -71,7 +71,16 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           </Flex>
 
           <Flex gap={10} direction={{ base: "column", md: "row" }}>
-            <Flex direction="column" borderRadius="lg" bg="theme.blueAlt" p={8} gap={6} color="greys.white" flex={1}>
+            <Flex
+              as="section"
+              direction="column"
+              borderRadius="lg"
+              bg="theme.blueAlt"
+              p={8}
+              gap={6}
+              color="greys.white"
+              flex={1}
+            >
               <Heading fontSize="xl">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
@@ -90,7 +99,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
                 </RouterLinkButton>
               </Flex>
             </Flex>
-            <Flex direction="column" flex={1} gap={4}>
+            <Flex as="section" direction="column" flex={1} gap={4}>
               <Flex direction="column" gap={2}>
                 <YellowLineSmall mt={4} />
                 <Heading>{t("landing.whoForTitle")}</Heading>
@@ -105,7 +114,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
             <Image src="https://placehold.co/230x150" alt="dont-forget-me" />
-            <Flex direction="column" gap={4}>
+            <Flex as="section" direction="column" gap={4}>
               <Heading fontSize="xl">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
             </Flex>
@@ -113,14 +122,14 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
         </Flex>
       </Container>
       <Container maxW="container.lg" px={8}>
-        <VStack w="full" gap={2} mb={4} textAlign="center">
+        <VStack as="section" w="full" gap={2} mb={4} textAlign="center">
           <Heading fontSize="4xl">{t("landing.iNeedLong")}</Heading>
           <Text>{t("landing.reqsVary")}</Text>
         </VStack>
       </Container>
       <Flex w="full" bg="greys.grey03">
         <Container maxW="container.lg" py={10} px={8}>
-          <Flex direction="column" gap={6}>
+          <Flex as="section" direction="column" gap={6}>
             <HousingTypeSearch />
             <VStack w="full" gap={2} textAlign="center" py={4} px={8}>
               <Heading fontSize="md">{t("landing.whenNotNecessaryQ")}</Heading>
@@ -132,7 +141,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Flex w="full" bg="greys.white">
         <Container maxW="container.lg" py={16} px={8}>
           <Flex direction="column" gap={6}>
-            <VStack w="full" gap={2} textAlign="center">
+            <VStack as="section" w="full" gap={2} textAlign="center">
               <Heading fontSize="md">{t("landing.expectQ")}</Heading>
               <Text>{t("landing.expectA")}</Text>
             </VStack>
@@ -145,7 +154,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
 
       <Flex w="full" bg="greys.grey03">
         <Container maxW="container.lg" py={10}>
-          <VStack w="full" gap={2} textAlign="center">
+          <VStack as="section" w="full" gap={2} textAlign="center">
             <Heading fontSize="md">{t("landing.createdQ")}</Heading>
             <Text>{t("landing.createdA")}</Text>
           </VStack>
@@ -172,7 +181,7 @@ const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
       <Flex direction="column" bg="white" flex={1} p={6} gap={4}>
-        <Flex direction="column" gap={2}>
+        <Flex as="section" direction="column" gap={2}>
           <YellowLineSmall mt={4} />
           <Heading fontSize="2xl">{t("landing.whereTitle")}</Heading>
           <Text>{t("landing.findAuthority")}</Text>
@@ -200,7 +209,7 @@ const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
       </Flex>
 
       <Flex direction="column" bg="white" flex={3} p={6} gap={4}>
-        <Flex direction="column" gap={2}>
+        <Flex as="section" direction="column" gap={2}>
           <YellowLineSmall mt={4} />
           <Heading fontSize="2xl">{t("landing.whatType")}</Heading>
           <Text>
