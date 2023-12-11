@@ -1,21 +1,19 @@
-// organize-imports-ignore - otherwise, react import is removed
-
 import "@bcgov/bc-sans/css/BC_Sans.css"
 import { ChakraProvider, Flex } from "@chakra-ui/react"
 import { Global } from "@emotion/react"
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { Helmet } from "react-helmet"
 import { Navigation } from "../components/domains/navigation"
+import "../i18n/i18n"
+import { useLanguageChange } from "../i18n/use-language-change"
+import { setupReactotron } from "../setup/reactotron"
 import { Provider, setupRootStore } from "../setup/root"
 import { GlobalStyles } from "../styles"
 import { theme } from "../styles/theme"
-import React from "react"
-import { setupReactotron } from "../setup/reactotron"
-import { createRoot } from "react-dom/client"
-import { useLanguageChange } from "../i18n/use-language-change"
-import { NavBar } from "../components/domains/navigation/nav-bar"
-import { Helmet } from "react-helmet"
 
-import "../i18n/i18n"
 import { useTranslation } from "react-i18next"
+import "../i18n/i18n"
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
