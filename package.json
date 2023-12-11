@@ -10,8 +10,9 @@
     "@prettier/plugin-ruby": "^4.0.2",
     "@types/leaflet": "^1.9.8",
     "@types/react-leaflet": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.12.0",
-    "@typescript-eslint/parser": "^6.12.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "^7.22.0",
     "husky": "^8.0.3",
     "lint-staged": "^11.0.0",
@@ -61,10 +62,12 @@
   "scripts": {
     "dev": "bin/vite dev",
     "build": "bundle exec vite build",
-    "lint": "eslint app/javascript/**/*.ts[x]",
+    "lint": "eslint app/frontend/**/*.ts[x]",
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{js,css,md,rb,ts,tsx}": "prettier --write"
+    "*.{js,css,md,rb,ts,tsx}": [
+      "prettier --write"
+    ]
   }
 }
