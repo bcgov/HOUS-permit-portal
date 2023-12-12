@@ -1,5 +1,7 @@
 import type { UniqueIdentifier } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
+import clone from "ramda/src/clone"
+import { v4 as uuidv4 } from "uuid"
 
 import type { FlattenedItem, TreeItem, TreeItems } from "./types"
 
@@ -194,4 +196,56 @@ export function removeChildrenOf(items: FlattenedItem[], ids: UniqueIdentifier[]
 
     return true
   })
+}
+
+export function buildDnDTreeFromFormioComponents(formIoComponents): TreeItems {
+  const clonedComponents = clone(formIoComponents)
+
+  const build = (components) => {
+    components.forEach((component) => {
+      component.id = component.id ?? component?.key ?? uuidv4()
+
+      if ("components" in component) {
+        component.children = component.components
+        delete component.components
+      } else if ("columns" in component) {
+        component.children = component.columns
+        delete component.columns
+      } else {
+        component.children = []
+      }
+
+      build(component.children)
+    })
+  }
+
+  build(clonedComponents)
+
+  return clonedComponents
+}
+
+export function buildFormFromTreeItems(treeItems: TreeItems) {
+  const clonedTreeItems = clone(treeItems)
+
+  const build = (items: TreeItems) => {
+    items.forEach((component) => {
+      if ("children" in component) {
+        if (component?.type?.includes("cols")) {
+          component.columns = component.children
+        } else {
+          component.components = component.children
+        }
+        delete component.children
+      }
+
+      build(component?.type?.includes("cols") ? component.columns : component.components)
+    })
+  }
+
+  build(clonedTreeItems)
+
+  return {
+    display: "form",
+    components: clonedTreeItems,
+  }
 }

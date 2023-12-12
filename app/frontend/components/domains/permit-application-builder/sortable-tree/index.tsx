@@ -23,9 +23,7 @@ import { createPortal } from "react-dom"
 
 import { Box } from "@chakra-ui/react"
 import { CSS } from "@dnd-kit/utilities"
-import { sortableTreeKeyboardCoordinates } from "./keyboard-coordinates"
-import { SortableTreeItem } from "./sortable-tree-item"
-import type { FlattenedItem, SensorContext, TreeItems } from "./types"
+import type { FlattenedItem, SensorContext, TreeItems } from "../types"
 import {
   buildTree,
   flattenTree,
@@ -34,7 +32,9 @@ import {
   removeChildrenOf,
   removeItem,
   setProperty,
-} from "./utils"
+} from "../utils"
+import { sortableTreeKeyboardCoordinates } from "./keyboard-coordinates"
+import { SortableTreeItem } from "./sortable-tree-item"
 
 // Using DnD Kit TreeExample as base https://github.com/clauderic/dnd-kit/tree/master/stories/3%20-%20Examples/Tree
 
@@ -184,7 +184,7 @@ export function SortableTree({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
-        <Box as={"ol"}>
+        <Box as={"ol"} pl={0}>
           {flattenedItems.map(({ id, children, collapsed, depth, type, legend, label }) => (
             <SortableTreeItem
               key={id}
