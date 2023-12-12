@@ -8,6 +8,7 @@ RSpec.describe PermitApplication, type: :model do
 
   describe "enums" do
     xit { should define_enum_for(:permit_type).with_values(residential: 0) }
+    it { should define_enum_for(:status).with_values(draft: 0, submitted: 1, viewed: 2) }
   end
 
   describe "validations" do

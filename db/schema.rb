@@ -54,6 +54,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "permit_type", default: 0
+    t.integer "status", default: 0
     t.uuid "submitter_id", null: false
     t.uuid "local_jurisdiction_id", null: false
     t.datetime "created_at", null: false

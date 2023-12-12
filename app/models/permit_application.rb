@@ -6,6 +6,7 @@ class PermitApplication < ApplicationRecord
   validate :submitter_must_have_role
 
   enum permit_type: { residential: 0 }, _default: 0
+  enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
 
   private
 
