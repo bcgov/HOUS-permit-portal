@@ -1,7 +1,7 @@
 import { Instance, types } from "mobx-state-tree"
 import { IContact } from "../types/types"
 
-export const Jurisdiction = types.model("Jurisdiction", {
+export const JurisdictionModel = types.model("JurisdictionModel", {
   id: types.identifier,
   name: types.string,
   description: types.maybeNull(types.string),
@@ -13,6 +13,4 @@ export const Jurisdiction = types.model("Jurisdiction", {
   updatedAt: types.Date,
 })
 
-export interface IJurisdictionModel extends Instance<typeof Jurisdiction> {}
-
-export default Jurisdiction
+export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}

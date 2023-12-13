@@ -1,9 +1,9 @@
 import { Instance, flow, types } from "mobx-state-tree"
-import Jurisdiction, { IJurisdictionModel } from "../models/jurisdiction"
+import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 
-export const JurisdictionStore = types
+export const JurisdictionStoreModel = types
   .model("JurisdictionStore", {
-    jurisdictionsMap: types.map(Jurisdiction),
+    jurisdictionsMap: types.map(JurisdictionModel),
   })
   .views((self) => ({
     // View to get a Jurisdiction by id
@@ -18,7 +18,7 @@ export const JurisdictionStore = types
   }))
   .actions((self) => ({
     // Action to add a new Jurisdiction
-    addJurisdiction(jurisdiction: IJurisdictionModel) {
+    addJurisdiction(jurisdiction: IJurisdiction) {
       self.jurisdictionsMap.put(jurisdiction)
     },
     // Action to remove a Jurisdiction
@@ -37,4 +37,4 @@ export const JurisdictionStore = types
     }),
   }))
 
-export interface IJurisdictionStore extends Instance<typeof JurisdictionStore> {}
+export interface IJurisdictionStore extends Instance<typeof JurisdictionStoreModel> {}

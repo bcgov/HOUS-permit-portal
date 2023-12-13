@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { IPermitApplication } from "../../domains/permit-application"
+import { IPermitApplication } from "../../../models/permit-application"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -15,7 +15,7 @@ interface IPermitApplicationCardProps {
 }
 
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
-  const { id, nickname, status, jurisdictionName, type, number, createdAt, updatedAt } = permitApplication
+  const { id, nickname, status, jurisdictionName, permitType, number, createdAt, updatedAt } = permitApplication
   const { t } = useTranslation()
 
   return (
@@ -33,7 +33,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             <VStack>
               <Image src="https://placehold.co/107x79" alt={`thumbnail for ${nickname}`} />
               <Text color="text.link" textTransform="capitalize" fontWeight="bold">
-                {status}
+                {permitType}
               </Text>
             </VStack>
           </Box>
@@ -90,7 +90,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           </Text>
         </Flex>
         <Flex direction={{ base: "column", md: "row" }} gap={4}>
-          <RouterLink to={"#"}>{`${t("permitApplication.seeBestPracticesLink")} ${type}`}</RouterLink>
+          <RouterLink to={"#"}>{`${t("permitApplication.seeBestPracticesLink")} ${permitType}`}</RouterLink>
           <Show above="md">
             <Text>{"  |  "}</Text>
           </Show>
@@ -114,5 +114,3 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
     </Flex>
   )
 }
-
-const BarOrBreak = () => <></>
