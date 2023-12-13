@@ -14,4 +14,5 @@ export const UserModel = types
   .extend(withEnvironment())
   .views((self) => ({}))
   .actions((self) => ({}))
+
 export interface IUser extends Instance<typeof UserModel> {}

@@ -1,58 +1,20 @@
 import { Container, Flex, Heading, Select, Text } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
 
 interface IPermitApplicationIndexScreenProps {}
 
-export interface IPermitApplication {
-  id: string
-  nickname: string
-  jurisdictionName: string
-  status: string
-  type: string
-  number: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-const stubApplications: IPermitApplication[] = [
-  {
-    id: "27a32891-7e34-480c-830d-ce595c2fe74c",
-    nickname: "Cool Draft Permit 1",
-    jurisdictionName: "North Cowichan",
-    number: "9999",
-    type: "residential",
-    status: "draft",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "27a32891-7e34-480c-830d-ce595c2fe73c",
-    nickname: "Cool Draft Permit 2",
-    jurisdictionName: "North Cowichan",
-    number: "8888",
-    type: "residential",
-    status: "draft",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "27a32891-7e34-480c-130d-ce595c2fe74c",
-    nickname: "Cool Draft Permit 3",
-    jurisdictionName: "North Cowichan",
-    number: "7777",
-    type: "residential",
-    status: "draft",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-]
-
-export const PermitApplicationIndexScreen = ({}: IPermitApplicationIndexScreenProps) => {
+export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationIndexScreenProps) => {
   const { t } = useTranslation()
+
+  const { permitApplicationStore } = useMst()
+  const { permitApplications } = permitApplicationStore
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
@@ -81,11 +43,11 @@ export const PermitApplicationIndexScreen = ({}: IPermitApplicationIndexScreenPr
               </Select>
             </Flex>
           </Flex>
-          {stubApplications.map((pa) => (
-            <PermitApplicationCard key={pa.id} permitApplication={pa} />
+          {permitApplications.map((pa) => (
+            <PermitApplicationCard key={pa.id} permitApplication={pa as IPermitApplication} />
           ))}
         </Flex>
       </Container>
     </Flex>
   )
-}
+})
