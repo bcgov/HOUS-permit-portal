@@ -1,4 +1,4 @@
-class LocalJurisdiction < ApplicationRecord
+class Jurisdiction < ApplicationRecord
   # Associations
   has_many :permit_applications
   has_many :contacts

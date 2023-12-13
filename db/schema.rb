@@ -37,13 +37,13 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
     t.string "first_nation"
     t.string "email"
     t.string "phone_number"
-    t.uuid "local_jurisdiction_id", null: false
+    t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["local_jurisdiction_id"], name: "index_contacts_on_local_jurisdiction_id"
+    t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
-  create_table "local_jurisdictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "jurisdictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.text "description"
     t.jsonb "checklist_slate_data"
@@ -54,12 +54,13 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "permit_type", default: 0
+    t.integer "building_type", default: 0
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
-    t.uuid "local_jurisdiction_id", null: false
+    t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["local_jurisdiction_id"], name: "index_permit_applications_on_local_jurisdiction_id"
+    t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
   end
 
@@ -78,17 +79,17 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role", default: 0
-    t.uuid "local_jurisdiction_id"
+    t.uuid "jurisdiction_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["local_jurisdiction_id"], name: "index_users_on_local_jurisdiction_id"
+    t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
-  add_foreign_key "contacts", "local_jurisdictions"
-  add_foreign_key "permit_applications", "local_jurisdictions"
+  add_foreign_key "contacts", "jurisdictions"
+  add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
-  add_foreign_key "users", "local_jurisdictions"
+  add_foreign_key "users", "jurisdictions"
 end

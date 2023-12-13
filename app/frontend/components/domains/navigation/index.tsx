@@ -10,9 +10,9 @@ import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
+import { JurisdictionIndexScreen } from "../jurisdictions"
+import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { LandingScreen } from "../landing"
-import { LocalJurisdictionIndexScreen } from "../local-jurisdictions"
-import { LocalJurisdictionScreen } from "../local-jurisdictions/local-jurisdiction-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { NavBar } from "./nav-bar"
 
@@ -59,8 +59,8 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           <Route path="/" element={<LandingScreen />} />
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/local-jurisdictions" element={<LocalJurisdictionIndexScreen />} />
-          <Route path="/local-jurisdictions/:localJurisdictionId" element={<LocalJurisdictionScreen />} />
+          <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
