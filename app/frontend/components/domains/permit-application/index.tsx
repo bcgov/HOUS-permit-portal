@@ -30,7 +30,7 @@ const stubApplications: IPermitApplication[] = [
     updatedAt: new Date(),
   },
   {
-    id: "27a32891-7e34-480c-830d-ce595c2fe74c",
+    id: "27a32891-7e34-480c-830d-ce595c2fe73c",
     nickname: "Cool Draft Permit 2",
     jurisdictionName: "North Cowichan",
     number: "8888",
@@ -40,7 +40,7 @@ const stubApplications: IPermitApplication[] = [
     updatedAt: new Date(),
   },
   {
-    id: "27a32891-7e34-480c-830d-ce595c2fe74c",
+    id: "27a32891-7e34-480c-130d-ce595c2fe74c",
     nickname: "Cool Draft Permit 3",
     jurisdictionName: "North Cowichan",
     number: "7777",

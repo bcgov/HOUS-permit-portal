@@ -32,7 +32,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           <Box p={2}>
             <VStack>
               <Image src="https://placehold.co/107x79" alt={`thumbnail for ${nickname}`} />
-              <Text color="text.link" textTransform="capitalize">
+              <Text color="text.link" textTransform="capitalize" fontWeight="bold">
                 {status}
               </Text>
             </VStack>

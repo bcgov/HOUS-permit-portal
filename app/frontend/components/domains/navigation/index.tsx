@@ -5,7 +5,6 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
-import { BreadcrumbBar } from "../../shared/navigation/breadcrumb-bar"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
@@ -15,6 +14,7 @@ import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { LandingScreen } from "../landing"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { NavBar } from "./nav-bar"
+import { SubNavBar } from "./sub-nav-bar"
 
 export const Navigation = observer(() => {
   const {
@@ -34,7 +34,7 @@ export const Navigation = observer(() => {
       </Box>
 
       <NavBar />
-      <BreadcrumbBar />
+      <SubNavBar />
       <AppRoutes />
       <Spacer />
       <Footer />
@@ -53,12 +53,14 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
   return (
     <Routes location={location}>
       {loggedIn ? (
-        <Route path="/" element={<Heading>Housing Permit Portal!</Heading>} />
+        <>
+          <Route path="/" element={<Heading>Housing Permit Portal!</Heading>} />
+          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+        </>
       ) : (
         <>
           <Route path="/" element={<LandingScreen />} />
           <Route path="/login" element={<LoginScreen />} />
-          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
