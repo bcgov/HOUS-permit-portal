@@ -10,7 +10,7 @@ interface IPermitApplicationIndexScreenProps {}
 export interface IPermitApplication {
   id: string
   nickname: string
-  localJurisdictionName: string
+  jurisdictionName: string
   status: string
   type: string
   number: string
@@ -22,7 +22,7 @@ const stubApplications: IPermitApplication[] = [
   {
     id: "27a32891-7e34-480c-830d-ce595c2fe74c",
     nickname: "Cool Draft Permit 1",
-    localJurisdictionName: "North Cowichan",
+    jurisdictionName: "North Cowichan",
     number: "9999",
     type: "residential",
     status: "draft",
@@ -32,7 +32,7 @@ const stubApplications: IPermitApplication[] = [
   {
     id: "27a32891-7e34-480c-830d-ce595c2fe74c",
     nickname: "Cool Draft Permit 2",
-    localJurisdictionName: "North Cowichan",
+    jurisdictionName: "North Cowichan",
     number: "8888",
     type: "residential",
     status: "draft",
@@ -42,7 +42,7 @@ const stubApplications: IPermitApplication[] = [
   {
     id: "27a32891-7e34-480c-830d-ce595c2fe74c",
     nickname: "Cool Draft Permit 3",
-    localJurisdictionName: "North Cowichan",
+    jurisdictionName: "North Cowichan",
     number: "7777",
     type: "residential",
     status: "draft",
@@ -56,7 +56,7 @@ export const PermitApplicationIndexScreen = ({}: IPermitApplicationIndexScreenPr
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
-      <BlueTitleBar title={t("permitApplication.indexTitle")} imageSrc={"/images/local-jurisdiction-bus.svg"} />
+      <BlueTitleBar title={t("permitApplication.indexTitle")} imageSrc={"/images/jurisdiction-bus.svg"} />
       <Container maxW="container.lg">
         <Flex as="section" direction="column" p={6} gap={6}>
           <RouterLinkButton

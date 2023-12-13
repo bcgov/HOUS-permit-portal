@@ -4,10 +4,10 @@ RSpec.describe User, type: :model do
   describe "associations" do
     # Testing associations
     it { should have_many(:permit_applications) }
-    it { should have_many(:applied_jurisdictions).through(:permit_applications).source(:local_jurisdiction) }
+    it { should have_many(:applied_jurisdictions).through(:permit_applications).source(:jurisdiction) }
 
     # Testing optional belongs_to association
-    it { should belong_to(:local_jurisdiction).optional }
+    it { should belong_to(:jurisdiction).optional }
   end
 
   describe "enums" do
@@ -22,14 +22,12 @@ RSpec.describe User, type: :model do
   end
 
   describe "validations" do
-    context "local_jurisdiction with invalid role" do
-      let(:user) { build(:user, role: :submitter, local_jurisdiction: build(:local_jurisdiction)) }
+    context "jurisdiction with invalid role" do
+      let(:user) { build(:user, role: :submitter, jurisdiction: build(:jurisdiction)) }
 
       it "is not valid" do
         expect(user).not_to be_valid
-        expect(user.errors[:local_jurisdiction]).to include(
-          "Cannot be present when user is not a reviewer or review manager",
-        )
+        expect(user.errors[:jurisdiction]).to include("Cannot be present when user is not a reviewer or review manager")
       end
     end
   end

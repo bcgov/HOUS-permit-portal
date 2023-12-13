@@ -1,4 +1,4 @@
-class LocalJurisdiction < ApplicationRecord
+class Jurisdiction < ApplicationRecord
   # Associations
   has_many :permit_applications
   has_many :review_managers, -> { where(role: User.roles[:review_manager]) }, class_name: "User"

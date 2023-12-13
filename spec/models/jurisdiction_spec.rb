@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe LocalJurisdiction, type: :model do
+RSpec.describe Jurisdiction, type: :model do
   describe "associations" do
     # Testing direct associations
     it { should have_many(:permit_applications) }

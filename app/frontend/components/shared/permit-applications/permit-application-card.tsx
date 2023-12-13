@@ -15,7 +15,7 @@ interface IPermitApplicationCardProps {
 }
 
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
-  const { id, nickname, status, localJurisdictionName, type, number, createdAt, updatedAt } = permitApplication
+  const { id, nickname, status, jurisdictionName, type, number, createdAt, updatedAt } = permitApplication
   const { t } = useTranslation()
 
   return (
@@ -54,11 +54,12 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           to="#"
           rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
         >
-          {nickname},
+          {nickname}
+          {", "}
           <Show below="md">
             <br />
           </Show>
-          {localJurisdictionName}
+          {jurisdictionName}
         </RouterLinkButton>
         <Show below="md">
           <Text>

@@ -66,7 +66,7 @@ export const BreadcrumbBar = () => {
 export const segmentToTitle = (segment) => {
   return (
     {
-      // "local-jurisdictions": "Local Jurisdictions",
+      // "jurisdictions": "Local Jurisdictions",
     }[segment] || decodeURIComponent(segment).replace(/[_-]/g, " ")
   )
 }

@@ -8,8 +8,8 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# Creating Local Jurisdictions
-5.times { FactoryBot.create(:local_jurisdiction) }
+# Creating Jurisdictions
+5.times { FactoryBot.create(:jurisdiction) }
 
 # Creating Users with different roles
 5.times do
@@ -20,12 +20,10 @@
 end
 
 # Creating Permit Applications
-local_jurisdictions = LocalJurisdiction.all
+jurisdictions = Jurisdiction.all
 submitters = User.where(role: "submitter")
 
-20.times do
-  FactoryBot.create(:permit_application, submitter: submitters.sample, local_jurisdiction: local_jurisdictions.sample)
-end
+20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
 
 # Creating Contacts
-local_jurisdictions.each { |lj| rand(3..5).times { FactoryBot.create(:contact, local_jurisdiction: lj) } }
+jurisdictions.each { |j| rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) } }
