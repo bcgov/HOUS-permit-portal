@@ -7,6 +7,8 @@ module Constants
     end
 
     USER_REGISTRATION_ERROR = e("user_registration_error", "Error registering user")
+    USER_CREATE_INVITE_ERROR = e("user_create_invite_error", "Error creating invitation")
+    USER_ACCEPT_INVITE_ERROR = e("user_accept_invite_error", "Error accepting invitation")
     USER_LOGIN_ERROR = e("invalid_login_error", "Invalid username or password")
     INVALID_TOKEN_ERROR = e("invalid_token_error", "The access token is invalid")
   end

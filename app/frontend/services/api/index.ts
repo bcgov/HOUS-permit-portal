@@ -1,5 +1,5 @@
 import { ApisauceInstance, create, Monitor } from "apisauce"
-import { IResetPasswordResponse, IUserResponse } from "../../types/api-responses"
+import { IAcceptInvitationResponse, IResetPasswordResponse, IUserResponse } from "../../types/api-responses"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -30,8 +30,8 @@ export class Api {
     this.client.addMonitor(monitor)
   }
 
-  async login(email, password) {
-    return this.client.post<IUserResponse>("/login", { user: { email, password } })
+  async login(username, password) {
+    return this.client.post<IUserResponse>("/login", { user: { username, password } })
   }
 
   async signUp(formData) {
@@ -56,5 +56,13 @@ export class Api {
 
   async validateToken() {
     return this.client.get("/validate_token")
+  }
+
+  async invite(params) {
+    return this.client.post("/invitation", params)
+  }
+
+  async acceptInvitation(params) {
+    return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 }

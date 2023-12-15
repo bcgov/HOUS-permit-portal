@@ -15,6 +15,16 @@ export const JurisdictionStoreModel = types
     get Jurisdictions() {
       return Array.from(self.jurisdictionsMap.values())
     },
+
+    get currentJurisdiction() {
+      return {
+        id: "0ee55726-8b7c-4a0d-9682-2731896fa244",
+        name: "STUB JURISDICTION",
+        description: "STUB DEFINITION",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    },
   }))
   .actions((self) => ({
     // Action to add a new Jurisdiction

@@ -24,10 +24,14 @@ Rails.application.routes.draw do
                  registrations: "api/registrations",
                  confirmations: "api/confirmations",
                  passwords: "api/passwords",
+                 invitations: "api/invitations",
                }
 
     devise_scope :user do
       get "/validate_token" => "sessions#validate_token"
+      delete "/invitation/remove" => "invitations#remove"
+      put "/invitation/resend" => "invitations#resend"
+      get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
   end
 
@@ -35,5 +39,6 @@ Rails.application.routes.draw do
 
   get "/reset-password" => "home#index", :as => :reset_password
   get "/login" => "home#index", :as => :login
+  get "/accept-invitation" => "home#index", :as => :accept_invitation
   get "/*path", to: "home#index", format: false, constraints: ->(req) { !req.path.include?("/rails") }
 end

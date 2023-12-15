@@ -5,10 +5,11 @@ import { useTranslation } from "react-i18next"
 
 interface IUsernameFormControlProps extends FormControlProps {
   validate?: boolean
-  autofocus?: boolean
+  autoFocus?: boolean
+  autoComplete?: string
 }
 
-export const UsernameFormControl = ({ validate, autoFocus, ...rest }: IUsernameFormControlProps) => {
+export const UsernameFormControl = ({ validate, autoFocus, autoComplete, ...rest }: IUsernameFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
 
@@ -21,11 +22,12 @@ export const UsernameFormControl = ({ validate, autoFocus, ...rest }: IUsernameF
             {...register("username", {
               required: true,
               validate: {
-                satisfiesUsernameRegex: (str) => !validate || str.length >= 2 || t("ui.invalidInput"),
+                satisfiesUsernameRegex: (str) =>
+                  !validate || (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
               },
             })}
             type={"text"}
-            autoComplete="username"
+            autoComplete={autoComplete || "username"}
             autoFocus={autoFocus}
           />
           {formState?.errors?.username && (

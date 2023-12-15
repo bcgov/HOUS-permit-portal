@@ -6,7 +6,7 @@ class CreateContacts < ActiveRecord::Migration[7.1]
       t.string :first_nation
       t.string :email
       t.string :phone_number
-      t.string :extension, null: false
+      t.string :extension, null: true
       t.references :jurisdiction, null: false, foreign_key: true, type: :uuid
       t.timestamps
     end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -37,6 +37,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
     t.string "first_nation"
     t.string "email"
     t.string "phone_number"
+    t.string "extension"
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -65,8 +66,8 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "username", default: "", null: false
+    t.string "email", null: false
+    t.string "username", null: false
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -79,9 +80,22 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_08_210651) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role", default: 0
+    t.string "first_name"
+    t.string "last_name"
     t.uuid "jurisdiction_id"
+    t.string "invitation_token"
+    t.datetime "invitation_created_at"
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
+    t.integer "invitation_limit"
+    t.string "invited_by_type"
+    t.bigint "invited_by_id"
+    t.integer "invitations_count", default: 0
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
+    t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
+    t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true

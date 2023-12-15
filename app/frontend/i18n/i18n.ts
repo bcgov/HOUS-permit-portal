@@ -9,6 +9,7 @@ i18n.use(initReactI18next).init({
         auth: {
           login: "Login",
           logout: "Logout",
+          role: "Role",
           loginInstructions: "Enter the username for your Digital Building Permit Account below.",
           usernameLabel: "Username",
           emailLabel: "Email address",
@@ -84,6 +85,7 @@ i18n.use(initReactI18next).init({
           feedbackLink: "Tell us what you think",
           sortBy: "Sort by",
           resume: "Resume",
+          remove: "Remove",
         },
         jurisdiction: {
           title: "Local Housing Permits",
@@ -117,6 +119,9 @@ i18n.use(initReactI18next).init({
           approvedPermits: "Approved Permits",
           myAccount: "My Account",
           giveFeedback: "Give Feedback",
+        },
+        admin: {
+          sendInvites: "Send Invites",
         },
       },
     },

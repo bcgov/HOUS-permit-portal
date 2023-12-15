@@ -1,10 +1,11 @@
-import { Box, Heading, Spacer } from "@chakra-ui/react"
+import { Box, Spacer } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
+import { RouterLink } from "../../shared/navigation/router-link"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
@@ -13,6 +14,8 @@ import { JurisdictionIndexScreen } from "../jurisdictions"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { LandingScreen } from "../landing"
 import { PermitApplicationIndexScreen } from "../permit-application"
+import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
+import { InviteScreen } from "../users/invite-screen"
 import { NavBar } from "./nav-bar"
 import { SubNavBar } from "./sub-nav-bar"
 
@@ -54,13 +57,15 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
     <Routes location={location}>
       {loggedIn ? (
         <>
-          <Route path="/" element={<Heading>Housing Permit Portal!</Heading>} />
+          <Route path="/" element={<RouterLink to="/users/invite">Invite</RouterLink>} />
+          <Route path="/users/invite" element={<InviteScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
         </>
       ) : (
         <>
           <Route path="/" element={<LandingScreen />} />
           <Route path="/login" element={<LoginScreen />} />
+          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />

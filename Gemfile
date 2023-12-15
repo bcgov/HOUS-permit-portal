@@ -31,6 +31,7 @@ gem "bootsnap", require: false
 
 # Authentication
 gem "devise", "4.9.3"
+gem "devise_invitable", "~> 2.0.9"
 gem "devise-jwt", "0.8.1"
 gem "devise-jwt-cookie", "0.5.1"
 gem "dry-container", "0.8.0"

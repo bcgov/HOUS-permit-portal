@@ -59,12 +59,30 @@ en:
       registration_error:
         title: Account could not be created.
         message: "%{error_message}"
+      accept_invite_error:
+        title: Oops
+        message: The invitation link is invalid or has expired. Please ask your administrator to re-invite you to the workspace.
+      create_invite_error:
+        title: Oops
+        message: "%{error_message}"
       authorization_error:
         title: Not authorized.
         message: User is not authorized to perform this aciton.
+      invitation_accepted_success:
+        title: Welcome
+        message: You have successfully been onboarded onto BC Permit Hub and are now logged in.
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed
       confirmation_error:
         title: Oops
         message: "%{error_message}"
+      send_invitation_success:
+        title: ""
+        message: Invitations have been sent successfully
+      invitation_removed_success:
+        title: ""
+        message: The invitation has been revoked
+      invite_error:
+        title: Oops
+        message: The users you specified weren't able to be invited. Please contact support.
