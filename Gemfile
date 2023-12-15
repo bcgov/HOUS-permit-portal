@@ -45,6 +45,7 @@ gem "sidekiq", "~> 7.2.0"
 gem "shrine", "~> 3.5.0"
 gem "redis", "~> 5.0.8"
 gem "image_processing", "~> 1.12.2"
+gem 'acts_as_list', "~> 1.1.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
 gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
