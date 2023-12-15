@@ -4,7 +4,7 @@ FactoryBot.define do
     title { Faker::Job.title }
     first_nation { Faker::Nation.nationality }
     email { Faker::Internet.email }
-    phone_number { Faker::PhoneNumber.phone_number }
-    association :local_jurisdiction
+    phone_number { "604-456-7890" }
+    association :jurisdiction
   end
 end

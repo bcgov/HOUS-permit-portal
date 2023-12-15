@@ -85,7 +85,7 @@ i18n.use(initReactI18next).init({
           sortBy: "Sort by",
           resume: "Resume",
         },
-        localJurisdiction: {
+        jurisdiction: {
           title: "Local Housing Permits",
           description:
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -113,6 +113,10 @@ i18n.use(initReactI18next).init({
           title: "Digital Permit Tool",
           description: "Lorem ipsum here is the site description",
           keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
+          activePermits: "Active Permits",
+          approvedPermits: "Approved Permits",
+          myAccount: "My Account",
+          giveFeedback: "Give Feedback",
         },
       },
     },

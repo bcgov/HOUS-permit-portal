@@ -4,7 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
 
-  validate :local_jurisdiction_must_belong_to_correct_roles
+  validate :jurisdiction_must_belong_to_correct_roles
 
   devise :database_authenticatable,
          :confirmable,
@@ -20,15 +20,15 @@ class User < ApplicationRecord
 
   # Associations
   has_many :permit_applications, foreign_key: "submitter_id"
-  has_many :applied_jurisdictions, through: :permit_applications, source: :local_jurisdiction
+  has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
 
-  belongs_to :local_jurisdiction, optional: true
+  belongs_to :jurisdiction, optional: true
 
   private
 
-  def local_jurisdiction_must_belong_to_correct_roles
-    if local_jurisdiction.present? && !reviewer? && !review_manager?
-      errors.add(:local_jurisdiction, "Cannot be present when user is not a reviewer or review manager")
+  def jurisdiction_must_belong_to_correct_roles
+    if jurisdiction.present? && !reviewer? && !review_manager?
+      errors.add(:jurisdiction, "Cannot be present when user is not a reviewer or review manager")
     end
   end
 end

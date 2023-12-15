@@ -22,7 +22,7 @@ FactoryBot.define do
       sequence :username do |n|
         "review_manager#{n}"
       end
-      association :local_jurisdiction
+      association :jurisdiction
     end
 
     trait :reviewer do
@@ -33,7 +33,7 @@ FactoryBot.define do
       sequence :username do |n|
         "reviewer#{n}"
       end
-      association :local_jurisdiction
+      association :jurisdiction
     end
 
     trait :super_admin do

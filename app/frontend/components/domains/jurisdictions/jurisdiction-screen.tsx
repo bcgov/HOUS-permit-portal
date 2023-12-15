@@ -5,22 +5,14 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { Descendant } from "slate"
-import { TLatLngTuple } from "../../../types/types"
+import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { ReadOnlySlate } from "../../shared/base/read-only-slate"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-export interface IContact {
-  name: string
-  firstNation?: string
-  title?: string
-  phone?: string
-  email?: string
-}
-
-export interface ILocalJurisdiction {
+export interface Jurisdiction {
   name: string
   contacts: IContact[]
 }
@@ -44,7 +36,7 @@ const linePositions: TLatLngTuple[] = [
   [51.512, -0.091],
 ] // Coordinates for your custom lines
 
-const localJurisdiction = {
+const jurisdiction = {
   name: "Greater Victoria",
   contacts: [
     {
@@ -69,14 +61,14 @@ const localJurisdiction = {
   ],
 }
 
-export const LocalJurisdictionScreen = () => {
+export const JurisdictionScreen = () => {
   const { t } = useTranslation()
 
-  const { localJurisdictionId } = useParams()
+  const { jurisdictionId } = useParams()
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
-      <BlueTitleBar title={localJurisdiction.name} imageSrc={"/images/local-jurisdiction-bus.svg"} />
+      <BlueTitleBar title={jurisdiction.name} imageSrc={"/images/jurisdiction-bus.svg"} />
       <Show below="md">
         <JurisdictionMap mapPosition={mapPosition} linePositions={linePositions} />
       </Show>
@@ -90,10 +82,10 @@ export const LocalJurisdictionScreen = () => {
             </Show>
             <Flex as="section" flex={1} direction="column" gap={4}>
               <YellowLineSmall mt={4} />
-              <Heading>{t("localJurisdiction.title")}</Heading>
-              <Text>{t("localJurisdiction.description")}</Text>
+              <Heading>{t("jurisdiction.title")}</Heading>
+              <Text>{t("jurisdiction.description")}</Text>
               <RouterLinkButton to="#" variant="primary">
-                {t("localJurisdiction.startApplication")}
+                {t("jurisdiction.startApplication")}
               </RouterLinkButton>
             </Flex>
           </Flex>
@@ -101,7 +93,7 @@ export const LocalJurisdictionScreen = () => {
             <Flex direction="column" flex={3}>
               <Flex as="section" direction="column" gap={2}>
                 <YellowLineSmall mt={4} />
-                <Heading>{t("localJurisdiction.checklist")}</Heading>
+                <Heading>{t("jurisdiction.checklist")}</Heading>
                 <ReadOnlySlate initialValue={exampleSlate} flex={1} />
               </Flex>
             </Flex>
@@ -115,27 +107,27 @@ export const LocalJurisdictionScreen = () => {
               border="1px solid"
               borderColor="border.light"
             >
-              <Heading>{t("localJurisdiction.lookOut")}</Heading>
+              <Heading>{t("jurisdiction.lookOut")}</Heading>
               <ReadOnlySlate initialValue={exampleSlate} />
             </Flex>
           </Flex>
           <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
             <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
               <Heading color="greys.white" fontSize="xl">
-                {t("localJurisdiction.contactInfo")}
+                {t("jurisdiction.contactInfo")}
               </Heading>
             </Box>
             <Flex direction="column" p={6} gap={9}>
               <Text>CUSTOM MESSAGE ABOUT CONTACTS HERE</Text>
 
               <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={4}>
-                {localJurisdiction.contacts.map((contact, index) => (
+                {jurisdiction.contacts.map((contact, index) => (
                   <ContactGridItem key={index} contact={contact} />
                 ))}
               </Grid>
             </Flex>
           </Flex>
-          <RouterLink to="#">{t("localJurisdiction.didNotFind")}</RouterLink>
+          <RouterLink to="#">{t("jurisdiction.didNotFind")}</RouterLink>
         </Flex>
       </Container>
     </Flex>
