@@ -82,6 +82,8 @@ i18n.use(initReactI18next).init({
           selectApplicable: "Select applicable:",
           clickHere: "Click here",
           feedbackLink: "Tell us what you think",
+          sortBy: "Sort by",
+          resume: "Resume",
         },
         localJurisdiction: {
           title: "Local Housing Permits",
@@ -92,6 +94,16 @@ i18n.use(initReactI18next).init({
           startApplication: "Start a Permit Application",
           contactInfo: "Contact information",
           didNotFind: "I didn't find what I was looking for",
+        },
+        permitApplication: {
+          indexTitle: "My Active Permits",
+          start: "Start a Permit Application",
+          drafts: "Draft Permits",
+          startedOn: "Started on",
+          lastUpdated: "Last updated",
+          seeBestPracticesLink: "See best practices for",
+          ask: "Ask a question",
+          applicationId: "Application ID",
         },
         site: {
           navBarTitle: "Building Permit Hub",

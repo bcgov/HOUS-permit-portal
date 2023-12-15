@@ -8,7 +8,7 @@ interface IRouterLinkButtonProps extends ButtonProps {
 
 export const RouterLinkButton = ({ to, children, ...rest }: IRouterLinkButtonProps) => {
   return (
-    <Button as={ReactRouterLink} to={to} {...rest}>
+    <Button as={ReactRouterLink} to={to} variant="primary" {...rest}>
       {children}
     </Button>
   )
