@@ -4,11 +4,22 @@ RSpec.describe RequirementBlockRequirement, type: :model do
   describe "associations" do
     it { should belong_to(:requirement_block) }
     it { should belong_to(:requirement) }
+    it "destroys associated non reusable requirements on destroy" do
+      requirement = create(:requirement, reusable: false)
+      requirement_id = requirement.id
+      requirement_block = create(:requirement_block)
+      requirement_block_requirement =
+        create(:requirement_block_requirement, requirement: requirement, requirement_block: requirement_block)
+
+      requirement_block.destroy
+
+      expect { Requirement.find(requirement_id) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 
   describe "validations" do
     context "uniqueness of requirement per requirement block" do
-      it "has only one instance of the same requirement per requirement block" do
+      it "enforces only one instance of the same requirement per requirement block" do
         requirement = create(:requirement)
         requirement_block = create(:requirement_block)
 
@@ -21,7 +32,7 @@ RSpec.describe RequirementBlockRequirement, type: :model do
         expect(requirement_block_requirement_2.errors[:requirement]).to include("has already been taken")
       end
 
-      it "has allows different combinations of requirement per requirement block" do
+      it "allows different combinations of requirement per requirement block" do
         requirement_1 = create(:requirement)
         requirement_2 = create(:requirement)
         requirement_block = create(:requirement_block)
@@ -30,6 +41,37 @@ RSpec.describe RequirementBlockRequirement, type: :model do
           create(:requirement_block_requirement, requirement: requirement_1, requirement_block: requirement_block)
         requirement_block_requirement_2 =
           build(:requirement_block_requirement, requirement: requirement_2, requirement_block: requirement_block)
+
+        expect(requirement_block_requirement_2).to be_valid
+      end
+    end
+
+    context "non reusable requirements" do
+      it "enforces only one instance of a requirement to be associated with one requirement block when the requirement is non reusable " do
+        requirement = create(:requirement, reusable: false)
+        requirement_block_1 = create(:requirement_block)
+        requirement_block_2 = create(:requirement_block)
+
+        requirement_block_requirement_1 =
+          create(:requirement_block_requirement, requirement: requirement, requirement_block: requirement_block_1)
+        requirement_block_requirement_2 =
+          build(:requirement_block_requirement, requirement: requirement, requirement_block: requirement_block_2)
+
+        expect(requirement_block_requirement_2).not_to be_valid
+        expect(requirement_block_requirement_2.errors[:requirement]).to include(
+          "is marked as non reusable and already associated with a requirement block.",
+        )
+      end
+
+      it "allows one instance of a requirement to be associated with different requirement blocks when the requirement is reusable " do
+        requirement = create(:requirement, reusable: true)
+        requirement_block_1 = create(:requirement_block)
+        requirement_block_2 = create(:requirement_block)
+
+        requirement_block_requirement_1 =
+          create(:requirement_block_requirement, requirement: requirement, requirement_block: requirement_block_1)
+        requirement_block_requirement_2 =
+          build(:requirement_block_requirement, requirement: requirement, requirement_block: requirement_block_2)
 
         expect(requirement_block_requirement_2).to be_valid
       end
