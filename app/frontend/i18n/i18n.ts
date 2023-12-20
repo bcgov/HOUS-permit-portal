@@ -107,6 +107,10 @@ i18n.use(initReactI18next).init({
           ask: "Ask a question",
           applicationId: "Application ID",
         },
+        user: {
+          addUser: "Add User",
+          invite: "Invite",
+        },
         site: {
           navBarTitle: "Building Permit Hub",
           beta: "Beta",
@@ -122,6 +126,9 @@ i18n.use(initReactI18next).init({
         },
         admin: {
           sendInvites: "Send Invites",
+        },
+        errors: {
+          fetchJurisdiction: "Something went wrong fetching jurisdiction",
         },
       },
     },

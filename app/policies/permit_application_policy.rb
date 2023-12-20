@@ -1,8 +1,13 @@
 class PermitApplicationPolicy < ApplicationPolicy
   class Scope < Scope
-    # NOTE: Be explicit about which records you allow access to!
-    # def resolve
-    #   scope.all
-    # end
+    def resolve
+      if user.super_admin?
+        scope.all
+      elsif user.review_manager? || user.reviewer?
+        scope.where(jurisdiction: user.jurisdiction)
+      elsif user.submitter?
+        scope.where(submitter: user)
+      end
+    end
   end
 end

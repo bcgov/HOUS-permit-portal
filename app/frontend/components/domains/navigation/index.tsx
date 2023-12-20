@@ -1,4 +1,4 @@
-import { Box, Spacer } from "@chakra-ui/react"
+import { Box, Flex, Spacer } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
@@ -57,20 +57,29 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
     <Routes location={location}>
       {loggedIn ? (
         <>
-          <Route path="/" element={<RouterLink to="/users/invite">Invite</RouterLink>} />
-          <Route path="/users/invite" element={<InviteScreen />} />
+          <Route
+            path="/"
+            element={
+              <Flex direction="column">
+                <RouterLink to="/jurisdictions">Jurisdictions</RouterLink>
+                <RouterLink to="/permit-applications">My Applications</RouterLink>
+              </Flex>
+            }
+          />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+          <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId/invite" element={<InviteScreen />} />
         </>
       ) : (
         <>
           <Route path="/" element={<LandingScreen />} />
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-          <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         </>
       )}
     </Routes>

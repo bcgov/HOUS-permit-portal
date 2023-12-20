@@ -1,9 +1,4 @@
 class InvitationPolicy < ApplicationPolicy
-  def initialize(user, record)
-    @user = user
-    @record = record
-  end
-
   def create?
     user.super_admin? || user.review_manager?
   end

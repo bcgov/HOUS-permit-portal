@@ -1,4 +1,5 @@
-import { ApisauceInstance, create, Monitor } from "apisauce"
+import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
+import { IJurisdiction } from "../../models/jurisdiction"
 import { IAcceptInvitationResponse, IResetPasswordResponse, IUserResponse } from "../../types/api-responses"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
@@ -64,5 +65,13 @@ export class Api {
 
   async acceptInvitation(params) {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
+  }
+
+  async fetchJurisdictions() {
+    return this.client.get<ApiResponse<IJurisdiction>>("/jurisdictions")
+  }
+
+  async fetchJurisdiction(id) {
+    return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
   }
 }

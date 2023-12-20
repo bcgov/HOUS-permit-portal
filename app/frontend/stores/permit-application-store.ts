@@ -4,18 +4,18 @@ import { EPermitApplicationStatus, EPermitType } from "../types/enums"
 
 export const PermitApplicationStoreModel = types
   .model("PermitApplicationStore", {
-    permitApplicationsMap: types.map(PermitApplicationModel),
+    permitApplicationMap: types.map(PermitApplicationModel),
   })
   .views((self) => ({
     // View to get a PermitApplication by id
     getPermitApplicationById(id: string) {
-      return self.permitApplicationsMap.get(id)
+      return self.permitApplicationMap.get(id)
     },
 
     // View to get all permitapplications as an array
     get permitApplications() {
       // TODO: UNSTUB APPLICATIONS
-      // return Array.from(self.permitApplicationsMap.values())
+      // return Array.from(self.permitApplicationMap.values())
 
       return [
         {
@@ -54,11 +54,11 @@ export const PermitApplicationStoreModel = types
   .actions((self) => ({
     // Action to add a new PermitApplication
     addPermitApplication(permitapplication: IPermitApplication) {
-      self.permitApplicationsMap.put(permitapplication)
+      self.permitApplicationMap.put(permitapplication)
     },
     // Action to remove a PermitApplication
     removePermitApplication(id: string) {
-      self.permitApplicationsMap.delete(id)
+      self.permitApplicationMap.delete(id)
     },
     // Example of an asynchronous action to fetch permitapplications from an API
     fetchPermitApplications: flow(function* () {

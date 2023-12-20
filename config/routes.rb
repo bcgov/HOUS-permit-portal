@@ -33,6 +33,8 @@ Rails.application.routes.draw do
       put "/invitation/resend" => "invitations#resend"
       get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
+
+    resources :jurisdictions, only: %i[index show]
   end
 
   root to: "home#index"
