@@ -3,10 +3,10 @@ FactoryBot.define do
     association :submitter, factory: :user, role: "submitter"
     association :jurisdiction
 
-    # Dynamic attribute for building_type association
-    building_type do
+    # Dynamic attribute for permit_template association
+    permit_template do
       # Define the traits as symbols
-      building_type_traits = %i[
+      permit_template_traits = %i[
         detached
         semi_detached
         secondary_suite
@@ -16,10 +16,10 @@ FactoryBot.define do
       ]
 
       # Select a random trait
-      selected_trait = building_type_traits.sample
+      selected_trait = permit_template_traits.sample
 
-      # Create the building_type with the selected trait
-      FactoryBot.create(:building_type, selected_trait)
+      # Create the permit_template with the selected trait
+      FactoryBot.create(:permit_template, selected_trait)
     end
 
     work_type do

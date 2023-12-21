@@ -9,7 +9,7 @@ export enum EPermitType {
   residential = "residential",
 }
 
-export enum EBuildingType {
+export enum EPermitTemplate {
   detatched = "detatched",
   semiDetatched = "semi_detatched",
   smallAppartment = "small_appartment",

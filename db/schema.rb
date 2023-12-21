@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_20_194155) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_21_193142) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -27,16 +27,6 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_20_194155) do
   end
 
   create_table "assets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "building_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "name"
-    t.string "description"
-    t.string "type"
-    t.string "zoning_type"
-    t.string "density_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -67,14 +57,35 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_20_194155) do
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
     t.uuid "jurisdiction_id", null: false
-    t.uuid "building_type_id", null: false
+    t.uuid "permit_template_id", null: false
     t.uuid "work_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["building_type_id"], name: "index_permit_applications_on_building_type_id"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
+    t.index ["permit_template_id"], name: "index_permit_applications_on_permit_template_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["work_type_id"], name: "index_permit_applications_on_work_type_id"
+  end
+
+  create_table "permit_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.uuid "secondary_type_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["secondary_type_id"], name: "index_permit_templates_on_secondary_type_id"
+  end
+
+  create_table "primary_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "secondary_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "primary_type_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["primary_type_id"], name: "index_secondary_types_on_primary_type_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -121,9 +132,11 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_20_194155) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "contacts", "jurisdictions"
-  add_foreign_key "permit_applications", "building_types"
   add_foreign_key "permit_applications", "jurisdictions"
+  add_foreign_key "permit_applications", "permit_templates"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_applications", "work_types"
+  add_foreign_key "permit_templates", "secondary_types"
+  add_foreign_key "secondary_types", "primary_types"
   add_foreign_key "users", "jurisdictions"
 end

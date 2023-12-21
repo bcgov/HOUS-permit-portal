@@ -1,5 +1,5 @@
 import { Instance, types } from "mobx-state-tree"
-import { EBuildingType, EPermitApplicationStatus, EPermitType } from "../types/enums"
+import { EPermitApplicationStatus, EPermitTemplate, EPermitType } from "../types/enums"
 import { JurisdictionModel } from "./jurisdiction"
 import { UserModel } from "./user"
 
@@ -9,7 +9,7 @@ export const PermitApplicationModel = types
     nickname: types.string,
     number: types.string,
     permitType: types.enumeration(Object.values(EPermitType)),
-    buildingType: types.enumeration(Object.values(EBuildingType)),
+    PermitTemplate: types.enumeration(Object.values(EPermitTemplate)),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitterId: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),

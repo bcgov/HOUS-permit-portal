@@ -31,7 +31,7 @@ end
 
 # Creating Permit Applications
 jurisdictions = Jurisdiction.all
-building_types = BuildingType.all
+permit_templates = PermitTemplate.all
 work_type = WorkType.all
 submitters = User.where(role: "submitter")
 
@@ -41,7 +41,7 @@ submitters = User.where(role: "submitter")
     submitter: submitters.sample,
     jurisdiction: jurisdictions.sample,
     work_type: work_type.sample,
-    building_type: building_types.sample,
+    permit_template: permit_templates.sample,
   )
 end
 

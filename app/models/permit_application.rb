@@ -1,10 +1,10 @@
 class PermitApplication < ApplicationRecord
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
-  belongs_to :building_type
+  belongs_to :permit_template
   belongs_to :work_type
 
-  delegate :permit_type, to: :building_type
+  delegate :permit_type, to: :permit_template
 
   enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
 
