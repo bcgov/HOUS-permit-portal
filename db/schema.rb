@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_20_194155) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -27,6 +27,16 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
   end
 
   create_table "assets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "building_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.string "type"
+    t.string "zoning_type"
+    t.string "density_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -54,15 +64,17 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
   end
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.integer "permit_type", default: 0
-    t.integer "building_type", default: 0
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
     t.uuid "jurisdiction_id", null: false
+    t.uuid "building_type_id", null: false
+    t.uuid "work_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["building_type_id"], name: "index_permit_applications_on_building_type_id"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
+    t.index ["work_type_id"], name: "index_permit_applications_on_work_type_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -89,7 +101,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
     t.datetime "invitation_accepted_at"
     t.integer "invitation_limit"
     t.string "invited_by_type"
-    t.bigint "invited_by_id"
+    t.uuid "invited_by_id"
     t.integer "invitations_count", default: 0
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -101,9 +113,17 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "work_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "contacts", "jurisdictions"
+  add_foreign_key "permit_applications", "building_types"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_applications", "work_types"
   add_foreign_key "users", "jurisdictions"
 end

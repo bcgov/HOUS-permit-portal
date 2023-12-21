@@ -11,6 +11,8 @@
 # Creating Jurisdictions
 5.times { FactoryBot.create(:jurisdiction) }
 
+PermitTypeSeeder.run
+
 FactoryBot.create(
   :user,
   :super_admin,
@@ -29,9 +31,19 @@ end
 
 # Creating Permit Applications
 jurisdictions = Jurisdiction.all
+building_types = BuildingType.all
+work_type = WorkType.all
 submitters = User.where(role: "submitter")
 
-20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
+20.times do
+  FactoryBot.create(
+    :permit_application,
+    submitter: submitters.sample,
+    jurisdiction: jurisdictions.sample,
+    work_type: work_type.sample,
+    building_type: building_types.sample,
+  )
+end
 
 # Creating Contacts
 jurisdictions.each { |j| rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) } }
