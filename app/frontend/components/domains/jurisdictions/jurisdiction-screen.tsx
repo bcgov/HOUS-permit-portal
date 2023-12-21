@@ -63,9 +63,6 @@ export const JurisdictionScreen = observer(() => {
               <RouterLinkButton to="#" variant="primary">
                 {t("jurisdiction.startApplication")}
               </RouterLinkButton>
-              <RouterLinkButton to={`invite`} variant="primary">
-                {t("user.invite")}
-              </RouterLinkButton>
             </Flex>
           </Flex>
           <Flex direction={{ base: "column", md: "row" }} gap={6}>

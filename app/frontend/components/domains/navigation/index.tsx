@@ -12,6 +12,7 @@ import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
 import { JurisdictionIndexScreen } from "../jurisdictions"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
+import { JurisdictionUserIndexScreen } from "../jurisdictions/jurisdiction-user-index-screen"
 import { LandingScreen } from "../landing"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
@@ -69,7 +70,8 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/invite" element={<InviteScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
         </>
       ) : (
         <>

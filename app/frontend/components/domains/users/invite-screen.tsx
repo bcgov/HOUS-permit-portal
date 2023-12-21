@@ -4,44 +4,44 @@ import {
   Container,
   Flex,
   FormControl,
-  FormErrorMessage,
   FormLabel,
+  Heading,
   Input,
   InputGroup,
   Select,
+  Tag,
   Text,
 } from "@chakra-ui/react"
-import { faPaperPlane, faPlus, faTrashCan } from "@fortawesome/free-solid-svg-icons"
+import { faCircleCheck, faCircleExclamation, faClose, faPaperPlane, faPlus } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { EMAIL_REGEX } from "../../../constants"
+import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { RouterLink } from "../../shared/navigation/router-link"
 
 interface IInviteScreenProps {}
 
 type TFormData = {
-  users: { firstName: string; lastName: string; email: string; role: EUserRoles; jurisdictionId: string }[]
+  users: { firstName?: string; lastName?: string; email?: string; role: EUserRoles; jurisdictionId: string }[]
 }
 
 export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { t } = useTranslation()
+  const { jurisdiction, error } = useJurisdiction()
   const {
     userStore: { invite },
   } = useMst()
 
-  const { jurisdictionId } = useParams()
-
   const defaultUserValues = {
-    email: "",
-    firstName: "",
-    lastName: "",
     role: EUserRoles.reviewManager,
-    jurisdictionId,
+    jurisdictionId: jurisdiction?.id,
   }
 
   const formMethods = useForm<TFormData>({
@@ -64,35 +64,61 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
     invite(formData)
   }
 
+  const navigate = useNavigate()
+
+  if (!jurisdiction) {
+    return (
+      <Flex as="main" w="full" bg="greys.white">
+        <SharedSpinner />
+      </Flex>
+    )
+  }
+
   return (
     <Flex direction="column" w="full" bg="greys.white">
       <Container maxW="container.lg" py={16} px={8}>
-        <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Flex direction="column" gap={4}>
-              {fields.map((field, index) => (
-                <UserInput key={field.id} index={index} remove={remove} />
-              ))}
-              <Button
-                type="button"
-                onClick={() => append(defaultUserValues)}
-                rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPlus} />}
-              >
-                {t("user.addUser")}
-              </Button>
-              <Button
-                w="full"
-                variant="primary"
-                type="submit"
-                isLoading={isSubmitting}
-                loadingText={t("ui.loading")}
-                rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPaperPlane} />}
-              >
-                {t("admin.sendInvites")}
-              </Button>
-            </Flex>
-          </form>
-        </FormProvider>
+        <Flex direction="column" gap={8}>
+          <Flex direction="column">
+            <Heading as="h1">{t("user.inviteTitle")}</Heading>
+            <Text>
+              {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
+            </Text>
+          </Flex>
+          <Heading fontSize="2xl">{jurisdiction.name}</Heading>
+          <FormProvider {...formMethods}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Flex direction="column" gap={6}>
+                <Flex direction="column" gap={4}>
+                  {fields.map((field, index) => (
+                    <UserInput key={field.id} index={index} remove={remove} />
+                  ))}
+                  <Button
+                    type="button"
+                    variant="tertiary"
+                    onClick={() => append(defaultUserValues)}
+                    leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPlus} />}
+                  >
+                    {t("user.addUser")}
+                  </Button>
+                </Flex>
+                <Flex gap={4}>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    isLoading={isSubmitting}
+                    loadingText={t("ui.loading")}
+                    rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPaperPlane} />}
+                  >
+                    {t("user.sendInvites")}
+                  </Button>
+                  <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
+                    {t("ui.cancel")}
+                  </Button>
+                </Flex>
+              </Flex>
+            </form>
+          </FormProvider>
+        </Flex>
       </Container>
     </Flex>
   )
@@ -109,22 +135,19 @@ const NameFormControl = ({ label, index, subFieldName }: INameFormControlProps) 
   const { t } = useTranslation()
 
   return (
-    <FormControl mb={4} isInvalid={!!formState?.errors.users?.[index]?.[subFieldName]} flex={1}>
+    <FormControl isInvalid={!!formState?.errors.users?.[index]?.[subFieldName]} flex={2}>
       <FormLabel>{label}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
           <Input
+            bg="greys.white"
             {...register(`users.${index}.${subFieldName}`, {
-              required: true,
               validate: {
-                satisfiesNameLength: (str) => (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
+                satisfiesNameLength: (str) => !str || (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
               },
             })}
             type={"text"}
           />
-          {formState?.errors.users?.[index]?.[subFieldName] && (
-            <FormErrorMessage>{formState?.errors.users[index][subFieldName].message as string}</FormErrorMessage>
-          )}
         </Flex>
       </InputGroup>
     </FormControl>
@@ -147,66 +170,65 @@ const UserInput = observer(({ index, remove }: IUserInputProps) => {
   const invited = invitedEmails?.includes(emailWatch)
   const taken = takenEmails?.includes(emailWatch)
 
-  let borderColor = "border.light"
-  if (invited) {
-    borderColor = "success"
-  } else if (taken) {
-    borderColor = "error"
-  }
-
   return (
-    <Box border="1px solid" borderColor={borderColor} p={4}>
-      {invited ? (
-        <Text>User invited successfully!</Text>
-      ) : (
-        <>
-          <Flex>
-            <FormControl mb={4} isInvalid={!!formState?.errors?.users?.[index]?.email}>
-              <FormLabel>{t("auth.emailLabel")}</FormLabel>
-              <InputGroup>
-                <Flex w="full" direction="column">
-                  <Input
-                    {...register(`users.${index}.email`, {
-                      required: true,
-                      validate: {
-                        matchesEmailRegex: (str) => EMAIL_REGEX.test(str) || t("ui.invalidInput"),
-                      },
-                    })}
-                    type={"text"}
-                  />
-                  {formState?.errors?.users?.[index]?.email && (
-                    <FormErrorMessage>{formState?.errors?.users[index]?.email.message as string}</FormErrorMessage>
-                  )}
-                </Flex>
-              </InputGroup>
-            </FormControl>
-          </Flex>
-          <Flex gap={4}>
-            <NameFormControl label="First Name" index={index} subFieldName="firstName" />
-            <NameFormControl label="Last Name" index={index} subFieldName="lastName" />
-          </Flex>
-          <FormControl mb={4}>
-            <FormLabel>{t("auth.role")}</FormLabel>
-            <Controller
-              name={`users.${index}.role`}
-              control={control}
-              render={({ field }) => (
-                <Select {...field}>
-                  <option value="review_manager">Review Manager</option>
-                  <option value="reviewer">Reviewer</option>
-                </Select>
-              )}
-            />
-          </FormControl>
-        </>
-      )}
-      <Button
-        onClick={() => remove(index)}
-        variant="secondary"
-        rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faTrashCan} />}
-      >
-        {t("ui.remove")}
-      </Button>
+    <Box bg="greys.grey03" p={2} borderRadius="sm">
+      <Flex gap={4} align="flex-end">
+        <FormControl flex={2}>
+          <FormLabel>{t("auth.role")}</FormLabel>
+          <Controller
+            name={`users.${index}.role`}
+            control={control}
+            render={({ field }) => (
+              <Select bg="greys.white" {...field}>
+                <option value="review_manager">Review Manager</option>
+                <option value="reviewer">Reviewer</option>
+              </Select>
+            )}
+          />
+        </FormControl>
+        <FormControl isInvalid={!!formState?.errors?.users?.[index]?.email} flex={3}>
+          <FormLabel>{t("auth.emailLabel")}</FormLabel>
+          <InputGroup>
+            <Flex w="full" direction="column">
+              <Input
+                bg="greys.white"
+                {...register(`users.${index}.email`, {
+                  required: true,
+                  validate: {
+                    matchesEmailRegex: (str) => EMAIL_REGEX.test(str) || t("ui.invalidInput"),
+                  },
+                })}
+                type={"text"}
+              />
+            </Flex>
+          </InputGroup>
+        </FormControl>
+        <NameFormControl label="First Name (optional)" index={index} subFieldName="firstName" />
+        <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
+        {invited && (
+          <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2}>
+            <Box color="semantic.success">
+              <FontAwesomeIcon style={{ height: 20, width: 20 }} icon={faCircleCheck} /> {t("user.inviteSuccess")}
+            </Box>
+          </Tag>
+        )}
+        {taken && (
+          <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" mb={2}>
+            <Box color="semantic.error">
+              <FontAwesomeIcon style={{ height: 20, width: 20 }} icon={faCircleExclamation} /> {t("user.inviteError")}
+            </Box>
+          </Tag>
+        )}
+        {!invited && !taken && (
+          <Button
+            onClick={() => remove(index)}
+            variant="tertiary"
+            leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faClose} />}
+          >
+            {t("ui.remove")}
+          </Button>
+        )}
+      </Flex>
     </Box>
   )
 })

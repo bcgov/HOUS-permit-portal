@@ -58,10 +58,10 @@ class Api::InvitationsController < Devise::InvitationsController
   def users_params
     params
       .require(:users)
-      .map { |user_param| user_param.permit(:first_name, :last_name, :email, :role, :jurisdiction_id) }
+      .map { |user_param| user_param.permit(:email, :role, :jurisdiction_id, :first_name, :last_name) }
   end
 
   def user_params
-    params.require(:user).permit(:username, :password)
+    params.require(:user).permit(:username, :password, :first_name, :last_name)
   end
 end

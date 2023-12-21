@@ -87,12 +87,14 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
                 <RouterLinkButton
                   to="/login"
+                  variant="primaryInverse"
                   rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
                 >
                   {t("auth.login")}
                 </RouterLinkButton>
                 <RouterLinkButton
                   to="/register"
+                  variant="primaryInverse"
                   rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
                 >
                   {t("auth.register")}

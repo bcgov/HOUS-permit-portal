@@ -22,7 +22,7 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
       jurisdictions index
       {jurisdictions.map((j) => (
         <Box>
-          <RouterLink to={`/jurisdictions/${j.id}`}>{j.name}</RouterLink>
+          <RouterLink to={`/jurisdictions/${j.id}/users`}>{j.name}</RouterLink>
         </Box>
       ))}
     </Flex>
