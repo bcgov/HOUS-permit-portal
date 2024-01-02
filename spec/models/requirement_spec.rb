@@ -23,9 +23,21 @@ RSpec.describe Requirement, type: :model do
 
     it "enforces select inputs to have string options" do
       invalid_select_requirement =
-        build(:requirement, input_type: "select", input_options: { "value_options" => [1, "test", 2] })
+        build(
+          :requirement,
+          input_type: "select",
+          input_options: {
+            "value_options" => [1, "test", { "label" => "2", "value" => 2 }],
+          },
+        )
       valid_select_requirement =
-        build(:requirement, input_type: "select", input_options: { "value_options" => %w[1 test 2] })
+        build(
+          :requirement,
+          input_type: "select",
+          input_options: {
+            "value_options" => [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }],
+          },
+        )
       error_message = "select inputs must have options defined"
 
       expect(invalid_select_requirement).not_to be_valid
@@ -51,11 +63,159 @@ RSpec.describe Requirement, type: :model do
 
   describe "methods" do
     it "returns the options for a select input" do
-      select_options = %w[1 test 2]
+      select_options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
       select_requirement =
         create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
 
       expect(select_requirement.value_options).to eq(select_options)
+    end
+
+    context "form json" do
+      it "returns correct form json for text requirement" do
+        requirement = create(:requirement, label: "Text Requirement", input_type: "text")
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "textRequirement",
+          type: "simpletextfield",
+          input: true,
+          label: "Text Requirement",
+          widget: {
+            type: "input",
+          },
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
+
+      it "returns correct form json for number requirement" do
+        requirement = create(:requirement, label: "Number Requirement", input_type: "number")
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "numberRequirement",
+          type: "number",
+          input: true,
+          label: "Number Requirement",
+          widget: {
+            type: "input",
+          },
+          applyMaskOn: "change",
+          mask: false,
+          inputFormat: "plain",
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
+
+      it "returns correct form json for checkbox requirement" do
+        requirement = create(:requirement, label: "Checkbox Requirement", input_type: "checkbox")
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "checkboxRequirement",
+          type: "checkbox",
+          input: true,
+          label: "Checkbox Requirement",
+          widget: {
+            type: "input",
+          },
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
+
+      it "returns correct form json for date requirement" do
+        requirement = create(:requirement, label: "Date  Requirement", input_type: "date")
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "dateRequirement",
+          type: "date",
+          input: true,
+          label: "Date  Requirement",
+          enableTime: false,
+          datePicker: {
+            disableWeekends: false,
+            disableWeekdays: false,
+          },
+          enableMinDateInput: false,
+          enableMaxDateInput: false,
+          widget: {
+            type: "calendar",
+            displayInTimezone: "viewer",
+            locale: "en",
+            useLocaleSettings: false,
+            allowInput: true,
+            mode: "single",
+            enableTime: true,
+            noCalendar: false,
+            format: "yyyy-MM-dd",
+            hourIncrement: 1,
+            minuteIncrement: 1,
+            time_24hr: false,
+            minDate: nil,
+            disableWeekends: false,
+            disableWeekdays: false,
+            maxDate: nil,
+          },
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
+
+      it "returns correct form json for select requirement" do
+        select_options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
+        requirement =
+          create(
+            :requirement,
+            label: "select Requirement",
+            input_type: "select",
+            input_options: {
+              "value_options" => select_options,
+            },
+          )
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "selectRequirement",
+          type: "select",
+          input: true,
+          label: "select Requirement",
+          widget: {
+            type: "choicesjs",
+          },
+          data: {
+            values: select_options,
+          },
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
+
+      it "returns correct form json for multi option select requirement" do
+        select_options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
+        requirement =
+          create(
+            :requirement,
+            label: "Multi option select Requirement",
+            input_type: "multi_option_select",
+            input_options: {
+              "value_options" => select_options,
+            },
+          )
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "multiOptionSelectRequirement",
+          type: "select",
+          input: true,
+          multiple: true,
+          label: "Multi option select Requirement",
+          widget: {
+            type: "choicesjs",
+          },
+          data: {
+            values: select_options,
+          },
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
     end
   end
 end
