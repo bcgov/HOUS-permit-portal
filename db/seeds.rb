@@ -12,13 +12,17 @@
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-FactoryBot.create(
-  :user,
-  :super_admin,
-  email: "admin@example.com",
-  username: "admin@example.com",
-  password: "P@ssword1",
-).confirm
+user = User.find_by(email: "admin@example.com")
+
+unless user
+  FactoryBot.create(
+    :user,
+    :super_admin,
+    email: "admin@example.com",
+    username: "admin@example.com",
+    password: "P@ssword1",
+  ).confirm
+end
 
 # Creating Users with different roles
 5.times do
@@ -35,3 +39,18 @@ submitters = User.where(role: "submitter")
 
 # Creating Contacts
 jurisdictions.each { |j| rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) } }
+
+PermitClassificationSeeder.seed
+
+activity1 = Activity.find_by_code("new_construction")
+activity2 = Activity.find_by_code("demolition")
+
+# Create PermitType records
+permit_type1 = PermitType.find_by_code("low_residential")
+permit_type2 = PermitType.find_by_code("high_residential")
+
+# Create RequirementTemplate records
+RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
+RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
+RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
+RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
