@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe JurisdicitonPolicy, type: :policy do
+RSpec.describe JurisdictionPolicy, type: :policy do
   let(:user) { User.new }
 
   subject { described_class }

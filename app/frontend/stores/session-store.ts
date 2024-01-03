@@ -16,11 +16,12 @@ export const SessionStoreModel = types
     }),
   }))
   .actions((self) => ({
-    handleLogin(response) {
+    handleLogin(response, opts = { redirectToRoot: false }) {
       if (response.ok) {
         const user = response.data.data
         self.loggedIn = true
         self.rootStore.userStore.setCurrentUser(user)
+        if (opts.redirectToRoot) window.location.replace("/")
         return true
       }
       return false
@@ -37,8 +38,8 @@ export const SessionStoreModel = types
       const response: any = yield self.environment.api.validateToken() // now try to validate this with the server
       self.handleLogin(response)
     }),
-    login: flow(function* (email, password) {
-      const response: any = yield self.environment.api.login(email, password)
+    login: flow(function* (username, password) {
+      const response: any = yield self.environment.api.login(username, password)
       return self.handleLogin(response)
     }),
     logout: flow(function* () {

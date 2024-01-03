@@ -11,6 +11,14 @@
 # Creating Jurisdictions
 5.times { FactoryBot.create(:jurisdiction) }
 
+FactoryBot.create(
+  :user,
+  :super_admin,
+  email: "admin@example.com",
+  username: "admin@example.com",
+  password: "P@ssword1",
+).confirm
+
 # Creating Users with different roles
 5.times do
   FactoryBot.create(:user, :submitter).confirm

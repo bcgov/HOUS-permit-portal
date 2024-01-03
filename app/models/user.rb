@@ -1,12 +1,14 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
+  devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
 
   validate :jurisdiction_must_belong_to_correct_roles
+  validates :username, presence: true
 
-  devise :database_authenticatable,
+  devise :invitable,
+         :database_authenticatable,
          :confirmable,
          :registerable,
          :recoverable,
@@ -23,6 +25,10 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
 
   belongs_to :jurisdiction, optional: true
+
+  def self.invitable_roles
+    %w[reviewer review_manager]
+  end
 
   private
 

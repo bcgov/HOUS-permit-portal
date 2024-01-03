@@ -9,6 +9,7 @@ i18n.use(initReactI18next).init({
         auth: {
           login: "Login",
           logout: "Logout",
+          role: "Role",
           loginInstructions: "Enter the username for your Digital Building Permit Account below.",
           usernameLabel: "Username",
           emailLabel: "Email address",
@@ -84,6 +85,8 @@ i18n.use(initReactI18next).init({
           feedbackLink: "Tell us what you think",
           sortBy: "Sort by",
           resume: "Resume",
+          cancel: "Cancel",
+          remove: "Remove",
         },
         jurisdiction: {
           title: "Local Housing Permits",
@@ -105,6 +108,19 @@ i18n.use(initReactI18next).init({
           ask: "Ask a question",
           applicationId: "Application ID",
         },
+        user: {
+          addUser: "Add more emails",
+          invite: "Invite",
+          inviteTitle: "Invite Users",
+          inviteSuccess: "Invite sent!",
+          inviteError: "Email taken",
+          sendInvites: "Send Invites",
+          acceptInvitation: "Accept Invitation",
+          acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
+          rolesAndPermissions: "User Roles & Permissions",
+          inviteInstructions:
+            "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
+        },
         site: {
           navBarTitle: "Building Permit Hub",
           beta: "Beta",
@@ -117,6 +133,11 @@ i18n.use(initReactI18next).init({
           approvedPermits: "Approved Permits",
           myAccount: "My Account",
           giveFeedback: "Give Feedback",
+          error: "Something went wrong, please try refreshing the page",
+        },
+        admin: {},
+        errors: {
+          fetchJurisdiction: "Something went wrong fetching jurisdiction",
         },
       },
     },

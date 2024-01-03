@@ -1,14 +1,15 @@
 import { Box, Container, Flex, Grid, GridItem, Heading, Link, Show, Text } from "@chakra-ui/react"
 import { faSquareEnvelope, faSquarePhone } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
-import { Descendant } from "slate"
+import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { ReadOnlySlate } from "../../shared/base/read-only-slate"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -16,15 +17,6 @@ export interface Jurisdiction {
   name: string
   contacts: IContact[]
 }
-
-const exampleSlate: Descendant[] = [
-  {
-    children: [{ text: "This is the first line of your read-only editor." }],
-  },
-  {
-    children: [{ text: "TODO: See the exampleSlate variable and replace this placeholder with real data" }],
-  },
-]
 
 // Starting position for the map
 const mapPosition: TLatLngTuple = [51.505, -0.09]
@@ -36,39 +28,32 @@ const linePositions: TLatLngTuple[] = [
   [51.512, -0.091],
 ] // Coordinates for your custom lines
 
-const jurisdiction = {
-  name: "Greater Victoria",
-  contacts: [
-    {
-      name: "Firstname Lastname",
-      title: "Senior Director",
-      phone: "123-456-7890",
-      email: "email@gov.bc.ca",
-    },
-    {
-      name: "Firstname Lastname",
-      firstNation: "Binche Whut'en",
-      title: "Senior Director",
-      phone: "123-456-7890",
-      email: "email@gov.bc.ca",
-    },
-    {
-      name: "Firstname Lastname",
-      title: "Senior Director",
-      phone: "123-456-7890",
-      email: "email@gov.bc.ca",
-    },
-  ],
-}
-
-export const JurisdictionScreen = () => {
+export const JurisdictionScreen = observer(() => {
   const { t } = useTranslation()
+  const { jurisdiction, error } = useJurisdiction()
 
-  const { jurisdictionId } = useParams()
+  if (error) {
+    return (
+      <Flex as="main" w="full" bg="greys.white">
+        {/* Todo: set up suspense and error boundries */}
+        <Text>{t("site.error")}</Text>
+      </Flex>
+    )
+  }
+
+  if (!jurisdiction) {
+    return (
+      <Flex as="main" w="full" bg="greys.white">
+        <SharedSpinner />
+      </Flex>
+    )
+  }
+
+  const { contacts, name, checklistSlateData, lookOutSlateData } = jurisdiction
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
-      <BlueTitleBar title={jurisdiction.name} imageSrc={"/images/jurisdiction-bus.svg"} />
+      <BlueTitleBar title={name} imageSrc={"/images/jurisdiction-bus.svg"} />
       <Show below="md">
         <JurisdictionMap mapPosition={mapPosition} linePositions={linePositions} />
       </Show>
@@ -94,7 +79,7 @@ export const JurisdictionScreen = () => {
               <Flex as="section" direction="column" gap={2}>
                 <YellowLineSmall mt={4} />
                 <Heading>{t("jurisdiction.checklist")}</Heading>
-                <ReadOnlySlate initialValue={exampleSlate} flex={1} />
+                <ReadOnlySlate initialValue={checklistSlateData} flex={1} />
               </Flex>
             </Flex>
             <Flex
@@ -108,7 +93,7 @@ export const JurisdictionScreen = () => {
               borderColor="border.light"
             >
               <Heading>{t("jurisdiction.lookOut")}</Heading>
-              <ReadOnlySlate initialValue={exampleSlate} />
+              <ReadOnlySlate initialValue={lookOutSlateData} />
             </Flex>
           </Flex>
           <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
@@ -121,7 +106,7 @@ export const JurisdictionScreen = () => {
               <Text>CUSTOM MESSAGE ABOUT CONTACTS HERE</Text>
 
               <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={4}>
-                {jurisdiction.contacts.map((contact, index) => (
+                {contacts.map((contact, index) => (
                   <ContactGridItem key={index} contact={contact} />
                 ))}
               </Grid>
@@ -132,7 +117,7 @@ export const JurisdictionScreen = () => {
       </Container>
     </Flex>
   )
-}
+})
 
 interface IContactBoxProps {
   contact: IContact

@@ -7,7 +7,12 @@ module Constants
     end
 
     USER_REGISTRATION_ERROR = e("user_registration_error", "Error registering user")
+    USER_CREATE_INVITE_ERROR = e("user_create_invite_error", "Error creating invitation")
+    USER_ACCEPT_INVITE_ERROR = e("user_accept_invite_error", "Error accepting invitation")
+    USER_REMOVE_INVITE_ERROR = e("user_remove_invite_error", "Error canceling invitation")
+    USER_RESEND_INVITE_ERROR = e("user_resend_invite_error", "Error re-sending invitation")
     USER_LOGIN_ERROR = e("invalid_login_error", "Invalid username or password")
     INVALID_TOKEN_ERROR = e("invalid_token_error", "The access token is invalid")
+    NOT_FOUND_ERROR = e("not_found_error", "404 - The requested resource could not be found")
   end
 end

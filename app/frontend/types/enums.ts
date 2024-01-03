@@ -20,3 +20,10 @@ export enum EPermitApplicationStatus {
   submitted = "submitted",
   viewed = "viewed",
 }
+
+export enum EUserRoles {
+  submitter = "submitter",
+  reviewManager = "review_manager",
+  reviewer = "reviewer",
+  superAdmin = "super_admin",
+}
