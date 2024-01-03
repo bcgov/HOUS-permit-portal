@@ -28,4 +28,23 @@ RSpec.describe RequirementBlock, type: :model do
     xit { should define_enum_for(:sign_off_role).with_prefix(true).with_values(any: 0) }
     xit { should define_enum_for(:reviewer_role).with_prefix(true).with_values(any: 0) }
   end
+
+  describe "methods" do
+    it "returns the form json with with all requirements" do
+      requirement_block = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 6)
+      form_json = requirement_block.to_form_json
+      expect(form_json.reject { |key| key === :components }).to eq (
+           {
+             id: requirement_block.id,
+             legend: requirement_block.name,
+             key: "fieldSet#{requirement_block.id}",
+             label: requirement_block.name,
+             input: false,
+             tableView: false,
+           }
+         )
+
+      expect(form_json[:components].count).to eq 6
+    end
+  end
 end
