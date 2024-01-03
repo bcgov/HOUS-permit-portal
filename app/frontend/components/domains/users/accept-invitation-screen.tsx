@@ -2,6 +2,7 @@ import { Button, Flex, Heading, Input, Text } from "@chakra-ui/react"
 import React, { useRef } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { useQuickSubmit } from "../../../hooks/use-quick-submit"
 import { useMst } from "../../../setup/root"
 import { CenterContainer } from "../../shared/base/center-container"
@@ -14,26 +15,16 @@ interface IAcceptInvitationScreenProps {}
 export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
   const { t } = useTranslation()
 
-  const getUserDefaults = () => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const encodedUser = urlParams.get("user")
-    const decodedUser = decodeURIComponent(encodedUser)
-    return JSON.parse(decodedUser)
-  }
-
-  const userDefaults = getUserDefaults()
-
-  const getInvitationToken = () => {
-    const urlParams = new URLSearchParams(window.location.search)
-    return urlParams.get("invitation_token") || ""
-  }
+  const [searchParams] = useSearchParams()
+  const user = JSON.parse(decodeURIComponent(searchParams.get("user")))
+  const invitationToken = searchParams.get("invitation_token")
 
   const formMethods = useForm({
     mode: "onChange",
     defaultValues: {
-      firstName: userDefaults.first_name,
-      lastName: userDefaults.last_name,
-      invitationToken: getInvitationToken(),
+      firstName: user.first_name,
+      lastName: user.last_name,
+      invitationToken: invitationToken,
     },
   })
 

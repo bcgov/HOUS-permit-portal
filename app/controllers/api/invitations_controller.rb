@@ -6,8 +6,11 @@ class Api::InvitationsController < Devise::InvitationsController
 
   def create
     inviter = Jurisdiction::UserInviter.new(inviter: current_user, users_params: users_params).call
-
-    render_success(inviter.results, nil, { blueprint: InvitationBlueprint })
+    if inviter.results[:invited].any?
+      render_success(inviter.results, nil, { blueprint: InvitationBlueprint })
+    else
+      render_error Constants::Error::USER_CREATE_INVITE_ERROR, "user.create_invite_error", nil and return
+    end
   end
 
   def remove
@@ -46,11 +49,19 @@ class Api::InvitationsController < Devise::InvitationsController
   end
 
   def resend
-    render_success({}, "user.send_invitation_success") if @user.invite!
+    if @user.invite!
+      render_success({}, "user.send_invitation_success")
+    else
+      render_error Constants::Error::USER_RESEND_INVITE_ERROR, "user.resend_invite_error", nil and return
+    end
   end
 
   def remove
-    render_success(@user, "user.invitation_removed_success") if @user.destroy
+    if @user.destroy
+      render_success(@user, "user.invitation_removed_success")
+    else
+      render_error Constants::Error::USER_REMOVE_INVITE_ERROR, "user.remove_invite_error", nil and return
+    end
   end
 
   private

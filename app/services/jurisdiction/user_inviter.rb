@@ -33,10 +33,6 @@ class Jurisdiction::UserInviter
             u.jurisdiction_id = inviter.super_admin? ? user_params[:jurisdiction_id] : inviter.jurisdiction&.id
             u.save
           end
-
-        # send instructions
-
-        # user.deliver_invitation
         self.results[:invited] << user
       end
     end

@@ -32,6 +32,15 @@ export const JurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const { jurisdiction, error } = useJurisdiction()
 
+  if (error) {
+    return (
+      <Flex as="main" w="full" bg="greys.white">
+        {/* Todo: set up suspense and error boundries */}
+        <Text>{t("site.error")}</Text>
+      </Flex>
+    )
+  }
+
   if (!jurisdiction) {
     return (
       <Flex as="main" w="full" bg="greys.white">

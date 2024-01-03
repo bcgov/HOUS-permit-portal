@@ -21,10 +21,10 @@ export const UserStoreModel = types
       return values(self.usersMap) as IUser[]
     },
     get invitedEmails(): string[] {
-      return self.invitationResponse?.data?.invited?.map((user) => user.email)
+      return self.invitationResponse?.data?.invited?.map((user) => user.email) || []
     },
     get takenEmails(): string[] {
-      return self.invitationResponse?.data?.emailTaken?.map((user) => user.email)
+      return self.invitationResponse?.data?.emailTaken?.map((user) => user.email) || []
     },
   }))
   .actions((self) => ({

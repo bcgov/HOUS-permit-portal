@@ -1,4 +1,4 @@
-class JurisdicitonPolicy < ApplicationPolicy
+class JurisdictionPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       scope.all

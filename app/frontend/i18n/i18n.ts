@@ -133,6 +133,7 @@ i18n.use(initReactI18next).init({
           approvedPermits: "Approved Permits",
           myAccount: "My Account",
           giveFeedback: "Give Feedback",
+          error: "Something went wrong, please try refreshing the page",
         },
         admin: {},
         errors: {
