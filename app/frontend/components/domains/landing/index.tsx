@@ -1,3 +1,4 @@
+import "@bcgov/design-tokens/css/variables.css"
 import {
   Box,
   BoxProps,
@@ -75,11 +76,12 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               as="section"
               direction="column"
               borderRadius="lg"
-              bg="theme.blueAlt"
+              // bg="theme.blueAlt"
               p={8}
               gap={6}
               color="greys.white"
               flex={1}
+              style={{ backgroundColor: "var(--bcds-surface-primary-invert)" }}
             >
               <Heading fontSize="xl">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>

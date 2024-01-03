@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@bcgov/bc-sans": "^2.1.0",
+    "@bcgov/design-tokens": "^2.0.0",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
