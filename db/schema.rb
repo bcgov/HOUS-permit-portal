@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_02_221154) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -54,8 +54,6 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
   end
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.integer "permit_type", default: 0
-    t.integer "building_type", default: 0
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
     t.uuid "jurisdiction_id", null: false
@@ -63,6 +61,27 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
+  end
+
+  create_table "permit_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "code", null: false
+    t.string "type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_permit_classifications_on_code", unique: true
+  end
+
+  create_table "requirement_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "activity_id", null: false
+    t.uuid "permit_type_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
+    t.index %w[permit_type_id activity_id],
+            name: "index_requirement_templates_on_permit_type_id_and_activity_id",
+            unique: true
+    t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -105,5 +124,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
   add_foreign_key "contacts", "jurisdictions"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
+  add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "users", "jurisdictions"
 end
