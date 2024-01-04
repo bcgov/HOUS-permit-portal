@@ -37,6 +37,7 @@ Rails.application.routes.draw do
 
     resources :jurisdictions, only: %i[index show]
     resource :profile, only: [:update], controller: "users"
+    resources :requirement_blocks
   end
 
   root to: "home#index"
