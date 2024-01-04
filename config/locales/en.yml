@@ -92,6 +92,16 @@ en:
       invite_error:
         title: Oops
         message: The users you specified weren't able to be invited. Please contact support.
+    requirement_block:
+      create_error:
+        title: Oops
+        message: "Something went wrong creating the requirement block."
+      update_error:
+        title: Oops
+        message: "Something went wrong updating the requirement block."
+      delete_error:
+        title: Oops
+        message: "Something went wrong deleting the requirement block."
     misc:
       not_found_error:
         title: "Oops"

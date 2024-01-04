@@ -6,6 +6,8 @@ class Requirement < ApplicationRecord
 
   validate :validate_options_for_select_inputs
 
+  before_validation :set_requirement_code
+
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
       type: "simpletextfield",
@@ -88,6 +90,11 @@ class Requirement < ApplicationRecord
 
   def formio_type_options
     DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+  end
+
+  # TODO: requirement codes should be auto generated. Using a uuid for now. Later we have to replace it with a more human readable code
+  def set_requirement_code
+    self.requirement_code = SecureRandom.uuid
   end
 
   def validate_options_for_select_inputs
