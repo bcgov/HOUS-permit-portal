@@ -3,8 +3,8 @@ import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { CenterContainer } from "../../shared/base/center-container"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/containers/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 
 interface IResetPasswordScreenProps {}

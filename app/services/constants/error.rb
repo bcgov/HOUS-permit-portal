@@ -12,6 +12,7 @@ module Constants
     USER_REMOVE_INVITE_ERROR = e("user_remove_invite_error", "Error canceling invitation")
     USER_RESEND_INVITE_ERROR = e("user_resend_invite_error", "Error re-sending invitation")
     USER_LOGIN_ERROR = e("invalid_login_error", "Invalid username or password")
+    USER_UPDATE_ERROR = e("user_update_error", "Could not update user")
     INVALID_TOKEN_ERROR = e("invalid_token_error", "The access token is invalid")
     NOT_FOUND_ERROR = e("not_found_error", "404 - The requested resource could not be found")
   end

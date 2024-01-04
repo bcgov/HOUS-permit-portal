@@ -16,7 +16,11 @@ export const SubNavBar = observer(() => {
   const path = location.pathname
 
   return path === "/" ? (
-    <></>
+    loggedIn ? (
+      <HomeSubNav />
+    ) : (
+      <></>
+    )
   ) : (
     <Flex
       w="full"
@@ -30,16 +34,18 @@ export const SubNavBar = observer(() => {
       borderColor="border.light"
       overflow="hidden"
     >
-      <Container minW="container.lg">{loggedIn ? <LoggedInSubNav /> : <DynamicBreadcrumb path={path} />}</Container>
+      <Container minW="container.lg">
+        <DynamicBreadcrumb path={path} />
+      </Container>
     </Flex>
   )
 })
 
-const LoggedInSubNav = () => {
+const HomeSubNav = () => {
   const { t } = useTranslation()
 
   return (
-    <Flex w="full" gap={8}>
+    <Flex w="full" gap={8} bg="greys.white">
       <RouterLinkButton to={"#"} variant="tertiary">
         {t("site.activePermits")}
       </RouterLinkButton>

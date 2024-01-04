@@ -17,6 +17,7 @@ import { LandingScreen } from "../landing"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
+import { ProfileScreen } from "../users/profile-screen"
 import { NavBar } from "./nav-bar"
 import { SubNavBar } from "./sub-nav-bar"
 
@@ -41,6 +42,7 @@ export const Navigation = observer(() => {
       <SubNavBar />
       <AppRoutes />
       <Spacer />
+
       <Footer />
     </BrowserRouter>
   )
@@ -69,6 +71,7 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
           <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
