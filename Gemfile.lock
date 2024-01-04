@@ -152,6 +152,14 @@ GEM
     dry-core (0.9.1)
       concurrent-ruby (~> 1.0)
       zeitwerk (~> 2.6)
+    elastic-transport (8.3.0)
+      faraday (< 3)
+      multi_json
+    elasticsearch (8.11.0)
+      elastic-transport (~> 8.3)
+      elasticsearch-api (= 8.11.0)
+    elasticsearch-api (8.11.0)
+      multi_json
     erubi (1.12.0)
     factory_bot (6.4.2)
       activesupport (>= 5.0.0)
@@ -160,6 +168,11 @@ GEM
       railties (>= 5.0.0)
     faker (3.2.2)
       i18n (>= 1.8.11, < 2)
+    faraday (2.8.1)
+      base64
+      faraday-net_http (>= 2.0, < 3.1)
+      ruby2_keywords (>= 0.0.4)
+    faraday-net_http (3.0.2)
     ffi (1.16.3)
     globalid (1.2.1)
       activesupport (>= 6.1)
@@ -167,6 +180,7 @@ GEM
       temple (>= 0.8.2)
       thor
       tilt
+    hashie (5.0.0)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
     image_processing (1.12.2)
@@ -196,6 +210,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.20.0)
     msgpack (1.7.2)
+    multi_json (1.15.0)
     mutex_m (0.2.0)
     net-imap (0.4.8)
       date
@@ -300,6 +315,9 @@ GEM
     ruby-vips (2.2.0)
       ffi (~> 1.12)
     ruby2_keywords (0.0.5)
+    searchkick (5.3.1)
+      activemodel (>= 6.1)
+      hashie
     shoulda-matchers (5.3.0)
       activesupport (>= 5.2.0)
     shrine (3.5.0)
@@ -368,6 +386,7 @@ DEPENDENCIES
   devise_invitable (~> 2.0.9)
   dotenv-rails (= 2.8.1)
   dry-container (= 0.8.0)
+  elasticsearch (~> 8.11.0)
   factory_bot (~> 6.4)
   factory_bot_rails (~> 6.4.2)
   faker (~> 3.2.2)
@@ -382,6 +401,7 @@ DEPENDENCIES
   rails (~> 7.1.2)
   redis (~> 5.0.8)
   rspec-rails (~> 6.1.0)
+  searchkick (~> 5.3.1)
   shoulda-matchers (~> 5.3.0)
   shrine (~> 3.5.0)
   sidekiq (~> 7.2.0)
