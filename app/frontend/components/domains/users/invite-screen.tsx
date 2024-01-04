@@ -89,7 +89,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
             <Flex direction="column" gap={6}>
               <Flex direction="column" gap={4}>
                 {fields.map((field, index) => (
-                  <UserInput key={field.id} index={index} remove={remove} />
+                  <UserInput key={field.id} index={index} remove={remove} jurisdictionId={jurisdiction.id} />
                 ))}
                 <Button
                   type="button"
@@ -155,9 +155,10 @@ const NameFormControl = ({ label, index, subFieldName }: INameFormControlProps) 
 interface IUserInputProps {
   index: number
   remove: (index: number) => any
+  jurisdictionId: string
 }
 
-const UserInput = observer(({ index, remove }: IUserInputProps) => {
+const UserInput = observer(({ index, remove, jurisdictionId }: IUserInputProps) => {
   const { register, formState, control, watch } = useFormContext()
   const { t } = useTranslation()
 
@@ -170,6 +171,7 @@ const UserInput = observer(({ index, remove }: IUserInputProps) => {
 
   return (
     <Box bg="greys.grey03" p={2} borderRadius="sm">
+      <Input hidden {...register(`users.${index}.jurisdictionId`)} value={jurisdictionId} />
       <Flex gap={4} align="flex-end">
         <FormControl flex={2}>
           <FormLabel>{t("auth.role")}</FormLabel>

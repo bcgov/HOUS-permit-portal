@@ -50,7 +50,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             <Select disabled defaultValue={role} w={{ base: "100%", md: "50%" }} textTransform="capitalize">
               <option value={role}>{t(`user.role.${role}`)}</option>
             </Select>
-            <Box gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
+            <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
               <UsernameFormControl isDisabled />
               <EmailFormControl />
               <Flex gap={{ base: 4, md: 6 }} mb={4} direction={{ base: "column", md: "row" }}>
@@ -81,11 +81,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
             </Box>
-            <Box gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
+            <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
               <PasswordFormControl label={t("user.oldPassword")} fieldName="currentPassword" required={false} />
               <PasswordFormControl label={t("user.newPassword")} fieldName="password" required={false} validate />
             </Box>
-            <Flex gap={4} mt={4}>
+            <Flex as="section" gap={4} mt={4}>
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("ui.save")}
               </Button>
