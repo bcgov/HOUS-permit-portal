@@ -88,6 +88,8 @@ i18n.use(initReactI18next).init({
           cancel: "Cancel",
           remove: "Remove",
           save: "Save Changes",
+          manage: "Manage",
+          view: "View",
         },
         jurisdiction: {
           title: "Local Housing Permits",
@@ -147,6 +149,26 @@ i18n.use(initReactI18next).init({
           myAccount: "My Account",
           giveFeedback: "Give Feedback",
           error: "Something went wrong, please try refreshing the page",
+        },
+        home: {
+          jurisdictionsTitle: "Jurisdictions",
+          jurisdictionsDescription: "Invite or remove Managers or Reviewers in the Building Permit Hub System.",
+          permitTemplateCatalogueTitle: "Permit Templates Catalogue",
+          permitTemplateCatalogueDescription:
+            "Create and manage permit templates for each permit type that Local Gov can use as a standardized base.",
+          requirementsLibraryTitle: "Requirements Library",
+          requirementsLibraryDescription:
+            "Create and manage requirement blocks that can be used inside of permit templates.",
+          contentManagementTitle: "Content Management",
+          contentManagementDescription: "Customize content in one centralized place.",
+          superAdminTitle: "Admin Home",
+          submissionsInboxTitle: "Submissions Inbox",
+          submissionsInboxDescription: "View all submitted building permit applications.",
+          permitsTitle: "Digital Building Permits",
+          permitsDescription:
+            "Control what permit types you want available for submitters to apply with on BC Building Permit Hub.",
+          userManagementTitle: "User Management",
+          userManagementDescription: "Invite or remove Managers or Reviewers in the Building Permit Hub System.",
         },
         admin: {},
         errors: {

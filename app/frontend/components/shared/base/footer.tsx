@@ -1,11 +1,16 @@
 import { Center } from "@chakra-ui/react"
 import React from "react"
-import { useLocation } from "react-router-dom"
+import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
 
 export const Footer = () => {
-  const location = useLocation()
-  const excludeFooterRoutes = ["/reset-password", "/login", "/forgot-password", "/register"]
-  const shouldShowFooter = !excludeFooterRoutes.includes(location.pathname)
+  const { userStore, sessionStore } = useMst()
+  const { currentUser } = userStore
+  const excludeFooterRoutes = ["/reset-password", "/accept-invitation", "/login", "/forgot-password", "/register"]
+
+  const shouldShowFooter =
+    (!sessionStore.loggedIn && !excludeFooterRoutes.includes(location.pathname)) ||
+    currentUser?.role === EUserRoles.submitter
 
   return (
     <>

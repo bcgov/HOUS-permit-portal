@@ -6,6 +6,7 @@ export const SessionStoreModel = types
   .model("SessionStoreModel")
   .props({
     loggedIn: types.optional(types.boolean, false),
+    isValidating: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -35,8 +36,10 @@ export const SessionStoreModel = types
   }))
   .actions((self) => ({
     validateToken: flow(function* () {
+      self.isValidating = true
       const response: any = yield self.environment.api.validateToken() // now try to validate this with the server
       self.handleLogin(response)
+      self.isValidating = false
     }),
     login: flow(function* (username, password) {
       const response: any = yield self.environment.api.login(username, password)
