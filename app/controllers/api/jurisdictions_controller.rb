@@ -1,5 +1,4 @@
 class Api::JurisdictionsController < Api::ApplicationController
-  include Pundit
   before_action :set_jurisdiction, only: [:show]
 
   def index

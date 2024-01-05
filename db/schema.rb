@@ -84,6 +84,41 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_02_221154) do
     t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
   end
 
+  create_table "requirement_block_requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "requirement_id", null: false
+    t.uuid "requirement_block_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_block_id"], name: "index_requirement_block_requirements_on_requirement_block_id"
+    t.index ["requirement_id"], name: "index_requirement_block_requirements_on_requirement_id"
+  end
+
+  create_table "requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "sign_off_role", default: 0, null: false
+    t.integer "reviewer_role", default: 0, null: false
+    t.jsonb "custom_validations", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+  end
+
+  create_table "requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "requirement_code", null: false
+    t.string "label"
+    t.integer "input_type", null: false
+    t.jsonb "input_options", default: {}, null: false
+    t.string "hint"
+    t.boolean "reusable", default: false, null: false
+    t.boolean "required", default: true, null: false
+    t.string "related_content"
+    t.boolean "required_for_in_person_hint", default: false, null: false
+    t.boolean "required_for_multiple_owners", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", null: false
     t.string "username", null: false
@@ -127,4 +162,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_02_221154) do
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "users", "jurisdictions"
+  add_foreign_key "requirement_block_requirements", "requirement_blocks"
+  add_foreign_key "requirement_block_requirements", "requirements"
 end
