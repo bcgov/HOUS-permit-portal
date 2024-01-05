@@ -36,6 +36,9 @@ module HousPermitPortal
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    # we will be using dotenv locally and Hashicorp Vault in production so disable default rails master.key
+    config.read_encrypted_secrets = false
+
     # Don't generate system test files.
     config.generators.system_tests = nil
 
