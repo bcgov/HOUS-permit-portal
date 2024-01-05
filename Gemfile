@@ -46,6 +46,7 @@ gem "image_processing", "~> 1.12.2"
 gem 'acts_as_list', "~> 1.1.0"
 gem "searchkick", "~> 5.3.1"
 gem "elasticsearch", "~> 8.11.0"
+gem 'kaminari', "~> 1.2.2"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
 gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"

@@ -2,13 +2,19 @@ module Api::Concerns::Search::RequirementBlocks
   extend ActiveSupport::Concern
 
   def perform_search
-    @search = RequirementBlock.search(query, order: order)
+    @search =
+      RequirementBlock.search(
+        query,
+        order: order,
+        page: search_params[:page],
+        per_page: search_params[:page] ? (search_params[:per_page] || Kaminari.config.default_per_page) : nil,
+      )
   end
 
   private
 
   def search_params
-    params.permit(:query, sort: %i[field direction])
+    params.permit(:query, :page, :per_page, sort: %i[field direction])
   end
 
   def query

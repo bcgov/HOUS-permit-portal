@@ -12,7 +12,15 @@ class Api::RequirementBlocksController < Api::ApplicationController
     # TODO: add authorization inside searchkick search
     perform_search
 
-    render_success @search.results, nil, { blueprint: RequirementBlockBlueprint }
+    render_success @search.results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @search.total_pages,
+                       total_count: @search.total_count,
+                     },
+                     blueprint: RequirementBlockBlueprint,
+                   }
   end
 
   def show

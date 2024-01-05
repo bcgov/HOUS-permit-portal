@@ -36,6 +36,9 @@ Rails.application.routes.draw do
 
     resources :jurisdictions, only: %i[index show]
     resources :requirement_blocks
+    resources :requirement_blocks, only: %i[create show update] do
+      post "search", on: :collection, to: "requirement_blocks#index"
+    end
   end
 
   root to: "home#index"
