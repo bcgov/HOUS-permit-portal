@@ -87,6 +87,7 @@ i18n.use(initReactI18next).init({
           resume: "Resume",
           cancel: "Cancel",
           remove: "Remove",
+          save: "Save Changes",
         },
         jurisdiction: {
           title: "Local Housing Permits",
@@ -111,15 +112,27 @@ i18n.use(initReactI18next).init({
         user: {
           addUser: "Add more emails",
           invite: "Invite",
+          firstName: "First Name",
+          lastName: "Last Name",
+          oldPassword: "Old Password",
+          newPassword: "New Password",
+          myProfile: "My Profile",
           inviteTitle: "Invite Users",
           inviteSuccess: "Invite sent!",
           inviteError: "Email taken",
           sendInvites: "Send Invites",
-          acceptInvitation: "Accept Invitation",
+          acceptInvitation: "Accept Invitation to",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           rolesAndPermissions: "User Roles & Permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
+          // Leave in snake case so we can use: t(`user.role.${role}`)
+          role: {
+            submitter: "submitter",
+            review_manager: "review manager",
+            reviewer: "reviewer",
+            super_admin: "super admin",
+          },
         },
         site: {
           navBarTitle: "Building Permit Hub",

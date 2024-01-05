@@ -18,9 +18,18 @@ import PasswordStrengthBar from "react-password-strength-bar"
 
 interface IPasswordFormControlProps extends FormControlProps {
   validate?: boolean
+  label?: string
+  fieldName?: string
+  required?: boolean
 }
 
-export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlProps) => {
+export const PasswordFormControl = ({
+  validate,
+  label,
+  fieldName,
+  required = true,
+  ...rest
+}: IPasswordFormControlProps) => {
   const [showPassword, setShowPassword] = useState(false)
   const { register, formState, watch } = useFormContext()
   const { t } = useTranslation()
@@ -28,14 +37,15 @@ export const PasswordFormControl = ({ validate, ...rest }: IPasswordFormControlP
 
   return (
     <FormControl mb={4} isInvalid={validate && !!formState?.errors?.password} {...rest}>
-      <FormLabel>{t("auth.passwordLabel")}</FormLabel>
+      <FormLabel>{label || t("auth.passwordLabel")}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
           <Input
-            {...register("password", {
-              required: true,
+            {...register(fieldName || "password", {
+              required: required,
               validate: {
                 matchesPasswordRegex: (str) =>
+                  !required ||
                   !validate ||
                   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
                   t("ui.invalidInput"),

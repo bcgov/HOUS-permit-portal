@@ -11,7 +11,7 @@ export const PermitApplicationModel = types
     permitType: types.enumeration(Object.values(EPermitType)),
     buildingType: types.enumeration(Object.values(EBuildingType)),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
-    submitterId: types.maybe(types.reference(types.late(() => UserModel))),
+    submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
 
     createdAt: types.Date,

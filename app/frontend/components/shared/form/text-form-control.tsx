@@ -6,20 +6,21 @@ import { useTranslation } from "react-i18next"
 interface ITextFormControlProps extends FormControlProps {
   label: string
   fieldName: string
+  required?: boolean
 }
 
-export const TextFormControl = ({ label, fieldName }: ITextFormControlProps) => {
+export const TextFormControl = ({ label, fieldName, required = true, ...rest }: ITextFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
 
   return (
-    <FormControl isInvalid={!!formState?.errors[fieldName]} flex={1}>
+    <FormControl isInvalid={!!formState?.errors[fieldName]} flex={1} {...rest}>
       <FormLabel>{label}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
           <Input
             {...register(fieldName, {
-              required: true,
+              required,
               validate: {
                 satisfiesNameLength: (str) => (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
               },

@@ -1,24 +1,13 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  HStack,
-  Heading,
-  Input,
-  Text,
-} from "@chakra-ui/react"
+import { Box, Button, Checkbox, Flex, FormControl, HStack, Heading, Text } from "@chakra-ui/react"
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { CenterContainer } from "../../shared/base/center-container"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/containers/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
+import { TextFormControl } from "../../shared/form/text-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
 
@@ -70,15 +59,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               <Box border="1px solid" borderColor="border.light" padding={6}>
                 <UsernameFormControl validate autoFocus />
                 <EmailFormControl validate />
-                <FormControl mb={4}>
-                  <FormLabel>{t("auth.organizationLabel")}</FormLabel>
-                  <FormHelperText my={1}>{t("auth.organizationHelpText")}</FormHelperText>
-                  <Input
-                    {...register("organization", {
-                      required: false,
-                    })}
-                  />
-                </FormControl>
+                <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" mb={4} required={false} />
                 <FormControl>
                   <Controller
                     name="certified"

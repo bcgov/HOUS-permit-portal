@@ -35,6 +35,7 @@ Rails.application.routes.draw do
     end
 
     resources :jurisdictions, only: %i[index show]
+    resource :profile, only: [:update], controller: "users"
   end
 
   root to: "home#index"

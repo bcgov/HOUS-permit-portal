@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useQuickSubmit } from "../../../hooks/use-quick-submit"
 import { useMst } from "../../../setup/root"
-import { CenterContainer } from "../../shared/base/center-container"
+import { CenterContainer } from "../../shared/containers/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { TextFormControl } from "../../shared/form/text-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
@@ -18,6 +18,7 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
   const [searchParams] = useSearchParams()
   const user = JSON.parse(decodeURIComponent(searchParams.get("user")))
   const invitationToken = searchParams.get("invitation_token")
+  const jurisdictionName = searchParams.get("jurisdiction_name")
 
   const formMethods = useForm({
     mode: "onChange",
@@ -57,14 +58,16 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
             borderColor="border.light"
             bg="greys.white"
           >
-            <Flex gap={2} direction="column">
-              <Heading>{t("user.acceptInvitation")}</Heading>
+            <Flex gap={4} direction="column">
+              <Heading>
+                {t("user.acceptInvitation")} {jurisdictionName}
+              </Heading>
               <Text>{t("user.acceptInstructions")}</Text>
             </Flex>
             <UsernameFormControl validate autoComplete="off" mb={0} />
             <Flex gap={4}>
-              <TextFormControl label="First Name" fieldName="firstName" />
-              <TextFormControl label="Last Name" fieldName="lastName" />
+              <TextFormControl label={t("user.firstName")} fieldName="firstName" />
+              <TextFormControl label={t("user.lastName")} fieldName="lastName" />
             </Flex>
             <PasswordFormControl validate mb={0} />
             <Text>{t("auth.passwordRequirements")}</Text>

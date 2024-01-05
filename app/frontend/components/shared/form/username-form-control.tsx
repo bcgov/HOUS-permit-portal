@@ -7,9 +7,16 @@ interface IUsernameFormControlProps extends FormControlProps {
   validate?: boolean
   autoFocus?: boolean
   autoComplete?: string
+  defaultValue?: string
 }
 
-export const UsernameFormControl = ({ validate, autoFocus, autoComplete, ...rest }: IUsernameFormControlProps) => {
+export const UsernameFormControl = ({
+  validate,
+  autoFocus,
+  autoComplete,
+  defaultValue,
+  ...rest
+}: IUsernameFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
 
@@ -29,6 +36,7 @@ export const UsernameFormControl = ({ validate, autoFocus, autoComplete, ...rest
             type={"text"}
             autoComplete={autoComplete || "username"}
             autoFocus={autoFocus}
+            defaultValue={defaultValue}
           />
           {formState?.errors?.username && (
             <FormErrorMessage>{formState?.errors?.username.message as string}</FormErrorMessage>

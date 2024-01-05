@@ -4,6 +4,10 @@ class UserPolicy < ApplicationPolicy
     @record = record
   end
 
+  def update?
+    user == record
+  end
+
   def invite?
     user.super_admin? || user.review_manager?
   end

@@ -88,9 +88,20 @@ const NavBarMenu = observer(() => {
       />
       <MenuList>
         {loggedIn ? (
-          <MenuItem as={Button} variant="tertiary" onClick={logout}>
-            {t("auth.logout")}
-          </MenuItem>
+          <>
+            <MenuItem
+              as={Button}
+              variant="tertiary"
+              onClick={() => {
+                navigate("/profile")
+              }}
+            >
+              {t("user.myProfile")}
+            </MenuItem>
+            <MenuItem as={Button} variant="tertiary" onClick={logout}>
+              {t("auth.logout")}
+            </MenuItem>
+          </>
         ) : (
           <MenuItem
             as={Button}
