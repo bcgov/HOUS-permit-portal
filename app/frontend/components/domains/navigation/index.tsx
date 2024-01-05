@@ -1,15 +1,16 @@
-import { Box, Flex, Spacer } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
-import { RouterLink } from "../../shared/navigation/router-link"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
+import { HomeScreen } from "../home"
 import { JurisdictionIndexScreen } from "../jurisdictions"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/jurisdiction-user-index-screen"
@@ -23,7 +24,7 @@ import { SubNavBar } from "./sub-nav-bar"
 
 export const Navigation = observer(() => {
   const {
-    sessionStore: { validateToken },
+    sessionStore: { validateToken, isValidating },
   } = useMst()
 
   useEffect(() => {
@@ -40,10 +41,14 @@ export const Navigation = observer(() => {
 
       <NavBar />
       <SubNavBar />
-      <AppRoutes />
-      <Spacer />
-
-      <Footer />
+      {isValidating ? (
+        <LoadingScreen />
+      ) : (
+        <>
+          <AppRoutes />
+          <Footer />
+        </>
+      )}
     </BrowserRouter>
   )
 })
@@ -60,15 +65,7 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
     <Routes location={location}>
       {loggedIn ? (
         <>
-          <Route
-            path="/"
-            element={
-              <Flex direction="column">
-                <RouterLink to="/jurisdictions">Jurisdictions</RouterLink>
-                <RouterLink to="/permit-applications">My Applications</RouterLink>
-              </Flex>
-            }
-          />
+          <Route path="/" element={<HomeScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />

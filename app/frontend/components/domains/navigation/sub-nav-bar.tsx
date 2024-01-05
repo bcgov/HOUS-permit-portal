@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, Container, Flex } from "@chakra-ui/react"
+import { Breadcrumb, BreadcrumbItem, Container, Flex, Show } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -45,20 +45,22 @@ const HomeSubNav = () => {
   const { t } = useTranslation()
 
   return (
-    <Flex w="full" gap={8} bg="greys.white">
-      <RouterLinkButton to={"#"} variant="tertiary">
-        {t("site.activePermits")}
-      </RouterLinkButton>
-      <RouterLinkButton to={"#"} variant="tertiary">
-        {t("site.approvedPermits")}
-      </RouterLinkButton>
-      <RouterLinkButton to={"#"} variant="tertiary">
-        {t("site.myAccount")}
-      </RouterLinkButton>
-      <RouterLinkButton to={"#"} variant="tertiary">
-        {t("site.giveFeedback")}
-      </RouterLinkButton>
-    </Flex>
+    <Show above="md">
+      <Flex w="full" gap={8} bg="greys.white">
+        <RouterLinkButton to={"#"} variant="tertiary">
+          {t("site.activePermits")}
+        </RouterLinkButton>
+        <RouterLinkButton to={"#"} variant="tertiary">
+          {t("site.approvedPermits")}
+        </RouterLinkButton>
+        <RouterLinkButton to={"#"} variant="tertiary">
+          {t("site.myAccount")}
+        </RouterLinkButton>
+        <RouterLinkButton to={"#"} variant="tertiary">
+          {t("site.giveFeedback")}
+        </RouterLinkButton>
+      </Flex>
+    </Show>
   )
 }
 
