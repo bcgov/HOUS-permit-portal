@@ -5,7 +5,7 @@ ARG RUBY_VERSION=3.2.2-bullseye
 FROM ruby:$RUBY_VERSION as base
 
 # Rails app lives here
-WORKDIR /rails
+WORKDIR /app
 
 # Set production environment
 ENV RAILS_ENV="production" \
@@ -30,7 +30,7 @@ RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler
+RUN gem install bundler:2.5.4
 RUN bundle install
 
 # Install node modules
@@ -44,8 +44,10 @@ COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+COPY config/database.yml.docker_precompile_dummy /app/config/database.yml
 # Also add a flag ASSET_PRECOMPILATION that we can use to stub Shrine
 RUN SECRET_KEY_BASE_DUMMY=1 ASSET_PRECOMPILATION=true ./bin/rails assets:precompile
+# RUN rm /app/config/database.yml
 
 # Final stage for app image
 FROM base
@@ -57,7 +59,7 @@ RUN apt-get update -qq && \
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
-COPY --from=build /rails /rails
+COPY --from=build /app /app
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
