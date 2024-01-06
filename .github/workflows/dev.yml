@@ -9,6 +9,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres: # Example with PostgreSQL
+        image: postgres:11
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -23,6 +37,14 @@ jobs:
         run: |
           bundle install
 
+      - name: Setup Test Database
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://user:password@localhost:5432/test_db
+        run: |
+          bundle exec rake db:create
+          bundle exec rake db:schema:load
+
       - name: Run RSpec
         run: |
           bundle exec rspec
@@ -31,23 +53,4 @@ jobs:
     #   runs-on: ubuntu-latest
     #   name: Build & Deploy Docker Rails / React application
     #   environment: dev
-
-    #   steps:
-    #     - name: Checkout Code
-    #       uses: actions/checkout@v3
-    #     - name: Build Docker Image
-    #       uses: redhat-actions/buildah-build@v2
-    #       with:
-    #         image: dev-hous-permit-portal
-    #         tags: latest ${{ github.sha }}
-    #         labels: |
-    #           app=dev-house-permit-portal
-    #         containerfiles: ./Dockerfile
-    #         build-args: DEBUG_BUILD=true
-    #     - name: Push to Openshift Registry using Service Account
-    #       uses: redhat-actions/push-to-registry@v2.7
-    #       with:
-    #         image: dev-hous-permit-portal
-    #         registry: ${{ secrets.REGISTRY_URL }}
-    #         username: ${{ secrets.BUILDER_USERNAME }}
-    #         password: ${{ secrets.BUILDER_TOKEN }}
+    #   ... [rest of your commented code] ...
