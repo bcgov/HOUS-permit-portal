@@ -6,27 +6,47 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push-image:
+  test:
     runs-on: ubuntu-latest
-    name: Build & Deploy Docker Rails / React application
-    environment: dev
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - name: Build Docker Image
-        uses: redhat-actions/buildah-build@v2
+
+      - name: Set up Ruby 3.2.2
+        uses: ruby/setup-ruby@v1
         with:
-          image: dev-hous-permit-portal
-          tags: latest ${{ github.sha }}
-          labels: |
-            app=dev-house-permit-portal
-          containerfiles: ./Dockerfile
-          build-args: DEBUG_BUILD=true
-      - name: Push to Openshift Registry using Service Account
-        uses: redhat-actions/push-to-registry@v2.7
-        with:
-          image: dev-hous-permit-portal
-          registry: ${{ secrets.REGISTRY_URL }}
-          username: ${{ secrets.BUILDER_USERNAME }}
-          password: ${{ secrets.BUILDER_TOKEN }}
+          ruby-version: "3.2.2"
+
+      - name: Install Dependencies
+        run: |
+          bundle install
+
+      - name: Run RSpec
+        run: |
+          bundle exec rspec
+
+    # build-and-push-image:
+    #   runs-on: ubuntu-latest
+    #   name: Build & Deploy Docker Rails / React application
+    #   environment: dev
+
+    #   steps:
+    #     - name: Checkout Code
+    #       uses: actions/checkout@v3
+    #     - name: Build Docker Image
+    #       uses: redhat-actions/buildah-build@v2
+    #       with:
+    #         image: dev-hous-permit-portal
+    #         tags: latest ${{ github.sha }}
+    #         labels: |
+    #           app=dev-house-permit-portal
+    #         containerfiles: ./Dockerfile
+    #         build-args: DEBUG_BUILD=true
+    #     - name: Push to Openshift Registry using Service Account
+    #       uses: redhat-actions/push-to-registry@v2.7
+    #       with:
+    #         image: dev-hous-permit-portal
+    #         registry: ${{ secrets.REGISTRY_URL }}
+    #         username: ${{ secrets.BUILDER_USERNAME }}
+    #         password: ${{ secrets.BUILDER_TOKEN }}
