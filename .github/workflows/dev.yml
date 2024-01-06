@@ -1,8 +1,9 @@
 name: Deploy main branch to dev
 
 on:
-  # push:
-  # branches: [ "main" ]
+  push:
+    branches: ["derekyau/sc-66815/setup-github-actions-pipeline"]
+    # branches: ["main"]
   workflow_dispatch:
 
 jobs:
