@@ -64,7 +64,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: dev-hous-permit-portal
-          tags: derek latest ${{ github.sha }}
+          tags: latest ${{ github.sha }}
           labels: |
             app=dev-house-permit-portal
           containerfiles: ./Dockerfile
@@ -73,6 +73,9 @@ jobs:
         uses: redhat-actions/push-to-registry@v2.7
         with:
           image: dev-hous-permit-portal
+          tags: latest ${{ github.sha }}
+          labels: |
+            app=dev-house-permit-portal
           registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.BUILDER_USERNAME }}
           password: ${{ secrets.BUILDER_TOKEN }}
