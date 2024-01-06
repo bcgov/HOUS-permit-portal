@@ -1,9 +1,8 @@
 name: Deploy main branch to dev
 
 on:
-  push:
-    branches: [] #empty for now so we can manually dispatch
-    # branches: [ "main" ]
+  # push:
+  # branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
