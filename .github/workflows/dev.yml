@@ -9,9 +9,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://user:password@localhost:5432/test_db
     services:
       postgres: # Example with PostgreSQL
-        image: postgres:11
+        image: postgres:16
         env:
           POSTGRES_DB: test_db
           POSTGRES_USER: user
@@ -38,9 +41,6 @@ jobs:
           bundle install
 
       - name: Setup Test Database
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://user:password@localhost:5432/test_db
         run: |
           bundle exec rake db:create
           bundle exec rake db:schema:load
@@ -49,8 +49,29 @@ jobs:
         run: |
           bundle exec rspec
 
-    # build-and-push-image:
-    #   runs-on: ubuntu-latest
-    #   name: Build & Deploy Docker Rails / React application
-    #   environment: dev
-    #   ... [rest of your commented code] ...
+  # build-and-push-image:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   if: success()
+  #   name: Build & Deploy Docker Rails / React application
+  #   environment: dev
+
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
+  #     - name: Build Docker Image
+  #       uses: redhat-actions/buildah-build@v2
+  #       with:
+  #         image: dev-hous-permit-portal
+  #         tags: latest ${{ github.sha }}
+  #         labels: |
+  #           app=dev-house-permit-portal
+  #         containerfiles: ./Dockerfile
+  #         build-args: DEBUG_BUILD=true
+  #     - name: Push to Openshift Registry using Service Account
+  #       uses: redhat-actions/push-to-registry@v2.7
+  #       with:
+  #         image: dev-hous-permit-portal
+  #         registry: ${{ secrets.REGISTRY_URL }}
+  #         username: ${{ secrets.BUILDER_USERNAME }}
+  #         password: ${{ secrets.BUILDER_TOKEN }}
