@@ -25,6 +25,7 @@ Rails.application.routes.draw do
                  confirmations: "api/confirmations",
                  passwords: "api/passwords",
                  invitations: "api/invitations",
+                 omniauth_callbacks: "api/omniauth_callbacks",
                }
 
     devise_scope :user do

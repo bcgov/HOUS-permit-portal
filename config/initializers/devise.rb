@@ -9,9 +9,27 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
-  config.jwt { |jwt| jwt.secret = ENV["DEVISE_JWT_SECRET_KEY"] }
+  config.jwt do |jwt|
+    jwt.secret = ENV["DEVISE_JWT_SECRET_KEY"]
+
+    jwt.dispatch_requests = [
+      ["POST", %r{^/api/login$}],
+      ["PUT", %r{^/api/invitation$}],
+      ["PUT", %r{^/api/password$}],
+      ["GET", %r{^/api/auth/keycloakopenid/callback$}],
+    ]
+  end
 
   config.jwt_cookie { |jwt_cookie| jwt_cookie.secure = ENV["SECURE_JWT_COOKIE"] == "true" || false }
+
+  config.omniauth :keycloak_openid,
+                  ENV["KEYCLOAK_CLIENT"],
+                  ENV["KEYCLOAK_SECRET"],
+                  client_options: {
+                    site: ENV["KEYCLOAK_AUTH_URL"],
+                    realm: "standard",
+                  },
+                  strategy_class: OmniAuth::Strategies::KeycloakOpenId
 
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing

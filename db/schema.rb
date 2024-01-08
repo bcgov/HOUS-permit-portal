@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_03_201926) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -67,7 +67,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", null: false
-    t.string "username", null: false
+    t.string "username"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -91,6 +91,8 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_14_224612) do
     t.string "invited_by_type"
     t.uuid "invited_by_id"
     t.integer "invitations_count", default: 0
+    t.string "provider"
+    t.string "uid"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true

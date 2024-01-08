@@ -35,6 +35,8 @@ gem "devise_invitable", "~> 2.0.9"
 gem "devise-jwt", "0.8.1"
 gem "devise-jwt-cookie", "0.5.1"
 gem "dry-container", "0.8.0"
+gem 'omniauth-keycloak', "1.5.1"
+gem 'omniauth-rails_csrf_protection', '1.0.1'
 
 gem "blueprinter", "~> 0.30.0"
 
