@@ -90,9 +90,14 @@ i18n.use(initReactI18next).init({
           save: "Save Changes",
           manage: "Manage",
           view: "View",
+          totalItems: "Total Items",
         },
         jurisdiction: {
           title: "Local Housing Permits",
+          localGovernments: "Local Governments",
+          indexTitle: "Manage Jurisdictions",
+          indexDescription: "Below is a list of all jurisdictions in the system",
+          createNew: "Create new jurisdiction",
           description:
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
           checklist: "Checklist",
@@ -100,6 +105,8 @@ i18n.use(initReactI18next).init({
           startApplication: "Start a Permit Application",
           contactInfo: "Contact information",
           didNotFind: "I didn't find what I was looking for",
+          viewAs: "View As",
+          manage: "Manage",
         },
         permitApplication: {
           indexTitle: "My Active Permits",
@@ -138,6 +145,7 @@ i18n.use(initReactI18next).init({
         },
         site: {
           navBarTitle: "Building Permit Hub",
+          adminNavBarTitle: "Building Permit Hub - Admin Panel",
           beta: "Beta",
           linkHome: "Navigate home",
           home: "Home",
@@ -149,6 +157,7 @@ i18n.use(initReactI18next).init({
           myAccount: "My Account",
           giveFeedback: "Give Feedback",
           error: "Something went wrong, please try refreshing the page",
+          menu: "Menu",
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",

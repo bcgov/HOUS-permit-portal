@@ -20,12 +20,11 @@ import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
 import { ProfileScreen } from "../users/profile-screen"
 import { NavBar } from "./nav-bar"
-import { SubNavBar } from "./sub-nav-bar"
 
 export const Navigation = observer(() => {
-  const {
-    sessionStore: { validateToken, isValidating },
-  } = useMst()
+  const { sessionStore } = useMst()
+
+  const { validateToken, isValidating, loggedIn } = sessionStore
 
   useEffect(() => {
     validateToken()
@@ -40,7 +39,7 @@ export const Navigation = observer(() => {
       </Box>
 
       <NavBar />
-      <SubNavBar />
+
       {isValidating ? (
         <LoadingScreen />
       ) : (

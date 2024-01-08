@@ -20,38 +20,61 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { RouterLink } from "../../shared/navigation/router-link"
-
-export const NAVBAR_HEIGHT = 16
+import { SubNavBar } from "./sub-nav-bar"
 
 export const NavBar = observer(() => {
   const { t } = useTranslation()
+  const { sessionStore, userStore } = useMst()
+
+  const { currentUser } = userStore
+
+  const { loggedIn } = sessionStore
+
+  const location = useLocation()
+  const path = location.pathname
 
   return (
-    <Box as="nav" w="full" h={NAVBAR_HEIGHT} position="sticky" top={0} bg="greys.white" zIndex={10} shadow="md">
-      <Container maxW="container.lg">
-        <Flex align="center">
-          <RouterLink to="/">
-            <Image alt={t("site.linkHome")} src="/images/logo.svg" />
-          </RouterLink>
-          <Show above="md">
-            <Heading fontSize="2xl" fontWeight="normal">
-              {t("site.navBarTitle")}
-            </Heading>
-            <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
-              {t("site.beta")}
-            </Text>
-          </Show>
-          <Spacer />
-          <HStack gap={2}>
-            <NavBarSearch />
-            <NavBarMenu />
-          </HStack>
-        </Flex>
-      </Container>
-    </Box>
+    <>
+      <Box
+        as="nav"
+        w="full"
+        position="sticky"
+        top={0}
+        bg={currentUser?.isAdmin ? "theme.blue" : "greys.white"}
+        color={currentUser?.isAdmin ? "greys.white" : "theme.blue"}
+        zIndex={10}
+        shadow="md"
+      >
+        <Container maxW="container.lg">
+          <Flex align="center" gap={2}>
+            <RouterLink to="/">
+              <Image
+                alt={t("site.linkHome")}
+                src={currentUser?.isAdmin ? "/images/logo-light.svg" : "/images/logo.svg"}
+              />
+            </RouterLink>
+            <Show above="md">
+              <Heading fontSize="2xl" fontWeight="normal">
+                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.navBarTitle")}
+              </Heading>
+              <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
+                {t("site.beta")}
+              </Text>
+            </Show>
+            <Spacer />
+            <HStack gap={2}>
+              {currentUser?.isSubmitter && <NavBarSearch />}
+              {currentUser?.jurisdiction && <Text color="greys.white">{currentUser.jurisdiction.name}</Text>}
+              <NavBarMenu isAdmin={currentUser?.isAdmin} />
+            </HStack>
+          </Flex>
+        </Container>
+      </Box>
+      {path !== "/" && loggedIn && <SubNavBar />}
+    </>
   )
 })
 
@@ -68,21 +91,26 @@ const NavBarSearch = () => {
   )
 }
 
-const NavBarMenu = observer(() => {
+interface INavBarMenuProps {
+  isAdmin: boolean
+}
+
+const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const { t } = useTranslation()
   const { sessionStore } = useMst()
   const navigate = useNavigate()
 
   const { logout, loggedIn } = sessionStore
+
   return (
     <Menu>
       <MenuButton
         as={IconButton}
         borderRadius="lg"
-        border="solid black"
+        border={isAdmin ? "solid white" : "solid black"}
         borderWidth="1px"
         p={3}
-        variant="primaryInverse"
+        variant={isAdmin ? "primary" : "primaryInverse"}
         aria-label="menu dropdown button"
         icon={<FontAwesomeIcon style={{ height: "14px", width: "14px" }} icon={faBars} />}
       />
@@ -91,6 +119,7 @@ const NavBarMenu = observer(() => {
           <>
             <MenuItem
               as={Button}
+              color="text.link"
               variant="tertiary"
               onClick={() => {
                 navigate("/profile")
@@ -98,13 +127,14 @@ const NavBarMenu = observer(() => {
             >
               {t("user.myProfile")}
             </MenuItem>
-            <MenuItem as={Button} variant="tertiary" onClick={logout}>
+            <MenuItem as={Button} color="text.link" variant="tertiary" onClick={logout}>
               {t("auth.logout")}
             </MenuItem>
           </>
         ) : (
           <MenuItem
             as={Button}
+            color="text.link"
             variant="tertiary"
             onClick={() => {
               navigate("/login")

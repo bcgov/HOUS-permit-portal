@@ -23,6 +23,9 @@ export const UserModel = types
     get isSuperAdmin() {
       return self.role == EUserRoles.superAdmin
     },
+    get isAdmin() {
+      return self.role == EUserRoles.superAdmin || self.role == EUserRoles.reviewManager
+    },
     get isReviewManager() {
       return self.role == EUserRoles.reviewManager
     },
