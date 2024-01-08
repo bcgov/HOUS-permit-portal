@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
@@ -26,6 +27,19 @@ export const RequirementBlockStore = types
     },
     get nextPage() {
       return self.currentPage ?? 0 + 1
+    },
+
+    getSortColumnHeader(field: ERequirementLibrarySortFields) {
+      switch (field) {
+        case ERequirementLibrarySortFields.name:
+          return t("requirementsLibrary.fields.name")
+        case ERequirementLibrarySortFields.associations:
+          return t("requirementsLibrary.fields.associations")
+        case ERequirementLibrarySortFields.formFields:
+          return t("requirementsLibrary.fields.formFields")
+        case ERequirementLibrarySortFields.updatedAt:
+          return t("requirementsLibrary.fields.updatedAt")
+      }
     },
   }))
   .actions((self) => ({

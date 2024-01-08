@@ -108,6 +108,17 @@ i18n.use(initReactI18next).init({
           ask: "Ask a question",
           applicationId: "Application ID",
         },
+        requirementsLibrary: {
+          title: "Requirements Library",
+          description: "List of all Requirement Blocks in the system that can be used inside Templates.",
+          fields: {
+            name: "Name",
+            associations: "Association",
+            formFields: "Form Fields",
+            updatedAt: "Updated At",
+          },
+          tableHeading: "Requirement Blocks",
+        },
         user: {
           addUser: "Add more emails",
           invite: "Invite",

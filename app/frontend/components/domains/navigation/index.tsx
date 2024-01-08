@@ -15,6 +15,7 @@ import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/jurisdiction-user-index-screen"
 import { LandingScreen } from "../landing"
 import { PermitApplicationIndexScreen } from "../permit-application"
+import { RequirementsLibraryScreen } from "../requirements-library"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
 import { NavBar } from "./nav-bar"
@@ -39,9 +40,9 @@ export const Navigation = observer(() => {
 
       <NavBar />
       <SubNavBar />
-      <AppRoutes />
-      <Spacer />
-      <Footer />
+      <Box w={"full"} h={"1px"} minH={"1px"} flexGrow={2}>
+        <AppRoutes />
+      </Box>
     </BrowserRouter>
   )
 })
@@ -54,36 +55,48 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
 
+  return loggedIn ? <LoggedInRoutes /> : <PublicRoutes />
+})
+
+function LoggedInRoutes() {
+  const location = useLocation()
   return (
     <Routes location={location}>
-      {loggedIn ? (
-        <>
-          <Route
-            path="/"
-            element={
-              <Flex direction="column">
-                <RouterLink to="/jurisdictions">Jurisdictions</RouterLink>
-                <RouterLink to="/permit-applications">My Applications</RouterLink>
-              </Flex>
-            }
-          />
-          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
-        </>
-      ) : (
-        <>
-          <Route path="/" element={<LandingScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-          <Route path="/reset-password" element={<ResetPasswordScreen />} />
-          <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
-          <Route path="/register" element={<RegisterScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-        </>
-      )}
+      <Route
+        path="/"
+        element={
+          <Flex direction="column">
+            <RouterLink to="/jurisdictions">Jurisdictions</RouterLink>
+            <RouterLink to="/permit-applications">My Applications</RouterLink>
+            <RouterLink to="/requirements-library">Requirements Library</RouterLink>
+          </Flex>
+        }
+      />
+      <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+      <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+      <Route path={"/requirements-library"} element={<RequirementsLibraryScreen />} />
     </Routes>
   )
-})
+}
+
+function PublicRoutes() {
+  const location = useLocation()
+  return (
+    <>
+      <Routes location={location}>
+        <Route path="/" element={<LandingScreen />} />
+        <Route path="/login" element={<LoginScreen />} />
+        <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+        <Route path="/reset-password" element={<ResetPasswordScreen />} />
+        <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+        <Route path="/register" element={<RegisterScreen />} />
+        <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+      </Routes>
+      <Spacer flexGrow={0} />
+      <Footer />
+    </>
+  )
+}

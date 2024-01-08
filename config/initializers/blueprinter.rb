@@ -1,1 +1,2 @@
-Blueprinter.configure { |config| config.datetime_format = ->(datetime) { datetime.to_i } }
+# epoch in milliseconds needed for js FE
+Blueprinter.configure { |config| config.datetime_format = ->(datetime) { datetime.to_i * 1000 } }
