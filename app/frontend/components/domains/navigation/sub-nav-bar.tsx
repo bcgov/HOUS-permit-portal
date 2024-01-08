@@ -1,68 +1,33 @@
-import { Breadcrumb, BreadcrumbItem, Container, Flex, Show } from "@chakra-ui/react"
+import { Breadcrumb, BreadcrumbItem, Container, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
-import { useMst } from "../../../setup/root"
 import { isUUID } from "../../../utils/utility-funcitons"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { NAVBAR_HEIGHT } from "./nav-bar"
 
 export const SubNavBar = observer(() => {
-  const { sessionStore } = useMst()
-  const { loggedIn } = sessionStore
-
   const location = useLocation()
   const path = location.pathname
 
-  return path === "/" ? (
-    loggedIn ? (
-      <HomeSubNav />
-    ) : (
-      <></>
-    )
-  ) : (
+  return (
     <Flex
       w="full"
       bg="greys.white"
       h="46px"
       align="center"
       position="sticky"
-      top={NAVBAR_HEIGHT}
       zIndex={9}
       borderBottom="1px solid"
       borderColor="border.light"
       overflow="hidden"
     >
-      <Container minW="container.lg">
+      <Container minW="container.lg" px={8}>
         <DynamicBreadcrumb path={path} />
       </Container>
     </Flex>
   )
 })
-
-const HomeSubNav = () => {
-  const { t } = useTranslation()
-
-  return (
-    <Show above="md">
-      <Flex w="full" gap={8} bg="greys.white">
-        <RouterLinkButton to={"#"} variant="tertiary">
-          {t("site.activePermits")}
-        </RouterLinkButton>
-        <RouterLinkButton to={"#"} variant="tertiary">
-          {t("site.approvedPermits")}
-        </RouterLinkButton>
-        <RouterLinkButton to={"#"} variant="tertiary">
-          {t("site.myAccount")}
-        </RouterLinkButton>
-        <RouterLinkButton to={"#"} variant="tertiary">
-          {t("site.giveFeedback")}
-        </RouterLinkButton>
-      </Flex>
-    </Show>
-  )
-}
 
 interface IDynamicBreadcrumbProps {
   path: string
