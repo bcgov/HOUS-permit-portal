@@ -5,7 +5,6 @@ class User < ApplicationRecord
   include Devise::JWT::RevocationStrategies::Allowlist
 
   validate :jurisdiction_must_belong_to_correct_roles
-  validates :username, presence: true
 
   devise :invitable,
          :database_authenticatable,
@@ -16,6 +15,8 @@ class User < ApplicationRecord
          :timeoutable,
          :jwt_cookie_authenticatable,
          :jwt_authenticatable,
+         :omniauthable,
+         omniauth_providers: %i[keycloakopenid],
          jwt_revocation_strategy: self
 
   enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
@@ -28,6 +29,13 @@ class User < ApplicationRecord
 
   def self.invitable_roles
     %w[reviewer review_manager]
+  end
+
+  def self.from_omniauth(auth)
+    find_or_create_by(provider: auth.provider, uid: auth.uid) do |user|
+      user.email = auth.info.email
+      user.password = Devise.friendly_token[0, 20]
+    end
   end
 
   private

@@ -68,6 +68,15 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
               <BackButton isDisabled={isSubmitting} />
             </HStack>
 
+            <form action="/api/auth/keycloakopenid" method="post">
+              <input
+                type="hidden"
+                name="authenticity_token"
+                value={document.querySelector("[name=csrf-token]").content}
+              />
+              <Button type="submit">Login with BCeID</Button>
+            </form>
+
             <Flex gap={2}>
               <RouterLink to="/forgot-password" state={{ username: usernameWatch }}>
                 {t("auth.forgotPassword")}
