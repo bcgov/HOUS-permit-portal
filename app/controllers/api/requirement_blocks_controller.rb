@@ -26,9 +26,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
   def show
     authorize @requirement_block
 
-    render_success @requirement_block,
-                   nil,
-                   { blueprint: RequirementBlockBlueprint, blueprint_opts: { view: :extended } }
+    render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
   end
 
   def create
@@ -37,9 +35,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.save
-      render_success @requirement_block,
-                     nil,
-                     { blueprint: RequirementBlockBlueprint, blueprint_opts: { view: :extended } }
+      render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
       render_error Constants::Error::REQUIREMENT_BLOCK_CREATE_ERROR,
                    "requirement_block.create_error",
@@ -53,9 +49,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.update(requirement_block_params)
-      render_success @requirement_block,
-                     nil,
-                     { blueprint: RequirementBlockBlueprint, blueprint_opts: { view: :extended } }
+      render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
       render_error Constants::Error::REQUIREMENT_BLOCK_UPDATE_ERROR,
                    "requirement_block.update_error",

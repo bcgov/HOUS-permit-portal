@@ -10,7 +10,7 @@ class RequirementBlock < ApplicationRecord
   enum reviewer_role: { any: 0 }, _prefix: true
 
   def search_data
-    { updated_at: updated_at, name: name }
+    { updated_at: updated_at, name: name, requirement_labels: requirements.pluck(:label) }
   end
 
   def to_form_json

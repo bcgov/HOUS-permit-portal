@@ -35,7 +35,7 @@ export const RequirementBlockStore = types
           return t("requirementsLibrary.fields.name")
         case ERequirementLibrarySortFields.associations:
           return t("requirementsLibrary.fields.associations")
-        case ERequirementLibrarySortFields.formFields:
+        case ERequirementLibrarySortFields.requirementLabels:
           return t("requirementsLibrary.fields.formFields")
         case ERequirementLibrarySortFields.updatedAt:
           return t("requirementsLibrary.fields.updatedAt")

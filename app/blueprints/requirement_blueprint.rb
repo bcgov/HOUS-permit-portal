@@ -12,7 +12,8 @@ class RequirementBlueprint < Blueprinter::Base
          :related_content,
          :required_for_in_person_hint,
          :required_for_multiple_owners,
-         :updated_at
+         :updated_at,
+         :created_at
 
   field :form_json do |requirement|
     requirement.to_form_json

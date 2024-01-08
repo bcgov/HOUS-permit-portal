@@ -31,7 +31,7 @@ export enum EUserRoles {
 export enum ERequirementLibrarySortFields {
   name = "name",
   associations = "associations",
-  formFields = "form_fields",
+  requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
 }
 
