@@ -1,6 +1,6 @@
 class RequirementBlockBlueprint < Blueprinter::Base
   identifier :id
-  fields :name, :sign_off_role, :reviewer_role, :updated_at
+  fields :name, :sign_off_role, :reviewer_role, :created_at, :updated_at
 
   view :extended do
     association :requirements, blueprint: RequirementBlueprint
