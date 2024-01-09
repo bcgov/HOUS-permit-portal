@@ -10,7 +10,6 @@ class JurisdictionSeeder
       type = is_rd ? "RegionalDistrict" : "SubDistrict"
 
       raise ActiveRecord::RecordInvalid if row[:regional_district].present? && is_rd
-
       j = Jurisdiction.find_or_create_by!(name: row[:name], locality_type: row[:locality_type], type: type)
       j.incorporation_date = row[:incorporation_date]
       j.postal_address = row[:postal_address]

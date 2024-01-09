@@ -97,8 +97,9 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                           align="center"
                           justify="space-between"
                           w="full"
-                          borderRight="1px solid"
-                          borderColor="border.light"
+                          border="2px solid"
+                          borderColor="transparent"
+                          borderRightColor="border.light"
                           gap={4}
                         >
                           <Text whiteSpace="normal" overflowWrap="normal" noOfLines={2} fontSize="sm">
@@ -114,10 +115,10 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                   {jurisdictions.map((j, index) => (
                     <Tr key={index}>
                       <Td fontWeight="bold">{j.name}</Td>
-                      <Td fontSize="sm">69420</Td>
-                      <Td fontSize="sm">69420</Td>
-                      <Td fontSize="sm">69420</Td>
-                      <Td fontSize="sm">69420</Td>
+                      <Td fontSize="sm">{j.reviewManagersSize}</Td>
+                      <Td fontSize="sm">{j.reviewersSize}</Td>
+                      <Td fontSize="sm">{j.permitApplicationsSize}</Td>
+                      <Td fontSize="sm">TODO</Td>
                       <Td fontSize="sm" p={0} pr={4}>
                         <HStack gap={4}>
                           <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>

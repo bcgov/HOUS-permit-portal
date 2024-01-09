@@ -7,9 +7,12 @@ class Jurisdiction < ApplicationRecord
   has_many :submitters, through: :permit_applications, source: :submitter
 
   validates :name, uniqueness: { scope: :locality_type }
+  validates :locality_type, presence: true
 
   def qualifier
-    "The #{locality_type.titleize} Of"
+    custom_titleized_locality_type =
+      locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
+    "#{custom_titleized_locality_type} of"
   end
 
   def qualified_name
@@ -18,5 +21,17 @@ class Jurisdiction < ApplicationRecord
 
   def reverse_qualified_name
     "#{name}, #{qualifier}"
+  end
+
+  def review_managers_size
+    review_managers.size
+  end
+
+  def reviewers_size
+    reviewers.size
+  end
+
+  def permit_applications_size
+    permit_applications.size
   end
 end
