@@ -25,6 +25,7 @@ export const SearchFormControl = ({ label, fieldName, ...rest }: ISearchFormCont
               satisfiesNameLength: (str) => (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
             },
           })}
+          bg="greys.white"
           placeholder={t("ui.search")}
           type={"text"}
         />

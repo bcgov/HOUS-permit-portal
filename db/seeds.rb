@@ -9,7 +9,7 @@
 #   end
 
 # Creating Jurisdictions
-5.times { FactoryBot.create(:jurisdiction) }
+JurisdictionSeeder.seed
 
 FactoryBot.create(
   :user,

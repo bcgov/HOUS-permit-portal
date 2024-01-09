@@ -63,8 +63,6 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
     // }
   }
 
-  const gridColumnTemplate = "3fr repeat(4, 1fr) 3fr"
-
   return (
     <FullWhiteContainer containerMaxW="container.lg">
       <FormProvider {...formMethods}>
@@ -103,7 +101,7 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                           borderColor="border.light"
                           gap={4}
                         >
-                          <Text whiteSpace="normal" overflowWrap="normal" noOfLines={2}>
+                          <Text whiteSpace="normal" overflowWrap="normal" noOfLines={2} fontSize="sm">
                             {header.header}
                           </Text>
                           <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faSort} />
@@ -116,11 +114,11 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                   {jurisdictions.map((j, index) => (
                     <Tr key={index}>
                       <Td fontWeight="bold">{j.name}</Td>
-                      <Td>0</Td>
-                      <Td>0</Td>
-                      <Td>0</Td>
-                      <Td>0</Td>
-                      <Td p={0} pr={4}>
+                      <Td fontSize="sm">69420</Td>
+                      <Td fontSize="sm">69420</Td>
+                      <Td fontSize="sm">69420</Td>
+                      <Td fontSize="sm">69420</Td>
+                      <Td fontSize="sm" p={0} pr={4}>
                         <HStack gap={4}>
                           <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>
                           <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
