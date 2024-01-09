@@ -1,4 +1,4 @@
-name: Deploy a branch to QA
+name: Deploy a branch to TEST
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
     name: Build & Deploy Docker Rails / React application
-    environment: qa
+    environment: test
 
     steps:
       - name: Checkout Code
@@ -22,17 +22,17 @@ jobs:
       - name: Build Docker Image
         uses: redhat-actions/buildah-build@v2
         with:
-          image: qa-hous-permit-portal
+          image: test-hous-permit-portal
           tags: latest ${{ github.sha }}
           labels: |
-            app=qa-house-permit-portal
+            app=test-house-permit-portal
             git-sha=${{ github.sha }}
           containerfiles: ./Dockerfile
           build-args: DEBUG_BUILD=true
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:
-          image: qa-hous-permit-portal
+          image: test-hous-permit-portal
           registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.BUILDER_USERNAME }}
           password: ${{ secrets.BUILDER_TOKEN }}
