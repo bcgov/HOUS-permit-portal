@@ -53,6 +53,10 @@ export const UserStoreModel = types
         window.location.replace(response.meta.redirectUrl)
       }
     }),
+    updateProfile: flow(function* (formData) {
+      const response = yield self.environment.api.updateProfile(formData)
+      return response.data
+    }),
   }))
   .actions((self) => ({}))
 

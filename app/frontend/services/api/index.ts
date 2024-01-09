@@ -1,5 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IUser } from "../../models/user"
 import { IAcceptInvitationResponse, IResetPasswordResponse, IUserResponse } from "../../types/api-responses"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
@@ -73,5 +74,9 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async updateProfile(params) {
+    return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
   }
 }

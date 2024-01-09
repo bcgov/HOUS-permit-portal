@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Container,
   Flex,
   FormControl,
   FormLabel,
@@ -24,6 +23,7 @@ import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { FullWhiteContainer } from "../../shared/containers/full-white-container"
 import { RouterLink } from "../../shared/navigation/router-link"
 
 interface IInviteScreenProps {}
@@ -75,52 +75,50 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   }
 
   return (
-    <Flex direction="column" w="full" bg="greys.white">
-      <Container maxW="container.lg" py={16} px={8}>
-        <Flex direction="column" gap={8}>
-          <Flex direction="column">
-            <Heading as="h1">{t("user.inviteTitle")}</Heading>
-            <Text>
-              {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
-            </Text>
-          </Flex>
-          <Heading fontSize="2xl">{jurisdiction.name}</Heading>
-          <FormProvider {...formMethods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Flex direction="column" gap={6}>
-                <Flex direction="column" gap={4}>
-                  {fields.map((field, index) => (
-                    <UserInput key={field.id} index={index} remove={remove} />
-                  ))}
-                  <Button
-                    type="button"
-                    variant="tertiary"
-                    onClick={() => append(defaultUserValues)}
-                    leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPlus} />}
-                  >
-                    {t("user.addUser")}
-                  </Button>
-                </Flex>
-                <Flex gap={4}>
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    isLoading={isSubmitting}
-                    loadingText={t("ui.loading")}
-                    rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPaperPlane} />}
-                  >
-                    {t("user.sendInvites")}
-                  </Button>
-                  <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
-                    {t("ui.cancel")}
-                  </Button>
-                </Flex>
-              </Flex>
-            </form>
-          </FormProvider>
+    <FullWhiteContainer>
+      <Flex direction="column" gap={8}>
+        <Flex direction="column">
+          <Heading as="h1">{t("user.inviteTitle")}</Heading>
+          <Text>
+            {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
+          </Text>
         </Flex>
-      </Container>
-    </Flex>
+        <Heading fontSize="2xl">{jurisdiction.name}</Heading>
+        <FormProvider {...formMethods}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Flex direction="column" gap={6}>
+              <Flex direction="column" gap={4}>
+                {fields.map((field, index) => (
+                  <UserInput key={field.id} index={index} remove={remove} jurisdictionId={jurisdiction.id} />
+                ))}
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  onClick={() => append(defaultUserValues)}
+                  leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPlus} />}
+                >
+                  {t("user.addUser")}
+                </Button>
+              </Flex>
+              <Flex gap={4}>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  isLoading={isSubmitting}
+                  loadingText={t("ui.loading")}
+                  rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPaperPlane} />}
+                >
+                  {t("user.sendInvites")}
+                </Button>
+                <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
+                  {t("ui.cancel")}
+                </Button>
+              </Flex>
+            </Flex>
+          </form>
+        </FormProvider>
+      </Flex>
+    </FullWhiteContainer>
   )
 })
 
@@ -157,9 +155,10 @@ const NameFormControl = ({ label, index, subFieldName }: INameFormControlProps) 
 interface IUserInputProps {
   index: number
   remove: (index: number) => any
+  jurisdictionId: string
 }
 
-const UserInput = observer(({ index, remove }: IUserInputProps) => {
+const UserInput = observer(({ index, remove, jurisdictionId }: IUserInputProps) => {
   const { register, formState, control, watch } = useFormContext()
   const { t } = useTranslation()
 
@@ -172,6 +171,7 @@ const UserInput = observer(({ index, remove }: IUserInputProps) => {
 
   return (
     <Box bg="greys.grey03" p={2} borderRadius="sm">
+      <Input hidden {...register(`users.${index}.jurisdictionId`)} value={jurisdictionId} />
       <Flex gap={4} align="flex-end">
         <FormControl flex={2}>
           <FormLabel>{t("auth.role")}</FormLabel>
