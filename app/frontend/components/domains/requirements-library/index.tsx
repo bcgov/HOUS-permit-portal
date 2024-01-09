@@ -17,6 +17,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { Paginator } from "../../shared/base/paginator"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { GridHeaders } from "./grid-header"
 
@@ -30,11 +31,12 @@ const sharedGridItemsStyles: Partial<GridItemProps> = {
 }
 export const RequirementsLibraryScreen = observer(function RequirementsLibrary() {
   const { requirementBlockStore } = useMst()
-  const tableRequirementBlocks = requirementBlockStore.tableRequirementBlocks
+  const { tableRequirementBlocks, currentPage, totalPages, totalCount, countPerPage, fetchRequirementBlocks } =
+    requirementBlockStore
   const { t } = useTranslation()
 
   useEffect(() => {
-    requirementBlockStore.fetchRequirementBlocks()
+    fetchRequirementBlocks()
   }, [])
 
   return (
@@ -110,6 +112,15 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
             )
           })}
         </Grid>
+        <Paginator
+          current={currentPage}
+          total={totalCount}
+          totalPages={totalPages}
+          pageSize={countPerPage}
+          handlePageChange={(page) => {
+            fetchRequirementBlocks({ page })
+          }}
+        />
       </VStack>
     </Box>
   )

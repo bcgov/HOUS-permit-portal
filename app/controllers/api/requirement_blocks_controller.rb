@@ -18,6 +18,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
                      meta: {
                        total_pages: @search.total_pages,
                        total_count: @search.total_count,
+                       current_page: @search.current_page,
                      },
                      blueprint: RequirementBlockBlueprint,
                    }

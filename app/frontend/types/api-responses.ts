@@ -14,6 +14,7 @@ export interface IRequirementBlockResponse
     {
       totalPages: number
       totalCount: number
+      currentPage: number
     }
   > {}
 

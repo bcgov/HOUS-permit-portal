@@ -14,9 +14,10 @@ export const RequirementBlockStore = types
     tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
     query: types.maybeNull(types.string),
     sort: types.maybeNull(types.frozen<ISort<ERequirementLibrarySortFields>>()),
-    currentPage: types.maybeNull(types.number),
+    currentPage: types.optional(types.number, 1),
     totalPages: types.maybeNull(types.number),
     totalCount: types.maybeNull(types.number),
+    countPerPage: types.optional(types.number, 2),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -44,7 +45,7 @@ export const RequirementBlockStore = types
   }))
   .actions((self) => ({
     resetPages() {
-      self.currentPage = null
+      self.currentPage = 1
       self.totalPages = null
       self.totalCount = null
     },
@@ -62,14 +63,15 @@ export const RequirementBlockStore = types
         self.environment.api.fetchRequirementBlocks({
           query: self.query,
           sort: self.sort,
-          page: opts?.page ?? self.nextPage,
+          page: opts?.page ?? self.currentPage,
+          perPage: self.countPerPage,
         })
       )
 
       if (response.ok) {
         R.map((requirementBlock) => self.requirementBlockMap.put(requirementBlock), response.data.data)
         self.tableRequirementBlocks = cast(response.data.data.map((requirementBlock) => requirementBlock.id))
-        self.currentPage = opts?.page ?? self.nextPage
+        self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
 
@@ -82,11 +84,11 @@ export const RequirementBlockStore = types
   .actions((self) => ({
     applySort: flow(function* (sort: ISort<ERequirementLibrarySortFields>) {
       self.sort = sort
-      return yield self.fetchRequirementBlocks({ reset: true })
+      return yield self.fetchRequirementBlocks()
     }),
     clearSort: flow(function* () {
       self.sort = null
-      return yield self.fetchRequirementBlocks({ reset: true })
+      return yield self.fetchRequirementBlocks()
     }),
   }))
   .actions((self) => ({
