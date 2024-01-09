@@ -5,7 +5,9 @@ import {
   GridItem,
   GridItemProps,
   Heading,
+  HStack,
   ListItem,
+  Tag,
   Text,
   UnorderedList,
   VStack,
@@ -81,10 +83,18 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
                 <GridItem {...sharedGridItemsStyles} fontWeight={700}>
                   {requirementBlock.name}
                 </GridItem>
-                <GridItem {...sharedGridItemsStyles}>{requirementBlock.name}</GridItem>
+                <GridItem {...sharedGridItemsStyles}>
+                  <HStack as={"ul"} wrap={"wrap"} spacing={1}>
+                    {requirementBlock.associations.map((association) => (
+                      <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
+                        {association}
+                      </Tag>
+                    ))}
+                  </HStack>
+                </GridItem>
                 <GridItem {...sharedGridItemsStyles}>
                   <UnorderedList>
-                    {requirementBlock.alphaSortedRequirements.map((requirement) => {
+                    {requirementBlock.requirements.map((requirement) => {
                       return (
                         <ListItem key={requirement.id} color={"text.secondary"} fontSize={"xs"}>
                           {requirement.label}

@@ -113,7 +113,7 @@ i18n.use(initReactI18next).init({
           description: "List of all Requirement Blocks in the system that can be used inside Templates.",
           fields: {
             name: "Name",
-            associations: "Association",
+            associations: "Associations",
             formFields: "Form Fields",
             updatedAt: "Updated At",
           },

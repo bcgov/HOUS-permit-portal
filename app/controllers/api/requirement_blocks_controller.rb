@@ -80,6 +80,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :name,
       :sign_off_role,
       :reviewer_role,
+      association_list: [],
       requirement_block_requirements_attributes: [
         :id,
         :requirement_id,
