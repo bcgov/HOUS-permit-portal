@@ -14,13 +14,14 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
+import { faBoxArchive } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { ChangeEvent, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/paginator"
-import { RouterLink } from "../../shared/navigation/router-link"
 import { GridHeaders } from "./grid-header"
 
 const sharedGridItemsStyles: Partial<GridItemProps> = {
@@ -59,17 +60,21 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
 
   return (
     <Box w={"full"} h={"full"} mx={"auto"} bg={"white"}>
-      <VStack alignItems={"flex-start"} spacing={8} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
-        <Box>
-          <Heading fontSize={"4xl"} color={"text.primary"}>
-            {t("requirementsLibrary.title")}
-          </Heading>
-          <Text color={"text.secondary"} mt={1}>
-            {t("requirementsLibrary.description")}
-          </Text>
-        </Box>
+      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
+        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
+          <Box>
+            <Heading fontSize={"4xl"} color={"text.primary"}>
+              {t("requirementsLibrary.index.title")}
+            </Heading>
+            <Text color={"text.secondary"} mt={1}>
+              {t("requirementsLibrary.index.description")}
+            </Text>
+          </Box>
+          <Button variant={"primary"}>{t("requirementsLibrary.index.createButton")}</Button>
+        </Flex>
 
         <Grid
+          mt={3}
           role={"table"}
           templateColumns="repeat(4, 1fr) 85px"
           w="full"
@@ -122,7 +127,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
                   {format(requirementBlock.updatedAt, "yyyy-MM-dd")}
                 </GridItem>
                 <GridItem {...sharedGridItemsStyles} justifyContent={"center"}>
-                  <Button as={RouterLink} to={`/requirements-library/${requirementBlock.id}/edit`} variant={"link"}>
+                  <Button variant={"link"} textDecoration={"underline"}>
                     Edit
                   </Button>
                 </GridItem>
@@ -154,6 +159,14 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
             handlePageChange={handlePageChange}
           />
         </Flex>
+
+        <Button
+          leftIcon={<FontAwesomeIcon style={{ width: "14px", height: "14px" }} icon={faBoxArchive} />}
+          variant={"secondary"}
+          mt={3}
+        >
+          {t("requirementsLibrary.index.seeArchivedButton")}
+        </Button>
       </VStack>
     </Box>
   )

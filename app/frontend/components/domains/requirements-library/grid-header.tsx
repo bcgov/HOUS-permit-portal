@@ -21,7 +21,7 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem display={"flex"} gridColumn={"span 5"} p={6} bg={"greys.grey10"} justifyContent={"space-between"}>
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"}>
-            {t("requirementsLibrary.tableHeading")}
+            {t("requirementsLibrary.index.tableHeading")}
           </Text>
           <SearchInput query={query} setQuery={setQuery} handleSearch={search} />
         </GridItem>
