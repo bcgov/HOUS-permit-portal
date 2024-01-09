@@ -1,12 +1,14 @@
 import {
   Box,
   Button,
+  Flex,
   Grid,
   GridItem,
   GridItemProps,
   Heading,
   HStack,
   ListItem,
+  Select,
   Tag,
   Text,
   UnorderedList,
@@ -14,7 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { ChangeEvent, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/paginator"
@@ -31,13 +33,29 @@ const sharedGridItemsStyles: Partial<GridItemProps> = {
 }
 export const RequirementsLibraryScreen = observer(function RequirementsLibrary() {
   const { requirementBlockStore } = useMst()
-  const { tableRequirementBlocks, currentPage, totalPages, totalCount, countPerPage, fetchRequirementBlocks } =
-    requirementBlockStore
+  const {
+    tableRequirementBlocks,
+    currentPage,
+    totalPages,
+    totalCount,
+    countPerPage,
+    fetchRequirementBlocks,
+    setCountPerPage,
+    isQuerying,
+  } = requirementBlockStore
   const { t } = useTranslation()
 
   useEffect(() => {
     fetchRequirementBlocks()
   }, [])
+
+  const handlePageChange = (page) => {
+    fetchRequirementBlocks({ page })
+  }
+  const handleCountPerPageChange = async (e: ChangeEvent<HTMLSelectElement>) => {
+    setCountPerPage(Number(e.target.value))
+    fetchRequirementBlocks()
+  }
 
   return (
     <Box w={"full"} h={"full"} mx={"auto"} bg={"white"}>
@@ -112,15 +130,30 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
             )
           })}
         </Grid>
-        <Paginator
-          current={currentPage}
-          total={totalCount}
-          totalPages={totalPages}
-          pageSize={countPerPage}
-          handlePageChange={(page) => {
-            fetchRequirementBlocks({ page })
-          }}
-        />
+        <Flex w={"full"} justifyContent={"space-between"}>
+          <HStack gap={4}>
+            <Select
+              aria-label={"Number of requirement Blocks per page"}
+              w={20}
+              onChange={handleCountPerPageChange}
+              value={countPerPage}
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </Select>
+            <Text>
+              {totalCount} {t("ui.totalItems")}
+            </Text>
+          </HStack>
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+          />
+        </Flex>
       </VStack>
     </Box>
   )

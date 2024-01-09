@@ -87,6 +87,7 @@ i18n.use(initReactI18next).init({
           resume: "Resume",
           cancel: "Cancel",
           remove: "Remove",
+          totalItems: "Total items",
         },
         jurisdiction: {
           title: "Local Housing Permits",

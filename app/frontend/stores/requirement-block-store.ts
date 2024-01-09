@@ -17,7 +17,8 @@ export const RequirementBlockStore = types
     currentPage: types.optional(types.number, 1),
     totalPages: types.maybeNull(types.number),
     totalCount: types.maybeNull(types.number),
-    countPerPage: types.optional(types.number, 2),
+    countPerPage: types.optional(types.number, 10),
+    isQuerying: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -25,9 +26,6 @@ export const RequirementBlockStore = types
     // View to get a RequirementBlock by id
     getRequirementBlockById(id: string) {
       return self.requirementBlockMap.get(id)
-    },
-    get nextPage() {
-      return self.currentPage ?? 0 + 1
     },
 
     getSortColumnHeader(field: ERequirementLibrarySortFields) {
@@ -51,10 +49,14 @@ export const RequirementBlockStore = types
     },
   }))
   .actions((self) => ({
+    setCountPerPage(countPerPage: number) {
+      self.countPerPage = countPerPage
+    },
     setQuery(query: string) {
       self.query = !!query?.trim() ? query : null
     },
     fetchRequirementBlocks: flow(function* (opts?: { reset?: boolean; page?: number }) {
+      self.isQuerying = true
       if (opts?.reset) {
         self.resetPages()
       }
@@ -67,6 +69,8 @@ export const RequirementBlockStore = types
           perPage: self.countPerPage,
         })
       )
+
+      self.isQuerying = false
 
       if (response.ok) {
         R.map((requirementBlock) => self.requirementBlockMap.put(requirementBlock), response.data.data)

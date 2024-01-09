@@ -1,12 +1,10 @@
-import { Box, Flex, GridItem, Input, InputGroup, InputLeftElement, Text, styled } from "@chakra-ui/react"
-import { faSearch } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Box, Flex, GridItem, Text, styled } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { ChangeEvent } from "react"
+import React, { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { ERequirementLibrarySortFields } from "../../../types/enums"
-import { debounce } from "../../../utils/utility-funcitons"
+import { SearchInput } from "../../shared/base/search-input"
 import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
@@ -14,11 +12,9 @@ export const GridHeaders = observer(function GridHeaders() {
   const { query, sort, getSortColumnHeader, toggleSort, fetchRequirementBlocks, setQuery } = requirementBlockStore
   const { t } = useTranslation()
 
-  const debouncedFetchRequirementBlocks = debounce(fetchRequirementBlocks, 500)
-  const search = async (e: ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value)
-    await debouncedFetchRequirementBlocks({ reset: true })
-  }
+  const search = useCallback(() => {
+    fetchRequirementBlocks({ reset: true })
+  }, [])
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
@@ -27,18 +23,7 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"}>
             {t("requirementsLibrary.tableHeading")}
           </Text>
-          <InputGroup w={"224px"} bg={"white"}>
-            <Input placeholder={"Search"} fontSize={"sm"} onChange={search} value={query ?? ""} />
-            <InputLeftElement color={"greys.grey01"}>
-              <FontAwesomeIcon
-                style={{
-                  width: "14px",
-                  height: "14px",
-                }}
-                icon={faSearch}
-              />
-            </InputLeftElement>
-          </InputGroup>
+          <SearchInput query={query} setQuery={setQuery} handleSearch={search} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
