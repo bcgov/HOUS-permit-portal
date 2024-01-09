@@ -17,36 +17,42 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
   return (
     <FullWhiteContainer>
       <Flex direction="column" align="center" w="full">
-        <Heading as="h1" mb={8}>
-          {currentUser?.jurisdiction.name}
-        </Heading>
-        <Flex direction="column" align="center" w="full" gap={6}>
-          <HomeScreenBox
-            title={t("home.submissionsInboxTitle")}
-            description={t("home.submissionsInboxDescription")}
-            icon={faInbox}
-            href={`${jurisdiction.id}/submission-inbox`}
-            useViewText
-          />
-          <HomeScreenBox
-            title={t("home.permitsTitle")}
-            description={t("home.permitsDescription")}
-            icon={faFile}
-            href={`${jurisdiction.id}/permit-applications`}
-          />{" "}
-          <HomeScreenBox
-            title={t("home.contentManagementTitle")}
-            description={t("home.contentManagementDescription")}
-            icon={faBookOpen}
-            href={`${jurisdiction.id}/content-mangement`}
-          />
-          <HomeScreenBox
-            title={t("home.userManagementTitle")}
-            description={t("home.userManagementDescription")}
-            icon={faUsers}
-            href={`${jurisdiction.id}/users`}
-          />
-        </Flex>
+        {jurisdiction ? (
+          <>
+            <Heading as="h1" mb={8}>
+              {currentUser?.jurisdiction.name}
+            </Heading>
+            <Flex direction="column" align="center" w="full" gap={6}>
+              <HomeScreenBox
+                title={t("home.submissionsInboxTitle")}
+                description={t("home.submissionsInboxDescription")}
+                icon={faInbox}
+                href={`${jurisdiction.id}/submission-inbox`}
+                useViewText
+              />
+              <HomeScreenBox
+                title={t("home.permitsTitle")}
+                description={t("home.permitsDescription")}
+                icon={faFile}
+                href={`${jurisdiction.id}/permit-applications`}
+              />{" "}
+              <HomeScreenBox
+                title={t("home.contentManagementTitle")}
+                description={t("home.contentManagementDescription")}
+                icon={faBookOpen}
+                href={`${jurisdiction.id}/content-mangement`}
+              />
+              <HomeScreenBox
+                title={t("home.userManagementTitle")}
+                description={t("home.userManagementDescription")}
+                icon={faUsers}
+                href={`${jurisdiction.id}/users`}
+              />
+            </Flex>
+          </>
+        ) : (
+          <></>
+        )}
       </Flex>
     </FullWhiteContainer>
   )

@@ -57,8 +57,9 @@ interface IAppRoutesProps {}
 const AppRoutes = observer(({}: IAppRoutesProps) => {
   const location = useLocation()
 
-  const { sessionStore } = useMst()
+  const { sessionStore, userStore } = useMst()
   const { loggedIn } = sessionStore
+  const { currentUser } = userStore
 
   return (
     <Routes location={location}>
@@ -69,8 +70,6 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
         </>
       ) : (
         <>
@@ -82,6 +81,21 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           <Route path="/register" element={<RegisterScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         </>
+      )}
+      {currentUser && (currentUser.isReviewManager || currentUser.isSuperAdmin) ? (
+        <>
+          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+        </>
+      ) : (
+        <></>
+      )}
+      {currentUser && currentUser.isReviewer ? (
+        <>
+          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+        </>
+      ) : (
+        <></>
       )}
     </Routes>
   )
