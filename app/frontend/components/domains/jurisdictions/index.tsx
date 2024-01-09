@@ -144,69 +144,9 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
               </HStack>
               <Paginator />
             </Flex>
-
-            {/* <Box borderRadius="md" border="1px solid" borderColor="border.light">
-              <Flex justify="space-between" px={6} py={4} bg="greys.grey10" w="full" align="center">
-                <Text>{t("jurisdiction.localGovernments")}</Text>
-                <SearchFormControl fieldName="jurisdictionSearch" maxW="250px" />
-              </Flex>
-
-              <Grid templateColumns={gridColumnTemplate} gap={8} p={4}>
-                {headers.map((header, index) => (
-                  <JurisdictionGridItem key={header.key} onClick={() => {}}>
-                    <Flex
-                      align="center"
-                      justify="space-between"
-                      borderRight="1px solid"
-                      borderColor="border.light"
-                      gap={4}
-                      h={6}
-                      pr={4}
-                    >
-                      <Text whiteSpace="normal" overflowWrap="normal" noOfLines={2}>
-                        {header.header}
-                      </Text>
-                      <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faSort} />
-                    </Flex>
-                  </JurisdictionGridItem>
-                ))}
-                <JurisdictionGridItem></JurisdictionGridItem>
-
-                {jurisdictions.map((j, index) => (
-                  <React.Fragment key={index}>
-                    <JurisdictionGridItem fontWeight="bold">{j.name}</JurisdictionGridItem>
-                    <JurisdictionGridItem>j.reviewers</JurisdictionGridItem>
-                    <JurisdictionGridItem>j.managers</JurisdictionGridItem>
-                    <JurisdictionGridItem>j.applicationsReceived</JurisdictionGridItem>
-                    <JurisdictionGridItem>j.templatesUsed</JurisdictionGridItem>
-                    <JurisdictionGridItem>
-                      <HStack>
-                        <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>
-                        <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
-                        <RouterLink to={"#"}>{t("jurisdiction.manage")}</RouterLink>
-                      </HStack>
-                    </JurisdictionGridItem>
-                  </React.Fragment>
-                ))}
-              </Grid>
-            </Box> */}
           </Flex>
         </form>
       </FormProvider>
     </FullWhiteContainer>
   )
 })
-
-// interface IJurisdictionGridItemProps extends GridItemProps {
-//   children?: ReactNode
-// }
-
-// const JurisdictionGridItem = ({ children }: IJurisdictionGridItemProps) => {
-//   return (
-//     <GridItem
-//       style={{ borderBottom: "1px solid #ccc" }} // Apply bottom border to all but the last item
-//     >
-//       {children}
-//     </GridItem>
-//   )
-// }

@@ -8,6 +8,7 @@ class Jurisdiction < ApplicationRecord
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
+  validate :has_correct_locality_type
 
   def qualifier
     custom_titleized_locality_type =
@@ -33,5 +34,11 @@ class Jurisdiction < ApplicationRecord
 
   def permit_applications_size
     permit_applications.size
+  end
+
+  private
+
+  def has_correct_locality_type
+    raise NotImplementedError, "Regional and Sub districts implement this method"
   end
 end
