@@ -61,15 +61,16 @@ class RequirementsFromXlsxSeeder
     #create requirements blocks
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
-    new_res_low_requirement_template =
+    requirement_template =
       RequirementTemplate.where(activity: activity, permit_type: permit_type).first_or_create(
         activity: activity,
         permit_type: permit_type,
       )
-    setup_sheet(activity, permit_type, sheet, errors)
+    setup_sheet(activity, permit_type, sheet, requirement_template, errors)
   end
 
-  def self.setup_sheet(activity, permit_type, sheet, errors)
+  def self.setup_sheet(activity, permit_type, sheet, requirement_template, errors)
+    rtrb_position_incrementer = 0
     (4..sheet.last_row).each do |row_index|
       begin
         #https://www.vishalon.net/blog/excel-column-letter-to-number-quick-reference but -1 for ruby
@@ -77,7 +78,7 @@ class RequirementsFromXlsxSeeder
         #TODO: section
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
           rb = RequirementBlock.where(name: sheet.row(row_index)[2]).first_or_create!(name: sheet.row(row_index)[2])
-          position_incrementer = 0
+          req_position_incrementer = 0
           (11..21).each_with_index do |req_col, req_position|
             val = sheet.row(row_index)[req_col]
             if val.present?
@@ -88,11 +89,19 @@ class RequirementsFromXlsxSeeder
                     .requirement_block_requirements
                     .where(requirement: requirement)
                     .first_or_initialize(requirement: requirement)
-                rbr.update!(requirement: requirement, position: position_incrementer)
-                position_incrementer += 1
+                rbr.update!(requirement: requirement, position: req_position_incrementer)
+                req_position_incrementer += 1
               end
             end
           end
+
+          rtrb =
+            requirement_template
+              .requirement_template_requirement_blocks
+              .where(requirement_block: rb)
+              .first_or_initialize(requirement_block: rb)
+          rtrb.update!(position: rtrb_position_incrementer)
+          rtrb_position_incrementer += 1
         end
       rescue StandardError => e
         errors << "Error loading #{activity} #{permit_type} - row:#{row_index} - #{e.message}"
