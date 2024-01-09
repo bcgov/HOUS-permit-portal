@@ -5,6 +5,10 @@ import { IContact } from "../types/types"
 export const JurisdictionModel = types.model("JurisdictionModel", {
   id: types.identifier,
   name: types.string,
+  qualifiedName: types.string,
+  reviewManagersSize: types.number,
+  reviewersSize: types.number,
+  permitApplicationsSize: types.number,
   description: types.maybeNull(types.string),
   // JSONB data type can be represented as a frozen type
   checklistSlateData: types.maybeNull(types.frozen<Descendant[]>()),

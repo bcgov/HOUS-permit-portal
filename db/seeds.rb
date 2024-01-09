@@ -9,7 +9,8 @@
 #   end
 
 # Creating Jurisdictions
-5.times { FactoryBot.create(:jurisdiction) }
+JurisdictionSeeder.seed
+jurisdictions = Jurisdiction.all
 
 user = User.find_by(email: "admin@example.com")
 
@@ -26,13 +27,12 @@ end
 # Creating Users with different roles
 5.times do
   FactoryBot.create(:user, :submitter).confirm
-  FactoryBot.create(:user, :review_manager).confirm
-  FactoryBot.create(:user, :reviewer).confirm
+  FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.sample).confirm
+  FactoryBot.create(:user, :reviewer, jurisdiction: jurisdictions.sample).confirm
   FactoryBot.create(:user, :super_admin).confirm
 end
 
 # Creating Permit Applications
-jurisdictions = Jurisdiction.all
 submitters = User.where(role: "submitter")
 
 20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }

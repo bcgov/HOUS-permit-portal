@@ -2,4 +2,4 @@
 
 <p>You have been invited to join the BC Permit Hub app.</p>
 
-<%= link_to 'Accept invitation', accept_invitation_url(invitation_token: @token, user: @resource.to_json) %>
+<%= link_to 'Accept invitation', accept_invitation_url(invitation_token: @token, user: @resource.to_json, jurisdiction_name: @resource.jurisdiction.name) %>

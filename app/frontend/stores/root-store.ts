@@ -2,6 +2,7 @@ import { IStateTreeNode, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
+import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IRequirementBlockStore, RequirementBlockStore } from "./requirement-block-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
@@ -16,6 +17,7 @@ export const RootStoreModel = types
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStore, {}),
+    permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
   })
   .extend(withEnvironment())
   .views((self) => ({}))
@@ -28,4 +30,5 @@ export interface IRootStore extends IStateTreeNode {
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   requirementBlockStore: IRequirementBlockStore
+  permitClassificationStore: IPermitClassificationStore
 }

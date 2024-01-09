@@ -2,7 +2,8 @@ class Api::JurisdictionsController < Api::ApplicationController
   before_action :set_jurisdiction, only: [:show]
 
   def index
-    @jurisdictions = policy_scope(Jurisdiction)
+    # TODO: Search, sort, pagination
+    @jurisdictions = policy_scope(Jurisdiction).first(10)
     render_success(@jurisdictions)
   end
 

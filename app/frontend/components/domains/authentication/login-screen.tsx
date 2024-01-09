@@ -4,8 +4,8 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { CenterContainer } from "../../shared/base/center-container"
 import { BackButton } from "../../shared/buttons/back-button"
+import { CenterContainer } from "../../shared/containers/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -67,6 +67,15 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
               </Button>
               <BackButton isDisabled={isSubmitting} />
             </HStack>
+
+            <form action="/api/auth/keycloakopenid" method="post">
+              <input
+                type="hidden"
+                name="authenticity_token"
+                value={document.querySelector("[name=csrf-token]").content}
+              />
+              <Button type="submit">Login with BCeID</Button>
+            </form>
 
             <Flex gap={2}>
               <RouterLink to="/forgot-password" state={{ username: usernameWatch }}>

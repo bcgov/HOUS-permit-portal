@@ -87,10 +87,17 @@ i18n.use(initReactI18next).init({
           resume: "Resume",
           cancel: "Cancel",
           remove: "Remove",
-          totalItems: "Total items",
+          save: "Save Changes",
+          manage: "Manage",
+          view: "View",
+          totalItems: "Total Items",
         },
         jurisdiction: {
           title: "Local Housing Permits",
+          localGovernments: "Local Governments",
+          indexTitle: "Manage Jurisdictions",
+          indexDescription: "Below is a list of all jurisdictions in the system",
+          createNew: "Create new jurisdiction",
           description:
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
           checklist: "Checklist",
@@ -98,6 +105,8 @@ i18n.use(initReactI18next).init({
           startApplication: "Start a Permit Application",
           contactInfo: "Contact information",
           didNotFind: "I didn't find what I was looking for",
+          viewAs: "View As",
+          manage: "Manage",
         },
         permitApplication: {
           indexTitle: "My Active Permits",
@@ -127,18 +136,31 @@ i18n.use(initReactI18next).init({
         user: {
           addUser: "Add more emails",
           invite: "Invite",
+          firstName: "First Name",
+          lastName: "Last Name",
+          oldPassword: "Old Password",
+          newPassword: "New Password",
+          myProfile: "My Profile",
           inviteTitle: "Invite Users",
           inviteSuccess: "Invite sent!",
           inviteError: "Email taken",
           sendInvites: "Send Invites",
-          acceptInvitation: "Accept Invitation",
+          acceptInvitation: "Accept Invitation to",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           rolesAndPermissions: "User Roles & Permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
+          // Leave in snake case so we can use: t(`user.role.${role}`)
+          role: {
+            submitter: "submitter",
+            review_manager: "review manager",
+            reviewer: "reviewer",
+            super_admin: "super admin",
+          },
         },
         site: {
           navBarTitle: "Building Permit Hub",
+          adminNavBarTitle: "Building Permit Hub - Admin Panel",
           beta: "Beta",
           linkHome: "Navigate home",
           home: "Home",
@@ -150,6 +172,27 @@ i18n.use(initReactI18next).init({
           myAccount: "My Account",
           giveFeedback: "Give Feedback",
           error: "Something went wrong, please try refreshing the page",
+          menu: "Menu",
+        },
+        home: {
+          jurisdictionsTitle: "Jurisdictions",
+          jurisdictionsDescription: "Invite or remove Managers or Reviewers in the Building Permit Hub System.",
+          permitTemplateCatalogueTitle: "Permit Templates Catalogue",
+          permitTemplateCatalogueDescription:
+            "Create and manage permit templates for each permit type that Local Gov can use as a standardized base.",
+          requirementsLibraryTitle: "Requirements Library",
+          requirementsLibraryDescription:
+            "Create and manage requirement blocks that can be used inside of permit templates.",
+          contentManagementTitle: "Content Management",
+          contentManagementDescription: "Customize content in one centralized place.",
+          superAdminTitle: "Admin Home",
+          submissionsInboxTitle: "Submissions Inbox",
+          submissionsInboxDescription: "View all submitted building permit applications.",
+          permitsTitle: "Digital Building Permits",
+          permitsDescription:
+            "Control what permit types you want available for submitters to apply with on BC Building Permit Hub.",
+          userManagementTitle: "User Management",
+          userManagementDescription: "Invite or remove Managers or Reviewers in the Building Permit Hub System.",
         },
         admin: {},
         errors: {

@@ -1,5 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IUser } from "../../models/user"
 import {
   IAcceptInvitationResponse,
   IRequirementBlockResponse,
@@ -89,5 +90,8 @@ export class Api {
     perPage?: number
   }) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
+  }
+  async updateProfile(params) {
+    return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
   }
 }

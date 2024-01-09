@@ -92,6 +92,15 @@ en:
       invite_error:
         title: Oops
         message: The users you specified weren't able to be invited. Please contact support.
+      update_success:
+        title: ""
+        message: The user was updated successfully
+      update_error:
+        title: Oops
+        message: "There was an error updating the user."
+      update_password_error:
+        title: Oops
+        message: "The provided current password is incorrect."
     requirement_block:
       create_error:
         title: Oops
