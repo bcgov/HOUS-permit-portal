@@ -1,5 +1,5 @@
 class RequirementBlock < ApplicationRecord
-  searchkick
+  searchkick searchable: %i[name requirement_labels associations], word_start: %i[name requirement_labels associations]
 
   has_many :requirement_block_requirements, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirements, through: :requirement_block_requirements

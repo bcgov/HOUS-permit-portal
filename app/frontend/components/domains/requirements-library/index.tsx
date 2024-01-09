@@ -66,11 +66,6 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           borderColor={"border.light"}
           borderRadius={"sm"}
         >
-          <GridItem gridColumn={"span 5"} p={6} bg={"greys.grey10"}>
-            <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"}>
-              {t("requirementsLibrary.tableHeading")}
-            </Text>
-          </GridItem>
           <GridHeaders />
           {tableRequirementBlocks.map((requirementBlock) => {
             return (

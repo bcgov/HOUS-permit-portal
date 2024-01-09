@@ -6,6 +6,7 @@ module Api::Concerns::Search::RequirementBlocks
       RequirementBlock.search(
         query,
         order: order,
+        match: :word_start,
         page: search_params[:page],
         per_page: search_params[:page] ? (search_params[:per_page] || Kaminari.config.default_per_page) : nil,
       )

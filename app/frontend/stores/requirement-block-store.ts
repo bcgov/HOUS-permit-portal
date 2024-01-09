@@ -4,7 +4,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
-import { ERequirementLibrarySortFields } from "../types/enums"
+import { ERequirementLibrarySortFields, ESortDirection } from "../types/enums"
 import { ISort } from "../types/types"
 
 export const RequirementBlockStore = types
@@ -50,7 +50,9 @@ export const RequirementBlockStore = types
     },
   }))
   .actions((self) => ({
-    // Example of an asynchronous action to fetch jurisdictions from an API
+    setQuery(query: string) {
+      self.query = !!query?.trim() ? query : null
+    },
     fetchRequirementBlocks: flow(function* (opts?: { reset?: boolean; page?: number }) {
       if (opts?.reset) {
         self.resetPages()
@@ -58,6 +60,7 @@ export const RequirementBlockStore = types
 
       const response = yield* toGenerator(
         self.environment.api.fetchRequirementBlocks({
+          query: self.query,
           sort: self.sort,
           page: opts?.page ?? self.nextPage,
         })
@@ -84,6 +87,23 @@ export const RequirementBlockStore = types
     clearSort: flow(function* () {
       self.sort = null
       return yield self.fetchRequirementBlocks({ reset: true })
+    }),
+  }))
+  .actions((self) => ({
+    toggleSort: flow(function* (sortField: ERequirementLibrarySortFields) {
+      // calculate the next sort state based on current sort
+      // descending -> ascending -> unsorted
+      if (self.sort && self.sort.field == sortField && self.sort.direction == ESortDirection.ascending) {
+        // return to unsorted state
+        yield self.clearSort()
+      } else {
+        // apply the next sort state
+        const direction =
+          self.sort?.field == sortField && self.sort?.direction == ESortDirection.descending
+            ? ESortDirection.ascending
+            : ESortDirection.descending
+        yield self.applySort({ field: sortField, direction })
+      }
     }),
   }))
 
