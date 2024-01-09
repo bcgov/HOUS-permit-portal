@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_08_233657) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_09_231303) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -60,6 +60,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_08_233657) do
   end
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.integer "permit_type", default: 0
+    t.integer "building_type", default: 0
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
     t.uuid "jurisdiction_id", null: false
@@ -96,6 +98,28 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_08_233657) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+  end
+
+  create_table "requirement_template_section_requirement_blocks",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "requirement_template_section_id", null: false
+    t.uuid "requirement_block_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_block_id"], name: "idx_on_requirement_block_id_7cfbb26f23"
+    t.index ["requirement_template_section_id"], name: "idx_on_requirement_template_section_id_bea21d663c"
+  end
+
+  create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.uuid "requirement_template_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_template_id"], name: "index_requirement_template_sections_on_requirement_template_id"
   end
 
   create_table "requirement_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -201,6 +225,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_08_233657) do
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "requirement_block_requirements", "requirement_blocks"
   add_foreign_key "requirement_block_requirements", "requirements"
+  add_foreign_key "requirement_template_section_requirement_blocks", "requirement_blocks"
+  add_foreign_key "requirement_template_section_requirement_blocks", "requirement_template_sections"
+  add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "taggings", "tags"

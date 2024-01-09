@@ -11,7 +11,7 @@ RSpec.describe Requirement, type: :model do
     it "enforces select inputs has defined accepted options" do
       select_requirement = build(:requirement, input_type: "select")
       multi_option_select_requirement = build(:requirement, input_type: "multi_option_select")
-      text_requirement = build(:requirement, input_type: "text")
+      text_requirement = build(:requirement, input_type: "textfield")
       error_message = "select inputs must have options defined"
 
       expect(select_requirement).not_to be_valid
@@ -72,7 +72,7 @@ RSpec.describe Requirement, type: :model do
 
     context "form json" do
       it "returns correct form json for text requirement" do
-        requirement = create(:requirement, label: "Text Requirement", input_type: "text")
+        requirement = create(:requirement, label: "Text Requirement", input_type: "textfield")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "textRequirement",
