@@ -1,15 +1,16 @@
-import { Box, Flex, Spacer } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
-import { RouterLink } from "../../shared/navigation/router-link"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
+import { HomeScreen } from "../home"
 import { JurisdictionIndexScreen } from "../jurisdictions"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/jurisdiction-user-index-screen"
@@ -19,12 +20,11 @@ import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
 import { ProfileScreen } from "../users/profile-screen"
 import { NavBar } from "./nav-bar"
-import { SubNavBar } from "./sub-nav-bar"
 
 export const Navigation = observer(() => {
-  const {
-    sessionStore: { validateToken },
-  } = useMst()
+  const { sessionStore } = useMst()
+
+  const { validateToken, isValidating, loggedIn } = sessionStore
 
   useEffect(() => {
     validateToken()
@@ -39,11 +39,15 @@ export const Navigation = observer(() => {
       </Box>
 
       <NavBar />
-      <SubNavBar />
-      <AppRoutes />
-      <Spacer />
 
-      <Footer />
+      {isValidating ? (
+        <LoadingScreen />
+      ) : (
+        <>
+          <AppRoutes />
+          <Footer />
+        </>
+      )}
     </BrowserRouter>
   )
 })
@@ -53,28 +57,19 @@ interface IAppRoutesProps {}
 const AppRoutes = observer(({}: IAppRoutesProps) => {
   const location = useLocation()
 
-  const { sessionStore } = useMst()
+  const { sessionStore, userStore } = useMst()
   const { loggedIn } = sessionStore
+  const { currentUser } = userStore
 
   return (
     <Routes location={location}>
       {loggedIn ? (
         <>
-          <Route
-            path="/"
-            element={
-              <Flex direction="column">
-                <RouterLink to="/jurisdictions">Jurisdictions</RouterLink>
-                <RouterLink to="/permit-applications">My Applications</RouterLink>
-              </Flex>
-            }
-          />
+          <Route path="/" element={<HomeScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
         </>
       ) : (
         <>
@@ -86,6 +81,21 @@ const AppRoutes = observer(({}: IAppRoutesProps) => {
           <Route path="/register" element={<RegisterScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         </>
+      )}
+      {currentUser && (currentUser.isReviewManager || currentUser.isSuperAdmin) ? (
+        <>
+          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+        </>
+      ) : (
+        <></>
+      )}
+      {currentUser && currentUser.isReviewer ? (
+        <>
+          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+        </>
+      ) : (
+        <></>
       )}
     </Routes>
   )

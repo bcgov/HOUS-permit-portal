@@ -1,0 +1,2 @@
+class RegionalDistrictBlueprint < JurisdictionBlueprint
+end

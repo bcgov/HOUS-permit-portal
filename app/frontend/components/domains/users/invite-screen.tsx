@@ -11,7 +11,13 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react"
-import { faCircleCheck, faCircleExclamation, faClose, faPaperPlane, faPlus } from "@fortawesome/free-solid-svg-icons"
+import {
+  faCircleCheck,
+  faCircleExclamation,
+  faPaperPlane,
+  faUserMinus,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -95,7 +101,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   type="button"
                   variant="tertiary"
                   onClick={() => append(defaultUserValues)}
-                  leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPlus} />}
+                  leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faUserPlus} />}
                 >
                   {t("user.addUser")}
                 </Button>
@@ -223,7 +229,7 @@ const UserInput = observer(({ index, remove, jurisdictionId }: IUserInputProps) 
           <Button
             onClick={() => remove(index)}
             variant="tertiary"
-            leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faClose} />}
+            leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faUserMinus} />}
           >
             {t("ui.remove")}
           </Button>
