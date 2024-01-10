@@ -106,7 +106,6 @@ i18n.use(initReactI18next).init({
           contactInfo: "Contact information",
           didNotFind: "I didn't find what I was looking for",
           viewAs: "View As",
-          manage: "Manage",
         },
         permitApplication: {
           indexTitle: "My Active Permits",
@@ -133,6 +132,7 @@ i18n.use(initReactI18next).init({
           acceptInvitation: "Accept Invitation to",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           rolesAndPermissions: "User Roles & Permissions",
+          accounts: "User Accounts",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
           // Leave in snake case so we can use: t(`user.role.${role}`)

@@ -9,7 +9,7 @@ interface IFullWhiteContainerProps extends FlexProps {
 export const FullWhiteContainer = ({ children, containerMaxW, ...rest }: IFullWhiteContainerProps) => {
   return (
     <Flex direction="column" w="full" bg="greys.white" flex={1} {...rest}>
-      <Container as={Flex} direction="column" maxW={containerMaxW || "container.lg"} p={8} flex={1}>
+      <Container as={Flex} direction="column" py={8} maxW={containerMaxW || "container.lg"} flex={1}>
         {children}
       </Container>
     </Flex>

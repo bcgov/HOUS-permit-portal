@@ -8,6 +8,7 @@ export const JurisdictionStoreModel = types
   .model("JurisdictionStore")
   .props({
     jurisdictionMap: types.map(JurisdictionModel),
+    currentJurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -16,20 +17,9 @@ export const JurisdictionStoreModel = types
     getJurisdictionById(id: string) {
       return self.jurisdictionMap.get(id)
     },
-
     // View to get all jurisdictions as an array
     get jurisdictions() {
       return Array.from(self.jurisdictionMap.values())
-    },
-
-    get currentJurisdiction() {
-      return {
-        id: "0ee55726-8b7c-4a0d-9682-2731896fa244",
-        name: "STUB JURISDICTION",
-        description: "STUB DEFINITION",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
     },
   }))
   .actions((self) => ({
@@ -45,6 +35,7 @@ export const JurisdictionStoreModel = types
     fetchJurisdictions: flow(function* () {
       const { ok, data: response } = yield self.environment.api.fetchJurisdictions()
       if (ok) R.map((j) => self.jurisdictionMap.put(j), response.data)
+      return ok
     }),
     fetchJurisdiction: flow(function* (id: string) {
       let jurisdiction = self.getJurisdictionById(id)
@@ -58,6 +49,9 @@ export const JurisdictionStoreModel = types
       }
       return jurisdiction
     }),
+    setCurrentJurisdiction(jurisdictionId) {
+      self.currentJurisdiction = jurisdictionId
+    },
   }))
 
 export interface IJurisdictionStore extends Instance<typeof JurisdictionStoreModel> {}
