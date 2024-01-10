@@ -8,17 +8,19 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
-if Rails.env.test? || ENV["ASSET_PRECOMPILATION"].present?
+if Rails.env.test?
   Shrine.storages = {
     cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
     store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
   }
 else
   s3_options = {
-    bucket: ENV["COMS_BUCKET"],
-    region: "dummy-value",
-    access_key_id: ENV["COMS_ACCESS_KEY_ID"],
-    secret_access_key: ENV["COMS_SECRET_ACCESS_KEY"],
+    bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
+    endpoint: ENV["BCGOV_OBJECT_STORAGE_ENDPOINT"],
+    region: "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable
+    access_key_id: ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"],
+    secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
+    force_path_style: true,
   }
   Shrine.storages = {
     cache: Shrine::Storage::S3.new(public: false, prefix: "cache", **s3_options),
