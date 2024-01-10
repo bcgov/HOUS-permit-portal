@@ -2,11 +2,19 @@ class Requirement < ApplicationRecord
   has_many :requirement_block_requirements, dependent: :destroy
   has_many :requirement_blocks, through: :requirement_block_requirements
 
-  enum input_type: { text: 0, number: 1, checkbox: 2, select: 3, multi_option_select: 4, date: 5 }, _prefix: true
+  enum input_type: {
+         text: 0,
+         number: 1,
+         checkbox: 2,
+         select: 3,
+         multi_option_select: 4,
+         date: 5,
+         textarea: 6,
+       },
+       _prefix: true
 
+  before_create :set_requirement_code
   validate :validate_options_for_select_inputs
-
-  before_validation :set_requirement_code
 
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
@@ -88,13 +96,13 @@ class Requirement < ApplicationRecord
 
   private
 
-  def formio_type_options
-    DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+  # requirement codes should not be auto generated during seeding.  Use uuid if not provided
+  def set_requirement_code
+    self.requirement_code ||= SecureRandom.uuid
   end
 
-  # TODO: requirement codes should be auto generated. Using a uuid for now. Later we have to replace it with a more human readable code
-  def set_requirement_code
-    self.requirement_code = SecureRandom.uuid
+  def formio_type_options
+    DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
   end
 
   def validate_options_for_select_inputs
