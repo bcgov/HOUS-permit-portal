@@ -25,7 +25,7 @@ jobs:
           image: test-hous-permit-portal
           tags: latest ${{ github.sha }}
           labels: |
-            app=test-house-permit-portal
+            app=test-hous-permit-portal
             git-sha=${{ github.sha }}
           containerfiles: ./Dockerfile
           build-args: DEBUG_BUILD=true
