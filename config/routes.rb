@@ -35,6 +35,10 @@ Rails.application.routes.draw do
       get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
 
+    resources :requirement_blocks, only: %i[create show update] do
+      post "search", on: :collection, to: "requirement_blocks#index"
+    end
+    
     resources :jurisdictions, only: %i[index show] do
       get "users", on: :member
     end

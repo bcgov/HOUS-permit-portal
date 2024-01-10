@@ -1,7 +1,14 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IUser } from "../../models/user"
-import { IAcceptInvitationResponse, IResetPasswordResponse, IUserResponse } from "../../types/api-responses"
+import {
+  IAcceptInvitationResponse,
+  IRequirementBlockResponse,
+  IResetPasswordResponse,
+  IUserResponse,
+} from "../../types/api-responses"
+import { ERequirementLibrarySortFields } from "../../types/enums"
+import { ISort } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -74,6 +81,15 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async fetchRequirementBlocks(params?: {
+    sort?: ISort<ERequirementLibrarySortFields>
+    query?: string
+    page?: number
+    perPage?: number
+  }) {
+    return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }
 
   async fetchJurisdictionUsers(jurisdictionId) {

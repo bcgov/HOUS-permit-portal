@@ -27,3 +27,15 @@ export enum EUserRoles {
   reviewer = "reviewer",
   superAdmin = "super_admin",
 }
+
+export enum ERequirementLibrarySortFields {
+  name = "name",
+  associations = "associations",
+  requirementLabels = "requirement_labels",
+  updatedAt = "updated_at",
+}
+
+export enum ESortDirection {
+  ascending = "asc",
+  descending = "desc",
+}

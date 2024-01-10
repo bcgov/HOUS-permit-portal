@@ -13,6 +13,9 @@ module Constants
     USER_RESEND_INVITE_ERROR = e("user_resend_invite_error", "Error re-sending invitation")
     USER_LOGIN_ERROR = e("invalid_login_error", "Invalid username or password")
     USER_UPDATE_ERROR = e("user_update_error", "Could not update user")
+    REQUIREMENT_BLOCK_CREATE_ERROR = e("requirement_block_create_error", "Error creating requirement block")
+    REQUIREMENT_BLOCK_UPDATE_ERROR = e("requirement_block_update_error", "Error updating requirement block")
+    REQUIREMENT_BLOCK_DELETE_ERROR = e("requirement_block_delete_error", "Error deleting requirement block")
     INVALID_TOKEN_ERROR = e("invalid_token_error", "The access token is invalid")
     NOT_FOUND_ERROR = e("not_found_error", "404 - The requested resource could not be found")
   end

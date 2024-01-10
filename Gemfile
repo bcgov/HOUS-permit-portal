@@ -35,8 +35,8 @@ gem "devise_invitable", "~> 2.0.9"
 gem "devise-jwt", "0.8.1"
 gem "devise-jwt-cookie", "0.5.1"
 gem "dry-container", "0.8.0"
-gem 'omniauth-keycloak', "1.5.1"
-gem 'omniauth-rails_csrf_protection', '1.0.1'
+gem "omniauth-keycloak", "1.5.1"
+gem "omniauth-rails_csrf_protection", "1.0.1"
 
 gem "blueprinter", "~> 0.30.0"
 
@@ -45,10 +45,16 @@ gem "sidekiq", "~> 7.2.0"
 gem "shrine", "~> 3.5.0"
 gem "redis", "~> 5.0.8"
 gem "image_processing", "~> 1.12.2"
+gem "acts_as_list", "~> 1.1.0"
+gem "searchkick", "~> 5.3.1"
+gem "elasticsearch", "~> 8.11.0"
+gem "kaminari", "~> 1.2.2"
+gem "acts-as-taggable-on", "~> 10.0.0"
 # Assuming BC Common Object Management Service (COMS) is compatible with S3 formats:
 gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
+gem "roo", "~> 2.10"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
