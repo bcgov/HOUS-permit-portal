@@ -58,6 +58,5 @@ export const UserStoreModel = types
       return response.data
     }),
   }))
-  .actions((self) => ({}))
 
 export interface IUserStore extends Instance<typeof UserStoreModel> {}

@@ -91,6 +91,11 @@ export class Api {
   }) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }
+
+  async fetchJurisdictionUsers(jurisdictionId) {
+    return this.client.get<ApiResponse<IUser>>(`/jurisdictions/${jurisdictionId}/users`)
+  }
+
   async updateProfile(params) {
     return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
   }

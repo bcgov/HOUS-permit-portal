@@ -67,7 +67,7 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
     <FullWhiteContainer containerMaxW="container.lg">
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex direction="column" gap={6}>
+          <Flex direction="column" gap={8}>
             <Flex gap={6}>
               <Flex direction="column" flex={1}>
                 <Heading as="h1">{t("jurisdiction.indexTitle")}</Heading>
@@ -123,7 +123,7 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                         <HStack gap={4}>
                           <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>
                           <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
-                          <RouterLink to={"#"}>{t("jurisdiction.manage")}</RouterLink>
+                          <RouterLink to={`${j.id}/users`}>{t("ui.manage")}</RouterLink>
                         </HStack>
                       </Td>
                     </Tr>

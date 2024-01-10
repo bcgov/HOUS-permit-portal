@@ -30,7 +30,7 @@ const linePositions: TLatLngTuple[] = [
 
 export const JurisdictionScreen = observer(() => {
   const { t } = useTranslation()
-  const { jurisdiction, error } = useJurisdiction()
+  const { currentJurisdiction, error } = useJurisdiction()
 
   if (error) {
     return (
@@ -41,7 +41,7 @@ export const JurisdictionScreen = observer(() => {
     )
   }
 
-  if (!jurisdiction) {
+  if (!currentJurisdiction) {
     return (
       <Flex as="main" w="full" bg="greys.white">
         <SharedSpinner />
@@ -49,7 +49,7 @@ export const JurisdictionScreen = observer(() => {
     )
   }
 
-  const { contacts, name, checklistSlateData, lookOutSlateData } = jurisdiction
+  const { contacts, name, checklistSlateData, lookOutSlateData } = currentJurisdiction
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">

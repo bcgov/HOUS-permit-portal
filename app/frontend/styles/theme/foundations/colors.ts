@@ -19,6 +19,8 @@ export const colors = {
     grey03: "#F2F2F2",
     grey04: "#FFFFFF",
     grey10: "#FAF9F8",
+    grey20: "#F3F2F1",
+    grey90: "#3B3A39",
   },
   border: {
     base: "#606060",
@@ -34,6 +36,9 @@ export const colors = {
   },
   darken: {
     100: "rgba(0, 0, 0, 0.1)",
+  },
+  hover: {
+    blue: "#DFECF9",
   },
   semantic: {
     success: "#2E8540",

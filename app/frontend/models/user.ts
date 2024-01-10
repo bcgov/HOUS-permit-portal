@@ -16,6 +16,7 @@ export const UserModel = types
     certified: types.boolean,
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+    createdAt: types.Date,
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -34,6 +35,9 @@ export const UserModel = types
     },
     get isSubmitter() {
       return self.role == EUserRoles.submitter
+    },
+    get name() {
+      return `${self.firstName} ${self.lastName}`
     },
   }))
   .actions((self) => ({}))

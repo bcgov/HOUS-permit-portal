@@ -1,6 +1,6 @@
 export const sizes = {
   container: {
-    md: "520px",
+    md: "631px",
     lg: "1170px",
   },
 }
