@@ -32,7 +32,7 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
             title={t("home.requirementsLibraryTitle")}
             description={t("home.requirementsLibraryDescription")}
             icon={faBookOpen}
-            href="/requirement-blocks"
+            href="/requirements-library"
           />
           <HomeScreenBox
             title={t("home.contentManagementTitle")}

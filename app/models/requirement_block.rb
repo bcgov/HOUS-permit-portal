@@ -1,4 +1,6 @@
 class RequirementBlock < ApplicationRecord
+  searchkick searchable: %i[name requirement_labels associations], word_start: %i[name requirement_labels associations]
+
   has_many :requirement_block_requirements, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirements, through: :requirement_block_requirements
 
@@ -6,6 +8,17 @@ class RequirementBlock < ApplicationRecord
 
   enum sign_off_role: { any: 0 }, _prefix: true
   enum reviewer_role: { any: 0 }, _prefix: true
+
+  acts_as_taggable_on :associations
+
+  def search_data
+    {
+      updated_at: updated_at,
+      name: name,
+      requirement_labels: requirements.pluck(:label),
+      associations: association_list,
+    }
+  end
 
   def to_form_json
     {

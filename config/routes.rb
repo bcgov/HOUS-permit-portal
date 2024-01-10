@@ -36,8 +36,10 @@ Rails.application.routes.draw do
     end
 
     resources :jurisdictions, only: %i[index show]
+    resources :requirement_blocks, only: %i[create show update] do
+      post "search", on: :collection, to: "requirement_blocks#index"
+    end
     resource :profile, only: [:update], controller: "users"
-    resources :requirement_blocks
   end
 
   root to: "home#index"

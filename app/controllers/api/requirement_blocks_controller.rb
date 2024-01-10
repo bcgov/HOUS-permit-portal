@@ -1,20 +1,33 @@
 # frozen_string_literal: true
 
 class Api::RequirementBlocksController < Api::ApplicationController
+  include Api::Concerns::Search::RequirementBlocks
+
   before_action :set_requirement_block, only: %i[show update destroy]
+  # searchkick cannot be called on collections and pundit cannot policy scope the searchkick result
+  # instead, we perform authorization inside the searchkick search and skip pundit
+  skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    @requirement_blocks = policy_scope(RequirementBlock)
+    # TODO: add authorization inside searchkick search
+    perform_search
 
-    render_success @requirement_blocks, nil, { blueprint: RequirementBlockBlueprint }
+    render_success @search.results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @search.total_pages,
+                       total_count: @search.total_count,
+                       current_page: @search.current_page,
+                     },
+                     blueprint: RequirementBlockBlueprint,
+                   }
   end
 
   def show
     authorize @requirement_block
 
-    render_success @requirement_block,
-                   nil,
-                   { blueprint: RequirementBlockBlueprint, blueprint_opts: { view: :extended } }
+    render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
   end
 
   def create
@@ -23,9 +36,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.save
-      render_success @requirement_block,
-                     nil,
-                     { blueprint: RequirementBlockBlueprint, blueprint_opts: { view: :extended } }
+      render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
       render_error Constants::Error::REQUIREMENT_BLOCK_CREATE_ERROR,
                    "requirement_block.create_error",
@@ -39,9 +50,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.update(requirement_block_params)
-      render_success @requirement_block,
-                     nil,
-                     { blueprint: RequirementBlockBlueprint, blueprint_opts: { view: :extended } }
+      render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
       render_error Constants::Error::REQUIREMENT_BLOCK_UPDATE_ERROR,
                    "requirement_block.update_error",
@@ -72,6 +81,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :name,
       :sign_off_role,
       :reviewer_role,
+      association_list: [],
       requirement_block_requirements_attributes: [
         :id,
         :requirement_id,
