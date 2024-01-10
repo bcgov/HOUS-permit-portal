@@ -18,7 +18,7 @@ import { faBoxArchive } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { ChangeEvent, useEffect } from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/paginator"
@@ -41,22 +41,14 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
     totalCount,
     countPerPage,
     fetchRequirementBlocks,
-    setCountPerPage,
-    isQuerying,
+    handleCountPerPageChange,
+    handlePageChange,
   } = requirementBlockStore
   const { t } = useTranslation()
 
   useEffect(() => {
     fetchRequirementBlocks()
   }, [])
-
-  const handlePageChange = (page) => {
-    fetchRequirementBlocks({ page })
-  }
-  const handleCountPerPageChange = async (e: ChangeEvent<HTMLSelectElement>) => {
-    setCountPerPage(Number(e.target.value))
-    fetchRequirementBlocks()
-  }
 
   return (
     <Box w={"full"} h={"full"} mx={"auto"} bg={"white"}>
@@ -140,7 +132,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
             <Select
               aria-label={"Number of requirement Blocks per page"}
               w={20}
-              onChange={handleCountPerPageChange}
+              onChange={(e) => handleCountPerPageChange(Number(e.target.value))}
               value={countPerPage}
             >
               <option value="10">10</option>
