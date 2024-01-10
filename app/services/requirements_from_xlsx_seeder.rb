@@ -83,7 +83,8 @@ class RequirementsFromXlsxSeeder
             .requirement_template_sections
             .where(name: section_name)
             .first_or_create!(name: section_name)
-        rs.update(position: rs_position_incrementer)
+        rs.update!(position: rs_position_incrementer)
+        rs_position_incrementer += 1
       end
 
     rstrb_position_incrementer = {}
