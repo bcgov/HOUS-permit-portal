@@ -16,7 +16,7 @@ Devise.setup do |config|
       ["POST", %r{^/api/login$}],
       ["PUT", %r{^/api/invitation$}],
       ["PUT", %r{^/api/password$}],
-      ["GET", %r{^/api/auth/keycloakopenid/callback$}],
+      ["GET", %r{^/api/auth/keycloak/callback$}],
     ]
   end
 
@@ -29,6 +29,7 @@ Devise.setup do |config|
                     site: ENV["KEYCLOAK_AUTH_URL"],
                     realm: "standard",
                   },
+                  name: :keycloak,
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
 
   # The secret key used by Devise. Devise uses this key to generate
