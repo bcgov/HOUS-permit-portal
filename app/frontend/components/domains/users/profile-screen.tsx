@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Flex, FormControl, Heading, Select } from "@chakra-ui/react"
+import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Heading, InputGroup, Select } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
@@ -47,9 +47,14 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" w="full" gap={6}>
             <Heading>{t("user.myProfile")}</Heading>
-            <Select disabled defaultValue={role} w={{ base: "100%", md: "50%" }} textTransform="capitalize">
-              <option value={role}>{t(`user.role.${role}`)}</option>
-            </Select>
+            <InputGroup>
+              <Flex direction="column" w="full">
+                <FormLabel>{t("auth.role")}</FormLabel>
+                <Select disabled defaultValue={role} w={{ base: "100%", md: "50%" }} textTransform="capitalize">
+                  <option value={role}>{t(`user.role.${role}`)}</option>
+                </Select>
+              </Flex>
+            </InputGroup>
             <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
               <UsernameFormControl isDisabled />
               <EmailFormControl />

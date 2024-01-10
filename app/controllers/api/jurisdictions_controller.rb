@@ -1,5 +1,5 @@
 class Api::JurisdictionsController < Api::ApplicationController
-  before_action :set_jurisdiction, only: [:show]
+  before_action :set_jurisdiction, only: %i[show users]
 
   def index
     # TODO: Search, sort, pagination
@@ -10,6 +10,12 @@ class Api::JurisdictionsController < Api::ApplicationController
   # GET /api/jurisdictions/:id
   def show
     render_success(@jurisdiction)
+  end
+
+  # GET /api/jurisdictions/:id/users
+  def users
+    # TODO: searchkiq
+    render_success(@jurisdiction.users)
   end
 
   private

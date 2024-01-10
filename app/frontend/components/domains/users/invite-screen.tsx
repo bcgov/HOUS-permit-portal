@@ -40,14 +40,14 @@ type TFormData = {
 
 export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { t } = useTranslation()
-  const { jurisdiction, error } = useJurisdiction()
+  const { currentJurisdiction, error } = useJurisdiction()
   const {
     userStore: { invite },
   } = useMst()
 
   const defaultUserValues = {
     role: EUserRoles.reviewManager,
-    jurisdictionId: jurisdiction?.id,
+    jurisdictionId: currentJurisdiction?.id,
   }
 
   const formMethods = useForm<TFormData>({
@@ -72,7 +72,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
 
   const navigate = useNavigate()
 
-  if (!jurisdiction) {
+  if (!currentJurisdiction) {
     return (
       <Flex as="main" w="full" bg="greys.white">
         <SharedSpinner />
@@ -89,13 +89,13 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
             {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
           </Text>
         </Flex>
-        <Heading fontSize="2xl">{jurisdiction.name}</Heading>
+        <Heading fontSize="2xl">{currentJurisdiction.name}</Heading>
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap={6}>
               <Flex direction="column" gap={4}>
                 {fields.map((field, index) => (
-                  <UserInput key={field.id} index={index} remove={remove} jurisdictionId={jurisdiction.id} />
+                  <UserInput key={field.id} index={index} remove={remove} jurisdictionId={currentJurisdiction.id} />
                 ))}
                 <Button
                   type="button"

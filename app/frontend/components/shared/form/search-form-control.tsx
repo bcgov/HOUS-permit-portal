@@ -20,11 +20,7 @@ export const SearchFormControl = ({ label, fieldName, ...rest }: ISearchFormCont
           <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faSearch} />
         </InputLeftElement>
         <Input
-          {...register(fieldName, {
-            validate: {
-              satisfiesNameLength: (str) => (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
-            },
-          })}
+          {...register(fieldName)}
           title={t("ui.search")}
           bg="greys.white"
           placeholder={t("ui.search")}

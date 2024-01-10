@@ -35,7 +35,9 @@ Rails.application.routes.draw do
       get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
 
-    resources :jurisdictions, only: %i[index show]
+    resources :jurisdictions, only: %i[index show] do
+      get "users", on: :member
+    end
     resource :profile, only: [:update], controller: "users"
   end
 

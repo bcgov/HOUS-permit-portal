@@ -10,6 +10,10 @@ class Jurisdiction < ApplicationRecord
   validates :locality_type, presence: true
   validate :has_correct_locality_type
 
+  def users
+    review_managers + reviewers
+  end
+
   def qualifier
     custom_titleized_locality_type =
       locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
