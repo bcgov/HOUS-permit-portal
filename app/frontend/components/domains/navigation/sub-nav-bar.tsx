@@ -1,8 +1,9 @@
-import { Breadcrumb, BreadcrumbItem, Container, Flex } from "@chakra-ui/react"
+import { Breadcrumb, BreadcrumbItem, Container, Flex, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
+import { useMst } from "../../../setup/root"
 import { isUUID } from "../../../utils/utility-funcitons"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
@@ -33,8 +34,9 @@ interface IDynamicBreadcrumbProps {
   path: string
 }
 
-const DynamicBreadcrumb = ({ path }: IDynamicBreadcrumbProps) => {
+const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
   const { t } = useTranslation()
+  const rootStore = useMst()
 
   const [breadcrumbs, setBreadcrumbs] = useState([])
 
@@ -46,11 +48,20 @@ const DynamicBreadcrumb = ({ path }: IDynamicBreadcrumbProps) => {
     // Create breadcrumb segments
     const breadcrumbSegments = pathSegments.map((segment, index) => {
       const href = "/" + pathSegments.slice(0, index + 1).join("/")
-      return { segment, href }
+      const resourceNeeded = isUUID(segment)
+      const previousSegment = pathSegments[index - 1]
+
+      const currentResourceMap = {
+        jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
+      }
+
+      const title = resourceNeeded ? currentResourceMap[previousSegment] || segment : t(`site.breadcrumb.${segment}`)
+
+      return { segment, href, title }
     })
 
     setBreadcrumbs(breadcrumbSegments)
-  }, [path])
+  }, [path, rootStore.jurisdictionStore.currentJurisdiction])
 
   return (
     <Breadcrumb>
@@ -59,23 +70,20 @@ const DynamicBreadcrumb = ({ path }: IDynamicBreadcrumbProps) => {
           {t("site.home")}
         </RouterLinkButton>
       </BreadcrumbItem>
-      {breadcrumbs.map((breadcrumb, index) => (
-        <BreadcrumbItem key={index}>
-          <RouterLinkButton variant="link" to={breadcrumb.href} textTransform="capitalize">
-            {isUUID(breadcrumb.segment)
-              ? "todo: replace UUID" || breadcrumb.segment
-              : segmentToTitle(breadcrumb.segment)}
-          </RouterLinkButton>
-        </BreadcrumbItem>
-      ))}
+      {breadcrumbs.map((breadcrumb, index) => {
+        const finalSegment = index == breadcrumbs.length - 1
+        return (
+          <BreadcrumbItem key={index}>
+            {finalSegment ? (
+              <Text fontWeight="bold">{breadcrumb.title}</Text>
+            ) : (
+              <RouterLinkButton variant="link" to={breadcrumb.href}>
+                {breadcrumb.title}
+              </RouterLinkButton>
+            )}
+          </BreadcrumbItem>
+        )
+      })}
     </Breadcrumb>
   )
-}
-
-export const segmentToTitle = (segment) => {
-  return (
-    {
-      // "jurisdictions": "Local Jurisdictions",
-    }[segment] || decodeURIComponent(segment).replace(/[_-]/g, " ")
-  )
-}
+})

@@ -14,6 +14,7 @@ import { HomeScreen } from "../home"
 import { JurisdictionIndexScreen } from "../jurisdictions"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/jurisdiction-user-index-screen"
+import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
 import { LandingScreen } from "../landing"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { RequirementsLibraryScreen } from "../requirements-library"
@@ -56,64 +57,54 @@ export const Navigation = observer(() => {
 const AppRoutes = observer(() => {
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
-
-  return loggedIn ? <LoggedInRoutes /> : <PublicRoutes />
-})
-
-const LoggedInRoutes = observer(() => {
   const location = useLocation()
 
   const { userStore } = useMst()
   const { currentUser } = userStore
 
-  return (
-    <Routes location={location}>
-      <Route path="/" element={<HomeScreen />} />
-      <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+  const superAdminOnlyRoutes = (
+    <>
       <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
-      <Route path="/profile" element={<ProfileScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-
-      {currentUser && (currentUser.isReviewManager || currentUser.isSuperAdmin) ? (
-        <>
-          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
-        </>
-      ) : (
-        <></>
-      )}
-
-      {currentUser && currentUser.isReviewer ? (
-        <>
-          <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
-        </>
-      ) : (
-        <></>
-      )}
-
-      {currentUser && currentUser.isSuperAdmin ? (
-        <>
-          <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
-        </>
-      ) : (
-        <></>
-      )}
-    </Routes>
+      <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
+      <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
+    </>
   )
-})
 
-const PublicRoutes = observer(() => {
-  const location = useLocation()
+  const adminOrManagerRoutes = (
+    <>
+      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/invite" element={<InviteScreen />} />
+    </>
+  )
+
+  const submitterOnlyRoutes = (
+    <>
+      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+    </>
+  )
 
   return (
     <Routes location={location}>
-      <Route path="/" element={<LandingScreen />} />
-      <Route path="/login" element={<LoginScreen />} />
-      <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-      <Route path="/reset-password" element={<ResetPasswordScreen />} />
-      <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
-      <Route path="/register" element={<RegisterScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+      {loggedIn ? (
+        <>
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+
+          {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
+          {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
+          {currentUser?.isSubmitter && submitterOnlyRoutes}
+        </>
+      ) : (
+        <>
+          <Route path="/" element={<LandingScreen />} />
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+          <Route path="/reset-password" element={<ResetPasswordScreen />} />
+          <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+          <Route path="/register" element={<RegisterScreen />} />
+        </>
+      )}
     </Routes>
   )
 })

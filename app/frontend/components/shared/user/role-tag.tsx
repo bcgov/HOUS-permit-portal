@@ -34,7 +34,7 @@ export const RoleTag = ({ role }: IRoleTagProps) => {
       backgroundColor={color}
       textTransform="capitalize"
     >
-      {t(`user.role.${role}`)}
+      {t(`user.roles.${role}`)}
     </Tag>
   )
 }

@@ -106,6 +106,11 @@ i18n.use(initReactI18next).init({
           contactInfo: "Contact information",
           didNotFind: "I didn't find what I was looking for",
           viewAs: "View As",
+          name: "Name",
+          managers: "Managers",
+          reviewers: "Reviewers",
+          applicationsReceived: "Applications Received",
+          templatesUsed: "Templates Used",
         },
         permitApplication: {
           indexTitle: "My Active Permits",
@@ -135,6 +140,10 @@ i18n.use(initReactI18next).init({
         user: {
           addUser: "Add more emails",
           invite: "Invite",
+          email: "Email",
+          name: "Name",
+          dateAdded: "Date Added",
+          lastSignIn: "Last Sign In",
           firstName: "First Name",
           lastName: "Last Name",
           oldPassword: "Old Password",
@@ -150,8 +159,9 @@ i18n.use(initReactI18next).init({
           accounts: "User Accounts",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
-          // Leave in snake case so we can use: t(`user.role.${role}`)
-          role: {
+          // Leave in snake case so we can use: t(`user.roles.${role}`)
+          role: "Role",
+          roles: {
             submitter: "submitter",
             review_manager: "review manager",
             reviewer: "reviewer",
@@ -173,6 +183,11 @@ i18n.use(initReactI18next).init({
           giveFeedback: "Give Feedback",
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
+          breadcrumb: {
+            jurisdictions: "Manage Jurisdictions",
+            new: "Create New",
+            invite: "Invite",
+          },
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",
