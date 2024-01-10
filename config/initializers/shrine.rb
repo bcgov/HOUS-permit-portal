@@ -8,7 +8,7 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
-if Rails.env.test?
+if Rails.env.test? || ENV["ASSET_PRECOMPILATION"].present?
   Shrine.storages = {
     cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
     store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
