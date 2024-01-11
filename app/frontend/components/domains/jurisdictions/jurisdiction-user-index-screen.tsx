@@ -27,6 +27,7 @@ import { FullWhiteContainer } from "../../shared/containers/full-white-container
 import { SearchFormControl } from "../../shared/form/search-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { Can } from "../../shared/user/can"
 import { RoleTag } from "../../shared/user/role-tag"
 
 interface IJurisdictionUserIndexScreenProps {}
@@ -55,11 +56,11 @@ export const JurisdictionUserIndexScreen = observer(({}: IJurisdictionUserIndexS
   }
 
   const headers: ITableHeader[] = [
-    { key: "role", header: "Role" },
-    { key: "email", header: "Email" },
-    { key: "name", header: "Name" },
-    { key: "date_added", header: "Date added" },
-    { key: "last_sign_in", header: "Last sign in" },
+    { key: "role", header: t("user.role") },
+    { key: "email", header: t("user.email") },
+    { key: "name", header: t("user.name") },
+    { key: "date_added", header: t("user.dateAdded") },
+    { key: "last_sign_in", header: t("user.lastSignIn") },
   ]
 
   const onSubmit = async (formData) => {
@@ -125,7 +126,9 @@ export const JurisdictionUserIndexScreen = observer(({}: IJurisdictionUserIndexS
                       <Td fontSize="sm">TODO</Td>
                       <Td fontSize="sm" p={0} pr={4}>
                         <HStack gap={4}>
-                          A<RouterLink to={"#"}>{t("ui.manage")}</RouterLink>
+                          <Can action="user:manage" data={{ user: u }}>
+                            <RouterLink to={"#"}>{t("ui.manage")}</RouterLink>
+                          </Can>
                         </HStack>
                       </Td>
                     </Tr>

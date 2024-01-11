@@ -11,6 +11,7 @@ import {
   Text,
   Th,
   Thead,
+  Tooltip,
   Tr,
 } from "@chakra-ui/react"
 import { faSort } from "@fortawesome/free-solid-svg-icons"
@@ -25,6 +26,7 @@ import { FullWhiteContainer } from "../../shared/containers/full-white-container
 import { SearchFormControl } from "../../shared/form/search-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { Can } from "../../shared/user/can"
 
 interface IJurisdictionIndexScreenProps {}
 
@@ -50,11 +52,11 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
   }
 
   const headers: ITableHeader[] = [
-    { key: "name", header: "Name" },
-    { key: "managers", header: "Managers" },
-    { key: "reviewers", header: "Reviewers" },
-    { key: "applicationsReceived", header: "Applications Received" },
-    { key: "templatesUsed", header: "Templates Used" },
+    { key: "name", header: t("jurisdiction.name") },
+    { key: "managers", header: t("jurisdiction.managers") },
+    { key: "reviewers", header: t("jurisdiction.reviewers") },
+    { key: "applicationsReceived", header: t("jurisdiction.applicationsReceived") },
+    { key: "templatesUsed", header: t("jurisdiction.templatesUsed") },
   ]
 
   const onSubmit = async (formData) => {
@@ -73,9 +75,11 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                 <Heading as="h1">{t("jurisdiction.indexTitle")}</Heading>
                 <Text>{t("jurisdiction.indexDescription")}</Text>
               </Flex>
-              <RouterLinkButton alignSelf="flex-end" to={"#"}>
-                {t("jurisdiction.createNew")}
-              </RouterLinkButton>
+              <Can action="jurisdiction:create">
+                <RouterLinkButton alignSelf="flex-end" to={"/jurisdictions/new"}>
+                  {t("jurisdiction.createNew")}
+                </RouterLinkButton>
+              </Can>
             </Flex>
 
             <TableContainer borderRadius="md" border="1px solid" borderColor="border.light">
@@ -114,16 +118,20 @@ export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenPro
                 <Tbody>
                   {jurisdictions.map((j, index) => (
                     <Tr key={index}>
-                      <Td fontWeight="bold">{j.name}</Td>
+                      <Tooltip label={j.reverseQualifiedName} placement="top" hasArrow>
+                        <Td fontWeight="bold" maxW="290px" isTruncated>
+                          {j.reverseQualifiedName}
+                        </Td>
+                      </Tooltip>
                       <Td fontSize="sm">{j.reviewManagersSize}</Td>
                       <Td fontSize="sm">{j.reviewersSize}</Td>
                       <Td fontSize="sm">{j.permitApplicationsSize}</Td>
                       <Td fontSize="sm">TODO</Td>
                       <Td fontSize="sm" p={0} pr={4}>
                         <HStack gap={4}>
-                          <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>
+                          <RouterLink to={`${j.id}/invite`}>{t("user.invite")}</RouterLink>
                           <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
-                          <RouterLink to={`${j.id}/users`}>{t("ui.manage")}</RouterLink>
+                          <RouterLink to={`${j.id}`}>{t("ui.manage")}</RouterLink>
                         </HStack>
                       </Td>
                     </Tr>

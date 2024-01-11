@@ -2,6 +2,7 @@ class JurisdictionBlueprint < Blueprinter::Base
   identifier :id
   fields :name,
          :qualified_name,
+         :reverse_qualified_name,
          :description,
          :checklist_slate_data,
          :look_out_slate_data,
