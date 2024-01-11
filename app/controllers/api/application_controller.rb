@@ -12,6 +12,10 @@ class Api::ApplicationController < ActionController::API
 
   protected
 
+  def apply_search_authorization(results)
+    results.select { |result| policy(result).send("#{action_name}?".to_sym) }
+  end
+
   def skip_pundit?
     devise_controller?
   end

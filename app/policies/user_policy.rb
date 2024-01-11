@@ -1,9 +1,4 @@
 class UserPolicy < ApplicationPolicy
-  def initialize(user, record)
-    @user = user
-    @record = record
-  end
-
   def update?
     user == record
   end

@@ -1,6 +1,18 @@
 class Api::UsersController < Api::ApplicationController
-  include BaseControllerMethods
-  before_action :authenticate_user!
+  def index
+    perform_search
+
+    render_success @search.results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @search.total_pages,
+                       total_count: @search.total_count,
+                       current_page: @search.current_page,
+                     },
+                     blueprint: UserBlueprint,
+                   }
+  end
 
   def update
     # Currently a user can only update themself

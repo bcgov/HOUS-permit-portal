@@ -1,3 +1,4 @@
+import { IJurisdiction } from "../models/jurisdiction"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IUser } from "../models/user"
 
@@ -11,6 +12,26 @@ export interface IUserResponse extends IApiResponse<IUser, {}> {}
 export interface IRequirementBlockResponse
   extends IApiResponse<
     IRequirementBlock[],
+    {
+      totalPages: number
+      totalCount: number
+      currentPage: number
+    }
+  > {}
+
+export interface IJurisdictionResponse
+  extends IApiResponse<
+    IJurisdiction[],
+    {
+      totalPages: number
+      totalCount: number
+      currentPage: number
+    }
+  > {}
+
+export interface IJurisdictionUserResponse
+  extends IApiResponse<
+    IUser[],
     {
       totalPages: number
       totalCount: number

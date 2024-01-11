@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
@@ -26,6 +28,23 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
 
   belongs_to :jurisdiction, optional: true
+
+  def search_data
+    {
+      updated_at: updated_at,
+      created_at: created_at,
+      role: role,
+      name: name,
+      username: username,
+      email: email,
+      jurisdiction_id: jurisdiction_id,
+      # last_sign_in: "TODO",
+    }
+  end
+
+  def name
+    "#{first_name} #{last_name}"
+  end
 
   def self.invitable_roles
     %w[reviewer review_manager]
