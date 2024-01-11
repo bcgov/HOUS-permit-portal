@@ -35,6 +35,22 @@ export enum ERequirementLibrarySortFields {
   updatedAt = "updated_at",
 }
 
+export enum EJurisdictionSortFields {
+  reverseQualifiedName = "reverse_qualified_name",
+  reviewManagersSize = "review_managers_size",
+  reviewersSize = "reviewers_size",
+  permitApplicationsSize = "permit_applications_size",
+  templatesUsed = "templates_used",
+}
+
+export enum EUserSortFields {
+  role = "role",
+  email = "email",
+  name = "name",
+  createdAt = "created_at",
+  lastSignIn = "last_sign_in",
+}
+
 export enum ESortDirection {
   ascending = "asc",
   descending = "desc",

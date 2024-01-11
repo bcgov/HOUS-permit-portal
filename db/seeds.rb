@@ -56,3 +56,14 @@ RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+
+25.times do |i|
+  RequirementBlock.create!(
+    name: "Block #{i + 1}",
+    sign_off_role: 0,
+    reviewer_role: 0,
+    custom_validations: {
+      key: "value",
+    },
+  )
+end

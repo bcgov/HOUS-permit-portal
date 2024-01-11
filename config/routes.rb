@@ -38,9 +38,10 @@ Rails.application.routes.draw do
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
-    
+
     resources :jurisdictions, only: %i[index show] do
-      get "users", on: :member
+      post "search", on: :collection, to: "jurisdictions#index"
+      post "users/search", on: :member, to: "jurisdictions#search_users"
     end
     resource :profile, only: [:update], controller: "users"
   end

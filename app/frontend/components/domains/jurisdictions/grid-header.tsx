@@ -3,13 +3,13 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { ERequirementLibrarySortFields } from "../../../types/enums"
+import { EJurisdictionSortFields } from "../../../types/enums"
 import { SearchInput } from "../../shared/base/search-input"
 import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { requirementBlockStore } = useMst()
-  const { sort, getSortColumnHeader, toggleSort } = requirementBlockStore
+  const { jurisdictionStore } = useMst()
+  const { sort, getSortColumnHeader, toggleSort } = jurisdictionStore
   const { t } = useTranslation()
 
   return (
@@ -17,20 +17,20 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 5"}
+          gridColumn={"span 6"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
         >
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
-            {t("requirementsLibrary.index.tableHeading")}
+            {t("jurisdiction.index.tableHeading")}
           </Text>
-          <SearchInput searchModel={requirementBlockStore} />
+          <SearchInput searchModel={jurisdictionStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
-        {Object.values(ERequirementLibrarySortFields).map((field) => (
+        {Object.values(EJurisdictionSortFields).map((field) => (
           <GridHeader key={field} role={"columnheader"}>
             <Flex
               w={"full"}
@@ -42,8 +42,8 @@ export const GridHeaders = observer(function GridHeaders() {
               borderColor={"border.light"}
               px={4}
             >
-              <Text>{getSortColumnHeader(field)}</Text>
-              <SortIcon<ERequirementLibrarySortFields> field={field} currentSort={sort} />
+              <Text textAlign="left">{getSortColumnHeader(field)}</Text>
+              <SortIcon<EJurisdictionSortFields> field={field} currentSort={sort} />
             </Flex>
           </GridHeader>
         ))}

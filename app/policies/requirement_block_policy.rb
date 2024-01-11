@@ -4,12 +4,16 @@ class RequirementBlockPolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def index?
+    show?
+  end
+
   def create?
-    user.super_admin?
+    show?
   end
 
   def update?
-    create?
+    show?
   end
 
   def destroy?

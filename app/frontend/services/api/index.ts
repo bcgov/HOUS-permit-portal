@@ -3,11 +3,13 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IUser } from "../../models/user"
 import {
   IAcceptInvitationResponse,
+  IJurisdictionResponse,
+  IJurisdictionUserResponse,
   IRequirementBlockResponse,
   IResetPasswordResponse,
   IUserResponse,
 } from "../../types/api-responses"
-import { ERequirementLibrarySortFields } from "../../types/enums"
+import { EJurisdictionSortFields, ERequirementLibrarySortFields, EUserSortFields } from "../../types/enums"
 import { ISort } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
@@ -75,8 +77,13 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
-  async fetchJurisdictions() {
-    return this.client.get<ApiResponse<IJurisdiction>>("/jurisdictions")
+  async fetchJurisdictions(params?: {
+    sort?: ISort<EJurisdictionSortFields>
+    query?: string
+    page?: number
+    perPage?: number
+  }) {
+    return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
 
   async fetchJurisdiction(id) {
@@ -92,8 +99,16 @@ export class Api {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }
 
-  async fetchJurisdictionUsers(jurisdictionId) {
-    return this.client.get<ApiResponse<IUser>>(`/jurisdictions/${jurisdictionId}/users`)
+  async fetchJurisdictionUsers(
+    jurisdictionId,
+    params?: {
+      sort?: ISort<EUserSortFields>
+      query?: string
+      page?: number
+      perPage?: number
+    }
+  ) {
+    return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
 
   async updateProfile(params) {
