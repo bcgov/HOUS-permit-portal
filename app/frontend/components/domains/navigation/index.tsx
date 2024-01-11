@@ -99,6 +99,7 @@ const AppRoutes = observer(() => {
         <>
           <Route path="/" element={<LandingScreen />} />
           <Route path="/login" element={<LoginScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/forgot-password" element={<ForgotPasswordScreen />} />

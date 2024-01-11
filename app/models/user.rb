@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
 
+  scope :review_managers, -> { where(role: User.roles[:review_manager]) }
+  scope :reviewers, -> { where(role: User.roles[:reviewer]) }
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable

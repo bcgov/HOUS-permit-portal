@@ -10,7 +10,7 @@ import {
   IUserResponse,
 } from "../../types/api-responses"
 import { EJurisdictionSortFields, ERequirementLibrarySortFields, EUserSortFields } from "../../types/enums"
-import { ISort } from "../../types/types"
+import { IOption, ISort } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -88,6 +88,14 @@ export class Api {
 
   async fetchJurisdiction(id) {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
+  }
+
+  async fetchLocalityTypeOptions() {
+    return this.client.get<ApiResponse<IOption>>(`/jurisdictions/locality_type_options`)
+  }
+
+  async createJurisdiction(params) {
+    return this.client.post<ApiResponse<IJurisdiction>>("/jurisdictions", { jurisdiction: params })
   }
 
   async fetchRequirementBlocks(params?: {

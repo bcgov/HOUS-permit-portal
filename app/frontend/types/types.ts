@@ -15,4 +15,9 @@ export interface ISort<TField = string> {
   direction: ESortDirection
 }
 
+export interface IOption<TField = string> {
+  name: string
+  value: TField
+}
+
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void

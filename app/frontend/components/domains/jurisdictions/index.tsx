@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Grid, GridItem, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Grid, GridItem, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -6,6 +6,7 @@ import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { GridHeaders } from "./grid-header"
 
 const sharedGridItemsStyles: Partial<GridItemProps> = {
@@ -46,7 +47,9 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
               {t("jurisdiction.index.description")}
             </Text>
           </Box>
-          <Button variant={"primary"}>{t("jurisdiction.index.createButton")}</Button>
+          <RouterLinkButton variant={"primary"} to={"/jurisdictions/new"}>
+            {t("jurisdiction.index.createButton")}
+          </RouterLinkButton>
         </Flex>
 
         <Grid
