@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/paginator"
 import { GridHeaders } from "./grid-header"
+import { RequirementsBlockModal } from "./requirements-block-modal"
 
 const sharedGridItemsStyles: Partial<GridItemProps> = {
   p: 4,
@@ -62,7 +63,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
               {t("requirementsLibrary.index.description")}
             </Text>
           </Box>
-          <Button variant={"primary"}>{t("requirementsLibrary.index.createButton")}</Button>
+          <RequirementsBlockModal />
         </Flex>
 
         <Grid
