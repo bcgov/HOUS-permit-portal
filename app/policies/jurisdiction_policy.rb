@@ -1,5 +1,13 @@
 class JurisdictionPolicy < ApplicationPolicy
-  def users?
+  def show?
+    true
+  end
+
+  def index?
+    user.super_admin?
+  end
+
+  def search_users?
     user.super_admin? || (user.review_manager? && user.jurisdiciton == resource)
   end
 
