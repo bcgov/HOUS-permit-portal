@@ -154,12 +154,28 @@ const options = {
             createButton: "Create New Requirement Block",
             seeArchivedButton: "See Archived",
           },
+          modals: {
+            create: {
+              triggerButton: "Create New Requirement Block",
+              title: "New Requirement Block",
+            },
+            blockSetupTitle: "Block Setup",
+            internalUse: "For internal use only",
+          },
           fields: {
             name: "Name",
+            description: "Description",
             associations: "Associations",
             formFields: "Form Fields",
             updatedAt: "Updated At",
+            requirementSku: "Requirement SKU",
           },
+          fieldDescriptions: {
+            description: "Provide some context for admins and managers for this fieldset.",
+            associations: "Assign a tag to help organize and find this requirement block easier.",
+            requirementSku: "Generated unique identifier",
+          },
+          descriptionMaxLength: "(Max length: 250 characters)",
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",

@@ -102,7 +102,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             </Box>
             <Flex as="section" gap={4} mt={4}>
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
-                {t("ui.save")}
+                {t("ui.saveChanges")}
               </Button>
               <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
                 {t("ui.cancel")}
