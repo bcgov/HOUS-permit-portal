@@ -1,6 +1,6 @@
 import { Box, Flex, GridItem, Text, styled } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useCallback } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { ERequirementLibrarySortFields } from "../../../types/enums"
@@ -9,12 +9,8 @@ import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
   const { requirementBlockStore } = useMst()
-  const { query, sort, getSortColumnHeader, toggleSort, fetchRequirementBlocks, setQuery } = requirementBlockStore
+  const { sort, getSortColumnHeader, toggleSort } = requirementBlockStore
   const { t } = useTranslation()
-
-  const search = useCallback(() => {
-    fetchRequirementBlocks({ reset: true })
-  }, [])
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
@@ -23,7 +19,7 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"}>
             {t("requirementsLibrary.index.tableHeading")}
           </Text>
-          <SearchInput query={query} setQuery={setQuery} handleSearch={search} />
+          <SearchInput searchModel={requirementBlockStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>

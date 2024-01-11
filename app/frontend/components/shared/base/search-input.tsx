@@ -3,37 +3,37 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React, { ChangeEvent, useCallback } from "react"
+import { ISearch } from "../../../lib/create-search-model"
 import { debounce } from "../../../utils/utility-funcitons"
 
-interface IProps {
-  setQuery: (query: string) => void
-  handleSearch: () => void | Promise<void>
-  query: string
+interface IProps<TSearchModel extends ISearch> {
+  searchModel: TSearchModel
   inputGroupProps?: Partial<InputGroupProps>
   inputProps?: Partial<InputProps>
   debounceTimeInMilliseconds?: number
 }
 
-export const SearchInput = observer(function SearchInput({
-  handleSearch,
-  setQuery,
-  query,
+export const SearchInput = observer(function SearchInput<TSearchModel extends ISearch>({
+  searchModel,
   inputGroupProps,
   inputProps,
   debounceTimeInMilliseconds = 500,
-}: IProps) {
-  const debouncedHandleSearch = useCallback(debounce(handleSearch, debounceTimeInMilliseconds), [handleSearch])
-  const search = (e: ChangeEvent<HTMLInputElement>) => {
+}: IProps<TSearchModel>) {
+  const { setQuery, query, search } = searchModel
+  const debouncedSearch = useCallback(debounce(search, debounceTimeInMilliseconds), [search])
+
+  const onSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value)
-    debouncedHandleSearch()
+    debouncedSearch()
   }
+
   return (
     <InputGroup as={"section"} w={"224px"} bg={"white"} {...inputGroupProps}>
       <Input
         type={"search"}
         placeholder={"Search"}
         fontSize={"sm"}
-        onChange={search}
+        onChange={onSearch}
         value={query ?? ""}
         {...inputProps}
       />
