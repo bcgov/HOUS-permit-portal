@@ -1,7 +1,7 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IUser } from "../../models/user"
-import { IRequirementBlockParams } from "../../types/api-request"
+import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IJurisdictionResponse,
@@ -121,5 +121,9 @@ export class Api {
 
   async updateProfile(params) {
     return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
+  }
+
+  async searchTags(params: Partial<ITagSearchParams>) {
+    return this.client.post<string[]>(`/tags/search`, { search: params })
   }
 }
