@@ -14,8 +14,6 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { faBoxArchive } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
