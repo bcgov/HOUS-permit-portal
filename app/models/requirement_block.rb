@@ -12,6 +12,10 @@ class RequirementBlock < ApplicationRecord
   enum sign_off_role: { any: 0 }, _prefix: true
   enum reviewer_role: { any: 0 }, _prefix: true
 
+  validates :sku, uniqueness: true, presence: true
+
+  before_validation :set_sku
+
   acts_as_taggable_on :associations
 
   def search_data
@@ -33,5 +37,12 @@ class RequirementBlock < ApplicationRecord
       tableView: false,
       components: requirements.map(&:to_form_json),
     }
+  end
+
+  private
+
+  # sku should be auto generated. Use uuid if not provided
+  def set_sku
+    self.sku ||= SecureRandom.uuid
   end
 end
