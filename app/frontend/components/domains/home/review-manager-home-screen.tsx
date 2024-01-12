@@ -1,11 +1,10 @@
-import { Flex, Heading } from "@chakra-ui/react"
+import { Container, Flex, Heading } from "@chakra-ui/react"
 import { faBookOpen, faFile, faInbox, faUsers } from "@fortawesome/free-solid-svg-icons"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
 import { useMst } from "../../../setup/root"
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
 import { HomeScreenBox } from "./home-screen-box"
 
 export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
@@ -15,7 +14,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
   const jurisdiction = currentUser.jurisdiction
 
   return (
-    <FullWhiteContainer>
+    <Container maxW="container.lg" p={8} as="main">
       <Flex direction="column" align="center" w="full">
         {jurisdiction ? (
           <>
@@ -54,6 +53,6 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
           <></>
         )}
       </Flex>
-    </FullWhiteContainer>
+    </Container>
   )
 })

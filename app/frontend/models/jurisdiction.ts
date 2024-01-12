@@ -70,7 +70,7 @@ export const JurisdictionModel = types
 
       if (response.ok) {
         self.rootStore.userStore.setUsers(response.data.data)
-        self.tableUsers = cast(response.data.data.map((requirementBlock) => requirementBlock.id))
+        self.tableUsers = cast(response.data.data.map((user) => user.id))
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount

@@ -304,6 +304,7 @@ export const resources = {
           giveFeedback: "Give Feedback",
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
+          somethingWrong: "Something went wrong",
           breadcrumb: {
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",

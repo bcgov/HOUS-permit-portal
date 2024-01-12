@@ -35,7 +35,7 @@ const renderApp = (rootStore) => {
             <meta property="og:description" content={t("site.description")} />
             <meta property="og:image" content="/images/logo.svg" />
           </Helmet>
-          <Flex flexDirection="column" minH="100vh" minW={"100vw"} className="outerFlex" bg="greys.grey03">
+          <Flex flexDirection="column" minH="100vh" minW="100vw" className="outerFlex" bg="greys.white">
             <Navigation />
           </Flex>
         </Provider>

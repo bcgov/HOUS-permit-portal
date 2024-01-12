@@ -1,11 +1,10 @@
-import { Box, Button, Flex, Grid, GridItem, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Grid, GridItem, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { GridHeaders } from "./grid-header"
 
@@ -36,8 +35,8 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
   }, [])
 
   return (
-    <FullWhiteContainer>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
+    <Container maxW="container.lg" p={8} as={"main"}>
+      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading fontSize={"4xl"} color={"text.primary"}>
@@ -105,6 +104,6 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           />
         </Flex>
       </VStack>
-    </FullWhiteContainer>
+    </Container>
   )
 })

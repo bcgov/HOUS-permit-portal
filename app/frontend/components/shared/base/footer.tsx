@@ -1,9 +1,12 @@
 import { Center } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
+import { useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 
-export const Footer = () => {
+export const Footer = observer(() => {
+  const location = useLocation()
   const { userStore, sessionStore } = useMst()
   const { currentUser } = userStore
   const excludeFooterRoutes = ["/reset-password", "/accept-invitation", "/login", "/forgot-password", "/register"]
@@ -21,4 +24,4 @@ export const Footer = () => {
       )}
     </>
   )
-}
+})
