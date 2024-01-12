@@ -1,14 +1,13 @@
-import { Box, Flex, Grid, GridItem, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Grid, GridItem, GridItemProps, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
-import { useMst } from "../../../../setup/root"
+import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { FullWhiteContainer } from "../../../shared/containers/full-white-container"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { Can } from "../../../shared/user/can"
@@ -24,9 +23,6 @@ const sharedGridItemsStyles: Partial<GridItemProps> = {
   color: "text.primary",
 }
 export const JurisdictionUserIndexScreen = observer(function JurisdictionUserIndex() {
-  const { jurisdictionStore } = useMst()
-  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
-    jurisdictionStore
   const { t } = useTranslation()
 
   const { currentJurisdiction, error } = useJurisdiction()
@@ -36,17 +32,20 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
     currentJurisdiction.fetchUsers()
   }, [currentJurisdiction])
 
+  if (error) return <ErrorScreen />
   if (!currentJurisdiction) return <LoadingScreen />
 
+  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
+    currentJurisdiction
+
   return (
-    <FullWhiteContainer>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
+    <Container maxW="container.lg" p={8} as={"main"}>
+      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1" fontSize={"4xl"} color={"text.primary"}>
               {currentJurisdiction?.qualifiedName}
             </Heading>
-            <Text color={"text.secondary"} mt={1}></Text>
           </Box>
           <RouterLinkButton alignSelf="flex-end" to={"invite"}>
             {t("user.index.inviteButton")}
@@ -108,6 +107,6 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
           />
         </Flex>
       </VStack>
-    </FullWhiteContainer>
+    </Container>
   )
 })

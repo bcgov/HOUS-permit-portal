@@ -30,6 +30,7 @@ export const SearchInput = observer(function SearchInput<TSearchModel extends IS
   return (
     <InputGroup as={"section"} w={"224px"} bg={"white"} {...inputGroupProps}>
       <Input
+        title={"search input"}
         type={"search"}
         placeholder={"Search"}
         fontSize={"sm"}

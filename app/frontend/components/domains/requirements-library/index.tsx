@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Container,
   Flex,
   Grid,
   GridItem,
@@ -22,7 +23,6 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
 import { GridHeaders } from "./grid-header"
 
 const sharedGridItemsStyles: Partial<GridItemProps> = {
@@ -52,8 +52,8 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
   }, [])
 
   return (
-    <FullWhiteContainer>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
+    <Container maxW="container.lg" p={8} as="main">
+      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading fontSize={"4xl"} color={"text.primary"}>
@@ -151,6 +151,6 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           {t("requirementsLibrary.index.seeArchivedButton")}
         </Button>
       </VStack>
-    </FullWhiteContainer>
+    </Container>
   )
 })

@@ -4,18 +4,22 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { EUserSortFields } from "../../../../types/enums"
+import { ErrorScreen } from "../../../shared/base/error-screen"
+import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { SearchInput } from "../../../shared/base/search-input"
 import { SortIcon } from "../../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
   const { currentJurisdiction, error } = useJurisdiction()
-  // const { sort, getSortColumnHeader, toggleSort } = currentJurisdiction
 
   const sort = currentJurisdiction?.sort
   const getSortColumnHeader = currentJurisdiction?.getUserSortColumnHeader
   const toggleSort = currentJurisdiction?.toggleSort
 
   const { t } = useTranslation()
+
+  if (error) return <ErrorScreen />
+  if (!currentJurisdiction) return <LoadingScreen />
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
