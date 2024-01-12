@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_09_231303) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_11_235823) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -95,7 +95,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_09_231303) do
     t.jsonb "custom_validations", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "description"
+    t.string "sku"
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+    t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
   create_table "requirement_template_section_requirement_blocks",
