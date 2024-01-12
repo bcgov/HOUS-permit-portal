@@ -4,10 +4,16 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
 import { useMst } from "../../../setup/root"
+import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 
 export const SubmitterHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
   const { t } = useTranslation()
   const {} = useMst()
 
-  return <Container>submitter home</Container>
+  return (
+    <Container>
+      <div>submitter home</div>
+      <RequirementForm />
+    </Container>
+  )
 })
