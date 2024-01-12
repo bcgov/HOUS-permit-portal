@@ -35,7 +35,6 @@ export const PermitApplicationStoreModel = types
     fetchPermitApplications: flow(function* () {
       const response: any = yield self.environment.api.fetchPermitApplications()
       if (response.ok) {
-        console.log(response)
         //find all unique jurisdictions
         const jurisdictionsUniq = R.uniqBy(
           (j) => j.id,
