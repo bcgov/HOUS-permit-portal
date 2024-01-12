@@ -50,7 +50,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           fontSize="lg"
           fontWeight="bold"
           color="text.link"
-          to="#"
+          to={`${id}`}
           rightIcon={<CaretRight size={16} />}
         >
           {nickname}

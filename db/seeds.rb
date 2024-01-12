@@ -58,8 +58,21 @@ activity2 = Activity.find_by_code("demolition")
 
 # Create PermitType records
 permit_type1 = PermitType.find_by_code("low_residential")
-permit_type2 = PermitType.find_by_code("high_residential")
+permit_type2 = PermitType.find_by_code("medium_residential")
 
+# Creating Permit Applications
+submitters = User.where(role: "submitter")
+20.times do
+  FactoryBot.create(
+    :permit_application,
+    submitter: submitters.sample,
+    jurisdiction: jurisdictions.sample,
+    activity: activity1,
+    permit_type: permit_type1,
+  )
+end
+
+RequirementsFromXlsxSeeder.seed
 # Create RequirementTemplate records
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)

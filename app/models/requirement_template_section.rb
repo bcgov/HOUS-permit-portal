@@ -7,11 +7,11 @@ class RequirementTemplateSection < ApplicationRecord
   def to_form_json
     {
       id: id,
-      legend: name,
-      key: "fieldSet#{id}",
-      label: name,
-      input: false,
-      tableView: false,
+      key: "section#{id}",
+      type: "panel",
+      title: name,
+      collapsible: true,
+      initially_collapsed: false,
       components: requirement_blocks.map(&:to_form_json),
     }
   end

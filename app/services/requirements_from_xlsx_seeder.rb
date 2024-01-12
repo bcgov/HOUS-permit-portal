@@ -81,8 +81,8 @@ class RequirementsFromXlsxSeeder
         rs =
           requirement_template
             .requirement_template_sections
-            .where(name: section_name)
-            .first_or_create!(name: section_name)
+            .where(name: section_name.strip)
+            .first_or_create!(name: section_name.strip)
         rs.update!(position: rs_position_incrementer)
         rs_position_incrementer += 1
       end
@@ -96,7 +96,7 @@ class RequirementsFromXlsxSeeder
         #go through each requirement block and add them to each section
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
           req_template_section =
-            requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0] }
+            requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
           rb = RequirementBlock.where(name: sheet.row(row_index)[2]).first_or_create!(name: sheet.row(row_index)[2])
           req_position_incrementer = 0
           (11..21).each_with_index do |req_col, req_position|

@@ -1,5 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IPermitApplication } from "../../models/permit-application"
 import { IUser } from "../../models/user"
 import {
   IAcceptInvitationResponse,
@@ -121,5 +122,9 @@ export class Api {
 
   async updateProfile(params) {
     return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
+  }
+
+  async fetchPermitApplications() {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
   }
 }

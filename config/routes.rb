@@ -44,6 +44,9 @@ Rails.application.routes.draw do
       post "users/search", on: :member, to: "jurisdictions#search_users"
       get "locality_type_options", on: :collection
     end
+
+    resources :permit_applications, only: %i[index create show update]
+
     resource :profile, only: [:update], controller: "users"
   end
 

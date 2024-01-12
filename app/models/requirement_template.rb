@@ -9,7 +9,7 @@ class RequirementTemplate < ApplicationRecord
   def to_form_json
     {
       id: id,
-      key: "fieldSet#{id}",
+      key: "requirementTemplate#{id}",
       input: false,
       tableView: false,
       components: requirement_template_sections.map(&:to_form_json),

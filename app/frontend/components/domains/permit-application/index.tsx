@@ -1,6 +1,6 @@
 import { Container, Flex, Heading, Select, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
@@ -14,7 +14,11 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
   const { t } = useTranslation()
 
   const { permitApplicationStore } = useMst()
-  const { permitApplications } = permitApplicationStore
+  const { fetchPermitApplications, permitApplications } = permitApplicationStore
+
+  useEffect(() => {
+    fetchPermitApplications()
+  }, [])
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">

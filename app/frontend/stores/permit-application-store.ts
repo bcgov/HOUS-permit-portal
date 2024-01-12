@@ -1,11 +1,15 @@
 import { Instance, flow, types } from "mobx-state-tree"
+import * as R from "ramda"
+import { withEnvironment } from "../lib/with-environment"
+import { withRootStore } from "../lib/with-root-store"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
-import { EPermitApplicationStatus, EPermitType } from "../types/enums"
 
 export const PermitApplicationStoreModel = types
   .model("PermitApplicationStore", {
     permitApplicationMap: types.map(PermitApplicationModel),
   })
+  .extend(withEnvironment())
+  .extend(withRootStore())
   .views((self) => ({
     // View to get a PermitApplication by id
     getPermitApplicationById(id: string) {
@@ -15,40 +19,7 @@ export const PermitApplicationStoreModel = types
     // View to get all permitapplications as an array
     get permitApplications() {
       // TODO: UNSTUB APPLICATIONS
-      // return Array.from(self.permitApplicationMap.values())
-
-      return [
-        {
-          id: "27a32891-7e34-480c-830d-ce595c2fe74c",
-          nickname: "Cool Draft Permit 1",
-          jurisdictionName: "North Cowichan",
-          number: "9999",
-          permitType: EPermitType.residential,
-          status: EPermitApplicationStatus.draft,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "27a32891-7e34-480c-830d-ce595c2fe73c",
-          nickname: "Cool Draft Permit 2",
-          jurisdictionName: "North Cowichan",
-          number: "8888",
-          permitType: "residential",
-          status: "draft",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "27a32891-7e34-480c-130d-ce595c2fe74c",
-          nickname: "Cool Draft Permit 3",
-          jurisdictionName: "North Cowichan",
-          number: "7777",
-          permitType: "residential",
-          status: "draft",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ]
+      return Array.from(self.permitApplicationMap.values())
     },
   }))
   .actions((self) => ({
@@ -62,13 +33,30 @@ export const PermitApplicationStoreModel = types
     },
     // Example of an asynchronous action to fetch permitapplications from an API
     fetchPermitApplications: flow(function* () {
-      // try {
-      //   const response = yield fetch("/api/permitapplications");
-      //   const permitapplications = yield response.json();
-      //   applySnapshot(self.permitapplications, permitapplications);
-      // } catch (error) {
-      //   console.error("Failed to fetch permitapplications", error);
-      // }
+      const response: any = yield self.environment.api.fetchPermitApplications()
+      if (response.ok) {
+        console.log(response)
+        //find all unique jurisdictions
+        const jurisdictionsUniq = R.uniqBy(
+          (j) => j.id,
+          response.data.data.map((pa) => pa.jurisdiction)
+        )
+        jurisdictionsUniq.forEach((j) => self.rootStore.jurisdictionStore.addJurisdiction(j))
+        //find all unique submitters
+        const submittersUniq = R.uniqBy(
+          (u) => u.id,
+          response.data.data.map((pa) => pa.submitter)
+        )
+        self.rootStore.userStore.setUsers(submittersUniq)
+
+        R.map((c) => {
+          self.permitApplicationMap.put(
+            R.mergeRight(c, { jurisdiction: c["jurisdiction"]["id"], submitter: c["submitter"]["id"] })
+          )
+        }, response.data.data)
+        //TODO: add pagination
+        return true
+      }
     }),
   }))
 

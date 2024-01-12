@@ -1,10 +1,10 @@
-import { Container } from "@chakra-ui/react"
+import { Container, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
 import { useMst } from "../../../setup/root"
-import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 export const SubmitterHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
   const { t } = useTranslation()
@@ -12,8 +12,13 @@ export const SubmitterHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
 
   return (
     <Container>
-      <div>submitter home</div>
-      <RequirementForm />
+      <div>Submitter Home</div>
+
+      <RouterLinkButton to={`/permit-applications`} variant="tertiary">
+        <Heading fontSize="lg" color="text.link">
+          Permit Applications
+        </Heading>
+      </RouterLinkButton>
     </Container>
   )
 })

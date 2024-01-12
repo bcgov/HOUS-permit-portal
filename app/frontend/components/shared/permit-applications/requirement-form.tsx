@@ -1,10 +1,12 @@
 import { Box, HStack, VStack } from "@chakra-ui/react"
 import React, { useState } from "react"
-import stubbedForm from "../../domains/permit-application-builder/stubs/test_permit_application_schema.json"
+// import stubbedForm from "../../domains/permit-application-builder/stubs/test_permit_application_schema.json"
 import { Form } from "../chefs"
 
-export function RequirementForm() {
-  const [form, setForm] = useState(stubbedForm)
+export function RequirementForm({ requirements }) {
+  const [form, setForm] = useState(requirements)
+  // const [form, setForm] = useState(stubbedForm)
+
   //setForm to load
   return (
     <VStack as={"main"} w={"full"} h={"full"}>
