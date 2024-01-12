@@ -1,6 +1,7 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IUser } from "../../models/user"
+import { IRequirementBlockParams } from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IRequirementBlockResponse,
@@ -90,6 +91,14 @@ export class Api {
     perPage?: number
   }) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
+  }
+
+  async createRequirementBlock(params?: { params: IRequirementBlockParams }) {
+    return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
+  }
+
+  async updateRequirementBlock(id: string, params?: { params: Partial<IRequirementBlockParams> }) {
+    return this.client.put<IRequirementBlockResponse>(`/requirement_blocks/${id}`, { requirementBlock: params })
   }
 
   async fetchJurisdictionUsers(jurisdictionId) {

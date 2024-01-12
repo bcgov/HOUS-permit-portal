@@ -79,6 +79,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
   def requirement_block_params
     params.require(:requirement_block).permit(
       :name,
+      :description,
       :sign_off_role,
       :reviewer_role,
       association_list: [],

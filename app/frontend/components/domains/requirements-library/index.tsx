@@ -54,7 +54,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
   return (
     <Box w={"full"} h={"full"} mx={"auto"} bg={"white"}>
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
-        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
+        <HStack justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading fontSize={"4xl"} color={"text.primary"}>
               {t("requirementsLibrary.index.title")}
@@ -64,7 +64,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
             </Text>
           </Box>
           <RequirementsBlockModal />
-        </Flex>
+        </HStack>
 
         <Grid
           mt={3}

@@ -14,7 +14,9 @@ import {
 import { faTag } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React from "react"
+import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IRequirementBlockForm } from "./index"
 
 const helperTextStyles: Partial<TextProps> = {
   color: "border.base",
@@ -22,6 +24,8 @@ const helperTextStyles: Partial<TextProps> = {
 
 export function BlockSetup() {
   const { t } = useTranslation()
+  const { register } = useFormContext<IRequirementBlockForm>()
+
   return (
     <Box as={"section"} w={"300px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} overflow={"hidden"}>
       <Box as={"header"} w={"full"} px={6} py={3} bg={"theme.blueAlt"}>
@@ -35,11 +39,11 @@ export function BlockSetup() {
         </Text>
         <FormControl mt={1}>
           <FormLabel>{t("requirementsLibrary.fields.name")}</FormLabel>
-          <Input bg={"white"} />
+          <Input bg={"white"} {...register("name", { required: true })} />
         </FormControl>
         <FormControl>
           <FormLabel>{`${t("requirementsLibrary.fields.description")} ${t("ui.optional")}`}</FormLabel>
-          <Textarea bg={"white"} />
+          <Textarea bg={"white"} {...register("description", { maxLength: 250 })} />
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.description")} <br />
             {t("requirementsLibrary.descriptionMaxLength")}
@@ -57,9 +61,9 @@ export function BlockSetup() {
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
         </FormControl>
-        <FormControl>
+        <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
-          <Input bg={"white"} />
+          <Input bg={"white"} isDisabled={true} />
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
