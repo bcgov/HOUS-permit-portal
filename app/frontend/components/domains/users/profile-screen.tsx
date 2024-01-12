@@ -1,11 +1,21 @@
-import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Heading, InputGroup, Select } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  InputGroup,
+  Select,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { TextFormControl } from "../../shared/form/text-form-control"
@@ -42,7 +52,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   }
 
   return (
-    <FullWhiteContainer>
+    <Container maxW="container.lg" p={8} as="main">
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" w="full" gap={6}>
@@ -101,6 +111,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
           </Flex>
         </form>
       </FormProvider>
-    </FullWhiteContainer>
+    </Container>
   )
 })

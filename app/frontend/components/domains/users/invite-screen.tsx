@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Container,
   Flex,
   FormControl,
   FormLabel,
@@ -28,8 +29,8 @@ import { EMAIL_REGEX } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
-import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
+import { ErrorScreen } from "../../shared/base/error-screen"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { RouterLink } from "../../shared/navigation/router-link"
 
 interface IInviteScreenProps {}
@@ -72,16 +73,11 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
 
   const navigate = useNavigate()
 
-  if (!currentJurisdiction) {
-    return (
-      <Flex as="main" w="full" bg="greys.white">
-        <SharedSpinner />
-      </Flex>
-    )
-  }
+  if (error) return <ErrorScreen />
+  if (!currentJurisdiction) return <LoadingScreen />
 
   return (
-    <FullWhiteContainer>
+    <Container maxW="container.lg" p={8} as="main">
       <Flex direction="column" gap={8}>
         <Flex direction="column">
           <Heading as="h1">{t("user.inviteTitle")}</Heading>
@@ -124,7 +120,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
           </form>
         </FormProvider>
       </Flex>
-    </FullWhiteContainer>
+    </Container>
   )
 })
 

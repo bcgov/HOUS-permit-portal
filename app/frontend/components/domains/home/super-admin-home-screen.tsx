@@ -1,16 +1,15 @@
-import { Flex, Heading } from "@chakra-ui/react"
+import { Container, Flex, Heading } from "@chakra-ui/react"
 import { faBookOpen, faBuilding, faFile, faPencil } from "@fortawesome/free-solid-svg-icons"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
 import { HomeScreenBox } from "./home-screen-box"
 
 export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
   const { t } = useTranslation()
 
   return (
-    <FullWhiteContainer containerMaxW="container.md">
+    <Container maxW="container.md" py={8}>
       <Flex direction="column" align="center" w="full">
         <Heading as="h1" mb={8}>
           {t("home.superAdminTitle")}
@@ -42,6 +41,6 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
           />
         </Flex>
       </Flex>
-    </FullWhiteContainer>
+    </Container>
   )
 }
