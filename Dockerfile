@@ -69,7 +69,7 @@ RUN useradd rails --create-home --shell /bin/bash && \
 USER rails:rails
 
 # Entrypoint - source vault variables from Hashicorp
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./bin/entrypoint.sh"]
 
 LABEL maintainer="Derek Yau <derek@laterolabs.com>"
 

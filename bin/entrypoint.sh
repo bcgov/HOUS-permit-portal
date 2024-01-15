@@ -21,4 +21,17 @@ else
   echo "[entrypoint] Vault secrets directory (${VAULT_SECRETS_DIR}) does not exist"
 fi
 
+# Rails Entrypoint
+# If running the rails server then create or migrate existing database
+if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+  until nc -z -v -w30 postgres 5432; do
+    echo "Waiting for PostgreSQL database to start..."
+    sleep 1
+  done
+
+  echo "*** Preparing Database..."
+  
+  ./bin/rails db:prepare
+fi
+
 exec "$@"
