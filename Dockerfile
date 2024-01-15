@@ -21,11 +21,6 @@ FROM base as build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python
 
-# Install Git LFS
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-    apt-get install git-lfs && \
-    git lfs install
-
 # Install JavaScript dependencies
 ARG NODE_VERSION=20.10.0
 ENV PATH=/usr/local/node/bin:$PATH
