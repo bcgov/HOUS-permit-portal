@@ -6,7 +6,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
-import { ERequirementLibrarySortFields } from "../types/enums"
+import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
 import { ISort } from "../types/types"
 
 export const RequirementBlockStore = types
@@ -87,6 +87,20 @@ export const RequirementBlockStore = types
       }
 
       return false
+    }),
+    searchAssociations: flow(function* (query: string) {
+      const response = yield* toGenerator(
+        self.environment.api.searchTags({
+          query,
+          taggableTypes: [ETagType.requirementBlock],
+        })
+      )
+
+      if (response.ok) {
+        return response.data
+      }
+
+      return []
     }),
   }))
 

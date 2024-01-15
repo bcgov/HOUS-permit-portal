@@ -20,14 +20,14 @@ import { BlockSetup } from "./block-setup"
 export interface IRequirementBlockForm {
   name: string
   description?: string
-  associations?: string[]
+  associationList: string[]
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal() {
   const { requirementBlockStore } = useMst()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
-  const formProps = useForm<IRequirementBlockForm>()
+  const formProps = useForm<IRequirementBlockForm>({ defaultValues: { associationList: [] } })
   const {
     handleSubmit,
     formState: { isSubmitting, isValid },

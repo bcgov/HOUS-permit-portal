@@ -38,11 +38,12 @@ Rails.application.routes.draw do
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
-    
+
     resources :jurisdictions, only: %i[index show] do
       get "users", on: :member
     end
     resource :profile, only: [:update], controller: "users"
+    post "tags/search", to: "tags#index", as: :tags_search
   end
 
   root to: "home#index"
