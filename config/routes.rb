@@ -44,6 +44,7 @@ Rails.application.routes.draw do
       post "users/search", on: :member, to: "jurisdictions#search_users"
     end
     resource :profile, only: [:update], controller: "users"
+    post "tags/search", to: "tags#index", as: :tags_search
   end
 
   root to: "home#index"

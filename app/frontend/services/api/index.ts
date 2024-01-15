@@ -111,11 +111,11 @@ export class Api {
   ) {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
-  async createRequirementBlock(params?: { params: IRequirementBlockParams }) {
+  async createRequirementBlock(params: IRequirementBlockParams) {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
   }
 
-  async updateRequirementBlock(id: string, params?: { params: Partial<IRequirementBlockParams> }) {
+  async updateRequirementBlock(id: string, params: Partial<IRequirementBlockParams>) {
     return this.client.put<IRequirementBlockResponse>(`/requirement_blocks/${id}`, { requirementBlock: params })
   }
 

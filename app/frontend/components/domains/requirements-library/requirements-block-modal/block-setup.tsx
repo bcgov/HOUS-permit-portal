@@ -1,30 +1,25 @@
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Text,
-  Textarea,
-  TextProps,
-  VStack,
-} from "@chakra-ui/react"
-import { faTag } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Box, FormControl, FormHelperText, FormLabel, Input, Text, Textarea, TextProps, VStack } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
-import { useFormContext } from "react-hook-form"
+import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../../setup/root"
+import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { IRequirementBlockForm } from "./index"
 
 const helperTextStyles: Partial<TextProps> = {
   color: "border.base",
 }
 
-export function BlockSetup() {
+export const BlockSetup = observer(function BlockSetup() {
+  const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
-  const { register } = useFormContext<IRequirementBlockForm>()
+  const { register, control } = useFormContext<IRequirementBlockForm>()
+
+  const fetchAssociationOptions = async (query: string) => {
+    const associations = await requirementBlockStore.searchAssociations(query)
+    return associations.map((association) => ({ value: association, label: association }))
+  }
 
   return (
     <Box as={"section"} w={"300px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} overflow={"hidden"}>
@@ -43,7 +38,11 @@ export function BlockSetup() {
         </FormControl>
         <FormControl>
           <FormLabel>{`${t("requirementsLibrary.fields.description")} ${t("ui.optional")}`}</FormLabel>
-          <Textarea bg={"white"} {...register("description", { maxLength: 250 })} />
+          <Textarea
+            bg={"white"}
+            _hover={{ borderColor: "border.base" }}
+            {...register("description", { maxLength: 250 })}
+          />
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.description")} <br />
             {t("requirementsLibrary.descriptionMaxLength")}
@@ -51,12 +50,27 @@ export function BlockSetup() {
         </FormControl>
         <FormControl>
           <FormLabel>{t("requirementsLibrary.fields.associations")}</FormLabel>
-          <InputGroup>
-            <Input bg={"white"} />
-            <InputLeftElement>
-              <FontAwesomeIcon icon={faTag} style={{ width: "16.7px", height: "16.7px" }} />
-            </InputLeftElement>
-          </InputGroup>
+          <Controller
+            name="associationList"
+            control={control}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <TagsSelect
+                  onChange={(options) => onChange(options.map((option) => option.value))}
+                  fetchOptions={fetchAssociationOptions}
+                  placeholder={undefined}
+                  selectedOptions={value.map((association) => ({
+                    value: association,
+                    label: association,
+                  }))}
+                  styles={{
+                    container: (css, state) => ({ ...css, width: "100%" }),
+                  }}
+                />
+              )
+            }}
+          />
+
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
@@ -71,4 +85,4 @@ export function BlockSetup() {
       </VStack>
     </Box>
   )
-}
+})

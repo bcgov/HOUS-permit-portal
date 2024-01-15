@@ -55,3 +55,7 @@ export enum ESortDirection {
   ascending = "asc",
   descending = "desc",
 }
+
+export enum ETagType {
+  requirementBlock = "RequirementBlock",
+}
