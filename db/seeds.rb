@@ -22,23 +22,25 @@ unless user
     username: "admin@example.com",
     password: "P@ssword1",
   ).confirm
-end
 
-# Creating Users with different roles
-5.times do
-  FactoryBot.create(:user, :submitter).confirm
-  FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.sample).confirm
-  FactoryBot.create(:user, :reviewer, jurisdiction: jurisdictions.sample).confirm
-  FactoryBot.create(:user, :super_admin).confirm
+  # Creating Users with different roles
+  5.times do
+    FactoryBot.create(:user, :submitter).confirm
+    FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.sample).confirm
+    FactoryBot.create(:user, :reviewer, jurisdiction: jurisdictions.sample).confirm
+    FactoryBot.create(:user, :super_admin).confirm
+  end
 end
 
 # Creating Permit Applications
 submitters = User.where(role: "submitter")
 
-20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
+if PermitApplication.all.blank?
+  20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
 
-# Creating Contacts
-jurisdictions.each { |j| rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) } }
+  # Creating Contacts
+  jurisdictions.each { |j| rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) } }
+end
 
 PermitClassificationSeeder.seed
 
