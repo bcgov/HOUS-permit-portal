@@ -1,6 +1,8 @@
 class JurisdictionBlueprint < Blueprinter::Base
   identifier :id
   fields :name,
+         :locality_type,
+         :qualifier,
          :qualified_name,
          :reverse_qualified_name,
          :description,

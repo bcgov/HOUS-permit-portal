@@ -12,9 +12,11 @@ export const ReadOnlySlate = ({ initialValue, ...rest }: IReadOnlySlateProps) =>
 
   return (
     <Box {...rest}>
-      <Slate editor={editor} onChange={() => {}} initialValue={initialValue}>
-        <Editable readOnly />
-      </Slate>
+      {initialValue && (
+        <Slate editor={editor} onChange={() => {}} initialValue={initialValue}>
+          <Editable readOnly />
+        </Slate>
+      )}
     </Box>
   )
 }

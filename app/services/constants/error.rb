@@ -14,6 +14,7 @@ module Constants
     USER_LOGIN_ERROR = e("invalid_login_error", "Invalid username or password")
     USER_UPDATE_ERROR = e("user_update_error", "Could not update user")
     REQUIREMENT_BLOCK_CREATE_ERROR = e("requirement_block_create_error", "Error creating requirement block")
+    JURISDICTION_CREATE_ERROR = e("jurisdiction_create_error", "Error creating jurisdiction")
     REQUIREMENT_BLOCK_UPDATE_ERROR = e("requirement_block_update_error", "Error updating requirement block")
     REQUIREMENT_BLOCK_DELETE_ERROR = e("requirement_block_delete_error", "Error deleting requirement block")
     INVALID_TOKEN_ERROR = e("invalid_token_error", "The access token is invalid")

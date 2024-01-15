@@ -3,9 +3,9 @@ class SubDistrict < Jurisdiction
 
   private
 
-  def has_correct_locality_type
-    if locality_type == RegionalDistrict.locality_type
-      errors.add(:locality_type, "must not be #{RegionalDistrict.locality_type} on a SubDistrict")
-    end
-  end
+  # def has_correct_locality_type
+  #   if locality_type == RegionalDistrict.locality_type
+  #     errors.add(:locality_type, "must not be #{RegionalDistrict.locality_type} on a SubDistrict")
+  #   end
+  # end
 end
