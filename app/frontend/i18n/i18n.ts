@@ -209,6 +209,7 @@ export const resources = {
           "Control what permit types you want available for submitters to apply with on BC Building Permit Hub.",
         userManagementTitle: "User Management",
         userManagementDescription: "Invite or remove Managers or Reviewers in the Building Permit Hub System.",
+        auditLogTitle: "Audit Log",
       },
       admin: {},
       errors: {
