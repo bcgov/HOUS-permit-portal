@@ -12,24 +12,33 @@
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-user = User.find_by(email: "admin@example.com")
-
-unless user
-  FactoryBot.create(
-    :user,
-    :super_admin,
-    email: "admin@example.com",
-    username: "admin@example.com",
-    password: "P@ssword1",
-  ).confirm
-
-  # Creating Users with different roles
+if User.all.blank?
   5.times do
     FactoryBot.create(:user, :submitter).confirm
-    FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.sample).confirm
-    FactoryBot.create(:user, :reviewer, jurisdiction: jurisdictions.sample).confirm
+    FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.first).confirm
+    FactoryBot.create(:user, :reviewer, jurisdiction: jurisdictions.first).confirm
     FactoryBot.create(:user, :super_admin).confirm
   end
+end
+
+User.find_or_create_by(username: "admin") do |user|
+  user.role = :super_admin
+  user.email = "admin@example.com"
+  user.password = "P@ssword1"
+end
+
+User.find_or_create_by(username: "review_manager") do |user|
+  user.role = :review_manager
+  user.email = "review_manager@example.com"
+  user.password = "P@ssword1"
+  user.jurisdiction = jurisdictions.first
+end
+
+User.find_or_create_by(username: "reviewer") do |user|
+  user.role = :reviewer
+  user.email = "reviewer@example.com"
+  user.password = "P@ssword1"
+  user.jurisdiction = jurisdictions.first
 end
 
 # Creating Permit Applications
@@ -56,3 +65,16 @@ RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+
+if RequirementBlock.all.blank?
+  25.times do |i|
+    RequirementBlock.create!(
+      name: "Block #{i + 1}",
+      sign_off_role: 0,
+      reviewer_role: 0,
+      custom_validations: {
+        key: "value",
+      },
+    )
+  end
+end
