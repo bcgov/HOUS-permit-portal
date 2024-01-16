@@ -36,23 +36,26 @@ jobs:
           -e "xpack.security.enabled=false"
 
     steps:
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs
+          git lfs install
       - name: Checkout Code
         uses: actions/checkout@v3
-
+                with:
+          lfs: true
       - name: Set up Ruby 3.2.2
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2.2"
-
       - name: Install Dependencies
         run: |
           bundle install
-
       - name: Setup Test Database
         run: |
           bundle exec rake db:create
           bundle exec rake db:schema:load
-
       - name: Run RSpec
         run: |
           bundle exec rspec

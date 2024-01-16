@@ -1,4 +1,4 @@
-name: Deploy main branch to dev
+name: Deploy main branch to DEV
 
 on:
   push:
@@ -7,9 +7,7 @@ on:
 
 jobs:
   build-and-push-image:
-    # needs: test
     runs-on: ubuntu-latest
-    # if: success()
     name: Build & Deploy Docker Rails / React application
     environment: dev
 

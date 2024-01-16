@@ -15,10 +15,16 @@ jobs:
     environment: prod
 
     steps:
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs
+          git lfs install
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch }}
+          lfs: true
       - name: Build Docker Image
         uses: redhat-actions/buildah-build@v2
         with:
