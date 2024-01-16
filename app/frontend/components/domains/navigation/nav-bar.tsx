@@ -6,7 +6,6 @@ import {
   Flex,
   HStack,
   Heading,
-  IconButton,
   Image,
   Menu,
   MenuButton,
@@ -66,9 +65,16 @@ export const NavBar = observer(() => {
               </Text>
             </Show>
             <Spacer />
-            <HStack gap={2}>
+            <HStack gap={3}>
               {currentUser?.isSubmitter && <NavBarSearch />}
               {currentUser?.jurisdiction && <Text color="greys.white">{currentUser.jurisdiction.name}</Text>}
+              {currentUser?.isReviewer ||
+                currentUser?.isReviewManager ||
+                (currentUser?.isSuperAdmin && (
+                  <Text color="greys.white" textTransform="capitalize">
+                    {t(`user.roles.${currentUser.role}`)}
+                  </Text>
+                ))}
               <NavBarMenu isAdmin={currentUser?.isAdmin} />
             </HStack>
           </Flex>
@@ -116,15 +122,17 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   return (
     <Menu>
       <MenuButton
-        as={IconButton}
+        as={Button}
         borderRadius="lg"
         border={isAdmin ? "solid white" : "solid black"}
         borderWidth="1px"
         p={3}
         variant={isAdmin ? "primary" : "primaryInverse"}
         aria-label="menu dropdown button"
-        icon={<List size={16} weight="bold" color={isAdmin ? "white" : "black"} />}
-      />
+        leftIcon={<List size={16} weight="bold" color={isAdmin ? "white" : "black"} />}
+      >
+        {t("site.menu")}
+      </MenuButton>
       <MenuList>
         {loggedIn ? (
           <>

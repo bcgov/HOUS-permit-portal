@@ -47,7 +47,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize :jurisdiction, :locality_type_options?
 
     options =
-      Jurisdiction.locality_types.sort.map { |lt| { name: Jurisdiction.custom_titleize_locality_type(lt), value: lt } }
+      Jurisdiction.locality_types.sort.map { |lt| { label: Jurisdiction.custom_titleize_locality_type(lt), value: lt } }
     render_success options, nil, { blueprint: OptionBlueprint }
   end
 

@@ -42,7 +42,7 @@ export const LocalityRadioGroup = observer(({ ...rest }: ILocalityRadioGroupProp
               <Stack direction="column">
                 {localityTypeOptions.map((option) => (
                   <Radio key={option.value} value={option.value}>
-                    {option.name}
+                    {option.label}
                   </Radio>
                 ))}
               </Stack>
