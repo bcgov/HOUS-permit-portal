@@ -19,5 +19,7 @@ class JurisdictionSeeder
 
       @current_regional_district = j if is_rd
     end
+
+    Jurisdiction.reindex!
   end
 end
