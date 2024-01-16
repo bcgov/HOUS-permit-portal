@@ -1,6 +1,5 @@
 import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
-import { faPaperPlane, faUserPlus } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { PaperPlane, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
@@ -80,7 +79,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   type="button"
                   variant="tertiary"
                   onClick={() => append(defaultUserValues)}
-                  leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faUserPlus} />}
+                  leftIcon={<UserPlus size={16} />}
                 >
                   {t("user.addUser")}
                 </Button>
@@ -91,7 +90,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   type="submit"
                   isLoading={isSubmitting}
                   loadingText={t("ui.loading")}
-                  rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faPaperPlane} />}
+                  rightIcon={<PaperPlane size={16} />}
                 >
                   {t("user.sendInvites")}
                 </Button>

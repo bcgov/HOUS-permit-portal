@@ -1,6 +1,5 @@
 import { Box, Button, Flex, FormControl, FormLabel, Input, InputGroup, Select, Tag } from "@chakra-ui/react"
-import { faCircleCheck, faCircleExclamation, faUserMinus } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CheckCircle, UserMinus, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -64,23 +63,19 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
         {invited && (
           <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2}>
             <Box color="semantic.success">
-              <FontAwesomeIcon style={{ height: 20, width: 20 }} icon={faCircleCheck} /> {t("user.inviteSuccess")}
+              <CheckCircle size={20} /> {t("user.inviteSuccess")}
             </Box>
           </Tag>
         )}
         {taken && (
           <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" mb={2}>
             <Box color="semantic.error">
-              <FontAwesomeIcon style={{ height: 20, width: 20 }} icon={faCircleExclamation} /> {t("user.inviteError")}
+              <WarningCircle size={20} /> {t("user.inviteError")}
             </Box>
           </Tag>
         )}
         {!invited && !taken && remove && (
-          <Button
-            onClick={() => remove(index)}
-            variant="tertiary"
-            leftIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faUserMinus} />}
-          >
+          <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<UserMinus size={16} />}>
             {t("ui.remove")}
           </Button>
         )}

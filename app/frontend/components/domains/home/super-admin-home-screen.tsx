@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { faBookOpen, faBuilding, faFile, faPencil } from "@fortawesome/free-solid-svg-icons"
+import { BookOpen, Buildings, FileText, Pencil } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
@@ -18,25 +18,25 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
           <HomeScreenBox
             title={t("home.jurisdictionsTitle")}
             description={t("home.jurisdictionsDescription")}
-            icon={faBuilding}
+            icon={<Buildings size={24} />}
             href="/jurisdictions"
           />
           <HomeScreenBox
             title={t("home.permitTemplateCatalogueTitle")}
             description={t("home.permitTemplateCatalogueDescription")}
-            icon={faFile}
+            icon={<FileText size={24} />}
             href="/requirement-templates"
-          />{" "}
+          />
           <HomeScreenBox
             title={t("home.requirementsLibraryTitle")}
             description={t("home.requirementsLibraryDescription")}
-            icon={faBookOpen}
+            icon={<BookOpen size={24} />}
             href="/requirements-library"
           />
           <HomeScreenBox
             title={t("home.contentManagementTitle")}
             description={t("home.contentManagementDescription")}
-            icon={faPencil}
+            icon={<Pencil size={24} />}
             href="/content-management"
           />
         </Flex>

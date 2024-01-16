@@ -16,9 +16,7 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { IconProp } from "@fortawesome/fontawesome-svg-core"
-import { faChevronRight, faCircleCheck, faClipboardCheck, faFileArrowUp } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CaretRight, CheckCircle, ClipboardText, FileArrowUp } from "@phosphor-icons/react"
 import i18next from "i18next"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -65,9 +63,9 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>
-            <IconBox icon={faFileArrowUp}>{t("landing.easilyUpload")}</IconBox>
-            <IconBox icon={faCircleCheck}>{t("landing.bestPractices")}</IconBox>
-            <IconBox icon={faClipboardCheck}>{t("landing.easyToFollow")}</IconBox>
+            <IconBox icon={<FileArrowUp size={24} />}>{t("landing.easilyUpload")}</IconBox>
+            <IconBox icon={<CheckCircle size={24} />}>{t("landing.bestPractices")}</IconBox>
+            <IconBox icon={<ClipboardText size={24} />}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
 
           <Flex gap={10} direction={{ base: "column", md: "row" }}>
@@ -85,18 +83,10 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                <RouterLinkButton
-                  to="/login"
-                  variant="primaryInverse"
-                  rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
-                >
+                <RouterLinkButton to="/login" variant="primaryInverse" rightIcon={<CaretRight size={16} />}>
                   {t("auth.login")}
                 </RouterLinkButton>
-                <RouterLinkButton
-                  to="/register"
-                  variant="primaryInverse"
-                  rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
-                >
+                <RouterLinkButton to="/register" variant="primaryInverse" rightIcon={<CaretRight size={16} />}>
                   {t("auth.register")}
                 </RouterLinkButton>
               </Flex>
@@ -237,7 +227,7 @@ const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
 }
 
 interface IIconBoxProps extends BoxProps {
-  icon: IconProp
+  icon: ReactNode
   children: ReactNode
 }
 
@@ -245,7 +235,7 @@ const IconBox = ({ icon, children, ...rest }: IIconBoxProps) => {
   return (
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1} {...rest}>
       <Flex gap={4} align="center" h="full">
-        <FontAwesomeIcon style={{ height: "24px", width: "24px" }} icon={icon} />
+        {icon}
         <Text fontSize="md" fontWeight="bold">
           {children}
         </Text>

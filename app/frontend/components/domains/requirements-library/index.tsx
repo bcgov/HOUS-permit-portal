@@ -14,6 +14,7 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
+import { Archive } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -141,11 +142,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           />
         </Flex>
 
-        <Button
-          leftIcon={<FontAwesomeIcon style={{ width: "14px", height: "14px" }} icon={faBoxArchive} />}
-          variant={"secondary"}
-          mt={3}
-        >
+        <Button leftIcon={<Archive size={16} />} variant={"secondary"} mt={3}>
           {t("requirementsLibrary.index.seeArchivedButton")}
         </Button>
       </VStack>

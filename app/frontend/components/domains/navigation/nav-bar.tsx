@@ -16,8 +16,7 @@ import {
   Spacer,
   Text,
 } from "@chakra-ui/react"
-import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -84,10 +83,7 @@ const NavBarSearch = () => {
   const { t } = useTranslation()
 
   return (
-    <Button
-      variant="tertiary"
-      rightIcon={<FontAwesomeIcon style={{ height: "14px", width: "14px" }} icon={faSearch} />}
-    >
+    <Button variant="tertiary" rightIcon={<MagnifyingGlass size={16} />}>
       {t("ui.search")}
     </Button>
   )
@@ -127,7 +123,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
         p={3}
         variant={isAdmin ? "primary" : "primaryInverse"}
         aria-label="menu dropdown button"
-        icon={<FontAwesomeIcon style={{ height: "14px", width: "14px" }} icon={faBars} />}
+        icon={<List size={16} weight="bold" color={isAdmin ? "white" : "black"} />}
       />
       <MenuList>
         {loggedIn ? (
