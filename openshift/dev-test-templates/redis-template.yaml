@@ -1,0 +1,122 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: redis-template
+parameters:
+  - name: STAGE
+    required: true
+    value: test
+objects:
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      annotations:
+        image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"redis:7.2.4"},"fieldPath":"spec.template.spec.containers[?(@.name==\"redis\")].image"}]'
+      labels:
+        app: redis
+      name: redis
+      namespace: bb18ab-${STAGE}
+    spec:
+      progressDeadlineSeconds: 600
+      replicas: 1
+      revisionHistoryLimit: 10
+      selector:
+        matchLabels:
+          app: redis
+          deployment: redis
+      strategy:
+        rollingUpdate:
+          maxSurge: 25%
+          maxUnavailable: 25%
+        type: RollingUpdate
+      template:
+        metadata:
+          annotations:
+            vault.hashicorp.com/agent-inject: "true"
+            vault.hashicorp.com/agent-inject-secret-secrets.env: bb18ab-nonprod/${STAGE}/redis
+            vault.hashicorp.com/agent-inject-template-secrets.env: |
+              {{- with secret "bb18ab-nonprod/${STAGE}/redis" }}
+              {{- range $k, $v := .Data.data }}
+              {{ $k }}={{ $v }}{{ end -}}
+              {{- end  }}
+            vault.hashicorp.com/agent-limits-cpu: 50m
+            vault.hashicorp.com/agent-limits-mem: 100Mi
+            vault.hashicorp.com/agent-pre-populate-only: "true"
+            vault.hashicorp.com/agent-requests-cpu: 10m
+            vault.hashicorp.com/agent-requests-mem: 25Mi
+            vault.hashicorp.com/auth-path: auth/k8s-silver
+            vault.hashicorp.com/namespace: platform-services
+            vault.hashicorp.com/role: bb18ab-nonprod
+          labels:
+            app: redis
+            deployment: redis
+        spec:
+          containers:
+            - args:
+                - set -a; . /vault/secrets/secrets.env; set +a; exec docker-entrypoint.sh
+                  redis-server --requirepass ${REDIS_PASSWORD}
+              command:
+                - /bin/sh
+                - -c
+              image: docker.io/library/redis@sha256:3de8ac4e0926e0f2dd0f7de165ffc502121ec2b6fb2277eb74ffcbed104926b8
+              imagePullPolicy: IfNotPresent
+              name: redis
+              ports:
+                - containerPort: 6379
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /${STAGE}/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /data
+                  name: redis-data
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: bb18ab-vault
+          serviceAccountName: bb18ab-vault
+          terminationGracePeriodSeconds: 30
+          volumes:
+            - name: redis-data
+              persistentVolumeClaim:
+                claimName: redis-${STAGE}-hous-permit-portal
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: redis
+      name: redis
+      namespace: bb18ab-${STAGE}
+    spec:
+      internalTrafficPolicy: Cluster
+      ipFamilies:
+        - IPv4
+      ipFamilyPolicy: SingleStack
+      ports:
+        - name: 6379-tcp
+          port: 6379
+          protocol: TCP
+          targetPort: 6379
+      selector:
+        app: redis
+        deployment: redis
+      sessionAffinity: None
+      type: ClusterIP
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      finalizers:
+        - kubernetes.io/pvc-protection
+      labels:
+        app: redis
+      name: redis-${STAGE}-hous-permit-portal
+      namespace: bb18ab-${STAGE}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: netapp-file-standard
+      volumeMode: Filesystem
