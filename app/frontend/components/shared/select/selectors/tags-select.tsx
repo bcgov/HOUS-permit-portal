@@ -44,8 +44,6 @@ export const TagsSelect = observer(
             paddingInline: "0.75rem",
           },
           menu: {
-            zIndex: 4,
-            position: "absolute",
             width: "100%",
             background: "var(--chakra-colors-greys-grey10)",
           },

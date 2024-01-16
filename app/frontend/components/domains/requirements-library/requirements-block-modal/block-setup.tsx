@@ -1,6 +1,6 @@
 import { Box, FormControl, FormHelperText, FormLabel, Input, Text, Textarea, TextProps, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
@@ -15,6 +15,7 @@ export const BlockSetup = observer(function BlockSetup() {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
   const { register, control } = useFormContext<IRequirementBlockForm>()
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const fetchAssociationOptions = async (query: string) => {
     const associations = await requirementBlockStore.searchAssociations(query)
@@ -22,7 +23,15 @@ export const BlockSetup = observer(function BlockSetup() {
   }
 
   return (
-    <Box as={"section"} w={"300px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} overflow={"hidden"}>
+    <Box
+      as={"section"}
+      w={"300px"}
+      boxShadow={"md"}
+      borderRadius={"xl"}
+      bg={"greys.grey10"}
+      overflow={"hidden"}
+      ref={containerRef}
+    >
       <Box as={"header"} w={"full"} px={6} py={3} bg={"theme.blueAlt"}>
         <Text as={"h3"} fontSize={"xl"} color={"greys.white"} fontWeight={700}>
           {t("requirementsLibrary.modals.blockSetupTitle")}
@@ -64,8 +73,13 @@ export const BlockSetup = observer(function BlockSetup() {
                     label: association,
                   }))}
                   styles={{
-                    container: (css, state) => ({ ...css, width: "100%" }),
+                    container: (css, state) => ({
+                      ...css,
+                      width: "100%",
+                    }),
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                   }}
+                  menuPortalTarget={document.body}
                 />
               )
             }}
