@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Flex,
   HStack,
   Heading,
@@ -20,9 +21,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { SubNavBar } from "./sub-nav-bar"
 
 export const NavBar = observer(() => {
@@ -97,10 +99,23 @@ interface INavBarMenuProps {
 
 const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const { t } = useTranslation()
-  const { sessionStore } = useMst()
-  const navigate = useNavigate()
+  const { sessionStore, userStore } = useMst()
+  const { currentUser } = userStore
 
   const { logout, loggedIn } = sessionStore
+
+  const superAdminOnlyItems = (
+    <>
+      <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+      <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/templates-catalogue"} />
+      <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
+      <NavMenuItem label={t("home.auditLogTitle")} to={"/audit-log"} />
+    </>
+  )
+
+  const adminOrManagerItems = <></>
+
+  const submitterOnlyItems = <></>
 
   return (
     <Menu>
@@ -117,33 +132,33 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       <MenuList>
         {loggedIn ? (
           <>
-            <MenuItem
-              as={Button}
-              color="text.link"
-              variant="tertiary"
-              onClick={() => {
-                navigate("/profile")
-              }}
-            >
-              {t("user.myProfile")}
-            </MenuItem>
-            <MenuItem as={Button} color="text.link" variant="tertiary" onClick={logout}>
-              {t("auth.logout")}
-            </MenuItem>
+            <NavMenuItem label={t("site.home")} to={"/"} />
+            {currentUser?.isSuperAdmin && superAdminOnlyItems}
+            {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+            {currentUser?.isSubmitter && submitterOnlyItems}
+            <Divider borderWidth="1px" />
+            <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
+            <NavMenuItem label={t("auth.logout")} onClick={logout} />
           </>
         ) : (
-          <MenuItem
-            as={Button}
-            color="text.link"
-            variant="tertiary"
-            onClick={() => {
-              navigate("/login")
-            }}
-          >
-            {t("auth.login")}
-          </MenuItem>
+          <NavMenuItem label={t("auth.login")} to="/login" />
         )}
       </MenuList>
     </Menu>
   )
 })
+
+// Looks complicated but this is jsut how you make it so that either to or onClick must be given, but not necessarily both
+type TNavMenuItemProps = {
+  label: string
+} & ({ to: string; onClick?: (any) => any } | { onClick: (any) => any; to?: string })
+
+const NavMenuItem = ({ label, to, onClick }: TNavMenuItemProps) => {
+  return (
+    <MenuItem as={RouterLinkButton} color="text.primary" variant="tertiary" to={to} onClick={onClick}>
+      <Text textAlign="left" w="full">
+        {label}
+      </Text>
+    </MenuItem>
+  )
+}

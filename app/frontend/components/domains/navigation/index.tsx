@@ -91,8 +91,8 @@ const AppRoutes = observer(() => {
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
 
-          {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
           {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
+          {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
           {currentUser?.isSubmitter && submitterOnlyRoutes}
         </>
       ) : (
