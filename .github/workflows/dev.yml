@@ -1,0 +1,40 @@
+name: Deploy main branch to DEV
+
+on:
+  push:
+    branches: ["develop"]
+  workflow_dispatch:
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    name: Build & Deploy Docker Rails / React application
+    environment: dev
+
+    steps:
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs
+          git lfs install
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - name: Build Docker Image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: dev-hous-permit-portal
+          tags: latest ${{ github.sha }}
+          labels: |
+            app=dev-hous-permit-portal
+            git-sha=${{ github.sha }}
+          containerfiles: ./Dockerfile
+          build-args: DEBUG_BUILD=true
+      - name: Push to Openshift Registry using Service Account
+        uses: redhat-actions/push-to-registry@v2.7
+        with:
+          image: dev-hous-permit-portal
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.BUILDER_USERNAME }}
+          password: ${{ secrets.BUILDER_TOKEN }}

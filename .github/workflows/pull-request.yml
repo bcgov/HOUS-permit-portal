@@ -1,0 +1,61 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    branches: ["develop"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run RSpec Test Suite
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://user:password@localhost:5432/test_db
+      ELASITCSEARCH_URL: http://localhost:9200
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.16
+        ports:
+          - 9200:9200
+        options: >-
+          -e "discovery.type=single-node"
+          -e "xpack.security.enabled=false"
+
+    steps:
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs
+          git lfs install
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+      - name: Set up Ruby 3.2.2
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.2"
+      - name: Install Dependencies
+        run: |
+          bundle install
+      - name: Setup Test Database
+        run: |
+          bundle exec rake db:create
+          bundle exec rake db:schema:load
+      - name: Run RSpec
+        run: |
+          bundle exec rspec

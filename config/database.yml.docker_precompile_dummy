@@ -1,0 +1,13 @@
+# A dummy database.yml so we can precompile assets
+
+default: &default
+  adapter: nulldb
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
