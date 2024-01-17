@@ -59,3 +59,17 @@ export enum ESortDirection {
 export enum ETagType {
   requirementBlock = "RequirementBlock",
 }
+
+export enum ERequirementType {
+  text = "text",
+  address = "address",
+  date = "date",
+  number = "number",
+  textArea = "text_area",
+  radio = "radio",
+  multiSelectCheckbox = "multi_select_checkbox",
+  select = "select",
+  signature = "signature",
+  generalContact = "general_contact",
+  fileUpload = "file_upload",
+}

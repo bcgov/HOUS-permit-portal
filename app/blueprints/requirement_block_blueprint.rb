@@ -8,5 +8,5 @@ class RequirementBlockBlueprint < Blueprinter::Base
     requirement_block.to_form_json
   end
 
-  association :requirements, blueprint: RequirementBlueprint
+  association :requirement_block_requirements, blueprint: RequirementBlockRequirementBlueprint
 end

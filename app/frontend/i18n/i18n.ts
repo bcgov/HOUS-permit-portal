@@ -99,6 +99,7 @@ const options = {
           view: "View",
           totalItems: "Total Items",
           doLater: "Do this later",
+          add: "Add",
         },
         jurisdiction: {
           new: {
@@ -154,6 +155,11 @@ const options = {
             createButton: "Create New Requirement Block",
             seeArchivedButton: "See Archived",
           },
+          fieldsDrawer: {
+            formFields: "Form Fields",
+            useButton: "Use",
+            dummyOption: "Option",
+          },
           modals: {
             create: {
               triggerButton: "Create New Requirement Block",
@@ -161,6 +167,8 @@ const options = {
             },
             blockSetupTitle: "Block Setup",
             internalUse: "For internal use only",
+            configureFields: "Configure the form fields below that submitters will see:",
+            noFormFieldsAdded: "No form fields have been added yet, start by clicking the Add button.",
           },
           fields: {
             name: "Name",
@@ -174,6 +182,19 @@ const options = {
             description: "Provide some context for admins and managers for this fieldset.",
             associations: "Assign a tag to help organize and find this requirement block easier.",
             requirementSku: "Generated unique identifier",
+          },
+          requirementTypeLabels: {
+            shortText: "Short Text",
+            address: "Address",
+            date: "Date",
+            number: "Number",
+            textArea: "Text Area",
+            radio: "Select Radio Options",
+            multiSelectCheckbox: "Multi-Select Checkboxes",
+            select: "Single Select Dropdown",
+            signature: "Signature",
+            generalContact: "General Contact",
+            fileUpload: "File Upload",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
         },

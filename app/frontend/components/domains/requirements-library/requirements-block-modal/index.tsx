@@ -16,6 +16,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { BlockSetup } from "./block-setup"
+import { FieldsSetup } from "./fields-setup"
 
 export interface IRequirementBlockForm {
   name: string
@@ -71,8 +72,9 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal()
               </HStack>
             </ModalHeader>
             <ModalBody px={"2.75rem"}>
-              <HStack spacing={9} w={"full"} h={"full"}>
+              <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                 <BlockSetup />
+                <FieldsSetup />
               </HStack>
             </ModalBody>
           </ModalContent>
