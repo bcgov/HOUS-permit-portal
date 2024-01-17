@@ -77,6 +77,8 @@ class Api::RequirementBlocksController < Api::ApplicationController
     params.require(:requirement_block).permit(
       :name,
       :description,
+      :display_name,
+      :display_description,
       :sign_off_role,
       :reviewer_role,
       association_list: [],
