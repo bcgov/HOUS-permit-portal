@@ -1,7 +1,10 @@
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 
-i18n.use(initReactI18next).init({
+export const defaultNS = "translation"
+export const fallbackNS = "translation"
+
+const options = {
   resources: {
     /* English translations */
     en: {
@@ -249,7 +252,13 @@ i18n.use(initReactI18next).init({
   },
   lng: "en", // default language
   fallbackLng: "en",
+  defaultNS,
+  fallbackNS,
   interpolation: { escapeValue: false },
-})
+}
+
+i18n.use(initReactI18next).init(options)
+
+export type TTranslationResources = (typeof options)["resources"]
 
 export default i18n
