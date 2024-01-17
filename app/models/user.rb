@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
   include Devise::JWT::RevocationStrategies::Allowlist
 
   devise :invitable,
@@ -25,6 +26,23 @@ class User < ApplicationRecord
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :unique_bceid
+
+  def search_data
+    {
+      updated_at: updated_at,
+      created_at: created_at,
+      role: role,
+      name: name,
+      username: username,
+      email: email,
+      jurisdiction_id: jurisdiction_id,
+      # last_sign_in: "TODO",
+    }
+  end
+
+  def name
+    "#{first_name} #{last_name}"
+  end
 
   def self.invitable_roles
     %w[reviewer review_manager]

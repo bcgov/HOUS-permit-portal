@@ -1,21 +1,45 @@
 class Api::JurisdictionsController < Api::ApplicationController
-  before_action :set_jurisdiction, only: %i[show users]
+  include Api::Concerns::Search::Jurisdictions
+  include Api::Concerns::Search::JurisdictionUsers
+
+  before_action :set_jurisdiction, only: %i[show search_users]
+  skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    # TODO: Search, sort, pagination
-    @jurisdictions = policy_scope(Jurisdiction).first(10)
-    render_success(@jurisdictions)
+    perform_search
+    authorized_results = apply_search_authorization(@search.results)
+    render_success @search.results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @search.total_pages,
+                       total_count: @search.total_count,
+                       current_page: @search.current_page,
+                     },
+                     blueprint: JurisdictionBlueprint,
+                   }
   end
 
   # GET /api/jurisdictions/:id
   def show
+    authorize @jurisdiction
     render_success(@jurisdiction)
   end
 
-  # GET /api/jurisdictions/:id/users
-  def users
-    # TODO: searchkiq
-    render_success(@jurisdiction.users)
+  # POST /api/jurisdictions/:id/users
+  def search_users
+    authorize @jurisdiction
+    perform_user_search
+    render_success @user_search.results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @user_search.total_pages,
+                       total_count: @user_search.total_count,
+                       current_page: @user_search.current_page,
+                     },
+                     blueprint: UserBlueprint,
+                   }
   end
 
   private

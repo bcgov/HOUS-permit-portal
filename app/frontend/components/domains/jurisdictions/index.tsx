@@ -1,160 +1,109 @@
-import {
-  Button,
-  Flex,
-  HStack,
-  Heading,
-  Select,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tooltip,
-  Tr,
-} from "@chakra-ui/react"
-import { faSort } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Box, Button, Container, Flex, Grid, GridItem, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { Paginator } from "../../shared/base/paginator"
-import { FullWhiteContainer } from "../../shared/containers/full-white-container"
-import { SearchFormControl } from "../../shared/form/search-form-control"
+import { Paginator } from "../../shared/base/inputs/paginator"
+import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { RouterLink } from "../../shared/navigation/router-link"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { Can } from "../../shared/user/can"
+import { GridHeaders } from "./grid-header"
 
-interface IJurisdictionIndexScreenProps {}
-
-export const JurisdictionIndexScreen = observer(({}: IJurisdictionIndexScreenProps) => {
-  const { t } = useTranslation()
-  const formMethods = useForm({
-    mode: "onChange",
-    defaultValues: {
-      jurisdictionSearch: "",
-    },
-  })
-  const { handleSubmit, register, formState } = formMethods
+const sharedGridItemsStyles: Partial<GridItemProps> = {
+  p: 4,
+  display: "flex",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  role: "cell",
+  color: "text.primary",
+}
+export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
   const { jurisdictionStore } = useMst()
-  const { fetchJurisdictions, jurisdictions } = jurisdictionStore
+  const {
+    tableJurisdictions,
+    currentPage,
+    totalPages,
+    totalCount,
+    countPerPage,
+    fetchJurisdictions,
+    handleCountPerPageChange,
+    handlePageChange,
+  } = jurisdictionStore
+  const { t } = useTranslation()
 
   useEffect(() => {
     fetchJurisdictions()
   }, [])
 
-  interface ITableHeader {
-    key: string
-    header: string
-  }
-
-  const headers: ITableHeader[] = [
-    { key: "name", header: t("jurisdiction.name") },
-    { key: "managers", header: t("jurisdiction.managers") },
-    { key: "reviewers", header: t("jurisdiction.reviewers") },
-    { key: "applicationsReceived", header: t("jurisdiction.applicationsReceived") },
-    { key: "templatesUsed", header: t("jurisdiction.templatesUsed") },
-  ]
-
-  const onSubmit = async (formData) => {
-    // if (await searchJurisdictions(formData)) {
-    //   // TODO
-    // }
-  }
-
   return (
-    <FullWhiteContainer containerMaxW="container.lg">
-      <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex direction="column" gap={8}>
-            <Flex gap={6}>
-              <Flex direction="column" flex={1}>
-                <Heading as="h1">{t("jurisdiction.indexTitle")}</Heading>
-                <Text>{t("jurisdiction.indexDescription")}</Text>
-              </Flex>
-              <Can action="jurisdiction:create">
-                <RouterLinkButton alignSelf="flex-end" to={"/jurisdictions/new"}>
-                  {t("jurisdiction.createNew")}
-                </RouterLinkButton>
-              </Can>
-            </Flex>
+    <Container maxW="container.lg" p={8} as={"main"}>
+      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
+        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
+          <Box>
+            <Heading fontSize={"4xl"} color={"text.primary"}>
+              {t("jurisdiction.index.title")}
+            </Heading>
+            <Text color={"text.secondary"} mt={1}>
+              {t("jurisdiction.index.description")}
+            </Text>
+          </Box>
+          <Button variant={"primary"}>{t("jurisdiction.index.createButton")}</Button>
+        </Flex>
 
-            <TableContainer borderRadius="md" border="1px solid" borderColor="border.light">
-              <Flex justify="space-between" px={6} py={4} bg="greys.grey10" w="full" align="center">
-                <Text>{t("jurisdiction.localGovernments")}</Text>
-                <SearchFormControl fieldName="jurisdictionSearch" maxW="250px" />
-              </Flex>
-              <Table variant="primary">
-                <Thead>
-                  <Tr>
-                    {headers.map((header) => (
-                      <Th key={header.key} pl={0}>
-                        <Flex
-                          as={Button}
-                          textAlign="left"
-                          textTransform="capitalize"
-                          bg="greys.white"
-                          onClick={() => {}}
-                          align="center"
-                          justify="space-between"
-                          w="full"
-                          border="2px solid"
-                          borderColor="transparent"
-                          borderRightColor="border.light"
-                          gap={4}
-                        >
-                          <Text whiteSpace="normal" overflowWrap="normal" noOfLines={2} fontSize="sm">
-                            {header.header}
-                          </Text>
-                          <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faSort} />
-                        </Flex>
-                      </Th>
-                    ))}
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {jurisdictions.map((j, index) => (
-                    <Tr key={index}>
-                      <Tooltip label={j.reverseQualifiedName} placement="top" hasArrow>
-                        <Td fontWeight="bold" maxW="290px" isTruncated>
-                          {j.reverseQualifiedName}
-                        </Td>
-                      </Tooltip>
-                      <Td fontSize="sm">{j.reviewManagersSize}</Td>
-                      <Td fontSize="sm">{j.reviewersSize}</Td>
-                      <Td fontSize="sm">{j.permitApplicationsSize}</Td>
-                      <Td fontSize="sm">TODO</Td>
-                      <Td fontSize="sm" p={0} pr={4}>
-                        <HStack gap={4}>
-                          <RouterLink to={`${j.id}/invite`}>{t("user.invite")}</RouterLink>
-                          <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
-                          <RouterLink to={`${j.id}`}>{t("ui.manage")}</RouterLink>
-                        </HStack>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </TableContainer>
-            <Flex justify="space-between">
-              <HStack gap={4}>
-                <Select w={20}>
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                </Select>
-                <Text>
-                  {`N`} {t("ui.totalItems")}
-                </Text>
-              </HStack>
-              <Paginator />
-            </Flex>
-          </Flex>
-        </form>
-      </FormProvider>
-    </FullWhiteContainer>
+        <Grid
+          mt={3}
+          role={"table"}
+          templateColumns="3fr repeat(4, 1fr) 2fr"
+          w="full"
+          maxW={"full"}
+          overflow={"auto"}
+          sx={{
+            borderCollapse: "separate",
+            ".jurisdiction-index-grid-row:not(:last-of-type) > div": {
+              borderBottom: "1px solid",
+              borderColor: "border.light",
+            },
+          }}
+          border={"1px solid"}
+          borderColor={"border.light"}
+          borderRadius={"sm"}
+        >
+          <GridHeaders />
+          {tableJurisdictions.map((j) => {
+            return (
+              <Box key={j.id} className={"jurisdiction-index-grid-row"} role={"row"} display={"contents"}>
+                <GridItem {...sharedGridItemsStyles} fontWeight={700}>
+                  {j.reverseQualifiedName}
+                </GridItem>
+                <GridItem {...sharedGridItemsStyles}>{j.reviewManagersSize}</GridItem>
+                <GridItem {...sharedGridItemsStyles}>{j.reviewersSize}</GridItem>
+                <GridItem {...sharedGridItemsStyles}>{j.permitApplicationsSize}</GridItem>
+                <GridItem {...sharedGridItemsStyles}>todo</GridItem>
+                <GridItem {...sharedGridItemsStyles}>
+                  <Flex justify="space-between" w="full">
+                    <RouterLink to={`${j.id}/invite`}>{t("user.invite")}</RouterLink>
+                    <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
+                    <RouterLink to={`${j.id}`}>{t("ui.manage")}</RouterLink>
+                  </Flex>
+                </GridItem>
+              </Box>
+            )
+          })}
+        </Grid>
+        <Flex w={"full"} justifyContent={"space-between"}>
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
+          <Paginator
+            current={currentPage}
+            total={totalCount}
+            totalPages={totalPages}
+            pageSize={countPerPage}
+            handlePageChange={handlePageChange}
+          />
+        </Flex>
+      </VStack>
+    </Container>
   )
 })

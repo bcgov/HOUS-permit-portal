@@ -1,4 +1,6 @@
 class Jurisdiction < ApplicationRecord
+  searchkick searchable: %i[reverse_qualified_name], word_start: %i[reverse_qualified_name]
+
   # Associations
   has_many :permit_applications
   has_many :contacts, dependent: :destroy
@@ -9,6 +11,17 @@ class Jurisdiction < ApplicationRecord
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
   validate :has_correct_locality_type
+
+  def search_data
+    {
+      reverse_qualified_name: reverse_qualified_name,
+      updated_at: updated_at,
+      review_managers_size: review_managers_size,
+      reviewers_size: reviewers_size,
+      permit_applications_size: permit_applications_size,
+      # templates_used: "TODO",
+    }
+  end
 
   def users
     review_managers + reviewers

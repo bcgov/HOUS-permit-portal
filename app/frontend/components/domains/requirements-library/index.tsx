@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Container,
   Flex,
   Grid,
   GridItem,
@@ -8,7 +9,6 @@ import {
   Heading,
   HStack,
   ListItem,
-  Select,
   Tag,
   Text,
   UnorderedList,
@@ -21,7 +21,8 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { Paginator } from "../../shared/base/paginator"
+import { Paginator } from "../../shared/base/inputs/paginator"
+import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { GridHeaders } from "./grid-header"
 
 const sharedGridItemsStyles: Partial<GridItemProps> = {
@@ -51,8 +52,8 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
   }, [])
 
   return (
-    <Box w={"full"} h={"full"} mx={"auto"} bg={"white"}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"} p={8} maxW={"1170px"} mx={"auto"} as={"main"}>
+    <Container maxW="container.lg" p={8} as="main">
+      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading fontSize={"4xl"} color={"text.primary"}>
@@ -128,21 +129,11 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           })}
         </Grid>
         <Flex w={"full"} justifyContent={"space-between"}>
-          <HStack gap={4}>
-            <Select
-              aria-label={"Number of requirement Blocks per page"}
-              w={20}
-              onChange={(e) => handleCountPerPageChange(Number(e.target.value))}
-              value={countPerPage}
-            >
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-            </Select>
-            <Text>
-              {totalCount} {t("ui.totalItems")}
-            </Text>
-          </HStack>
+          <PerPageSelect
+            handleCountPerPageChange={handleCountPerPageChange}
+            countPerPage={countPerPage}
+            totalCount={totalCount}
+          />
           <Paginator
             current={currentPage}
             total={totalCount}
@@ -160,6 +151,6 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           {t("requirementsLibrary.index.seeArchivedButton")}
         </Button>
       </VStack>
-    </Box>
+    </Container>
   )
 })

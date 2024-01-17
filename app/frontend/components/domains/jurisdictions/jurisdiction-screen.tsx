@@ -8,8 +8,9 @@ import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
+import { ErrorScreen } from "../../shared/base/error-screen"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ReadOnlySlate } from "../../shared/base/read-only-slate"
-import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -41,13 +42,8 @@ export const JurisdictionScreen = observer(() => {
     )
   }
 
-  if (!currentJurisdiction) {
-    return (
-      <Flex as="main" w="full" bg="greys.white">
-        <SharedSpinner />
-      </Flex>
-    )
-  }
+  if (error) return <ErrorScreen />
+  if (!currentJurisdiction) return <LoadingScreen />
 
   const { contacts, name, checklistSlateData, lookOutSlateData } = currentJurisdiction
 

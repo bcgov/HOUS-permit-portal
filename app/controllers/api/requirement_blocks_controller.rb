@@ -4,14 +4,11 @@ class Api::RequirementBlocksController < Api::ApplicationController
   include Api::Concerns::Search::RequirementBlocks
 
   before_action :set_requirement_block, only: %i[show update destroy]
-  # searchkick cannot be called on collections and pundit cannot policy scope the searchkick result
-  # instead, we perform authorization inside the searchkick search and skip pundit
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    # TODO: add authorization inside searchkick search
     perform_search
-
+    authorized_results = apply_search_authorization(@search.results)
     render_success @search.results,
                    nil,
                    {
