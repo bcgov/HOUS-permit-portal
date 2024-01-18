@@ -92,4 +92,4 @@ if RequirementBlock.all.blank?
   end
 end
 
-User.reindex!
+User.reindex

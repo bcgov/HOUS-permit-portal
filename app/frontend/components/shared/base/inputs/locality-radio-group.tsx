@@ -20,7 +20,6 @@ export const LocalityRadioGroup = observer(({ ...rest }: ILocalityRadioGroupProp
   useEffect(() => {
     fetchLocalityTypeOptions()
   }, [])
-
   return localityTypeOptions?.length > 0 ? (
     <Box w="full" {...rest}>
       <Text mb={1}>{t("jurisdiction.fields.localityType")}</Text>

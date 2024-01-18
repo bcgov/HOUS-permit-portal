@@ -1,7 +1,10 @@
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 
-i18n.use(initReactI18next).init({
+export const defaultNS = "translation"
+export const fallbackNS = "translation"
+
+const options = {
   resources: {
     /* English translations */
     en: {
@@ -9,6 +12,10 @@ i18n.use(initReactI18next).init({
         auth: {
           login: "Login",
           logout: "Logout",
+          submit: "Submit",
+          or: "or",
+          bceid_login: "Login with BCeID",
+          accept_invite_with_bceid: "Connect with BCeID",
           role: "Role",
           loginInstructions: "Enter the username for your Digital Building Permit Account below.",
           usernameLabel: "Username",
@@ -74,6 +81,8 @@ i18n.use(initReactI18next).init({
         },
         ui: {
           back: "Back",
+          yes: "Yes",
+          no: "No",
           show: "Show",
           hide: "Hide",
           search: "Search",
@@ -217,12 +226,20 @@ i18n.use(initReactI18next).init({
           },
         },
         site: {
-          navBarTitle: "Building Permit Hub",
+          title: "Building Permit Hub",
+          titleLong: "BC Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
           beta: "Beta",
           linkHome: "Navigate home",
+          didYouFind: "Did you find what you were looking for?",
+          territorialAcknowledgement:
+            "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
           home: "Home",
-          title: "Digital Permit Tool",
+          contact: "Contact us",
+          help: "Help",
+          aboutTitle: "About",
+          disclaimerTitle: "Disclaimer",
+          copyrightHolder: "Government of British Columbia.",
           description: "Lorem ipsum here is the site description",
           keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           activePermits: "Active Permits",
@@ -246,6 +263,10 @@ i18n.use(initReactI18next).init({
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
-})
+}
+
+i18n.use(initReactI18next).init(options)
+
+export type TTranslationResources = (typeof options)["resources"]
 
 export default i18n

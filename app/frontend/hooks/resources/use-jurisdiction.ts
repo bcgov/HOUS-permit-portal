@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
+import { isUUID } from "../../utils/utility-funcitons"
 
 export const useJurisdiction = () => {
   const { jurisdictionId } = useParams()
@@ -15,8 +16,10 @@ export const useJurisdiction = () => {
   useEffect(() => {
     ;(async () => {
       try {
-        const j = await fetchJurisdiction(jurisdictionId)
-        setCurrentJurisdiction(j)
+        if (isUUID(jurisdictionId)) {
+          const j = await fetchJurisdiction(jurisdictionId)
+          setCurrentJurisdiction(j)
+        }
       } catch (e) {
         setError(e instanceof Error ? e : new Error(t("errors.fetchJurisdiction")))
       }

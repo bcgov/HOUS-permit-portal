@@ -16,6 +16,7 @@ import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/users"
 import { LandingScreen } from "../landing"
+import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { PermitApplicationNewScreen } from "../permit-application/new"
 import { PermitApplicationShowScreen } from "../permit-application/show"
@@ -110,6 +111,7 @@ const AppRoutes = observer(() => {
           <Route path="/register" element={<RegisterScreen />} />
         </>
       )}
+      <Route path="/contact" element={<ContactScreen />} />
     </Routes>
   )
 })

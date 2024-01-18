@@ -49,6 +49,13 @@ en:
       password_updated:
         title: "Password updated"
         message: "Your password has been changed successfully."
+    omniauth:
+      failure:
+        title: BCeID login failed
+        message: Please try again or contact your adminstrator for support
+      failure_with_message:
+        title: BCeID login failed
+        message: "%{error_message}"
     user:
       login_error:
         title: Failed to login.
@@ -122,3 +129,13 @@ en:
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found
+  activerecord:
+    attributes:
+      user:
+        uid: BCeID
+    errors:
+      models:
+        user:
+          attributes:
+            uid:
+              taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
