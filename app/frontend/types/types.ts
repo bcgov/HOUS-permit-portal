@@ -15,8 +15,8 @@ export interface ISort<TField = string> {
   direction: ESortDirection
 }
 
-export interface IOption<TField = string> {
-  value: TField
+export interface IOption<TValue = string> {
+  value: TValue
   label?: string
 }
 

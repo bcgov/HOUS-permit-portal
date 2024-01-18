@@ -1,7 +1,10 @@
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 
-i18n.use(initReactI18next).init({
+export const defaultNS = "translation"
+export const fallbackNS = "translation"
+
+const options = {
   resources: {
     /* English translations */
     en: {
@@ -9,6 +12,10 @@ i18n.use(initReactI18next).init({
         auth: {
           login: "Login",
           logout: "Logout",
+          submit: "Submit",
+          or: "or",
+          bceid_login: "Login with BCeID",
+          accept_invite_with_bceid: "Connect with BCeID",
           role: "Role",
           loginInstructions: "Enter the username for your Digital Building Permit Account below.",
           usernameLabel: "Username",
@@ -246,6 +253,10 @@ i18n.use(initReactI18next).init({
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
-})
+}
+
+i18n.use(initReactI18next).init(options)
+
+export type TTranslationResources = (typeof options)["resources"]
 
 export default i18n

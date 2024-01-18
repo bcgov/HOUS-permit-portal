@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
+import { AbsoluteCenter, Box, Button, Divider, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -35,58 +35,52 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
 
   return (
     <CenterContainer>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <Flex direction="column" gap={6} w="full" p={10} border="solid 1px" borderColor="border.light" bg="greys.white">
+        <Heading>{t("auth.login")}</Heading>
+        <form action="/api/auth/keycloak" method="post">
+          <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
+          <Button variant="primary" w="full" type="submit">
+            {t("auth.bceid_login")}
+          </Button>
+        </form>
+        <Box position="relative" py={2}>
+          <Divider borderBottomWidth={2} />
+          <AbsoluteCenter bg="white" px="4" textTransform="uppercase" fontSize="sm" fontWeight="medium">
+            {t("auth.or")}
+          </AbsoluteCenter>
+        </Box>
         <FormProvider {...formMethods}>
-          <Flex
-            direction="column"
-            gap={6}
-            w="full"
-            p={10}
-            border="solid 1px"
-            borderColor="border.light"
-            bg="greys.white"
-          >
-            <Flex gap={2} direction="column">
-              <Heading>{t("auth.login")}</Heading>
-              <Text>{t("auth.loginInstructions")}</Text>
-            </Flex>
-            <Box>
-              <UsernameFormControl autoFocus />
-              <PasswordFormControl />
-            </Box>
-
-            <HStack gap={4}>
-              <Button
-                variant="primary"
-                type="submit"
-                isLoading={isSubmitting}
-                loadingText={t("ui.loading")}
-                isDisabled={hasErrors}
-              >
-                {t("auth.login")}
-              </Button>
-              <BackButton isDisabled={isSubmitting} />
-            </HStack>
-
-            <form action="/api/auth/keycloakopenid" method="post">
-              <input
-                type="hidden"
-                name="authenticity_token"
-                value={document.querySelector("[name=csrf-token]").content}
-              />
-              <Button type="submit">Login with BCeID</Button>
-            </form>
-
-            <Flex gap={2}>
-              <RouterLink to="/forgot-password" state={{ username: usernameWatch }}>
-                {t("auth.forgotPassword")}
-              </RouterLink>
-              {" | "}
-              <RouterLink to="/register">{t("auth.register")}</RouterLink>
-            </Flex>
-          </Flex>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <VStack spacing={4}>
+              <Text>{t("auth.loginInstructions")}</Text>]{" "}
+              <Box w="full">
+                <UsernameFormControl autoFocus />
+                <PasswordFormControl />
+              </Box>
+              <HStack gap={4} w="full">
+                <Button
+                  variant="primary"
+                  type="submit"
+                  isLoading={isSubmitting}
+                  loadingText={t("ui.loading")}
+                  isDisabled={hasErrors}
+                >
+                  {t("auth.login")}
+                </Button>
+                <BackButton isDisabled={isSubmitting} />
+              </HStack>
+            </VStack>
+          </form>
         </FormProvider>
-      </form>
+
+        <Flex gap={2}>
+          <RouterLink to="/forgot-password" state={{ username: usernameWatch }}>
+            {t("auth.forgotPassword")}
+          </RouterLink>
+          {" | "}
+          <RouterLink to="/register">{t("auth.register")}</RouterLink>
+        </Flex>
+      </Flex>
     </CenterContainer>
   )
 }
