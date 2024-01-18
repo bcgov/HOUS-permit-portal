@@ -23,6 +23,12 @@ const labelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
 }
 
+type TRequirementPropsMap = {
+  [ERequirementType.text]: { id: string }
+}
+
+type TRequirementProps<T extends ERequirementType> = T extends keyof TRequirementPropsMap ? TRequirementPropsMap[T] : {}
+
 export class RequirementFieldDisplayRenderer {
   readonly requirementType: ERequirementType
 
@@ -34,11 +40,11 @@ export class RequirementFieldDisplayRenderer {
     return requirementType in RequirementFieldDisplayRenderer.prototype
   }
 
-  render(): JSX.Element {
-    return this?.[this.requirementType]?.() ?? null
+  render<T extends ERequirementType>(props?: TRequirementProps<T>): JSX.Element {
+    return this?.[this.requirementType]?.(props ?? {}) ?? null
   }
 
-  [ERequirementType.text]() {
+  [ERequirementType.text]({}: TRequirementProps<ERequirementType.text>) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>

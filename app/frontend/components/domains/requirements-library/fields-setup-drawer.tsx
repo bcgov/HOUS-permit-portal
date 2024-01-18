@@ -24,7 +24,7 @@ import { RequirementFieldDisplayRenderer } from "./requirement-field-display-ren
 interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
-  onUse?: (requirementType: ERequirementType, closeDrawer: () => void) => void
+  onUse?: (requirementType: ERequirementType, closeDrawer?: () => void) => void
 }
 
 export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
