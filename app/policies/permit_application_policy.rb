@@ -1,4 +1,8 @@
 class PermitApplicationPolicy < ApplicationPolicy
+  def create
+    user.submitter?
+  end
+
   class Scope < Scope
     def resolve
       if user.super_admin?

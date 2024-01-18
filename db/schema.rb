@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_09_231303) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_12_012855) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -65,7 +65,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_09_231303) do
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "permit_type_id", null: false
+    t.uuid "activity_id", null: false
+    t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
+    t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
   end
 
@@ -219,6 +223,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_09_231303) do
   add_foreign_key "contacts", "jurisdictions"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "permit_applications", "jurisdictions"
+  add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
+  add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "requirement_block_requirements", "requirement_blocks"
   add_foreign_key "requirement_block_requirements", "requirements"

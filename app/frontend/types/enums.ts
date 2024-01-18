@@ -6,13 +6,13 @@ export enum EFlashMessageStatus {
 }
 
 export enum EPermitType {
-  residential = "residential",
+  low_residential = "low_residential",
+  medium_residential = "medium_residential",
 }
 
-export enum EBuildingType {
-  detatched = "detatched",
-  semiDetatched = "semi_detatched",
-  smallAppartment = "small_appartment",
+export enum EActivity {
+  new_construction = "new_construction",
+  demolition = "demolition",
 }
 
 export enum EPermitApplicationStatus {
