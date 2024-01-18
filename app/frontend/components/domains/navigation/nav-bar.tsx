@@ -6,7 +6,6 @@ import {
   Flex,
   HStack,
   Heading,
-  IconButton,
   Image,
   Menu,
   MenuButton,
@@ -16,8 +15,7 @@ import {
   Spacer,
   Text,
 } from "@chakra-ui/react"
-import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -60,16 +58,23 @@ export const NavBar = observer(() => {
             </RouterLink>
             <Show above="md">
               <Heading fontSize="2xl" fontWeight="normal">
-                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.navBarTitle")}
+                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Heading>
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}
               </Text>
             </Show>
             <Spacer />
-            <HStack gap={2}>
+            <HStack gap={3}>
               {currentUser?.isSubmitter && <NavBarSearch />}
               {currentUser?.jurisdiction && <Text color="greys.white">{currentUser.jurisdiction.name}</Text>}
+              {currentUser?.isReviewer ||
+                currentUser?.isReviewManager ||
+                (currentUser?.isSuperAdmin && (
+                  <Text color="greys.white" textTransform="capitalize">
+                    {t(`user.roles.${currentUser.role}`)}
+                  </Text>
+                ))}
               <NavBarMenu isAdmin={currentUser?.isAdmin} />
             </HStack>
           </Flex>
@@ -84,10 +89,7 @@ const NavBarSearch = () => {
   const { t } = useTranslation()
 
   return (
-    <Button
-      variant="tertiary"
-      rightIcon={<FontAwesomeIcon style={{ height: "14px", width: "14px" }} icon={faSearch} />}
-    >
+    <Button variant="tertiary" rightIcon={<MagnifyingGlass size={16} />}>
       {t("ui.search")}
     </Button>
   )
@@ -120,15 +122,17 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   return (
     <Menu>
       <MenuButton
-        as={IconButton}
+        as={Button}
         borderRadius="lg"
         border={isAdmin ? "solid white" : "solid black"}
         borderWidth="1px"
         p={3}
         variant={isAdmin ? "primary" : "primaryInverse"}
         aria-label="menu dropdown button"
-        icon={<FontAwesomeIcon style={{ height: "14px", width: "14px" }} icon={faBars} />}
-      />
+        leftIcon={<List size={16} weight="bold" color={isAdmin ? "white" : "black"} />}
+      >
+        {t("site.menu")}
+      </MenuButton>
       <MenuList>
         {loggedIn ? (
           <>

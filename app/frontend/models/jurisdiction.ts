@@ -15,6 +15,8 @@ export const JurisdictionModel = types
       name: types.string,
       qualifiedName: types.string,
       reverseQualifiedName: types.string,
+      localityType: types.string,
+      qualifier: types.string,
       reviewManagersSize: types.number,
       reviewersSize: types.number,
       permitApplicationsSize: types.number,

@@ -118,6 +118,13 @@ en:
       delete_error:
         title: Oops
         message: "Something went wrong deleting the requirement block."
+    jurisdiction:
+      create_error:
+        title: Oops
+        message: "%{error_message}"
+      create_success:
+        title: ""
+        message: "New jurisdiction created successfully!"
     misc:
       not_found_error:
         title: "Oops"

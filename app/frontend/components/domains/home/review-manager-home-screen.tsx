@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { faBookOpen, faFile, faInbox, faUsers } from "@fortawesome/free-solid-svg-icons"
+import { BookOpen, FileText, Tray, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -25,26 +25,26 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
               <HomeScreenBox
                 title={t("home.submissionsInboxTitle")}
                 description={t("home.submissionsInboxDescription")}
-                icon={faInbox}
+                icon={<Tray size={24} />}
                 href={`${jurisdiction.id}/submission-inbox`}
                 useViewText
               />
               <HomeScreenBox
                 title={t("home.permitsTitle")}
                 description={t("home.permitsDescription")}
-                icon={faFile}
+                icon={<FileText size={24} />}
                 href={`${jurisdiction.id}/permit-applications`}
               />{" "}
               <HomeScreenBox
                 title={t("home.contentManagementTitle")}
                 description={t("home.contentManagementDescription")}
-                icon={faBookOpen}
+                icon={<BookOpen size={24} />}
                 href={`${jurisdiction.id}/content-mangement`}
               />
               <HomeScreenBox
                 title={t("home.userManagementTitle")}
                 description={t("home.userManagementDescription")}
-                icon={faUsers}
+                icon={<Users size={24} />}
                 href={`${jurisdiction.id}/users`}
               />
             </Flex>

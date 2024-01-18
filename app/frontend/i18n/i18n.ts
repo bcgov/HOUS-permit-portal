@@ -81,6 +81,8 @@ const options = {
         },
         ui: {
           back: "Back",
+          yes: "Yes",
+          no: "No",
           show: "Show",
           hide: "Hide",
           search: "Search",
@@ -224,12 +226,20 @@ const options = {
           },
         },
         site: {
-          navBarTitle: "Building Permit Hub",
+          title: "Building Permit Hub",
+          titleLong: "BC Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
           beta: "Beta",
           linkHome: "Navigate home",
+          didYouFind: "Did you find what you were looking for?",
+          territorialAcknowledgement:
+            "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
           home: "Home",
-          title: "Digital Permit Tool",
+          contact: "Contact us",
+          help: "Help",
+          aboutTitle: "About",
+          disclaimerTitle: "Disclaimer",
+          copyrightHolder: "Government of British Columbia.",
           description: "Lorem ipsum here is the site description",
           keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           activePermits: "Active Permits",
@@ -252,8 +262,6 @@ const options = {
   },
   lng: "en", // default language
   fallbackLng: "en",
-  defaultNS,
-  fallbackNS,
   interpolation: { escapeValue: false },
 }
 

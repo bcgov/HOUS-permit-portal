@@ -1,6 +1,5 @@
 import { Input, InputGroup, InputGroupProps, InputLeftElement, InputProps } from "@chakra-ui/react"
-import { faSearch } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ChangeEvent, useCallback } from "react"
 import { ISearch } from "../../../lib/create-search-model"
@@ -39,13 +38,7 @@ export const SearchInput = observer(function SearchInput<TSearchModel extends IS
         {...inputProps}
       />
       <InputLeftElement color={"greys.grey01"}>
-        <FontAwesomeIcon
-          style={{
-            width: "14px",
-            height: "14px",
-          }}
-          icon={faSearch}
-        />
+        <MagnifyingGlass size={16} />,
       </InputLeftElement>
     </InputGroup>
   )

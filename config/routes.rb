@@ -39,9 +39,10 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
 
-    resources :jurisdictions, only: %i[index show] do
+    resources :jurisdictions, only: %i[index show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
+      get "locality_type_options", on: :collection
     end
     resource :profile, only: [:update], controller: "users"
   end

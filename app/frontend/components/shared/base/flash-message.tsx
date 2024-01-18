@@ -1,11 +1,5 @@
 import { Box, Flex, Heading, Text, ToastPosition, ToastProps, useToast } from "@chakra-ui/react"
-import {
-  faCircleCheck,
-  faCircleExclamation,
-  faCircleInfo,
-  faTriangleExclamation,
-} from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useMst } from "../../../setup/root"
@@ -34,10 +28,10 @@ export const FlashMessage = observer(() => {
 
 const CustomToast = ({ title, description, status }: ToastProps) => {
   const iconMap = {
-    success: faCircleCheck,
-    warning: faTriangleExclamation,
-    error: faCircleExclamation,
-    info: faCircleInfo,
+    success: <CheckCircle size={20} />,
+    warning: <Warning size={20} />,
+    error: <WarningCircle size={20} />,
+    info: <Info size={20} />,
   }
 
   return (
@@ -51,9 +45,7 @@ const CustomToast = ({ title, description, status }: ToastProps) => {
       p={4}
     >
       <Flex align="flex-start" gap={2}>
-        <Box color={`semantic.${status}`}>
-          <FontAwesomeIcon style={{ height: 20, width: 20 }} icon={iconMap[status]} />
-        </Box>
+        <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
         <Flex direction="column" gap={2}>
           {title && <Heading fontSize="md">{title}</Heading>}
           {description && <Text>{description}</Text>}

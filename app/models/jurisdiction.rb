@@ -4,13 +4,25 @@ class Jurisdiction < ApplicationRecord
   # Associations
   has_many :permit_applications
   has_many :contacts, dependent: :destroy
-  has_many :review_managers, -> { where(role: User.roles[:review_manager]) }, class_name: "User"
-  has_many :reviewers, -> { where(role: User.roles[:reviewer]) }, class_name: "User"
+  has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
-  validate :has_correct_locality_type
+
+  before_validation :set_type_based_on_locality
+
+  def review_managers
+    users.review_managers
+  end
+
+  def reviewers
+    users.reviewers
+  end
+
+  def self.locality_types
+    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(:locality_type)
+  end
 
   def search_data
     {
@@ -23,14 +35,12 @@ class Jurisdiction < ApplicationRecord
     }
   end
 
-  def users
-    review_managers + reviewers
+  def self.custom_titleize_locality_type(locality_type)
+    locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
   end
 
   def qualifier
-    custom_titleized_locality_type =
-      locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
-    "#{custom_titleized_locality_type} of"
+    "#{Jurisdiction.custom_titleize_locality_type(locality_type)} of"
   end
 
   def qualified_name
@@ -55,7 +65,12 @@ class Jurisdiction < ApplicationRecord
 
   private
 
-  def has_correct_locality_type
-    raise NotImplementedError, "Regional and Sub districts implement this method"
+  def set_type_based_on_locality
+    case locality_type
+    when RegionalDistrict.locality_type
+      self.type = "RegionalDistrict"
+    else
+      self.type = "SubDistrict"
+    end
   end
 end

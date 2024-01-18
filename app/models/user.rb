@@ -1,5 +1,12 @@
 class User < ApplicationRecord
   searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
+
+  scope :review_managers, -> { where(role: User.roles[:review_manager]) }
+  scope :reviewers, -> { where(role: User.roles[:reviewer]) }
+
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
 
   devise :invitable,
@@ -26,6 +33,23 @@ class User < ApplicationRecord
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :unique_bceid
+
+  def search_data
+    {
+      updated_at: updated_at,
+      created_at: created_at,
+      role: role,
+      name: name,
+      username: username,
+      email: email,
+      jurisdiction_id: jurisdiction_id,
+      # last_sign_in: "TODO",
+    }
+  end
+
+  def name
+    "#{first_name} #{last_name}"
+  end
 
   def search_data
     {

@@ -1,10 +1,9 @@
 import { Box, Button, IconButton } from "@chakra-ui/react"
 import { css } from "@emotion/react"
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Pagination, { PaginationProps } from "rc-pagination"
 import "rc-pagination/assets/index.css"
 
+import { CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 
@@ -52,7 +51,7 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
           mx={1}
           icon={
             <Box color="theme.blue">
-              <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faChevronLeft} />
+              <CaretLeft size={16} />
             </Box>
           }
           onClick={() => handlePageChange(pageToTransitionTo)}
@@ -71,7 +70,7 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
           mx={1}
           icon={
             <Box color="theme.blue">
-              <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faChevronRight} />
+              <CaretRight size={16} />
             </Box>
           }
           onClick={() => handlePageChange(pageToTransitionTo)}
@@ -86,7 +85,12 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
 
   return (
     <Box display="flex" justifyContent="center" css={paginationItemStyle}>
-      <Pagination style={{ border: 0 }} itemRender={ItemRender} {...paginationProps} />
+      <Pagination
+        style={{ border: 0 }}
+        itemRender={ItemRender}
+        {...paginationProps}
+        onChange={() => console.log("changed")}
+      />
     </Box>
   )
 })

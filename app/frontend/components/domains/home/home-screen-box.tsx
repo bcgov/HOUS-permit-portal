@@ -1,13 +1,11 @@
 import { Box, Flex, Heading, Text } from "@chakra-ui/react"
-import { IconProp } from "@fortawesome/fontawesome-svg-core"
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import React from "react"
+import { CaretRight } from "@phosphor-icons/react"
+import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 interface IHomeScreenBoxProps {
-  icon: IconProp
+  icon: ReactNode
   href: string
   title: string
   description: string
@@ -22,18 +20,14 @@ export const HomeScreenBox = ({ icon, title, description, href, useViewText }: I
       <Flex direction={{ base: "column", md: "row" }} gap={8} align="center">
         <Flex direction="column" gap={3} flex={1}>
           <Flex color="text.link">
-            <FontAwesomeIcon style={{ height: 24, width: 24 }} icon={icon} />
+            {icon}
             <Heading fontSize="xl" ml={2}>
               {title}
             </Heading>
           </Flex>
           <Text ml={8}>{description}</Text>
         </Flex>
-        <RouterLinkButton
-          to={href}
-          variant="tertiary"
-          rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
-        >
+        <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />}>
           <Heading fontSize="lg" color="text.link">
             {useViewText ? t("ui.view") : t("ui.manage")}
           </Heading>
