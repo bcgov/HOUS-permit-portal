@@ -34,34 +34,23 @@ export const FieldsSetup = observer(function FieldsSetup() {
         {t("requirementsLibrary.modals.configureFields")}
       </Text>
 
-      {!hasFields && (
-        <Box
-          as={"section"}
-          px={6}
-          py={"1.875rem"}
-          w={"full"}
-          border={"1px solid"}
-          borderColor={"border.light"}
-          borderRadius={"sm"}
-          mt={4}
-        >
-          <Flex w={"full"} justifyContent={"space-between"}>
-            <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-            <FieldsSetupDrawer onUse={onUseRequirement} />
-          </Flex>
+      <Box as={"section"} w={"full"} border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"} mt={4}>
+        <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>
+          <EditableInputWithControls
+            initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
+            editableInputProps={register("displayName", { required: true })}
+            color={R.isEmpty(watchedDisplayName) ? "text.link" : undefined}
+          />
+        </Flex>
+        <Box py={8} px={6}>
+          {!hasFields && (
+            <Flex w={"full"} justifyContent={"space-between"}>
+              <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
+              <FieldsSetupDrawer onUse={onUseRequirement} />
+            </Flex>
+          )}
         </Box>
-      )}
-      {hasFields && (
-        <Box as={"section"} w={"full"} border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"} mt={4}>
-          <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>
-            <EditableInputWithControls
-              initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
-              editableInputProps={register("displayName", { required: true })}
-              color={R.isEmpty(watchedDisplayName) ? "text.link" : undefined}
-            />
-          </Flex>
-        </Box>
-      )}
+      </Box>
     </Flex>
   )
 })
