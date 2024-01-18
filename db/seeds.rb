@@ -8,6 +8,8 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+PermitClassificationSeeder.seed
+
 # Creating Jurisdictions
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
