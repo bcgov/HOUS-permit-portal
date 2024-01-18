@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { faCalendar, faLocationDot } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
@@ -29,21 +30,7 @@ type TRequirementPropsMap = {
 
 type TRequirementProps<T extends ERequirementType> = T extends keyof TRequirementPropsMap ? TRequirementPropsMap[T] : {}
 
-export class RequirementFieldDisplayRenderer {
-  readonly requirementType: ERequirementType
-
-  constructor(requirementType: ERequirementType) {
-    this.requirementType = requirementType
-  }
-
-  static hasRenderer(requirementType: ERequirementType): boolean {
-    return requirementType in RequirementFieldDisplayRenderer.prototype
-  }
-
-  render<T extends ERequirementType>(props?: TRequirementProps<T>): JSX.Element {
-    return this?.[this.requirementType]?.(props ?? {}) ?? null
-  }
-
+const requirementsComponentMap = {
   [ERequirementType.text]({}: TRequirementProps<ERequirementType.text>) {
     const { t } = useTranslation()
     return (
@@ -57,7 +44,7 @@ export class RequirementFieldDisplayRenderer {
         </InputGroup>
       </FormControl>
     )
-  }
+  },
 
   [ERequirementType.address]() {
     const { t } = useTranslation()
@@ -72,7 +59,7 @@ export class RequirementFieldDisplayRenderer {
         </InputGroup>
       </FormControl>
     )
-  }
+  },
 
   [ERequirementType.date]() {
     const { t } = useTranslation()
@@ -87,7 +74,7 @@ export class RequirementFieldDisplayRenderer {
         </InputGroup>
       </FormControl>
     )
-  }
+  },
 
   [ERequirementType.number]() {
     const { t } = useTranslation()
@@ -100,7 +87,7 @@ export class RequirementFieldDisplayRenderer {
         </InputGroup>
       </FormControl>
     )
-  }
+  },
 
   [ERequirementType.textArea]() {
     const { t } = useTranslation()
@@ -110,7 +97,7 @@ export class RequirementFieldDisplayRenderer {
         <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} />
       </FormControl>
     )
-  }
+  },
 
   [ERequirementType.radio]() {
     const { t } = useTranslation()
@@ -125,7 +112,7 @@ export class RequirementFieldDisplayRenderer {
         </RadioGroup>
       </FormControl>
     )
-  }
+  },
 
   [ERequirementType.multiSelectCheckbox]() {
     const { t } = useTranslation()
@@ -140,5 +127,18 @@ export class RequirementFieldDisplayRenderer {
         </CheckboxGroup>
       </FormControl>
     )
-  }
+  },
 }
+
+type TProps<T extends ERequirementType> = { requirementType: ERequirementType } & TRequirementProps<T>
+
+export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
+  return !!requirementsComponentMap[requirementType]
+}
+
+export const RequirementFieldDisplay = observer(function RequirementFieldDisplay<T extends ERequirementType>({
+  requirementType,
+  ...rest
+}: TProps<T>) {
+  return requirementsComponentMap[requirementType]?.(rest) ?? null
+})

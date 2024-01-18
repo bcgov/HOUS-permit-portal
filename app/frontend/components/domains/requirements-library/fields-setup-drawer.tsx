@@ -19,7 +19,7 @@ import React, { Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { RequirementFieldDisplayRenderer } from "./requirement-field-display-renderer"
+import { RequirementFieldDisplay, hasRequirementFieldDisplayComponent } from "./requirement-field-display"
 
 interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
@@ -76,7 +76,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
             </Flex>
             <Flex flexDir={"column"} w={"full"}>
               {Object.values(ERequirementType)
-                .filter((requirementType) => RequirementFieldDisplayRenderer.hasRenderer(requirementType))
+                .filter((requirementType) => hasRequirementFieldDisplayComponent(requirementType))
                 .map((requirementType) => (
                   <HStack
                     key={requirementType}
@@ -92,7 +92,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                       "&:last-of-type": { border: "none" },
                     }}
                   >
-                    {new RequirementFieldDisplayRenderer(requirementType).render()}
+                    <RequirementFieldDisplay requirementType={requirementType} />
                     <Button
                       variant={"primary"}
                       rightIcon={<FontAwesomeIcon icon={faChevronRight} />}
