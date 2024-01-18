@@ -4,6 +4,7 @@ import * as R from "ramda"
 import { TCreateJurisdictionFormData } from "../components/domains/jurisdictions/new-jurisdiction-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
@@ -22,6 +23,7 @@ export const JurisdictionStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     // View to get a Jurisdiction by id
     getJurisdictionById(id: string) {

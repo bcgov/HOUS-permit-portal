@@ -1,6 +1,7 @@
 import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 
@@ -10,6 +11,7 @@ export const PermitApplicationStoreModel = types
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     // View to get a PermitApplication by id
     getPermitApplicationById(id: string) {
@@ -20,6 +22,28 @@ export const PermitApplicationStoreModel = types
     get permitApplications() {
       // TODO: UNSTUB APPLICATIONS
       return Array.from(self.permitApplicationMap.values())
+    },
+  }))
+  .actions((self) => ({
+    __beforeMergeUpdateAll(permitApplicationsData) {
+      //find all unique jurisdictions
+      const jurisdictionsUniq = R.uniqBy(
+        (j) => j.id,
+        permitApplicationsData.map((pa) => pa.jurisdiction)
+      )
+      self.rootStore.jurisdictionStore.mergeUpdateAll(jurisdictionsUniq, "jurisdictionMap")
+      //find all unique submitters
+      const submittersUniq = R.uniqBy(
+        (u) => u.id,
+        permitApplicationsData.map((pa) => pa.submitter)
+      )
+      self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
+
+      //return the remapped Data
+      return R.map(
+        (c) => R.mergeRight(c, { jurisdiction: c["jurisdiction"]["id"], submitter: c["submitter"]["id"] }),
+        permitApplicationsData
+      )
     },
   }))
   .actions((self) => ({
@@ -35,24 +59,8 @@ export const PermitApplicationStoreModel = types
     fetchPermitApplications: flow(function* () {
       const response: any = yield self.environment.api.fetchPermitApplications()
       if (response.ok) {
-        //find all unique jurisdictions
-        const jurisdictionsUniq = R.uniqBy(
-          (j) => j.id,
-          response.data.data.map((pa) => pa.jurisdiction)
-        )
-        jurisdictionsUniq.forEach((j) => self.rootStore.jurisdictionStore.addJurisdiction(j))
-        //find all unique submitters
-        const submittersUniq = R.uniqBy(
-          (u) => u.id,
-          response.data.data.map((pa) => pa.submitter)
-        )
-        self.rootStore.userStore.setUsers(submittersUniq)
-
-        R.map((c) => {
-          self.permitApplicationMap.put(
-            R.mergeRight(c, { jurisdiction: c["jurisdiction"]["id"], submitter: c["submitter"]["id"] })
-          )
-        }, response.data.data)
+        let responseData = response.data.data
+        self.mergeUpdateAll(responseData, "permitApplicationMap")
         //TODO: add pagination
         return true
       }
