@@ -1,3 +1,3 @@
 class OptionBlueprint < Blueprinter::Base
-  fields :name, :value
+  fields :label, :value
 end
