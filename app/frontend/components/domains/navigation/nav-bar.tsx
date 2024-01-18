@@ -58,7 +58,7 @@ export const NavBar = observer(() => {
             </RouterLink>
             <Show above="md">
               <Heading fontSize="2xl" fontWeight="normal">
-                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.navBarTitle")}
+                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Heading>
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}

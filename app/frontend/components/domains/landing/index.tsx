@@ -235,7 +235,7 @@ const IconBox = ({ icon, children, ...rest }: IIconBoxProps) => {
   return (
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1} {...rest}>
       <Flex gap={4} align="center" h="full">
-        {icon}
+        <Box>{icon}</Box>
         <Text fontSize="md" fontWeight="bold">
           {children}
         </Text>
