@@ -1,14 +1,14 @@
 import { ERequirementType, ETagType } from "./enums"
 
-export interface IRequirementAttribute {
+export interface IRequirementAttributes {
   label?: string
   inputType?: ERequirementType
 }
 
-export interface IRequirementBlockRequirementAttribute {
+export interface IRequirementBlockRequirementAttributes {
   id?: string
   _destroy?: boolean
-  requirementAttribute: IRequirementAttribute
+  requirementAttributes: IRequirementAttributes
 }
 
 export interface IRequirementBlockParams {
@@ -17,7 +17,7 @@ export interface IRequirementBlockParams {
   displayDescription: string
   description?: string
   associationList?: string[]
-  requirementBlockRequirementsAttributes?: Array<IRequirementBlockRequirementAttribute>
+  requirementBlockRequirementsAttributes?: Array<IRequirementBlockRequirementAttributes>
 }
 
 export interface ITagSearchParams {

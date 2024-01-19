@@ -17,14 +17,14 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 
-interface IProps extends Partial<EditableProps> {
+export interface IEditableControlProps extends Partial<EditableProps> {
   editablePreviewProps?: Partial<EditablePreviewProps>
   editableInputProps?: Partial<EditableInputProps>
   initialHint?: string
   CustomEditableControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
 }
 
-function EditableControls({ CustomEditableControls }: Pick<IProps, "CustomEditableControls">) {
+function EditableControls({ CustomEditableControls }: Pick<IEditableControlProps, "CustomEditableControls">) {
   const editableControls = useEditableControls()
   const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
   const { t } = useTranslation()
@@ -63,7 +63,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   onBlur,
   CustomEditableControls,
   ...editableProps
-}: IProps) {
+}: IEditableControlProps) {
   const [isInEditMode, setIsInEditMode] = useState(false)
 
   return (

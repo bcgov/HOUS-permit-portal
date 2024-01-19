@@ -101,6 +101,7 @@ const options = {
           totalItems: "Total Items",
           doLater: "Do this later",
           add: "Add",
+          edit: "Edit",
         },
         jurisdiction: {
           new: {

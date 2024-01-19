@@ -1,4 +1,5 @@
 import {
+  Box,
   Checkbox,
   CheckboxGroup,
   FormControl,
@@ -20,12 +21,18 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
+import { EditableInputWithControls, IEditableControlProps } from "../../shared/editable-input-with-controls"
 
 const labelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
 }
 
-type TRequirementProps = { label?: string; options?: string[]; helperText?: string }
+type TRequirementEditProps = {
+  label?: string
+  options?: string[]
+  helperText?: string
+  editableLabelProps?: IEditableControlProps
+}
 
 const helperTextStyles = {
   color: "border.base",
@@ -34,22 +41,22 @@ const helperTextStyles = {
 const defaultOptions = ["Option", "Option"]
 
 const requirementsComponentMap = {
-  [ERequirementType.text]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.text]({ label, helperText, editableLabelProps }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.shortText")}</FormLabel>
+      <Box>
+        <EditableInputWithControls {...editableLabelProps} />
         <Input bg={"white"} />
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      </Box>
     )
   },
 
-  [ERequirementType.address]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.address]({ label, helperText }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.address")}</FormLabel>
+        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.address")}</FormLabel>
         <InputGroup>
           <InputLeftElement>
             <FontAwesomeIcon icon={faLocationDot} />
@@ -61,11 +68,11 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.date]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.date]({ label, helperText }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.date")}</FormLabel>
+        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.date")}</FormLabel>
         <InputGroup w={"166px"}>
           <InputLeftElement>
             <FontAwesomeIcon icon={faCalendar} />
@@ -77,11 +84,11 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.number]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.number]({ label, helperText }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.number")}</FormLabel>
+        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.number")}</FormLabel>
         <InputGroup w={"130px"}>
           <InputRightElement mr={2}>unit</InputRightElement>
           <Input bg={"white"} />
@@ -91,22 +98,22 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.textArea]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.textArea]({ label, helperText }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.textArea")}</FormLabel>
+        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.textArea")}</FormLabel>
         <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} />
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
       </FormControl>
     )
   },
 
-  [ERequirementType.radio]({ label, options = defaultOptions, helperText }: TRequirementProps) {
+  [ERequirementType.radio]({ label, options = defaultOptions, helperText }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.radio")}</FormLabel>
+        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.radio")}</FormLabel>
         <RadioGroup defaultValue="1">
           <Stack>
             {options.map((option) => (
@@ -119,12 +126,12 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.multiSelectCheckbox]({ label, helperText, options = defaultOptions }: TRequirementProps) {
+  [ERequirementType.multiSelectCheckbox]({ label, helperText, options = defaultOptions }: TRequirementEditProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
         <FormLabel {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.multiSelectCheckbox")}
+          {label || t("requirementsLibrary.requirementTypeLabels.multiSelectCheckbox")}
         </FormLabel>
         <CheckboxGroup>
           <Stack>
@@ -139,12 +146,12 @@ const requirementsComponentMap = {
   },
 }
 
-type TProps = { requirementType: ERequirementType } & TRequirementProps
+type TProps = { requirementType: ERequirementType } & TRequirementEditProps
 
-export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
+export function hasRequirementFieldEditComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
 }
 
-export const RequirementFieldDisplay = observer(function RequirementFieldDisplay({ requirementType, ...rest }: TProps) {
+export const RequirementFieldEdit = observer(function RequirementFieldDisplay({ requirementType, ...rest }: TProps) {
   return requirementsComponentMap[requirementType]?.(rest) ?? null
 })
