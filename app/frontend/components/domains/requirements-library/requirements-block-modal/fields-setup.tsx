@@ -2,7 +2,7 @@ import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
-import { useFieldArray, useFormContext } from "react-hook-form"
+import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../../types/enums"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
@@ -13,7 +13,7 @@ import { IRequirementBlockForm } from "./index"
 
 export const FieldsSetup = observer(function FieldsSetup() {
   const { t } = useTranslation()
-  const { control, register, watch } = useFormContext<IRequirementBlockForm>()
+  const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
   const { fields, append } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementBlockRequirementsAttributes",
@@ -59,6 +59,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           )}
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
             {fields.map((field, index) => {
+              const watchedHint = watch(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`)
               return (
                 <Box
                   key={field.id}
@@ -70,6 +71,13 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       visibility: isRequirementInEditMode(field.id) ? "hidden" : "visible",
                     },
                   }}
+                  _focus={{
+                    bg: "theme.blueLight",
+                    "& .requirement-edit-btn": {
+                      visibility: isRequirementInEditMode(field.id) ? "hidden" : "visible",
+                    },
+                  }}
+                  tabIndex={0}
                   px={3}
                   pt={1}
                   pb={5}
@@ -87,15 +95,47 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     }}
                     display={isRequirementInEditMode(field.id) ? "block" : "none"}
                   >
-                    <RequirementFieldEdit
-                      requirementType={field.requirementAttributes.inputType}
-                      editableLabelProps={{
-                        defaultValue: "Label",
-                        editableInputProps: register(
-                          `requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`,
-                          { required: true, value: "Label" }
-                        ),
+                    <Controller
+                      control={control}
+                      render={({ field: checkboxField }) => (
+                        <RequirementFieldEdit
+                          requirementType={field.requirementAttributes.inputType}
+                          editableLabelProps={{
+                            color: "text.link",
+                            editableInputProps: register(
+                              `requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`,
+                              {
+                                required: true,
+                                value: t("requirementsLibrary.modals.defaultRequirementLabel"),
+                              }
+                            ),
+                          }}
+                          editableHelperTextProps={{
+                            getStateBasedEditableProps: (isEditing) =>
+                              isEditing
+                                ? {}
+                                : {
+                                    color: !!watchedHint ? "text.secondary" : "text.link",
+                                    textDecoration: watchedHint ? undefined : "underline",
+                                  },
+                            editableInputProps: register(
+                              `requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`
+                            ),
+                          }}
+                          // ts-ignored because checkbox value type is string in native html but we want boolean
+                          /*@ts-ignore*/
+                          checkboxProps={checkboxField}
+                        />
+                      )}
+                      rules={{
+                        onChange: (e) =>
+                          setValue(
+                            `requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`,
+                            !e.target.value
+                          ),
                       }}
+                      name={`requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`}
+                      defaultValue={true}
                     />
                   </Box>
                   <Box
@@ -110,6 +150,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     <RequirementFieldDisplay
                       requirementType={field.requirementAttributes.inputType}
                       label={watch(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`)}
+                      helperText={watchedHint}
                     />
                   </Box>
                   <Button

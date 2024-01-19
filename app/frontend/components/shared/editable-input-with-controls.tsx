@@ -1,6 +1,7 @@
 import {
   Button,
   ButtonGroup,
+  ButtonProps,
   Editable,
   EditableInput,
   EditableInputProps,
@@ -9,6 +10,7 @@ import {
   EditableProps,
   Flex,
   IconButton,
+  IconButtonProps,
   useEditableControls,
 } from "@chakra-ui/react"
 import { faPencil } from "@fortawesome/free-solid-svg-icons"
@@ -17,14 +19,27 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 
-export interface IEditableControlProps extends Partial<EditableProps> {
+interface IControlsProps {
+  CustomEditableControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
+  saveButtonProps?: Partial<ButtonProps>
+  cancelButtonProps?: Partial<ButtonProps>
+  iconButtonProps?: Partial<IconButtonProps>
+}
+
+export interface IEditableInputWithControlsProps extends EditableProps {
   editablePreviewProps?: Partial<EditablePreviewProps>
   editableInputProps?: Partial<EditableInputProps>
   initialHint?: string
-  CustomEditableControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
+  getStateBasedEditableProps?: (isEditing: boolean) => Partial<EditableProps>
+  controlsProps?: IControlsProps
 }
 
-function EditableControls({ CustomEditableControls }: Pick<IEditableControlProps, "CustomEditableControls">) {
+function EditableControls({
+  CustomEditableControls,
+  saveButtonProps,
+  cancelButtonProps,
+  iconButtonProps,
+}: IControlsProps) {
   const editableControls = useEditableControls()
   const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
   const { t } = useTranslation()
@@ -35,10 +50,10 @@ function EditableControls({ CustomEditableControls }: Pick<IEditableControlProps
 
   return isEditing ? (
     <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
-      <Button {...getSubmitButtonProps()} variant={"primary"}>
+      <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
         {t("ui.onlySave")}
       </Button>
-      <Button {...getCancelButtonProps()} variant={"secondary"}>
+      <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
         {t("ui.cancel")}
       </Button>
     </ButtonGroup>
@@ -49,6 +64,7 @@ function EditableControls({ CustomEditableControls }: Pick<IEditableControlProps
       aria-label={"Enter edit mode"}
       color={"text.link"}
       icon={<FontAwesomeIcon icon={faPencil} style={{ width: "14px", height: "14px" }} {...getEditButtonProps()} />}
+      {...iconButtonProps}
     />
   )
 }
@@ -61,9 +77,10 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   onEdit,
   onCancel,
   onBlur,
-  CustomEditableControls,
+  controlsProps,
+  getStateBasedEditableProps,
   ...editableProps
-}: IEditableControlProps) {
+}: IEditableInputWithControlsProps) {
   const [isInEditMode, setIsInEditMode] = useState(false)
 
   return (
@@ -85,10 +102,11 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
       }}
       fontWeight={700}
       {...editableProps}
+      {...getStateBasedEditableProps?.(isInEditMode)}
     >
       <EditablePreview {...editablePreviewProps} />
       <EditableInput {...editableInputProps} />
-      <EditableControls CustomEditableControls={CustomEditableControls} />
+      <EditableControls {...controlsProps} />
     </Editable>
   )
 })

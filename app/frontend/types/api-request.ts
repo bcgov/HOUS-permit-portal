@@ -3,6 +3,8 @@ import { ERequirementType, ETagType } from "./enums"
 export interface IRequirementAttributes {
   label?: string
   inputType?: ERequirementType
+  hint?: string
+  required?: boolean
 }
 
 export interface IRequirementBlockRequirementAttributes {

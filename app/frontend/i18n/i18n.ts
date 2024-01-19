@@ -172,6 +172,10 @@ const options = {
             internalUse: "For internal use only",
             configureFields: "Configure the form fields below that submitters will see:",
             noFormFieldsAdded: "No form fields have been added yet, start by clicking the Add button.",
+            defaultRequirementLabel: "Label",
+            addHelpText: "Add help text",
+            helpTextPlaceHolder: "Help text",
+            optionalForSubmitters: "This field is optional for submitters",
           },
           fields: {
             name: "Name",

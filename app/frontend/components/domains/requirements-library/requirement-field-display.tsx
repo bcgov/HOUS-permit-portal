@@ -28,7 +28,7 @@ const labelProps: Partial<FormLabelProps> = {
 type TRequirementProps = { label?: string; options?: string[]; helperText?: string }
 
 const helperTextStyles = {
-  color: "border.base",
+  color: "text.secondary",
 }
 
 const defaultOptions = ["Option", "Option"]

@@ -1,7 +1,7 @@
 import {
-  Box,
   Checkbox,
   CheckboxGroup,
+  CheckboxProps,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -21,7 +21,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
-import { EditableInputWithControls, IEditableControlProps } from "../../shared/editable-input-with-controls"
+import { EditableInputWithControls, IEditableInputWithControlsProps } from "../../shared/editable-input-with-controls"
 
 const labelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
@@ -31,24 +31,44 @@ type TRequirementEditProps = {
   label?: string
   options?: string[]
   helperText?: string
-  editableLabelProps?: IEditableControlProps
+  editableLabelProps?: IEditableInputWithControlsProps
+  editableHelperTextProps?: IEditableInputWithControlsProps
+  checkboxProps?: Partial<CheckboxProps>
 }
 
 const helperTextStyles = {
-  color: "border.base",
+  fontWeight: 400,
+  color: "text.secondary",
+  fontSize: "sm",
+  controlsProps: {
+    iconButtonProps: {
+      sx: {
+        svg: { width: "12px !important", height: "12px !important" },
+      },
+    },
+  },
 }
 
 const defaultOptions = ["Option", "Option"]
 
 const requirementsComponentMap = {
-  [ERequirementType.text]({ label, helperText, editableLabelProps }: TRequirementEditProps) {
+  [ERequirementType.text]({ editableLabelProps, editableHelperTextProps, checkboxProps }: TRequirementEditProps) {
     const { t } = useTranslation()
+
     return (
-      <Box>
-        <EditableInputWithControls {...editableLabelProps} />
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
         <Input bg={"white"} />
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </Box>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Checkbox {...checkboxProps}>{t("requirementsLibrary.modals.optionalForSubmitters")}</Checkbox>
+      </Stack>
     )
   },
 
