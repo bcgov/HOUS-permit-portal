@@ -1,10 +1,15 @@
 import { ERequirementType, ETagType } from "./enums"
+import { ENumberUnit, IOption } from "./types"
 
 export interface IRequirementAttributes {
   label?: string
   inputType?: ERequirementType
   hint?: string
   required?: boolean
+  inputOptions?: {
+    valueOptions?: IOption[]
+    numberUnit?: ENumberUnit
+  }
 }
 
 export interface IRequirementBlockRequirementAttributes {

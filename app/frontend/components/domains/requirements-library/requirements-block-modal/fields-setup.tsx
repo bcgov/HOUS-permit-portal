@@ -2,9 +2,10 @@ import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
-import { Controller, useFieldArray, useFormContext } from "react-hook-form"
+import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../../types/enums"
+import { ENumberUnit } from "../../../../types/types"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { RequirementFieldDisplay } from "../requirement-field-display"
@@ -46,6 +47,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
         <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
+            fontWeight={700}
             editableInputProps={register("displayName", { required: true })}
             color={R.isEmpty(watchedDisplayName) ? "text.link" : undefined}
           />
@@ -60,6 +62,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
             {fields.map((field, index) => {
               const watchedHint = watch(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`)
+              const requirementType = field.requirementAttributes.inputType
               return (
                 <Box
                   key={field.id}
@@ -87,7 +90,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   }}
                 >
                   <Box
-                    w={"calc(100% - 60px)"}
+                    w={"full"}
                     sx={{
                       "& input": {
                         maxW: "339px",
@@ -95,51 +98,62 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     }}
                     display={isRequirementInEditMode(field.id) ? "block" : "none"}
                   >
-                    <Controller
-                      control={control}
-                      render={({ field: checkboxField }) => (
-                        <RequirementFieldEdit
-                          requirementType={field.requirementAttributes.inputType}
-                          editableLabelProps={{
-                            color: "text.link",
-                            editableInputProps: register(
-                              `requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`,
-                              {
-                                required: true,
-                                value: t("requirementsLibrary.modals.defaultRequirementLabel"),
-                              }
-                            ),
-                          }}
-                          editableHelperTextProps={{
-                            getStateBasedEditableProps: (isEditing) =>
-                              isEditing
-                                ? {}
-                                : {
-                                    color: !!watchedHint ? "text.secondary" : "text.link",
-                                    textDecoration: watchedHint ? undefined : "underline",
-                                  },
-                            editableInputProps: register(
-                              `requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`
-                            ),
-                          }}
-                          // ts-ignored because checkbox value type is string in native html but we want boolean
-                          /*@ts-ignore*/
-                          checkboxProps={checkboxField}
-                        />
-                      )}
-                      rules={{
-                        onChange: (e) =>
-                          setValue(
-                            `requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`,
-                            !e.target.value
-                          ),
+                    <RequirementFieldEdit<IRequirementBlockForm>
+                      requirementType={requirementType}
+                      editableLabelProps={{
+                        color: "text.link",
+                        editableInputProps: {
+                          ...register(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`, {
+                            required: true,
+                            value: t("requirementsLibrary.modals.defaultRequirementLabel"),
+                          }),
+                          w: "calc(100% - 60px)",
+                        },
                       }}
-                      name={`requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`}
-                      defaultValue={true}
+                      editableHelperTextProps={{
+                        getStateBasedEditableProps: (isEditing) =>
+                          isEditing
+                            ? {}
+                            : {
+                                color: !!watchedHint ? "text.secondary" : "text.link",
+                                textDecoration: watchedHint ? undefined : "underline",
+                              },
+                        editableInputProps: register(
+                          `requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`
+                        ),
+                      }}
+                      checkboxProps={{
+                        controlProps: {
+                          control: control,
+                          rules: {
+                            onChange: (e) =>
+                              setValue(
+                                `requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`,
+                                !e.target.value
+                              ),
+                          },
+                          name: `requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`,
+                          // @ts-ignore
+                          defaultValue: true,
+                        },
+                      }}
+                      unitSelectProps={
+                        requirementType === ERequirementType.number
+                          ? {
+                              controlProps: {
+                                control: control,
+
+                                name: `requirementBlockRequirementsAttributes.${index}.requirementAttributes.inputOptions.numberUnit`,
+                                // @ts-ignore
+                                defaultValue: ENumberUnit.noUnit,
+                              },
+                            }
+                          : undefined
+                      }
                     />
                   </Box>
                   <Box
-                    w={"calc(100% - 60px)"}
+                    w={"full"}
                     sx={{
                       "& input": {
                         maxW: "339px",
@@ -148,9 +162,19 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     display={!isRequirementInEditMode(field.id) ? "block" : "none"}
                   >
                     <RequirementFieldDisplay
-                      requirementType={field.requirementAttributes.inputType}
+                      requirementType={requirementType}
                       label={watch(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`)}
                       helperText={watchedHint}
+                      labelProps={{
+                        w: "calc(100% - 60px)",
+                      }}
+                      unit={
+                        requirementType === ERequirementType.number
+                          ? watch(
+                              `requirementBlockRequirementsAttributes.${index}.requirementAttributes.inputOptions.numberUnit`
+                            )
+                          : undefined
+                      }
                     />
                   </Box>
                   <Button

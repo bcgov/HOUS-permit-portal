@@ -204,6 +204,26 @@ const options = {
             fileUpload: "File Upload",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
+          unitLabels: {
+            option: {
+              noUnit: "(no unit)",
+              mm: "mm - millimeters",
+              cm: "cm- centimeters",
+              m: "m - meters",
+              in: "in - inches",
+              ft: "ft - feet",
+              mi: "mi - miles",
+            },
+            display: {
+              noUnit: "(no unit)",
+              mm: "millimeters (mm)",
+              cm: "centimeters (cm)",
+              m: "meters (m)",
+              in: "inches (in)",
+              ft: "feet (ft)",
+              mi: "miles (mi)",
+            },
+          },
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",

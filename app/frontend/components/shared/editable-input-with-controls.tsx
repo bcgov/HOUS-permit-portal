@@ -100,7 +100,6 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
         setIsInEditMode(false)
         onBlur?.(e)
       }}
-      fontWeight={700}
       {...editableProps}
       {...getStateBasedEditableProps?.(isInEditMode)}
     >

@@ -62,6 +62,7 @@ export const AsyncSelect = observer(function <
         "&:hover": {
           backgroundColor: "var(--chakra-colors-gray-100)",
         },
+        backgroundColor: state.isFocused ? "var(--chakra-colors-semantic-infoLight)" : undefined,
         ...(stylesToMerge?.option ?? {}),
       }),
       input: (css, state) => ({

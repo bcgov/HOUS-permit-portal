@@ -21,3 +21,13 @@ export interface IOption<TValue = string> {
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
+
+export enum ENumberUnit {
+  noUnit = "noUnit",
+  mm = "mm",
+  cm = "cm",
+  m = "m",
+  in = "in",
+  ft = "ft",
+  mi = "mi",
+}

@@ -20,12 +20,19 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
+import { ENumberUnit } from "../../../types/types"
 
-const labelProps: Partial<FormLabelProps> = {
+const defaultLabelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
 }
 
-type TRequirementProps = { label?: string; options?: string[]; helperText?: string }
+type TRequirementProps = {
+  labelProps?: Partial<FormLabelProps>
+  label?: string
+  options?: string[]
+  helperText?: string
+  unit?: ENumberUnit
+}
 
 const helperTextStyles = {
   color: "text.secondary",
@@ -34,22 +41,26 @@ const helperTextStyles = {
 const defaultOptions = ["Option", "Option"]
 
 const requirementsComponentMap = {
-  [ERequirementType.text]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.text]({ label, helperText, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.shortText")}</FormLabel>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.shortText")}
+        </FormLabel>
         <Input bg={"white"} />
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
       </FormControl>
     )
   },
 
-  [ERequirementType.address]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.address]({ label, helperText, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.address")}</FormLabel>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.address")}
+        </FormLabel>
         <InputGroup>
           <InputLeftElement>
             <FontAwesomeIcon icon={faLocationDot} />
@@ -61,11 +72,13 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.date]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.date]({ label, helperText, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.date")}</FormLabel>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.date")}
+        </FormLabel>
         <InputGroup w={"166px"}>
           <InputLeftElement>
             <FontAwesomeIcon icon={faCalendar} />
@@ -77,13 +90,15 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.number]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.number]({ label, helperText, unit, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.number")}</FormLabel>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.number")}
+        </FormLabel>
         <InputGroup w={"130px"}>
-          <InputRightElement mr={2}>unit</InputRightElement>
+          <InputRightElement mr={2}>{unit === "noUnit" ? null : unit ?? "unit"}</InputRightElement>
           <Input bg={"white"} />
         </InputGroup>
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
@@ -91,22 +106,26 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.textArea]({ label, helperText }: TRequirementProps) {
+  [ERequirementType.textArea]({ label, helperText, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.textArea")}</FormLabel>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.textArea")}
+        </FormLabel>
         <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} />
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
       </FormControl>
     )
   },
 
-  [ERequirementType.radio]({ label, options = defaultOptions, helperText }: TRequirementProps) {
+  [ERequirementType.radio]({ label, options = defaultOptions, helperText, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label ?? t("requirementsLibrary.requirementTypeLabels.radio")}</FormLabel>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.radio")}
+        </FormLabel>
         <RadioGroup defaultValue="1">
           <Stack>
             {options.map((option) => (
@@ -119,11 +138,16 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.multiSelectCheckbox]({ label, helperText, options = defaultOptions }: TRequirementProps) {
+  [ERequirementType.multiSelectCheckbox]({
+    label,
+    helperText,
+    options = defaultOptions,
+    labelProps,
+  }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
-        <FormLabel {...labelProps}>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
           {label ?? t("requirementsLibrary.requirementTypeLabels.multiSelectCheckbox")}
         </FormLabel>
         <CheckboxGroup>

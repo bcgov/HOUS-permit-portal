@@ -6,10 +6,10 @@ import {
   FormHelperText,
   FormLabel,
   FormLabelProps,
+  HStack,
   Input,
   InputGroup,
   InputLeftElement,
-  InputRightElement,
   Radio,
   RadioGroup,
   Stack,
@@ -19,21 +19,31 @@ import { faCalendar, faLocationDot } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { Controller, FieldValues } from "react-hook-form"
+import { FieldPath } from "react-hook-form/dist/types"
+import { UseControllerProps } from "react-hook-form/dist/types/controller"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
+import { ENumberUnit } from "../../../types/types"
 import { EditableInputWithControls, IEditableInputWithControlsProps } from "../../shared/editable-input-with-controls"
+import { UnitSelect } from "../../shared/select/selectors/unit-select"
 
 const labelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
 }
 
-type TRequirementEditProps = {
+type TRequirementEditProps<TFieldValues extends FieldValues> = {
   label?: string
   options?: string[]
   helperText?: string
   editableLabelProps?: IEditableInputWithControlsProps
   editableHelperTextProps?: IEditableInputWithControlsProps
-  checkboxProps?: Partial<CheckboxProps>
+  checkboxProps: {
+    controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
+  } & Partial<CheckboxProps>
+  unitSelectProps: {
+    controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
+  }
 }
 
 const helperTextStyles = {
@@ -52,8 +62,13 @@ const helperTextStyles = {
 const defaultOptions = ["Option", "Option"]
 
 const requirementsComponentMap = {
-  [ERequirementType.text]({ editableLabelProps, editableHelperTextProps, checkboxProps }: TRequirementEditProps) {
+  [ERequirementType.text]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
 
     return (
       <Stack spacing={4}>
@@ -61,64 +76,141 @@ const requirementsComponentMap = {
           defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
           {...editableLabelProps}
         />
-        <Input bg={"white"} />
+        <Input bg={"white"} isReadOnly />
         <EditableInputWithControls
           initialHint={t("requirementsLibrary.modals.addHelpText")}
           placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
           {...editableHelperTextProps}
         />
-        <Checkbox {...checkboxProps}>{t("requirementsLibrary.modals.optionalForSubmitters")}</Checkbox>
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
       </Stack>
     )
   },
 
-  [ERequirementType.address]({ label, helperText }: TRequirementEditProps) {
+  [ERequirementType.address]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.address")}</FormLabel>
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
         <InputGroup>
           <InputLeftElement>
             <FontAwesomeIcon icon={faLocationDot} />
           </InputLeftElement>
-          <Input bg={"white"} />
+          <Input bg={"white"} isReadOnly />
         </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
     )
   },
 
-  [ERequirementType.date]({ label, helperText }: TRequirementEditProps) {
+  [ERequirementType.date]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.date")}</FormLabel>
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
         <InputGroup w={"166px"}>
           <InputLeftElement>
             <FontAwesomeIcon icon={faCalendar} />
           </InputLeftElement>
-          <Input bg={"white"} />
+          <Input bg={"white"} isReadOnly />
         </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
     )
   },
 
-  [ERequirementType.number]({ label, helperText }: TRequirementEditProps) {
+  [ERequirementType.number]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+    unitSelectProps,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps: checkboxControlProps, ...restCheckboxProps } = checkboxProps
+    const { controlProps: unitSelectControlProps } = unitSelectProps
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.number")}</FormLabel>
-        <InputGroup w={"130px"}>
-          <InputRightElement mr={2}>unit</InputRightElement>
-          <Input bg={"white"} />
-        </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <HStack>
+          <Input bg={"white"} isReadOnly w={"130px"} />
+          <Controller<TFieldValues>
+            {...unitSelectControlProps}
+            render={({ field: { onChange, value } }) => <UnitSelect value={value as ENumberUnit} onChange={onChange} />}
+          />
+        </HStack>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...checkboxControlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
     )
   },
 
-  [ERequirementType.textArea]({ label, helperText }: TRequirementEditProps) {
+  [ERequirementType.textArea]: function <TFieldValues>({ label, helperText }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
@@ -129,7 +221,11 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.radio]({ label, options = defaultOptions, helperText }: TRequirementEditProps) {
+  [ERequirementType.radio]: function <TFieldValues>({
+    label,
+    options = defaultOptions,
+    helperText,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
@@ -146,7 +242,11 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.multiSelectCheckbox]({ label, helperText, options = defaultOptions }: TRequirementEditProps) {
+  [ERequirementType.multiSelectCheckbox]: function <TFieldValues>({
+    label,
+    helperText,
+    options = defaultOptions,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>
@@ -166,12 +266,17 @@ const requirementsComponentMap = {
   },
 }
 
-type TProps = { requirementType: ERequirementType } & TRequirementEditProps
+type TProps<TFieldValues> = {
+  requirementType: ERequirementType
+} & TRequirementEditProps<TFieldValues>
 
 export function hasRequirementFieldEditComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
 }
 
-export const RequirementFieldEdit = observer(function RequirementFieldDisplay({ requirementType, ...rest }: TProps) {
+export const RequirementFieldEdit = observer(function RequirementFieldDisplay<TFieldValues>({
+  requirementType,
+  ...rest
+}: TProps<TFieldValues>) {
   return requirementsComponentMap[requirementType]?.(rest) ?? null
 })
