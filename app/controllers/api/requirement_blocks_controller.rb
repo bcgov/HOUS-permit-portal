@@ -9,7 +9,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
   def index
     perform_search
     authorized_results = apply_search_authorization(@search.results)
-    render_success @search.results,
+    render_success authorized_results,
                    nil,
                    {
                      meta: {
