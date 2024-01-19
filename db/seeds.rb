@@ -23,25 +23,37 @@ if User.all.blank?
   end
 end
 
-User.find_or_create_by(username: "admin") do |user|
-  user.role = :super_admin
-  user.email = "admin@example.com"
-  user.password = "P@ssword1"
-end
+User
+  .find_or_create_by(username: "admin") do |user|
+    user.role = :super_admin
+    user.first_name = "Admin"
+    user.last_name = "McUser"
+    user.email = "admin@example.com"
+    user.password = "P@ssword1"
+  end
+  .confirm
 
-User.find_or_create_by(username: "review_manager") do |user|
-  user.role = :review_manager
-  user.email = "review_manager@example.com"
-  user.password = "P@ssword1"
-  user.jurisdiction = jurisdictions.first
-end
+User
+  .find_or_create_by(username: "review_manager") do |user|
+    user.role = :review_manager
+    user.first_name = "ReviewManager"
+    user.last_name = "McUser"
+    user.email = "review_manager@example.com"
+    user.password = "P@ssword1"
+    user.jurisdiction = jurisdictions.first
+  end
+  .confirm
 
-User.find_or_create_by(username: "reviewer") do |user|
-  user.role = :reviewer
-  user.email = "reviewer@example.com"
-  user.password = "P@ssword1"
-  user.jurisdiction = jurisdictions.first
-end
+User
+  .find_or_create_by(username: "reviewer") do |user|
+    user.role = :reviewer
+    user.first_name = "Reviewer"
+    user.last_name = "McUser"
+    user.email = "reviewer@example.com"
+    user.password = "P@ssword1"
+    user.jurisdiction = jurisdictions.first
+  end
+  .confirm
 
 # Creating Permit Applications
 submitters = User.where(role: "submitter")

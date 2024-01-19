@@ -32,7 +32,9 @@ class User < ApplicationRecord
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
+  validate :confirmed_user_has_fields
   validate :unique_bceid
+  validates :email, presence: true
 
   def search_data
     {
@@ -85,6 +87,12 @@ class User < ApplicationRecord
   end
 
   private
+
+  def confirmed_user_has_fields
+    errors.add(:user, "Confirmed user must have username") unless !confirmed? || username.present?
+    errors.add(:user, "Confirmed user must have first_name") unless !confirmed? || first_name.present?
+    errors.add(:user, "Confirmed user must have last_name") unless !confirmed? || last_name.present?
+  end
 
   def jurisdiction_must_belong_to_correct_roles
     if jurisdiction.present? && !reviewer? && !review_manager?

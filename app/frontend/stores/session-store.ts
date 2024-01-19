@@ -14,6 +14,7 @@ export const SessionStoreModel = types
   .actions((self) => ({
     resetAuth: flow(function* () {
       self.loggedIn = false
+      self.rootStore.userStore.unsetCurrentUser()
     }),
   }))
   .actions((self) => ({

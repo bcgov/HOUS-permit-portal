@@ -40,6 +40,9 @@ export const UserStoreModel = types
       self.usersMap.put(user)
       self.currentUser = user.id
     },
+    unsetCurrentUser() {
+      self.currentUser = null
+    },
     signUp: flow(function* (formData) {
       const response = yield self.environment.api.signUp(formData)
       return response.ok
