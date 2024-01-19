@@ -7,11 +7,17 @@ import {
   IJurisdictionResponse,
   IJurisdictionUserResponse,
   IRequirementBlockResponse,
+  IRequirementTemplateResponse,
   IResetPasswordResponse,
   IUserResponse,
 } from "../../types/api-responses"
-import { EJurisdictionSortFields, ERequirementLibrarySortFields, EUserSortFields } from "../../types/enums"
-import { IOption, ISort } from "../../types/types"
+import {
+  EJurisdictionSortFields,
+  ERequirementLibrarySortFields,
+  ERequirementTemplateSortFields,
+  EUserSortFields,
+} from "../../types/enums"
+import { IOption, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -78,12 +84,7 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
-  async fetchJurisdictions(params?: {
-    sort?: ISort<EJurisdictionSortFields>
-    query?: string
-    page?: number
-    perPage?: number
-  }) {
+  async fetchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
 
@@ -99,24 +100,11 @@ export class Api {
     return this.client.post<ApiResponse<IJurisdiction>>("/jurisdictions", { jurisdiction: params })
   }
 
-  async fetchRequirementBlocks(params?: {
-    sort?: ISort<ERequirementLibrarySortFields>
-    query?: string
-    page?: number
-    perPage?: number
-  }) {
+  async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }
 
-  async fetchJurisdictionUsers(
-    jurisdictionId,
-    params?: {
-      sort?: ISort<EUserSortFields>
-      query?: string
-      page?: number
-      perPage?: number
-    }
-  ) {
+  async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
 
@@ -126,5 +114,11 @@ export class Api {
 
   async fetchPermitApplications() {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
+  }
+
+  async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
+    return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, {
+      requirementTemplate: params,
+    })
   }
 }

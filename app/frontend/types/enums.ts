@@ -5,20 +5,21 @@ export enum EFlashMessageStatus {
   info = "info",
 }
 
-export enum EPermitType {
-  low_residential = "low_residential",
-  medium_residential = "medium_residential",
-}
-
-export enum EActivity {
-  new_construction = "new_construction",
-  demolition = "demolition",
+export enum EPermitClassificationType {
+  PermitType = "PermitType",
+  Activity = "Activity",
 }
 
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
   viewed = "viewed",
+}
+
+export enum ERequirementTemplateStatus {
+  published = "published",
+  scheduled = "scheduled",
+  draft = "draft",
 }
 
 export enum EUserRoles {
@@ -49,6 +50,15 @@ export enum EUserSortFields {
   name = "name",
   createdAt = "created_at",
   lastSignIn = "last_sign_in",
+}
+
+export enum ERequirementTemplateSortFields {
+  status = "status",
+  permitType = "permit_type",
+  activityType = "activity_type",
+  description = "description",
+  version = "version",
+  jurisdictionsSize = "jurisdictions_size",
 }
 
 export enum ESortDirection {

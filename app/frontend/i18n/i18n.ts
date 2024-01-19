@@ -101,6 +101,7 @@ const options = {
           view: "View",
           totalItems: "Total Items",
           doLater: "Do this later",
+          edit: "Edit",
         },
         jurisdiction: {
           new: {
@@ -225,6 +226,29 @@ const options = {
             super_admin: "super admin",
           },
         },
+        requirementTemplate: {
+          fields: {
+            status: "Status",
+            permit_type: "Permit Type",
+            activity_type: "Work Type",
+            description: "Description",
+            version: "Version",
+            jurisdictions_size: "Used By",
+          },
+          status: {
+            published: "Published",
+            scheduled: "Scheduled",
+            draft: "Draft",
+          },
+          index: {
+            tableHeading: "Templates",
+            title: "Permit Templates Catalogue",
+            description:
+              "List of all permit templates in the system that’s been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
+            createButton: "Create new template",
+            seeArchivedButton: "See Archived",
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "BC Building Permit Hub",
@@ -254,6 +278,7 @@ const options = {
             new: "Create New",
             invite: "Invite",
             "requirements-library": "Requirements Library",
+            "requirement-templates": "Permit Templates Catalogue",
           },
         },
       },

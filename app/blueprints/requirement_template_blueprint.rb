@@ -1,0 +1,7 @@
+class RequirementTemplateBlueprint < Blueprinter::Base
+  identifier :id
+  fields :status, :description, :version, :jurisdictions_size, :scheduled_for, :created_at, :updated_at
+
+  association :permit_type, blueprint: PermitClassificationBlueprint
+  association :activity, blueprint: PermitClassificationBlueprint
+end

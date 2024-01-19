@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_12_012855) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -42,6 +42,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_12_012855) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
+  end
+
+  create_table "jurisdiction_requirement_templates", force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "requirement_template_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"], name: "index_jurisdiction_requirement_templates_on_jurisdiction_id"
+    t.index ["requirement_template_id"], name: "idx_on_requirement_template_id_df1d54db04"
   end
 
   create_table "jurisdictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -126,6 +135,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_12_012855) do
     t.uuid "permit_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "status", default: 0
+    t.string "description"
+    t.string "version"
+    t.date "scheduled_for"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["permit_type_id", "activity_id"], name: "index_requirement_templates_on_permit_type_id_and_activity_id", unique: true
     t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
@@ -218,6 +231,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_12_012855) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "contacts", "jurisdictions"
+  add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
+  add_foreign_key "jurisdiction_requirement_templates", "requirement_templates"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"

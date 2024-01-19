@@ -6,19 +6,12 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { ERequirementLibrarySortFields } from "../types/enums"
-import { ISort } from "../types/types"
 
 export const RequirementBlockStore = types
   .compose(
     types.model("RequirementBlockStore").props({
       requirementBlockMap: types.map(RequirementBlockModel),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
-      query: types.maybeNull(types.string),
-      sort: types.maybeNull(types.frozen<ISort<ERequirementLibrarySortFields>>()),
-      currentPage: types.optional(types.number, 1),
-      totalPages: types.maybeNull(types.number),
-      totalCount: types.maybeNull(types.number),
-      countPerPage: types.optional(types.number, 10),
     }),
     createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks")
   )

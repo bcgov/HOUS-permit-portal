@@ -3,11 +3,8 @@ import {
   Button,
   Container,
   Flex,
-  Grid,
-  GridItem,
-  GridItemProps,
-  Heading,
   HStack,
+  Heading,
   ListItem,
   Tag,
   Text,
@@ -22,16 +19,10 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SearchGrid } from "../../shared/grid/search-grid"
+import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { GridHeaders } from "./grid-header"
 
-const sharedGridItemsStyles: Partial<GridItemProps> = {
-  p: 4,
-  display: "flex",
-  justifyContent: "flex-start",
-  alignItems: "center",
-  role: "cell",
-  color: "text.primary",
-}
 export const RequirementsLibraryScreen = observer(function RequirementsLibrary() {
   const { requirementBlockStore } = useMst()
   const {
@@ -53,7 +44,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
   return (
     <Container maxW="container.lg" p={8} as="main">
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
+        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"} gap={6}>
           <Box>
             <Heading fontSize={"4xl"} color={"text.primary"}>
               {t("requirementsLibrary.index.title")}
@@ -65,24 +56,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           <Button variant={"primary"}>{t("requirementsLibrary.index.createButton")}</Button>
         </Flex>
 
-        <Grid
-          mt={3}
-          role={"table"}
-          templateColumns="repeat(4, 1fr) 85px"
-          w="full"
-          maxW={"full"}
-          overflow={"auto"}
-          sx={{
-            borderCollapse: "separate",
-            ".requirements-library-grid-row:not(:last-of-type) > div": {
-              borderBottom: "1px solid",
-              borderColor: "border.light",
-            },
-          }}
-          border={"1px solid"}
-          borderColor={"border.light"}
-          borderRadius={"sm"}
-        >
+        <SearchGrid templateColumns="repeat(4, 1fr) 85px">
           <GridHeaders />
           {tableRequirementBlocks.map((requirementBlock) => {
             return (
@@ -92,10 +66,8 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
                 role={"row"}
                 display={"contents"}
               >
-                <GridItem {...sharedGridItemsStyles} fontWeight={700}>
-                  {requirementBlock.name}
-                </GridItem>
-                <GridItem {...sharedGridItemsStyles}>
+                <SearchGridItem fontWeight={700}>{requirementBlock.name}</SearchGridItem>
+                <SearchGridItem>
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
                     {requirementBlock.associations.map((association) => (
                       <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
@@ -103,8 +75,8 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
                       </Tag>
                     ))}
                   </HStack>
-                </GridItem>
-                <GridItem {...sharedGridItemsStyles}>
+                </SearchGridItem>
+                <SearchGridItem>
                   <UnorderedList>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
@@ -114,19 +86,17 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
                       )
                     })}
                   </UnorderedList>
-                </GridItem>
-                <GridItem {...sharedGridItemsStyles} fontSize={"sm"}>
-                  {format(requirementBlock.updatedAt, "yyyy-MM-dd")}
-                </GridItem>
-                <GridItem {...sharedGridItemsStyles} justifyContent={"center"}>
+                </SearchGridItem>
+                <SearchGridItem fontSize={"sm"}>{format(requirementBlock.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
+                <SearchGridItem justifyContent={"center"}>
                   <Button variant={"link"} textDecoration={"underline"}>
-                    Edit
+                    {t("ui.edit")}
                   </Button>
-                </GridItem>
+                </SearchGridItem>
               </Box>
             )
           })}
-        </Grid>
+        </SearchGrid>
         <Flex w={"full"} justifyContent={"space-between"}>
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}

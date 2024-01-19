@@ -18,8 +18,9 @@ import { JurisdictionUserIndexScreen } from "../jurisdictions/users"
 import { LandingScreen } from "../landing"
 import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
-import { PermitApplicationNewScreen } from "../permit-application/new"
-import { PermitApplicationShowScreen } from "../permit-application/show"
+import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
+import { PermitApplicationScreen } from "../permit-application/permit-application-screen"
+import { RequirementTemplatesScreen } from "../requirement-template"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
@@ -70,6 +71,7 @@ const AppRoutes = observer(() => {
       <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
+      <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
     </>
   )
 
@@ -92,8 +94,8 @@ const AppRoutes = observer(() => {
         <>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/permit-applications/new" element={<PermitApplicationNewScreen />} />
-          <Route path="/permit-applications/:id" element={<PermitApplicationShowScreen />} />
+          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+          <Route path="/permit-applications/:id" element={<PermitApplicationScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
 
           {currentUser?.isSuperAdmin && superAdminOnlyRoutes}

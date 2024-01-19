@@ -58,7 +58,7 @@ User
 # Creating Permit Applications
 submitters = User.where(role: "submitter")
 
-if PermitApplication.all.blank?
+unless PermitApplication.size > 0
   20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
 
   # Creating Contacts
@@ -86,14 +86,15 @@ submitters = User.where(role: "submitter")
   )
 end
 
-RequirementsFromXlsxSeeder.seed
+RequirementsFromXlsxSeeder.seed unless Requirement.size > 0
+
 # Create RequirementTemplate records
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
 
-if RequirementBlock.all.blank?
+unless RequirementBlock.size > 0
   25.times do |i|
     RequirementBlock.create!(
       name: "Block #{i + 1}",

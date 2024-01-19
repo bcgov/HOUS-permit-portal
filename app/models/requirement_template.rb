@@ -1,10 +1,23 @@
 class RequirementTemplate < ApplicationRecord
+  searchkick searchable: %i[description status version], word_start: %i[status]
+
   belongs_to :activity
   belongs_to :permit_type
 
   has_many :requirement_template_sections, -> { order(position: :asc) }, dependent: :destroy
+  has_many :jurisdiction_requirement_templates
+  has_many :jurisdictions, through: :jurisdiction_requirement_templates
 
   validates :activity_id, uniqueness: { scope: :permit_type_id }
+  validate :scheduled_for_presence_if_scheduled
+
+  before_create :set_default_version
+
+  enum status: { draft: 0, scheduled: 1, published: 2 }, _default: 0
+
+  def jurisdictions_size
+    jurisdictions.size
+  end
 
   def to_form_json
     {
@@ -14,5 +27,25 @@ class RequirementTemplate < ApplicationRecord
       tableView: false,
       components: requirement_template_sections.map(&:to_form_json),
     }
+  end
+
+  def search_data
+    {
+      description: description,
+      status: status,
+      version: version,
+      permit_type: permit_type.name,
+      activity: activity.name,
+    }
+  end
+
+  private
+
+  def scheduled_for_presence_if_scheduled
+    errors.add(:scheduled_for, "must be set when status is 'scheduled'") if scheduled? && scheduled_for.blank?
+  end
+
+  def set_default_version
+    self.version ||= "v. #{Date.today.strftime("%Y.%m.%d")}"
   end
 end

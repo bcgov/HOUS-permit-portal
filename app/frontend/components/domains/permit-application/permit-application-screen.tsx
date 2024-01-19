@@ -5,9 +5,9 @@ import { useParams } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 
-interface IPermitApplicationShowScreenProps {}
+interface IPermitApplicationScreenProps {}
 
-export const PermitApplicationShowScreen = observer(({}: IPermitApplicationShowScreenProps) => {
+export const PermitApplicationScreen = observer(({}: IPermitApplicationScreenProps) => {
   const { id } = useParams()
   const { permitApplicationStore } = useMst()
   const { getPermitApplicationById } = permitApplicationStore

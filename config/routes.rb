@@ -39,6 +39,10 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
 
+    resources :requirement_templates, only: %i[] do
+      post "search", on: :collection, to: "requirement_templates#index"
+    end
+
     resources :jurisdictions, only: %i[index show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"

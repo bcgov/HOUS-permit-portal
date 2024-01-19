@@ -2,9 +2,9 @@ import { Container, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 
-interface IPermitApplicationNewScreenProps {}
+interface INewPermitApplicationScreenProps {}
 
-export const PermitApplicationNewScreen = observer(({}: IPermitApplicationNewScreenProps) => {
+export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScreenProps) => {
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
       <Container maxW="container.lg">

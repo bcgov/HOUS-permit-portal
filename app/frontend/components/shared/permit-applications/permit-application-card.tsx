@@ -7,7 +7,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { PermitApplicationStatusTag } from "./permit-application-status-tag"
+import { PermitApplicationTemplateStatusTag } from "./permit-application-status-tag"
 
 interface IPermitApplicationCardProps {
   permitApplication: IPermitApplication
@@ -41,7 +41,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
       <Show below="md">
         <Flex justify="space-between">
           <Image src="https://placehold.co/90x36" alt={`thumbnail for ${nickname}`} />
-          <PermitApplicationStatusTag status={status} />
+          <PermitApplicationTemplateStatusTag status={status} />
         </Flex>
       </Show>
       <Flex direction="column" gap={4}>
@@ -101,7 +101,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
       </Show>
       <Flex direction="column" align="flex-end" gap={2}>
         <Show above="md">
-          <PermitApplicationStatusTag status={status} />
+          <PermitApplicationTemplateStatusTag status={status} />
           <Text>
             {t("Application ID")}: {number}
           </Text>

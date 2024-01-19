@@ -1,6 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
 
-export const RequirementModel = types.model("RequirementBlockModel", {
+export const RequirementModel = types.model("RequirementModel", {
   id: types.identifier,
   label: types.string,
   createdAt: types.Date,

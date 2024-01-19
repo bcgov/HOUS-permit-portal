@@ -21,6 +21,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { SubNavBar } from "./sub-nav-bar"
@@ -72,7 +73,7 @@ export const NavBar = observer(() => {
                 currentUser?.isReviewManager ||
                 (currentUser?.isSuperAdmin && (
                   <Text color="greys.white" textTransform="capitalize">
-                    {t(`user.roles.${currentUser.role}`)}
+                    {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
               <NavBarMenu isAdmin={currentUser?.isAdmin} />

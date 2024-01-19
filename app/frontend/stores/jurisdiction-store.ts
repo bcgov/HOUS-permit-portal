@@ -1,4 +1,3 @@
-import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { TCreateJurisdictionFormData } from "../components/domains/jurisdictions/new-jurisdiction-screen"
@@ -32,20 +31,6 @@ export const JurisdictionStoreModel = types
     // View to get all jurisdictions as an array
     get jurisdictions() {
       return Array.from(self.jurisdictionMap.values())
-    },
-    getSortColumnHeader(field: EJurisdictionSortFields) {
-      switch (field) {
-        case EJurisdictionSortFields.reverseQualifiedName:
-          return t("jurisdiction.fields.reverse_qualified_name")
-        case EJurisdictionSortFields.reviewManagersSize:
-          return t("jurisdiction.fields.review_managers_size")
-        case EJurisdictionSortFields.reviewersSize:
-          return t("jurisdiction.fields.reviewers_size")
-        case EJurisdictionSortFields.permitApplicationsSize:
-          return t("jurisdiction.fields.permit_applications_size")
-        case EJurisdictionSortFields.templatesUsed:
-          return t("jurisdiction.fields.templates_used")
-      }
     },
   }))
   .actions((self) => ({
