@@ -16,3 +16,22 @@ export function debounce<T extends (...args: any[]) => any>(func: T, delay: numb
     }, delay)
   }
 }
+
+export function toCamelCase(input: string): string {
+  return (
+    input
+      // Split the string by '-' (for kebab-case) or '_' (for snake_case)
+      .split(/[-_]/)
+      // Transform each part: capitalize the first letter of each part except the first one
+      .map((part, index) => {
+        if (index === 0) {
+          // The first part remains in lower case
+          return part.toLowerCase()
+        }
+        // Capitalize the first letter of each subsequent part
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      })
+      // Join all parts back together
+      .join("")
+  )
+}

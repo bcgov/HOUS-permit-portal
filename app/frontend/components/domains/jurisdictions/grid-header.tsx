@@ -9,7 +9,7 @@ import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
   const { jurisdictionStore } = useMst()
-  const { sort, toggleSort } = jurisdictionStore
+  const { sort, toggleSort, getSortColumnHeader } = jurisdictionStore
   const { t } = useTranslation()
 
   return (
@@ -42,7 +42,7 @@ export const GridHeaders = observer(function GridHeaders() {
               borderColor={"border.light"}
               px={4}
             >
-              <Text textAlign="left">{t(`jurisdiction.fields.${field as EJurisdictionSortFields}`)}</Text>
+              <Text textAlign="left">{getSortColumnHeader(field)}</Text>
               <SortIcon<EJurisdictionSortFields> field={field} currentSort={sort} />
             </Flex>
           </GridHeader>

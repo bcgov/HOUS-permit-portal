@@ -9,7 +9,7 @@ import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
   const { requirementTemplateStore } = useMst()
-  const { sort, toggleSort } = requirementTemplateStore
+  const { sort, toggleSort, getSortColumnHeader } = requirementTemplateStore
   const { t } = useTranslation()
 
   return (
@@ -42,7 +42,7 @@ export const GridHeaders = observer(function GridHeaders() {
               borderColor={"border.light"}
               px={4}
             >
-              <Text>{t(`requirementTemplate.fields.${field as ERequirementTemplateSortFields}`)}</Text>
+              <Text>{getSortColumnHeader(field)}</Text>
               <SortIcon<ERequirementTemplateSortFields> field={field} currentSort={sort} />
             </Flex>
           </GridHeader>

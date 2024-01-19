@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { TCreateJurisdictionFormData } from "../components/domains/jurisdictions/new-jurisdiction-screen"
@@ -8,6 +9,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
 import { IOption, ISort } from "../types/types"
+import { toCamelCase } from "../utils/utility-funcitons"
 
 export const JurisdictionStoreModel = types
   .compose(
@@ -24,6 +26,10 @@ export const JurisdictionStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    getSortColumnHeader(field: EJurisdictionSortFields) {
+      //@ts-ignore
+      return t(`jurisdiction.fields.${toCamelCase(field)}`)
+    },
     // View to get a Jurisdiction by id
     getJurisdictionById(id: string) {
       return self.jurisdictionMap.get(id)

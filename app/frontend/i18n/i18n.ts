@@ -117,12 +117,12 @@ const options = {
             tableHeading: "Local Governments",
           },
           fields: {
-            reverse_qualified_name: "Name",
-            review_managers_size: "Managers",
-            reviewers_size: "Reviewers",
+            reverseQualifiedName: "Name",
+            reviewManagersSize: "Managers",
+            reviewersSize: "Reviewers",
             localityType: "Locality Type",
-            permit_applications_size: "Applications Received",
-            templates_used: "Templates Used",
+            permitApplicationsSize: "Applications Received",
+            templatesUsed: "Templates Used",
           },
           title: "Local Housing Permits",
           description:
@@ -229,11 +229,11 @@ const options = {
         requirementTemplate: {
           fields: {
             status: "Status",
-            permit_type: "Permit Type",
-            activity_type: "Work Type",
+            permitType: "Permit Type",
+            activityType: "Work Type",
             description: "Description",
             version: "Version",
-            jurisdictions_size: "Used By",
+            jurisdictionsSize: "Used By",
           },
           status: {
             published: "Published",
@@ -277,8 +277,8 @@ const options = {
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
             invite: "Invite",
-            "requirements-library": "Requirements Library",
-            "requirement-templates": "Permit Templates Catalogue",
+            requirementsLibrary: "Requirements Library",
+            requirementTemplates: "Permit Templates Catalogue",
           },
         },
       },

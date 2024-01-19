@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
@@ -5,6 +6,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementTemplateModel } from "../models/requirement-template"
 import { ERequirementTemplateSortFields } from "../types/enums"
+import { toCamelCase } from "../utils/utility-funcitons"
 
 export const RequirementTemplateStore = types
   .compose(
@@ -20,6 +22,10 @@ export const RequirementTemplateStore = types
     // View to get a RequirementTemplate by id
     getRequirementTemplateById(id: string) {
       return self.requirementTemplateMap.get(id)
+    },
+    getSortColumnHeader(field: ERequirementTemplateSortFields) {
+      //@ts-ignore
+      return t(`requirementTemplate.fields.${toCamelCase(field)}`)
     },
   }))
 
