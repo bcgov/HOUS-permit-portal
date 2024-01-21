@@ -210,14 +210,35 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.textArea]: function <TFieldValues>({ label, helperText }: TRequirementEditProps<TFieldValues>) {
+  [ERequirementType.textArea]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.textArea")}</FormLabel>
-        <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} />
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} isReadOnly />
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
     )
   },
 
