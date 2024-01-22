@@ -48,6 +48,7 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
           bg={value === undefined ? "semantic.info" : undefined}
           color={value === undefined ? "white" : "text.primary"}
           onClick={() => onChange(undefined)}
+          aria-selected={value === undefined}
         >
           {getUnitOptionLabel()}
         </MenuItem>
@@ -63,6 +64,7 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
                 bg={value === unit ? "semantic.info" : undefined}
                 color={value === unit ? "white" : "text.primary"}
                 onClick={() => onChange(unit)}
+                aria-selected={value === unit}
               >
                 {getUnitOptionLabel(unit)}
               </MenuItem>
