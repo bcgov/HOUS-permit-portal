@@ -19,8 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { ERequirementType } from "../../../types/enums"
-import { ENumberUnit } from "../../../types/types"
+import { ENumberUnit, ERequirementType } from "../../../types/enums"
 
 const defaultLabelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
@@ -31,7 +30,7 @@ type TRequirementProps = {
   label?: string
   options?: string[]
   helperText?: string
-  unit?: ENumberUnit
+  unit?: ENumberUnit | null
 }
 
 const helperTextStyles = {
@@ -98,7 +97,7 @@ const requirementsComponentMap = {
           {label ?? t("requirementsLibrary.requirementTypeLabels.number")}
         </FormLabel>
         <InputGroup w={"130px"}>
-          <InputRightElement mr={2}>{unit === "noUnit" ? null : unit ?? "unit"}</InputRightElement>
+          <InputRightElement mr={2}>{unit === undefined ? "unit" : unit}</InputRightElement>
           <Input bg={"white"} />
         </InputGroup>
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}

@@ -73,3 +73,12 @@ export enum ERequirementType {
   generalContact = "general_contact",
   fileUpload = "file_upload",
 }
+
+export enum ENumberUnit {
+  mm = "mm",
+  cm = "cm",
+  m = "m",
+  in = "in",
+  ft = "ft",
+  mi = "mi",
+}

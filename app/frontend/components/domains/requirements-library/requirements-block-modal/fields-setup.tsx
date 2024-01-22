@@ -4,8 +4,7 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ERequirementType } from "../../../../types/enums"
-import { ENumberUnit } from "../../../../types/types"
+import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { RequirementFieldDisplay } from "../requirement-field-display"
@@ -172,7 +171,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         requirementType === ERequirementType.number
                           ? watch(
                               `requirementBlockRequirementsAttributes.${index}.requirementAttributes.inputOptions.numberUnit`
-                            )
+                            ) ?? null
                           : undefined
                       }
                     />

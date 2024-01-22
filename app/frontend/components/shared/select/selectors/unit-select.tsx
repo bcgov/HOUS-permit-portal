@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { getUnitDisplayLabel, getUnitOptionLabel, unitGroups } from "../../../../constants"
-import { ENumberUnit } from "../../../../types/types"
+import { ENumberUnit } from "../../../../types/enums"
 
 interface IProps {
   value: ENumberUnit
@@ -42,6 +42,17 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
         </HStack>
       </MenuButton>
       <MenuList aria-multiselectable={false} aria-label={"Unit options"} role={"listbox"} w={"200px"}>
+        <MenuItem
+          fontSize={"sm"}
+          role={"option"}
+          _focus={{ bg: value === undefined ? undefined : "semantic.infoLight" }}
+          bg={value === undefined ? "semantic.info" : undefined}
+          color={value === undefined ? "white" : "text.primary"}
+          onClick={() => onChange(undefined)}
+        >
+          {getUnitOptionLabel()}
+        </MenuItem>
+        <MenuDivider />
         {unitGroupEntries.map(([unitGroupKey, units], index) => (
           <React.Fragment key={unitGroupKey}>
             {units.map((unit) => (

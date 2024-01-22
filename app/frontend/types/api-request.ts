@@ -1,5 +1,5 @@
-import { ERequirementType, ETagType } from "./enums"
-import { ENumberUnit, IOption } from "./types"
+import { ENumberUnit, ERequirementType, ETagType } from "./enums"
+import { IOption } from "./types"
 
 export interface IRequirementAttributes {
   label?: string
