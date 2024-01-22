@@ -1,6 +1,5 @@
 import { HStack, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { getUnitDisplayLabel, getUnitOptionLabel, unitGroups } from "../../../../constants"
@@ -38,7 +37,7 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
           <Text as={"span"} flex={1} w={"full"}>
             {getUnitDisplayLabel(value)}
           </Text>
-          <FontAwesomeIcon icon={faChevronDown} />
+          <CaretDown />
         </HStack>
       </MenuButton>
       <MenuList aria-multiselectable={false} aria-label={"Unit options"} role={"listbox"} w={"200px"}>

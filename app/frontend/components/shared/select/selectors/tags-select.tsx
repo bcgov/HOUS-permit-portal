@@ -1,6 +1,5 @@
 import { IconButton, Tag } from "@chakra-ui/react"
-import { faClose, faTag } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Tag as TagIcon, X as XIcon } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
 import React, { useCallback } from "react"
@@ -63,7 +62,7 @@ const Option = (props: OptionProps<IOption>) => {
   return (
     <components.Option {...props}>
       <Tag bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
-        <FontAwesomeIcon icon={faTag} style={{ width: "12px", height: "12px", marginRight: "0.5rem" }} />
+        <TagIcon size={"12px"} style={{ marginRight: "0.5rem" }} />
         {props.label}
       </Tag>
     </components.Option>
@@ -86,13 +85,14 @@ const MultiValue = (props: MultiValueProps<IOption>) => {
       py={1}
     >
       {props.data.label}
+      {/*  @ts-ignore*/}
       <IconButton
-        {...props?.removeProps}
         size={"xxs"}
         bg={"greys.grey03"}
         aria-label={"remove association"}
-        icon={<FontAwesomeIcon icon={faClose} style={{ width: "14px", height: "14px" }} />}
+        icon={<XIcon size={14} />}
         sx={{ visibility: "var(--association-remove-icon-visibility)" }}
+        {...props?.removeProps}
       />
     </Tag>
   )
@@ -101,7 +101,7 @@ const MultiValue = (props: MultiValueProps<IOption>) => {
 const Control = ({ children, ...props }: ControlProps<IOption>) => {
   return (
     <components.Control {...props}>
-      <FontAwesomeIcon icon={faTag} style={{ width: "16.7px", height: "16.7px" }} />
+      <TagIcon size={"16.7px"} />
       {children}
     </components.Control>
   )

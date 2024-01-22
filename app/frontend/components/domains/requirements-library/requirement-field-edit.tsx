@@ -15,8 +15,7 @@ import {
   Stack,
   Textarea,
 } from "@chakra-ui/react"
-import { faCalendar, faLocationDot } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CalendarBlank, MapPin } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FieldValues } from "react-hook-form"
@@ -110,7 +109,7 @@ const requirementsComponentMap = {
         />
         <InputGroup>
           <InputLeftElement>
-            <FontAwesomeIcon icon={faLocationDot} />
+            <MapPin />
           </InputLeftElement>
           <Input bg={"white"} isReadOnly />
         </InputGroup>
@@ -147,7 +146,7 @@ const requirementsComponentMap = {
         />
         <InputGroup w={"166px"}>
           <InputLeftElement>
-            <FontAwesomeIcon icon={faCalendar} />
+            <CalendarBlank />
           </InputLeftElement>
           <Input bg={"white"} isReadOnly />
         </InputGroup>

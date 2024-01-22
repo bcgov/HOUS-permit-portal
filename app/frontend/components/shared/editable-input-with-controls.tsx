@@ -13,8 +13,7 @@ import {
   IconButtonProps,
   useEditableControls,
 } from "@chakra-ui/react"
-import { faPencil } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -63,7 +62,8 @@ function EditableControls({
       variant={"unstyled"}
       aria-label={"Enter edit mode"}
       color={"text.link"}
-      icon={<FontAwesomeIcon icon={faPencil} style={{ width: "14px", height: "14px" }} {...getEditButtonProps()} />}
+      icon={<Pencil size={14} />}
+      {...getEditButtonProps()}
       {...iconButtonProps}
     />
   )

@@ -12,8 +12,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CaretRight, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,7 +39,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
     <>
       {renderTriggerButton?.({ onClick: onOpen, ref: btnRef }) ?? (
         <Button
-          leftIcon={<FontAwesomeIcon icon={faPlus} />}
+          leftIcon={<Plus size={12} />}
           variant={"primary"}
           onClick={onOpen}
           aria-label={"add form fields to requirement block"}
@@ -95,7 +94,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                     <RequirementFieldDisplay requirementType={requirementType} />
                     <Button
                       variant={"primary"}
-                      rightIcon={<FontAwesomeIcon icon={faChevronRight} />}
+                      rightIcon={<CaretRight />}
                       onClick={() => onUse?.(requirementType, onClose)}
                     >
                       {t("requirementsLibrary.fieldsDrawer.useButton")}
