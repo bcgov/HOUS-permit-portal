@@ -1,6 +1,5 @@
 import { Center, Container, Flex, Text, VStack } from "@chakra-ui/react"
-import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Warning } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "../../domains/home"
@@ -12,7 +11,7 @@ export const ErrorScreen = ({ ...rest }: IHomeScreenProps) => {
     <Container as={Flex} direction="column" maxW="container.lg" flexGrow={1}>
       <Center w="full" flex={1} color="greys.grey02">
         <VStack>
-          <FontAwesomeIcon style={{ height: 100, width: 100 }} icon={faTriangleExclamation} />
+          <Warning size={100} />
           <Text>{t("site.somethingWrong")}</Text>
         </VStack>
       </Center>

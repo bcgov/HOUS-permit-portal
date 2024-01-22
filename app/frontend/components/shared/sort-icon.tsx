@@ -1,5 +1,4 @@
-import { faSort, faSortDown, faSortUp } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CaretDown, CaretUp, CaretUpDown } from "@phosphor-icons/react"
 import React from "react"
 import { ESortDirection } from "../../types/enums"
 import { ISort } from "../../types/types"
@@ -9,13 +8,13 @@ export function SortIcon<TSortField>({ field, currentSort }: { field: TSortField
     // this column is sorted
     switch (currentSort.direction) {
       case ESortDirection.ascending:
-        return <FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faSortUp} />
+        return <CaretUp size={16} />
       case ESortDirection.descending:
-        return <FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faSortDown} />
+        return <CaretDown size={16} />
       default:
-        return <FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faSortDown} />
+        return <CaretDown size={16} />
     }
   } else {
-    return <FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faSort} />
+    return <CaretUpDown size={16} />
   }
 }

@@ -8,6 +8,8 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+PermitClassificationSeeder.seed
+
 # Creating Jurisdictions
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
@@ -21,25 +23,37 @@ if User.all.blank?
   end
 end
 
-User.find_or_create_by(username: "admin") do |user|
-  user.role = :super_admin
-  user.email = "admin@example.com"
-  user.password = "P@ssword1"
-end
+User
+  .find_or_create_by(username: "admin") do |user|
+    user.role = :super_admin
+    user.first_name = "Admin"
+    user.last_name = "McUser"
+    user.email = "admin@example.com"
+    user.password = "P@ssword1"
+  end
+  .confirm
 
-User.find_or_create_by(username: "review_manager") do |user|
-  user.role = :review_manager
-  user.email = "review_manager@example.com"
-  user.password = "P@ssword1"
-  user.jurisdiction = jurisdictions.first
-end
+User
+  .find_or_create_by(username: "review_manager") do |user|
+    user.role = :review_manager
+    user.first_name = "ReviewManager"
+    user.last_name = "McUser"
+    user.email = "review_manager@example.com"
+    user.password = "P@ssword1"
+    user.jurisdiction = jurisdictions.first
+  end
+  .confirm
 
-User.find_or_create_by(username: "reviewer") do |user|
-  user.role = :reviewer
-  user.email = "reviewer@example.com"
-  user.password = "P@ssword1"
-  user.jurisdiction = jurisdictions.first
-end
+User
+  .find_or_create_by(username: "reviewer") do |user|
+    user.role = :reviewer
+    user.first_name = "Reviewer"
+    user.last_name = "McUser"
+    user.email = "reviewer@example.com"
+    user.password = "P@ssword1"
+    user.jurisdiction = jurisdictions.first
+  end
+  .confirm
 
 # Creating Permit Applications
 submitters = User.where(role: "submitter")
@@ -58,8 +72,21 @@ activity2 = Activity.find_by_code("demolition")
 
 # Create PermitType records
 permit_type1 = PermitType.find_by_code("low_residential")
-permit_type2 = PermitType.find_by_code("high_residential")
+permit_type2 = PermitType.find_by_code("medium_residential")
 
+# Creating Permit Applications
+submitters = User.where(role: "submitter")
+20.times do
+  FactoryBot.create(
+    :permit_application,
+    submitter: submitters.sample,
+    jurisdiction: jurisdictions.sample,
+    activity: activity1,
+    permit_type: permit_type1,
+  )
+end
+
+RequirementsFromXlsxSeeder.seed
 # Create RequirementTemplate records
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)

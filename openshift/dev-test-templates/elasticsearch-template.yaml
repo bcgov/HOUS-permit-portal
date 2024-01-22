@@ -74,7 +74,13 @@ objects:
                   protocol: TCP
                 - containerPort: 9300
                   protocol: TCP
-              resources: {}
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 512Mi
+                requests:
+                  cpu: 20m
+                  memory: 128Mi
               terminationMessagePath: /${STAGE}/termination-log
               terminationMessagePolicy: File
               volumeMounts:

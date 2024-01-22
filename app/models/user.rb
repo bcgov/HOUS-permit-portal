@@ -1,5 +1,12 @@
 class User < ApplicationRecord
   searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
+
+  scope :review_managers, -> { where(role: User.roles[:review_manager]) }
+  scope :reviewers, -> { where(role: User.roles[:reviewer]) }
+
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
 
   devise :invitable,
@@ -25,7 +32,26 @@ class User < ApplicationRecord
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
+  validate :confirmed_user_has_fields
   validate :unique_bceid
+  validates :email, presence: true
+
+  def search_data
+    {
+      updated_at: updated_at,
+      created_at: created_at,
+      role: role,
+      name: name,
+      username: username,
+      email: email,
+      jurisdiction_id: jurisdiction_id,
+      # last_sign_in: "TODO",
+    }
+  end
+
+  def name
+    "#{first_name} #{last_name}"
+  end
 
   def search_data
     {
@@ -61,6 +87,12 @@ class User < ApplicationRecord
   end
 
   private
+
+  def confirmed_user_has_fields
+    errors.add(:user, "Confirmed user must have username") unless !confirmed? || username.present?
+    errors.add(:user, "Confirmed user must have first_name") unless !confirmed? || first_name.present?
+    errors.add(:user, "Confirmed user must have last_name") unless !confirmed? || last_name.present?
+  end
 
   def jurisdiction_must_belong_to_correct_roles
     if jurisdiction.present? && !reviewer? && !review_manager?

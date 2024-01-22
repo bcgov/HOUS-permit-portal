@@ -1,6 +1,5 @@
 import { Box, Container, Flex, Grid, GridItem, Heading, Link, Show, Text } from "@chakra-ui/react"
-import { faSquareEnvelope, faSquarePhone } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { Envelope, Phone } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -32,15 +31,6 @@ const linePositions: TLatLngTuple[] = [
 export const JurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
-
-  if (error) {
-    return (
-      <Flex as="main" w="full" bg="greys.white">
-        {/* Todo: set up suspense and error boundries */}
-        <Text>{t("site.error")}</Text>
-      </Flex>
-    )
-  }
 
   if (error) return <ErrorScreen />
   if (!currentJurisdiction) return <LoadingScreen />
@@ -134,14 +124,14 @@ const ContactGridItem = ({ contact }: IContactBoxProps) => {
       {contact.title}
       <Flex mt={2} direction={{ base: "column", md: "row" }} gap={2}>
         <Flex flex={1} gap={4}>
-          <FontAwesomeIcon style={{ height: "32px", width: "32px" }} icon={faSquarePhone} />
+          <Phone size={32} />
           <Flex direction="column" flex={1}>
             <Heading fontSize="md">Telephone</Heading>
             <Link href={`tel:+${contact.phone}`}>{contact.phone}</Link>
           </Flex>
         </Flex>
         <Flex flex={1} gap={4}>
-          <FontAwesomeIcon style={{ height: "32px", width: "32px" }} icon={faSquareEnvelope} />
+          <Envelope size={32} />
           <Flex direction="column" flex={1}>
             <Heading fontSize="md">Email</Heading>
             <Link href={`mailto:${contact.email}`}>{contact.email}</Link>

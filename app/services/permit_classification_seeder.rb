@@ -2,9 +2,9 @@ class PermitClassificationSeeder
   def self.seed
     # Define PermitType data
     permit_types = [
-      { name: "Low Residential", code: "low_residential" },
-      { name: "Medium Residential", code: "medium_residential" },
-      { name: "High Residential", code: "high_residential" },
+      { name: "Low Density Residential", code: "low_residential" },
+      { name: "Medium Density Residential", code: "medium_residential" },
+      { name: "High Density Residential", code: "high_residential" },
     ]
 
     # Create PermitTypes

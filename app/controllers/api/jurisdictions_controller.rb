@@ -26,6 +26,30 @@ class Api::JurisdictionsController < Api::ApplicationController
     render_success(@jurisdiction)
   end
 
+  # POST /api/jurisdiction
+  def create
+    @jurisdiction = Jurisdiction.build(jurisdiction_params)
+
+    authorize @jurisdiction
+
+    if @jurisdiction.save
+      render_success @jurisdiction, "jurisdiction.create_success", { blueprint: JurisdictionBlueprint }
+    else
+      render_error Constants::Error::JURISDICTION_CREATE_ERROR,
+                   "jurisdiction.create_error",
+                   message_opts: {
+                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def locality_type_options
+    authorize :jurisdiction, :locality_type_options?
+    options =
+      Jurisdiction.locality_types.sort.map { |lt| { label: Jurisdiction.custom_titleize_locality_type(lt), value: lt } }
+    render_success options, nil, { blueprint: OptionBlueprint }
+  end
+
   # POST /api/jurisdictions/:id/users
   def search_users
     authorize @jurisdiction
@@ -43,6 +67,10 @@ class Api::JurisdictionsController < Api::ApplicationController
   end
 
   private
+
+  def jurisdiction_params
+    params.require(:jurisdiction).permit(:name, :locality_type, users_attributes: %i[first_name last_name role email])
+  end
 
   def set_jurisdiction
     @jurisdiction = Jurisdiction.find(params[:id])

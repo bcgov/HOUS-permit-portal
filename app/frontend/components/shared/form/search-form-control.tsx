@@ -1,6 +1,5 @@
 import { FormControl, FormControlProps, FormErrorMessage, Input, InputGroup, InputLeftElement } from "@chakra-ui/react"
-import { faSearch } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { MagnifyingGlass } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -17,7 +16,7 @@ export const SearchFormControl = ({ label, fieldName, ...rest }: ISearchFormCont
     <FormControl isInvalid={!!formState?.errors[fieldName]} flex={1} {...rest}>
       <InputGroup>
         <InputLeftElement pointerEvents="none" color="greys.grey02">
-          <FontAwesomeIcon style={{ height: 16, width: 16 }} icon={faSearch} />
+          <MagnifyingGlass size={16} />
         </InputLeftElement>
         <Input
           {...register(fieldName)}

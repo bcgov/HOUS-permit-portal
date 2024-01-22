@@ -16,7 +16,10 @@ import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/users"
 import { LandingScreen } from "../landing"
+import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
+import { PermitApplicationNewScreen } from "../permit-application/new"
+import { PermitApplicationShowScreen } from "../permit-application/show"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
@@ -89,6 +92,8 @@ const AppRoutes = observer(() => {
         <>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+          <Route path="/permit-applications/new" element={<PermitApplicationNewScreen />} />
+          <Route path="/permit-applications/:id" element={<PermitApplicationShowScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
 
           {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
@@ -99,12 +104,14 @@ const AppRoutes = observer(() => {
         <>
           <Route path="/" element={<LandingScreen />} />
           <Route path="/login" element={<LoginScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
           <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
         </>
       )}
+      <Route path="/contact" element={<ContactScreen />} />
     </Routes>
   )
 })

@@ -37,7 +37,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.string "first_nation"
     t.string "email"
     t.string "phone_number"
-    t.string "extension", null: false
+    t.string "extension"
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -65,7 +65,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "permit_type_id", null: false
+    t.uuid "activity_id", null: false
+    t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
+    t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
   end
 
@@ -103,10 +107,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
-  create_table "requirement_template_section_requirement_blocks",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "requirement_template_section_requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "requirement_template_section_id", null: false
     t.uuid "requirement_block_id", null: false
     t.integer "position"
@@ -131,9 +132,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
-    t.index %w[permit_type_id activity_id],
-            name: "index_requirement_templates_on_permit_type_id_and_activity_id",
-            unique: true
+    t.index ["permit_type_id", "activity_id"], name: "index_requirement_templates_on_permit_type_id_and_activity_id", unique: true
     t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
   end
 
@@ -162,16 +161,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.datetime "created_at", precision: nil
     t.string "tenant", limit: 128
     t.index ["context"], name: "index_taggings_on_context"
-    t.index %w[tag_id taggable_id taggable_type context tagger_id tagger_type], name: "taggings_idx", unique: true
+    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
-    t.index %w[taggable_id taggable_type context], name: "taggings_taggable_context_idx"
-    t.index %w[taggable_id taggable_type tagger_id context], name: "taggings_idy"
+    t.index ["taggable_id", "taggable_type", "context"], name: "taggings_taggable_context_idx"
+    t.index ["taggable_id", "taggable_type", "tagger_id", "context"], name: "taggings_idy"
     t.index ["taggable_id"], name: "index_taggings_on_taggable_id"
-    t.index %w[taggable_type taggable_id], name: "index_taggings_on_taggable_type_and_taggable_id"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable_type_and_taggable_id"
     t.index ["taggable_type"], name: "index_taggings_on_taggable_type"
-    t.index %w[tagger_id tagger_type], name: "index_taggings_on_tagger_id_and_tagger_type"
+    t.index ["tagger_id", "tagger_type"], name: "index_taggings_on_tagger_id_and_tagger_type"
     t.index ["tagger_id"], name: "index_taggings_on_tagger_id"
-    t.index %w[tagger_type tagger_id], name: "index_taggings_on_tagger_type_and_tagger_id"
+    t.index ["tagger_type", "tagger_id"], name: "index_taggings_on_tagger_type_and_tagger_id"
     t.index ["tenant"], name: "index_taggings_on_tenant"
   end
 
@@ -184,8 +183,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "username", default: ""
+    t.string "email", null: false
+    t.string "username"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -198,6 +197,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role", default: 0
+    t.string "first_name"
+    t.string "last_name"
     t.uuid "jurisdiction_id"
     t.string "invitation_token"
     t.datetime "invitation_created_at"
@@ -213,7 +214,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
-    t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
+    t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -224,6 +225,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_17_183130) do
   add_foreign_key "contacts", "jurisdictions"
   add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "permit_applications", "jurisdictions"
+  add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
+  add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "requirement_block_requirements", "requirement_blocks"
   add_foreign_key "requirement_block_requirements", "requirements"

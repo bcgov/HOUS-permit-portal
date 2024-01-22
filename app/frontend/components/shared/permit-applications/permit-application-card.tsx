@@ -1,6 +1,5 @@
 import { Box, Flex, Image, Show, Spacer, Text, VStack } from "@chakra-ui/react"
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { CaretRight } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -51,8 +50,8 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           fontSize="lg"
           fontWeight="bold"
           color="text.link"
-          to="#"
-          rightIcon={<FontAwesomeIcon style={{ height: 14, width: 14 }} icon={faChevronRight} />}
+          to={`${id}`}
+          rightIcon={<CaretRight size={16} />}
         >
           {nickname}
           {", "}

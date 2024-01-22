@@ -2,6 +2,7 @@ import { values } from "mobx"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
@@ -15,6 +16,7 @@ export const UserStoreModel = types
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     get users(): IUser[] {
       //@ts-ignore
@@ -37,6 +39,9 @@ export const UserStoreModel = types
     setCurrentUser(user) {
       self.usersMap.put(user)
       self.currentUser = user.id
+    },
+    unsetCurrentUser() {
+      self.currentUser = null
     },
     signUp: flow(function* (formData) {
       const response = yield self.environment.api.signUp(formData)

@@ -1,5 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IPermitApplication } from "../../models/permit-application"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-request"
 import {
@@ -11,7 +12,7 @@ import {
   IUserResponse,
 } from "../../types/api-responses"
 import { EJurisdictionSortFields, ERequirementLibrarySortFields, EUserSortFields } from "../../types/enums"
-import { ISort } from "../../types/types"
+import { IOption, ISort } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -91,6 +92,14 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
   }
 
+  async fetchLocalityTypeOptions() {
+    return this.client.get<ApiResponse<IOption>>(`/jurisdictions/locality_type_options`)
+  }
+
+  async createJurisdiction(params) {
+    return this.client.post<ApiResponse<IJurisdiction>>("/jurisdictions", { jurisdiction: params })
+  }
+
   async fetchRequirementBlocks(params?: {
     sort?: ISort<ERequirementLibrarySortFields>
     query?: string
@@ -125,5 +134,8 @@ export class Api {
 
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
+  }
+  async fetchPermitApplications() {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
   }
 }
