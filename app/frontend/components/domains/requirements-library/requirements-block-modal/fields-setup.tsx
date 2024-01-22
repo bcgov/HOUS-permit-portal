@@ -47,8 +47,12 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
             fontWeight={700}
-            editableInputProps={register("displayName", { required: true })}
+            editableInputProps={{
+              ...register("displayName", { required: true }),
+              "aria-label": "Edit Display Name",
+            }}
             color={R.isEmpty(watchedDisplayName) ? "text.link" : undefined}
+            aria-label={"Edit Display Name"}
           />
         </Flex>
         <Box py={8}>
@@ -106,6 +110,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             required: true,
                             value: t("requirementsLibrary.modals.defaultRequirementLabel"),
                           }),
+                          "aria-label": "Edit Label",
                           w: "calc(100% - 60px)",
                         },
                       }}
@@ -117,9 +122,10 @@ export const FieldsSetup = observer(function FieldsSetup() {
                                 color: !!watchedHint ? "text.secondary" : "text.link",
                                 textDecoration: watchedHint ? undefined : "underline",
                               },
-                        editableInputProps: register(
-                          `requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`
-                        ),
+                        editableInputProps: {
+                          ...register(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`),
+                          "aria-label": "Edit Helper Text",
+                        },
                       }}
                       checkboxProps={{
                         controlProps: {
