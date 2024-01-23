@@ -10,7 +10,11 @@ FactoryBot.define do
       transient { requirements_count { 5 } }
 
       after(:create) do |requirement_block, evaluator|
-        requirement_block.requirements << create_list(:requirement, evaluator.requirements_count)
+        requirement_block.requirements << create_list(
+          :requirement,
+          evaluator.requirements_count,
+          requirement_block: requirement_block,
+        )
 
         # You may need to reload the record here, depending on your application
         requirement_block.reload

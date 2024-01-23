@@ -3,8 +3,7 @@ require "rails_helper"
 RSpec.describe RequirementBlock, type: :model do
   describe "associations" do
     # Testing direct associations
-    it { should have_many(:requirement_block_requirements) }
-    it { should have_many(:requirements).through(:requirement_block_requirements) }
+    it { should have_many(:requirements) }
     it "should order requirements by position in ascending order" do
       requirement_block = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 6)
 
@@ -12,14 +11,14 @@ RSpec.describe RequirementBlock, type: :model do
       # in update order we might get a false positive test, where the position seems correct
       # due to being inserted in order.
 
-      first_requirement_block_requirement = requirement_block.requirement_block_requirements.first
+      first_requirement = requirement_block.requirements.first
 
-      first_requirement_block_requirement.position = 3
-      first_requirement_block_requirement.save
+      first_requirement.position = 3
+      first_requirement.save
 
       requirement_block.reload
 
-      requirement_block.requirement_block_requirements.each_with_index { |r, i| expect(r.position).to eq(i) }
+      requirement_block.requirements.each_with_index { |r, i| expect(r.position).to eq(i) }
     end
   end
 

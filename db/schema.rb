@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
+ActiveRecord::Schema[7.1].define(version: 2024_01_23_212112) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -91,16 +91,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
     t.index ["code"], name: "index_permit_classifications_on_code", unique: true
   end
 
-  create_table "requirement_block_requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "requirement_id", null: false
-    t.uuid "requirement_block_id", null: false
-    t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["requirement_block_id"], name: "index_requirement_block_requirements_on_requirement_block_id"
-    t.index ["requirement_id"], name: "index_requirement_block_requirements_on_requirement_id"
-  end
-
   create_table "requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.integer "sign_off_role", default: 0, null: false
@@ -155,13 +145,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
     t.integer "input_type", null: false
     t.jsonb "input_options", default: {}, null: false
     t.string "hint"
-    t.boolean "reusable", default: false, null: false
     t.boolean "required", default: true, null: false
     t.string "related_content"
     t.boolean "required_for_in_person_hint", default: false, null: false
     t.boolean "required_for_multiple_owners", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "requirement_block_id", null: false
+    t.integer "position"
+    t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
   end
 
   create_table "taggings", force: :cascade do |t|
@@ -242,13 +234,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
   add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
   add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
-  add_foreign_key "requirement_block_requirements", "requirement_blocks"
-  add_foreign_key "requirement_block_requirements", "requirements"
   add_foreign_key "requirement_template_section_requirement_blocks", "requirement_blocks"
   add_foreign_key "requirement_template_section_requirement_blocks", "requirement_template_sections"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
+  add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "taggings", "tags"
   add_foreign_key "users", "jurisdictions"
 end
