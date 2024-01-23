@@ -76,9 +76,9 @@ class RequirementsFromXlsxSeeder
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
           rb =
-            RequirementBlock.where(name: sheet.row(row_index)[2]).first_or_create!(
-              name: sheet.row(row_index)[2],
-              display_name: sheet.row(row_index)[2],
+            RequirementBlock.where(name: sheet.row(row_index)[2].strip).first_or_create!(
+              name: sheet.row(row_index)[2].strip,
+              display_name: sheet.row(row_index)[2].strip,
             )
 
           req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)

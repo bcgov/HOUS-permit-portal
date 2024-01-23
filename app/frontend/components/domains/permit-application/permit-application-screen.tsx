@@ -19,6 +19,7 @@ export const PermitApplicationScreen = observer(({}: IPermitApplicationScreenPro
     return (
       <Flex as="main" direction="column" w="full" bg="greys.white" key={"permit-application-show"}>
         <Container maxW="container.lg">Show selected address, etc.</Container>
+        <Container maxW="container.lg">{permitApplication.permitTypeAndActivity}</Container>
         {permitApplication.requirements && (
           <Container maxW="container.lg">
             <RequirementForm requirements={permitApplication.requirements} />

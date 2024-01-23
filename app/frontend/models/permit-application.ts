@@ -22,7 +22,7 @@ export const PermitApplicationModel = types
     get jurisdictionName() {
       return self.jurisdiction.name
     },
-    get permitType() {
+    get permitTypeAndActivity() {
       return `${self.activity.name} ${self.permitType.name}`.trim()
     },
   }))
