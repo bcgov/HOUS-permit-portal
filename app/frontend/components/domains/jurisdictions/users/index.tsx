@@ -1,9 +1,10 @@
 import { Box, Center, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
+import { useSearch } from "../../../../hooks/use-search"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -22,10 +23,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
 
   const { currentJurisdiction, error } = useJurisdiction()
 
-  useEffect(() => {
-    if (!currentJurisdiction) return
-    currentJurisdiction.fetchUsers()
-  }, [currentJurisdiction])
+  useSearch(currentJurisdiction)
 
   if (error) return <ErrorScreen />
   if (!currentJurisdiction) return <LoadingScreen />
