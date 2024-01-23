@@ -1,6 +1,7 @@
 import { flow, Instance, types } from "mobx-state-tree"
 import { ESortDirection } from "../types/enums"
 import { ISort } from "../types/types"
+import { setQueryParam } from "../utils/utility-funcitons"
 
 interface IFetchOptions {
   reset?: boolean
@@ -27,11 +28,18 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.currentPage = 1
         self.totalPages = null
         self.totalCount = null
+        setQueryParam("currentPage", "1")
       },
       setCountPerPage(countPerPage: number) {
+        setQueryParam("countPerPage", countPerPage.toString())
         self.countPerPage = countPerPage
       },
+      setCurrentPage(currentPage: number) {
+        setQueryParam("currentPage", currentPage.toString())
+        self.currentPage = currentPage
+      },
       setQuery(query: string) {
+        setQueryParam("query", query)
         self.query = !!query?.trim() ? query : null
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
@@ -47,10 +55,12 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         return yield self.fetchData({ reset: true, ...opts })
       }),
       applySort: flow(function* (sort: ISort<TSortField>, opts?: TFetchOptions) {
+        setQueryParam("sort", JSON.stringify(sort))
         self.sort = sort
         return yield self.fetchData(opts)
       }),
       clearSort: flow(function* (opts?: TFetchOptions) {
+        setQueryParam("sort", undefined)
         self.sort = null
         return yield self.fetchData(opts)
       }),
@@ -72,11 +82,18 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         }
       }),
       handlePageChange: flow(function* (page: number, opts?: TFetchOptions) {
+        setQueryParam("currentPage", page.toString())
         return yield self.fetchData({ page, ...opts })
       }),
       handleCountPerPageChange: flow(function* (countPerPage: number, opts?: TFetchOptions) {
+        setQueryParam("countPerPage", countPerPage.toString())
         return yield self.fetchData({ countPerPage, ...opts })
       }),
+      resetAll() {
+        self.resetPages()
+        self.applySort(null)
+        self.setQuery(null)
+      },
     }))
 
 export interface ISearch extends Instance<ReturnType<typeof createSearchModel>> {}

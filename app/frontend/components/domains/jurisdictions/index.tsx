@@ -1,7 +1,8 @@
 import { Box, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
+import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -20,16 +21,13 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
     totalPages,
     totalCount,
     countPerPage,
-    fetchJurisdictions,
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
   } = jurisdictionStore
   const { t } = useTranslation()
 
-  useEffect(() => {
-    fetchJurisdictions()
-  }, [])
+  useSearch(jurisdictionStore)
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>

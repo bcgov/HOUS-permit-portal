@@ -35,3 +35,13 @@ export function toCamelCase(input: string): string {
       .join("")
   )
 }
+
+export function setQueryParam(key: string, value: string) {
+  const searchParams = new URLSearchParams(window.location.search)
+  if (!value) {
+    searchParams.delete(key)
+  } else {
+    searchParams.set(key, encodeURIComponent(value))
+  }
+  window.history.replaceState({}, "", `${window.location.pathname}?${searchParams.toString()}`)
+}

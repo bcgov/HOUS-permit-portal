@@ -15,8 +15,9 @@ import {
 import { Archive } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
+import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -34,16 +35,13 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
     totalPages,
     totalCount,
     countPerPage,
-    fetchRequirementBlocks,
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
   } = requirementBlockStore
   const { t } = useTranslation()
 
-  useEffect(() => {
-    fetchRequirementBlocks()
-  }, [])
+  useSearch(requirementBlockStore)
 
   return (
     <Container maxW="container.lg" p={8} as="main">
