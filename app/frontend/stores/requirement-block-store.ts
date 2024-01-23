@@ -7,7 +7,6 @@ import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
 import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
-import { ISort } from "../types/types"
 
 export const RequirementBlockStore = types
   .compose(
