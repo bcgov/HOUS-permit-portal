@@ -37,8 +37,8 @@ export const SearchInput = observer(function SearchInput<TSearchModel extends IS
         value={query ?? ""}
         {...inputProps}
       />
-      <InputLeftElement color={"greys.grey01"}>
-        <MagnifyingGlass size={16} />,
+      <InputLeftElement color={"greys.gresearcy01"}>
+        <MagnifyingGlass size={16} />
       </InputLeftElement>
     </InputGroup>
   )

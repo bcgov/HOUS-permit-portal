@@ -85,12 +85,7 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
 
   return (
     <Box display="flex" justifyContent="center" css={paginationItemStyle}>
-      <Pagination
-        style={{ border: 0 }}
-        itemRender={ItemRender}
-        {...paginationProps}
-        onChange={() => console.log("changed")}
-      />
+      <Pagination style={{ border: 0 }} itemRender={ItemRender} {...paginationProps} />
     </Box>
   )
 })

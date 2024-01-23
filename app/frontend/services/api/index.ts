@@ -117,8 +117,6 @@ export class Api {
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
-    return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, {
-      requirementTemplate: params,
-    })
+    return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 }

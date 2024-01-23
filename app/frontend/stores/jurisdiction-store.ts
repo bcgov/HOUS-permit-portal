@@ -78,7 +78,6 @@ export const JurisdictionStoreModel = types
         self.totalCount = response.data.meta.totalCount
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
       }
-
       return response.ok
     }),
     fetchJurisdiction: flow(function* (id: string) {

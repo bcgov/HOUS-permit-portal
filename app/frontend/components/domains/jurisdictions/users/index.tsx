@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { Box, Center, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -8,6 +8,7 @@ import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
@@ -29,7 +30,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
   if (error) return <ErrorScreen />
   if (!currentJurisdiction) return <LoadingScreen />
 
-  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
+  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
     currentJurisdiction
 
   return (
@@ -48,24 +49,31 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
 
         <SearchGrid templateColumns="160px 2fr 2fr repeat(3, 1fr)">
           <GridHeaders />
-          {currentJurisdiction.tableUsers.map((u) => {
-            return (
-              <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
-                <SearchGridItem fontWeight={700}>{<RoleTag role={u.role} />}</SearchGridItem>
-                <SearchGridItem>{u.email}</SearchGridItem>
-                <SearchGridItem>{u.name}</SearchGridItem>
-                <SearchGridItem>{format(u.createdAt, "MMM d, yyyy")}</SearchGridItem>
-                <SearchGridItem>todo</SearchGridItem>
-                <SearchGridItem>
-                  <Flex justify="space-between" w="full">
-                    <Can action="user:manage" data={{ user: u }}>
-                      <RouterLink to={"#"}>{t("ui.manage")}</RouterLink>
-                    </Can>
-                  </Flex>
-                </SearchGridItem>
-              </Box>
-            )
-          })}
+
+          {isSearching ? (
+            <Center p={50}>
+              <SharedSpinner />
+            </Center>
+          ) : (
+            currentJurisdiction.tableUsers.map((u) => {
+              return (
+                <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
+                  <SearchGridItem fontWeight={700}>{<RoleTag role={u.role} />}</SearchGridItem>
+                  <SearchGridItem>{u.email}</SearchGridItem>
+                  <SearchGridItem>{u.name}</SearchGridItem>
+                  <SearchGridItem>{format(u.createdAt, "MMM d, yyyy")}</SearchGridItem>
+                  <SearchGridItem>todo</SearchGridItem>
+                  <SearchGridItem>
+                    <Flex justify="space-between" w="full">
+                      <Can action="user:manage" data={{ user: u }}>
+                        <RouterLink to={"#"}>{t("ui.manage")}</RouterLink>
+                      </Can>
+                    </Flex>
+                  </SearchGridItem>
+                </Box>
+              )
+            })
+          )}
         </SearchGrid>
         <Flex w={"full"} justifyContent={"space-between"}>
           <PerPageSelect

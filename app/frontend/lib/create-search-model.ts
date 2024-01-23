@@ -36,9 +36,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
         if (fetchDataActionName in self) {
-          self.isSearching = true
           const result = yield self[fetchDataActionName](opts)
-          self.isSearching = false
           return result
         }
         throw new Error("fetch action must be implemented in the derived model for search to work")

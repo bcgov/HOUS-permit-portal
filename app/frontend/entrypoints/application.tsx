@@ -47,11 +47,11 @@ const renderApp = (rootStore) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const rootStore = setupRootStore()
-
   if (import.meta.env.PROD) {
     renderApp(rootStore)
   } else if (import.meta.env.DEV) {
     setupReactotron(rootStore.environment.api).then((reactotron) => {
+      // @ts-ignore
       reactotron.trackMstNode(rootStore)
       // set reactotron into console
       window.console.tron = reactotron

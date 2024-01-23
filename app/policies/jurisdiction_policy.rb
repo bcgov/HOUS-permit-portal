@@ -16,7 +16,7 @@ class JurisdictionPolicy < ApplicationPolicy
   end
 
   def search_users?
-    user.super_admin? || (user.review_manager? && user.jurisdiciton == resource)
+    user.super_admin? || (user.review_manager? && user.jurisdiction == record)
   end
 
   class Scope < Scope

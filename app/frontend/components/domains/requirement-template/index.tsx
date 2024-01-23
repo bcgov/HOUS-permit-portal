@@ -1,10 +1,11 @@
-import { Box, Container, Flex, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Center, Container, Flex, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -32,6 +33,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
     fetchRequirementTemplates,
     handleCountPerPageChange,
     handlePageChange,
+    isSearching,
   } = requirementTemplateStore
   const { t } = useTranslation()
 
@@ -58,25 +60,32 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
 
         <SearchGrid templateColumns="repeat(3, 1fr) 2fr repeat(3, 1fr)">
           <GridHeaders />
-          {tableRequirementTemplates.map((rt) => {
-            return (
-              <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
-                <SearchGridItem>
-                  <TemplateStatusTag requirementTemplate={rt} />
-                </SearchGridItem>
-                <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
-                <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
-                <SearchGridItem>{rt.description}</SearchGridItem>
-                <SearchGridItem>{rt.version}</SearchGridItem>
-                <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
-                <SearchGridItem>
-                  <Flex justify="space-between" w="full">
-                    <RouterLink to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLink>
-                  </Flex>
-                </SearchGridItem>
-              </Box>
-            )
-          })}
+
+          {isSearching ? (
+            <Center p={50}>
+              <SharedSpinner />
+            </Center>
+          ) : (
+            tableRequirementTemplates.map((rt) => {
+              return (
+                <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
+                  <SearchGridItem>
+                    <TemplateStatusTag requirementTemplate={rt} />
+                  </SearchGridItem>
+                  <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
+                  <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
+                  <SearchGridItem>{rt.description}</SearchGridItem>
+                  <SearchGridItem>{rt.version}</SearchGridItem>
+                  <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
+                  <SearchGridItem>
+                    <Flex justify="space-between" w="full">
+                      <RouterLink to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLink>
+                    </Flex>
+                  </SearchGridItem>
+                </Box>
+              )
+            })
+          )}
         </SearchGrid>
         <Flex w={"full"} justifyContent={"space-between"}>
           <PerPageSelect

@@ -68,11 +68,8 @@ export const JurisdictionModel = types
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
-
-        return true
       }
-
-      return false
+      return response.ok
     }),
   }))
 

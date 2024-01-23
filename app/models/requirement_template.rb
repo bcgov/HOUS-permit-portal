@@ -1,5 +1,7 @@
 class RequirementTemplate < ApplicationRecord
-  searchkick searchable: %i[description status version], word_start: %i[status]
+  searchkick searchable: %i[description status version permit_type activity],
+             word_start: %i[description status version permit_type activity],
+             text_middle: %i[version description]
 
   belongs_to :activity
   belongs_to :permit_type

@@ -55,7 +55,7 @@ export enum EUserSortFields {
 export enum ERequirementTemplateSortFields {
   status = "status",
   permitType = "permit_type",
-  activityType = "activity_type",
+  activity = "activity",
   description = "description",
   version = "version",
   jurisdictionsSize = "jurisdictions_size",

@@ -37,6 +37,10 @@ export const UserStoreModel = types
       self.usersMap.delete(removedUser.id)
     },
     setCurrentUser(user) {
+      if (user.jurisdiction) {
+        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
+        user.jurisdiction = user.jurisdiction.id
+      }
       self.usersMap.put(user)
       self.currentUser = user.id
     },

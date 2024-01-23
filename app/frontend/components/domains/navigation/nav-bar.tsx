@@ -19,11 +19,10 @@ import { List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { SubNavBar } from "./sub-nav-bar"
 
 export const NavBar = observer(() => {
@@ -143,7 +142,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
             {currentUser?.isSubmitter && submitterOnlyItems}
             <Divider borderWidth="1px" />
             <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-            <NavMenuItem label={t("auth.logout")} onClick={logout} />
+            <NavMenuItem label={t("auth.logout")} to="/" onClick={logout} />
           </>
         ) : (
           <NavMenuItem label={t("auth.login")} to="/login" />
@@ -154,13 +153,22 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
 })
 
 // Looks complicated but this is jsut how you make it so that either to or onClick must be given, but not necessarily both
-type TNavMenuItemProps = {
+interface INavMenuItemProps {
   label: string
-} & ({ to: string; onClick?: (any) => any } | { onClick: (any) => any; to?: string })
+  to?: string
+  onClick?: (any) => void
+}
 
-const NavMenuItem = ({ label, to, onClick }: TNavMenuItemProps) => {
+const NavMenuItem = ({ label, to, onClick }: INavMenuItemProps) => {
+  const navigate = useNavigate()
+
+  const handleClick = (e) => {
+    navigate(to)
+    onClick && onClick(e)
+  }
+
   return (
-    <MenuItem as={RouterLinkButton} color="text.primary" variant="tertiary" to={to} onClick={onClick}>
+    <MenuItem as={Button} color="text.primary" variant="tertiary" onClick={handleClick}>
       <Text textAlign="left" w="full">
         {label}
       </Text>

@@ -38,6 +38,7 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
       <Flex direction="column" gap={6} w="full" p={10} border="solid 1px" borderColor="border.light" bg="greys.white">
         <Heading>{t("auth.login")}</Heading>
         <form action="/api/auth/keycloak" method="post">
+          {/* @ts-ignore */}
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
             {t("auth.bceid_login")}

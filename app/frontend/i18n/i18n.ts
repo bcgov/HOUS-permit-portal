@@ -230,7 +230,7 @@ const options = {
           fields: {
             status: "Status",
             permitType: "Permit Type",
-            activityType: "Work Type",
+            activity: "Work Type",
             description: "Description",
             version: "Version",
             jurisdictionsSize: "Used By",
