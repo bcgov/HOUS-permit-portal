@@ -14,12 +14,6 @@ export const RequirementBlockStore = types
     types.model("RequirementBlockStore").props({
       requirementBlockMap: types.map(RequirementBlockModel),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
-      query: types.maybeNull(types.string),
-      sort: types.maybeNull(types.frozen<ISort<ERequirementLibrarySortFields>>()),
-      currentPage: types.optional(types.number, 1),
-      totalPages: types.maybeNull(types.number),
-      totalCount: types.maybeNull(types.number),
-      countPerPage: types.optional(types.number, 10),
     }),
     createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks")
   )
@@ -66,11 +60,8 @@ export const RequirementBlockStore = types
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
-
-        return true
       }
-
-      return false
+      return response.ok
     }),
   }))
   .actions((self) => ({

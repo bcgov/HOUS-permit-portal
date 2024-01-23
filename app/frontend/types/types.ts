@@ -21,3 +21,10 @@ export interface IOption<TValue = string> {
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
+
+export type TSearchParams<IModelSortFields> = {
+  sort?: ISort<IModelSortFields>
+  query?: string
+  page?: number
+  perPage?: number
+}

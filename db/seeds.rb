@@ -14,7 +14,7 @@ PermitClassificationSeeder.seed
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-if User.all.blank?
+if User.first.blank?
   5.times do
     FactoryBot.create(:user, :submitter).confirm
     FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.first).confirm
@@ -24,11 +24,11 @@ if User.all.blank?
 end
 
 User
-  .find_or_create_by(username: "admin") do |user|
+  .find_or_create_by(username: "super_admin") do |user|
     user.role = :super_admin
-    user.first_name = "Admin"
+    user.first_name = "SuperAdmin"
     user.last_name = "McUser"
-    user.email = "admin@example.com"
+    user.email = "super_admin@example.com"
     user.password = "P@ssword1"
   end
   .confirm
@@ -55,10 +55,20 @@ User
   end
   .confirm
 
+User
+  .find_or_create_by(username: "reviewer") do |user|
+    user.role = :submitter
+    user.first_name = "Submitter"
+    user.last_name = "McUser"
+    user.email = "submitter@example.com"
+    user.password = "P@ssword1"
+  end
+  .confirm
+
 # Creating Permit Applications
 submitters = User.where(role: "submitter")
 
-if PermitApplication.all.blank?
+if PermitApplication.first.blank?
   20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
 
   # Creating Contacts
@@ -66,7 +76,6 @@ if PermitApplication.all.blank?
 end
 
 PermitClassificationSeeder.seed
-
 activity1 = Activity.find_by_code("new_construction")
 activity2 = Activity.find_by_code("demolition")
 
@@ -74,36 +83,28 @@ activity2 = Activity.find_by_code("demolition")
 permit_type1 = PermitType.find_by_code("low_residential")
 permit_type2 = PermitType.find_by_code("medium_residential")
 
-# Creating Permit Applications
-submitters = User.where(role: "submitter")
-20.times do
-  FactoryBot.create(
-    :permit_application,
-    submitter: submitters.sample,
-    jurisdiction: jurisdictions.sample,
-    activity: activity1,
-    permit_type: permit_type1,
-  )
+if PermitApplication.first.blank?
+  # Creating Permit Applications
+  submitters = User.where(role: "submitter")
+  20.times do
+    FactoryBot.create(
+      :permit_application,
+      submitter: submitters.sample,
+      jurisdiction: jurisdictions.sample,
+      activity: activity1,
+      permit_type: permit_type1,
+    )
+  end
 end
 
-RequirementsFromXlsxSeeder.seed
 # Create RequirementTemplate records
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
 
-if RequirementBlock.all.blank?
-  25.times do |i|
-    RequirementBlock.create!(
-      name: "Block #{i + 1}",
-      sign_off_role: 0,
-      reviewer_role: 0,
-      custom_validations: {
-        key: "value",
-      },
-    )
-  end
-end
+# Requrements from seeder are idempotent
+# Requirments block will get created from requiremetms templates
+RequirementsFromXlsxSeeder.seed
 
 User.reindex

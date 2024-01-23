@@ -6,6 +6,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EUserSortFields } from "../types/enums"
 import { IContact, ISort } from "../types/types"
+import { toCamelCase } from "../utils/utility-funcitons"
 import { UserModel } from "./user"
 
 export const JurisdictionModel = types
@@ -41,18 +42,8 @@ export const JurisdictionModel = types
   .extend(withRootStore())
   .views((self) => ({
     getUserSortColumnHeader(field: EUserSortFields) {
-      switch (field) {
-        case EUserSortFields.role:
-          return t("user.fields.role")
-        case EUserSortFields.email:
-          return t("user.fields.email")
-        case EUserSortFields.name:
-          return t("user.fields.name")
-        case EUserSortFields.createdAt:
-          return t("user.fields.createdAt")
-        case EUserSortFields.lastSignIn:
-          return t("user.fields.lastSignIn")
-      }
+      //@ts-ignore
+      return t(`user.fields.${toCamelCase(field)}`)
     },
   }))
   .actions((self) => ({
@@ -77,11 +68,8 @@ export const JurisdictionModel = types
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
-
-        return true
       }
-
-      return false
+      return response.ok
     }),
   }))
 

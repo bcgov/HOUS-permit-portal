@@ -4,7 +4,6 @@ export const PermitClassificationModel = types.model("PermitClassificationModel"
   id: types.identifier,
   name: types.string,
   code: types.string,
-  description: types.string,
 })
 
 // Subclass Model for PermitType

@@ -15,7 +15,7 @@ export const UserModel = types
     username: types.string,
     certified: types.boolean,
     organization: types.maybeNull(types.string),
-    jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+    jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     createdAt: types.Date,
   })
   .extend(withRootStore())

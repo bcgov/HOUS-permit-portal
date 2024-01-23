@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { isUUID } from "../../../utils/utility-funcitons"
+import { isUUID, toCamelCase } from "../../../utils/utility-funcitons"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 export const SubNavBar = observer(() => {
@@ -55,7 +55,10 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
       }
 
-      const title = resourceNeeded ? currentResourceMap[previousSegment] || segment : t(`site.breadcrumb.${segment}`)
+      const title = resourceNeeded
+        ? currentResourceMap[previousSegment] || segment
+        : //@ts-ignore
+          t(`site.breadcrumb.${toCamelCase(segment)}`)
 
       return { segment, href, title }
     })

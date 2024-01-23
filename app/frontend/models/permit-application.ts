@@ -1,6 +1,7 @@
 import { Instance, types } from "mobx-state-tree"
-import { EActivity, EPermitApplicationStatus, EPermitType } from "../types/enums"
+import { EPermitApplicationStatus } from "../types/enums"
 import { JurisdictionModel } from "./jurisdiction"
+import { IActivity, IPermitType } from "./permit-classification"
 import { UserModel } from "./user"
 
 export const PermitApplicationModel = types
@@ -8,10 +9,8 @@ export const PermitApplicationModel = types
     id: types.identifier,
     nickname: types.string,
     number: types.string,
-    permitTypeCode: types.enumeration(Object.values(EPermitType)),
-    permitTypeName: types.string,
-    activityCode: types.enumeration(Object.values(EActivity)),
-    activityName: types.string,
+    permitType: types.frozen<IPermitType>(),
+    activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
@@ -24,7 +23,7 @@ export const PermitApplicationModel = types
       return self.jurisdiction.name
     },
     get permitType() {
-      return `${self.activityName} ${self.permitTypeName}`.trim()
+      return `${self.activity.name} ${self.permitType.name}`.trim()
     },
   }))
   .actions((self) => ({

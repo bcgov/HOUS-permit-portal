@@ -14,8 +14,7 @@ class Api::SessionsController < Devise::SessionsController
     # override this using store: false so that it does not create a warden session
     sign_in(resource_name, resource, store: false)
     yield resource if block_given?
-
-    render_success current_user
+    render_success current_user, nil, { blueprint_opts: { view: :extended } }
   end
 
   def destroy
@@ -27,7 +26,7 @@ class Api::SessionsController < Devise::SessionsController
     authenticate_user!
     if current_user
       warden.authenticate({ scope: :user })
-      render_success current_user
+      render_success current_user, nil, { blueprint_opts: { view: :extended } }
     else
       # clear the cookie so user can try and login again
       name, cookie = Devise::JWT::Cookie::CookieHelper.new.build(nil)

@@ -6,6 +6,8 @@ class Jurisdiction < ApplicationRecord
   has_many :contacts, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
+  has_many :jurisdiction_requirement_templates
+  has_many :requirement_templates, through: :jurisdiction_requirement_templates
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true

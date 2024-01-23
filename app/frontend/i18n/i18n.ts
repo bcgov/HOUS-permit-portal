@@ -119,12 +119,12 @@ const options = {
             tableHeading: "Local Governments",
           },
           fields: {
-            reverse_qualified_name: "Name",
-            review_managers_size: "Managers",
-            reviewers_size: "Reviewers",
+            reverseQualifiedName: "Name",
+            reviewManagersSize: "Managers",
+            reviewersSize: "Reviewers",
             localityType: "Locality Type",
-            permit_applications_size: "Applications Received",
-            templates_used: "Templates Used",
+            permitApplicationsSize: "Applications Received",
+            templatesUsed: "Templates Used",
           },
           title: "Local Housing Permits",
           description:
@@ -295,6 +295,29 @@ const options = {
             super_admin: "super admin",
           },
         },
+        requirementTemplate: {
+          fields: {
+            status: "Status",
+            permitType: "Permit Type",
+            activity: "Work Type",
+            description: "Description",
+            version: "Version",
+            jurisdictionsSize: "Used By",
+          },
+          status: {
+            published: "Published",
+            scheduled: "Scheduled",
+            draft: "Draft",
+          },
+          index: {
+            tableHeading: "Templates",
+            title: "Permit Templates Catalogue",
+            description:
+              "List of all permit templates in the system that’s been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
+            createButton: "Create new template",
+            seeArchivedButton: "See Archived",
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "BC Building Permit Hub",
@@ -323,7 +346,8 @@ const options = {
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
             invite: "Invite",
-            "requirements-library": "Requirements Library",
+            requirementsLibrary: "Requirements Library",
+            requirementTemplates: "Permit Templates Catalogue",
           },
           questionSupport: "Question Support",
         },

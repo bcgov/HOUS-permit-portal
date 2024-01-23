@@ -1,7 +1,7 @@
 import { Tag } from "@chakra-ui/react"
 import React from "react"
 
-export const PermitApplicationStatusTag = ({ status }) => {
+export const PermitApplicationTemplateStatusTag = ({ status }) => {
   return (
     <Tag
       p={1}

@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Grid, GridItem, GridItemProps, Heading, VStack } from "@chakra-ui/react"
+import { Box, Center, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -8,20 +8,15 @@ import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { SearchGrid } from "../../../shared/grid/search-grid"
+import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { Can } from "../../../shared/user/can"
 import { RoleTag } from "../../../shared/user/role-tag"
 import { GridHeaders } from "./grid-header"
 
-const sharedGridItemsStyles: Partial<GridItemProps> = {
-  p: 4,
-  display: "flex",
-  justifyContent: "flex-start",
-  alignItems: "center",
-  role: "cell",
-  color: "text.primary",
-}
 export const JurisdictionUserIndexScreen = observer(function JurisdictionUserIndex() {
   const { t } = useTranslation()
 
@@ -35,7 +30,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
   if (error) return <ErrorScreen />
   if (!currentJurisdiction) return <LoadingScreen />
 
-  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange } =
+  const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
     currentJurisdiction
 
   return (
@@ -52,46 +47,34 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
           </RouterLinkButton>
         </Flex>
 
-        <Grid
-          mt={3}
-          role={"table"}
-          templateColumns="160px 2fr 2fr repeat(3, 1fr)"
-          w="full"
-          maxW={"full"}
-          overflow={"auto"}
-          sx={{
-            borderCollapse: "separate",
-            ".jurisdiction-user-index-grid-row:not(:last-of-type) > div": {
-              borderBottom: "1px solid",
-              borderColor: "border.light",
-            },
-          }}
-          border={"1px solid"}
-          borderColor={"border.light"}
-          borderRadius={"sm"}
-        >
+        <SearchGrid templateColumns="160px 2fr 2fr repeat(3, 1fr)">
           <GridHeaders />
-          {currentJurisdiction.tableUsers.map((u) => {
-            return (
-              <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
-                <GridItem {...sharedGridItemsStyles} fontWeight={700}>
-                  {<RoleTag role={u.role} />}
-                </GridItem>
-                <GridItem {...sharedGridItemsStyles}>{u.email}</GridItem>
-                <GridItem {...sharedGridItemsStyles}>{u.name}</GridItem>
-                <GridItem {...sharedGridItemsStyles}>{format(u.createdAt, "MMM d, yyyy")}</GridItem>
-                <GridItem {...sharedGridItemsStyles}>todo</GridItem>
-                <GridItem {...sharedGridItemsStyles}>
-                  <Flex justify="space-between" w="full">
-                    <Can action="user:manage" data={{ user: u }}>
-                      <RouterLink to={"#"}>{t("ui.manage")}</RouterLink>
-                    </Can>
-                  </Flex>
-                </GridItem>
-              </Box>
-            )
-          })}
-        </Grid>
+
+          {isSearching ? (
+            <Center p={50}>
+              <SharedSpinner />
+            </Center>
+          ) : (
+            currentJurisdiction.tableUsers.map((u) => {
+              return (
+                <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
+                  <SearchGridItem fontWeight={700}>{<RoleTag role={u.role} />}</SearchGridItem>
+                  <SearchGridItem>{u.email}</SearchGridItem>
+                  <SearchGridItem>{u.name}</SearchGridItem>
+                  <SearchGridItem>{format(u.createdAt, "MMM d, yyyy")}</SearchGridItem>
+                  <SearchGridItem>todo</SearchGridItem>
+                  <SearchGridItem>
+                    <Flex justify="space-between" w="full">
+                      <Can action="user:manage" data={{ user: u }}>
+                        <RouterLink to={"#"}>{t("ui.manage")}</RouterLink>
+                      </Can>
+                    </Flex>
+                  </SearchGridItem>
+                </Box>
+              )
+            })
+          )}
+        </SearchGrid>
         <Flex w={"full"} justifyContent={"space-between"}>
           <PerPageSelect
             handleCountPerPageChange={handleCountPerPageChange}

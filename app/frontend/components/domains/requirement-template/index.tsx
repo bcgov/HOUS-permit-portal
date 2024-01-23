@@ -1,4 +1,4 @@
-import { Box, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Center, Container, Flex, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,45 +10,55 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { GridHeaders } from "./grid-header"
 
-export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
-  const { jurisdictionStore } = useMst()
+const sharedGridItemsStyles: Partial<GridItemProps> = {
+  p: 4,
+  display: "flex",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  role: "cell",
+  color: "text.primary",
+}
+
+export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
+  const { requirementTemplateStore } = useMst()
   const {
-    tableJurisdictions,
+    tableRequirementTemplates,
     currentPage,
     totalPages,
     totalCount,
     countPerPage,
-    fetchJurisdictions,
+    fetchRequirementTemplates,
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
-  } = jurisdictionStore
+  } = requirementTemplateStore
   const { t } = useTranslation()
 
   useEffect(() => {
-    fetchJurisdictions()
+    fetchRequirementTemplates()
   }, [])
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
+    <Container maxW="container.lg" p={8} as="main">
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
+        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"} gap={6}>
           <Box>
             <Heading fontSize={"4xl"} color={"text.primary"}>
-              {t("jurisdiction.index.title")}
+              {t("requirementTemplate.index.title")}
             </Heading>
             <Text color={"text.secondary"} mt={1}>
-              {t("jurisdiction.index.description")}
+              {t("requirementTemplate.index.description")}
             </Text>
           </Box>
-          <RouterLinkButton variant={"primary"} to={"/jurisdictions/new"}>
-            {t("jurisdiction.index.createButton")}
+          <RouterLinkButton to="#" variant={"primary"} minWidth="fit-content">
+            {t("requirementTemplate.index.createButton")}
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="3fr repeat(4, 1fr) 2fr">
+        <SearchGrid templateColumns="repeat(3, 1fr) 2fr repeat(3, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -56,19 +66,20 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
               <SharedSpinner />
             </Center>
           ) : (
-            tableJurisdictions.map((j) => {
+            tableRequirementTemplates.map((rt) => {
               return (
-                <Box key={j.id} className={"jurisdiction-index-grid-row"} role={"row"} display={"contents"}>
-                  <SearchGridItem fontWeight={700}>{j.reverseQualifiedName}</SearchGridItem>
-                  <SearchGridItem>{j.reviewManagersSize}</SearchGridItem>
-                  <SearchGridItem>{j.reviewersSize}</SearchGridItem>
-                  <SearchGridItem>{j.permitApplicationsSize}</SearchGridItem>
-                  <SearchGridItem>todo</SearchGridItem>
+                <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
+                  <SearchGridItem>
+                    <TemplateStatusTag requirementTemplate={rt} />
+                  </SearchGridItem>
+                  <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
+                  <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
+                  <SearchGridItem>{rt.description}</SearchGridItem>
+                  <SearchGridItem>{rt.version}</SearchGridItem>
+                  <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="space-between" w="full">
-                      <RouterLink to={`${j.id}/invite`}>{t("user.invite")}</RouterLink>
-                      <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
-                      <RouterLink to={`${j.id}`}>{t("ui.manage")}</RouterLink>
+                      <RouterLink to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLink>
                     </Flex>
                   </SearchGridItem>
                 </Box>

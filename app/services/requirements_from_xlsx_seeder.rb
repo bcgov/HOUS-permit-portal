@@ -51,6 +51,7 @@ class RequirementsFromXlsxSeeder
 
       puts errors
     end
+    RequirementTemplate.reindex
   end
 
   private
