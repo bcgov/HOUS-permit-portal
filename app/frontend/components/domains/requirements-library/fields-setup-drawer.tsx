@@ -26,6 +26,16 @@ interface IProps {
   onUse?: (requirementType: ERequirementType, closeDrawer?: () => void) => void
 }
 
+// TODO: remove when backend for these types is implemented
+const DISABLED_TYPES = [
+  ERequirementType.address,
+  ERequirementType.multiSelectCheckbox,
+  ERequirementType.select,
+  ERequirementType.radio,
+  ERequirementType.fileUpload,
+  ERequirementType.generalContact,
+]
+
 export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   defaultButtonProps,
   renderTriggerButton,
@@ -95,6 +105,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                     <Button
                       variant={"primary"}
                       rightIcon={<CaretRight />}
+                      isDisabled={DISABLED_TYPES.includes(requirementType)}
                       onClick={() => onUse?.(requirementType, onClose)}
                     >
                       {t("requirementsLibrary.fieldsDrawer.useButton")}
