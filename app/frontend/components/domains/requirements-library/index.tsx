@@ -24,6 +24,7 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { GridHeaders } from "./grid-header"
+import { RequirementsBlockModal } from "./requirements-block-modal"
 
 export const RequirementsLibraryScreen = observer(function RequirementsLibrary() {
   const { requirementBlockStore } = useMst()
@@ -56,7 +57,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
               {t("requirementsLibrary.index.description")}
             </Text>
           </Box>
-          <Button variant={"primary"}>{t("requirementsLibrary.index.createButton")}</Button>
+          <RequirementsBlockModal />
         </Flex>
 
         <SearchGrid templateColumns="repeat(4, 1fr) 85px">

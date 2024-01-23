@@ -10,11 +10,15 @@ class Requirement < ApplicationRecord
          multi_option_select: 4,
          date: 5,
          textarea: 6,
+         file: 7,
+         simplephonenumber: 10,
+         simpleemail: 11,
        },
        _prefix: true
 
   before_create :set_requirement_code
   validate :validate_options_for_select_inputs
+  validate :validate_unit_for_number_inputs
 
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
@@ -67,12 +71,23 @@ class Requirement < ApplicationRecord
         type: "choicesjs",
       },
     },
+    file: {
+      type: "simplefile",
+    },
   }
+
+  NUMBER_UNITS = %w[no_unit mm cm m in ft mi $]
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
 
     input_options["value_options"]
+  end
+
+  def number_unit
+    return nil if input_options.blank? || input_options["number_unit"].blank?
+
+    input_options["number_unit"]
   end
 
   def to_form_json
@@ -107,13 +122,20 @@ class Requirement < ApplicationRecord
 
   def validate_options_for_select_inputs
     return unless input_type_select? || input_type_multi_option_select?
-
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
              (option.key?("value") && option["value"].is_a?(String))
          }
       errors.add(:input_options, "select inputs must have options defined")
+    end
+  end
+
+  def validate_unit_for_number_inputs
+    return unless input_type_number? && (input_options.present? && input_options["number_unit"].present?)
+
+    if !NUMBER_UNITS.include?(input_options["number_unit"])
+      errors.add(:input_options, "the number_unit must be one of #{NUMBER_UNITS.join(", ")}")
     end
   end
 end

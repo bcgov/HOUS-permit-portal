@@ -2,6 +2,7 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
 import { IUser } from "../../models/user"
+import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IJurisdictionResponse,
@@ -107,11 +108,21 @@ export class Api {
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
+  async createRequirementBlock(params: IRequirementBlockParams) {
+    return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
+  }
+
+  async updateRequirementBlock(id: string, params: Partial<IRequirementBlockParams>) {
+    return this.client.put<IRequirementBlockResponse>(`/requirement_blocks/${id}`, { requirementBlock: params })
+  }
 
   async updateProfile(params) {
     return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
   }
 
+  async searchTags(params: Partial<ITagSearchParams>) {
+    return this.client.post<string[]>(`/tags/search`, { search: params })
+  }
   async fetchPermitApplications() {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
   }

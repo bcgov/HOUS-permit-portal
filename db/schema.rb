@@ -108,7 +108,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
     t.jsonb "custom_validations", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "description"
+    t.string "sku"
+    t.string "display_name", null: false
+    t.string "display_description"
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+    t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
   create_table "requirement_template_section_requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -224,7 +229,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_19_181243) do
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
-    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end

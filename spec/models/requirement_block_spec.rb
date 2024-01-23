@@ -47,4 +47,19 @@ RSpec.describe RequirementBlock, type: :model do
       expect(form_json[:components].count).to eq 6
     end
   end
+
+  describe "validations" do
+    let!(:existing_block) { create(:requirement_block, sku: "existing_value") }
+
+    it "validates uniqueness of sku" do
+      new_block = build(:requirement_block, sku: existing_block.sku)
+      expect(new_block).not_to be_valid
+      expect(new_block.errors[:sku]).to include("has already been taken")
+    end
+
+    it "validates presence of sku" do
+      new_block = create(:requirement_block, sku: nil)
+      expect(new_block.sku).to be_present
+    end
+  end
 end
