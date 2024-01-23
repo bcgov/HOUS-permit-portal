@@ -178,6 +178,12 @@ const options = {
             addHelpText: "Add help text",
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
+            optionsMenu: {
+              triggerButton: "Options",
+              remove: "Remove",
+              conditionalLogic: "Conditional Logic",
+              dataValidation: "Data Validation",
+            },
           },
           fields: {
             name: "Name",

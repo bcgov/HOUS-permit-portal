@@ -9,12 +9,13 @@ import { EditableInputWithControls } from "../../../shared/editable-input-with-c
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { RequirementFieldDisplay } from "../requirement-field-display"
 import { RequirementFieldEdit } from "../requirement-field-edit"
+import { OptionsMenu } from "../requirement-field-edit/options-menu"
 import { IRequirementBlockForm } from "./index"
 
 export const FieldsSetup = observer(function FieldsSetup() {
   const { t } = useTranslation()
   const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
-  const { fields, append } = useFieldArray<IRequirementBlockForm>({
+  const { fields, append, remove } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementBlockRequirementsAttributes",
   })
@@ -196,6 +197,16 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   >
                     {t("ui.edit")}
                   </Button>
+                  {isRequirementInEditMode(field.id) && (
+                    <OptionsMenu
+                      menuButtonProps={{
+                        pos: "absolute",
+                        right: 0,
+                        top: 0,
+                      }}
+                      onRemove={() => remove(index)}
+                    />
+                  )}
                 </Box>
               )
             })}

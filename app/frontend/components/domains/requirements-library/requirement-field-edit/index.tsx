@@ -22,9 +22,12 @@ import { Controller, FieldValues } from "react-hook-form"
 import { FieldPath } from "react-hook-form/dist/types"
 import { UseControllerProps } from "react-hook-form/dist/types/controller"
 import { useTranslation } from "react-i18next"
-import { ENumberUnit, ERequirementType } from "../../../types/enums"
-import { EditableInputWithControls, IEditableInputWithControlsProps } from "../../shared/editable-input-with-controls"
-import { UnitSelect } from "../../shared/select/selectors/unit-select"
+import { ENumberUnit, ERequirementType } from "../../../../types/enums"
+import {
+  EditableInputWithControls,
+  IEditableInputWithControlsProps,
+} from "../../../shared/editable-input-with-controls"
+import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 
 const labelProps: Partial<FormLabelProps> = {
   fontWeight: 700,
