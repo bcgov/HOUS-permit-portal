@@ -76,6 +76,9 @@ class Api::RequirementBlocksController < Api::ApplicationController
   def requirement_block_params
     params.require(:requirement_block).permit(
       :name,
+      :description,
+      :display_name,
+      :display_description,
       :sign_off_role,
       :reviewer_role,
       association_list: [],
@@ -94,7 +97,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
           :required_for_in_person_hint,
           :required_for_multiple_owners,
           :_destroy,
-          input_options: [value_options: [%i[value label]]],
+          input_options: [:number_unit, value_options: [%i[value label]]],
         ],
       ],
     )

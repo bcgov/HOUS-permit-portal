@@ -8,42 +8,68 @@ RSpec.describe Requirement, type: :model do
   end
 
   describe "validations" do
-    it "enforces select inputs has defined accepted options" do
-      select_requirement = build(:requirement, input_type: "select")
-      multi_option_select_requirement = build(:requirement, input_type: "multi_option_select")
-      text_requirement = build(:requirement, input_type: "text")
-      error_message = "select inputs must have options defined"
+    context "number inputs" do
+      it "enforces number inputs are valid without a unit" do
+        number_requirement = build(:requirement, input_type: "number")
 
-      expect(select_requirement).not_to be_valid
-      expect(select_requirement.errors[:input_options]).to include(error_message)
-      expect(multi_option_select_requirement).not_to be_valid
-      expect(multi_option_select_requirement.errors[:input_options]).to include(error_message)
-      expect(text_requirement).to be_valid
+        expect(number_requirement.valid?).to eq(true)
+      end
+
+      it "enforces number inputs with valid unit defined to be valid" do
+        Requirement::NUMBER_UNITS.each do |unit|
+          number_requirement_with_valid_unit =
+            build(:requirement, input_type: "number", input_options: { "number_unit" => unit })
+
+          expect(number_requirement_with_valid_unit.valid?).to eq(true)
+        end
+      end
+
+      it "enforces number inputs with invalid unit defined to be invalid" do
+        number_requirement_with_invalid_unit =
+          build(:requirement, input_type: "number", input_options: { "number_unit" => "cmmm" })
+
+        expect(number_requirement_with_invalid_unit.valid?).to eq(false)
+      end
     end
 
-    it "enforces select inputs to have string options" do
-      invalid_select_requirement =
-        build(
-          :requirement,
-          input_type: "select",
-          input_options: {
-            "value_options" => [1, "test", { "label" => "2", "value" => 2 }],
-          },
-        )
-      valid_select_requirement =
-        build(
-          :requirement,
-          input_type: "select",
-          input_options: {
-            "value_options" => [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }],
-          },
-        )
-      error_message = "select inputs must have options defined"
+    context "select inputs" do
+      it "enforces select inputs has defined accepted options" do
+        select_requirement = build(:requirement, input_type: "select")
+        multi_option_select_requirement = build(:requirement, input_type: "multi_option_select")
+        text_requirement = build(:requirement, input_type: "text")
+        error_message = "select inputs must have options defined"
 
-      expect(invalid_select_requirement).not_to be_valid
-      expect(invalid_select_requirement.errors[:input_options]).to include(error_message)
+        expect(select_requirement).not_to be_valid
+        expect(select_requirement.errors[:input_options]).to include(error_message)
+        expect(multi_option_select_requirement).not_to be_valid
+        expect(multi_option_select_requirement.errors[:input_options]).to include(error_message)
+        expect(text_requirement).to be_valid
+      end
 
-      expect(valid_select_requirement).to be_valid
+      it "enforces select inputs to have string options" do
+        invalid_select_requirement =
+          build(
+            :requirement,
+            input_type: "select",
+            input_options: {
+              "value_options" => [1, "test", { "label" => "2", "value" => 2 }],
+            },
+          )
+        valid_select_requirement =
+          build(
+            :requirement,
+            input_type: "select",
+            input_options: {
+              "value_options" => [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }],
+            },
+          )
+        error_message = "select inputs must have options defined"
+
+        expect(invalid_select_requirement).not_to be_valid
+        expect(invalid_select_requirement.errors[:input_options]).to include(error_message)
+
+        expect(valid_select_requirement).to be_valid
+      end
     end
   end
 
@@ -68,6 +94,16 @@ RSpec.describe Requirement, type: :model do
         create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
 
       expect(select_requirement.value_options).to eq(select_options)
+    end
+
+    it "returns the number unit for number input with a unit" do
+      number_unit = "m"
+      number_requirement_with_unit =
+        create(:requirement, input_type: "number", input_options: { "number_unit" => number_unit })
+      number_requirement_without_unit = create(:requirement, input_type: "number")
+
+      expect(number_requirement_with_unit.number_unit).to eq(number_unit)
+      expect(number_requirement_without_unit.number_unit).to eq(nil)
     end
 
     context "form json" do

@@ -1,6 +1,13 @@
 class RequirementBlockBlueprint < Blueprinter::Base
   identifier :id
-  fields :name, :sign_off_role, :reviewer_role, :created_at, :updated_at
+  fields :name,
+         :description,
+         :display_name,
+         :display_description,
+         :sign_off_role,
+         :reviewer_role,
+         :created_at,
+         :updated_at
 
   field :association_list, name: :associations
 
@@ -8,5 +15,5 @@ class RequirementBlockBlueprint < Blueprinter::Base
     requirement_block.to_form_json
   end
 
-  association :requirements, blueprint: RequirementBlueprint
+  association :requirement_block_requirements, blueprint: RequirementBlockRequirementBlueprint
 end

@@ -5,7 +5,8 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
-import { ERequirementLibrarySortFields } from "../types/enums"
+import { IRequirementBlockParams } from "../types/api-request"
+import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
 import { ISort } from "../types/types"
 
 export const RequirementBlockStore = types
@@ -70,6 +71,36 @@ export const RequirementBlockStore = types
       }
 
       return false
+    }),
+  }))
+  .actions((self) => ({
+    createRequirementBlock: flow(function* (requirementParams: IRequirementBlockParams) {
+      const response = yield* toGenerator(self.environment.api.createRequirementBlock(requirementParams))
+
+      if (response.ok) {
+        self.requirementBlockMap.put(response.data.data)
+
+        // Get latest data for current page, sort and filters
+        yield self.fetchRequirementBlocks()
+
+        return true
+      }
+
+      return false
+    }),
+    searchAssociations: flow(function* (query: string) {
+      const response = yield* toGenerator(
+        self.environment.api.searchTags({
+          query,
+          taggableTypes: [ETagType.requirementBlock],
+        })
+      )
+
+      if (response.ok) {
+        return response.data
+      }
+
+      return []
     }),
   }))
 

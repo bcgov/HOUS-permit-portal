@@ -48,6 +48,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[index create show update]
 
     resource :profile, only: [:update], controller: "users"
+    post "tags/search", to: "tags#index", as: :tags_search
   end
 
   root to: "home#index"
