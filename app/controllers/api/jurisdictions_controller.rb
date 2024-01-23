@@ -3,12 +3,12 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionUsers
 
   before_action :set_jurisdiction, only: %i[show search_users]
-  skip_after_action :verify_policy_scoped, only: [:index]
+  skip_after_action :verify_policy_scoped, only: %i[index search_users]
 
   def index
     perform_search
     authorized_results = apply_search_authorization(@search.results)
-    render_success @search.results,
+    render_success authorized_results,
                    nil,
                    {
                      meta: {
@@ -29,7 +29,6 @@ class Api::JurisdictionsController < Api::ApplicationController
   # POST /api/jurisdiction
   def create
     @jurisdiction = Jurisdiction.build(jurisdiction_params)
-
     authorize @jurisdiction
 
     if @jurisdiction.save
@@ -54,7 +53,8 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_users
     authorize @jurisdiction
     perform_user_search
-    render_success @user_search.results,
+    authorized_results = apply_search_authorization(@user_search.results, "index")
+    render_success authorized_results,
                    nil,
                    {
                      meta: {

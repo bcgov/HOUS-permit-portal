@@ -12,8 +12,8 @@ class Api::ApplicationController < ActionController::API
 
   protected
 
-  def apply_search_authorization(results)
-    results.select { |result| policy(result).send("#{action_name}?".to_sym) }
+  def apply_search_authorization(results, policy_action = action_name)
+    results.select { |result| policy(result).send("#{policy_action}?".to_sym) }
   end
 
   def skip_pundit?
