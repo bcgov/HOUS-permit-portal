@@ -21,7 +21,7 @@ class RequirementsFromXlsxSeeder
               input_type: row["input_type"],
               hint: row["hint"],
               required: row["required"].present?,
-              reusable: true, #TODO: DECIDE WHAT CASES ARE NON REUSABLE?
+              # reusable: true, #TODO: DECIDE WHAT CASES ARE NON REUSABLE?
               input_options: row["input_options"].blank? ? {} : JSON.parse(row["input_options"]), #if parse fails it will raise error
               #required_for_in_person_hint - text
               #reusable - boolean
@@ -97,7 +97,11 @@ class RequirementsFromXlsxSeeder
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
-          rb = RequirementBlock.where(name: sheet.row(row_index)[2]).first_or_create!(name: sheet.row(row_index)[2])
+          rb =
+            RequirementBlock.where(name: sheet.row(row_index)[2]).first_or_create!(
+              name: sheet.row(row_index)[2],
+              display_name: sheet.row(row_index)[2],
+            )
           req_position_incrementer = 0
           (11..21).each_with_index do |req_col, req_position|
             val = sheet.row(row_index)[req_col]

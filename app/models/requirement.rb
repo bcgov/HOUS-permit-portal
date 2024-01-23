@@ -10,6 +10,9 @@ class Requirement < ApplicationRecord
          multi_option_select: 4,
          date: 5,
          textarea: 6,
+         file: 7,
+         simplephonenumber: 10,
+         simpleemail: 11,
        },
        _prefix: true
 
@@ -68,9 +71,12 @@ class Requirement < ApplicationRecord
         type: "choicesjs",
       },
     },
+    file: {
+      type: "simplefile",
+    },
   }
 
-  NUMBER_UNITS = %w[no_unit mm cm m in ft mi]
+  NUMBER_UNITS = %w[no_unit mm cm m in ft mi $]
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -116,7 +122,6 @@ class Requirement < ApplicationRecord
 
   def validate_options_for_select_inputs
     return unless input_type_select? || input_type_multi_option_select?
-
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
