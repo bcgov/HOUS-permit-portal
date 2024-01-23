@@ -97,25 +97,14 @@ if PermitApplication.first.blank?
   end
 end
 
-RequirementsFromXlsxSeeder.seed if Requirement.first.blank?
-
 # Create RequirementTemplate records
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
 
-if RequirementBlock.first.blank?
-  25.times do |i|
-    RequirementBlock.create!(
-      name: "Block #{i + 1}",
-      sign_off_role: 0,
-      reviewer_role: 0,
-      custom_validations: {
-        key: "value",
-      },
-    )
-  end
-end
+# Requrements from seeder are idempotent
+# Requirments block will get created from requiremetms templates
+RequirementsFromXlsxSeeder.seed
 
 User.reindex
