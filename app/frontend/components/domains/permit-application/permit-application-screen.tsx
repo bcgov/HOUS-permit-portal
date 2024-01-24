@@ -1,4 +1,4 @@
-import { Container, Flex } from "@chakra-ui/react"
+import { Container, Flex, FormControl, FormLabel, Input } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useParams } from "react-router-dom"
@@ -18,8 +18,20 @@ export const PermitApplicationScreen = observer(({}: IPermitApplicationScreenPro
   if (permitApplication) {
     return (
       <Flex as="main" direction="column" w="full" bg="greys.white" key={"permit-application-show"}>
-        <Container maxW="container.lg">Show selected address, etc.</Container>
-        <Container maxW="container.lg">{permitApplication.permitTypeAndActivity}</Container>
+        <Container maxW="container.lg" p={10}>
+          <FormControl>
+            <FormLabel>Permit</FormLabel>
+            <Input type="text" disabled={true} value={permitApplication.permitTypeAndActivity} />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Full address</FormLabel>
+            <Input type="text" disabled={true} value={permitApplication.fullAddress} />
+          </FormControl>
+          <FormControl>
+            <FormLabel>PID / PIN</FormLabel>
+            <Input type="text" disabled={true} value={permitApplication.pid || permitApplication.pin} />
+          </FormControl>
+        </Container>
         {permitApplication.requirements && (
           <Container maxW="container.lg">
             <RequirementForm requirements={permitApplication.requirements} />

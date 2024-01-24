@@ -55,11 +55,6 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           rightIcon={<CaretRight size={16} />}
         >
           {nickname}
-          {", "}
-          <Show below="md">
-            <br />
-          </Show>
-          {jurisdictionName}
         </RouterLinkButton>
         <Show below="md">
           <Text>
@@ -107,7 +102,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             {t("Application ID")}: {number}
           </Text>
         </Show>
-        <RouterLinkButton to={"#"} variant="primary" w={{ base: "full", md: "fit-content" }}>
+        <RouterLinkButton to={`${id}`} variant="primary" w={{ base: "full", md: "fit-content" }}>
           {t("ui.resume")}
         </RouterLinkButton>
       </Flex>

@@ -16,7 +16,7 @@ class PermitApplication < ApplicationRecord
   #stubs for UI
   alias number id
   def nickname
-    "#{jurisdiction_name} - #{id}"
+    "#{jurisdiction_name}: #{full_address || pid || pin || id}"
   end
 
   def requirements

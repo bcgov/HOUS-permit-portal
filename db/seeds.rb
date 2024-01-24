@@ -65,16 +65,6 @@ User
   end
   .confirm
 
-# Creating Permit Applications
-submitters = User.where(role: "submitter")
-
-if PermitApplication.first.blank?
-  20.times { FactoryBot.create(:permit_application, submitter: submitters.sample, jurisdiction: jurisdictions.sample) }
-
-  # Creating Contacts
-  jurisdictions.each { |j| rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) } }
-end
-
 PermitClassificationSeeder.seed
 activity1 = Activity.find_by_code("new_construction")
 activity2 = Activity.find_by_code("demolition")
@@ -84,6 +74,7 @@ permit_type1 = PermitType.find_by_code("low_residential")
 permit_type2 = PermitType.find_by_code("medium_residential")
 
 if PermitApplication.first.blank?
+  jurisdictions.each { |j| (rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) }) if j.contacts.blank? }
   # Creating Permit Applications
   submitters = User.where(role: "submitter")
   20.times do
@@ -93,6 +84,28 @@ if PermitApplication.first.blank?
       jurisdiction: jurisdictions.sample,
       activity: activity1,
       permit_type: permit_type1,
+    )
+  end
+  # Seed a North Vancouver Example
+  4.times do
+    j = Jurisdiction.where(name: "North Vancouver").sample
+    pid = (j.locality_type == "corporation of the city") ? "013228544" : "008535981"
+    full_address =
+      (
+        if (j.locality_type == "corporation of the city")
+          "323 18TH ST E, NORTH VANCOUVER, BC, V7L 2X8"
+        else
+          "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
+        end
+      )
+    FactoryBot.create(
+      :permit_application,
+      submitter: submitters.sample,
+      jurisdiction: j,
+      activity: activity1,
+      permit_type: permit_type1,
+      full_address: full_address,
+      pid: pid,
     )
   end
 end
