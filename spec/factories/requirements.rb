@@ -9,5 +9,7 @@ FactoryBot.define do
     related_content { nil }
     required_for_in_person_hint { false }
     required_for_multiple_owners { false }
+
+    association :requirement_block
   end
 end

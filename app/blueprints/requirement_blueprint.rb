@@ -7,7 +7,6 @@ class RequirementBlueprint < Blueprinter::Base
          :input_type,
          :input_options,
          :hint,
-         :reusable,
          :required,
          :related_content,
          :required_for_in_person_hint,

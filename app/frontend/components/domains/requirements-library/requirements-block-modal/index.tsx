@@ -28,7 +28,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal()
   const getDefaultValues = () => {
     return {
       associationList: [],
-      requirementBlockRequirementsAttributes: [],
+      requirementsAttributes: [],
     }
   }
   const formProps = useForm<IRequirementBlockForm>({

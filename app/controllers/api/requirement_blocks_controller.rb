@@ -82,23 +82,17 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :sign_off_role,
       :reviewer_role,
       association_list: [],
-      requirement_block_requirements_attributes: [
-        :id,
-        :requirement_id,
+      requirements_attributes: [
+        :requirement_code,
+        :label,
+        :input_type,
+        :hint,
+        :required,
+        :related_content,
+        :required_for_in_person_hint,
+        :required_for_multiple_owners,
         :_destroy,
-        requirement_attributes: [
-          :requirement_code,
-          :label,
-          :input_type,
-          :hint,
-          :reusable,
-          :required,
-          :related_content,
-          :required_for_in_person_hint,
-          :required_for_multiple_owners,
-          :_destroy,
-          input_options: [:number_unit, value_options: [%i[value label]]],
-        ],
+        input_options: [:number_unit, value_options: [%i[value label]]],
       ],
     )
   end

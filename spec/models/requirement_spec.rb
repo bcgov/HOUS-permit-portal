@@ -3,8 +3,7 @@ require "rails_helper"
 RSpec.describe Requirement, type: :model do
   describe "associations" do
     # Testing direct associations
-    it { should have_many(:requirement_block_requirements) }
-    it { should have_many(:requirement_blocks).through(:requirement_block_requirements) }
+    it { should belong_to(:requirement_block) }
   end
 
   describe "validations" do
@@ -69,6 +68,30 @@ RSpec.describe Requirement, type: :model do
         expect(invalid_select_requirement.errors[:input_options]).to include(error_message)
 
         expect(valid_select_requirement).to be_valid
+      end
+    end
+
+    context "positions of requirements" do
+      it "starts position at 0" do
+        requirement = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 1)
+        expect(requirement.requirements.first.position).to eq(0)
+      end
+
+      it "can have duplicate positions when requirements are added to different requirement blocks" do
+        requirement_1 = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 1)
+        requirement_2 = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 1)
+
+        expect(requirement_1.requirements.first.position).to eq(0)
+        expect(requirement_2.requirements.first.position).to eq(0)
+      end
+
+      it "does not have duplicate positions when multiple requirements are added to the same requirement block" do
+        requirement_block = create(:requirement_block)
+        requirement_1 = create(:requirement, requirement_block: requirement_block)
+        requirement_2 = create(:requirement, requirement_block: requirement_block)
+
+        expect(requirement_1.position).to eq(0)
+        expect(requirement_2.position).to eq(1)
       end
     end
   end

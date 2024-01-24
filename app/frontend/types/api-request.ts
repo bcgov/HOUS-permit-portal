@@ -12,19 +12,13 @@ export interface IRequirementAttributes {
   }
 }
 
-export interface IRequirementBlockRequirementAttributes {
-  id?: string
-  _destroy?: boolean
-  requirementAttributes: IRequirementAttributes
-}
-
 export interface IRequirementBlockParams {
   name: string
   displayName: string
   displayDescription: string
   description?: string
   associationList?: string[]
-  requirementBlockRequirementsAttributes?: Array<IRequirementBlockRequirementAttributes>
+  requirementsAttributes: IRequirementAttributes[]
 }
 
 export interface ITagSearchParams {

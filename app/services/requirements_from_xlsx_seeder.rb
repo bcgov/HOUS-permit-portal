@@ -6,42 +6,19 @@ class RequirementsFromXlsxSeeder
 
       req_sheet = xlsx.sheet("Dev-Requirements")
       parsed_req_sheet = req_sheet.parse(headers: true)
-
+      valid_rows =
+        parsed_req_sheet.select { |row| row["requirement_code"] && row["requirement_code"] != "requirement_code" }
       errors = ["Requirements Loading"]
-
-      parsed_req_sheet.each do |row|
-        if row["requirement_code"] && row["requirement_code"] != "requirement_code" #skip anything with no code
-          begin
-            requirement =
-              Requirement.where(requirement_code: row["requirement_code"]).find_or_initialize_by(
-                requirement_code: row["requirement_code"],
-              )
-            requirement.update!(
-              label: row["display_label"],
-              input_type: row["input_type"],
-              hint: row["hint"],
-              required: row["required"].present?,
-              # reusable: true, #TODO: DECIDE WHAT CASES ARE NON REUSABLE?
-              input_options: row["input_options"].blank? ? {} : JSON.parse(row["input_options"]), #if parse fails it will raise error
-              #required_for_in_person_hint - text
-              #reusable - boolean
-              required_for_multiple_owners: row["required_for_multiple_owners"].present?,
-            )
-          rescue StandardError => e #ArgumentError, ActiveRecord::ActiveRecordError => e
-            errors << "Error loading #{row["requirement_code"]} - #{e.message}"
-          end
-        end
-      end
-      #loop through requirements and do first or update.  At some point we will not allow updating.
 
       setup_requirement_template(
         "new_construction",
         "low_residential",
         xlsx.sheet("Dev-RequirementBlocks-House"),
+        valid_rows,
         errors,
       )
 
-      #medium density new contruction
+      # medium density new contruction
       # setup_requirement_template(
       #   "new_construction",
       #   "medium_residential",
@@ -56,10 +33,10 @@ class RequirementsFromXlsxSeeder
 
   private
 
-  def self.setup_requirement_template(activity, permit_type, sheet, errors)
+  def self.setup_requirement_template(activity, permit_type, sheet, valid_rows, errors)
     errors << "#{activity} #{permit_type} loading"
 
-    #create requirements blocks
+    # create requirements blocks
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
@@ -67,12 +44,12 @@ class RequirementsFromXlsxSeeder
         activity: activity,
         permit_type: permit_type,
       )
-    setup_sheet(activity, permit_type, sheet, requirement_template, errors)
+    setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
   end
 
-  def self.setup_sheet(activity, permit_type, sheet, requirement_template, errors)
+  def self.setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
     rs_position_incrementer = 0
-    #create sections first and order them
+    # create sections first and order them
     sheet
       .column(1)
       .drop(3)
@@ -91,10 +68,10 @@ class RequirementsFromXlsxSeeder
     rstrb_position_incrementer = {}
     (4..sheet.last_row).each do |row_index|
       begin
-        #https://www.vishalon.net/blog/excel-column-letter-to-number-quick-reference but -1 for ruby
-        #if column A(0) Section, C(2) Fieldset and L(11) value
+        # https://www.vishalon.net/blog/excel-column-letter-to-number-quick-reference but -1 for ruby
+        # if column A(0) Section, C(2) Fieldset and L(11) value
 
-        #go through each requirement block and add them to each section
+        # go through each requirement block and add them to each section
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
@@ -103,22 +80,9 @@ class RequirementsFromXlsxSeeder
               name: sheet.row(row_index)[2],
               display_name: sheet.row(row_index)[2],
             )
-          req_position_incrementer = 0
-          (11..21).each_with_index do |req_col, req_position|
-            val = sheet.row(row_index)[req_col]
-            if val.present?
-              requirement = Requirement.find_by_requirement_code(val)
-              if requirement
-                rbr =
-                  rb
-                    .requirement_block_requirements
-                    .where(requirement: requirement)
-                    .first_or_initialize(requirement: requirement)
-                rbr.update!(requirement: requirement, position: req_position_incrementer)
-                req_position_incrementer += 1
-              end
-            end
-          end
+
+          req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
+          self.setup_requirements(rb, valid_rows, req_vals)
 
           rsrb =
             req_template_section
@@ -134,5 +98,41 @@ class RequirementsFromXlsxSeeder
         errors << "Error loading #{activity} #{permit_type} - row:#{row_index} - #{e.message}"
       end
     end
+  end
+
+  def self.setup_requirements(requirement_block, valid_rows, requirement_block_requirement_codes)
+    req_position_incrementer = 0
+    requirement_block_requirement_codes.each do |val|
+      row = valid_rows.find { |v| v["requirement_code"] == val }
+      if row.present?
+        begin
+          requirement =
+            requirement_block
+              .requirements
+              .where(requirement_code: "#{requirement_block.id}_#{row["requirement_code"]}")
+              .find_or_initialize_by(requirement_code: "#{requirement_block.id}_#{row["requirement_code"]}")
+          requirement.update!(
+            label: row["display_label"],
+            input_type: row["input_type"],
+            hint: row["hint"],
+            required: row["required"].present?,
+            # reusable: true, #TODO: DECIDE WHAT CASES ARE NON REUSABLE?
+            input_options: row["input_options"].blank? ? {} : JSON.parse(row["input_options"]), # if parse fails it will raise error
+            # required_for_in_person_hint - text
+            # reusable - boolean
+            required_for_multiple_owners: row["required_for_multiple_owners"].present?,
+            position: req_position_incrementer,
+          )
+          req_position_incrementer += 1
+        rescue StandardError => e # ArgumentError, ActiveRecord::ActiveRecordError => e
+          errors << "Error loading #{row["requirement_code"]} - #{e.message}"
+        end
+      end
+    end
+
+    # loop through requirements and do first or update.  At some point we will not allow updating.
+
+    # have to reindex so that requirement blocks get the fields indexed from requirements
+    RequirementBlock.reindex
   end
 end

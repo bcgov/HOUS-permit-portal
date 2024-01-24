@@ -1,6 +1,7 @@
 class Requirement < ApplicationRecord
-  has_many :requirement_block_requirements, dependent: :destroy
-  has_many :requirement_blocks, through: :requirement_block_requirements
+  belongs_to :requirement_block
+
+  acts_as_list scope: :requirement_block, top_of_list: 0
 
   enum input_type: {
          text: 0,
@@ -92,7 +93,7 @@ class Requirement < ApplicationRecord
 
   def to_form_json
     json = {
-      id: reusable ? SecureRandom.uuid : id,
+      id: id,
       key: label.parameterize.underscore.camelize(:lower),
       type: input_type,
       input: true,

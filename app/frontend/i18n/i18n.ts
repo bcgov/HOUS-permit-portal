@@ -104,6 +104,7 @@ const options = {
           doLater: "Do this later",
           add: "Add",
           edit: "Edit",
+          optional: "(optional)",
         },
         jurisdiction: {
           new: {

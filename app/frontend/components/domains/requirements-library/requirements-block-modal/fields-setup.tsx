@@ -17,15 +17,13 @@ export const FieldsSetup = observer(function FieldsSetup() {
   const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
   const { fields, append, remove } = useFieldArray<IRequirementBlockForm>({
     control,
-    name: "requirementBlockRequirementsAttributes",
+    name: "requirementsAttributes",
   })
   const [requirementToEdit, setRequirementToEdit] = useState<string | null>()
 
   const onUseRequirement = (requirementType: ERequirementType) => {
     append({
-      requirementAttributes: {
-        inputType: requirementType,
-      },
+      inputType: requirementType,
     })
   }
 
@@ -65,8 +63,8 @@ export const FieldsSetup = observer(function FieldsSetup() {
           )}
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
             {fields.map((field, index) => {
-              const watchedHint = watch(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`)
-              const requirementType = field.requirementAttributes.inputType
+              const watchedHint = watch(`requirementsAttributes.${index}.hint`)
+              const requirementType = field.inputType
               return (
                 <Box
                   key={field.id}
@@ -107,7 +105,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       editableLabelProps={{
                         color: "text.link",
                         editableInputProps: {
-                          ...register(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`, {
+                          ...register(`requirementsAttributes.${index}.label`, {
                             required: true,
                             value: t("requirementsLibrary.modals.defaultRequirementLabel"),
                           }),
@@ -124,7 +122,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                                 textDecoration: watchedHint ? undefined : "underline",
                               },
                         editableInputProps: {
-                          ...register(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.hint`),
+                          ...register(`requirementsAttributes.${index}.hint`),
                           "aria-label": "Edit Helper Text",
                         },
                       }}
@@ -132,13 +130,9 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         controlProps: {
                           control: control,
                           rules: {
-                            onChange: (e) =>
-                              setValue(
-                                `requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`,
-                                !e.target.value
-                              ),
+                            onChange: (e) => setValue(`requirementsAttributes.${index}.required`, !e.target.value),
                           },
-                          name: `requirementBlockRequirementsAttributes.${index}.requirementAttributes.required`,
+                          name: `requirementsAttributes.${index}.required`,
                           // @ts-ignore
                           defaultValue: true,
                         },
@@ -149,7 +143,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                               controlProps: {
                                 control: control,
 
-                                name: `requirementBlockRequirementsAttributes.${index}.requirementAttributes.inputOptions.numberUnit`,
+                                name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
                                 // @ts-ignore
                                 defaultValue: ENumberUnit.noUnit,
                               },
@@ -169,16 +163,14 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   >
                     <RequirementFieldDisplay
                       requirementType={requirementType}
-                      label={watch(`requirementBlockRequirementsAttributes.${index}.requirementAttributes.label`)}
+                      label={watch(`requirementsAttributes.${index}.label`)}
                       helperText={watchedHint}
                       labelProps={{
                         w: "calc(100% - 60px)",
                       }}
                       unit={
                         requirementType === ERequirementType.number
-                          ? watch(
-                              `requirementBlockRequirementsAttributes.${index}.requirementAttributes.inputOptions.numberUnit`
-                            ) ?? null
+                          ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
                           : undefined
                       }
                     />
