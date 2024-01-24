@@ -18,7 +18,7 @@ class RequirementsFromXlsxSeeder
         errors,
       )
 
-      #medium density new contruction
+      # medium density new contruction
       # setup_requirement_template(
       #   "new_construction",
       #   "medium_residential",
@@ -36,7 +36,7 @@ class RequirementsFromXlsxSeeder
   def self.setup_requirement_template(activity, permit_type, sheet, valid_rows, errors)
     errors << "#{activity} #{permit_type} loading"
 
-    #create requirements blocks
+    # create requirements blocks
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
@@ -49,7 +49,7 @@ class RequirementsFromXlsxSeeder
 
   def self.setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
     rs_position_incrementer = 0
-    #create sections first and order them
+    # create sections first and order them
     sheet
       .column(1)
       .drop(3)
@@ -68,10 +68,10 @@ class RequirementsFromXlsxSeeder
     rstrb_position_incrementer = {}
     (4..sheet.last_row).each do |row_index|
       begin
-        #https://www.vishalon.net/blog/excel-column-letter-to-number-quick-reference but -1 for ruby
-        #if column A(0) Section, C(2) Fieldset and L(11) value
+        # https://www.vishalon.net/blog/excel-column-letter-to-number-quick-reference but -1 for ruby
+        # if column A(0) Section, C(2) Fieldset and L(11) value
 
-        #go through each requirement block and add them to each section
+        # go through each requirement block and add them to each section
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
@@ -117,18 +117,22 @@ class RequirementsFromXlsxSeeder
             hint: row["hint"],
             required: row["required"].present?,
             # reusable: true, #TODO: DECIDE WHAT CASES ARE NON REUSABLE?
-            input_options: row["input_options"].blank? ? {} : JSON.parse(row["input_options"]), #if parse fails it will raise error
-            #required_for_in_person_hint - text
-            #reusable - boolean
+            input_options: row["input_options"].blank? ? {} : JSON.parse(row["input_options"]), # if parse fails it will raise error
+            # required_for_in_person_hint - text
+            # reusable - boolean
             required_for_multiple_owners: row["required_for_multiple_owners"].present?,
             position: req_position_incrementer,
           )
           req_position_incrementer += 1
-        rescue StandardError => e #ArgumentError, ActiveRecord::ActiveRecordError => e
+        rescue StandardError => e # ArgumentError, ActiveRecord::ActiveRecordError => e
           errors << "Error loading #{row["requirement_code"]} - #{e.message}"
         end
       end
     end
-    #loop through requirements and do first or update.  At some point we will not allow updating.
+
+    # loop through requirements and do first or update.  At some point we will not allow updating.
+
+    # have to reindex so that requirement blocks get the fields indexed from requirements
+    RequirementBlock.reindex
   end
 end
