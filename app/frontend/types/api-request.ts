@@ -2,6 +2,7 @@ import { ENumberUnit, ERequirementType, ETagType } from "./enums"
 import { IOption } from "./types"
 
 export interface IRequirementAttributes {
+  id?: string
   label?: string
   inputType?: ERequirementType
   hint?: string

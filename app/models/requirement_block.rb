@@ -1,7 +1,6 @@
 class RequirementBlock < ApplicationRecord
   searchkick searchable: %i[name requirement_labels associations], word_start: %i[name requirement_labels associations]
 
-  # has_many :requirement_block_requirements, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
 
   has_many :requirement_template_section_requirement_blocks, dependent: :destroy
@@ -13,7 +12,8 @@ class RequirementBlock < ApplicationRecord
   enum reviewer_role: { any: 0 }, _prefix: true
 
   validates :sku, uniqueness: true, presence: true
-
+  validates :name, uniqueness: true, presence: true
+  validates :display_name, presence: true
   before_validation :set_sku
 
   acts_as_taggable_on :associations

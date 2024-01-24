@@ -1,4 +1,4 @@
-import { ESortDirection } from "./enums"
+import { ENumberUnit, ESortDirection } from "./enums"
 
 export type TLatLngTuple = [number, number]
 
@@ -27,4 +27,9 @@ export type TSearchParams<IModelSortFields> = {
   query?: string
   page?: number
   perPage?: number
+}
+
+export interface IRequirementOptions {
+  valueOptions?: IOption[]
+  numberUnit?: ENumberUnit
 }

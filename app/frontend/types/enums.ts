@@ -77,11 +77,13 @@ export enum ERequirementType {
   number = "number",
   textArea = "text_area",
   radio = "radio",
-  multiSelectCheckbox = "multi_select_checkbox",
+  checkbox = "checkbox",
   select = "select",
   signature = "signature",
   generalContact = "general_contact",
-  fileUpload = "file_upload",
+  fileUpload = "file",
+  simplePhoneNumber = "simplephonenumber",
+  simpleEmail = "simpleemail",
 }
 
 export enum ENumberUnit {

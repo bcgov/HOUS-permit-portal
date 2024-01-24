@@ -14,7 +14,7 @@ const helperTextStyles: Partial<TextProps> = {
 export const BlockSetup = observer(function BlockSetup() {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
-  const { register, control } = useFormContext<IRequirementBlockForm>()
+  const { register, control, watch } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const fetchAssociationOptions = async (query: string) => {
@@ -91,7 +91,7 @@ export const BlockSetup = observer(function BlockSetup() {
         </FormControl>
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
-          <Input bg={"white"} isDisabled={true} />
+          <Input bg={"white"} value={watch("sku")} isDisabled={true} />
           <FormHelperText {...helperTextStyles}>
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>

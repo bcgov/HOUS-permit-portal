@@ -46,6 +46,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
             fontWeight={700}
+            value={watchedDisplayName}
             editableInputProps={{
               ...register("displayName", { required: true }),
               "aria-label": "Edit Display Name",

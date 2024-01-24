@@ -1,4 +1,14 @@
-import { HStack, Menu, MenuButton, MenuButtonProps, MenuDivider, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import {
+  Button,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuButtonProps,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Text,
+} from "@chakra-ui/react"
 import { CaretDown, SlidersHorizontal, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -14,6 +24,7 @@ export const OptionsMenu = observer(function UnitSelect({ menuButtonProps, onRem
   return (
     <Menu placement={"bottom-end"}>
       <MenuButton
+        as={Button}
         _expanded={{
           "div > span": {
             textDecoration: "none",
@@ -24,6 +35,7 @@ export const OptionsMenu = observer(function UnitSelect({ menuButtonProps, onRem
             textDecoration: "underline",
           },
         }}
+        righIcon={<CaretDown />}
         {...menuButtonProps}
       >
         <HStack justifyContent={"space-between"} w={"full"}>
