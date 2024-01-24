@@ -25,11 +25,11 @@ export const PermitApplicationScreen = observer(({}: IPermitApplicationScreenPro
           </FormControl>
           <FormControl>
             <FormLabel>Full address</FormLabel>
-            <Input type="text" disabled={true} value={permitApplication.fullAddress} />
+            <Input type="text" disabled={true} value={permitApplication.fullAddress || ""} />
           </FormControl>
           <FormControl>
             <FormLabel>PID / PIN</FormLabel>
-            <Input type="text" disabled={true} value={permitApplication.pid || permitApplication.pin} />
+            <Input type="text" disabled={true} value={`${permitApplication.pid || permitApplication.pin || ""}`} />
           </FormControl>
         </Container>
         {permitApplication.requirements && (
