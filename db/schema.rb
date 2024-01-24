@@ -76,6 +76,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_23_212112) do
     t.datetime "updated_at", null: false
     t.uuid "permit_type_id", null: false
     t.uuid "activity_id", null: false
+    t.string "full_address"
+    t.string "pid"
+    t.string "pin"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
@@ -221,6 +224,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_23_212112) do
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
