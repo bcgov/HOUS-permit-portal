@@ -121,7 +121,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
         </Flex>
 
         <Button leftIcon={<Archive size={16} />} variant={"secondary"} mt={3}>
-          {t("requirementsLibrary.index.seeArchivedButton")}
+          {t("ui.seeArchivedButton")}
         </Button>
       </VStack>
     </Container>

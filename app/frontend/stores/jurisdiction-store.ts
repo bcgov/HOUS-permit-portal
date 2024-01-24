@@ -73,9 +73,9 @@ export const JurisdictionStoreModel = types
         R.map((jurisdiction) => self.jurisdictionMap.put(jurisdiction), response.data.data)
         self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
         self.currentPage = opts?.page ?? self.currentPage
+        self.countPerPage = opts?.countPerPage ?? self.countPerPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
       }
       return response.ok
     }),

@@ -58,3 +58,7 @@ export function isQuillEmpty(value: string) {
   }
   return false
 }
+
+export function parseBoolean(value: string): boolean {
+  return value.toLowerCase() === "true"
+}

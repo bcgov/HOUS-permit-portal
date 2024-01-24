@@ -18,6 +18,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       query: types.maybeNull(types.string),
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
+      showArchived: types.optional(types.boolean, false),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
@@ -42,6 +43,10 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         setQueryParam("query", query)
         self.query = !!query?.trim() ? query : null
       },
+      setShowArchived(bool) {
+        setQueryParam("showArchived", bool.toString())
+        self.showArchived = bool
+      },
       fetchData: flow(function* (opts?: TFetchOptions) {
         if (fetchDataActionName in self) {
           const result = yield self[fetchDataActionName](opts)
@@ -54,16 +59,15 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       search: flow(function* (opts?: TFetchOptions) {
         return yield self.fetchData({ reset: true, ...opts })
       }),
-      applySort: flow(function* (sort: ISort<TSortField>, opts?: TFetchOptions) {
-        setQueryParam("sort", JSON.stringify(sort))
+      applySort(sort: ISort<TSortField>, opts?: TFetchOptions) {
+        setQueryParam("sortDirection", sort.direction)
+        setQueryParam("sortField", sort.field as string)
         self.sort = sort
-        return yield self.fetchData(opts)
-      }),
-      clearSort: flow(function* (opts?: TFetchOptions) {
+      },
+      clearSort(opts?: TFetchOptions) {
         setQueryParam("sort", undefined)
         self.sort = null
-        return yield self.fetchData(opts)
-      }),
+      },
     }))
     .actions((self) => ({
       toggleSort: flow(function* (sortField: TSortField, opts?: TFetchOptions) {
@@ -71,15 +75,20 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         // descending -> ascending -> unsorted
         if (self.sort && self.sort.field == sortField && self.sort.direction == ESortDirection.ascending) {
           // return to unsorted state
-          yield self.clearSort(opts)
+          self.clearSort(opts)
+          yield self.fetchData(opts)
         } else {
           // apply the next sort state
           const direction =
             self.sort?.field == sortField && self.sort?.direction == ESortDirection.descending
               ? ESortDirection.ascending
               : ESortDirection.descending
-          yield self.applySort({ field: sortField, direction, ...opts })
+          self.applySort({ field: sortField, direction, ...opts })
+          yield self.fetchData(opts)
         }
+      }),
+      toggleShowArchived: flow(function* () {
+        self.setShowArchived(!self.showArchived)
       }),
       handlePageChange: flow(function* (page: number, opts?: TFetchOptions) {
         setQueryParam("currentPage", page.toString())

@@ -17,6 +17,14 @@ class UserPolicy < ApplicationPolicy
       (user.review_manager? && user.jurisdiciton_id == record.jurisdiction_id)
   end
 
+  def destroy?
+    index?
+  end
+
+  def restore?
+    index?
+  end
+
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     # def resolve

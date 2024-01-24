@@ -8,6 +8,7 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
+  include Discard::Model
 
   devise :invitable,
          :database_authenticatable,
@@ -20,6 +21,7 @@ class User < ApplicationRecord
          :jwt_cookie_authenticatable,
          :jwt_authenticatable,
          :omniauthable,
+         :trackable,
          omniauth_providers: %i[keycloak],
          jwt_revocation_strategy: self
 
@@ -36,18 +38,7 @@ class User < ApplicationRecord
   validate :unique_bceid
   validates :email, presence: true
 
-  def search_data
-    {
-      updated_at: updated_at,
-      created_at: created_at,
-      role: role,
-      name: name,
-      username: username,
-      email: email,
-      jurisdiction_id: jurisdiction_id,
-      # last_sign_in: "TODO",
-    }
-  end
+  after_commit :refresh_search_index_on_discard_or_restore
 
   def name
     "#{first_name} #{last_name}"
@@ -58,10 +49,12 @@ class User < ApplicationRecord
       updated_at: updated_at,
       created_at: created_at,
       role: role,
-      name: name,
+      first_name: first_name,
+      last_name: last_name,
       username: username,
       email: email,
       jurisdiction_id: jurisdiction_id,
+      discarded: discarded_at.present?,
       # last_sign_in: "TODO",
     }
   end
@@ -87,6 +80,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def refresh_search_index_on_discard_or_restore
+    User.search_index.refresh if saved_change_to_discarded_at
+  end
 
   def confirmed_user_has_fields
     errors.add(:user, "Confirmed user must have username") unless !confirmed? || username.present?

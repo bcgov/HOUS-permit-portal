@@ -3,7 +3,9 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
+import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
+import { IUser } from "../models/user"
 
 export const PermitApplicationStoreModel = types
   .model("PermitApplicationStore", {
@@ -28,13 +30,13 @@ export const PermitApplicationStoreModel = types
     __beforeMergeUpdateAll(permitApplicationsData) {
       //find all unique jurisdictions
       const jurisdictionsUniq = R.uniqBy(
-        (j) => j.id,
+        (j: IJurisdiction) => j.id,
         permitApplicationsData.map((pa) => pa.jurisdiction)
       )
       self.rootStore.jurisdictionStore.mergeUpdateAll(jurisdictionsUniq, "jurisdictionMap")
       //find all unique submitters
       const submittersUniq = R.uniqBy(
-        (u) => u.id,
+        (u: IUser) => u.id,
         permitApplicationsData.map((pa) => pa.submitter)
       )
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
