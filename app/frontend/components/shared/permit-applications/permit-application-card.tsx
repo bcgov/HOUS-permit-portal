@@ -14,7 +14,8 @@ interface IPermitApplicationCardProps {
 }
 
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
-  const { id, nickname, status, jurisdictionName, permitType, number, createdAt, updatedAt } = permitApplication
+  const { id, nickname, status, jurisdictionName, permitTypeAndActivity, number, createdAt, updatedAt } =
+    permitApplication
   const { t } = useTranslation()
 
   return (
@@ -32,7 +33,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             <VStack>
               <Image src="https://placehold.co/107x79" alt={`thumbnail for ${nickname}`} />
               <Text color="text.link" textTransform="capitalize" fontWeight="bold">
-                {permitType}
+                {permitTypeAndActivity}
               </Text>
             </VStack>
           </Box>
@@ -54,11 +55,6 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           rightIcon={<CaretRight size={16} />}
         >
           {nickname}
-          {", "}
-          <Show below="md">
-            <br />
-          </Show>
-          {jurisdictionName}
         </RouterLinkButton>
         <Show below="md">
           <Text>
@@ -89,7 +85,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           </Text>
         </Flex>
         <Flex direction={{ base: "column", md: "row" }} gap={4}>
-          <RouterLink to={"#"}>{`${t("permitApplication.seeBestPracticesLink")} ${permitType}`}</RouterLink>
+          <RouterLink to={"#"}>{`${t("permitApplication.seeBestPracticesLink")} ${permitTypeAndActivity}`}</RouterLink>
           <Show above="md">
             <Text>{"  |  "}</Text>
           </Show>
@@ -106,7 +102,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             {t("Application ID")}: {number}
           </Text>
         </Show>
-        <RouterLinkButton to={"#"} variant="primary" w={{ base: "full", md: "fit-content" }}>
+        <RouterLinkButton to={`${id}`} variant="primary" w={{ base: "full", md: "fit-content" }}>
           {t("ui.resume")}
         </RouterLinkButton>
       </Flex>

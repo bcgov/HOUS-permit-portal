@@ -76,13 +76,13 @@ class RequirementsFromXlsxSeeder
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
           rb =
-            RequirementBlock.where(name: sheet.row(row_index)[2]).first_or_create!(
-              name: sheet.row(row_index)[2],
-              display_name: sheet.row(row_index)[2],
+            RequirementBlock.where(name: sheet.row(row_index)[2].strip).first_or_create!(
+              name: sheet.row(row_index)[2].strip,
+              display_name: sheet.row(row_index)[2].strip,
             )
 
           req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
-          self.setup_requirements(rb, valid_rows, req_vals)
+          self.setup_requirements(rb, valid_rows, req_vals, errors)
 
           rsrb =
             req_template_section
@@ -95,12 +95,12 @@ class RequirementsFromXlsxSeeder
             rstrb_position_incrementer[req_template_section.name] = 1
         end
       rescue StandardError => e
-        errors << "Error loading #{activity} #{permit_type} - row:#{row_index} - #{e.message}"
+        errors << "Error loading #{activity.name} #{permit_type.name} - row:#{row_index} - #{e.message}"
       end
     end
   end
 
-  def self.setup_requirements(requirement_block, valid_rows, requirement_block_requirement_codes)
+  def self.setup_requirements(requirement_block, valid_rows, requirement_block_requirement_codes, errors)
     req_position_incrementer = 0
     requirement_block_requirement_codes.each do |val|
       row = valid_rows.find { |v| v["requirement_code"] == val }
