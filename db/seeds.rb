@@ -14,56 +14,50 @@ PermitClassificationSeeder.seed
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
-if User.first.blank?
-  5.times do
-    FactoryBot.create(:user, :submitter).confirm
-    FactoryBot.create(:user, :review_manager, jurisdiction: jurisdictions.first).confirm
-    FactoryBot.create(:user, :reviewer, jurisdiction: jurisdictions.first).confirm
-    FactoryBot.create(:user, :super_admin).confirm
-  end
+5.times do |n|
+  suffix = n == 0 ? "" : n
+  User
+    .find_or_create_by(username: "super_admin#{suffix}") do |user|
+      user.role = :super_admin
+      user.first_name = "SuperAdmin#{suffix}"
+      user.last_name = "McUser"
+      user.email = "super_admin#{suffix}@example.com"
+      user.password = "P@ssword1"
+    end
+    .confirm
+
+  User
+    .find_or_create_by(username: "review_manager#{suffix}") do |user|
+      user.role = :review_manager
+      user.first_name = "ReviewManager#{suffix}"
+      user.last_name = "McUser"
+      user.email = "review_manager#{suffix}@example.com"
+      user.password = "P@ssword1"
+      user.jurisdiction = jurisdictions.first
+    end
+    .confirm
+
+  User
+    .find_or_create_by(username: "reviewer#{suffix}") do |user|
+      user.role = :reviewer
+      user.first_name = "Reviewer#{suffix}"
+      user.last_name = "McUser"
+      user.email = "reviewer#{suffix}@example.com"
+      user.password = "P@ssword1"
+      user.jurisdiction = jurisdictions.first
+    end
+    .confirm
+
+  User
+    .find_or_create_by(username: "submitter#{suffix}") do |user|
+      user.role = :submitter
+      user.first_name = "Submitter#{suffix}"
+      user.last_name = "McUser"
+      user.email = "submitter#{suffix}@example.com"
+      user.password = "P@ssword1"
+    end
+    .confirm
 end
-
-User
-  .find_or_create_by(username: "super_admin") do |user|
-    user.role = :super_admin
-    user.first_name = "SuperAdmin"
-    user.last_name = "McUser"
-    user.email = "super_admin@example.com"
-    user.password = "P@ssword1"
-  end
-  .confirm
-
-User
-  .find_or_create_by(username: "review_manager") do |user|
-    user.role = :review_manager
-    user.first_name = "ReviewManager"
-    user.last_name = "McUser"
-    user.email = "review_manager@example.com"
-    user.password = "P@ssword1"
-    user.jurisdiction = jurisdictions.first
-  end
-  .confirm
-
-User
-  .find_or_create_by(username: "reviewer") do |user|
-    user.role = :reviewer
-    user.first_name = "Reviewer"
-    user.last_name = "McUser"
-    user.email = "reviewer@example.com"
-    user.password = "P@ssword1"
-    user.jurisdiction = jurisdictions.first
-  end
-  .confirm
-
-User
-  .find_or_create_by(username: "reviewer") do |user|
-    user.role = :submitter
-    user.first_name = "Submitter"
-    user.last_name = "McUser"
-    user.email = "submitter@example.com"
-    user.password = "P@ssword1"
-  end
-  .confirm
 
 PermitClassificationSeeder.seed
 activity1 = Activity.find_by_code("new_construction")
@@ -74,16 +68,30 @@ permit_type1 = PermitType.find_by_code("low_residential")
 permit_type2 = PermitType.find_by_code("medium_residential")
 
 if PermitApplication.first.blank?
-  jurisdictions.each { |j| (rand(3..5).times { FactoryBot.create(:contact, jurisdiction: j) }) if j.contacts.blank? }
+  jurisdictions
+    .first(10)
+    .each do |jurisdiction|
+      if jurisdiction.contacts.blank?
+        rand(3..5).times do |n|
+          Contact.create(
+            name: "Contact #{n}",
+            title: "Title #{n}",
+            first_nation: "Nation #{n}",
+            email: "contact_#{n}_#{jurisdiction.id}@example.com",
+            phone_number: "604-456-7802",
+            jurisdiction_id: jurisdiction.id,
+          )
+        end
+      end
+    end
   # Creating Permit Applications
   submitters = User.where(role: "submitter")
   20.times do
-    FactoryBot.create(
-      :permit_application,
-      submitter: submitters.sample,
-      jurisdiction: jurisdictions.sample,
-      activity: activity1,
-      permit_type: permit_type1,
+    PermitApplication.create(
+      submitter_id: submitters.sample.id,
+      jurisdiction_id: jurisdictions.sample.id,
+      activity_id: activity1.id,
+      permit_type_id: permit_type1.id,
     )
   end
   # Seed a North Vancouver Example
@@ -98,8 +106,7 @@ if PermitApplication.first.blank?
           "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
         end
       )
-    FactoryBot.create(
-      :permit_application,
+    PermitApplication.create(
       submitter: submitters.sample,
       jurisdiction: j,
       activity: activity1,
@@ -115,6 +122,7 @@ RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+RequirementTemplate.reindex
 
 # Requrements from seeder are idempotent
 # Requirments block will get created from requiremetms templates
