@@ -52,3 +52,5 @@ node_modules
 # https://vitejs.dev/guide/env-and-mode.html#env-files
 *.local
 *.DS_Store
+
+/spec/support/real-arch-signed.pdf

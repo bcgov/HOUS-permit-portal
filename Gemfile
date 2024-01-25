@@ -56,8 +56,9 @@ gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
-gem 'faraday', '~> 2.9.0'
 gem 'discard', '~> 1.2'
+gem "faraday", "~> 2.9.0"
+gem "factory_bot", "~> 6.4"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -67,6 +68,7 @@ group :development, :test do
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
+  gem "vcr", "~> 6.2"
 end
 
 group :development do
@@ -86,4 +88,4 @@ group :development do
   gem "letter_opener", "~> 1.8"
 end
 
-gem "factory_bot", "~> 6.4"
+gem "faraday-multipart", "~> 1.0"

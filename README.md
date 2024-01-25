@@ -27,3 +27,15 @@ Ensure you have the following:
 ## Deployment (DevOps)
 
 TBD
+
+## Testing
+
+All unit tests should be run like the following:
+
+```
+bundle exec rspec
+```
+
+Some other notes
+
+- For digital seal tests, the we have not uploaded documents with the real document to the repo, but captured the request responses

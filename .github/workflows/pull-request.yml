@@ -13,7 +13,8 @@ jobs:
     env:
       RAILS_ENV: test
       DATABASE_URL: postgres://user:password@localhost:5432/test_db
-      ELASITCSEARCH_URL: http://localhost:9200
+      ELASTICSEARCH_URL: http://localhost:9200
+      CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
     services:
       postgres:
         image: postgres:16
