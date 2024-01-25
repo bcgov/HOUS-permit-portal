@@ -16,47 +16,43 @@ jurisdictions = Jurisdiction.all
 
 5.times do |n|
   suffix = n == 0 ? "" : n
-  User
-    .find_or_create_by(username: "super_admin#{suffix}") do |user|
-      user.role = :super_admin
-      user.first_name = "SuperAdmin#{suffix}"
-      user.last_name = "McUser"
-      user.email = "super_admin#{suffix}@example.com"
-      user.password = "P@ssword1"
-    end
-    .confirm
+  User.find_or_create_by(username: "super_admin#{suffix}") do |user|
+    user.role = :super_admin
+    user.first_name = "SuperAdmin#{suffix}"
+    user.last_name = "McUser"
+    user.email = "super_admin#{suffix}@example.com"
+    user.password = "P@ssword1"
+    user.confirmed_at = Time.now
+  end
 
-  User
-    .find_or_create_by(username: "review_manager#{suffix}") do |user|
-      user.role = :review_manager
-      user.first_name = "ReviewManager#{suffix}"
-      user.last_name = "McUser"
-      user.email = "review_manager#{suffix}@example.com"
-      user.password = "P@ssword1"
-      user.jurisdiction = jurisdictions.first
-    end
-    .confirm
+  User.find_or_create_by(username: "review_manager#{suffix}") do |user|
+    user.role = :review_manager
+    user.first_name = "ReviewManager#{suffix}"
+    user.last_name = "McUser"
+    user.email = "review_manager#{suffix}@example.com"
+    user.password = "P@ssword1"
+    user.jurisdiction = jurisdictions.first
+    user.confirmed_at = Time.now
+  end
 
-  User
-    .find_or_create_by(username: "reviewer#{suffix}") do |user|
-      user.role = :reviewer
-      user.first_name = "Reviewer#{suffix}"
-      user.last_name = "McUser"
-      user.email = "reviewer#{suffix}@example.com"
-      user.password = "P@ssword1"
-      user.jurisdiction = jurisdictions.first
-    end
-    .confirm
+  User.find_or_create_by(username: "reviewer#{suffix}") do |user|
+    user.role = :reviewer
+    user.first_name = "Reviewer#{suffix}"
+    user.last_name = "McUser"
+    user.email = "reviewer#{suffix}@example.com"
+    user.password = "P@ssword1"
+    user.jurisdiction = jurisdictions.first
+    user.confirmed_at = Time.now
+  end
 
-  User
-    .find_or_create_by(username: "submitter#{suffix}") do |user|
-      user.role = :submitter
-      user.first_name = "Submitter#{suffix}"
-      user.last_name = "McUser"
-      user.email = "submitter#{suffix}@example.com"
-      user.password = "P@ssword1"
-    end
-    .confirm
+  User.find_or_create_by(username: "submitter#{suffix}") do |user|
+    user.role = :submitter
+    user.first_name = "Submitter#{suffix}"
+    user.last_name = "McUser"
+    user.email = "submitter#{suffix}@example.com"
+    user.password = "P@ssword1"
+    user.confirmed_at = Time.now
+  end
 end
 
 PermitClassificationSeeder.seed
