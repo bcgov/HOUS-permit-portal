@@ -53,14 +53,13 @@ objects:
             deployment: elasticsearch
         spec:
           containers:
-            - args:
-                - /bin/bash
-                - -c
-                - |
-                  set -a
-                  . /vault/secrets/secrets.env
-                  set +a
-                  exec elasticsearch
+            command:
+              - /bin/sh
+              - '-c'
+            args:
+              - >-
+                set -a; . /vault/secrets/secrets.env; set +a;  exec /bin/tini --
+                /usr/local/bin/docker-entrypoint.sh
               env:
                 - name: discovery.type
                   value: single-node
@@ -76,10 +75,10 @@ objects:
                   protocol: TCP
               resources:
                 limits:
-                  cpu: 100m
+                  cpu: 250m
                   memory: 512Mi
                 requests:
-                  cpu: 20m
+                  cpu: 50m
                   memory: 128Mi
               terminationMessagePath: /${STAGE}/termination-log
               terminationMessagePolicy: File
