@@ -5,11 +5,9 @@ import { parseBoolean } from "../utils/utility-funcitons"
 
 export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => {
   useEffect(() => {
-    console.tron.log("DEPS", dependencyArray)
     // This is necessary for preventing failed calls, IE when the currentJursidiction for user search is undefined
     if (dependencyArray.some((dep) => dep == null)) return
 
-    console.tron.log("PASSED", dependencyArray)
     const queryParams = new URLSearchParams(location.search)
     const query = queryParams.get("query")
     const currentPage = queryParams.get("currentPage")
