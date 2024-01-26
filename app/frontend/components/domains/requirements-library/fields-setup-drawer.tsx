@@ -27,12 +27,7 @@ interface IProps {
 }
 
 // TODO: remove when backend for these types is implemented
-const DISABLED_TYPES = [
-  ERequirementType.address,
-  ERequirementType.select,
-  ERequirementType.fileUpload,
-  ERequirementType.generalContact,
-]
+const DISABLED_TYPES = [ERequirementType.address, ERequirementType.fileUpload, ERequirementType.generalContact]
 
 export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   defaultButtonProps,

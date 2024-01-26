@@ -211,6 +211,9 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(
                         (option) => option.label
                       )}
+                      selectProps={{
+                        maxW: "339px",
+                      }}
                     />
                   </Box>
                   <Button
