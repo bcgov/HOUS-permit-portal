@@ -14,11 +14,12 @@ class Requirement < ApplicationRecord
          file: 7,
          simplephonenumber: 10,
          simpleemail: 11,
+         radio: 12,
        },
        _prefix: true
 
   before_create :set_requirement_code
-  validate :validate_options_for_select_inputs
+  validate :validate_value_options
   validate :validate_unit_for_number_inputs
 
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
@@ -78,6 +79,7 @@ class Requirement < ApplicationRecord
   }
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi $]
+  TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select checkbox radio]
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -121,14 +123,15 @@ class Requirement < ApplicationRecord
     DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
   end
 
-  def validate_options_for_select_inputs
-    return unless input_type_select? || input_type_multi_option_select?
+  def validate_value_options
+    return unless TYPES_WITH_VALUE_OPTIONS.include?(input_type.to_s)
+
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
              (option.key?("value") && option["value"].is_a?(String))
          }
-      errors.add(:input_options, "select inputs must have options defined")
+      errors.add(:input_options, "must have value options defined")
     end
   end
 

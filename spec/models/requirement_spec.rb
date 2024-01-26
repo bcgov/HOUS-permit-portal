@@ -31,43 +31,48 @@ RSpec.describe Requirement, type: :model do
       end
     end
 
-    context "select inputs" do
-      it "enforces select inputs has defined accepted options" do
-        select_requirement = build(:requirement, input_type: "select")
-        multi_option_select_requirement = build(:requirement, input_type: "multi_option_select")
-        text_requirement = build(:requirement, input_type: "text")
-        error_message = "select inputs must have options defined"
+    context "types with value options" do
+      it "enforces types with value options has defined accepted options" do
+        error_message = "must have value options defined"
 
-        expect(select_requirement).not_to be_valid
-        expect(select_requirement.errors[:input_options]).to include(error_message)
-        expect(multi_option_select_requirement).not_to be_valid
-        expect(multi_option_select_requirement.errors[:input_options]).to include(error_message)
+        Requirement::TYPES_WITH_VALUE_OPTIONS.each do |type|
+          requirement = build(:requirement, input_type: type)
+
+          expect(requirement).not_to be_valid
+          expect(requirement.errors[:input_options]).to include(error_message)
+        end
+
+        text_requirement = build(:requirement, input_type: "text")
+
         expect(text_requirement).to be_valid
       end
 
-      it "enforces select inputs to have string options" do
-        invalid_select_requirement =
-          build(
-            :requirement,
-            input_type: "select",
-            input_options: {
-              "value_options" => [1, "test", { "label" => "2", "value" => 2 }],
-            },
-          )
-        valid_select_requirement =
-          build(
-            :requirement,
-            input_type: "select",
-            input_options: {
-              "value_options" => [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }],
-            },
-          )
-        error_message = "select inputs must have options defined"
+      it "enforces types with value options to have string options" do
+        error_message = "must have value options defined"
 
-        expect(invalid_select_requirement).not_to be_valid
-        expect(invalid_select_requirement.errors[:input_options]).to include(error_message)
+        Requirement::TYPES_WITH_VALUE_OPTIONS.each do |type|
+          invalid_requirement =
+            build(
+              :requirement,
+              input_type: type,
+              input_options: {
+                "value_options" => [1, "test", { "label" => "2", "value" => 2 }],
+              },
+            )
+          valid_requirement =
+            build(
+              :requirement,
+              input_type: type,
+              input_options: {
+                "value_options" => [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }],
+              },
+            )
 
-        expect(valid_select_requirement).to be_valid
+          expect(invalid_requirement).not_to be_valid
+          expect(invalid_requirement.errors[:input_options]).to include(error_message)
+
+          expect(valid_requirement).to be_valid
+        end
       end
     end
 
@@ -166,7 +171,16 @@ RSpec.describe Requirement, type: :model do
       end
 
       it "returns correct form json for checkbox requirement" do
-        requirement = create(:requirement, label: "Checkbox Requirement", input_type: "checkbox")
+        options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
+        requirement =
+          create(
+            :requirement,
+            label: "Checkbox Requirement",
+            input_type: "checkbox",
+            input_options: {
+              "value_options" => options,
+            },
+          )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "checkboxRequirement",
