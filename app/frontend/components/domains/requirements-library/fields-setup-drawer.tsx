@@ -31,7 +31,6 @@ const DISABLED_TYPES = [
   ERequirementType.address,
   ERequirementType.checkbox,
   ERequirementType.select,
-  ERequirementType.radio,
   ERequirementType.fileUpload,
   ERequirementType.generalContact,
 ]
