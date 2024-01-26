@@ -109,17 +109,11 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       </Button>
 
       {/*this is so that the modal children unmount on close to reset their states*/}
-      {isOpen && (
+      {(!requirementBlock || isOpen) && (
         <Modal onClose={handleClose} isOpen>
           <ModalOverlay />
           <FormProvider {...formProps}>
-            <ModalContent
-              as={"form"}
-              onSubmit={handleSubmit(onSubmit)}
-              w={"min(1170px, calc(95%))"}
-              maxW={"full"}
-              py={9}
-            >
+            <ModalContent as={"form"} w={"min(1170px, 95%)"} maxW={"full"} py={9}>
               <ModalCloseButton fontSize={"11px"} />
               <ModalHeader display={"flex"} justifyContent={"space-between"} p={0} px={"2.75rem"}>
                 <Text as={"h2"} fontSize={"2xl"}>
@@ -131,6 +125,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                     type={"submit"}
                     isDisabled={isSubmitting || !isValid}
                     isLoading={isSubmitting}
+                    onClick={handleSubmit(onSubmit)}
                   >
                     {t("ui.onlySave")}
                   </Button>

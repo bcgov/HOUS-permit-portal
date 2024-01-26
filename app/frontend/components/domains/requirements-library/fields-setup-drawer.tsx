@@ -29,7 +29,6 @@ interface IProps {
 // TODO: remove when backend for these types is implemented
 const DISABLED_TYPES = [
   ERequirementType.address,
-  ERequirementType.checkbox,
   ERequirementType.select,
   ERequirementType.fileUpload,
   ERequirementType.generalContact,
