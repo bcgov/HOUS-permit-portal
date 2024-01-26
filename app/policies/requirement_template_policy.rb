@@ -3,6 +3,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     user.super_admin? || user.review_manager?
   end
 
+  def create?
+    user.super_admin?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

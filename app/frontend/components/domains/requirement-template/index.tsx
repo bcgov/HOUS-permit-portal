@@ -1,4 +1,4 @@
-import { Box, Center, Container, Flex, GridItemProps, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -13,15 +13,6 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { GridHeaders } from "./grid-header"
-
-const sharedGridItemsStyles: Partial<GridItemProps> = {
-  p: 4,
-  display: "flex",
-  justifyContent: "flex-start",
-  alignItems: "center",
-  role: "cell",
-  color: "text.primary",
-}
 
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore } = useMst()
@@ -51,7 +42,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
               {t("requirementTemplate.index.description")}
             </Text>
           </Box>
-          <RouterLinkButton to="#" variant={"primary"} minWidth="fit-content">
+          <RouterLinkButton to="new" variant={"primary"} minWidth="fit-content">
             {t("requirementTemplate.index.createButton")}
           </RouterLinkButton>
         </Flex>

@@ -24,6 +24,7 @@ const options = {
           organizationHelpText: "Lorem Ipsum Organiation help text",
           passwordLabel: "Password",
           forgotPassword: "Forgot password?",
+          passwordTooWeak: "Password too weak",
           register: "Register for account",
           registerButton: "Register",
           forgotPasswordInstructions:
@@ -258,6 +259,7 @@ const options = {
         admin: {},
         errors: {
           fetchJurisdiction: "Something went wrong fetching jurisdiction",
+          fetchOptions: "Something went wrong fetching options",
         },
         user: {
           fields: {
@@ -317,6 +319,13 @@ const options = {
               "List of all permit templates in the system that’s been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
             createButton: "Create new template",
             seeArchivedButton: "See Archived",
+          },
+          new: {
+            title: "Create New Template",
+            typePrompt: "What kind of building permit is this?",
+            descriptionHelpText:
+              "Provide some context for managers and admin on what kinds of buildings this permit is meant for.",
+            createButton: "Create template",
           },
         },
         site: {

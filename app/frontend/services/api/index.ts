@@ -1,12 +1,15 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
+import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-tempate-screen"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
+import { IRequirementTemplate } from "../../models/requirement-template"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IJurisdictionResponse,
   IJurisdictionUserResponse,
+  IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IResetPasswordResponse,
@@ -18,7 +21,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { IOption, TSearchParams } from "../../types/types"
+import { TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -94,7 +97,15 @@ export class Api {
   }
 
   async fetchLocalityTypeOptions() {
-    return this.client.get<ApiResponse<IOption>>(`/jurisdictions/locality_type_options`)
+    return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
+  }
+
+  async fetchPermitTypeOptions() {
+    return this.client.get<IOptionResponse>(`/permit_classifications/permit_type_options`)
+  }
+
+  async fetchActivityOptions() {
+    return this.client.get<IOptionResponse>(`/permit_classifications/activity_options`)
   }
 
   async createJurisdiction(params) {
@@ -129,5 +140,11 @@ export class Api {
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
+  }
+
+  async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
+      requirementTemplate: params,
+    })
   }
 }

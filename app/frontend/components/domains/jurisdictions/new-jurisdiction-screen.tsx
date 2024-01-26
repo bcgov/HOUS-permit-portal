@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
-import { LocalityRadioGroup } from "../../shared/base/inputs/locality-radio-group"
+import { AsyncRadioGroup } from "../../shared/base/inputs/async-radio-group"
 import { TextFormControl } from "../../shared/form/text-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
@@ -19,7 +19,7 @@ export const NewJurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>()
   const {
-    jurisdictionStore: { createJurisdiction },
+    jurisdictionStore: { createJurisdiction, fetchLocalityTypeOptions },
   } = useMst()
 
   const formMethods = useForm<TCreateJurisdictionFormData>({
@@ -82,7 +82,11 @@ export const NewJurisdictionScreen = observer(() => {
                 >
                   <Flex gap={8}>
                     <Center w="50%">
-                      <LocalityRadioGroup />
+                      <AsyncRadioGroup
+                        label={t("jurisdiction.fields.localityType")}
+                        fetchOptions={fetchLocalityTypeOptions}
+                        fieldName={"localityType"}
+                      />
                     </Center>
                     <Box w="50%">
                       <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} />

@@ -8,14 +8,13 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
-import { IOption, ISort } from "../types/types"
+import { ISort } from "../types/types"
 import { toCamelCase } from "../utils/utility-funcitons"
 
 export const JurisdictionStoreModel = types
   .compose(
     types.model("JurisdictionStore").props({
       jurisdictionMap: types.map(JurisdictionModel),
-      localityTypeOptions: types.array(types.frozen<IOption>()),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
       currentJurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
       sort: types.maybeNull(types.frozen<ISort<EJurisdictionSortFields>>()),
@@ -95,8 +94,7 @@ export const JurisdictionStoreModel = types
     fetchLocalityTypeOptions: flow(function* () {
       // Jurisdiction not found in the map, fetch from API
       const { ok, data: response } = yield self.environment.api.fetchLocalityTypeOptions()
-      self.localityTypeOptions = response.data
-      return ok
+      return response.data
     }),
     setCurrentJurisdiction(jurisdictionId) {
       self.currentJurisdiction = jurisdictionId

@@ -21,6 +21,7 @@ import { PermitApplicationIndexScreen } from "../permit-application"
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
 import { PermitApplicationScreen } from "../permit-application/permit-application-screen"
 import { RequirementTemplatesScreen } from "../requirement-template"
+import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
@@ -72,6 +73,7 @@ const AppRoutes = observer(() => {
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
+      <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
     </>
   )
 

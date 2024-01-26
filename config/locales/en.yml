@@ -118,6 +118,19 @@ en:
       delete_error:
         title: Oops
         message: "Something went wrong deleting the requirement block."
+    requirement_template:
+      create_success:
+        title: ""
+        message: "New template created successfully!"
+      create_error:
+        title: Oops
+        message: "%{error_message}"
+      update_error:
+        title: Oops
+        message: "%{error_message}"
+      delete_error:
+        title: Oops
+        message: "%{error_message}"
     jurisdiction:
       create_error:
         title: Oops
