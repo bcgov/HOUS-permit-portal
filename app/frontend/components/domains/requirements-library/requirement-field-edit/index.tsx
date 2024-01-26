@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Checkbox,
   CheckboxGroup,
   CheckboxProps,
@@ -12,7 +13,6 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  RadioGroup,
   Stack,
   Textarea,
 } from "@chakra-ui/react"
@@ -274,7 +274,7 @@ const requirementsComponentMap = {
 
     const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
 
-    const { fields } = useFieldArray<TFieldValues>(useFieldArrayProps)
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
     return (
       <Stack spacing={4}>
@@ -282,34 +282,38 @@ const requirementsComponentMap = {
           defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
           {...editableLabelProps}
         />
-        <RadioGroup>
-          <Stack>
-            {fields.map((field, idx) => (
-              <HStack key={field.id}>
-                <Box
-                  border={"1px solid"}
-                  borderColor={"border.light"}
-                  bg={"white"}
-                  w={"16px"}
-                  h={"16px"}
-                  borderRadius={"100px"}
-                />
-                <Input
-                  bg={"white"}
-                  size={"sm"}
-                  value={getOptionValue(idx).label}
-                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
-                />
-                <IconButton aria-label={"remove option"} icon={<X />} />
-              </HStack>
-            ))}
-          </Stack>
-        </RadioGroup>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <Stack>
+          {fields.map((field, idx) => (
+            <HStack key={field.id}>
+              <Box
+                border={"1px solid"}
+                borderColor={"border.light"}
+                bg={"white"}
+                w={"16px"}
+                h={"16px"}
+                borderRadius={"100px"}
+              />
+              <Input
+                bg={"white"}
+                size={"sm"}
+                value={getOptionValue(idx).label}
+                onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                w={"150px"}
+              />
+              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
+            </HStack>
+          ))}
+
+          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            {t("requirementsLibrary.modals.addOptionButton")}
+          </Button>
+          <EditableInputWithControls
+            initialHint={t("requirementsLibrary.modals.addHelpText")}
+            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+            {...editableHelperTextProps}
+          />
+        </Stack>
+
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
