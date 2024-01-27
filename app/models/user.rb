@@ -59,10 +59,6 @@ class User < ApplicationRecord
     }
   end
 
-  def name
-    "#{first_name} #{last_name}"
-  end
-
   def self.invitable_roles
     %w[reviewer review_manager]
   end

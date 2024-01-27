@@ -16,7 +16,7 @@ export const JurisdictionStoreModel = types
     types.model("JurisdictionStore").props({
       jurisdictionMap: types.map(JurisdictionModel),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
-      currentJurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+      currentJurisdiction: types.maybeNull(types.reference(JurisdictionModel)),
       sort: types.maybeNull(types.frozen<ISort<EJurisdictionSortFields>>()),
     }),
     createSearchModel<EJurisdictionSortFields>("fetchJurisdictions")
