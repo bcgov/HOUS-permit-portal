@@ -1,4 +1,6 @@
 import {
+  Box,
+  Button,
   Checkbox,
   CheckboxGroup,
   CheckboxProps,
@@ -7,22 +9,22 @@ import {
   FormLabel,
   FormLabelProps,
   HStack,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
-  Radio,
-  RadioGroup,
   Stack,
   Textarea,
 } from "@chakra-ui/react"
-import { CalendarBlank, MapPin } from "@phosphor-icons/react"
+import { CalendarBlank, MapPin, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { Controller, FieldValues } from "react-hook-form"
-import { FieldPath } from "react-hook-form/dist/types"
+import { Controller, FieldValues, useFieldArray } from "react-hook-form"
+import { FieldPath, UseFieldArrayProps } from "react-hook-form/dist/types"
 import { UseControllerProps } from "react-hook-form/dist/types/controller"
 import { useTranslation } from "react-i18next"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { IOption } from "../../../../types/types"
 import {
   EditableInputWithControls,
   IEditableInputWithControlsProps,
@@ -42,8 +44,13 @@ type TRequirementEditProps<TFieldValues extends FieldValues> = {
   checkboxProps: {
     controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
   } & Partial<CheckboxProps>
-  unitSelectProps: {
+  unitSelectProps?: {
     controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
+  }
+  multiOptionProps?: {
+    useFieldArrayProps: UseFieldArrayProps<TFieldValues>
+    onOptionValueChange: (optionIndex: number, optionValue: string) => void
+    getOptionValue: (idx: number) => IOption
   }
 }
 
@@ -179,7 +186,14 @@ const requirementsComponentMap = {
   }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
     const { controlProps: checkboxControlProps, ...restCheckboxProps } = checkboxProps
+
+    if (!unitSelectProps) {
+      import.meta.env.DEV && console.error("unitSelectProps is required for number requi  rement edit")
+      return null
+    }
+
     const { controlProps: unitSelectControlProps } = unitSelectProps
+
     return (
       <Stack spacing={4}>
         <EditableInputWithControls
@@ -218,6 +232,7 @@ const requirementsComponentMap = {
   }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
     const { controlProps, ...restCheckboxProps } = checkboxProps
+
     return (
       <Stack spacing={4}>
         <EditableInputWithControls
@@ -244,23 +259,71 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.radio]: function <TFieldValues>({
-    label,
-    options = defaultOptions,
-    helperText,
+    multiOptionProps,
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
   }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for radio requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>{label || t("requirementsLibrary.requirementTypeLabels.radio")}</FormLabel>
-        <RadioGroup defaultValue="1">
-          <Stack>
-            {options.map((option) => (
-              <Radio value={option}>{option}</Radio>
-            ))}
-          </Stack>
-        </RadioGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <Stack>
+          {fields.map((field, idx) => (
+            <HStack key={field.id}>
+              <Box
+                border={"1px solid"}
+                borderColor={"border.light"}
+                bg={"white"}
+                w={"16px"}
+                h={"16px"}
+                borderRadius={"100px"}
+              />
+              <Input
+                bg={"white"}
+                size={"sm"}
+                value={getOptionValue(idx).label}
+                onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                w={"150px"}
+              />
+              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
+            </HStack>
+          ))}
+
+          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            {t("requirementsLibrary.modals.addOptionButton")}
+          </Button>
+          <EditableInputWithControls
+            initialHint={t("requirementsLibrary.modals.addHelpText")}
+            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+            {...editableHelperTextProps}
+          />
+        </Stack>
+
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
     )
   },
 

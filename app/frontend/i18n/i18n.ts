@@ -188,6 +188,7 @@ const options = {
               conditionalLogic: "Conditional Logic",
               dataValidation: "Data Validation",
             },
+            addOptionButton: "Add another option",
           },
           fields: {
             name: "Name",

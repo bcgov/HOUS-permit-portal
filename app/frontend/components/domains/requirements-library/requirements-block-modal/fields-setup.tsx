@@ -5,6 +5,7 @@ import React, { useState } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { isMultiOptionRequirement } from "../../../../utils/utility-funcitons"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { RequirementFieldDisplay } from "../requirement-field-display"
@@ -25,6 +26,20 @@ export const FieldsSetup = observer(function FieldsSetup() {
   const onUseRequirement = (requirementType: ERequirementType) => {
     append({
       inputType: requirementType,
+      ...(isMultiOptionRequirement(requirementType)
+        ? {
+            inputOptions: {
+              valueOptions: [
+                { value: "Option 1", label: "Option 1" },
+                {
+                  value: "Option 2",
+                  label: "Option 2",
+                },
+                { value: "Option 3", label: "Option 3" },
+              ],
+            },
+          }
+        : {}),
     })
   }
 
@@ -152,6 +167,24 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             }
                           : undefined
                       }
+                      multiOptionProps={{
+                        useFieldArrayProps: {
+                          control,
+                          name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
+                        },
+                        onOptionValueChange: (optionNIndex, optionValue) => {
+                          setValue(
+                            `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
+                            optionValue
+                          )
+                          setValue(
+                            `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
+                            optionValue
+                          )
+                        },
+                        getOptionValue: (idx) =>
+                          watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
+                      }}
                     />
                   </Box>
                   <Box
@@ -175,6 +208,12 @@ export const FieldsSetup = observer(function FieldsSetup() {
                           ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
                           : undefined
                       }
+                      options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(
+                        (option) => option.label
+                      )}
+                      selectProps={{
+                        maxW: "339px",
+                      }}
                     />
                   </Box>
                   <Button

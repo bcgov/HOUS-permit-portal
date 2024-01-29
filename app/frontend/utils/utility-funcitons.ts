@@ -1,3 +1,4 @@
+import { ERequirementType } from "../types/enums"
 import { TDebouncedFunction } from "../types/types"
 
 export function isUUID(str) {
@@ -44,4 +45,9 @@ export function setQueryParam(key: string, value: string) {
     searchParams.set(key, encodeURIComponent(value))
   }
   window.history.replaceState({}, "", `${window.location.pathname}?${searchParams.toString()}`)
+}
+
+export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {
+  const multiOptionRequirementFields = [ERequirementType.radio, ERequirementType.checkbox, ERequirementType.select]
+  return multiOptionRequirementFields.includes(requirementType)
 }

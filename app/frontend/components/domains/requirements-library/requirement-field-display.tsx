@@ -11,6 +11,8 @@ import {
   InputRightElement,
   Radio,
   RadioGroup,
+  Select,
+  SelectProps,
   Stack,
   Textarea,
 } from "@chakra-ui/react"
@@ -30,6 +32,7 @@ type TRequirementProps = {
   options?: string[]
   helperText?: string
   unit?: ENumberUnit | null
+  selectProps?: Partial<SelectProps>
 }
 
 const helperTextStyles = {
@@ -150,6 +153,30 @@ const requirementsComponentMap = {
             ))}
           </Stack>
         </CheckboxGroup>
+        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      </FormControl>
+    )
+  },
+  [ERequirementType.select]({
+    label,
+    helperText,
+    options = defaultOptions,
+    labelProps,
+    selectProps,
+  }: TRequirementProps) {
+    const { t } = useTranslation()
+    return (
+      <FormControl isReadOnly>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.select")}
+        </FormLabel>
+        <Select placeholder={"Select"} color={"greys.grey01"} value={""} isReadOnly {...selectProps}>
+          {options.map((option) => (
+            <option value={option} style={{ width: "100%" }}>
+              {option}
+            </option>
+          ))}
+        </Select>
         {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
       </FormControl>
     )
