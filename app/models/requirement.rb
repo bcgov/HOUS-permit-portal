@@ -75,7 +75,7 @@ class Requirement < ApplicationRecord
     },
     file: {
       type: "file",
-      storage: "s3custom",
+      storage: (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?) ? "s3custom" : nil,
     },
   }
 
