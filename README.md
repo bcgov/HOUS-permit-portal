@@ -37,8 +37,11 @@ minio server --address 127.0.0.1:9001 ~/Documents/whatever-your-folder-for-stora
 
 - Log into minio with the admin/password provided and set up the environment.
 - Set up a bucket (in our example we call it `hous-local`)
+  <img width="1466" alt="minio-create-bucket" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/81c315a5-1bc9-46c7-ac32-202269691276">
 - Set up a user (in our example, we call it `hous-formio-user`)
+  <img width="1458" alt="minio-create-user" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/0bc1864e-f461-4ad7-bfe0-4a76babb311e">
 - Set up a policy (in our example, we call it `formioupload`)
+  <img width="1462" alt="minio-create-policy" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/01890f09-633e-4dff-8e00-24d9fbb4494c">
 
 ```
 {
@@ -70,6 +73,7 @@ minio server --address 127.0.0.1:9001 ~/Documents/whatever-your-folder-for-stora
 ```
 
 - Assign the policy to the user
+  <img width="1464" alt="minio-assign-policy" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/86f6b0c3-8c7f-43f7-afd7-fe2c4dce6dc4">
 - You will need to add the following to your .env files:
 
 ```
