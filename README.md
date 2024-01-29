@@ -24,6 +24,73 @@ Ensure you have the following:
 - Start the server: `rails s`
 - Start the front-end dev server for hot-reloading: `npm run dev`
 
+### Local - File storage setup
+
+- For the local environment, if you want to test the full file upload process, you would want to run a local version of minio to simulate the object storage environment.
+- Install minio:
+
+```
+brew install minio
+
+minio server --address 127.0.0.1:9001 ~/Documents/whatever-your-folder-for-storage-is
+```
+
+- Log into minio with the admin/password provided and set up the environment.
+- Set up a bucket (in our example we call it `hous-local`)
+- Set up a user (in our example, we call it `hous-formio-user`)
+- Set up a policy (in our example, we call it `formioupload`)
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "UploadFile",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::hous-local/*"
+            ]
+        },
+        {
+            "Sid": "crossdomainAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::hous-local/crossdomain.xml"
+            ]
+        }
+    ]
+}
+```
+
+- Assign the policy to the user
+- You will need to add the following to your .env files:
+
+```
+BCGOV_OBJECT_STORAGE_ENDPOINT=http://127.0.0.1:9001(or_whatever_you want)
+BCGOV_OBJECT_STORAGE_BUCKET=your-local-bucket-name
+BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID=your-local-user-access-key
+BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY=your-local-user-secret-access
+BCGOV_OBJECT_STORAGE_REGION=us-east-1
+```
+
+Our folder structure for our bucket is designed as follows:
+
+- :bucket_name/permit-applications/:id/\*
+
+The overall process of a file upload is as follow:
+
+- The front-end form allows you to upload files
+- Upon selecting files, it calls the backend to get a presigned url for upload
+- The files are directly uploaded into the /cache/ folder
+- Upon saving the file, it persists gainst the application as a 'supporting_document'
+
 ## Deployment (DevOps)
 
 TBD
