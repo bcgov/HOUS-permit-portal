@@ -74,7 +74,8 @@ class Requirement < ApplicationRecord
       },
     },
     file: {
-      type: "simplefile",
+      type: "file",
+      storage: "s3custom",
     },
   }
 

@@ -66,6 +66,8 @@ Rails.application.routes.draw do
     end
 
     post "tags/search", to: "tags#index", as: :tags_search
+
+    get "storage/s3" => "storage#s3" #use a storage controller instead of shrine mount since we want api authentication before being able to access
   end
 
   root to: "home#index"

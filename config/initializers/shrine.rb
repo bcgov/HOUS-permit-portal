@@ -8,7 +8,7 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
-if !Rails.env.production? || ENV["ASSET_PRECOMPILATION"].present?
+if Rails.env.test? || ENV["ASSET_PRECOMPILATION"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
   Shrine.storages = {
     cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
     store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
@@ -17,7 +17,7 @@ else
   s3_options = {
     bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
     endpoint: ENV["BCGOV_OBJECT_STORAGE_ENDPOINT"],
-    region: "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable
+    region: ENV["BCGOV_OBJECT_STORAGE_REGION"] || "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable.  For dev testing will need a region.
     access_key_id: ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"],
     secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
     force_path_style: true,
@@ -50,6 +50,6 @@ Shrine.plugin :presign_endpoint,
                   {
                     content_disposition: ContentDisposition.attachment(filename), # set download filename
                     content_type: type, # set content type (required if using DigitalOcean Spaces)
-                    content_length_range: 0..(10 * 1024 * 1024), # limit upload size to 10 MB
+                    content_length_range: 0..(100 * 1024 * 1024), # limit upload size to 100 MB
                   }
                 }
