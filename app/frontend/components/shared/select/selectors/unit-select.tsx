@@ -1,4 +1,4 @@
-import { HStack, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text } from "@chakra-ui/react"
+import { Button, Menu, MenuButton, MenuDivider, MenuItem, MenuList } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -15,6 +15,7 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
   return (
     <Menu>
       <MenuButton
+        as={Button}
         aria-haspopup={"listbox"}
         fontSize={"sm"}
         lineHeight="27px"
@@ -31,14 +32,9 @@ export const UnitSelect = observer(function UnitSelect({ value, onChange }: IPro
         sx={{
           "&:focus": { borderColor: "focus" },
         }}
-        tabIndex={0}
+        rightIcon={<CaretDown />}
       >
-        <HStack justifyContent={"space-between"} w={"full"}>
-          <Text as={"span"} flex={1} w={"full"}>
-            {getUnitDisplayLabel(value)}
-          </Text>
-          <CaretDown />
-        </HStack>
+        {getUnitDisplayLabel(value)}
       </MenuButton>
       <MenuList aria-multiselectable={false} aria-label={"Unit options"} role={"listbox"} w={"200px"}>
         <MenuItem

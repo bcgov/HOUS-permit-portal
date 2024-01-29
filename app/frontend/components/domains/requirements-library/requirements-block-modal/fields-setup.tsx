@@ -20,6 +20,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
     name: "requirementsAttributes",
   })
   const [requirementToEdit, setRequirementToEdit] = useState<string | null>()
+  const [isAnyEditOptionsMenuOpen, setIsAnyEditOptionsMenuOpen] = useState<boolean>(false)
 
   const onUseRequirement = (requirementType: ERequirementType) => {
     append({
@@ -46,6 +47,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
             fontWeight={700}
+            value={watchedDisplayName}
             editableInputProps={{
               ...register("displayName", { required: true }),
               "aria-label": "Edit Display Name",
@@ -88,7 +90,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   pb={5}
                   pos={"relative"}
                   onMouseLeave={() => {
-                    isRequirementInEditMode(field.id) && setRequirementToEdit(null)
+                    isRequirementInEditMode(field.id) && !isAnyEditOptionsMenuOpen && setRequirementToEdit(null)
                   }}
                 >
                   <Box
@@ -197,6 +199,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         top: 0,
                       }}
                       onRemove={() => remove(index)}
+                      emitOpenState={(isOpen) => setIsAnyEditOptionsMenuOpen(isOpen)}
                     />
                   )}
                 </Box>

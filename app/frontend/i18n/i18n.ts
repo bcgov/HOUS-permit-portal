@@ -170,6 +170,9 @@ const options = {
               triggerButton: "Create New Requirement Block",
               title: "New Requirement Block",
             },
+            edit: {
+              title: "Edit Requirement Block",
+            },
             clickToWriteDisplayName: "Click to write display name",
             blockSetupTitle: "Block Setup",
             internalUse: "For internal use only",

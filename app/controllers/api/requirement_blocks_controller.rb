@@ -83,6 +83,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :reviewer_role,
       association_list: [],
       requirements_attributes: [
+        :id,
         :requirement_code,
         :label,
         :input_type,

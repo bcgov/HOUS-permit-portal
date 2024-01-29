@@ -136,12 +136,7 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.multiSelectCheckbox]({
-    label,
-    helperText,
-    options = defaultOptions,
-    labelProps,
-  }: TRequirementProps) {
+  [ERequirementType.checkbox]({ label, helperText, options = defaultOptions, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
       <FormControl isReadOnly>

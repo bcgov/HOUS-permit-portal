@@ -264,7 +264,7 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.multiSelectCheckbox]: function <TFieldValues>({
+  [ERequirementType.checkbox]: function <TFieldValues>({
     label,
     helperText,
     options = defaultOptions,

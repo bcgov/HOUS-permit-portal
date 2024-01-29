@@ -18,6 +18,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
+import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -41,7 +42,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
   } = requirementBlockStore
   const { t } = useTranslation()
 
-  useSearch(requirementBlockStore)
+  useSearch(requirementBlockStore as ISearch)
 
   return (
     <Container maxW="container.lg" p={8} as="main">
@@ -97,9 +98,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
                   </SearchGridItem>
                   <SearchGridItem fontSize={"sm"}>{format(requirementBlock.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
                   <SearchGridItem justifyContent={"center"}>
-                    <Button variant={"link"} textDecoration={"underline"}>
-                      {t("ui.edit")}
-                    </Button>
+                    <RequirementsBlockModal requirementBlock={requirementBlock} />
                   </SearchGridItem>
                 </Box>
               )
