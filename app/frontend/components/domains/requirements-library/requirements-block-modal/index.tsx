@@ -109,7 +109,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       </Button>
 
       {/*this is so that the modal children unmount on close to reset their states*/}
-      {(!requirementBlock || isOpen) && (
+      {isOpen && (
         <Modal onClose={handleClose} isOpen>
           <ModalOverlay />
           <FormProvider {...formProps}>
