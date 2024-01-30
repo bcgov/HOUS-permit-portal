@@ -1,7 +1,13 @@
 class PermitApplicationPolicy < ApplicationPolicy
-  def create
+  def create?
     user.submitter?
   end
+
+  def update?
+    record.submitter == user
+  end
+
+  #we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
     def resolve

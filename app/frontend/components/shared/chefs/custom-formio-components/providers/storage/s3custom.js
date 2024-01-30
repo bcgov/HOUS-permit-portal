@@ -1,6 +1,6 @@
 /* tslint:disable */
 const s3custom = function Provider(formio) {
-  const requestPresignedUrl = (file, fileName) => {
+  const requestPresignedUrl = (file, fileName, url) => {
     return new Promise((resolve, reject) => {
       const params = new URLSearchParams({
         filename: fileName,
@@ -9,7 +9,7 @@ const s3custom = function Provider(formio) {
       })
 
       const xhr = new XMLHttpRequest()
-      xhr.open("GET", `/api/storage/s3?${params.toString()}`, true)
+      xhr.open("GET", url == "undefined" ? `/api/storage/s3?${params.toString()}` : `${url}?${params.toString()}`, true)
       xhr.setRequestHeader("Content-Type", "application/json")
       xhr.setRequestHeader("Accept", "application/json")
 
@@ -17,6 +17,7 @@ const s3custom = function Provider(formio) {
         if (this.readyState === XMLHttpRequest.DONE) {
           if (this.status === 200) {
             const response = JSON.parse(this.responseText)
+            // console.log("***get signed url request", response)
             resolve(response)
           } else {
             reject("Failed to get pre-signed URL")
@@ -35,7 +36,8 @@ const s3custom = function Provider(formio) {
     uploadFile(file, fileName, dir, progressCallback, url, options, fileKey, groupPermissions, groupId, abortCallback) {
       return new Promise((resolve, reject) => {
         // Step 1: Request a pre-signed URL from your Shrine.rb backend
-        requestPresignedUrl(file, fileName)
+        // console.log("***upload call", { fileName, dir, url, fileKey, options })
+        requestPresignedUrl(file, fileName, url)
           .then((presignedData) => {
             // Step 2: Upload the file directly to the storage service using the pre-signed URL
             const xhr = new XMLHttpRequest()
@@ -56,26 +58,42 @@ const s3custom = function Provider(formio) {
 
             xhr.onload = () => {
               if (xhr.status === 204) {
+                //the file info needs to mathc what rails needs
+                // console.log("*** success - upate with info", presignedData)
                 resolve({
-                  storage: "s3custom",
-                  name: file.name,
+                  storage: "cache",
+                  filename: fileName,
                   size: file.size,
                   type: file.type,
-                  fileInfo: {
-                    url: presignedData.url,
+                  groupPermissions,
+                  groupId,
+                  id: (presignedData?.fields?.id || presignedData?.fields?.key).replace(/^cache\//, ""),
+                  key: presignedData?.fields?.key,
+                  url: presignedData?.fields?.url,
+                  metadata: {
+                    filename: file.name,
+                    size: file.size,
+                    mime_type: file.type,
+                    content_disposition: presignedData?.fields?.["Content-Disposition"],
                   },
                 })
               } else if (xhr.status >= 200 && xhr.status < 300) {
                 // Step 3: Resolve the promise with the file's URL on the storage service
                 resolve({
-                  storage: "s3custom",
-                  name: file.name,
+                  storage: "cache",
+                  filename: fileName,
                   size: file.size,
                   type: file.type,
-                  bucket: xhr.response.bucket,
-                  url: xhr.response.url,
-                  fileInfo: {
-                    url: xhr.response.url,
+                  groupPermissions,
+                  groupId,
+                  id: (xhr.response?.fields?.id || xhr.response?.fields?.key).replace(/^cache\//, ""),
+                  key: xhr.response?.fields?.key,
+                  url: xhr.response?.fields?.url,
+                  metadata: {
+                    filename: fileName,
+                    size: file.size,
+                    mime_type: file.type,
+                    content_disposition: xhr.response?.fields?.["Content-Disposition"],
                   },
                 })
               } else {
