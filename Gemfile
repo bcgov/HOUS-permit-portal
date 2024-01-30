@@ -56,6 +56,7 @@ gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
+gem 'faraday', '~> 2.9.0'
 gem 'discard', '~> 1.2'
 
 group :development, :test do

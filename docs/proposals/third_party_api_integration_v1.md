@@ -8,14 +8,15 @@ permit applications** and which we can serve within our timeframe for the Beta r
 change based on requirements changing.
 
 In our initial proposal we are imagining a few use cases that current jurisdictions may have:
-1) The jurisdiction is using a digital intake with a separate process for non-digital intake (ab intake clerk or similar role would do data entry).  For the digital intake, users would create an account and upload documents.
-2) The jurisidction utilizes a backend permit system, but no digital front-end - typically involving a combination of e-mails / ftp (a intake clerk or similar role would do data entry into the digital backend), with a similar process for non-digital intake (a intake clerk or similar role would do data entry).  Please see the integration path without an API here.
 
+1. The jurisdiction is using a digital intake with a separate process for non-digital intake (ab intake clerk or similar role would do data entry). For the digital intake, users would create an account and upload documents.
+2. The jurisidction utilizes a backend permit system, but no digital front-end - typically involving a combination of e-mails / ftp (a intake clerk or similar role would do data entry into the digital backend), with a similar process for non-digital intake (a intake clerk or similar role would do data entry). Please see the integration path without an API here.
 
 ## Integration Path without API
-This path may be adopted by jurisdictions that do not have integration capability OR be in a transition phase for jurisdictions that are looking to minimize the change management until they have time to build out integration capabilities.  
 
-In general, upon submission, we would e-mail the jursidiction's intake contact team directly with a link to open / download the application.  They must be logged in / authorized to see the application.
+This path may be adopted by jurisdictions that do not have integration capability OR be in a transition phase for jurisdictions that are looking to minimize the change management until they have time to build out integration capabilities.
+
+In general, upon submission, we would e-mail the jursidiction's intake contact team directly with a link to open / download the application. They must be logged in / authorized to see the application.
 
 In the case current jurisdictions are sending an ftp link to a contact and then receiving files to kick of the data intake process, this should be a good alternative plug-in solution.
 

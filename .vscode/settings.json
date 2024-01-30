@@ -4,6 +4,6 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "workbench.editor.labelFormat": "short",
   "[ruby]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "Shopify.ruby-lsp"
   }
 }
