@@ -35,7 +35,7 @@ export const UserStoreModel = types
   }))
   .actions((self) => ({
     setUsers(users) {
-      R.map((u) => self.usersMap.put(u), users)
+      R.forEach((u) => self.usersMap.put(u), users)
     },
     removeUser(removedUser) {
       self.usersMap.delete(removedUser.id)
