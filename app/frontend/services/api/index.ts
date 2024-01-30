@@ -142,8 +142,13 @@ export class Api {
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
   }
+
   async fetchPermitApplications() {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
+  }
+
+  async updatePermitApplication(id, params) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, params)
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {

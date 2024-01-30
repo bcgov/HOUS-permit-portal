@@ -28,6 +28,14 @@
 #       enabled: "ON"
 
 en:
+  activerecord:
+    errors:
+      models:
+        supporting_document:
+          attributes:
+            file:
+              max_size: "must not be larger than %{max_size} bytes"
+              not_valid_file_type: "must be a pdf, jpg, or png"
   arbitrary_message_construct:
     devise:
       failure:
@@ -151,6 +159,9 @@ en:
         title: ""
         message: "New jurisdiction created successfully!"
     misc:
+      user_not_authorized_error:
+        title: "Unauthorized"
+        message: "The user is not authorized to do this action"
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found

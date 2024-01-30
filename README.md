@@ -48,11 +48,24 @@ minio server --address 127.0.0.1:9001 ~/Documents/whatever-your-folder-for-stora
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Sid": "ListBucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::hous-local"
+            ]
+        },
+        {
             "Sid": "UploadFile",
             "Effect": "Allow",
             "Action": [
+                "s3:GetObject",
+                "s3:ListMultipartUploadParts",
                 "s3:PutObject",
-                "s3:GetObject"
+                "s3:AbortMultipartUpload",
+                "s3:DeleteObject"
             ],
             "Resource": [
                 "arn:aws:s3:::hous-local/*"
@@ -71,6 +84,8 @@ minio server --address 127.0.0.1:9001 ~/Documents/whatever-your-folder-for-stora
     ]
 }
 ```
+
+- note that "s3:PutObjectAcl" is ignored at the moment since we are at the root bucket, but we may need it later
 
 - Assign the policy to the user
   <img width="1464" alt="minio-assign-policy" src="https://github.com/bcgov/HOUS-permit-portal/assets/607956/86f6b0c3-8c7f-43f7-afd7-fe2c4dce6dc4">

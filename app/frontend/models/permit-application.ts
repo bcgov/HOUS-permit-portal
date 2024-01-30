@@ -1,4 +1,6 @@
-import { Instance, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
+import { withEnvironment } from "../lib/with-environment"
+import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
@@ -21,6 +23,8 @@ export const PermitApplicationModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
   })
+  .extend(withEnvironment())
+  .extend(withRootStore())
   .views((self) => ({
     get jurisdictionName() {
       return self.jurisdiction.name
@@ -30,7 +34,13 @@ export const PermitApplicationModel = types
     },
   }))
   .actions((self) => ({
-    // Define any actions here if needed
+    update: flow(function* (params) {
+      const response = yield self.environment.api.updatePermitApplication(self.id, params)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+      }
+    }),
   }))
 
 export interface IPermitApplication extends Instance<typeof PermitApplicationModel> {}
