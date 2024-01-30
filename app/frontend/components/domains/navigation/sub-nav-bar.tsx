@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, Container, Flex, Text } from "@chakra-ui/react"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Container, Flex, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -67,12 +67,13 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
   }, [path, rootStore.jurisdictionStore.currentJurisdiction])
 
   return (
-    <Breadcrumb>
+    <Breadcrumb spacing={2} separator="/" mt={4}>
       <BreadcrumbItem>
-        <RouterLinkButton variant="link" to="/" textTransform="capitalize">
+        <BreadcrumbLink as={RouterLinkButton} to="/" textTransform="capitalize" variant="link">
           {t("site.home")}
-        </RouterLinkButton>
+        </BreadcrumbLink>
       </BreadcrumbItem>
+
       {breadcrumbs.map((breadcrumb, index) => {
         const finalSegment = index == breadcrumbs.length - 1
         return (
@@ -80,9 +81,9 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
             {finalSegment ? (
               <Text fontWeight="bold">{breadcrumb.title}</Text>
             ) : (
-              <RouterLinkButton variant="link" to={breadcrumb.href}>
+              <BreadcrumbLink as={RouterLinkButton} to={breadcrumb.href} variant="link">
                 {breadcrumb.title}
-              </RouterLinkButton>
+              </BreadcrumbLink>
             )}
           </BreadcrumbItem>
         )

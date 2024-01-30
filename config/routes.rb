@@ -57,6 +57,10 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[index create show update]
 
     resource :profile, only: [:update], controller: "users"
+    resources :users, only: [:destroy] do
+      patch "restore", on: :member
+    end
+
     post "tags/search", to: "tags#index", as: :tags_search
   end
 

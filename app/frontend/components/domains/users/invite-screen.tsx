@@ -1,7 +1,7 @@
 import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
 import { PaperPlane, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -40,7 +40,15 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
     },
   })
 
-  const { handleSubmit, formState, control } = formMethods
+  const { handleSubmit, formState, control, reset } = formMethods
+
+  // Update the form's default values when currentJurisdiction.id changes
+  // This happens when navigating from the jurisdiciton creation
+  useEffect(() => {
+    reset({
+      users: [defaultUserValues],
+    })
+  }, [currentJurisdiction?.id])
 
   const { fields, append, remove } = useFieldArray({
     control,

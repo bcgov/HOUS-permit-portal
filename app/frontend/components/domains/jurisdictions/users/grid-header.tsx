@@ -2,24 +2,21 @@ import { Box, Flex, GridItem, Text, styled } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
+import { useMst } from "../../../../setup/root"
 import { EUserSortFields } from "../../../../types/enums"
-import { ErrorScreen } from "../../../shared/base/error-screen"
-import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { SearchInput } from "../../../shared/base/search-input"
 import { SortIcon } from "../../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { currentJurisdiction, error } = useJurisdiction()
+  const { jurisdictionStore } = useMst()
+  const { currentJurisdiction } = jurisdictionStore
+  const { userStore } = useMst()
 
-  const sort = currentJurisdiction?.sort
   const getSortColumnHeader = currentJurisdiction?.getUserSortColumnHeader
-  const toggleSort = currentJurisdiction?.toggleSort
+
+  const { toggleSort, sort } = userStore
 
   const { t } = useTranslation()
-
-  if (error) return <ErrorScreen />
-  if (!currentJurisdiction) return <LoadingScreen />
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
@@ -35,7 +32,7 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
             {t("user.index.tableHeading")}
           </Text>
-          <SearchInput searchModel={currentJurisdiction} />
+          <SearchInput searchModel={userStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>

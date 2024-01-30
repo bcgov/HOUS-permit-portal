@@ -108,6 +108,18 @@ en:
       update_password_error:
         title: Oops
         message: "The provided current password is incorrect."
+      destroy_success:
+        title: ""
+        message: The user was archived successfully
+      destroy_error:
+        title: "Oops"
+        message: "There was an error archiving the user."
+      restore_success:
+        title: ""
+        message: The user was restored successfully
+      restore_error:
+        title: "Oops"
+        message: "There was an error restoring the user."
     requirement_block:
       create_error:
         title: Oops

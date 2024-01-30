@@ -6,7 +6,7 @@ export const SessionStoreModel = types
   .model("SessionStoreModel")
   .props({
     loggedIn: types.optional(types.boolean, false),
-    isValidating: types.optional(types.boolean, false),
+    isValidating: types.optional(types.boolean, true),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

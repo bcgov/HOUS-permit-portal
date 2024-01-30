@@ -16,7 +16,7 @@ export const JurisdictionStoreModel = types
     types.model("JurisdictionStore").props({
       jurisdictionMap: types.map(JurisdictionModel),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
-      currentJurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+      currentJurisdiction: types.maybeNull(types.reference(JurisdictionModel)),
       sort: types.maybeNull(types.frozen<ISort<EJurisdictionSortFields>>()),
     }),
     createSearchModel<EJurisdictionSortFields>("fetchJurisdictions")
@@ -73,9 +73,9 @@ export const JurisdictionStoreModel = types
         R.map((jurisdiction) => self.jurisdictionMap.put(jurisdiction), response.data.data)
         self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
         self.currentPage = opts?.page ?? self.currentPage
+        self.countPerPage = opts?.countPerPage ?? self.countPerPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
-        self.countPerPage = opts?.countPerPage ?? self.countPerPage
       }
       return response.ok
     }),

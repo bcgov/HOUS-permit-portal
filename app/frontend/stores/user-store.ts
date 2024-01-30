@@ -1,19 +1,23 @@
 import { values } from "mobx"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
+import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
+import { EUserSortFields } from "../types/enums"
 
 export const UserStoreModel = types
-  .model("UserStoreModel")
-  .props({
-    usersMap: types.map(UserModel),
-    currentUser: types.maybeNull(types.safeReference(UserModel)),
-    invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
-  })
+  .compose(
+    types.model("UserStoreModel").props({
+      usersMap: types.map(UserModel),
+      currentUser: types.maybeNull(types.safeReference(UserModel)),
+      invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
+    }),
+    createSearchModel<EUserSortFields>("fetchUsers")
+  )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
@@ -63,8 +67,37 @@ export const UserStoreModel = types
       }
     }),
     updateProfile: flow(function* (formData) {
-      const response = yield self.environment.api.updateProfile(formData)
-      return response.data
+      const { ok, data: response } = yield self.environment.api.updateProfile(formData)
+      self.mergeUpdate(response.data, "usersMap")
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    fetchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+      if (opts?.reset) {
+        self.resetPages()
+      }
+
+      const response = yield self.environment.api.fetchJurisdictionUsers(
+        self.rootStore.jurisdictionStore.currentJurisdiction.id,
+        {
+          query: self.query,
+          sort: self.sort,
+          page: opts?.page ?? self.currentPage,
+          perPage: opts?.countPerPage ?? self.countPerPage,
+          showArchived: self.showArchived,
+        }
+      )
+
+      if (response.ok) {
+        self.setUsers(response.data.data)
+        self.rootStore.jurisdictionStore.currentJurisdiction.setTableUsers(response.data.data)
+        self.currentPage = opts?.page ?? self.currentPage
+        self.totalPages = response.data.meta.totalPages
+        self.totalCount = response.data.meta.totalCount
+        self.countPerPage = opts?.countPerPage ?? self.countPerPage
+      }
+      return response.ok
     }),
   }))
 

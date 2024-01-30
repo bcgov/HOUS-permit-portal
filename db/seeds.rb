@@ -55,6 +55,8 @@ jurisdictions = Jurisdiction.all
   end
 end
 
+User.reindex
+
 PermitClassificationSeeder.seed
 activity1 = Activity.find_by_code("new_construction")
 activity2 = Activity.find_by_code("demolition")
@@ -123,5 +125,3 @@ RequirementTemplate.reindex
 # Requrements from seeder are idempotent
 # Requirments block will get created from requiremetms templates
 RequirementsFromXlsxSeeder.seed
-
-User.reindex

@@ -66,7 +66,13 @@ RSpec.configure do |config|
   Devise::Mailer.delivery_method = :test
   Devise::Mailer.perform_deliveries = false
 
+  config.include Devise::Test::ControllerHelpers, type: :controller
   config.include FactoryBot::Syntax::Methods
+
+  def json_response
+    JSON.parse(response.body)
+  end
+
   Shoulda::Matchers.configure do |config|
     config.integrate do |with|
       with.test_framework :rspec
