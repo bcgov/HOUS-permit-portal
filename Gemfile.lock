@@ -461,6 +461,7 @@ DEPENDENCIES
   factory_bot (~> 6.4)
   factory_bot_rails (~> 6.4.2)
   faker (~> 3.2.2)
+  faraday (~> 2.9.0)
   image_processing (~> 1.12.2)
   kaminari (~> 1.2.2)
   letter_opener (~> 1.8)
