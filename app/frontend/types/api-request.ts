@@ -1,7 +1,7 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
 import { IOption } from "./types"
 
-export interface IRequirementAttributes {
+export interface IRequirementsAttribute {
   id?: string
   label?: string
   inputType?: ERequirementType
@@ -19,7 +19,7 @@ export interface IRequirementBlockParams {
   displayDescription: string
   description?: string
   associationList?: string[]
-  requirementsAttributes: IRequirementAttributes[]
+  requirementsAttributes: IRequirementsAttribute[]
 }
 
 export interface ITagSearchParams {

@@ -16,15 +16,16 @@ export const useJurisdiction = () => {
   useEffect(() => {
     ;(async () => {
       try {
+        setCurrentJurisdiction(null)
         if (isUUID(jurisdictionId)) {
-          const j = await fetchJurisdiction(jurisdictionId)
-          setCurrentJurisdiction(j)
+          await fetchJurisdiction(jurisdictionId)
+          setCurrentJurisdiction(jurisdictionId)
         }
       } catch (e) {
         setError(e instanceof Error ? e : new Error(t("errors.fetchJurisdiction")))
       }
     })()
-  }, [jurisdictionId])
+  }, [window.location.pathname])
 
   return { currentJurisdiction, error }
 }

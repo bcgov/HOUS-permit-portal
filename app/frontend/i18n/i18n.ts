@@ -106,6 +106,11 @@ const options = {
           add: "Add",
           edit: "Edit",
           optional: "(optional)",
+          archive: "Remove and Archive",
+          restore: "Restore",
+          seeArchivedButton: "See Archived",
+          seeUnarchivedButton: "See Unarchived",
+          never: "never",
         },
         jurisdiction: {
           new: {
@@ -159,7 +164,6 @@ const options = {
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
             tableHeading: "Requirement Blocks",
             createButton: "Create New Requirement Block",
-            seeArchivedButton: "See Archived",
           },
           fieldsDrawer: {
             formFields: "Form Fields",
@@ -167,6 +171,8 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            displayDescriptionLabel: "Instruction/Description (public)",
+            addDescriptionTrigger: "Add instructions/description for this block",
             create: {
               triggerButton: "Create New Requirement Block",
               title: "New Requirement Block",
@@ -277,6 +283,7 @@ const options = {
             tableHeading: "User Accounts",
             inviteButton: "Invite users",
           },
+          changeRole: "Change Role",
           addUser: "Add more emails",
           invite: "Invite",
           firstName: "First Name",

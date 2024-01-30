@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EUserRoles } from "../types/enums"
@@ -17,6 +17,8 @@ export const UserModel = types
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     createdAt: types.Date,
+    discardedAt: types.maybeNull(types.Date),
+    lastSignInAt: types.maybeNull(types.Date),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -36,10 +38,22 @@ export const UserModel = types
     get isSubmitter() {
       return self.role == EUserRoles.submitter
     },
+    get isDiscarded() {
+      return self.discardedAt !== null
+    },
     get name() {
       return `${self.firstName} ${self.lastName}`
     },
   }))
-  .actions((self) => ({}))
+  .actions((self) => ({
+    destroy: flow(function* () {
+      const response = yield self.environment.api.destroyUser(self.id)
+      return response.ok
+    }),
+    restore: flow(function* () {
+      const response = yield self.environment.api.restoreUser(self.id)
+      return response.ok
+    }),
+  }))
 
 export interface IUser extends Instance<typeof UserModel> {}

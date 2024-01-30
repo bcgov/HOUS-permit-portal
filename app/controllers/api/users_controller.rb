@@ -1,4 +1,6 @@
 class Api::UsersController < Api::ApplicationController
+  before_action :find_user, only: %i[destroy restore]
+
   def index
     perform_search
 
@@ -36,10 +38,32 @@ class Api::UsersController < Api::ApplicationController
     render_error Constants::Error::USER_UPDATE_ERROR, "user.update_error", {}
   end
 
+  def destroy
+    authorize @user
+    if @user.discard
+      render_success(@user, "user.destroy_success")
+    else
+      render_error Constants::Error::USER_DESTROY_ERROR, "user.destroy_error", {}
+    end
+  end
+
+  def restore
+    authorize @user
+    if @user.update(discarded_at: nil)
+      render_success(@user, "user.restore_success")
+    else
+      render_error Constants::Error::USER_RESTORE_ERROR, "user.restore_error", {}
+    end
+  end
+
   private
 
   def password_params
     params.require(:user).permit(:current_password, :password)
+  end
+
+  def find_user
+    @user = User.find(params[:id])
   end
 
   def user_params

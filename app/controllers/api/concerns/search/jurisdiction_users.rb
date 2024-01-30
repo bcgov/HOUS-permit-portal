@@ -7,6 +7,8 @@ module Api::Concerns::Search::JurisdictionUsers
         query,
         where: {
           jurisdiction_id: @jurisdiction&.id,
+          discarded: discarded,
+          role: current_user.super_admin? ? ["review_manager"] : (User.roles.keys - %w[super_admin submitter]),
         },
         order: order,
         match: :word_start,
@@ -18,11 +20,15 @@ module Api::Concerns::Search::JurisdictionUsers
   private
 
   def user_search_params
-    params.permit(:query, :page, :per_page, sort: %i[field direction])
+    params.permit(:query, :show_archived, :page, :per_page, sort: %i[field direction])
   end
 
   def query
     user_search_params[:query].present? ? user_search_params[:query] : "*"
+  end
+
+  def discarded
+    user_search_params[:show_archived].present?
   end
 
   def order

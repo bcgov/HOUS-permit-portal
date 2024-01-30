@@ -1,13 +1,28 @@
-# Third Party API Integration - V1
+# Integration - V1
 
 ## Introduction
 
-This is a rough document which puts forward a proposal of how third-parties might integrate into our system to retrieve
+This is a rough document which puts forward a proposal of how local jurisdictions might integrate into our system to retrieve
 data related to permit applications. Note that this proposal is for a simplified system to only expose **completed
 permit applications** and which we can serve within our timeframe for the Beta release on March 2024. This is subject to
-change based on requirements changing
+change based on requirements changing.
 
-## Authentication
+In our initial proposal we are imagining a few use cases that current jurisdictions may have:
+
+1. The jurisdiction is using a digital intake with a separate process for non-digital intake (ab intake clerk or similar role would do data entry). For the digital intake, users would create an account and upload documents.
+2. The jurisidction utilizes a backend permit system, but no digital front-end - typically involving a combination of e-mails / ftp (a intake clerk or similar role would do data entry into the digital backend), with a similar process for non-digital intake (a intake clerk or similar role would do data entry). Please see the integration path without an API here.
+
+## Integration Path without API
+
+This path may be adopted by jurisdictions that do not have integration capability OR be in a transition phase for jurisdictions that are looking to minimize the change management until they have time to build out integration capabilities.
+
+In general, upon submission, we would e-mail the jursidiction's intake contact team directly with a link to open / download the application. They must be logged in / authorized to see the application.
+
+In the case current jurisdictions are sending an ftp link to a contact and then receiving files to kick of the data intake process, this should be a good alternative plug-in solution.
+
+## API Integration
+
+### Authentication
 
 - Authentication can be done by generated API keys/ access tokens which can be added to Auth Header
   - They will be scoped to a jurisdiction
@@ -16,7 +31,9 @@ change based on requirements changing
   - It should be possible to blacklist generated API keys
   - Initial version of API key won't have an expiration date from user facing side, but the backend should have it
 
-## API key generation suggested flow
+### API key generation suggested flow (under design discussion)
+
+If you have an opinion on what would work for you as a vendor to integrate with us, please let us know.
 
 #### Option 1 (Simpler for V1)
 

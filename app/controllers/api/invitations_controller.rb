@@ -19,12 +19,14 @@ class Api::InvitationsController < Devise::InvitationsController
 
   def update
     raw_invitation_token = update_resource_params["invitation_token"]
-    self.resource = accept_resource
+    user = User.find_by_invitation_token(raw_invitation_token, true)
+    user.update(user_params)
+
+    self.resource = accept_resource if user&.errors.empty?
     invitation_accepted = resource.errors.empty?
 
     yield resource if block_given?
 
-    resource.update(user_params)
     if invitation_accepted
       resource.after_database_authentication
 

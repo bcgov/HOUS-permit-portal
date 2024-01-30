@@ -131,6 +131,14 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
   }
 
+  async destroyUser(id) {
+    return this.client.delete<ApiResponse<IUser>>(`/users/${id}`)
+  }
+
+  async restoreUser(id) {
+    return this.client.patch<ApiResponse<IUser>>(`/users/${id}/restore`)
+  }
+
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
   }

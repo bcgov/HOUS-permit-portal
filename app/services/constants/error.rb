@@ -13,6 +13,8 @@ module Constants
     USER_RESEND_INVITE_ERROR = e("user_resend_invite_error", "Error re-sending invitation")
     USER_LOGIN_ERROR = e("invalid_login_error", "Invalid username or password")
     USER_UPDATE_ERROR = e("user_update_error", "Could not update user")
+    USER_DESTROY_ERROR = e("user_destroy_error", "Could not discard user")
+    USER_RESTORE_ERROR = e("user_restore_error", "Could not restore user")
     REQUIREMENT_BLOCK_CREATE_ERROR = e("requirement_block_create_error", "Error creating requirement block")
     JURISDICTION_CREATE_ERROR = e("jurisdiction_create_error", "Error creating jurisdiction")
     REQUIREMENT_BLOCK_UPDATE_ERROR = e("requirement_block_update_error", "Error updating requirement block")
