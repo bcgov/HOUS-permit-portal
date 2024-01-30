@@ -79,13 +79,13 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
               <Button
                 variant="primary"
                 type="submit"
-                isDisabled={!formState.isValid}
+                isDisabled={!formState.isValid || isSubmitting}
                 isLoading={isSubmitting}
                 loadingText={t("ui.loading")}
               >
                 {t("requirementTemplate.new.createButton")}
               </Button>
-              <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
+              <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
                 {t("ui.cancel")}
               </Button>
             </Flex>

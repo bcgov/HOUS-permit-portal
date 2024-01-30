@@ -85,7 +85,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal()
                   >
                     {t("ui.onlySave")}
                   </Button>
-                  <Button variant={"secondary"} onClick={handleClose}>
+                  <Button variant={"secondary"} onClick={handleClose} isDisabled={isSubmitting}>
                     {t("ui.cancel")}
                   </Button>
                 </HStack>
