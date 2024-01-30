@@ -2,11 +2,13 @@ import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
-import { useFieldArray, useFormContext } from "react-hook-form"
+import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IRequirementsAttribute } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { isMultiOptionRequirement } from "../../../../utils/utility-funcitons"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
+import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { RequirementFieldDisplay } from "../requirement-field-display"
 import { RequirementFieldEdit } from "../requirement-field-edit"
@@ -71,7 +73,25 @@ export const FieldsSetup = observer(function FieldsSetup() {
             aria-label={"Edit Display Name"}
           />
         </Flex>
-        <Box py={8}>
+        <Box pb={8}>
+          <Box px={3} mt={4} mb={3}>
+            <Controller
+              render={({ field: { value, onChange } }) => (
+                <EditorWithPreview
+                  label={t("requirementsLibrary.modals.displayDescriptionLabel")}
+                  htmlValue={value}
+                  onChange={onChange}
+                  initialTriggerText={t("requirementsLibrary.modals.addDescriptionTrigger")}
+                  onRemove={(setEditMode) => {
+                    setEditMode(false)
+                    onChange("")
+                  }}
+                />
+              )}
+              name={"displayDescription"}
+              control={control}
+            />
+          </Box>
           {!hasFields && (
             <Flex w={"full"} justifyContent={"space-between"} px={6}>
               <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
@@ -81,7 +101,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
             {fields.map((field, index) => {
               const watchedHint = watch(`requirementsAttributes.${index}.hint`)
-              const requirementType = field.inputType
+              const requirementType = (field as IRequirementsAttribute).inputType
               return (
                 <Box
                   key={field.id}
@@ -101,7 +121,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   }}
                   tabIndex={0}
                   px={3}
-                  pt={1}
+                  pt={index !== 0 ? 1 : 0}
                   pb={5}
                   pos={"relative"}
                   onMouseLeave={() => {

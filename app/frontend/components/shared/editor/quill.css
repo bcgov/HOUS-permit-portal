@@ -1,0 +1,33 @@
+/* Update version if react-quill or quill-mention packages are upgraded */
+@import url("https://unpkg.com/react-quill@2.0.0/dist/quill.snow.css");
+@import url("https://unpkg.com/react-quill@2.0.0/dist/quill.bubble.css");
+@import url("https://unpkg.com/quill-mention@3.1.0/dist/quill.mention.css");
+
+/* override default quill styles*/
+.quill .ql-container.ql-snow {
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  border: 1px solid var(--chakra-colors-border-light);
+  display: flex;
+  flex-direction: column;
+}
+
+.ql-editor {
+  flex-grow: 1;
+}
+
+.quill .ql-toolbar.ql-snow {
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  border: 1px solid var(--chakra-colors-border-light);
+}
+
+.quill .ql-container {
+  font-size: 1rem;
+}
+
+/*// this is to overrides placeholder styles*/
+
+.ql-editor ul {
+  padding-left: 0;
+}

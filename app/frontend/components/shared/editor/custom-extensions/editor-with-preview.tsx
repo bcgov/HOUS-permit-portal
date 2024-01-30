@@ -1,0 +1,105 @@
+import { Box, BoxProps, Button, ButtonProps, Text } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
+import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { isQuillEmpty } from "../../../../utils/utility-funcitons"
+import { Editor } from "../editor"
+
+type TProps = {
+  label?: string
+  htmlValue: string
+  onChange?: (htmlValue: string) => void
+  containerProps?: BoxProps
+  onRemove?: (setEditMode: (editMode: boolean) => void) => void
+} & (
+  | { initialTriggerText: string; renderInitialTrigger?: never }
+  | {
+      initialTriggerText?: never
+      renderInitialTrigger: (buttonProps: ButtonProps) => JSX.Element
+    }
+  | { initialTriggerText?: never; renderInitialTrigger?: never }
+)
+
+export const EditorWithPreview = observer(function EditorWithPreview({
+  label,
+  htmlValue = "",
+  onChange,
+  containerProps,
+  renderInitialTrigger,
+  initialTriggerText,
+  onRemove,
+}: TProps) {
+  const isEditorEmpty = isQuillEmpty(htmlValue)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const { t } = useTranslation()
+
+  const mainContainerProps: BoxProps = {
+    pos: "relative",
+    _hover: {
+      bg: "theme.blueLight",
+    },
+    bg: isEditMode ? "theme.blueLight" : undefined,
+    px: 4,
+    py: 3,
+    borderRadius: "sm",
+    sx: {
+      ".quill": {
+        bg: isEditMode ? "white" : undefined,
+      },
+      ".quill .ql-editor": {
+        px: isEditMode ? undefined : 0,
+      },
+    },
+    w: "full",
+    minH: "1rem",
+    cursor: !isEditMode ? "pointer" : undefined,
+    onClick: () => setIsEditMode(true),
+    onMouseLeave: () => setIsEditMode(false),
+    ...containerProps,
+  }
+
+  if (!isEditMode && isEditorEmpty && (initialTriggerText || renderInitialTrigger)) {
+    return (
+      <Box {...mainContainerProps}>
+        {initialTriggerText ? (
+          <Button variant={"link"} textDecoration={"underline"}>
+            {initialTriggerText}
+          </Button>
+        ) : (
+          renderInitialTrigger({ onClick: () => setIsEditMode(true) })
+        )}
+      </Box>
+    )
+  }
+
+  return (
+    <Box {...mainContainerProps}>
+      {isEditMode && (
+        <Text color={"text.primary"} mb={1}>
+          {label}
+        </Text>
+      )}
+      {onRemove && isEditMode && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove(setIsEditMode)
+          }}
+          variant={"link"}
+          textDecoration={"underline"}
+          fontSize={"sm"}
+          pos={"absolute"}
+          top={"5px"}
+          right={"10px"}
+        >
+          {t("ui.remove")}
+        </Button>
+      )}
+      {isEditMode ? (
+        <Editor key={"edit"} htmlValue={htmlValue} onChange={onChange} />
+      ) : (
+        <Editor key={"read-only"} htmlValue={htmlValue} readonly />
+      )}
+    </Box>
+  )
+})

@@ -167,6 +167,8 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            displayDescriptionLabel: "Instruction/Description (public)",
+            addDescriptionTrigger: "Add instructions/description for this block",
             create: {
               triggerButton: "Create New Requirement Block",
               title: "New Requirement Block",
