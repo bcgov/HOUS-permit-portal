@@ -3,7 +3,9 @@ import { Instance, types } from "mobx-state-tree"
 export const PermitClassificationModel = types.model("PermitClassificationModel", {
   id: types.identifier,
   name: types.string,
-  code: types.string,
+  description: types.string,
+  enabled: types.boolean,
+  imageUrl: types.string,
 })
 
 // Subclass Model for PermitType

@@ -25,6 +25,7 @@ export const TextFormControl = ({ label, fieldName, required = true, ...rest }: 
                 satisfiesNameLength: (str) => (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
               },
             })}
+            bg="greys.white"
             type={"text"}
           />
           {formState?.errors[fieldName] && (

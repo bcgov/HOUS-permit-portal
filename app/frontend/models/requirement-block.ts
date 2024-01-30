@@ -32,7 +32,7 @@ export const RequirementBlockModel = types
         applySnapshot(self, response.data.data)
 
         // Get latest data for current page, sort and filters
-        yield self.rootStore.requirementBlockStore.fetchRequirementBlocks()
+        yield self.rootStore.RequirementBlockStoreModel.fetchRequirementBlocks()
 
         return true
       }

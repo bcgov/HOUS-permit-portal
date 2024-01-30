@@ -9,9 +9,9 @@ import { RequirementTemplateModel } from "../models/requirement-template"
 import { ERequirementTemplateSortFields } from "../types/enums"
 import { toCamelCase } from "../utils/utility-funcitons"
 
-export const RequirementTemplateStore = types
+export const RequirementTemplateStoreModel = types
   .compose(
-    types.model("RequirementTemplateStore").props({
+    types.model("RequirementTemplateStoreModel").props({
       requirementTemplateMap: types.map(RequirementTemplateModel),
       tableRequirementTemplates: types.array(types.safeReference(RequirementTemplateModel)),
     }),
@@ -76,16 +76,6 @@ export const RequirementTemplateStore = types
         return response.data
       }
     }),
-    fetchPermitTypeOptions: flow(function* () {
-      // Jurisdiction not found in the map, fetch from API
-      const { ok, data: response } = yield self.environment.api.fetchPermitTypeOptions()
-      return response.data
-    }),
-    fetchActivityOptions: flow(function* () {
-      // Jurisdiction not found in the map, fetch from API
-      const { ok, data: response } = yield self.environment.api.fetchActivityOptions()
-      return response.data
-    }),
   }))
 
-export interface IRequirementTemplateStore extends Instance<typeof RequirementTemplateStore> {}
+export interface IRequirementTemplateStoreModel extends Instance<typeof RequirementTemplateStoreModel> {}

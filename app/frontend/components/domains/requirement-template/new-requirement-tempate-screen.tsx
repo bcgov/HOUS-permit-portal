@@ -20,7 +20,8 @@ interface INewRequirementTemplateScreenProps {}
 export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplateScreenProps) => {
   const { t } = useTranslation()
   const {
-    requirementTemplateStore: { createRequirementTemplate, fetchPermitTypeOptions, fetchActivityOptions },
+    RequirementTemplateStoreModel: { createRequirementTemplate },
+    permitClassificationStore: { fetchPermitTypeIdOptions, fetchActivityIdOptions },
   } = useMst()
 
   const formMethods = useForm<TCreateRequirementTemplateFormData>({
@@ -58,12 +59,12 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
             <Flex gap={8} w="full" as="section">
               <AsyncRadioGroup
                 label={t("requirementTemplate.fields.permitType")}
-                fetchOptions={fetchPermitTypeOptions}
+                fetchOptions={fetchPermitTypeIdOptions}
                 fieldName={"permitTypeId"}
               />
               <AsyncRadioGroup
                 label={t("requirementTemplate.fields.activity")}
-                fetchOptions={fetchActivityOptions}
+                fetchOptions={fetchActivityIdOptions}
                 fieldName={"activityId"}
               />
             </Flex>

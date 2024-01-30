@@ -121,7 +121,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const superAdminOnlyItems = (
     <>
       <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
-      <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/templates-catalogue"} />
+      <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <NavMenuItem label={t("home.auditLogTitle")} to={"/audit-log"} />
     </>

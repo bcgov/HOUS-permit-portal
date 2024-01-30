@@ -101,12 +101,8 @@ export class Api {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
 
-  async fetchPermitTypeOptions() {
-    return this.client.get<IOptionResponse>(`/permit_classifications/permit_type_options`)
-  }
-
-  async fetchActivityOptions() {
-    return this.client.get<IOptionResponse>(`/permit_classifications/activity_options`)
+  async fetchPermitClassifications() {
+    return this.client.get<IOptionResponse>(`/permit_classifications`)
   }
 
   async createJurisdiction(params) {
@@ -161,5 +157,13 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
       requirementTemplate: params,
     })
+  }
+
+  async fetchSiteOptions(address: string) {
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
+  }
+
+  async fetchPid(siteId: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pid`, { siteId })
   }
 }

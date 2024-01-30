@@ -114,6 +114,9 @@ const options = {
           seeArchivedButton: "See Archived",
           seeUnarchivedButton: "See Unarchived",
           never: "never",
+          submit: "Submit",
+          select: "Select",
+          notAvailable: "Not available yet",
         },
         jurisdiction: {
           new: {
@@ -160,6 +163,13 @@ const options = {
           seeBestPracticesLink: "See best practices for",
           ask: "Ask a question",
           applicationId: "Application ID",
+          pidLabel: "Parcel Identification (PID) No.",
+          addressLabel: "Address",
+          new: {
+            locationHeading: "Location for permit",
+            permitTypeHeading: "Permit type",
+            workTypeHeading: "Work Type",
+          },
         },
         requirementsLibrary: {
           index: {
@@ -379,6 +389,7 @@ const options = {
             requirementTemplates: "Permit Templates Catalogue",
             edit: "Edit",
             editTemplate: "Edit template",
+            permitApplications: "Permit Applications",
           },
           questionSupport: "Question Support",
         },

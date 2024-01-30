@@ -15,7 +15,7 @@ import { TemplateStatusTag } from "../../shared/requirement-template/template-st
 import { GridHeaders } from "./grid-header"
 
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
-  const { requirementTemplateStore } = useMst()
+  const { RequirementTemplateStoreModel } = useMst()
   const {
     tableRequirementTemplates,
     currentPage,
@@ -25,10 +25,10 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
-  } = requirementTemplateStore
+  } = RequirementTemplateStoreModel
   const { t } = useTranslation()
 
-  useSearch(requirementTemplateStore)
+  useSearch(RequirementTemplateStoreModel)
 
   return (
     <Container maxW="container.lg" p={8} as="main">

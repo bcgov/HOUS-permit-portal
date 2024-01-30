@@ -33,7 +33,7 @@ interface IRequirementsBlockProps {
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   requirementBlock,
 }: IRequirementsBlockProps) {
-  const { requirementBlockStore } = useMst()
+  const { RequirementBlockStoreModel } = useMst()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
 
@@ -75,7 +75,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         requirementsAttributes: [...data.requirementsAttributes, ...removedRequirementAttributes],
       })
     } else {
-      isSuccess = await requirementBlockStore.createRequirementBlock(data)
+      isSuccess = await RequirementBlockStoreModel.createRequirementBlock(data)
     }
 
     isSuccess && onClose()

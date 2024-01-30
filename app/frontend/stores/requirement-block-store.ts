@@ -8,9 +8,9 @@ import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
 import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
 
-export const RequirementBlockStore = types
+export const RequirementBlockStoreModel = types
   .compose(
-    types.model("RequirementBlockStore").props({
+    types.model("RequirementBlockStoreModel").props({
       requirementBlockMap: types.map(RequirementBlockModel),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
     }),
@@ -94,4 +94,4 @@ export const RequirementBlockStore = types
     }),
   }))
 
-export interface IRequirementBlockStore extends Instance<typeof RequirementBlockStore> {}
+export interface IRequirementBlockStoreModel extends Instance<typeof RequirementBlockStoreModel> {}
