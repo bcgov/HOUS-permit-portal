@@ -1,9 +1,10 @@
 class CHESApiWrapper
-  attr_accessor :client, :bearer_token
+  attr_accessor :client, :bearer_token, :delivery_method
 
   # In Production environments use CHES, otherwise locally use Letter Opener
   def initialize
-    if Rails.env.production?
+    @delivery_method = Rails.application.config.action_mailer.delivery_method
+    if delivery_method == :ches
       obtain_bearer_token
       @client =
         Faraday.new(url: "#{ENV["CHES_HOST"]}/api/v1") do |conn|
@@ -11,8 +12,10 @@ class CHESApiWrapper
           conn.request :authorization, :bearer, @bearer_token
           conn.adapter Faraday.default_adapter
         end
-    else
+    elsif delivery_method == :letter_opener
       @client = LetterOpener::DeliveryMethod.new
+    else
+      raise "Error: Unsupported delivery method: #{delivery_method}"
     end
   end
 
@@ -31,7 +34,7 @@ class CHESApiWrapper
     to = to.is_a?(Array) ? to : [to]
 
     # send request to CHES in deployed prod mode
-    if Rails.env.production?
+    if delivery_method == :ches
       ensure_ches_token_is_valid_and_health_check_passes
       params = { to:, from:, bcc:, cc:, encoding:, priority:, subject:, attachments:, body:, bodyType: }
       response = client.post("email", params.to_json)
@@ -40,7 +43,7 @@ class CHESApiWrapper
         body = JSON.parse(response.body)
         return body.dig("messages", 0, "msgId")
       end
-    else
+    elsif delivery_method == :letter_opener
       # use letter opener in dev mode
       mail =
         Mail.new do

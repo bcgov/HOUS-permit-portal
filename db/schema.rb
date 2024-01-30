@@ -226,7 +226,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_29_204224) do
     t.integer "invitations_count", default: 0
     t.string "provider"
     t.string "uid"
+    t.datetime "discarded_at"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
