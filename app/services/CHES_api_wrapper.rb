@@ -1,8 +1,6 @@
 class CHESApiWrapper
   attr_accessor :client, :bearer_token
 
-  TOKEN_AUTH_URL = "#{ENV["CHES_AUTH_HOST"]}/auth/realms/comsvcauth/protocol/openid-connect/token"
-
   def initialize
     obtain_bearer_token
     @client =
@@ -26,6 +24,7 @@ class CHESApiWrapper
     bodyType: "html"
   )
     ensure_ches_token_is_valid_and_health_check_passes
+
     to = to.is_a?(Array) ? to : [to]
     params = { to:, from:, bcc:, cc:, encoding:, priority:, subject:, attachments:, body:, bodyType: }
     response = client.post("email", params.to_json)
@@ -34,6 +33,13 @@ class CHESApiWrapper
       body = JSON.parse(response.body)
       return body.dig("messages", 0, "msgId")
     end
+  end
+
+  def email_status(msg_id)
+    ensure_ches_token_is_valid_and_health_check_passes
+
+    response = client.get("status/#{msg_id}")
+    JSON.parse(response.body) if response.success?
   end
 
   private
@@ -52,13 +58,16 @@ class CHESApiWrapper
 
   def obtain_bearer_token
     auth_client =
-      Faraday.new(url: TOKEN_AUTH_URL) do |conn|
+      Faraday.new(url: ENV["CHES_AUTH_HOST"]) do |conn|
         conn.request :url_encoded
         conn.request :authorization, :basic, ENV["CHES_CLIENT_ID"], ENV["CHES_CLIENT_SECRET"]
         conn.adapter Faraday.default_adapter
       end
 
-    response = auth_client.post { |req| req.body = { grant_type: "client_credentials" } }
+    response =
+      auth_client.post("auth/realms/comsvcauth/protocol/openid-connect/token") do |req|
+        req.body = { grant_type: "client_credentials" }
+      end
 
     if response.success?
       body = JSON.parse(response.body)
