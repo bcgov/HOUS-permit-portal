@@ -94,7 +94,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                 >
                   {t("user.sendInvites")}
                 </Button>
-                <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
+                <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
                   {t("ui.cancel")}
                 </Button>
               </Flex>

@@ -10,7 +10,6 @@ class RequirementTemplate < ApplicationRecord
   has_many :jurisdiction_requirement_templates
   has_many :jurisdictions, through: :jurisdiction_requirement_templates
 
-  validates :activity_id, uniqueness: { scope: :permit_type_id }
   validate :scheduled_for_presence_if_scheduled
 
   before_create :set_default_version

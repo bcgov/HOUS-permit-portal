@@ -48,7 +48,7 @@ export const PasswordFormControl = ({
                   !required ||
                   !validate ||
                   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
-                  t("ui.invalidInput"),
+                  t("auth.passwordTooWeak"),
               },
             })}
             type={showPassword ? "text" : "password"}

@@ -39,7 +39,7 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
 
-    resources :requirement_templates, only: %i[] do
+    resources :requirement_templates, only: %i[create] do
       post "search", on: :collection, to: "requirement_templates#index"
     end
 
@@ -47,6 +47,11 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
       get "locality_type_options", on: :collection
+    end
+
+    resources :permit_classifications, only: %i[] do
+      get "permit_type_options", on: :collection
+      get "activity_options", on: :collection
     end
 
     resources :permit_applications, only: %i[index create show update]

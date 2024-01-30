@@ -2,6 +2,7 @@ import { IJurisdiction } from "../models/jurisdiction"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
+import { IOption } from "./types"
 
 export interface IApiResponse<TData, TMeta> {
   data: TData
@@ -29,3 +30,5 @@ export interface IResetPasswordResponse extends IApiResponse<{}, { redirectUrl: 
 export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUrl: string }> {}
 
 export interface IInvitationResponse extends IApiResponse<{ invited: IUser[]; emailTaken: IUser[] }, {}> {}
+
+export interface IOptionResponse extends IApiResponse<IOption[], IPageMeta> {}

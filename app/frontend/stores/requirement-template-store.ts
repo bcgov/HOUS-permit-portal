@@ -1,6 +1,7 @@
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
+import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-tempate-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -53,6 +54,24 @@ export const RequirementTemplateStore = types
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
       }
       return response.ok
+    }),
+    createRequirementTemplate: flow(function* (formData: TCreateRequirementTemplateFormData) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.createRequirementTemplate(formData))
+
+      if (ok) {
+        self.requirementTemplateMap.put(response.data)
+        return response.data
+      }
+    }),
+    fetchPermitTypeOptions: flow(function* () {
+      // Jurisdiction not found in the map, fetch from API
+      const { ok, data: response } = yield self.environment.api.fetchPermitTypeOptions()
+      return response.data
+    }),
+    fetchActivityOptions: flow(function* () {
+      // Jurisdiction not found in the map, fetch from API
+      const { ok, data: response } = yield self.environment.api.fetchActivityOptions()
+      return response.data
     }),
   }))
 

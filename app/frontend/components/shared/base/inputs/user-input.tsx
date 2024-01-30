@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, Input, InputGroup, Select, Tag } from "@chakra-ui/react"
+import { Button, Flex, FormControl, FormLabel, HStack, Input, InputGroup, Select, Tag, Text } from "@chakra-ui/react"
 import { CheckCircle, UserMinus, WarningCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -62,16 +62,18 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
         <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
         {invited && (
           <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2}>
-            <Box color="semantic.success">
-              <CheckCircle size={20} /> {t("user.inviteSuccess")}
-            </Box>
+            <HStack color="semantic.success">
+              <CheckCircle size={20} />
+              <Text>{t("user.inviteSuccess")}</Text>
+            </HStack>
           </Tag>
         )}
         {taken && (
           <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" mb={2}>
-            <Box color="semantic.error">
-              <WarningCircle size={20} /> {t("user.inviteError")}
-            </Box>
+            <HStack color="semantic.error">
+              <WarningCircle size={20} />
+              <Text>{t("user.inviteError")}</Text>
+            </HStack>
           </Tag>
         )}
         {!invited && !taken && remove && (

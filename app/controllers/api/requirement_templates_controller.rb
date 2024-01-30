@@ -18,5 +18,26 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                    }
   end
 
+  def create
+    @requirement_template = RequirementTemplate.build(requirement_template_params)
+    authorize @requirement_template
+
+    if @requirement_template.save
+      render_success @requirement_template,
+                     "requirement_template.create_success",
+                     { blueprint: RequirementTemplateBlueprint }
+    else
+      render_error Constants::Error::REQUIREMENT_TEMPLATE_CREATE_ERROR,
+                   "requirement_template.create_error",
+                   message_opts: {
+                     error_message: @requirement_template.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
   private
+
+  def requirement_template_params
+    params.require(:requirement_template).permit(:description, :activity_id, :permit_type_id)
+  end
 end

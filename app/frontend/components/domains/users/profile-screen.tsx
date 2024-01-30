@@ -16,6 +16,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { TextFormControl } from "../../shared/form/text-form-control"
@@ -61,7 +62,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               <Flex direction="column" w="full">
                 <FormLabel>{t("auth.role")}</FormLabel>
                 <Select disabled defaultValue={role} w={{ base: "100%", md: "50%" }} textTransform="capitalize">
-                  <option value={role}>{t(`user.roles.${role}`)}</option>
+                  <option value={role}>{t(`user.roles.${role as EUserRoles}`)}</option>
                 </Select>
               </Flex>
             </InputGroup>
@@ -104,7 +105,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("ui.save")}
               </Button>
-              <Button variant="secondary" isLoading={isSubmitting} onClick={() => navigate(-1)}>
+              <Button variant="secondary" isDisabled={isSubmitting} onClick={() => navigate(-1)}>
                 {t("ui.cancel")}
               </Button>
             </Flex>
