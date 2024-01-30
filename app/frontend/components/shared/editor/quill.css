@@ -4,16 +4,9 @@
 @import url("https://unpkg.com/quill-mention@3.1.0/dist/quill.mention.css");
 
 /* override default quill styles*/
-.quill .ql-container {
-  border-bottom-left-radius: 0.375rem;
-  border-bottom-right-radius: 0.375rem;
-  border: 1px solid var(--chakra-colors-border-light);
-  display: flex;
-  flex-direction: column;
-}
-
-.quill .ql-container.ql-bubble {
-  border-radius: 0.375rem;
+.quill .ql-container.ql-snow {
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
   border: 1px solid var(--chakra-colors-border-light);
   display: flex;
   flex-direction: column;
@@ -24,8 +17,8 @@
 }
 
 .quill .ql-toolbar.ql-snow {
-  border-top-left-radius: 0.375rem;
-  border-top-right-radius: 0.375rem;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
   border: 1px solid var(--chakra-colors-border-light);
 }
 

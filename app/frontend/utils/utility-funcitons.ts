@@ -51,3 +51,10 @@ export function isMultiOptionRequirement(requirementType: ERequirementType): boo
   const multiOptionRequirementFields = [ERequirementType.radio, ERequirementType.checkbox, ERequirementType.select]
   return multiOptionRequirementFields.includes(requirementType)
 }
+
+export function isQuillEmpty(value: string) {
+  if (!value || (value.replace(/<(.|\n)*?>/g, "").trim().length === 0 && !value.includes("<img"))) {
+    return true
+  }
+  return false
+}

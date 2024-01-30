@@ -1,10 +1,11 @@
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useRef } from "react"
-import ReactQuill, { Quill } from "react-quill"
+import ReactQuill, { Quill, ReactQuillProps } from "react-quill"
 // importing Quill CSS directly from NPM package doesn't work with Vite
 // instead, we import from this CSS file which imports the CSS from the CDN URL
 // this URL is specific to the current quill versions and should be updated accordingly
+import { isQuillEmpty } from "../../../utils/utility-funcitons"
 import { CustomImageBlot } from "./custom-extensions/image-blot"
 import { CustomLinkBlot } from "./custom-extensions/link-blot"
 import ImageUploader from "./custom-extensions/quill-image-uploader/imageUploader.js"
@@ -13,13 +14,6 @@ import "./quill.css"
 Quill.register(CustomImageBlot)
 Quill.register(CustomLinkBlot)
 Quill.register("modules/imageUploader", ImageUploader)
-
-const isQuillEmpty = (value: string) => {
-  if (value.replace(/<(.|\n)*?>/g, "").trim().length === 0 && !value.includes("<img")) {
-    return true
-  }
-  return false
-}
 
 // from https://stackoverflow.com/questions/11300906/check-if-a-string-starts-with-http-using-javascript
 export const getValidUrl = (url = "") => {
@@ -48,7 +42,7 @@ type TToolbarItemName =
   | "image"
   | "list"
 
-export interface IEditorProps {
+export interface IEditorProps extends Partial<ReactQuillProps> {
   richText?: boolean
   readonly?: boolean
   placeholder?: string
@@ -69,6 +63,7 @@ export const Editor = observer(
     htmlValue = "",
     autoFocus = false,
     shouldContainRichTextToolbarItem = () => true,
+    ...rest
   }: IEditorProps) => {
     const editorRef = useRef<ReactQuill>()
 
@@ -181,6 +176,7 @@ export const Editor = observer(
         onChange={debouncedHandleChangeEditor}
         modules={modules}
         placeholder={placeholder}
+        {...rest}
       />
     )
   }
