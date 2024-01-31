@@ -40,6 +40,9 @@ class User < ApplicationRecord
 
   after_commit :refresh_search_index_on_discard_or_restore
 
+  # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
+  attr_accessor :current_sign_in_ip, :last_sign_in_ip
+
   def name
     "#{first_name} #{last_name}"
   end

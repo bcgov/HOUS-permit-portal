@@ -20,6 +20,8 @@ const options = {
           loginInstructions: "Enter the username for your Digital Building Permit Account below.",
           usernameLabel: "Username",
           emailLabel: "Email address",
+          userFirstNameLabel: "First Name",
+          userLastNameLabel: "Last Name",
           organizationLabel: "Organization (optional)",
           organizationHelpText: "Lorem Ipsum Organiation help text",
           passwordLabel: "Password",
