@@ -7,6 +7,7 @@ import { IUser } from "../../models/user"
 import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
+  IApiResponse,
   IJurisdictionResponse,
   IJurisdictionUserResponse,
   IOptionResponse,
@@ -119,6 +120,7 @@ export class Api {
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
+
   async createRequirementBlock(params: IRequirementBlockParams) {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
   }
@@ -142,12 +144,17 @@ export class Api {
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
   }
+
   async fetchPermitApplications() {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
+  }
+
+  async fetchRequirementTemplate(id: string) {
+    return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {

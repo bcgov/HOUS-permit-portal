@@ -22,6 +22,10 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementsAttribute[]
 }
 
+export interface IRequirementTemplateParams {
+  description?: string | null
+}
+
 export interface ITagSearchParams {
   query?: string
   taggableTypes?: Array<ETagType>

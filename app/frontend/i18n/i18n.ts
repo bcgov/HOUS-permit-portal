@@ -101,6 +101,7 @@ const options = {
           remove: "Remove",
           save: "Save Changes",
           onlySave: "Save",
+          done: "Done",
           manage: "Manage",
           view: "View",
           totalItems: "Total Items",
@@ -271,6 +272,7 @@ const options = {
         admin: {},
         errors: {
           fetchJurisdiction: "Something went wrong fetching jurisdiction",
+          fetchRequirementTemplate: "Something went wrong fetching requirement template",
           fetchOptions: "Something went wrong fetching options",
         },
         user: {
@@ -312,6 +314,10 @@ const options = {
           },
         },
         requirementTemplate: {
+          edit: {
+            clickToWriteDescription: "Click to write description",
+            title: "Permit Application Builder",
+          },
           fields: {
             status: "Status",
             permitType: "Permit Type",
@@ -371,6 +377,8 @@ const options = {
             invite: "Invite",
             requirementsLibrary: "Requirements Library",
             requirementTemplates: "Permit Templates Catalogue",
+            edit: "Edit",
+            editTemplate: "Edit template",
           },
           questionSupport: "Question Support",
         },

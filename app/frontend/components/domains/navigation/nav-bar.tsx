@@ -25,6 +25,18 @@ import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { SubNavBar } from "./sub-nav-bar"
 
+function isTemplateEditPath(path: string): boolean {
+  const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
+
+  return regex.test(path)
+}
+
+function shouldHideSubNavbarForPath(path: string): boolean {
+  const matchers: Array<(path: string) => boolean> = [(path) => path === "/", isTemplateEditPath]
+
+  return matchers.some((matcher) => matcher(path))
+}
+
 export const NavBar = observer(() => {
   const { t } = useTranslation()
   const { sessionStore, userStore } = useMst()
@@ -80,7 +92,7 @@ export const NavBar = observer(() => {
           </Flex>
         </Container>
       </Box>
-      {path !== "/" && loggedIn && <SubNavBar />}
+      {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
     </>
   )
 })

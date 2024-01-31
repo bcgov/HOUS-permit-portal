@@ -4,4 +4,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
 
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
+
+  view :extended do
+  end
 end

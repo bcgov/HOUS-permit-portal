@@ -1,6 +1,7 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
 
+  before_action :set_requirement_template, only: [:show]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -16,6 +17,14 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      },
                      blueprint: RequirementTemplateBlueprint,
                    }
+  end
+
+  def show
+    authorize @requirement_template
+
+    render_success @requirement_template,
+                   nil,
+                   { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
   end
 
   def create
@@ -36,6 +45,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   private
+
+  def set_requirement_template
+    @requirement_template = RequirementTemplate.find(params[:id])
+  end
 
   def requirement_template_params
     params.require(:requirement_template).permit(:description, :activity_id, :permit_type_id)

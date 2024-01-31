@@ -46,7 +46,7 @@ export const RequirementTemplateStore = types
       )
 
       if (response.ok) {
-        R.map((requirementTemplate) => self.requirementTemplateMap.put(requirementTemplate), response.data.data)
+        R.forEach((requirementTemplate) => self.requirementTemplateMap.put(requirementTemplate), response.data.data)
         self.tableRequirementTemplates = cast(response.data.data.map((requirementTemplate) => requirementTemplate.id))
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
@@ -55,6 +55,19 @@ export const RequirementTemplateStore = types
       }
       return response.ok
     }),
+    fetchRequirementTemplate: flow(function* (id: string) {
+      const response = yield* toGenerator(self.environment.api.fetchRequirementTemplate(id))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        self.requirementTemplateMap.put(templateData)
+
+        return self.requirementTemplateMap.get(templateData.id)
+      }
+
+      return response.ok
+    }),
+
     createRequirementTemplate: flow(function* (formData: TCreateRequirementTemplateFormData) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.createRequirementTemplate(formData))
 

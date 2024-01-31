@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Container, Flex, Text } from "@chakra-ui/react"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Container, Flex, FlexProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,7 +7,14 @@ import { useMst } from "../../../setup/root"
 import { isUUID, toCamelCase } from "../../../utils/utility-funcitons"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
-export const SubNavBar = observer(() => {
+type TBreadcrumbSegment = { href: string; title: string }
+
+interface ISubNavBar extends FlexProps {
+  breadCrumbContainerProps?: FlexProps
+  staticBreadCrumbs?: TBreadcrumbSegment[]
+}
+
+export const SubNavBar = observer(({ staticBreadCrumbs, breadCrumbContainerProps, ...containerProps }: ISubNavBar) => {
   const location = useLocation()
   const path = location.pathname
 
@@ -22,9 +29,14 @@ export const SubNavBar = observer(() => {
       borderBottom="1px solid"
       borderColor="border.light"
       overflow="hidden"
+      {...containerProps}
     >
-      <Container minW="container.lg" px={8}>
-        <DynamicBreadcrumb path={path} />
+      <Container minW="container.lg" px={8} {...breadCrumbContainerProps}>
+        {Array.isArray(staticBreadCrumbs) ? (
+          <SiteBreadcrumbs breadcrumbs={staticBreadCrumbs} />
+        ) : (
+          <DynamicBreadcrumb path={path} />
+        )}
       </Container>
     </Flex>
   )
@@ -38,7 +50,7 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
   const { t } = useTranslation()
   const rootStore = useMst()
 
-  const [breadcrumbs, setBreadcrumbs] = useState([])
+  const [breadcrumbs, setBreadcrumbs] = useState<TBreadcrumbSegment[]>([])
 
   useEffect(() => {
     // Get the current path and split into segments
@@ -60,12 +72,21 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
         : //@ts-ignore
           t(`site.breadcrumb.${toCamelCase(segment)}`)
 
-      return { segment, href, title }
+      return { href, title }
     })
 
     setBreadcrumbs(breadcrumbSegments)
   }, [path, rootStore.jurisdictionStore.currentJurisdiction])
 
+  return <SiteBreadcrumbs breadcrumbs={breadcrumbs} />
+})
+
+interface ISiteBreadcrumbProps {
+  breadcrumbs: TBreadcrumbSegment[]
+}
+
+const SiteBreadcrumbs = observer(function SiteBreadcrumb({ breadcrumbs }: ISiteBreadcrumbProps) {
+  const { t } = useTranslation()
   return (
     <Breadcrumb spacing={2} separator="/" mt={4}>
       <BreadcrumbItem>
