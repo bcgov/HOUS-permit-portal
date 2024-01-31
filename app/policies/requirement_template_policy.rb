@@ -3,6 +3,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     user.super_admin? || user.review_manager?
   end
 
+  def show?
+    index?
+  end
+
   def create?
     user.super_admin?
   end

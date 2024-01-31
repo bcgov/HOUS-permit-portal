@@ -271,6 +271,7 @@ const options = {
         admin: {},
         errors: {
           fetchJurisdiction: "Something went wrong fetching jurisdiction",
+          fetchRequirementTemplate: "Something went wrong fetching requirement template",
           fetchOptions: "Something went wrong fetching options",
         },
         user: {
@@ -371,6 +372,7 @@ const options = {
             invite: "Invite",
             requirementsLibrary: "Requirements Library",
             requirementTemplates: "Permit Templates Catalogue",
+            edit: "Edit",
           },
           questionSupport: "Question Support",
         },

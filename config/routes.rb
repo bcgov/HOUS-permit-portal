@@ -39,7 +39,7 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
 
-    resources :requirement_templates, only: %i[create] do
+    resources :requirement_templates, only: %i[show create] do
       post "search", on: :collection, to: "requirement_templates#index"
     end
 

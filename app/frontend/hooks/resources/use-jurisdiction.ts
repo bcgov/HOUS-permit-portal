@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-funcitons"
 
 export const useJurisdiction = () => {
   const { jurisdictionId } = useParams()
+  const { pathname } = useLocation()
   const { jurisdictionStore } = useMst()
 
   const { currentJurisdiction, setCurrentJurisdiction, fetchJurisdiction } = jurisdictionStore
@@ -25,7 +26,7 @@ export const useJurisdiction = () => {
         setError(e instanceof Error ? e : new Error(t("errors.fetchJurisdiction")))
       }
     })()
-  }, [window.location.pathname])
+  }, [pathname])
 
   return { currentJurisdiction, error }
 }
