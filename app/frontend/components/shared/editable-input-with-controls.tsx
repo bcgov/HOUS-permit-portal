@@ -50,7 +50,7 @@ function EditableControls({
   return isEditing ? (
     <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
       <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
-        {t("ui.onlySave")}
+        {t("ui.done")}
       </Button>
       <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
         {t("ui.cancel")}
@@ -58,6 +58,7 @@ function EditableControls({
     </ButtonGroup>
   ) : (
     <IconButton
+      ml={1}
       size={"sm"}
       variant={"unstyled"}
       aria-label={"Enter edit mode"}

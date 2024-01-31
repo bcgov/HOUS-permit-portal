@@ -101,6 +101,7 @@ const options = {
           remove: "Remove",
           save: "Save Changes",
           onlySave: "Save",
+          done: "Done",
           manage: "Manage",
           view: "View",
           totalItems: "Total Items",
@@ -313,6 +314,10 @@ const options = {
           },
         },
         requirementTemplate: {
+          edit: {
+            clickToWriteDescription: "Click to write description",
+            title: "Permit Application Builder",
+          },
           fields: {
             status: "Status",
             permitType: "Permit Type",
@@ -373,6 +378,7 @@ const options = {
             requirementsLibrary: "Requirements Library",
             requirementTemplates: "Permit Templates Catalogue",
             edit: "Edit",
+            editTemplate: "Edit template",
           },
           questionSupport: "Question Support",
         },
