@@ -110,6 +110,10 @@ class Requirement < ApplicationRecord
       json.merge!({ data: { values: input_options["value_options"] } })
     end
 
+    if input_options["computed_compliance"].present?
+      json.merge!({ computedCompliance: input_options["computed_compliance"] })
+    end
+
     json
   end
 

@@ -1,6 +1,15 @@
 class PermitApplicationBlueprint < Blueprinter::Base
   identifier :id
-  fields :nickname, :status, :number, :created_at, :updated_at, :requirements, :full_address, :pid, :pin
+  fields :nickname,
+         :status,
+         :number,
+         :created_at,
+         :updated_at,
+         :requirements,
+         :full_address,
+         :pid,
+         :pin,
+         :submission_data
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint

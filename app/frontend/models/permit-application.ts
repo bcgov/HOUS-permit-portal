@@ -1,4 +1,5 @@
 import { Instance, flow, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
@@ -20,6 +21,7 @@ export const PermitApplicationModel = types
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     requirements: types.maybeNull(types.frozen({})),
+    submissionData: types.maybeNull(types.frozen({})),
     createdAt: types.Date,
     updatedAt: types.Date,
   })
@@ -34,6 +36,23 @@ export const PermitApplicationModel = types
     },
   }))
   .actions((self) => ({
+    __mergeUpdate: (resourceData) => {
+      let jurisdiction = resourceData["jurisdiction"]
+      let submitter = resourceData["submitter"]
+      if (jurisdiction && typeof jurisdiction !== "string") {
+        self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
+        jurisdiction = jurisdiction["id"]
+      }
+      if (submitter && typeof submitter !== "string") {
+        self.rootStore.userStore.mergeUpdate(submitter, "usersMap")
+        submitter = submitter["id"]
+      }
+      const newData = R.mergeRight(resourceData, {
+        jurisdiction,
+        submitter,
+      })
+      self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
+    },
     update: flow(function* (params) {
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
