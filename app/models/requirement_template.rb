@@ -23,10 +23,14 @@ class RequirementTemplate < ApplicationRecord
     jurisdictions.size
   end
 
+  def key
+    "requirementtemplate#{id}"
+  end
+
   def to_form_json
     {
       id: id,
-      key: "requirementTemplate#{id}",
+      key: key,
       input: false,
       tableView: false,
       components:

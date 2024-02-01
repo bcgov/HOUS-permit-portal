@@ -36,7 +36,7 @@ RSpec.describe RequirementBlock, type: :model do
            {
              id: requirement_block.id,
              legend: requirement_block.name,
-             key: "fieldSet#{requirement_block.id}",
+             key: requirement_block.key,
              label: requirement_block.name,
              input: false,
              tableView: false,

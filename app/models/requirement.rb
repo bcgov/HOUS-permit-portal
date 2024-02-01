@@ -94,17 +94,14 @@ class Requirement < ApplicationRecord
     input_options["number_unit"]
   end
 
+  def key
+    "#{requirement_block.key}|#{requirement_code}"
+  end
+
   def to_form_json
-    json = {
-      id: id,
-      key: label.parameterize.underscore.camelize(:lower),
-      type: input_type,
-      input: true,
-      label: label,
-      widget: {
-        type: "input",
-      },
-    }.merge!(formio_type_options)
+    json = { id: id, key: key, type: input_type, input: true, label: label, widget: { type: "input" } }.merge!(
+      formio_type_options,
+    )
 
     if input_type_select? || input_type_multi_option_select?
       json.merge!({ data: { values: input_options["value_options"] } })
@@ -121,7 +118,7 @@ class Requirement < ApplicationRecord
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code
-    self.requirement_code ||= SecureRandom.uuid
+    self.requirement_code ||= label.present? ? label.parameterize.underscore.camelize(:lower) : SecureRandom.uuid
   end
 
   def formio_type_options
