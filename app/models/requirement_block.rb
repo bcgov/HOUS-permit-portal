@@ -27,11 +27,15 @@ class RequirementBlock < ApplicationRecord
     }
   end
 
+  def key
+    "formSubmissionDataRequirementblock#{id}"
+  end
+
   def to_form_json
     {
       id: id,
       legend: name,
-      key: "fieldSet#{id}",
+      key: key,
       label: name,
       input: false,
       tableView: false,
