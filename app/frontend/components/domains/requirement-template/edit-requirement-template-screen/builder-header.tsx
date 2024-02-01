@@ -21,7 +21,7 @@ export const BuilderHeader = observer(function BuilderHeader({ requirementTempla
   const { register, watch } = useFormContext<IRequirementTemplateForm>()
   const watchedDescription = watch("description")
   return (
-    <Container as={"header"} maxW={"container.lg"} px={8} borderBottom={"1px solid"} borderColor={"border.base"}>
+    <Container as={"header"} maxW={"container.lg"} px={8}>
       <HStack justifyContent={"space-between"}>
         <SubNavBar
           staticBreadCrumbs={[
