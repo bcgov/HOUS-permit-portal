@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -9,6 +9,7 @@ import { IRequirementTemplateParams } from "../../../../types/api-request"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "./builder-header"
+import { SectionsDnd } from "./sections-dnd"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateParams {}
 
@@ -16,11 +17,31 @@ function formFormDefaults(requirementType?: IRequirementTemplate): IRequirementT
   if (!requirementType) {
     return {
       description: "",
+      requirementTemplateSectionsAttributes: [
+        { id: "A", name: "Section A" },
+        { id: "B", name: "Section B" },
+        { id: "C", name: "Section C" },
+        {
+          id: "D",
+          name: "Section D",
+        },
+        { id: "E", name: "Section E" },
+      ],
     }
   }
 
   return {
     description: requirementType.description,
+    requirementTemplateSectionsAttributes: [
+      { id: "A", name: "Section A" },
+      { id: "B", name: "Section B" },
+      { id: "C", name: "Section C" },
+      {
+        id: "D",
+        name: "Section D",
+      },
+      { id: "E", name: "Section D" },
+    ],
   }
 }
 
@@ -38,10 +59,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   if (!requirementTemplate) return <LoadingScreen />
 
   return (
-    <Box minH={"1px"} w={"full"} flex={1} as="main">
+    <Flex flexDir={"column"} w={"full"} flex={1} as="main">
       <FormProvider {...formMethods}>
         <BuilderHeader requirementTemplate={requirementTemplate} />
+        <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
+          <SectionsDnd />
+        </Flex>
       </FormProvider>
-    </Box>
+    </Flex>
   )
 })
