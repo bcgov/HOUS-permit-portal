@@ -43,9 +43,8 @@ module BaseControllerMethods
     end
   end
 
-  # error_hash comes from Constants::ErrorCode
   # error_key maps to a translation key in en.yml
-  def render_error(error_hash, error_key = nil, opts = {})
+  def render_error(error_key = nil, opts = {})
     opts.reverse_merge!({ status: 400, meta: {} })
     message =
       (
@@ -56,7 +55,7 @@ module BaseControllerMethods
         end
       )
     meta = opts[:meta].merge(default_meta(message))
-    render json: { data: { error: error_hash }, meta: meta }, status: opts[:status]
+    render json: { data: {}, meta: meta }, status: opts[:status]
   end
 
   def render_flash_message(message_key, message_type, opts = {})

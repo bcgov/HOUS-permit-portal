@@ -19,8 +19,7 @@ class Api::RegistrationsController < Devise::RegistrationsController
       else
         clean_up_passwords resource
         set_minimum_password_length
-        render_error Constants::Error::USER_REGISTRATION_ERROR,
-                     "user.registration_error",
+        render_error "user.registration_error",
                      message_opts: {
                        error_message: resource.errors.full_messages.join(", "),
                      } and return

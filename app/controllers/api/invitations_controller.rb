@@ -9,7 +9,7 @@ class Api::InvitationsController < Devise::InvitationsController
     if inviter.results[:invited].any?
       render_success(inviter.results, nil, { blueprint: InvitationBlueprint })
     else
-      render_error Constants::Error::USER_CREATE_INVITE_ERROR, "user.create_invite_error", nil and return
+      render_error "user.create_invite_error" and return
     end
   end
 
@@ -42,8 +42,7 @@ class Api::InvitationsController < Devise::InvitationsController
     else
       resource.invitation_token = raw_invitation_token
       # resource.errors.full_messages is full here probably with "Invitation token is invalid", lets just craft our own message for now
-      render_error Constants::Error::USER_ACCEPT_INVITE_ERROR,
-                   "user.accept_invite_error",
+      render_error "user.accept_invite_error",
                    message_opts: {
                      error_message: resource.errors.full_messages.join(", "),
                    } and return
@@ -54,7 +53,7 @@ class Api::InvitationsController < Devise::InvitationsController
     if @user.invite!
       render_success({}, "user.send_invitation_success")
     else
-      render_error Constants::Error::USER_RESEND_INVITE_ERROR, "user.resend_invite_error", nil and return
+      render_error "user.resend_invite_error" and return
     end
   end
 
@@ -62,7 +61,7 @@ class Api::InvitationsController < Devise::InvitationsController
     if @user.destroy
       render_success(@user, "user.invitation_removed_success")
     else
-      render_error Constants::Error::USER_REMOVE_INVITE_ERROR, "user.remove_invite_error", nil and return
+      render_error "user.remove_invite_error" and return
     end
   end
 

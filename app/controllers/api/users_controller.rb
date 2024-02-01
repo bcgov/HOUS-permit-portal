@@ -33,9 +33,9 @@ class Api::UsersController < Api::ApplicationController
   rescue ActiveRecord::RecordInvalid
     # Handle any ActiveRecord exceptions here
     if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
-      render_error Constants::Error::USER_UPDATE_ERROR, "user.update_password_error", {} and return
+      render_error "user.update_password_error" and return
     end
-    render_error Constants::Error::USER_UPDATE_ERROR, "user.update_error", {}
+    render_error "user.update_error"
   end
 
   def destroy
@@ -43,7 +43,7 @@ class Api::UsersController < Api::ApplicationController
     if @user.discard
       render_success(@user, "user.destroy_success")
     else
-      render_error Constants::Error::USER_DESTROY_ERROR, "user.destroy_error", {}
+      render_error "user.destroy_error", {}
     end
   end
 
@@ -52,7 +52,7 @@ class Api::UsersController < Api::ApplicationController
     if @user.update(discarded_at: nil)
       render_success(@user, "user.restore_success")
     else
-      render_error Constants::Error::USER_RESTORE_ERROR, "user.restore_error", {}
+      render_error "user.restore_error", {}
     end
   end
 

@@ -22,8 +22,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     if @permit_application.save
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
-      render_error Constants::Error.e("permit_application.create_error", "Error creating permit application"),
-                   "permit_application.create_error",
+      render_error "permit_application.create_error",
                    message_opts: {
                      error_message: @permit_application.errors.full_messages.join(", "),
                    }

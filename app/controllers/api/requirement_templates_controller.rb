@@ -36,8 +36,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      "requirement_template.create_success",
                      { blueprint: RequirementTemplateBlueprint }
     else
-      render_error Constants::Error::REQUIREMENT_TEMPLATE_CREATE_ERROR,
-                   "requirement_template.create_error",
+      render_error "requirement_template.create_error",
                    message_opts: {
                      error_message: @requirement_template.errors.full_messages.join(", "),
                    }
