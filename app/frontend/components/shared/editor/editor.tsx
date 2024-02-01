@@ -157,7 +157,7 @@ export const Editor = observer(
       []
     )
 
-    const debouncedHandleChangeEditor = debounce(handleChange, 100)
+    const debouncedHandleChangeEditor = debounce(handleChange, 500)
 
     useEffect(() => {
       if (autoFocus) {

@@ -2,7 +2,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::Jurisdictions
   include Api::Concerns::Search::JurisdictionUsers
 
-  before_action :set_jurisdiction, only: %i[show search_users]
+  before_action :set_jurisdiction, only: %i[show update search_users]
   skip_after_action :verify_policy_scoped, only: %i[index search_users]
 
   def index
@@ -18,6 +18,25 @@ class Api::JurisdictionsController < Api::ApplicationController
                      },
                      blueprint: JurisdictionBlueprint,
                    }
+  end
+
+  def update
+    authorize @jurisdiction
+
+    # Get current contact ids from the params
+    payload_contact_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+    # Mark contacts not included in the current payload for destruction
+    @jurisdiction.contacts.each do |contact|
+      contact.mark_for_destruction unless payload_contact_ids.include?(contact.id.to_s)
+    end
+    if @jurisdiction.update(jurisdiction_params)
+      render_success @jurisdiction, "jurisdiction.update_success", { blueprint: JurisdictionBlueprint }
+    else
+      render_error "jurisdiction.update_error",
+                   message_opts: {
+                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                   }
+    end
   end
 
   # GET /api/jurisdictions/:id
@@ -68,7 +87,17 @@ class Api::JurisdictionsController < Api::ApplicationController
   private
 
   def jurisdiction_params
-    params.require(:jurisdiction).permit(:name, :locality_type, users_attributes: %i[first_name last_name role email])
+    params.require(:jurisdiction).permit(
+      :name,
+      :locality_type,
+      :description_html,
+      :checklist_html,
+      :look_out_html,
+      :contact_summary_html,
+      map_position: [],
+      users_attributes: %i[first_name last_name role email],
+      contacts_attributes: %i[id name department title phone_number email],
+    )
   end
 
   def set_jurisdiction

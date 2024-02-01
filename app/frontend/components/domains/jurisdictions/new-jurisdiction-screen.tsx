@@ -33,7 +33,7 @@ export const NewJurisdictionScreen = observer(() => {
   const navigate = useNavigate()
   const { handleSubmit, formState } = formMethods
 
-  const { isSubmitting } = formState
+  const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
     const createdJurisdiction = (await createJurisdiction(formData)) as IJurisdiction
@@ -61,7 +61,7 @@ export const NewJurisdictionScreen = observer(() => {
                   {t("jurisdiction.new.nextStep")}
                 </Text>
                 <HStack>
-                  <RouterLinkButton to={`/jurisdictions/${jurisdiction?.id}/invite`} variant="primary">
+                  <RouterLinkButton to={`/jurisdictions/${jurisdiction?.id}/users/invite`} variant="primary">
                     {t("user.index.inviteButton")}
                   </RouterLinkButton>
                   <RouterLinkButton to={`/jurisdictions`} variant="secondary">
@@ -97,7 +97,7 @@ export const NewJurisdictionScreen = observer(() => {
                   <Button
                     variant="primary"
                     type="submit"
-                    isDisabled={!formState.isValid || isSubmitting}
+                    isDisabled={!isValid || isSubmitting}
                     isLoading={isSubmitting}
                     loadingText={t("ui.loading")}
                   >

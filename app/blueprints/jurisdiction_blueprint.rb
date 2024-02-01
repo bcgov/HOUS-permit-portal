@@ -5,12 +5,14 @@ class JurisdictionBlueprint < Blueprinter::Base
          :qualifier,
          :qualified_name,
          :reverse_qualified_name,
-         :description,
-         :checklist_slate_data,
-         :look_out_slate_data,
+         :description_html,
+         :checklist_html,
+         :look_out_html,
+         :contact_summary_html,
          :review_managers_size,
          :reviewers_size,
          :permit_applications_size,
+         :map_position,
          :created_at,
          :updated_at
 

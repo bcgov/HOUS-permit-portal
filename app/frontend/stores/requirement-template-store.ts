@@ -1,9 +1,9 @@
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import * as R from "ramda"
 import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-tempate-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementTemplateModel } from "../models/requirement-template"
 import { ERequirementTemplateSortFields } from "../types/enums"
@@ -19,6 +19,7 @@ export const RequirementTemplateStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     // View to get a RequirementTemplate by id
     getRequirementTemplateById(id: string) {
@@ -47,7 +48,7 @@ export const RequirementTemplateStoreModel = types
       )
 
       if (response.ok) {
-        R.forEach((requirementTemplate) => self.requirementTemplateMap.put(requirementTemplate), response.data.data)
+        self.mergeUpdateAll(response.data.data, "requirementTemplateMap")
         self.tableRequirementTemplates = cast(response.data.data.map((requirementTemplate) => requirementTemplate.id))
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages

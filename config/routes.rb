@@ -44,7 +44,7 @@ Rails.application.routes.draw do
       patch "restore", on: :member
     end
 
-    resources :jurisdictions, only: %i[index show create] do
+    resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
       get "locality_type_options", on: :collection

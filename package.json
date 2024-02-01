@@ -54,6 +54,7 @@
     "mobx-react-lite": "^4.0.5",
     "mobx-state-tree": "^5.4.0",
     "query-string": "^8.1.0",
+    "quill-delta": "^5.1.0",
     "ramda": "^0.29.1",
     "rc-pagination": "^4.0.4",
     "react-helmet": "^6.1.0",
@@ -63,8 +64,7 @@
     "react-password-strength-bar": "^0.4.1",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.20.0",
-    "react-select": "^5.8.0",
-    "slate-react": "^0.101.3"
+    "react-select": "^5.8.0"
   },
   "overrides": {
     "vite": {

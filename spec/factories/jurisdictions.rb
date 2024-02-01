@@ -4,11 +4,25 @@ FactoryBot.define do
     type { "SubDistrict" }
     locality_type { "city" }
     description { Faker::Lorem.paragraph }
-    checklist_slate_data do
-      [{ children: [{ text: Faker::Lorem.sentence }] }, { children: [{ text: Faker::Lorem.sentence }] }]
+    checklist_html do
+      {
+        ops: [
+          { insert: "Checklist Item 1" },
+          { insert: "\n", attributes: { list: "bullet" } },
+          { insert: "Checklist Item 2" },
+          { insert: "\n", attributes: { list: "bullet" } },
+        ],
+      }.to_json
     end
-    look_out_slate_data do
-      [{ children: [{ text: Faker::Lorem.sentence }] }, { children: [{ text: Faker::Lorem.sentence }] }]
+    look_out_html do
+      {
+        ops: [
+          { insert: "Look Out Point 1" },
+          { insert: "\n", attributes: { list: "ordered" } },
+          { insert: "Look Out Point 2" },
+          { insert: "\n", attributes: { list: "ordered" } },
+        ],
+      }.to_json
     end
   end
 end

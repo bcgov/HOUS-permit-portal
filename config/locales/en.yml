@@ -169,6 +169,12 @@ en:
       create_success:
         title: ""
         message: "New jurisdiction created successfully!"
+      update_error:
+        title: Oops
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Jurisdiction successfully updated!"
     misc:
       not_found_error:
         title: "Oops"

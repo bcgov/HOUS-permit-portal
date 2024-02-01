@@ -10,6 +10,7 @@ type TProps = {
   htmlValue: string
   onChange?: (htmlValue: string) => void
   containerProps?: BoxProps
+  editText?: string
   onRemove?: (setEditMode: (editMode: boolean) => void) => void
 } & (
   | { initialTriggerText: string; renderInitialTrigger?: never }
@@ -27,6 +28,7 @@ export const EditorWithPreview = observer(function EditorWithPreview({
   containerProps,
   renderInitialTrigger,
   initialTriggerText,
+  editText,
   onRemove,
 }: TProps) {
   const isEditorEmpty = isQuillEmpty(htmlValue)
@@ -54,8 +56,12 @@ export const EditorWithPreview = observer(function EditorWithPreview({
     minH: "1rem",
     cursor: !isEditMode ? "pointer" : undefined,
     onClick: () => setIsEditMode(true),
-    onMouseLeave: () => setIsEditMode(false),
     ...containerProps,
+  }
+
+  const handleClickDone = (e) => {
+    e.stopPropagation()
+    setIsEditMode(false)
   }
 
   if (!isEditMode && isEditorEmpty && (initialTriggerText || renderInitialTrigger)) {
@@ -96,9 +102,21 @@ export const EditorWithPreview = observer(function EditorWithPreview({
         </Button>
       )}
       {isEditMode ? (
-        <Editor key={"edit"} htmlValue={htmlValue} onChange={onChange} />
+        <>
+          <Editor key={"edit"} htmlValue={htmlValue} onChange={onChange} />
+          <Button variant="primary" mt={4} onClick={handleClickDone}>
+            {t("ui.done")}
+          </Button>
+        </>
       ) : (
-        <Editor key={"read-only"} htmlValue={htmlValue} readonly />
+        <>
+          {editText && (
+            <Button variant={"link"} textDecoration={"underline"}>
+              {editText}
+            </Button>
+          )}
+          <Editor key={"read-only"} htmlValue={htmlValue} readonly />
+        </>
       )}
     </Box>
   )

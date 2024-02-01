@@ -90,7 +90,7 @@ export const UserStoreModel = types
       )
 
       if (response.ok) {
-        self.setUsers(response.data.data)
+        self.mergeUpdateAll(response.data.data, "usersMap")
         self.rootStore.jurisdictionStore.currentJurisdiction.setTableUsers(response.data.data)
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages

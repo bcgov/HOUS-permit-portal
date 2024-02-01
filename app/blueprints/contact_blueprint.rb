@@ -1,4 +1,4 @@
 class ContactBlueprint < Blueprinter::Base
   identifier :id
-  fields :name, :title, :first_nation, :email, :phone_number, :extension
+  fields :name, :title, :department, :email, :phone_number, :extension
 end

@@ -1,6 +1,5 @@
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import * as R from "ramda"
 import { TCreateJurisdictionFormData } from "../components/domains/jurisdictions/new-jurisdiction-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -70,7 +69,7 @@ export const JurisdictionStoreModel = types
       )
 
       if (response.ok) {
-        R.map((jurisdiction) => self.jurisdictionMap.put(jurisdiction), response.data.data)
+        self.mergeUpdateAll(response.data.data, "jurisdictionMap")
         self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
         self.currentPage = opts?.page ?? self.currentPage
         self.countPerPage = opts?.countPerPage ?? self.countPerPage

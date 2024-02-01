@@ -14,6 +14,8 @@ class Jurisdiction < ApplicationRecord
 
   before_validation :set_type_based_on_locality
 
+  accepts_nested_attributes_for :contacts
+
   def review_managers
     users.review_managers
   end

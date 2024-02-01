@@ -64,7 +64,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
                   <SearchGridItem>todo</SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="space-between" w="full">
-                      <RouterLink to={`${j.id}/invite`}>{t("user.invite")}</RouterLink>
+                      <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>
                       <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
                       <RouterLink to={`${j.id}`}>{t("ui.manage")}</RouterLink>
                     </Flex>

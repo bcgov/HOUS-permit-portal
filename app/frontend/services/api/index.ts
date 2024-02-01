@@ -109,6 +109,10 @@ export class Api {
     return this.client.post<ApiResponse<IJurisdiction>>("/jurisdictions", { jurisdiction: params })
   }
 
+  async updateJurisdiction(id, params) {
+    return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`, { jurisdiction: params })
+  }
+
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }
