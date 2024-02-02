@@ -50,7 +50,7 @@ const s3custom = function Provider(formio) {
             // Add the file
             formData.append("file", file)
 
-            xhr.open("POST", presignedData.url, true)
+            xhr.open(presignedData.method, presignedData.url, true)
 
             xhr.upload.onprogress = (event) => {
               progressCallback(file, event) //custom update progress for form.io
@@ -61,14 +61,14 @@ const s3custom = function Provider(formio) {
                 //the file info needs to mathc what rails needs
                 // console.log("*** success - upate with info", presignedData)
                 resolve({
-                  storage: "cache",
+                  storage: "s3custom",
                   filename: fileName,
                   size: file.size,
                   type: file.type,
                   groupPermissions,
                   groupId,
                   id: (presignedData?.fields?.id || presignedData?.fields?.key).replace(/^cache\//, ""),
-                  key: presignedData?.fields?.key,
+                  key: presignedData?.fields?.key.replace(/^cache\//, ""),
                   url: presignedData?.fields?.url,
                   metadata: {
                     filename: file.name,
@@ -80,14 +80,14 @@ const s3custom = function Provider(formio) {
               } else if (xhr.status >= 200 && xhr.status < 300) {
                 // Step 3: Resolve the promise with the file's URL on the storage service
                 resolve({
-                  storage: "cache",
+                  storage: "s3custom",
                   filename: fileName,
                   size: file.size,
                   type: file.type,
                   groupPermissions,
                   groupId,
                   id: (xhr.response?.fields?.id || xhr.response?.fields?.key).replace(/^cache\//, ""),
-                  key: xhr.response?.fields?.key,
+                  key: xhr.response?.fields?.key.replace(/^cache\//, ""),
                   url: xhr.response?.fields?.url,
                   metadata: {
                     filename: fileName,
@@ -115,28 +115,37 @@ const s3custom = function Provider(formio) {
           .catch(reject)
       })
     },
-    deleteFile(fileInfo) {
-      console.log(fileInfo)
+    deleteFile(fileInfo, options) {
+      //assume we will not have public-read acl, use shrine to generate the request
+      console.log("s3 custom delete file", fileInfo)
     },
-    downloadFile(file) {
-      console.log(fileInfo)
+    downloadFile(fileInfo, options) {
+      new Promise((resolve, reject) => {
+        //assume we will not have public-read acl, use shrine to generate the request
+        // console.log("s3 custom download files", fileInfo, options)
+        //return a file value, the file value must have a url
+        const xhr = new XMLHttpRequest()
+        const params = new URLSearchParams({
+          key: fileInfo.key,
+        })
+        xhr.open("GET", `/api/storage/s3/download?${params.toString()}`, true)
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.setRequestHeader("Accept", "application/json")
+        xhr.onreadystatechange = function () {
+          if (this.readyState === XMLHttpRequest.DONE) {
+            if (this.status === 200) {
+              const response = JSON.parse(this.responseText)
+              window.open(response.url, "_blank")
+              //NOT SURE WHY, BUT THIS RESOLVE DOES NOT CAUSE THE WINDOW.OPEN IN FORMIO
+              resolve(response)
+            } else {
+              reject("Failed to download file")
+            }
+          }
+        }
+        xhr.send()
+      })
     },
-
-    // deleteFile(fileInfo) {
-    //   const url = `${formio.formUrl}/storage/s3?bucket=${XHR.trim(fileInfo.bucket)}&key=${XHR.trim(fileInfo.key)}`
-    //   return formio.makeRequest("", url, "delete")
-    // },
-    // downloadFile(file) {
-    //   if (file.acl !== "public-read") {
-    //     return formio.makeRequest(
-    //       "file",
-    //       `${formio.formUrl}/storage/s3?bucket=${XHR.trim(file.bucket)}&key=${XHR.trim(file.key)}`,
-    //       "GET"
-    //     )
-    //   } else {
-    //     return Promise.resolve(file)
-    //   }
-    // },
   }
 }
 s3custom.title = "s3custom"
