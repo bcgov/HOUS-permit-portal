@@ -3,6 +3,7 @@ import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
@@ -18,6 +19,7 @@ export const RequirementBlockStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     // View to get a RequirementBlock by id
     getRequirementBlockById(id: string) {

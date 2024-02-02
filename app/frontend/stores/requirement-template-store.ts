@@ -4,6 +4,7 @@ import * as R from "ramda"
 import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-tempate-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementTemplateModel } from "../models/requirement-template"
 import { ERequirementTemplateSortFields } from "../types/enums"
@@ -19,6 +20,7 @@ export const RequirementTemplateStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     // View to get a RequirementTemplate by id
     getRequirementTemplateById(id: string) {
@@ -27,6 +29,19 @@ export const RequirementTemplateStoreModel = types
     getSortColumnHeader(field: ERequirementTemplateSortFields) {
       //@ts-ignore
       return t(`requirementTemplate.fields.${toCamelCase(field)}`)
+    },
+  }))
+  .actions((self) => ({
+    __beforeMergeUpdate(requirementTemplate) {
+      // merge updates requirementBlocks
+      if (requirementTemplate.requirementTemplateSections?.length > 0) {
+        requirementTemplate.requirementTemplateSections.forEach((section) => {
+          section.templateSectionBlocks.forEach((sectionBlock) => {
+            sectionBlock.requirementBlock &&
+              self.rootStore.requirementBlockStore.mergeUpdate(sectionBlock.requirementBlock, "requirementBlockMap")
+          })
+        })
+      }
     },
   }))
 
@@ -60,7 +75,8 @@ export const RequirementTemplateStoreModel = types
 
       if (response.ok) {
         const templateData = response.data.data
-        self.requirementTemplateMap.put(templateData)
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
 
         return self.requirementTemplateMap.get(templateData.id)
       }
