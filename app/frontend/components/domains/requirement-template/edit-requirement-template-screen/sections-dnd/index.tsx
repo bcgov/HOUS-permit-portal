@@ -60,34 +60,6 @@ export function SectionsDnd({ sections }: IProps) {
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
 
-  const isSection = (id: UniqueIdentifier) => id in dndSectionMap
-  const getSectionById = (id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined => dndSectionMap[id]
-  const getSectionBlockById = (id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined => {
-    const sectionWithBlock = Object.values(dndSectionMap).find(
-      (section) =>
-        section.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
-          (blockAttribute) => blockAttribute.id === id
-        ) > -1
-    )
-    return sectionWithBlock?.requirementTemplateSectionRequirementBlocksAttributes?.find(
-      (blockAttribute) => blockAttribute.id === id
-    )
-  }
-
-  const getSectionOrParentSection = (id: UniqueIdentifier) => {
-    if (isSection(id)) {
-      return getSectionById(id)
-    }
-    const sectionWithBlock = Object.values(dndSectionMap).find(
-      (section) =>
-        section.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
-          (blockAttribute) => blockAttribute.id === id
-        ) > -1
-    )
-
-    return sectionWithBlock
-  }
-
   /**
    * Custom collision detection strategy optimized for multiple containers
    *
@@ -320,6 +292,40 @@ export function SectionsDnd({ sections }: IProps) {
         },
       })
     })
+  }
+
+  function isSection(id: UniqueIdentifier) {
+    return id in dndSectionMap
+  }
+
+  function getSectionById(id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined {
+    return dndSectionMap[id]
+  }
+
+  function getSectionBlockById(id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined {
+    const sectionWithBlock = Object.values(dndSectionMap).find(
+      (section) =>
+        section.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
+          (blockAttribute) => blockAttribute.id === id
+        ) > -1
+    )
+    return sectionWithBlock?.requirementTemplateSectionRequirementBlocksAttributes?.find(
+      (blockAttribute) => blockAttribute.id === id
+    )
+  }
+
+  function getSectionOrParentSection(id: UniqueIdentifier) {
+    if (isSection(id)) {
+      return getSectionById(id)
+    }
+    const sectionWithBlock = Object.values(dndSectionMap).find(
+      (section) =>
+        section.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
+          (blockAttribute) => blockAttribute.id === id
+        ) > -1
+    )
+
+    return sectionWithBlock
   }
 
   function onDragEnd({ active, over }: DragEndEvent) {
