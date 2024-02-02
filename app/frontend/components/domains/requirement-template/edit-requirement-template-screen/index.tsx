@@ -18,14 +18,27 @@ function formFormDefaults(requirementType?: IRequirementTemplate): IRequirementT
     return {
       description: "",
       requirementTemplateSectionsAttributes: [
-        { id: "A", name: "Section A" },
-        { id: "B", name: "Section B" },
-        { id: "C", name: "Section C" },
+        {
+          id: "A",
+          name: "Section A",
+          requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
+        },
+        {
+          id: "B",
+          name: "Section B",
+          requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
+        },
+        { id: "C", name: "Section C", requirementTemplateSectionRequirementBlocksAttributes: [] },
         {
           id: "D",
           name: "Section D",
+          requirementTemplateSectionRequirementBlocksAttributes: [],
         },
-        { id: "E", name: "Section E" },
+        {
+          id: "E",
+          name: "Section E",
+          requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
+        },
       ],
     }
   }
@@ -33,14 +46,27 @@ function formFormDefaults(requirementType?: IRequirementTemplate): IRequirementT
   return {
     description: requirementType.description,
     requirementTemplateSectionsAttributes: [
-      { id: "A", name: "Section A" },
-      { id: "B", name: "Section B" },
-      { id: "C", name: "Section C" },
+      {
+        id: "A",
+        name: "Section A",
+        requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
+      },
+      {
+        id: "B",
+        name: "Section B",
+        requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
+      },
+      { id: "C", name: "Section C", requirementTemplateSectionRequirementBlocksAttributes: [] },
       {
         id: "D",
         name: "Section D",
+        requirementTemplateSectionRequirementBlocksAttributes: [],
       },
-      { id: "E", name: "Section D" },
+      {
+        id: "E",
+        name: "Section E",
+        requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
+      },
     ],
   }
 }
@@ -49,7 +75,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const { requirementTemplate, error } = useRequirementTemplate()
   const { t } = useTranslation()
   const formMethods = useForm({ defaultValues: formFormDefaults(requirementTemplate) })
-  const { reset } = formMethods
+  const { reset, watch } = formMethods
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
@@ -63,7 +89,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       <FormProvider {...formMethods}>
         <BuilderHeader requirementTemplate={requirementTemplate} />
         <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
-          <SectionsDnd />
+          <SectionsDnd sections={watch("requirementTemplateSectionsAttributes")} />
         </Flex>
       </FormProvider>
     </Flex>

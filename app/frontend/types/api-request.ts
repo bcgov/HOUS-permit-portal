@@ -22,9 +22,16 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementsAttribute[]
 }
 
+interface IRequirementTemplateSectionRequirementBlocksAttribute {
+  id?: string
+  requirementBlockId?: string
+  requirementTemplateSectionId?: string
+}
+
 export interface IRequirementTemplateSectionsAttribute {
-  id: string
+  id?: string
   name?: string
+  requirementTemplateSectionRequirementBlocksAttributes?: IRequirementTemplateSectionRequirementBlocksAttribute[]
 }
 
 export interface IRequirementTemplateParams {
