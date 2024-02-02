@@ -1,4 +1,4 @@
-class RequirementTemplateSectionRequirementBlock < ApplicationRecord
+class TemplateSectionBlock < ApplicationRecord
   belongs_to :requirement_template_section
   belongs_to :requirement_block
 

@@ -22,7 +22,7 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementsAttribute[]
 }
 
-interface IRequirementTemplateSectionRequirementBlocksAttribute {
+interface ITemplateSectionBlocksAttribute {
   id?: string
   requirementBlockId?: string
   requirementTemplateSectionId?: string
@@ -31,7 +31,7 @@ interface IRequirementTemplateSectionRequirementBlocksAttribute {
 export interface IRequirementTemplateSectionsAttribute {
   id?: string
   name?: string
-  requirementTemplateSectionRequirementBlocksAttributes?: IRequirementTemplateSectionRequirementBlocksAttribute[]
+  templateSectionBlocksAttributes?: ITemplateSectionBlocksAttribute[]
 }
 
 export interface IRequirementTemplateParams {

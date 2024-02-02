@@ -1,8 +1,8 @@
 class RequirementTemplateSection < ApplicationRecord
   belongs_to :requirement_template
 
-  has_many :requirement_template_section_requirement_blocks, -> { order(position: :asc) }, dependent: :destroy
-  has_many :requirement_blocks, through: :requirement_template_section_requirement_blocks
+  has_many :template_section_blocks, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_blocks, through: :template_section_blocks
 
   def to_form_json
     {

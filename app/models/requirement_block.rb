@@ -3,8 +3,8 @@ class RequirementBlock < ApplicationRecord
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
 
-  has_many :requirement_template_section_requirement_blocks, dependent: :destroy
-  has_many :requirement_templates, through: :requirement_template_section_requirement_blocks
+  has_many :template_section_blocks, dependent: :destroy
+  has_many :requirement_templates, through: :template_section_blocks
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
 
