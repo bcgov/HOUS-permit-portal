@@ -1,31 +1,18 @@
 /* tslint:disable */
 const s3custom = function Provider(formio) {
   const requestPresignedUrl = (file, fileName, url) => {
-    return new Promise((resolve, reject) => {
-      const params = new URLSearchParams({
-        filename: fileName,
-        type: file.type,
-        size: file.size,
-      })
+    const params = new URLSearchParams({
+      filename: fileName,
+      type: file.type,
+      size: file.size,
+    })
 
-      const xhr = new XMLHttpRequest()
-      xhr.open("GET", url == "undefined" ? `/api/storage/s3?${params.toString()}` : `${url}?${params.toString()}`, true)
-      xhr.setRequestHeader("Content-Type", "application/json")
-      xhr.setRequestHeader("Accept", "application/json")
-
-      xhr.onreadystatechange = function () {
-        if (this.readyState === XMLHttpRequest.DONE) {
-          if (this.status === 200) {
-            const response = JSON.parse(this.responseText)
-            // console.log("***get signed url request", response)
-            resolve(response)
-          } else {
-            reject("Failed to get pre-signed URL")
-          }
-        }
-      }
-
-      xhr.send()
+    return fetch(url == "undefined" ? `/api/storage/s3?${params.toString()}` : `${url}?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
     })
   }
 
@@ -33,11 +20,28 @@ const s3custom = function Provider(formio) {
     title: "s3custom",
     name: "s3custom",
 
-    uploadFile(file, fileName, dir, progressCallback, url, options, fileKey, groupPermissions, groupId, abortCallback) {
+    uploadFile: (
+      file,
+      fileName,
+      dir,
+      progressCallback,
+      url,
+      options,
+      fileKey,
+      groupPermissions,
+      groupId,
+      abortCallback
+    ) => {
       return new Promise((resolve, reject) => {
         // Step 1: Request a pre-signed URL from your Shrine.rb backend
         // console.log("***upload call", { fileName, dir, url, fileKey, options })
         requestPresignedUrl(file, fileName, url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            return response.json()
+          })
           .then((presignedData) => {
             // Step 2: Upload the file directly to the storage service using the pre-signed URL
             const xhr = new XMLHttpRequest()
@@ -112,38 +116,43 @@ const s3custom = function Provider(formio) {
             // Perform the actual upload
             xhr.send(formData)
           })
-          .catch(reject)
+          .catch((error) => {
+            reject("Failed to get pre-signed URL")
+          })
       })
     },
-    deleteFile(fileInfo, options) {
+    deleteFile: (fileInfo, options) => {
       //assume we will not have public-read acl, use shrine to generate the request
-      console.log("s3 custom delete file", fileInfo)
+      // console.log("s3 custom delete file", fileInfo)
     },
-    downloadFile(fileInfo, options) {
-      new Promise((resolve, reject) => {
+    downloadFile: (fileInfo, options) => {
+      return new Promise((resolve, reject) => {
         //assume we will not have public-read acl, use shrine to generate the request
         // console.log("s3 custom download files", fileInfo, options)
         //return a file value, the file value must have a url
-        const xhr = new XMLHttpRequest()
         const params = new URLSearchParams({
           key: fileInfo.key,
         })
-        xhr.open("GET", `/api/storage/s3/download?${params.toString()}`, true)
-        xhr.setRequestHeader("Content-Type", "application/json")
-        xhr.setRequestHeader("Accept", "application/json")
-        xhr.onreadystatechange = function () {
-          if (this.readyState === XMLHttpRequest.DONE) {
-            if (this.status === 200) {
-              const response = JSON.parse(this.responseText)
-              window.open(response.url, "_blank")
-              //NOT SURE WHY, BUT THIS RESOLVE DOES NOT CAUSE THE WINDOW.OPEN IN FORMIO
-              resolve(response)
-            } else {
-              reject("Failed to download file")
+        fetch(`/api/storage/s3/download?${params.toString()}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`)
             }
-          }
-        }
-        xhr.send()
+            return response.json()
+          })
+          .then((responseJson) => {
+            window.open(responseJson.url, "_blank")
+            resolve(responseJson)
+          })
+          .catch((error) => {
+            reject("Failed to get pre-signed URL")
+          })
       })
     },
   }
