@@ -1,4 +1,4 @@
-import { VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, HStack, Text, VStack } from "@chakra-ui/react"
 import {
   CollisionDetection,
   DndContext,
@@ -20,8 +20,10 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { Plus } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { IRequirementTemplateSectionsAttribute } from "../../../../../types/api-request"
 import { DroppableSection } from "./droppable-section"
 import { RequirementBlock } from "./requirement-block"
@@ -45,6 +47,7 @@ interface IProps {
 }
 
 export function SectionsDnd({ sections }: IProps) {
+  const { t } = useTranslation()
   const [dndSectionMap, setDndSectionMap] = useState(() =>
     sections.reduce<{ [key: string]: IRequirementTemplateSectionsAttribute }>((acc, section) => {
       acc[section.id] = section
@@ -140,69 +143,83 @@ export function SectionsDnd({ sections }: IProps) {
   }, [dndSectionMap])
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={collisionDetectionStrategy}
-      measuring={{
-        droppable: {
-          strategy: MeasuringStrategy.Always,
-        },
-      }}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDragCancel={onDragCancel}
-      onDragEnd={onDragEnd}
-    >
-      <VStack
-        w={"368px"}
-        alignItems={"flex-start"}
-        align-self={"stretch"}
-        px={3}
-        py={2}
-        borderRight={"1px solid"}
-        borderColor={"border.light"}
-        h={"100%"}
-        boxSizing={"border-box"}
+    <Box w={"368px"} as={"section"}>
+      <HStack w={"full"} justifyContent={"space-between"} bg={"theme.blue"} py={5} px={4}>
+        <Button size={"sm"} variant={"secondaryInverse"} leftIcon={<Plus />} isDisabled>
+          {t("requirementTemplate.edit.addSectionButton")}
+        </Button>
+        <ButtonGroup size={"sm"} isDisabled>
+          <Button variant={"primaryInverse"}>{t("ui.onlySave")}</Button>
+          <Button variant={"secondaryInverse"}>{t("ui.cancel")}</Button>
+        </ButtonGroup>
+      </HStack>
+      <Text as={"h3"} fontSize={"md"} color={"text.secondary"} fontWeight={700} py={1} px={4} bg={"greys.grey03"}>
+        {t("requirementTemplate.edit.dndTitle")}
+      </Text>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={collisionDetectionStrategy}
+        measuring={{
+          droppable: {
+            strategy: MeasuringStrategy.Always,
+          },
+        }}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDragCancel={onDragCancel}
+        onDragEnd={onDragEnd}
       >
-        <SortableContext items={sortedSectionIds} strategy={verticalListSortingStrategy}>
-          {sortedSectionIds.map((id) => {
-            const section = getSectionById(id)
-            const sectionBlocks = section?.requirementTemplateSectionRequirementBlocksAttributes
-            const isSortingSection = activeId in dndSectionMap
-            return (
-              <DroppableSection
-                key={section.id}
-                sectionName={section.name}
-                id={section.id}
-                childRequirementBlockIds={R.pluck("id", sectionBlocks)}
-              >
-                <SortableContext items={R.pluck("id", sectionBlocks ?? [])} strategy={verticalListSortingStrategy}>
-                  <VStack ml={7} borderLeft={"1px solid"} borderColor={"border.light"}>
-                    {sectionBlocks.map((block, index) => {
-                      return (
-                        <SortableRequirementBlock
-                          disabled={isSortingSection}
-                          key={block.id}
-                          id={block.id}
-                          requirementBlockName={block.id}
-                        />
-                      )
-                    })}
-                  </VStack>
-                </SortableContext>
-              </DroppableSection>
-            )
-          })}
-        </SortableContext>
-        <DragOverlay dropAnimation={dropAnimation}>
-          {activeId
-            ? isSection(activeId)
-              ? renderSectionDragOverlay(activeId)
-              : renderSortableRequirementBlockDragOverlay(activeId)
-            : null}
-        </DragOverlay>
-      </VStack>
-    </DndContext>
+        <VStack
+          w={"full"}
+          alignItems={"flex-start"}
+          align-self={"stretch"}
+          px={3}
+          py={2}
+          borderRight={"1px solid"}
+          borderColor={"border.light"}
+          h={"100%"}
+          boxSizing={"border-box"}
+        >
+          <SortableContext items={sortedSectionIds} strategy={verticalListSortingStrategy}>
+            {sortedSectionIds.map((id) => {
+              const section = getSectionById(id)
+              const sectionBlocks = section?.requirementTemplateSectionRequirementBlocksAttributes
+              const isSortingSection = activeId in dndSectionMap
+              return (
+                <DroppableSection
+                  key={section.id}
+                  sectionName={section.name}
+                  id={section.id}
+                  childRequirementBlockIds={R.pluck("id", sectionBlocks)}
+                >
+                  <SortableContext items={R.pluck("id", sectionBlocks ?? [])} strategy={verticalListSortingStrategy}>
+                    <VStack ml={7} borderLeft={"1px solid"} borderColor={"border.light"}>
+                      {sectionBlocks.map((block, index) => {
+                        return (
+                          <SortableRequirementBlock
+                            disabled={isSortingSection}
+                            key={block.id}
+                            id={block.id}
+                            requirementBlockName={block.id}
+                          />
+                        )
+                      })}
+                    </VStack>
+                  </SortableContext>
+                </DroppableSection>
+              )
+            })}
+          </SortableContext>
+          <DragOverlay dropAnimation={dropAnimation}>
+            {activeId
+              ? isSection(activeId)
+                ? renderSectionDragOverlay(activeId)
+                : renderSortableRequirementBlockDragOverlay(activeId)
+              : null}
+          </DragOverlay>
+        </VStack>
+      </DndContext>
+    </Box>
   )
 
   function onDragStart({ active }: DragStartEvent) {
