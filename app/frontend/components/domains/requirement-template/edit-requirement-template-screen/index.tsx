@@ -13,61 +13,42 @@ import { SectionsDnd } from "./sections-dnd"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateParams {}
 
+// TODO: remove stubbed sections when concrete data is available
+const stubbedSectionsAttributes = [
+  {
+    id: "A",
+    name: "Section A",
+    requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
+  },
+  {
+    id: "B",
+    name: "Section B",
+    requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
+  },
+  { id: "C", name: "Section C", requirementTemplateSectionRequirementBlocksAttributes: [] },
+  {
+    id: "D",
+    name: "Section D",
+    requirementTemplateSectionRequirementBlocksAttributes: [],
+  },
+  {
+    id: "E",
+    name: "Section E",
+    requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
+  },
+]
+
 function formFormDefaults(requirementType?: IRequirementTemplate): IRequirementTemplateForm {
   if (!requirementType) {
     return {
       description: "",
-      requirementTemplateSectionsAttributes: [
-        {
-          id: "A",
-          name: "Section A",
-          requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
-        },
-        {
-          id: "B",
-          name: "Section B",
-          requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
-        },
-        { id: "C", name: "Section C", requirementTemplateSectionRequirementBlocksAttributes: [] },
-        {
-          id: "D",
-          name: "Section D",
-          requirementTemplateSectionRequirementBlocksAttributes: [],
-        },
-        {
-          id: "E",
-          name: "Section E",
-          requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
-        },
-      ],
+      requirementTemplateSectionsAttributes: stubbedSectionsAttributes,
     }
   }
 
   return {
     description: requirementType.description,
-    requirementTemplateSectionsAttributes: [
-      {
-        id: "A",
-        name: "Section A",
-        requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
-      },
-      {
-        id: "B",
-        name: "Section B",
-        requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
-      },
-      { id: "C", name: "Section C", requirementTemplateSectionRequirementBlocksAttributes: [] },
-      {
-        id: "D",
-        name: "Section D",
-        requirementTemplateSectionRequirementBlocksAttributes: [],
-      },
-      {
-        id: "E",
-        name: "Section E",
-        requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
-      },
-    ],
+    requirementTemplateSectionsAttributes: stubbedSectionsAttributes,
   }
 }
 
