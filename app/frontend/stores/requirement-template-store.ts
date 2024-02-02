@@ -30,6 +30,19 @@ export const RequirementTemplateStoreModel = types
       return t(`requirementTemplate.fields.${toCamelCase(field)}`)
     },
   }))
+  .actions((self) => ({
+    __beforeMergeUpdate(requirementTemplate) {
+      // merge updates requirementBlocks
+      if (requirementTemplate.requirementTemplateSections?.length > 0) {
+        requirementTemplate.requirementTemplateSections.forEach((section) => {
+          section.templateSectionBlocks.forEach((sectionBlock) => {
+            sectionBlock.requirementBlock &&
+              self.rootStore.requirementBlockStore.mergeUpdate(sectionBlock.requirementBlock, "requirementBlockMap")
+          })
+        })
+      }
+    },
+  }))
 
   .actions((self) => ({
     fetchRequirementTemplates: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -62,7 +75,8 @@ export const RequirementTemplateStoreModel = types
 
       if (response.ok) {
         const templateData = response.data.data
-        self.requirementTemplateMap.put(templateData)
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
 
         return self.requirementTemplateMap.get(templateData.id)
       }

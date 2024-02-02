@@ -20,7 +20,7 @@ export const useRequirementTemplate = () => {
       return
     }
 
-    if (!requirementTemplate) {
+    if (!requirementTemplate || !requirementTemplate.isFullyLoaded) {
       ;(async () => {
         try {
           const isSuccess = await requirementTemplateStore.fetchRequirementTemplate(requirementTemplateId)
