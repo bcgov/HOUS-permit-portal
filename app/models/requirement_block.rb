@@ -28,7 +28,7 @@ class RequirementBlock < ApplicationRecord
     }
   end
 
-  def key(section_key)
+  def key(section_key = nil)
     "formSubmissionDataRST#{section_key}|RB#{id}"
   end
 

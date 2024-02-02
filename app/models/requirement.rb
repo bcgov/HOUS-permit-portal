@@ -90,11 +90,11 @@ class Requirement < ApplicationRecord
     input_options["number_unit"]
   end
 
-  def key(requirement_block_key = requirement_block.key)
+  def key(requirement_block_key)
     "#{requirement_block_key}|#{requirement_code}"
   end
 
-  def to_form_json(requirement_block_key)
+  def to_form_json(requirement_block_key = requirement_block&.key)
     json = {
       id: id,
       key: key(requirement_block_key),
