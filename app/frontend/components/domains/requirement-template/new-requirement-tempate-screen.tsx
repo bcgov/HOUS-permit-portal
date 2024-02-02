@@ -20,7 +20,7 @@ interface INewRequirementTemplateScreenProps {}
 export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplateScreenProps) => {
   const { t } = useTranslation()
   const {
-    RequirementTemplateStoreModel: { createRequirementTemplate },
+    requirementTemplateStore: { createRequirementTemplate },
     permitClassificationStore: { fetchPermitTypeIdOptions, fetchActivityIdOptions },
   } = useMst()
 

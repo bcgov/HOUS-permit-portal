@@ -19,8 +19,8 @@ export const RootStoreModel = types
     permitApplicationStore: types.optional(PermitApplicationStoreModel, {}),
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
-    RequirementBlockStoreModel: types.optional(RequirementBlockStoreModel, {}),
-    RequirementTemplateStoreModel: types.optional(RequirementTemplateStoreModel, {}),
+    requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
+    requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
   })
   .extend(withEnvironment())
@@ -34,7 +34,7 @@ export interface IRootStore extends IStateTreeNode {
   permitClassificationStore: IPermitClassificationStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
-  RequirementBlockStoreModel: IRequirementBlockStoreModel
-  RequirementTemplateStoreModel: IRequirementTemplateStoreModel
+  requirementBlockStore: IRequirementBlockStoreModel
+  requirementTemplateStore: IRequirementTemplateStoreModel
   geocoderStore: IGeocoderStore
 }

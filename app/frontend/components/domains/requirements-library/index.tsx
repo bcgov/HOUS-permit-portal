@@ -29,7 +29,7 @@ import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
 export const RequirementsLibraryScreen = observer(function RequirementsLibrary() {
-  const { RequirementBlockStoreModel } = useMst()
+  const { requirementBlockStore } = useMst()
   const {
     tableRequirementBlocks,
     currentPage,
@@ -39,10 +39,10 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
-  } = RequirementBlockStoreModel
+  } = requirementBlockStore
   const { t } = useTranslation()
 
-  useSearch(RequirementBlockStoreModel as ISearch)
+  useSearch(requirementBlockStore as ISearch)
 
   return (
     <Container maxW="container.lg" p={8} as="main">

@@ -35,7 +35,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const { fetchPermitTypeOptions, fetchActivityOptions, isLoading } = permitClassificationStore
 
   const onSubmit = (formValues) => {
-    console.tron.log(formValues)
+    // TODO
   }
 
   return (

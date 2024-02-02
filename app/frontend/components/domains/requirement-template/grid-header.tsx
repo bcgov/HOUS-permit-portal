@@ -8,8 +8,8 @@ import { SearchInput } from "../../shared/base/search-input"
 import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { RequirementTemplateStoreModel } = useMst()
-  const { sort, toggleSort, getSortColumnHeader } = RequirementTemplateStoreModel
+  const { requirementTemplateStore } = useMst()
+  const { sort, toggleSort, getSortColumnHeader } = requirementTemplateStore
   const { t } = useTranslation()
 
   return (
@@ -26,7 +26,7 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
             {t("requirementTemplate.index.tableHeading")}
           </Text>
-          <SearchInput searchModel={RequirementTemplateStoreModel} />
+          <SearchInput searchModel={requirementTemplateStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>

@@ -12,13 +12,13 @@ const helperTextStyles: Partial<TextProps> = {
 }
 
 export const BlockSetup = observer(function BlockSetup() {
-  const { RequirementBlockStoreModel } = useMst()
+  const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
   const { register, control, watch } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const fetchAssociationOptions = async (query: string) => {
-    const associations = await RequirementBlockStoreModel.searchAssociations(query)
+    const associations = await requirementBlockStore.searchAssociations(query)
     return associations.map((association) => ({ value: association, label: association }))
   }
 
