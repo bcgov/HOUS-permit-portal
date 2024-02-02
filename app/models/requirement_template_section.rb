@@ -16,7 +16,7 @@ class RequirementTemplateSection < ApplicationRecord
       title: name,
       collapsible: true,
       initially_collapsed: false,
-      components: requirement_blocks.map(&:to_form_json),
+      components: requirement_blocks.map { |rb| rb.to_form_json(key) },
     }
   end
 end

@@ -4,7 +4,8 @@ class RequirementBlock < ApplicationRecord
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
 
   has_many :requirement_template_section_requirement_blocks, dependent: :destroy
-  has_many :requirement_templates, through: :requirement_template_section_requirement_blocks
+  has_many :requirement_template_sections, through: :requirement_template_section_requirement_blocks
+  has_many :requirement_templates, through: :requirement_template_sections
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
 
@@ -27,19 +28,19 @@ class RequirementBlock < ApplicationRecord
     }
   end
 
-  def key
-    "formSubmissionDataRequirementblock#{id}"
+  def key(section_key)
+    "formSubmissionDataRST#{section_key}|RB#{id}"
   end
 
-  def to_form_json
+  def to_form_json(section_key = nil)
     {
       id: id,
       legend: name,
-      key: key,
+      key: key(section_key),
       label: name,
       input: false,
       tableView: false,
-      components: requirements.map(&:to_form_json),
+      components: requirements.map { |r| r.to_form_json(key(section_key)) },
     }
   end
 

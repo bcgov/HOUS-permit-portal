@@ -90,14 +90,21 @@ class Requirement < ApplicationRecord
     input_options["number_unit"]
   end
 
-  def key
-    "#{requirement_block.key}|#{requirement_code}"
+  def key(requirement_block_key = requirement_block.key)
+    "#{requirement_block_key}|#{requirement_code}"
   end
 
-  def to_form_json
-    json = { id: id, key: key, type: input_type, input: true, label: label, widget: { type: "input" } }.merge!(
-      formio_type_options,
-    )
+  def to_form_json(requirement_block_key)
+    json = {
+      id: id,
+      key: key(requirement_block_key),
+      type: input_type,
+      input: true,
+      label: label,
+      widget: {
+        type: "input",
+      },
+    }.merge!(formio_type_options)
 
     if input_type_select? || input_type_multi_option_select?
       json.merge!({ data: { values: input_options["value_options"] } })
