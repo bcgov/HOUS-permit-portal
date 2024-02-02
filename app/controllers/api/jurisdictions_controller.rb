@@ -34,8 +34,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     if @jurisdiction.save
       render_success @jurisdiction, "jurisdiction.create_success", { blueprint: JurisdictionBlueprint }
     else
-      render_error Constants::Error::JURISDICTION_CREATE_ERROR,
-                   "jurisdiction.create_error",
+      render_error "jurisdiction.create_error",
                    message_opts: {
                      error_message: @jurisdiction.errors.full_messages.join(", "),
                    }
@@ -75,6 +74,6 @@ class Api::JurisdictionsController < Api::ApplicationController
   def set_jurisdiction
     @jurisdiction = Jurisdiction.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error(Constants::Error::NOT_FOUND_ERROR, "misc.not_found_error", status: :not_found)
+    render_error("misc.not_found_error", status: :not_found)
   end
 end

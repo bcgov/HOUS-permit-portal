@@ -49,9 +49,12 @@ Rails.application.routes.draw do
       get "locality_type_options", on: :collection
     end
 
-    resources :permit_classifications, only: %i[] do
-      get "permit_type_options", on: :collection
-      get "activity_options", on: :collection
+    resources :permit_classifications, only: %i[index] do
+    end
+
+    resources :geocoder, only: %i[] do
+      get "site_options", on: :collection
+      get "pid", on: :collection
     end
 
     resources :permit_applications, only: %i[index create show update]
@@ -69,5 +72,8 @@ Rails.application.routes.draw do
   get "/reset-password" => "home#index", :as => :reset_password
   get "/login" => "home#index", :as => :login
   get "/accept-invitation" => "home#index", :as => :accept_invitation
-  get "/*path", to: "home#index", format: false, constraints: ->(req) { !req.path.include?("/rails") }
+  get "/*path",
+      to: "home#index",
+      format: false,
+      constraints: ->(req) { !req.path.include?("/rails") && !req.path.start_with?("/public") }
 end

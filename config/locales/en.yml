@@ -56,6 +56,13 @@ en:
       failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
+    geocoder:
+      site_options_error:
+        title: Oops
+        message: Error encountered fetching site options
+      pid_error:
+        title: Oops
+        message: Error encountered fetching pid for address
     user:
       login_error:
         title: Failed to login.

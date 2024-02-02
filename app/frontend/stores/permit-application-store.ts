@@ -64,8 +64,8 @@ export const PermitApplicationStoreModel = types
         let responseData = response.data.data
         self.mergeUpdateAll(responseData, "permitApplicationMap")
         //TODO: add pagination
-        return true
       }
+      return response.ok
     }),
   }))
 

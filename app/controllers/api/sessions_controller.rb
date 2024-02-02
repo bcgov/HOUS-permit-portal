@@ -7,7 +7,7 @@ class Api::SessionsController < Devise::SessionsController
   def create
     # override by manually throwing the error in our format for front end
     user = warden.authenticate(auth_options)
-    return render_error(Constants::Error::USER_LOGIN_ERROR, "user.login_error", status: :unauthorized) unless user
+    return render_error("user.login_error", status: :unauthorized) unless user
 
     self.resource = user
 
@@ -31,7 +31,7 @@ class Api::SessionsController < Devise::SessionsController
       # clear the cookie so user can try and login again
       name, cookie = Devise::JWT::Cookie::CookieHelper.new.build(nil)
       Rack::Utils.set_cookie_header!(headers, name, cookie)
-      render_error(Constants::Error::INVALID_TOKEN_ERROR, nil, status: :unauthorized)
+      render_error(nil, status: :unauthorized)
     end
   end
 end

@@ -35,8 +35,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     if @requirement_block.save
       render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
-      render_error Constants::Error::REQUIREMENT_BLOCK_CREATE_ERROR,
-                   "requirement_block.create_error",
+      render_error "requirement_block.create_error",
                    message_opts: {
                      error_message: @requirement_block.errors.full_messages.join(", "),
                    }
@@ -49,8 +48,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     if @requirement_block.update(requirement_block_params)
       render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
-      render_error Constants::Error::REQUIREMENT_BLOCK_UPDATE_ERROR,
-                   "requirement_block.update_error",
+      render_error "requirement_block.update_error",
                    message_opts: {
                      error_message: @requirement_block.errors.full_messages.join(", "),
                    }
@@ -63,8 +61,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     if @requirement_block.destroy
       render json: {}, status: :ok
     else
-      render_error Constants::Error::REQUIREMENT_BLOCK_DELETE_ERROR,
-                   "requirement_block.delete_error",
+      render_error "requirement_block.delete_error",
                    message_opts: {
                      error_message: @requirement_block.errors.full_messages.join(", "),
                    }
