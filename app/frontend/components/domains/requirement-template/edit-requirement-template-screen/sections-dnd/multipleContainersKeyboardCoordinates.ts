@@ -6,9 +6,10 @@ import {
   getFirstCollision,
 } from "@dnd-kit/core"
 
+// from https://github.com/clauderic/dnd-kit/blob/master/stories/2%20-%20Presets/Sortable/
 const directions: string[] = [KeyboardCode.Down, KeyboardCode.Right, KeyboardCode.Up, KeyboardCode.Left]
 
-export const coordinateGetter: KeyboardCoordinateGetter = (
+export const multipleContainersKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
   event,
   { context: { active, droppableRects, droppableContainers, collisionRect } }
 ) => {
@@ -37,8 +38,8 @@ export const coordinateGetter: KeyboardCoordinateGetter = (
       if (data) {
         const { type, children } = data
 
-        if (type === "container" && children?.length > 0) {
-          if (active.data.current?.type !== "container") {
+        if (type === "section" && children?.length > 0) {
+          if (active.data.current?.type !== "section") {
             return
           }
         }
@@ -90,7 +91,7 @@ export const coordinateGetter: KeyboardCoordinateGetter = (
           }
         }
 
-        if (newDroppable.data.current?.type === "container") {
+        if (newDroppable.data.current?.type === "section") {
           return {
             x: newRect.left + 20,
             y: newRect.top + 74,
