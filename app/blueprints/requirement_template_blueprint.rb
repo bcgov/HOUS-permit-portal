@@ -6,5 +6,6 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   association :activity, blueprint: PermitClassificationBlueprint
 
   view :extended do
+    association :requirement_template_sections, blueprint: RequirementTemplateSectionBlueprint
   end
 end
