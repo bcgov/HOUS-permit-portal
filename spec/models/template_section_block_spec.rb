@@ -1,5 +1,5 @@
 require "rails_helper"
 
-RSpec.describe RequirementTemplateSectionRequirementBlock, type: :model do
+RSpec.describe TemplateSectionBlock, type: :model do
   pending "add some examples to (or delete) #{__FILE__}"
 end

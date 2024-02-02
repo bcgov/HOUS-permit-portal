@@ -86,7 +86,7 @@ class RequirementsFromXlsxSeeder
 
           rsrb =
             req_template_section
-              .requirement_template_section_requirement_blocks
+              .template_section_blocks
               .where(requirement_block: rb)
               .first_or_initialize(requirement_block: rb)
           rsrb.update!(position: rstrb_position_incrementer[req_template_section.name] || 0)

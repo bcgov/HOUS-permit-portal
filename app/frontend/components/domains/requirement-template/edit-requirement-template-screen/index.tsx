@@ -18,23 +18,23 @@ const stubbedSectionsAttributes = [
   {
     id: "A",
     name: "Section A",
-    requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
+    templateSectionBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
   },
   {
     id: "B",
     name: "Section B",
-    requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
+    templateSectionBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
   },
-  { id: "C", name: "Section C", requirementTemplateSectionRequirementBlocksAttributes: [] },
+  { id: "C", name: "Section C", templateSectionBlocksAttributes: [] },
   {
     id: "D",
     name: "Section D",
-    requirementTemplateSectionRequirementBlocksAttributes: [],
+    templateSectionBlocksAttributes: [],
   },
   {
     id: "E",
     name: "Section E",
-    requirementTemplateSectionRequirementBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
+    templateSectionBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
   },
 ]
 
