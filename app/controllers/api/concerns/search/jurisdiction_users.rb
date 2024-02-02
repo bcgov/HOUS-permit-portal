@@ -8,12 +8,27 @@ module Api::Concerns::Search::JurisdictionUsers
         where: {
           jurisdiction_id: @jurisdiction&.id,
           discarded: discarded,
-          role: current_user.super_admin? ? ["review_manager"] : (User.roles.keys - %w[super_admin submitter]),
+          # Only show the review managers if current user is a super admin, but also show reviewers if a review manager
+          role:
+            (
+              if current_user.super_admin?
+                ["review_manager"]
+              else
+                (User.roles.keys - %w[super_admin submitter])
+              end
+            ),
         },
         order: order,
         match: :word_start,
         page: user_search_params[:page],
-        per_page: user_search_params[:page] ? (user_search_params[:per_page] || Kaminari.config.default_per_page) : nil,
+        per_page:
+          (
+            if user_search_params[:page]
+              (user_search_params[:per_page] || Kaminari.config.default_per_page)
+            else
+              nil
+            end
+          ),
       )
   end
 

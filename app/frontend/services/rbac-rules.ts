@@ -12,7 +12,14 @@ const sharedDynamicRules = {
 
 export const rules = {
   [EUserRoles.superAdmin]: {
-    static: [...sharedStaticRules, "jurisdiction:create", "jurisdiction:manage", "user:invite", "user:manage"],
+    static: [
+      ...sharedStaticRules,
+      "jurisdiction:create",
+      "jurisdiction:manage",
+      "user:invite",
+      "user:manage",
+      "requirementTemplate:manage",
+    ],
     dynamic: { ...sharedDynamicRules },
   },
   [EUserRoles.reviewManager]: {

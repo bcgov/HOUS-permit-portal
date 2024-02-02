@@ -13,8 +13,11 @@ class RequirementTemplate < ApplicationRecord
   validate :scheduled_for_presence_if_scheduled
 
   before_create :set_default_version
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
 
   enum status: { draft: 0, scheduled: 1, published: 2 }, _default: 0
+
+  include Discard::Model
 
   def jurisdictions_size
     jurisdictions.size
@@ -37,10 +40,15 @@ class RequirementTemplate < ApplicationRecord
       version: version,
       permit_type: permit_type.name,
       activity: activity.name,
+      discarded: discarded_at.present?,
     }
   end
 
   private
+
+  def refresh_search_index
+    RequirementTemplate.search_index.refresh
+  end
 
   def scheduled_for_presence_if_scheduled
     errors.add(:scheduled_for, "must be set when status is 'scheduled'") if scheduled? && scheduled_for.blank?

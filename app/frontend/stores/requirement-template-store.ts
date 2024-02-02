@@ -42,6 +42,7 @@ export const RequirementTemplateStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
+          showArchived: self.showArchived,
         })
       )
 

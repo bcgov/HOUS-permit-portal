@@ -166,4 +166,12 @@ export class Api {
   async fetchPid(siteId: string) {
     return this.client.get<ApiResponse<string>>(`/geocoder/pid`, { siteId })
   }
+
+  async destroyRequirementTemplate(id) {
+    return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}`)
+  }
+
+  async restoreRequirementTemplate(id) {
+    return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
+  }
 }

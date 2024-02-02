@@ -7,10 +7,12 @@ import { useMst } from "../../../setup/root"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { ToggleArchivedButton } from "../../shared/buttons/show-archived-button"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { ManageRequirementTemplateMenu } from "../../shared/requirement-template/mange-requirement-template-menu"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { GridHeaders } from "./grid-header"
 
@@ -67,8 +69,9 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
                   <SearchGridItem>{rt.version}</SearchGridItem>
                   <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
                   <SearchGridItem>
-                    <Flex justify="space-between" w="full">
+                    <Flex justify="space-between" w="full" gap={2}>
                       <RouterLink to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLink>
+                      <ManageRequirementTemplateMenu requirementTemplate={rt} searchModel={requirementTemplateStore} />
                     </Flex>
                   </SearchGridItem>
                 </Box>
@@ -90,6 +93,8 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
             handlePageChange={handlePageChange}
           />
         </Flex>
+
+        <ToggleArchivedButton searchModel={requirementTemplateStore} mt={3} />
       </VStack>
     </Container>
   )

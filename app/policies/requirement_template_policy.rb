@@ -11,6 +11,14 @@ class RequirementTemplatePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def destroy?
+    create?
+  end
+
+  def restore?
+    create?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

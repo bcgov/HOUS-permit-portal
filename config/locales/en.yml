@@ -31,24 +31,24 @@ en:
   arbitrary_message_construct:
     devise:
       failure:
-        already_authenticated: "You are already signed in."
-        inactive: "Your account is not activated yet."
-        invalid: "Invalid %{authentication_keys} or password."
-        locked: "Your account is locked."
-        last_attempt: "You have one more attempt before your account is locked."
-        not_found_in_database: "Invalid %{authentication_keys} or password."
-        timeout: "Your session expired. Please sign in again to continue."
-        unauthenticated: "You need to sign in or sign up before continuing."
-        unconfirmed: "You have to confirm your email address before continuing."
+        already_authenticated: "You are already signed in"
+        inactive: "Your account is not activated yet"
+        invalid: "Invalid %{authentication_keys} or password"
+        locked: "Your account is locked"
+        last_attempt: "You have one more attempt before your account is locked"
+        not_found_in_database: "Invalid %{authentication_keys} or password"
+        timeout: "Your session expired. Please sign in again to continue"
+        unauthenticated: "You need to sign in or sign up before continuing"
+        unconfirmed: "You have to confirm your email address before continuing"
       confirmed:
         title: "Confirmed"
-        message: "Your email address has been successfully confirmed."
+        message: "Your email address has been successfully confirmed"
       send_paranoid_instructions:
         title: "Check your inbox"
-        message: "Please check your email inbox for instructions on how to proceed. The Email will contain instructions on how to change your password in a few minutes."
+        message: "Please check your email inbox for instructions on how to proceed. The Email will contain instructions on how to change your password in a few minutes"
       password_updated:
         title: "Password updated"
-        message: "Your password has been changed successfully."
+        message: "Your password has been changed successfully"
     omniauth:
       failure:
         title: BCeID login failed
@@ -78,13 +78,13 @@ en:
         message: The invitation link is invalid or has expired. Please ask your administrator to re-invite you to the workspace.
       create_invite_error:
         title: Oops
-        message: "Something went wrong inviting users."
+        message: "Something went wrong inviting users"
       remove_invite_error:
         title: Oops
-        message: "Something went wrong canceling the invite."
+        message: "Something went wrong canceling the invite"
       resend_invite_error:
         title: Oops
-        message: "Something went wrong re-sending the invite."
+        message: "Something went wrong re-sending the invite"
       authorization_error:
         title: Not authorized.
         message: User is not authorized to perform this aciton.
@@ -111,32 +111,32 @@ en:
         message: The user was updated successfully
       update_error:
         title: Oops
-        message: "There was an error updating the user."
+        message: "There was an error updating the user"
       update_password_error:
         title: Oops
-        message: "The provided current password is incorrect."
+        message: "The provided current password is incorrect"
       destroy_success:
         title: ""
         message: The user was archived successfully
       destroy_error:
         title: "Oops"
-        message: "There was an error archiving the user."
+        message: "There was an error archiving the user"
       restore_success:
         title: ""
         message: The user was restored successfully
       restore_error:
         title: "Oops"
-        message: "There was an error restoring the user."
+        message: "There was an error restoring the user"
     requirement_block:
       create_error:
         title: Oops
-        message: "Something went wrong creating the requirement block."
+        message: "Something went wrong creating the requirement block"
       update_error:
         title: Oops
-        message: "Something went wrong updating the requirement block."
+        message: "Something went wrong updating the requirement block"
       delete_error:
         title: Oops
-        message: "Something went wrong deleting the requirement block."
+        message: "Something went wrong deleting the requirement block"
     requirement_template:
       create_success:
         title: ""
@@ -144,12 +144,24 @@ en:
       create_error:
         title: Oops
         message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: "New template archived successfully"
+      destroy_error:
+        title: Oops
+        message: "Something went wrong archiving the template"
       update_error:
         title: Oops
         message: "%{error_message}"
       delete_error:
         title: Oops
         message: "%{error_message}"
+      restore_success:
+        title: ""
+        message: The template was restored successfully
+      restore_error:
+        title: "Oops"
+        message: "There was an error restoring the template"
     jurisdiction:
       create_error:
         title: Oops

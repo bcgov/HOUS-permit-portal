@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_01_31_225517) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_02_181210) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -55,7 +55,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_225517) do
 
   create_table "jurisdictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
-    t.text "description"
     t.jsonb "checklist_slate_data"
     t.jsonb "look_out_slate_data"
     t.datetime "created_at", null: false
@@ -65,6 +64,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_225517) do
     t.string "type"
     t.string "locality_type"
     t.uuid "regional_district_id"
+    t.text "description"
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
   end
 
@@ -139,7 +139,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_01_31_225517) do
     t.string "description"
     t.string "version"
     t.date "scheduled_for"
+    t.datetime "discarded_at"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
+    t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
     t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
   end
 
