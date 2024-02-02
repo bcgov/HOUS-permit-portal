@@ -19,7 +19,7 @@ export function DroppableSection({
   containerProps,
   ...sectionProps
 }: IDroppableSectionProps) {
-  const { attributes, isDragging, listeners, setNodeRef, transition, transform } = useSortable({
+  const { active, over, attributes, isDragging, listeners, setNodeRef, transition, transform } = useSortable({
     id,
     data: {
       type: "section",
@@ -34,9 +34,6 @@ export function DroppableSection({
     transition,
     ...containerProps?.style,
   }
-  // const isOverContainer = over
-  //   ? (id === over.id && active?.data.current?.type !== "container") || items.includes(over.id)
-  //   : false
 
   return (
     <Section

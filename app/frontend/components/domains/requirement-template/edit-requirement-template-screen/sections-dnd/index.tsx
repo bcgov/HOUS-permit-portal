@@ -2,6 +2,7 @@ import { VStack } from "@chakra-ui/react"
 import {
   CollisionDetection,
   DndContext,
+  DragEndEvent,
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
@@ -18,7 +19,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { IRequirementTemplateSectionsAttribute } from "../../../../../types/api-request"
@@ -26,6 +27,8 @@ import { DroppableSection } from "./droppable-section"
 import { RequirementBlock } from "./requirement-block"
 import { Section } from "./section"
 import { SortableRequirementBlock } from "./sortable-requirement-block"
+
+// using https://github.com/clauderic/dnd-kit/blob/master/stories/2%20-%20Presets/Sortable/MultipleContainers.tsx as base example
 
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -48,7 +51,7 @@ export function SectionsDnd({ sections }: IProps) {
       return acc
     }, {})
   )
-  const [sortedSectionIds, setSortedSections] = useState(Object.keys(dndSectionMap))
+  const [sortedSectionIds, setSortedSectionIds] = useState(Object.keys(dndSectionMap))
   const [clonedDndSectionMap, setClonedDndSectionMap] = useState<{
     [key: string]: IRequirementTemplateSectionsAttribute
   } | null>(null)
@@ -85,9 +88,6 @@ export function SectionsDnd({ sections }: IProps) {
     return sectionWithBlock
   }
 
-  const isSectionBlock = (id: UniqueIdentifier): boolean => !!getSectionBlockById(id)
-
-  // from https://github.com/clauderic/dnd-kit/blob/master/stories/2%20-%20Presets/Sortable/MultipleContainers.tsx
   /**
    * Custom collision detection strategy optimized for multiple containers
    *
@@ -179,63 +179,7 @@ export function SectionsDnd({ sections }: IProps) {
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragCancel={onDragCancel}
-      onDragEnd={({ active, over }) => {
-        setActiveId(null)
-        //
-        // if (active.id in items && over?.id) {
-        //   setContainers((containers) => {
-        //     const activeIndex = containers.indexOf(active.id)
-        //     const overIndex = containers.indexOf(over.id)
-        //
-        //     return arrayMove(containers, activeIndex, overIndex)
-        //   })
-        // }
-        //
-        // const activeContainer = findContainer(active.id)
-        //
-        // if (!activeContainer) {
-        //   setActiveId(null)
-        //   return
-        // }
-        //
-        // const overId = over?.id
-        //
-        // if (overId == null) {
-        //   setActiveId(null)
-        //   return
-        // }
-        //
-        // if (overId === PLACEHOLDER_ID) {
-        //   const newContainerId = getNextContainerId()
-        //
-        //   unstable_batchedUpdates(() => {
-        //     setContainers((containers) => [...containers, newContainerId])
-        //     setItems((items) => ({
-        //       ...items,
-        //       [activeContainer]: items[activeContainer].filter((id) => id !== activeId),
-        //       [newContainerId]: [active.id],
-        //     }))
-        //     setActiveId(null)
-        //   })
-        //   return
-        // }
-        //
-        // const overContainer = findContainer(overId)
-        //
-        // if (overContainer) {
-        //   const activeIndex = items[activeContainer].indexOf(active.id)
-        //   const overIndex = items[overContainer].indexOf(overId)
-        //
-        //   if (activeIndex !== overIndex) {
-        //     setItems((items) => ({
-        //       ...items,
-        //       [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
-        //     }))
-        //   }
-        // }
-        //
-        // setActiveId(null)
-      }}
+      onDragEnd={onDragEnd}
     >
       <VStack
         w={"368px"}
@@ -376,6 +320,66 @@ export function SectionsDnd({ sections }: IProps) {
         },
       })
     })
+  }
+
+  function onDragEnd({ active, over }: DragEndEvent) {
+    // if active item is a section then only need to resort the section ids
+    if (isSection(active.id) && over?.id) {
+      setSortedSectionIds((pastSectionIds) => {
+        const activeIndex = pastSectionIds.indexOf(active.id as string)
+        const overIndex = pastSectionIds.indexOf(over.id as string)
+
+        return arrayMove(pastSectionIds, activeIndex, overIndex)
+      })
+    }
+
+    const activeSection = getSectionOrParentSection(active.id)
+
+    if (!activeSection) {
+      setActiveId(null)
+      return
+    }
+
+    const overId = over?.id
+
+    if (!overId) {
+      setActiveId(null)
+      return
+    }
+
+    const overSection = getSectionOrParentSection(overId)
+
+    if (overSection) {
+      const activeBlockIndex = activeSection.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
+        (block) => block.id === active.id
+      )
+      const overBlockIndex = overSection.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
+        (block) => block.id === overId
+      )
+
+      if (activeBlockIndex !== overBlockIndex) {
+        // moves active block to new position within the same section. We only consider
+        // the same section because if a block is moved to a new section, that movement
+        // is already handled by the `onDragOver` handler as that places the active block
+        // to the new section.
+        setDndSectionMap((pastSectionsMap) => {
+          const clonedPastSectionsMap = R.clone(pastSectionsMap)
+          return {
+            ...clonedPastSectionsMap,
+            [overSection.id]: {
+              ...clonedPastSectionsMap[overSection.id],
+              requirementTemplateSectionRequirementBlocksAttributes: arrayMove(
+                pastSectionsMap[overSection.id].requirementTemplateSectionRequirementBlocksAttributes,
+                activeBlockIndex,
+                overBlockIndex
+              ),
+            },
+          }
+        })
+      }
+    }
+
+    setActiveId(null)
   }
 
   function renderSortableRequirementBlockDragOverlay(id: UniqueIdentifier) {
