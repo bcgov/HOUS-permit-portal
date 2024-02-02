@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, HStack, VStack } from "@chakra-ui/react"
-import React, { useState } from "react"
+import React from "react"
 import { IPermitApplication } from "../../../models/permit-application"
 import { Form } from "../chefs"
 
@@ -10,13 +10,13 @@ interface IRequirementFormProps {
 
 export function RequirementForm({ permitApplication, requirements }: IRequirementFormProps) {
   const form = permitApplication ? permitApplication.requirements : requirements
-  const [submission, setSubmission] = useState(permitApplication?.submissionData || {})
+  const submission = permitApplication?.submissionData
 
   //if there is no permit application provdided, you cannto run the key items like submit OR file upload.
   const onSubmit = (submission: any) => {
     if (permitApplication) {
       permitApplication.update({ submissionData: submission })
-      setSubmission(submission)
+      //error on saving should be handled by error pipeline
     } else {
       alert("This is a sample render, you can only submit a real permit applicaiton.")
     }

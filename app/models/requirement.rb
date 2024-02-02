@@ -73,10 +73,6 @@ class Requirement < ApplicationRecord
         type: "choicesjs",
       },
     },
-    file: {
-      type: "file",
-      storage: (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?) ? "s3custom" : nil,
-    },
   }
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi $]
@@ -122,6 +118,19 @@ class Requirement < ApplicationRecord
   end
 
   def formio_type_options
+    if (input_type.to_sym == :file)
+      return(
+        {
+          type: "file",
+          storage: (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?) ? "s3custom" : nil,
+        }.tap do |file_hash|
+          file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
+            "computed_compliance"
+          ].present?
+          file_hash["multiple"] = true if input_options["multiple"].present?
+        end
+      )
+    end
     DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
   end
 

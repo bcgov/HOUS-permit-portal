@@ -59,6 +59,7 @@ export const PermitApplicationModel = types
         const { data: permitApplication } = response.data
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
+      return response
     }),
   }))
 
