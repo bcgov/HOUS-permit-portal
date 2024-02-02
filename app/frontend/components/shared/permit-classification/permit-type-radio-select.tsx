@@ -46,7 +46,7 @@ export const PermitTypeRadioSelect = ({
   if (isLoading) return <SharedSpinner />
 
   return (
-    <Flex gap={4} flexWrap="wrap" {...rest}>
+    <Flex gap={4} flexWrap="wrap" role="radiogroup" {...rest}>
       {permitTypeOptions.map((option) => {
         const radio = getRadioProps({ value: option.value.id })
         return <PermitTypeRadioCard key={option.value.id} permitType={option.value} {...radio} />
@@ -67,7 +67,7 @@ export const PermitTypeRadioCard = (props: IPermitTypeRadioCardProps) => {
   const checkbox = getRadioProps()
 
   return (
-    <Box as="label">
+    <Box as="label" role="radio">
       <input aria-label={`${permitType.name} selector`} {...input} />
       <Flex
         {...checkbox}
