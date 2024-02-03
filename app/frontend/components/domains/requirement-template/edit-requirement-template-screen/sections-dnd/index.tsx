@@ -24,7 +24,10 @@ import { Plus } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { IRequirementTemplateSectionsAttribute } from "../../../../../types/api-request"
+import {
+  IRequirementTemplateSectionsAttribute,
+  ITemplateSectionBlocksAttribute,
+} from "../../../../../types/api-request"
 import { DroppableSection } from "./droppable-section"
 import { RequirementBlock } from "./requirement-block"
 import { Section } from "./section"
@@ -46,14 +49,16 @@ interface IProps {
   sections: IRequirementTemplateSectionsAttribute[]
 }
 
+function formSectionsMapFromSections(sections: IRequirementTemplateSectionsAttribute[]) {
+  return sections.reduce<{ [key: string]: IRequirementTemplateSectionsAttribute }>((acc, section) => {
+    acc[section.id] = section
+    return acc
+  }, {})
+}
+
 export function SectionsDnd({ sections }: IProps) {
   const { t } = useTranslation()
-  const [dndSectionMap, setDndSectionMap] = useState(() =>
-    sections.reduce<{ [key: string]: IRequirementTemplateSectionsAttribute }>((acc, section) => {
-      acc[section.id] = section
-      return acc
-    }, {})
-  )
+  const [dndSectionMap, setDndSectionMap] = useState(() => formSectionsMapFromSections(sections))
   const [sortedSectionIds, setSortedSectionIds] = useState(Object.keys(dndSectionMap))
   const [clonedDndSectionMap, setClonedDndSectionMap] = useState<{
     [key: string]: IRequirementTemplateSectionsAttribute
@@ -62,6 +67,12 @@ export function SectionsDnd({ sections }: IProps) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
+
+  useEffect(() => {
+    const newDndSectionMap = formSectionsMapFromSections(sections)
+    setDndSectionMap(newDndSectionMap)
+    setSortedSectionIds(Object.keys(newDndSectionMap))
+  }, [sections])
 
   /**
    * Custom collision detection strategy optimized for multiple containers
@@ -200,7 +211,7 @@ export function SectionsDnd({ sections }: IProps) {
                             disabled={isSortingSection}
                             key={block.id}
                             id={block.id}
-                            requirementBlockName={block.id}
+                            requirementBlockId={block.requirementBlockId}
                           />
                         )
                       })}
@@ -314,7 +325,7 @@ export function SectionsDnd({ sections }: IProps) {
     return dndSectionMap[id]
   }
 
-  function getSectionBlockById(id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined {
+  function getSectionBlockById(id: UniqueIdentifier): ITemplateSectionBlocksAttribute | undefined {
     const sectionWithBlock = Object.values(dndSectionMap).find(
       (section) => section.templateSectionBlocksAttributes.findIndex((blockAttribute) => blockAttribute.id === id) > -1
     )
@@ -391,9 +402,12 @@ export function SectionsDnd({ sections }: IProps) {
   }
 
   function renderSortableRequirementBlockDragOverlay(id: UniqueIdentifier) {
-    const sectionBlockAttributes = getSectionBlockById(id)
+    const sectionBlock = getSectionBlockById(id)
     return (
-      <RequirementBlock requirementBlockName={sectionBlockAttributes.id} containerProps={{ boxShadow: "md", pr: 2 }} />
+      <RequirementBlock
+        requirementBlockId={sectionBlock.requirementBlockId}
+        containerProps={{ boxShadow: "md", pr: 2 }}
+      />
     )
   }
 
@@ -404,7 +418,7 @@ export function SectionsDnd({ sections }: IProps) {
       <Section sectionName={section?.name} containerProps={{ boxShadow: "md", pr: 2, borderRadius: "sm" }}>
         <VStack w="full" ml={7} borderLeft={"1px solid"} borderColor={"border.light"} alignItems={"flex-start"}>
           {sectionBlocks.map((block, index) => {
-            return <RequirementBlock key={block.id} requirementBlockName={block.id} />
+            return <RequirementBlock key={block.id} requirementBlockId={block.requirementBlockId} />
           })}
         </VStack>
       </Section>

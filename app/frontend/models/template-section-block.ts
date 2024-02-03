@@ -6,10 +6,16 @@ function preProcessor(snapshot) {
 }
 
 export const TemplateSectionBlockModel = types.snapshotProcessor(
-  types.model("TemplateSectionBlockModel", {
-    id: types.identifier,
-    requirementBlock: types.safeReference(RequirementBlockModel),
-  }),
+  types
+    .model("TemplateSectionBlockModel", {
+      id: types.identifier,
+      requirementBlock: types.safeReference(RequirementBlockModel),
+    })
+    .views((self) => ({
+      get requirementBlockId() {
+        return self.requirementBlock?.id
+      },
+    })),
   { preProcessor }
 )
 

@@ -1,5 +1,6 @@
 import { Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -13,42 +14,30 @@ import { SectionsDnd } from "./sections-dnd"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateParams {}
 
-// TODO: remove stubbed sections when concrete data is available
-const stubbedSectionsAttributes = [
-  {
-    id: "A",
-    name: "Section A",
-    templateSectionBlocksAttributes: [{ id: "RB 1" }, { id: "RB 2" }],
-  },
-  {
-    id: "B",
-    name: "Section B",
-    templateSectionBlocksAttributes: [{ id: "RB 3" }, { id: "RB 4" }],
-  },
-  { id: "C", name: "Section C", templateSectionBlocksAttributes: [] },
-  {
-    id: "D",
-    name: "Section D",
-    templateSectionBlocksAttributes: [],
-  },
-  {
-    id: "E",
-    name: "Section E",
-    templateSectionBlocksAttributes: [{ id: "RB 5" }, { id: "RB 6x" }],
-  },
-]
-
-function formFormDefaults(requirementType?: IRequirementTemplate): IRequirementTemplateForm {
-  if (!requirementType) {
+function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirementTemplateForm {
+  if (!requirementTemplate) {
     return {
       description: "",
-      requirementTemplateSectionsAttributes: stubbedSectionsAttributes,
+      requirementTemplateSectionsAttributes: [],
     }
   }
 
+  const requirementTemplateSectionsAttributes = requirementTemplate.sortedRequirementTemplateSections.map(
+    (templateSection) => {
+      return {
+        id: templateSection.id,
+        name: templateSection.name,
+        templateSectionBlocksAttributes: R.map(
+          (sectionBlocks) => R.pick(["id", "requirementBlockId"], sectionBlocks),
+          templateSection.sortedTemplateSectionBlocks
+        ),
+      }
+    }
+  )
+  console.log("here 2", requirementTemplateSectionsAttributes)
   return {
-    description: requirementType.description,
-    requirementTemplateSectionsAttributes: stubbedSectionsAttributes,
+    description: requirementTemplate.description,
+    requirementTemplateSectionsAttributes,
   }
 }
 
@@ -60,17 +49,20 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
-  }, [requirementTemplate])
+  }, [requirementTemplate?.isFullyLoaded])
 
   if (error) return <ErrorScreen />
-  if (!requirementTemplate) return <LoadingScreen />
+  if (!requirementTemplate?.isFullyLoaded) return <LoadingScreen />
 
+  const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
+
+  console.log("watchedSectionsAttributes", requirementTemplate.isFullyLoaded, watchedSectionsAttributes)
   return (
     <Flex flexDir={"column"} w={"full"} flex={1} as="main">
       <FormProvider {...formMethods}>
         <BuilderHeader requirementTemplate={requirementTemplate} />
         <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
-          <SectionsDnd sections={watch("requirementTemplateSectionsAttributes")} />
+          <SectionsDnd sections={watchedSectionsAttributes} />
         </Flex>
       </FormProvider>
     </Flex>
