@@ -1,4 +1,4 @@
-import { Flex } from "@chakra-ui/react"
+import { Box, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -6,10 +6,12 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useRequirementTemplate } from "../../../../hooks/resources/use-requirement-template"
 import { IRequirementTemplate } from "../../../../models/requirement-template"
+import { ITemplateSectionBlockModel } from "../../../../models/template-section-block"
 import { IRequirementTemplateParams } from "../../../../types/api-request"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "./builder-header"
+import { SectionsDisplay } from "./sections-display"
 import { SectionsDnd } from "./sections-dnd"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateParams {}
@@ -29,12 +31,11 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
         name: templateSection.name,
         templateSectionBlocksAttributes: R.map(
           (sectionBlocks) => R.pick(["id", "requirementBlockId"], sectionBlocks),
-          templateSection.sortedTemplateSectionBlocks
+          templateSection.sortedTemplateSectionBlocks as ITemplateSectionBlockModel[]
         ),
       }
     }
   )
-  console.log("here 2", requirementTemplateSectionsAttributes)
   return {
     description: requirementTemplate.description,
     requirementTemplateSectionsAttributes,
@@ -56,13 +57,15 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
 
-  console.log("watchedSectionsAttributes", requirementTemplate.isFullyLoaded, watchedSectionsAttributes)
   return (
     <Flex flexDir={"column"} w={"full"} flex={1} as="main">
       <FormProvider {...formMethods}>
         <BuilderHeader requirementTemplate={requirementTemplate} />
         <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
           <SectionsDnd sections={watchedSectionsAttributes} />
+          <Box flex={1} h={"full"}>
+            <SectionsDisplay />
+          </Box>
         </Flex>
       </FormProvider>
     </Flex>

@@ -12,6 +12,7 @@ type TProps = {
   containerProps?: BoxProps
   editText?: string
   onRemove?: (setEditMode: (editMode: boolean) => void) => void
+  isReadOnly?: boolean
 } & (
   | { initialTriggerText: string; renderInitialTrigger?: never }
   | {
@@ -30,32 +31,39 @@ export const EditorWithPreview = observer(function EditorWithPreview({
   initialTriggerText,
   editText,
   onRemove,
+  isReadOnly,
 }: TProps) {
   const isEditorEmpty = isQuillEmpty(htmlValue)
   const [isEditMode, setIsEditMode] = useState(false)
   const { t } = useTranslation()
 
+  const isEditable = isEditMode && !isReadOnly
   const mainContainerProps: BoxProps = {
     pos: "relative",
     _hover: {
-      bg: "theme.blueLight",
+      bg: isReadOnly ? undefined : "theme.blueLight",
     },
-    bg: isEditMode ? "theme.blueLight" : undefined,
+    bg: isEditable ? "theme.blueLight" : undefined,
     px: 4,
     py: 3,
     borderRadius: "sm",
     sx: {
       ".quill": {
-        bg: isEditMode ? "white" : undefined,
+        bg: isEditable ? "white" : undefined,
       },
       ".quill .ql-editor": {
-        px: isEditMode ? undefined : 0,
+        px: isEditable ? undefined : 0,
+      },
+      ".quill .ql-container": {
+        fontSize: isEditable ? undefined : "sm",
       },
     },
     w: "full",
     minH: "1rem",
-    cursor: !isEditMode ? "pointer" : undefined,
-    onClick: () => setIsEditMode(true),
+    cursor: !isEditMode && !isReadOnly ? "pointer" : undefined,
+    fontSize: "sm",
+    onClick: () => !isReadOnly && setIsEditMode(true),
+    ...containerProps,
     ...containerProps,
   }
 
@@ -64,7 +72,7 @@ export const EditorWithPreview = observer(function EditorWithPreview({
     setIsEditMode(false)
   }
 
-  if (!isEditMode && isEditorEmpty && (initialTriggerText || renderInitialTrigger)) {
+  if (!isEditMode && !isReadOnly && isEditorEmpty && (initialTriggerText || renderInitialTrigger)) {
     return (
       <Box {...mainContainerProps}>
         {initialTriggerText ? (
@@ -80,12 +88,12 @@ export const EditorWithPreview = observer(function EditorWithPreview({
 
   return (
     <Box {...mainContainerProps}>
-      {isEditMode && (
+      {isEditable && (
         <Text color={"text.primary"} mb={1}>
           {label}
         </Text>
       )}
-      {onRemove && isEditMode && (
+      {onRemove && !isReadOnly && isEditMode && (
         <Button
           onClick={(e) => {
             e.stopPropagation()
