@@ -1,4 +1,5 @@
 class Jurisdiction < ApplicationRecord
+  include ActionView::Helpers::SanitizeHelper
   searchkick searchable: %i[reverse_qualified_name], word_start: %i[reverse_qualified_name]
 
   # Associations
@@ -13,6 +14,7 @@ class Jurisdiction < ApplicationRecord
   validates :locality_type, presence: true
 
   before_validation :set_type_based_on_locality
+  before_save :sanitize_html_fields
 
   accepts_nested_attributes_for :contacts
 
@@ -68,6 +70,12 @@ class Jurisdiction < ApplicationRecord
   end
 
   private
+
+  def sanitize_html_fields
+    attributes.each do |name, value|
+      self[name] = sanitize(value) if name.ends_with?("_html") && will_save_change_to_attribute?(name)
+    end
+  end
 
   def set_type_based_on_locality
     case locality_type
