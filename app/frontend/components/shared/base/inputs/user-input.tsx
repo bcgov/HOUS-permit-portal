@@ -4,8 +4,8 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { EMAIL_REGEX } from "../../../../constants"
 import { useMst } from "../../../../setup/root"
+import { EmailFormControl } from "../../form/email-form-control"
 
 interface IUserInputProps {
   index: number
@@ -41,23 +41,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
             )}
           />
         </FormControl>
-        <FormControl isInvalid={!!formState?.errors?.users?.[index]?.email} flex={3}>
-          <FormLabel>{t("auth.emailLabel")}</FormLabel>
-          <InputGroup>
-            <Flex w="full" direction="column">
-              <Input
-                bg="greys.white"
-                {...register(`users.${index}.email`, {
-                  required: true,
-                  validate: {
-                    matchesEmailRegex: (str) => EMAIL_REGEX.test(str) || t("ui.invalidInput"),
-                  },
-                })}
-                type={"text"}
-              />
-            </Flex>
-          </InputGroup>
-        </FormControl>
+        <EmailFormControl fieldName={`users.${index}.email`} flex={3} validate />
         <NameFormControl label="First Name (optional)" index={index} subFieldName="firstName" />
         <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
         {invited && (

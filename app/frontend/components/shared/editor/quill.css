@@ -7,13 +7,14 @@
 .quill .ql-container.ql-snow {
   border-bottom-left-radius: 0.25rem;
   border-bottom-right-radius: 0.25rem;
-  border: 1px solid var(--chakra-colors-border-light);
   display: flex;
   flex-direction: column;
+  border: 0;
 }
 
 .ql-editor {
   flex-grow: 1;
+  border-color: transparent;
 }
 
 .quill .ql-toolbar.ql-snow {
@@ -24,6 +25,7 @@
 
 .quill .ql-container {
   font-size: 1rem;
+  /* border: 0 !important; */
 }
 
 /*// this is to overrides placeholder styles*/

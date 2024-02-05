@@ -40,13 +40,13 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
             title={t("home.contentManagementTitle")}
             description={t("home.contentManagementDescription")}
             icon={<BookOpen size={24} />}
-            href={`jurisdictions/${jurisdiction.id}/content-mangement`}
+            href={`jurisdictions/${jurisdiction.id}`}
           />
           <HomeScreenBox
             title={t("home.userManagementTitle")}
             description={t("home.userManagementDescription")}
             icon={<Users size={24} />}
-            href={`jurisdictions/${jurisdiction.id}`}
+            href={`jurisdictions/${jurisdiction.id}/users`}
           />
         </Flex>
       </Flex>

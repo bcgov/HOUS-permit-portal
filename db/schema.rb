@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_02_181210) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_02_222652) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -34,13 +34,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_02_181210) do
   create_table "contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "title"
-    t.string "first_nation"
     t.string "email"
     t.string "phone_number"
     t.string "extension"
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "department"
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
@@ -55,8 +55,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_02_181210) do
 
   create_table "jurisdictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
-    t.jsonb "checklist_slate_data"
-    t.jsonb "look_out_slate_data"
+    t.text "description_html"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "incorporation_date"
@@ -64,7 +63,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_02_181210) do
     t.string "type"
     t.string "locality_type"
     t.uuid "regional_district_id"
-    t.text "description"
+    t.text "checklist_html"
+    t.text "look_out_html"
+    t.text "contact_summary_html"
+    t.jsonb "map_position"
     t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
   end
 

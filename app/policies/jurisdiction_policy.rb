@@ -15,8 +15,12 @@ class JurisdictionPolicy < ApplicationPolicy
     user.super_admin?
   end
 
-  def search_users?
+  def update?
     user.super_admin? || (user.review_manager? && user.jurisdiction_id == record.id)
+  end
+
+  def search_users?
+    update?
   end
 
   class Scope < Scope

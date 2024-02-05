@@ -3,10 +3,11 @@ import { ENumberUnit, ESortDirection } from "./enums"
 export type TLatLngTuple = [number, number]
 
 export interface IContact {
+  id: string
   name: string
-  firstNation?: string
+  department: string
   title?: string
-  phone?: string
+  phoneNumber?: string
   email?: string
 }
 

@@ -58,7 +58,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               </Flex>
               <Box border="1px solid" borderColor="border.light" padding={6}>
                 <UsernameFormControl validate autoFocus />
-                <EmailFormControl validate />
+                <EmailFormControl mb={4} validate />
                 <TextFormControl label={t("auth.userFirstNameLabel")} fieldName="firstName" mb={4} required={true} />
                 <TextFormControl label={t("auth.userLastNameLabel")} fieldName="lastName" mb={4} required={true} />
                 <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" mb={4} required={false} />

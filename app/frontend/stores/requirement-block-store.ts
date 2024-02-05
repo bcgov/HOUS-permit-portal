@@ -1,8 +1,8 @@
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import * as R from "ramda"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
@@ -18,6 +18,7 @@ export const RequirementBlockStoreModel = types
   )
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
     // View to get a RequirementBlock by id
     getRequirementBlockById(id: string) {
@@ -53,7 +54,7 @@ export const RequirementBlockStoreModel = types
       )
 
       if (response.ok) {
-        R.map((requirementBlock) => self.requirementBlockMap.put(requirementBlock), response.data.data)
+        self.mergeUpdateAll(response.data.data, "requirementBlockMap")
         self.tableRequirementBlocks = cast(response.data.data.map((requirementBlock) => requirementBlock.id))
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages

@@ -2,6 +2,7 @@ import { Flex, FormControl, FormControlProps, FormErrorMessage, FormLabel, Input
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { fieldArrayCompatibleErrorMessage } from "./form-helpers"
 
 interface ITextFormControlProps extends FormControlProps {
   label: string
@@ -12,9 +13,10 @@ interface ITextFormControlProps extends FormControlProps {
 export const TextFormControl = ({ label, fieldName, required = true, ...rest }: ITextFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
+  const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)
 
   return (
-    <FormControl isInvalid={!!formState?.errors[fieldName]} flex={1} {...rest}>
+    <FormControl isInvalid={errorMessage} flex={1} {...rest}>
       <FormLabel>{label}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
@@ -22,15 +24,14 @@ export const TextFormControl = ({ label, fieldName, required = true, ...rest }: 
             {...register(fieldName, {
               required,
               validate: {
-                satisfiesNameLength: (str) => (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
+                satisfiesNameLength: (str) =>
+                  !required || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
               },
             })}
             bg="greys.white"
             type={"text"}
           />
-          {formState?.errors[fieldName] && (
-            <FormErrorMessage>{formState?.errors[fieldName].message as string}</FormErrorMessage>
-          )}
+          {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
         </Flex>
       </InputGroup>
     </FormControl>

@@ -3,12 +3,9 @@ FactoryBot.define do
     name { Faker::Address.city }
     type { "SubDistrict" }
     locality_type { "city" }
-    description { Faker::Lorem.paragraph }
-    checklist_slate_data do
-      [{ children: [{ text: Faker::Lorem.sentence }] }, { children: [{ text: Faker::Lorem.sentence }] }]
-    end
-    look_out_slate_data do
-      [{ children: [{ text: Faker::Lorem.sentence }] }, { children: [{ text: Faker::Lorem.sentence }] }]
-    end
+    description_html { "<p>Some description</p>" }
+    checklist_html { "<p>Some checklist</p>" }
+    look_out_html { "<p>Some lookout</p>" }
+    contact_summary_html { "<p>Some lookout</p>" }
   end
 end

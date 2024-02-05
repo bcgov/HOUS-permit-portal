@@ -74,7 +74,7 @@ if PermitApplication.first.blank?
           Contact.create(
             name: "Contact #{n}",
             title: "Title #{n}",
-            first_nation: "Nation #{n}",
+            department: "Department #{n}",
             email: "contact_#{n}_#{jurisdiction.id}@example.com",
             phone_number: "604-456-7802",
             jurisdiction_id: jurisdiction.id,

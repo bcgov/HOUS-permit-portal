@@ -68,7 +68,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             </InputGroup>
             <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
               <UsernameFormControl isDisabled />
-              <EmailFormControl />
+              <EmailFormControl mb={4} />
               <Flex gap={{ base: 4, md: 6 }} mb={4} direction={{ base: "column", md: "row" }}>
                 <TextFormControl label={t("user.firstName")} fieldName="firstName" />
                 <TextFormControl label={t("user.lastName")} fieldName="lastName" />

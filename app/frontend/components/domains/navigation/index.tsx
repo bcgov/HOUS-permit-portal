@@ -81,16 +81,12 @@ const AppRoutes = observer(() => {
 
   const adminOrManagerRoutes = (
     <>
-      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionUserIndexScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId/invite" element={<InviteScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
     </>
   )
 
-  const submitterOnlyRoutes = (
-    <>
-      <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-    </>
-  )
+  const submitterOnlyRoutes = <></>
 
   return (
     <Routes location={location}>
@@ -101,6 +97,7 @@ const AppRoutes = observer(() => {
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
           <Route path="/permit-applications/:id" element={<PermitApplicationScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
 
           {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
           {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
