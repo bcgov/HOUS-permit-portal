@@ -66,10 +66,8 @@ export const Button = {
     link: {
       color: "text.link",
       fontWeight: "normal",
-      _hover: {
-        textDecoration: "underline",
-        _disabled: { textDecoration: "none" },
-      },
+      textDecoration: "underline",
+      _hover: {},
       _disabled: { ...disabledStyles, bg: "inherit" },
     },
   },

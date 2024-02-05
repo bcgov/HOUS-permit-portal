@@ -1,40 +1,38 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Archive, ArrowsLeftRight, ClockClockwise } from "@phosphor-icons/react"
+import { Archive, ClockClockwise } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
-import { IUser } from "../../../models/user"
+import { IRequirementTemplate } from "../../../models/requirement-template"
 import { ManageMenuItem } from "../base/manage-menu-item"
-import { Can } from "./can"
+import { Can } from "../user/can"
 
-interface IManageUserMenuProps<TSearchModel extends ISearch> {
-  user: IUser
+interface IManageRequirementTemplateMenuProps<TSearchModel extends ISearch> {
+  requirementTemplate: IRequirementTemplate
   searchModel?: TSearchModel
 }
 
-export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel extends ISearch>({
-  user,
-  searchModel,
-}: IManageUserMenuProps<TSearchModel>) {
+export const ManageRequirementTemplateMenu = observer(function ManageRequirementTemplateMenu<
+  TSearchModel extends ISearch,
+>({ requirementTemplate, searchModel }: IManageRequirementTemplateMenuProps<TSearchModel>) {
   const handleRemove = async () => {
-    if (await user.destroy()) searchModel?.search()
+    if (await requirementTemplate.destroy()) searchModel?.search()
   }
 
   const handleRestore = async () => {
-    if (await user.restore()) searchModel?.search()
+    if (await requirementTemplate.restore()) searchModel?.search()
   }
 
   const { t } = useTranslation()
   return (
-    <Can action="user:manage" data={{ user }}>
+    <Can action="requirementTemplate:manage" data={{ requirementTemplate }}>
       <Menu>
         <MenuButton as={Button} variant="link">
           {t("ui.manage")}
         </MenuButton>
         <MenuList>
-          <ManageMenuItem icon={<ArrowsLeftRight />}>{t("user.changeRole")}</ManageMenuItem>
-          {user.isDiscarded ? (
+          {requirementTemplate.isDiscarded ? (
             <ManageMenuItem color="semantic.success" onClick={handleRestore} icon={<ClockClockwise />}>
               {t("ui.restore")}
             </ManageMenuItem>

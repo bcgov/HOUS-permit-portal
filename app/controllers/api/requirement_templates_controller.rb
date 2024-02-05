@@ -1,7 +1,7 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
 
-  before_action :set_requirement_template, only: [:show]
+  before_action :set_requirement_template, only: %i[show destroy restore]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -13,9 +13,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      meta: {
                        total_pages: @search.total_pages,
                        total_count: @search.total_count,
-                       current_page: @search.current_page,
+                       current_page: @search.current_page
                      },
-                     blueprint: RequirementTemplateBlueprint,
+                     blueprint: RequirementTemplateBlueprint
                    }
   end
 
@@ -24,11 +24,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     render_success @requirement_template,
                    nil,
-                   { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
   end
 
   def create
-    @requirement_template = RequirementTemplate.build(requirement_template_params)
+    @requirement_template =
+      RequirementTemplate.build(requirement_template_params)
     authorize @requirement_template
 
     if @requirement_template.save
@@ -38,8 +44,36 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     else
       render_error "requirement_template.create_error",
                    message_opts: {
-                     error_message: @requirement_template.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_template.errors.full_messages.join(", ")
                    }
+    end
+  end
+
+  def destroy
+    authorize @requirement_template
+    if @requirement_template.discard
+      render_success(
+        @requirement_template,
+        "requirement_template.destroy_success"
+      )
+    else
+      render_error "REMOVE ME AFTER REBASE",
+                   "requirement_template.destroy_error"
+    end
+  end
+
+  def restore
+    authorize @requirement_template
+    if @requirement_template.update(discarded_at: nil)
+      render_success(
+        @requirement_template,
+        "requirement_template.restore_success"
+      )
+    else
+      render_error Constants::Error::USER_RESTORE_ERROR,
+                   "requirement_template.restore_error",
+                   {}
     end
   end
 
@@ -50,6 +84,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def requirement_template_params
-    params.require(:requirement_template).permit(:description, :activity_id, :permit_type_id)
+    params.require(:requirement_template).permit(
+      :description,
+      :activity_id,
+      :permit_type_id
+    )
   end
 end

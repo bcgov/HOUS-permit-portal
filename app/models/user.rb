@@ -38,7 +38,7 @@ class User < ApplicationRecord
   validate :unique_bceid
   validates :email, presence: true
 
-  after_commit :refresh_search_index_on_discard_or_restore
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -80,8 +80,8 @@ class User < ApplicationRecord
 
   private
 
-  def refresh_search_index_on_discard_or_restore
-    User.search_index.refresh if saved_change_to_discarded_at
+  def refresh_search_index
+    User.search_index.refresh
   end
 
   def confirmed_user_has_fields
