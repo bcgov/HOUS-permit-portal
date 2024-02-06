@@ -14,7 +14,6 @@ export const TextFormControl = ({ label, fieldName, required = true, ...rest }: 
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
   const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)
-
   return (
     <FormControl isInvalid={errorMessage} flex={1} {...rest}>
       <FormLabel>{label}</FormLabel>
@@ -22,10 +21,9 @@ export const TextFormControl = ({ label, fieldName, required = true, ...rest }: 
         <Flex w="full" direction="column">
           <Input
             {...register(fieldName, {
-              required,
+              required: required && t("ui.isRequired", { field: label }),
               validate: {
-                satisfiesNameLength: (str) =>
-                  !required || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
+                satisfiesLength: (str) => !required || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
               },
             })}
             bg="greys.white"

@@ -120,6 +120,7 @@ const options = {
           submit: "Submit",
           select: "Select",
           notAvailable: "Not available yet",
+          isRequired: "{{field}} is required",
         },
         contact: {
           fields: {
@@ -157,6 +158,8 @@ const options = {
             description: "Below is a list of all jurisdictions in the system",
             createButton: "Create New Jurisdiction",
             tableHeading: "Local Governments",
+            users: "Users",
+            about: "About",
           },
           fields: {
             reverseQualifiedName: "Name",

@@ -50,7 +50,7 @@ export const JurisdictionScreen = observer(() => {
   const [isEditingContacts, setIsEditingContacts] = useState(false)
 
   const formMethods = useForm<TJurisdictionFieldValues>({
-    mode: "onChange",
+    mode: "all",
     defaultValues: getDefaultJurisdictionValues(),
   })
 
@@ -168,7 +168,7 @@ export const JurisdictionScreen = observer(() => {
                   <Button
                     variant="primary"
                     type="submit"
-                    isDisabled={!isValid || isSubmitting}
+                    isDisabled={isSubmitting}
                     isLoading={isSubmitting}
                     loadingText={t("ui.loading")}
                   >
