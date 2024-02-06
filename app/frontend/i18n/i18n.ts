@@ -122,6 +122,7 @@ const options = {
           notAvailable: "Not available yet",
           isRequired: "{{field}} is required",
           use: "Use",
+          publish: "Publish",
         },
         contact: {
           fields: {
@@ -364,6 +365,7 @@ const options = {
             dndTitle: "Drag to reorder",
             addSectionButton: "Add Section",
             addRequirementButton: "Add Requirement",
+            saveDraft: "Save as Draft",
           },
           fields: {
             status: "Status",

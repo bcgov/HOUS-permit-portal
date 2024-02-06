@@ -1,4 +1,5 @@
-import { Box, Flex } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack } from "@chakra-ui/react"
+import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -46,7 +47,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const { requirementTemplate, error } = useRequirementTemplate()
   const { t } = useTranslation()
   const formMethods = useForm({ defaultValues: formFormDefaults(requirementTemplate) })
-  const { reset, watch } = formMethods
+  const { reset, watch, handleSubmit } = formMethods
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
@@ -56,6 +57,14 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   if (!requirementTemplate?.isFullyLoaded) return <LoadingScreen />
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
+  const onSubmit = handleSubmit((templateFormData) => {
+    templateFormData.requirementTemplateSectionsAttributes.forEach((sectionAttributes, sectionIndex) => {
+      sectionAttributes.position = sectionIndex
+      sectionAttributes.templateSectionBlocksAttributes.forEach((sectionBlockAttributes, blockIndex) => {
+        sectionBlockAttributes.position = blockIndex
+      })
+    })
+  })
 
   return (
     <Flex flexDir={"column"} w={"full"} flex={1} as="main">
@@ -64,6 +73,16 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
         <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
           <SectionsDnd sections={watchedSectionsAttributes} />
           <Box flex={1} h={"full"}>
+            <HStack px={6} py={4} bg={"greys.grey03"} w={"full"} justifyContent={"flex-end"}>
+              <HStack spacing={4}>
+                <Button variant={"primary"} isDisabled>
+                  {t("requirementTemplate.edit.saveDraft")}
+                </Button>
+                <Button variant={"primary"} rightIcon={<CaretRight />} isDisabled>
+                  {t("ui.publish")}
+                </Button>
+              </HStack>
+            </HStack>
             <SectionsDisplay />
           </Box>
         </Flex>

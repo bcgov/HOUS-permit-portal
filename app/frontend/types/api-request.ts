@@ -25,11 +25,13 @@ export interface IRequirementBlockParams {
 export interface ITemplateSectionBlocksAttribute {
   id?: string
   requirementBlockId?: string
+  position?: number
 }
 
 export interface IRequirementTemplateSectionsAttribute {
   id?: string
   name?: string
+  position?: number
   templateSectionBlocksAttributes?: ITemplateSectionBlocksAttribute[]
 }
 
