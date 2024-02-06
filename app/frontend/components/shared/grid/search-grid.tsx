@@ -1,12 +1,12 @@
-import { Grid } from "@chakra-ui/react"
+import { Grid, GridProps } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
 
-interface ISearchGridProps {
+interface ISearchGridProps extends Partial<Omit<GridProps, "templateColumns">> {
   children: ReactNode
   templateColumns: string
 }
 
-export const SearchGrid = ({ children, templateColumns }: ISearchGridProps) => {
+export const SearchGrid = ({ children, templateColumns, ...containerProps }: ISearchGridProps) => {
   return (
     <Grid
       mt={3}
@@ -25,6 +25,7 @@ export const SearchGrid = ({ children, templateColumns }: ISearchGridProps) => {
       border={"1px solid"}
       borderColor={"border.light"}
       borderRadius={"sm"}
+      {...containerProps}
     >
       {children}
     </Grid>

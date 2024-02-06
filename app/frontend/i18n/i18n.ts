@@ -121,6 +121,7 @@ const options = {
           select: "Select",
           notAvailable: "Not available yet",
           isRequired: "{{field}} is required",
+          use: "Use",
         },
         contact: {
           fields: {
@@ -362,6 +363,7 @@ const options = {
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
             addSectionButton: "Add Section",
+            addRequirementButton: "Add Requirement",
           },
           fields: {
             status: "Status",
