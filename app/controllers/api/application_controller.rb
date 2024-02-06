@@ -26,10 +26,6 @@ class Api::ApplicationController < ActionController::API
   end
 
   def user_not_authorized(exception)
-    render_error Constants::Error::USER_NOT_AUTHORIZED_ERROR,
-                 "misc.user_not_authorized_error",
-                 message_opts: {
-                   error_message: exception.message,
-                 } and return
+    render_error "misc.user_not_authorized_error", message_opts: { error_message: exception.message } and return
   end
 end
