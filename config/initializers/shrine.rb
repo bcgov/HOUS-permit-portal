@@ -46,10 +46,30 @@ Shrine.plugin :presign_endpoint,
                 lambda { |request|
                   filename = request.params["filename"]
                   type = request.params["type"]
-
                   {
-                    content_disposition: ContentDisposition.attachment(filename), # set download filename
-                    content_type: type, # set content type (required if using DigitalOcean Spaces)
-                    content_length_range: 0..(100 * 1024 * 1024), # limit upload size to 100 MB
+                    method: :put,
+                    content_disposition: ContentDisposition.attachment(filename),
+                    content_type: type,
+                    content_md5: request.params["checksum"],
+                    # transfer_encoding: "chunked",
                   }
                 }
+
+class Shrine::Storage::S3
+  def presign_put(id, options)
+    obj = object(id)
+    url = obj.presigned_url(:put, options)
+
+    # When any of these options are specified, the corresponding request
+    # headers must be included in the upload request.
+    headers = {}
+    headers["Content-Length"] = options[:content_length] if options[:content_length]
+    headers["Content-Type"] = options[:content_type] if options[:content_type]
+    headers["Content-Disposition"] = options[:content_disposition] if options[:content_disposition]
+    headers["Content-Encoding"] = options[:content_encoding] if options[:content_encoding]
+    headers["Content-Language"] = options[:content_language] if options[:content_language]
+    headers["Content-MD5"] = options[:content_md5] if options[:content_md5]
+
+    { method: :put, url: url, headers: headers, key: obj.key }
+  end
+end

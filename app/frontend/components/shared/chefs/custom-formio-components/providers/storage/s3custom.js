@@ -16,6 +16,50 @@ const s3custom = function Provider(formio) {
     })
   }
 
+  const uploadFileInChunks = async (signedUrl, headers, file, progressCallback, chunkSize = 1 * 1024 * 1024) => {
+    // Default chunk size is 1MB
+    let start = 0
+
+    // Function to upload a single chunk
+    async function uploadChunk(chunk, chunkNumber, contentRange) {
+      const response = await fetch(signedUrl, {
+        method: "PUT",
+        headers: Object.assign({}, headers, {
+          // "Content-Type": "application/octet-stream",
+          // "Content-Range": contentRange,
+          "Content-Length": chunk.size,
+          "Transfer-Encoding": "chunked",
+        }),
+        body: chunk,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status} during chunk ${chunkNumber} upload.`)
+      }
+    }
+
+    // Iterate over the file in chunks and upload each chunk
+    let chunkNumber = 0
+
+    let chunkUnits = Math.ceil(file.size / chunkSize)
+    while (start < file.size) {
+      let end = start + chunkSize
+      const chunk = file.slice(start, end)
+      const contentRange = `bytes ${start}-${end - 1}/${file.size}`
+
+      // Await ensures each chunk is uploaded before the next one starts
+      await uploadChunk(chunk, chunkNumber, contentRange)
+      chunkNumber++
+      console.log(`calling callback - ${chunkNumber} / ${chunkUnits}`)
+      progressCallback(
+        file,
+        new ProgressEvent("progress", { lengthComputable: true, loaded: chunkNumber, total: chunkUnits })
+      ) //update in format required
+
+      start = end
+    }
+  }
+
   return {
     title: "s3custom",
     name: "s3custom",
@@ -44,26 +88,9 @@ const s3custom = function Provider(formio) {
           })
           .then((presignedData) => {
             // Step 2: Upload the file directly to the storage service using the pre-signed URL
-            const xhr = new XMLHttpRequest()
-
-            const formData = new FormData()
-            // Add the fields to the form data
-            Object.keys(presignedData.fields).forEach((key) => {
-              formData.append(key, presignedData.fields[key])
-            })
-            // Add the file
-            formData.append("file", file)
-
-            xhr.open(presignedData.method, presignedData.url, true)
-
-            xhr.upload.onprogress = (event) => {
-              progressCallback(file, event) //custom update progress for form.io
-            }
-
-            xhr.onload = () => {
-              if (xhr.status === 204) {
-                //the file info needs to mathc what rails needs
-                // console.log("*** success - upate with info", presignedData)
+            // Dell ECS S3 does not support POST object, we need to use PUT and chunked transfer encoding
+            uploadFileInChunks(presignedData.url, presignedData.headers, file, progressCallback, 1 * 1024 * 1024).then(
+              (result) => {
                 resolve({
                   storage: "s3custom",
                   filename: fileName,
@@ -71,50 +98,16 @@ const s3custom = function Provider(formio) {
                   type: file.type,
                   groupPermissions,
                   groupId,
-                  id: (presignedData?.fields?.id || presignedData?.fields?.key).replace(/^cache\//, ""),
-                  key: presignedData?.fields?.key.replace(/^cache\//, ""),
-                  url: presignedData?.fields?.url,
+                  key: presignedData?.key.replace(/^cache\//, ""),
                   metadata: {
                     filename: file.name,
                     size: file.size,
                     mime_type: file.type,
-                    content_disposition: presignedData?.fields?.["Content-Disposition"],
+                    content_disposition: presignedData?.headers?.["Content-Disposition"],
                   },
                 })
-              } else if (xhr.status >= 200 && xhr.status < 300) {
-                // Step 3: Resolve the promise with the file's URL on the storage service
-                resolve({
-                  storage: "s3custom",
-                  filename: fileName,
-                  size: file.size,
-                  type: file.type,
-                  groupPermissions,
-                  groupId,
-                  id: (xhr.response?.fields?.id || xhr.response?.fields?.key).replace(/^cache\//, ""),
-                  key: xhr.response?.fields?.key.replace(/^cache\//, ""),
-                  url: xhr.response?.fields?.url,
-                  metadata: {
-                    filename: fileName,
-                    size: file.size,
-                    mime_type: file.type,
-                    content_disposition: xhr.response?.fields?.["Content-Disposition"],
-                  },
-                })
-              } else {
-                reject(xhr.response)
               }
-            }
-
-            xhr.onerror = () => reject(xhr.response)
-
-            xhr.responseType = "json"
-            // Set any additional headers required for the upload (if any)
-            Object.entries(presignedData.headers || {}).forEach(([key, value]) => {
-              xhr.setRequestHeader(key, value)
-            })
-
-            // Perform the actual upload
-            xhr.send(formData)
+            )
           })
           .catch((error) => {
             reject("Failed to get pre-signed URL")
