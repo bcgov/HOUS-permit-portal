@@ -24,7 +24,10 @@ import { Plus } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { IRequirementTemplateSectionsAttribute } from "../../../../../types/api-request"
+import {
+  IRequirementTemplateSectionsAttribute,
+  ITemplateSectionBlocksAttribute,
+} from "../../../../../types/api-request"
 import { DroppableSection } from "./droppable-section"
 import { RequirementBlock } from "./requirement-block"
 import { Section } from "./section"
@@ -46,14 +49,16 @@ interface IProps {
   sections: IRequirementTemplateSectionsAttribute[]
 }
 
+function formSectionsMapFromSections(sections: IRequirementTemplateSectionsAttribute[]) {
+  return sections.reduce<{ [key: string]: IRequirementTemplateSectionsAttribute }>((acc, section) => {
+    acc[section.id] = section
+    return acc
+  }, {})
+}
+
 export function SectionsDnd({ sections }: IProps) {
   const { t } = useTranslation()
-  const [dndSectionMap, setDndSectionMap] = useState(() =>
-    sections.reduce<{ [key: string]: IRequirementTemplateSectionsAttribute }>((acc, section) => {
-      acc[section.id] = section
-      return acc
-    }, {})
-  )
+  const [dndSectionMap, setDndSectionMap] = useState(() => formSectionsMapFromSections(sections))
   const [sortedSectionIds, setSortedSectionIds] = useState(Object.keys(dndSectionMap))
   const [clonedDndSectionMap, setClonedDndSectionMap] = useState<{
     [key: string]: IRequirementTemplateSectionsAttribute
@@ -62,6 +67,12 @@ export function SectionsDnd({ sections }: IProps) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
   const lastOverId = useRef<UniqueIdentifier | null>(null)
   const recentlyMovedToNewContainer = useRef(false)
+
+  useEffect(() => {
+    const newDndSectionMap = formSectionsMapFromSections(sections)
+    setDndSectionMap(newDndSectionMap)
+    setSortedSectionIds(Object.keys(newDndSectionMap))
+  }, [sections])
 
   /**
    * Custom collision detection strategy optimized for multiple containers
@@ -91,7 +102,7 @@ export function SectionsDnd({ sections }: IProps) {
 
       if (overId != null) {
         if (isSection(overId as string)) {
-          const sectionBlocks = getSectionById(overId).requirementTemplateSectionRequirementBlocksAttributes
+          const sectionBlocks = getSectionById(overId).templateSectionBlocksAttributes
 
           // If a section is matched and it contains blocks
           if (sectionBlocks.length > 0) {
@@ -183,7 +194,7 @@ export function SectionsDnd({ sections }: IProps) {
           <SortableContext items={sortedSectionIds} strategy={verticalListSortingStrategy}>
             {sortedSectionIds.map((id) => {
               const section = getSectionById(id)
-              const sectionBlocks = section?.requirementTemplateSectionRequirementBlocksAttributes
+              const sectionBlocks = section?.templateSectionBlocksAttributes
               const isSortingSection = activeId in dndSectionMap
               return (
                 <DroppableSection
@@ -200,7 +211,7 @@ export function SectionsDnd({ sections }: IProps) {
                             disabled={isSortingSection}
                             key={block.id}
                             id={block.id}
-                            requirementBlockName={block.id}
+                            requirementBlockId={block.requirementBlockId}
                           />
                         )
                       })}
@@ -256,9 +267,8 @@ export function SectionsDnd({ sections }: IProps) {
     }
 
     setDndSectionMap((pastDndSectionMap) => {
-      const activeSectionBlocks =
-        pastDndSectionMap[activeSection.id].requirementTemplateSectionRequirementBlocksAttributes
-      const overSectionBlocks = pastDndSectionMap[overSection.id].requirementTemplateSectionRequirementBlocksAttributes
+      const activeSectionBlocks = pastDndSectionMap[activeSection.id].templateSectionBlocksAttributes
+      const overSectionBlocks = pastDndSectionMap[overSection.id].templateSectionBlocksAttributes
       const overSectionBlockIndex = overSectionBlocks.findIndex((block) => block.id === overId)
       const activeSectionBlockIndex = activeSectionBlocks.findIndex((block) => block.id === active.id)
 
@@ -286,22 +296,18 @@ export function SectionsDnd({ sections }: IProps) {
       recentlyMovedToNewContainer.current = true
 
       const clonedPastSectionMap = R.clone(pastDndSectionMap)
-      const clonedActiveSectionBlocks =
-        clonedPastSectionMap[activeSection.id].requirementTemplateSectionRequirementBlocksAttributes
-      const clonedOverSectionBlocks =
-        clonedPastSectionMap[overSection.id].requirementTemplateSectionRequirementBlocksAttributes
+      const clonedActiveSectionBlocks = clonedPastSectionMap[activeSection.id].templateSectionBlocksAttributes
+      const clonedOverSectionBlocks = clonedPastSectionMap[overSection.id].templateSectionBlocksAttributes
 
       // Removes active block from original section to new position in new section
       return R.mergeRight(clonedPastSectionMap, {
         [activeSection.id]: {
           ...clonedPastSectionMap[activeSection.id],
-          requirementTemplateSectionRequirementBlocksAttributes: clonedActiveSectionBlocks.filter(
-            (block) => block.id !== active.id
-          ),
+          templateSectionBlocksAttributes: clonedActiveSectionBlocks.filter((block) => block.id !== active.id),
         },
         [overSection.id]: {
           ...clonedPastSectionMap[overSection.id],
-          requirementTemplateSectionRequirementBlocksAttributes: [
+          templateSectionBlocksAttributes: [
             ...clonedOverSectionBlocks.slice(0, newIndex),
             clonedActiveSectionBlocks[activeSectionBlockIndex],
             ...clonedOverSectionBlocks.slice(newIndex, clonedOverSectionBlocks.length),
@@ -319,16 +325,11 @@ export function SectionsDnd({ sections }: IProps) {
     return dndSectionMap[id]
   }
 
-  function getSectionBlockById(id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined {
+  function getSectionBlockById(id: UniqueIdentifier): ITemplateSectionBlocksAttribute | undefined {
     const sectionWithBlock = Object.values(dndSectionMap).find(
-      (section) =>
-        section.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
-          (blockAttribute) => blockAttribute.id === id
-        ) > -1
+      (section) => section.templateSectionBlocksAttributes.findIndex((blockAttribute) => blockAttribute.id === id) > -1
     )
-    return sectionWithBlock?.requirementTemplateSectionRequirementBlocksAttributes?.find(
-      (blockAttribute) => blockAttribute.id === id
-    )
+    return sectionWithBlock?.templateSectionBlocksAttributes?.find((blockAttribute) => blockAttribute.id === id)
   }
 
   function getSectionOrParentSection(id: UniqueIdentifier) {
@@ -336,10 +337,7 @@ export function SectionsDnd({ sections }: IProps) {
       return getSectionById(id)
     }
     const sectionWithBlock = Object.values(dndSectionMap).find(
-      (section) =>
-        section.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
-          (blockAttribute) => blockAttribute.id === id
-        ) > -1
+      (section) => section.templateSectionBlocksAttributes.findIndex((blockAttribute) => blockAttribute.id === id) > -1
     )
 
     return sectionWithBlock
@@ -373,12 +371,10 @@ export function SectionsDnd({ sections }: IProps) {
     const overSection = getSectionOrParentSection(overId)
 
     if (overSection) {
-      const activeBlockIndex = activeSection.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
+      const activeBlockIndex = activeSection.templateSectionBlocksAttributes.findIndex(
         (block) => block.id === active.id
       )
-      const overBlockIndex = overSection.requirementTemplateSectionRequirementBlocksAttributes.findIndex(
-        (block) => block.id === overId
-      )
+      const overBlockIndex = overSection.templateSectionBlocksAttributes.findIndex((block) => block.id === overId)
 
       if (activeBlockIndex !== overBlockIndex) {
         // moves active block to new position within the same section. We only consider
@@ -391,8 +387,8 @@ export function SectionsDnd({ sections }: IProps) {
             ...clonedPastSectionsMap,
             [overSection.id]: {
               ...clonedPastSectionsMap[overSection.id],
-              requirementTemplateSectionRequirementBlocksAttributes: arrayMove(
-                pastSectionsMap[overSection.id].requirementTemplateSectionRequirementBlocksAttributes,
+              templateSectionBlocksAttributes: arrayMove(
+                pastSectionsMap[overSection.id].templateSectionBlocksAttributes,
                 activeBlockIndex,
                 overBlockIndex
               ),
@@ -406,20 +402,23 @@ export function SectionsDnd({ sections }: IProps) {
   }
 
   function renderSortableRequirementBlockDragOverlay(id: UniqueIdentifier) {
-    const sectionBlockAttributes = getSectionBlockById(id)
+    const sectionBlock = getSectionBlockById(id)
     return (
-      <RequirementBlock requirementBlockName={sectionBlockAttributes.id} containerProps={{ boxShadow: "md", pr: 2 }} />
+      <RequirementBlock
+        requirementBlockId={sectionBlock.requirementBlockId}
+        containerProps={{ boxShadow: "md", pr: 2 }}
+      />
     )
   }
 
   function renderSectionDragOverlay(sectionId: UniqueIdentifier) {
     const section = getSectionById(sectionId)
-    const sectionBlocks = section?.requirementTemplateSectionRequirementBlocksAttributes
+    const sectionBlocks = section?.templateSectionBlocksAttributes
     return (
       <Section sectionName={section?.name} containerProps={{ boxShadow: "md", pr: 2, borderRadius: "sm" }}>
         <VStack w="full" ml={7} borderLeft={"1px solid"} borderColor={"border.light"} alignItems={"flex-start"}>
           {sectionBlocks.map((block, index) => {
-            return <RequirementBlock key={block.id} requirementBlockName={block.id} />
+            return <RequirementBlock key={block.id} requirementBlockId={block.requirementBlockId} />
           })}
         </VStack>
       </Section>

@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next"
 import { ENumberUnit, ERequirementType } from "../../../types/enums"
 
 const defaultLabelProps: Partial<FormLabelProps> = {
-  fontWeight: 700,
+  color: "text.primary",
 }
 
 type TRequirementProps = {

@@ -6,6 +6,7 @@ export const RequirementModel = types
   .model("RequirementModel", {
     id: types.identifier,
     label: types.string,
+    hint: types.maybeNull(types.string),
     inputType: types.enumeration<ERequirementType[]>(Object.values(ERequirementType)),
     inputOptions: types.frozen<IRequirementOptions>({}),
     createdAt: types.Date,
