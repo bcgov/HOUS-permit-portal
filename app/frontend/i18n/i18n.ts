@@ -357,6 +357,8 @@ const options = {
           edit: {
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
+            dndTitle: "Drag to reorder",
+            addSectionButton: "Add Section",
           },
           fields: {
             status: "Status",

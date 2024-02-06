@@ -22,8 +22,21 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementsAttribute[]
 }
 
+interface IRequirementTemplateSectionRequirementBlocksAttribute {
+  id?: string
+  requirementBlockId?: string
+  requirementTemplateSectionId?: string
+}
+
+export interface IRequirementTemplateSectionsAttribute {
+  id?: string
+  name?: string
+  requirementTemplateSectionRequirementBlocksAttributes?: IRequirementTemplateSectionRequirementBlocksAttribute[]
+}
+
 export interface IRequirementTemplateParams {
   description?: string | null
+  requirementTemplateSectionsAttributes?: IRequirementTemplateSectionsAttribute[]
 }
 
 export interface ITagSearchParams {
