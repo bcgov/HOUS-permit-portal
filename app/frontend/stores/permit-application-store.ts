@@ -1,5 +1,6 @@
 import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
+import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
@@ -8,9 +9,12 @@ import { IPermitApplication, PermitApplicationModel } from "../models/permit-app
 import { IUser } from "../models/user"
 
 export const PermitApplicationStoreModel = types
-  .model("PermitApplicationStore", {
-    permitApplicationMap: types.map(PermitApplicationModel),
-  })
+  .compose(
+    types.model("PermitApplicationStore", {
+      permitApplicationMap: types.map(PermitApplicationModel),
+    }),
+    createSearchModel<EPermitApplicationSortFields>("fetchPermitApplications")
+  )
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())

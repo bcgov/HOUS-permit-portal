@@ -432,6 +432,7 @@ const options = {
             users: "Users",
             editTemplate: "Edit template",
             permitApplications: "Permit Applications",
+            submissionInbox: "Submission Inbox",
           },
           questionSupport: "Question Support",
         },
