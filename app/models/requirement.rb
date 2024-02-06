@@ -121,7 +121,14 @@ class Requirement < ApplicationRecord
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code
-    self.requirement_code ||= label.present? ? label.parameterize.underscore.camelize(:lower) : SecureRandom.uuid
+    self.requirement_code ||=
+      (
+        if label.present?
+          label.parameterize.underscore.camelize(:lower)
+        else
+          SecureRandom.uuid
+        end
+      )
   end
 
   def formio_type_options
@@ -129,7 +136,14 @@ class Requirement < ApplicationRecord
       return(
         {
           type: "file",
-          storage: (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?) ? "s3custom" : nil,
+          storage:
+            (
+              if (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?)
+                "s3custom"
+              else
+                nil
+              end
+            ),
         }.tap do |file_hash|
           file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
             "computed_compliance"

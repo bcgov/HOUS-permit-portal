@@ -117,7 +117,14 @@ class RequirementsFromXlsxSeeder
             hint: row["hint"],
             required: row["required"].present?,
             # reusable: true, #TODO: DECIDE WHAT CASES ARE NON REUSABLE?
-            input_options: row["input_options"].blank? ? {} : JSON.parse(row["input_options"]), # if parse fails it will raise error
+            input_options:
+              (
+                if row["input_options"].blank?
+                  {}
+                else
+                  JSON.parse(row["input_options"])
+                end
+              ), # if parse fails it will raise error
             # required_for_in_person_hint - text
             # reusable - boolean
             required_for_multiple_owners: row["required_for_multiple_owners"].present?,
