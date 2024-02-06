@@ -35,12 +35,13 @@ export function RequirementForm({ permitApplication, requirements }: IRequiremen
   return (
     <VStack as={"main"} w={"full"} h={"full"}>
       <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
-        <Box as={"section"} flex={1}>
+        <Box as={"section"} flex={1} className={"form-wrapper"}>
           <Form
             form={form}
             submission={submission}
             onSubmit={onSubmit}
             options={permitApplication ? {} : { readOnly: true }}
+
             //url={}
           />
         </Box>
