@@ -58,7 +58,7 @@ Rails.application.routes.draw do
       get "pid", on: :collection
     end
 
-    resources :permit_applications, only: %i[index create show]
+    resources :permit_applications, only: %i[index create update show]
 
     resource :profile, only: [:update], controller: "users"
     resources :users, only: [:destroy] do

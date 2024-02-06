@@ -11,11 +11,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
     render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
   end
 
-  def create
-    # authorize @permit_application
-    # render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
-  end
-
   def update
     authorize @permit_application
 
