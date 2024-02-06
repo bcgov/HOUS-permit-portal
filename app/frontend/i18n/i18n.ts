@@ -207,6 +207,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
