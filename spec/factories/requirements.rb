@@ -1,6 +1,5 @@
 FactoryBot.define do
   factory :requirement do
-    requirement_code { Faker::Alphanumeric.unique.alpha }
     label { Faker::Lorem.words(number: 2).join(" ") }
     input_type { 0 }
     input_options { "{}" }

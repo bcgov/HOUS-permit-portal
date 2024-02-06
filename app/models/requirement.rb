@@ -73,9 +73,6 @@ class Requirement < ApplicationRecord
         type: "choicesjs",
       },
     },
-    file: {
-      type: "simplefile",
-    },
   }
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi $]
@@ -93,10 +90,14 @@ class Requirement < ApplicationRecord
     input_options["number_unit"]
   end
 
-  def to_form_json
+  def key(requirement_block_key)
+    "#{requirement_block_key}|#{requirement_code}"
+  end
+
+  def to_form_json(requirement_block_key = requirement_block&.key)
     json = {
       id: id,
-      key: label.parameterize.underscore.camelize(:lower),
+      key: key(requirement_block_key),
       type: input_type,
       input: true,
       label: label,
@@ -109,6 +110,10 @@ class Requirement < ApplicationRecord
       json.merge!({ data: { values: input_options["value_options"] } })
     end
 
+    if input_options["computed_compliance"].present?
+      json.merge!({ computedCompliance: input_options["computed_compliance"] })
+    end
+
     json
   end
 
@@ -116,10 +121,23 @@ class Requirement < ApplicationRecord
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code
-    self.requirement_code ||= SecureRandom.uuid
+    self.requirement_code ||= label.present? ? label.parameterize.underscore.camelize(:lower) : SecureRandom.uuid
   end
 
   def formio_type_options
+    if (input_type.to_sym == :file)
+      return(
+        {
+          type: "file",
+          storage: (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?) ? "s3custom" : nil,
+        }.tap do |file_hash|
+          file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
+            "computed_compliance"
+          ].present?
+          file_hash["multiple"] = true if input_options["multiple"].present?
+        end
+      )
+    end
     DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
   end
 

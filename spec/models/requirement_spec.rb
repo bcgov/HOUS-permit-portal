@@ -136,10 +136,11 @@ RSpec.describe Requirement, type: :model do
 
     context "form json" do
       it "returns correct form json for text requirement" do
-        requirement = create(:requirement, label: "Text Requirement", input_type: "text")
+        requirement =
+          create(:requirement, requirement_code: "text_requirement", label: "Text Requirement", input_type: "text")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "textRequirement",
+          key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
           type: "simpletextfield",
           input: true,
           label: "Text Requirement",
@@ -155,7 +156,7 @@ RSpec.describe Requirement, type: :model do
         requirement = create(:requirement, label: "Number Requirement", input_type: "number")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "numberRequirement",
+          key: "#{requirement.requirement_block.key}|numberRequirement",
           type: "number",
           input: true,
           label: "Number Requirement",
@@ -183,7 +184,7 @@ RSpec.describe Requirement, type: :model do
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "checkboxRequirement",
+          key: "#{requirement.requirement_block.key}|checkboxRequirement",
           type: "checkbox",
           input: true,
           label: "Checkbox Requirement",
@@ -199,7 +200,7 @@ RSpec.describe Requirement, type: :model do
         requirement = create(:requirement, label: "Date  Requirement", input_type: "date")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "dateRequirement",
+          key: "#{requirement.requirement_block.key}|dateRequirement",
           type: "date",
           input: true,
           label: "Date  Requirement",
@@ -246,7 +247,7 @@ RSpec.describe Requirement, type: :model do
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "selectRequirement",
+          key: "#{requirement.requirement_block.key}|selectRequirement",
           type: "select",
           input: true,
           label: "select Requirement",
@@ -274,7 +275,7 @@ RSpec.describe Requirement, type: :model do
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "multiOptionSelectRequirement",
+          key: "#{requirement.requirement_block.key}|multiOptionSelectRequirement",
           type: "select",
           input: true,
           multiple: true,

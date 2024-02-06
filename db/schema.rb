@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_02_222652) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_06_012642) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -81,6 +81,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_02_222652) do
     t.string "full_address"
     t.string "pid"
     t.string "pin"
+    t.jsonb "submission_data"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
@@ -162,6 +163,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_02_222652) do
     t.uuid "requirement_block_id", null: false
     t.integer "position"
     t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "supporting_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "permit_application_id", null: false
+    t.string "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "compliance_data"
+    t.index ["permit_application_id"], name: "index_supporting_documents_on_permit_application_id"
   end
 
   create_table "taggings", force: :cascade do |t|
@@ -254,6 +264,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_02_222652) do
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"
   add_foreign_key "users", "jurisdictions"
 end

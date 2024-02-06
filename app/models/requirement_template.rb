@@ -23,13 +23,34 @@ class RequirementTemplate < ApplicationRecord
     jurisdictions.size
   end
 
+  def key
+    "requirementtemplate#{id}"
+  end
+
   def to_form_json
     {
       id: id,
-      key: "requirementTemplate#{id}",
+      key: key,
       input: false,
       tableView: false,
-      components: requirement_template_sections.map(&:to_form_json),
+      components:
+        requirement_template_sections.map(&:to_form_json).concat(
+          [
+            {
+              key: "submit",
+              size: "md",
+              type: "button",
+              block: false,
+              input: true,
+              label: "Submit",
+              theme: "primary",
+              action: "submit",
+              widget: {
+                type: "input",
+              },
+            },
+          ],
+        ),
     }
   end
 

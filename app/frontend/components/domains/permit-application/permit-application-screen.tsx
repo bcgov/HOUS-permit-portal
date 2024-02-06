@@ -34,7 +34,7 @@ export const PermitApplicationScreen = observer(({}: IPermitApplicationScreenPro
         </Container>
         {permitApplication.requirements && (
           <Container maxW="container.lg">
-            <RequirementForm requirements={permitApplication.requirements} />
+            <RequirementForm permitApplication={permitApplication} />
           </Container>
         )}
       </Flex>

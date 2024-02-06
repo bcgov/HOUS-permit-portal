@@ -109,8 +109,8 @@ class RequirementsFromXlsxSeeder
           requirement =
             requirement_block
               .requirements
-              .where(requirement_code: "#{requirement_block.id}_#{row["requirement_code"]}")
-              .find_or_initialize_by(requirement_code: "#{requirement_block.id}_#{row["requirement_code"]}")
+              .where(requirement_code: "#{row["requirement_code"]}")
+              .find_or_initialize_by(requirement_code: "#{row["requirement_code"]}")
           requirement.update!(
             label: row["display_label"],
             input_type: row["input_type"],

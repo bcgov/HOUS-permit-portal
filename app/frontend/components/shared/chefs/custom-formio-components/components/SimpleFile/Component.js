@@ -13,7 +13,7 @@ export default class Component extends ParentComponent {
         type: ID,
         label: DISPLAY,
         key: ID,
-        storage: "chefs",
+        storage: "s3custom", //REMOVED THE DEFAULT CHEFS STORAGE AS THERE IS NO SUCH TYPE HERE
         url: "/files",
         fileKey: "files",
         fileNameTemplate: "{{fileName}}",

@@ -8,7 +8,7 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
-if !Rails.env.production? || ENV["ASSET_PRECOMPILATION"].present?
+if Rails.env.test? || ENV["ASSET_PRECOMPILATION"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
   Shrine.storages = {
     cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
     store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
@@ -17,7 +17,7 @@ else
   s3_options = {
     bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
     endpoint: ENV["BCGOV_OBJECT_STORAGE_ENDPOINT"],
-    region: "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable
+    region: ENV["BCGOV_OBJECT_STORAGE_REGION"] || "no-region-needed", # We are using Object Storage which does not require this, put in a dummy variable.  For dev testing will need a region.
     access_key_id: ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"],
     secret_access_key: ENV["BCGOV_OBJECT_STORAGE_SECRET_ACCESS_KEY"],
     force_path_style: true,
@@ -46,10 +46,30 @@ Shrine.plugin :presign_endpoint,
                 lambda { |request|
                   filename = request.params["filename"]
                   type = request.params["type"]
-
                   {
-                    content_disposition: ContentDisposition.attachment(filename), # set download filename
-                    content_type: type, # set content type (required if using DigitalOcean Spaces)
-                    content_length_range: 0..(10 * 1024 * 1024), # limit upload size to 10 MB
+                    method: :put,
+                    content_disposition: ContentDisposition.attachment(filename),
+                    content_type: type,
+                    content_md5: request.params["checksum"],
+                    # transfer_encoding: "chunked",
                   }
                 }
+
+class Shrine::Storage::S3
+  def presign_put(id, options)
+    obj = object(id)
+    url = obj.presigned_url(:put, options)
+
+    # When any of these options are specified, the corresponding request
+    # headers must be included in the upload request.
+    headers = {}
+    headers["Content-Length"] = options[:content_length] if options[:content_length]
+    headers["Content-Type"] = options[:content_type] if options[:content_type]
+    headers["Content-Disposition"] = options[:content_disposition] if options[:content_disposition]
+    headers["Content-Encoding"] = options[:content_encoding] if options[:content_encoding]
+    headers["Content-Language"] = options[:content_language] if options[:content_language]
+    headers["Content-MD5"] = options[:content_md5] if options[:content_md5]
+
+    { method: :put, url: url, headers: headers, key: obj.key }
+  end
+end
