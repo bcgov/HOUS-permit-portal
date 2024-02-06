@@ -13,6 +13,7 @@ import { ResetPasswordScreen } from "../authentication/reset-password-screen"
 import { HomeScreen } from "../home"
 import { JurisdictionIndexScreen } from "../jurisdictions/index"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
+import { JurisdictionSubmissionInboxScreen } from "../jurisdictions/jurisdiction-submisson-inbox-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/users"
 import { LandingScreen } from "../landing"
@@ -86,8 +87,13 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const submitterOnlyRoutes = <></>
+  const managerOrReviewerRoutes = (
+    <>
+      <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
+    </>
+  )
 
+  const submitterOnlyRoutes = <></>
   return (
     <Routes location={location}>
       {loggedIn ? (
@@ -99,6 +105,7 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
 
+          {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
           {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
           {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
           {currentUser?.isSubmitter && submitterOnlyRoutes}
