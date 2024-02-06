@@ -18,6 +18,8 @@ class Jurisdiction < ApplicationRecord
 
   accepts_nested_attributes_for :contacts
 
+  after_commit :reindex_users
+
   def review_managers
     users.review_managers
   end
@@ -70,6 +72,10 @@ class Jurisdiction < ApplicationRecord
   end
 
   private
+
+  def reindex_users
+    users.reindex
+  end
 
   def sanitize_html_fields
     attributes.each do |name, value|

@@ -57,7 +57,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.update(discarded_at: nil)
       render_success(@requirement_template, "requirement_template.restore_success")
     else
-      render_error Constants::Error::USER_RESTORE_ERROR, "requirement_template.restore_error", {}
+      render_error "requirement_template.restore_error", {}
     end
   end
 
