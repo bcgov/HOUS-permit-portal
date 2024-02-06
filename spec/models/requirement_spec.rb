@@ -292,4 +292,30 @@ RSpec.describe Requirement, type: :model do
       end
     end
   end
+
+  it "audits creation" do
+    requirement = build(:requirement)
+    requirement.save
+    binding.pry
+    expect(requirement.audits.count).to eq(1) # Checks if an audit record is created
+  end
+
+  it "audits updates" do
+    requirement = build(:requirement)
+    requirement.save
+    requirement.update!(label: "Updated Requirement")
+    expect(requirement.audits.count).to eq(2) # Initial creation and subsequent update
+    expect(requirement.audits.last.audited_changes["label"]).to include("Updated Requirement")
+  end
+
+  it "audits association changes when associated_with is used" do
+    requirement_block = build(:requirement_block)
+    requirement = build(:requirement, requirement_block: requirement_block)
+    requirement.save
+    new_block = create(:requirement_block)
+    requirement.update!(requirement_block: new_block)
+
+    # Check if the association change is audited
+    expect(requirement.audits.last.audited_changes["requirement_block_id"]).to eq(new_block.id)
+  end
 end

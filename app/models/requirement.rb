@@ -1,5 +1,6 @@
 class Requirement < ApplicationRecord
   belongs_to :requirement_block
+  audited associated_with: :requirement_block
 
   acts_as_list scope: :requirement_block, top_of_list: 0
 
