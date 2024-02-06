@@ -366,6 +366,7 @@ const options = {
             addSectionButton: "Add Section",
             addRequirementButton: "Add Requirement",
             saveDraft: "Save as Draft",
+            closeEditor: "Close Editor",
           },
           fields: {
             status: "Status",

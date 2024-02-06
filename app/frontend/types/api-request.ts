@@ -35,7 +35,7 @@ export interface IRequirementTemplateSectionsAttribute {
   templateSectionBlocksAttributes?: ITemplateSectionBlocksAttribute[]
 }
 
-export interface IRequirementTemplateParams {
+export interface IRequirementTemplateUpdateParams {
   description?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionsAttribute[]
 }

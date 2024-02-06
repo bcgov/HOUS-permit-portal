@@ -19,6 +19,8 @@ class RequirementTemplate < ApplicationRecord
 
   include Discard::Model
 
+  accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
+
   def jurisdictions_size
     jurisdictions.size
   end
