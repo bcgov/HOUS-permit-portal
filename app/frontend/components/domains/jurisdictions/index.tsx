@@ -9,6 +9,7 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { ManageJurisdictionMenu } from "../../shared/jurisdiction/manage-jurisdiction-menu"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { GridHeaders } from "./grid-header"
@@ -66,7 +67,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
                     <Flex justify="space-between" w="full">
                       <RouterLink to={`${j.id}/users/invite`}>{t("user.invite")}</RouterLink>
                       <RouterLink to={"#"}>{t("jurisdiction.viewAs")}</RouterLink>
-                      <RouterLink to={`${j.id}`}>{t("ui.manage")}</RouterLink>
+                      <ManageJurisdictionMenu jurisdiction={j} searchModel={jurisdictionStore} />
                     </Flex>
                   </SearchGridItem>
                 </Box>
