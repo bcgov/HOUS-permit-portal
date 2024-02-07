@@ -114,17 +114,14 @@ class PermitApplication < ApplicationRecord
   def automated_compliance_unfilled_requirements
     automated_compliance_requirements.select do |field_id, req|
       #TODO: if it is a file field, we check the compliance_data value is set instead
-      submission_field_is_empty?(field_id, requirement)
+      submission_field_is_empty?(field_id, req)
     end
   end
 
   def submission_field_is_empty?(field_id, requirement)
+    return true if submission_data.blank?
     if requirement.input_options.dig("computed_compliance", "value_on")
-      permit_application
-        .supporting_documents
-        .find_by_id(submission_data.dig("data", field_id, "id"))
-        &.compliance_data
-        .blank?
+      supporting_documents.find_by_id(submission_data.dig("data", field_id, "id"))&.compliance_data.blank?
     else
       submission_data.dig("data", field_id).blank?
     end
