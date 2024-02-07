@@ -86,6 +86,9 @@
   "lint-staged": {
     "*.{js,css,md,rb,ts,tsx}": [
       "prettier --write"
+    ],
+    "*.rb": [
+      "stree write"
     ]
   }
 }

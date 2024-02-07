@@ -9,7 +9,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
          :full_address,
          :pid,
          :pin,
-         :submission_data
+         :submission_data,
+         :submitted_at
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint

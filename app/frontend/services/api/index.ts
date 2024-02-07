@@ -8,6 +8,7 @@ import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-reque
 import {
   IAcceptInvitationResponse,
   IApiResponse,
+  IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
   IJurisdictionUserResponse,
   IOptionResponse,
@@ -18,6 +19,7 @@ import {
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
+  EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EUserSortFields,
@@ -89,7 +91,7 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
-  async fetchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
+  async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
 
@@ -119,6 +121,13 @@ export class Api {
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
+  }
+
+  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(
+      `/jurisdictions/${jurisdictionId}/permit_applications/search`,
+      params
+    )
   }
 
   async createRequirementBlock(params: IRequirementBlockParams) {

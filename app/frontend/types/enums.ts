@@ -63,8 +63,8 @@ export enum ERequirementTemplateSortFields {
 
 export enum EPermitApplicationSortFields {
   number = "number",
-  permit_classification = "permit_classification",
-  applicant = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
   submitted_at = "submitted_at",
   status = "status",
 }

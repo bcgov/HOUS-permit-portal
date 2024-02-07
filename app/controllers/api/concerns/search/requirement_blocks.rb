@@ -8,7 +8,14 @@ module Api::Concerns::Search::RequirementBlocks
         order: order,
         match: :word_start,
         page: search_params[:page],
-        per_page: search_params[:page] ? (search_params[:per_page] || Kaminari.config.default_per_page) : nil,
+        per_page:
+          (
+            if search_params[:page]
+              (search_params[:per_page] || Kaminari.config.default_per_page)
+            else
+              nil
+            end
+          ),
       )
   end
 

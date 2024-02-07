@@ -4,12 +4,14 @@ import { withEnvironment } from "../lib/with-environment"
 import { EUserSortFields } from "../types/enums"
 import { IContact, TLatLngTuple } from "../types/types"
 import { toCamelCase } from "../utils/utility-funcitons"
+import { PermitApplicationModel } from "./permit-application"
 import { UserModel } from "./user"
 
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
     id: types.identifier,
     name: types.string,
+    submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     reverseQualifiedName: types.string,
     localityType: types.string,
@@ -25,6 +27,7 @@ export const JurisdictionModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
     tableUsers: types.array(types.reference(UserModel)),
+    tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
   })
@@ -38,6 +41,9 @@ export const JurisdictionModel = types
   .actions((self) => ({
     setTableUsers: (users) => {
       self.tableUsers = users.map((user) => user.id)
+    },
+    setTablePermitApplications: (permitApplications) => {
+      self.tablePermitApplications = permitApplications.map((pa) => pa.id)
     },
     update: flow(function* (params) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))

@@ -1,9 +1,10 @@
 class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::Jurisdictions
   include Api::Concerns::Search::JurisdictionUsers
+  include Api::Concerns::Search::JurisdictionPermitApplications
 
-  before_action :set_jurisdiction, only: %i[show update search_users]
-  skip_after_action :verify_policy_scoped, only: %i[index search_users]
+  before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
+  skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
   skip_before_action :authenticate_user!, only: %i[show]
 
   def index
@@ -68,11 +69,11 @@ class Api::JurisdictionsController < Api::ApplicationController
     render_success options, nil, { blueprint: OptionBlueprint }
   end
 
-  # POST /api/jurisdictions/:id/users
+  # POST /api/jurisdictions/:id/users/search
   def search_users
     authorize @jurisdiction
     perform_user_search
-    authorized_results = apply_search_authorization(@user_search.results, "index")
+    authorized_results = apply_search_authorization(@user_search.results, "search_users")
     render_success authorized_results,
                    nil,
                    {
@@ -82,6 +83,23 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
+                   }
+  end
+
+  # POST /api/jurisdictions/:id/permit_applications/search
+  def search_permit_applications
+    authorize @jurisdiction
+    perform_permit_application_search
+    authorized_results = apply_search_authorization(@permit_application_search.results, "search_permit_applications")
+    render_success authorized_results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @permit_application_search.total_pages,
+                       total_count: @permit_application_search.total_count,
+                       current_page: @permit_application_search.current_page,
+                     },
+                     blueprint: PermitApplicationBlueprint,
                    }
   end
 
