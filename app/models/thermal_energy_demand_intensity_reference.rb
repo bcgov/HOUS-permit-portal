@@ -1,0 +1,2 @@
+class ThermalEnergyDemandIntensityReference < ApplicationRecord
+end
