@@ -21,137 +21,6 @@ $bcgov-alert-warning: #f9f1c6;
 $bcgov-alert-info: #d9eaf7;
 $bcgov-alert-success: #dff0d8;
 
-// Typography
-.v-application {
-  font-family: -apple-system, BlinkMacSystemFont, BCSans, Roboto, Verdana, Arial, sans-serif !important;
-  line-height: 1.4;
-  font-size: 0.875rem;
-}
-
-h1 {
-  font-size: 1.9em;
-}
-h2 {
-  font-size: 1.7em;
-}
-h3 {
-  font-size: 1.3em;
-}
-h4 {
-  font-size: 1.05em;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5 {
-  color: $bcgov-font;
-  line-height: 1.2;
-  font-weight: bold;
-}
-
-p {
-  color: $bcgov-font;
-  line-height: 1.7;
-}
-
-// links
-a {
-  color: $bcgov-link;
-  &:hover {
-    color: $bcgov-link-hover;
-  }
-}
-
-// Horizontal Rule
-hr {
-  margin-bottom: 1em;
-  .orange {
-    border-top: 2px solid $bcgov-orange;
-  }
-}
-
-// General Transition Animation Behavior
-.component-fade-enter-active,
-.component-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.component-fade-enter,
-.component-fade-leave-to {
-  opacity: 0;
-}
-
-// Anchor and Tab Behavior
-a,
-.v-tab {
-  text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-    button,
-    .v-icon {
-      text-decoration: none;
-    }
-  }
-}
-
-.v-btn {
-  span > span {
-    font-weight: bold;
-  }
-
-  &:hover {
-    opacity: 0.8;
-    span > span {
-      text-decoration: underline;
-    }
-  }
-  &.v-btn--disabled {
-    color: #777;
-  }
-
-  &.v-btn--outlined {
-    border: 2px solid #fff;
-    &.v-btn--disabled {
-      border-color: rgba(0, 0, 0, 0.26);
-    }
-  }
-}
-
-.v-tooltip > .v-overlay__content {
-  background: rgba(97, 97, 97, 0.9) !important;
-}
-
-// Customized expand/collapse section
-.nrmc-expand-collapse {
-  width: 100%;
-  min-height: 50px;
-
-  .v-expansion-panel--active {
-    margin-bottom: 20px;
-  }
-
-  .v-expansion-panel--active > .v-expansion-panel-title {
-    min-height: 50px;
-  }
-
-  .v-expansion-panel-title {
-    padding: 10px;
-    background-color: $bcgov-grey;
-    .icon {
-      order: 0;
-    }
-
-    .header {
-      order: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex: 1 auto;
-    }
-  }
-}
-
 /////////////////////////////////
 ///  override formio styles:
 /////////////////////////////////
@@ -162,6 +31,145 @@ a,
 .form-wrapper,
 // override preview panel in form builder component editor modal
 .component-preview {
+  ///////
+  /////moved from the main application
+  ///////
+
+  // Typography
+  .v-application {
+    font-family: -apple-system, BlinkMacSystemFont, BCSans, Roboto, Verdana, Arial, sans-serif !important;
+    line-height: 1.4;
+    font-size: 0.875rem;
+  }
+
+  h1 {
+    font-size: 1.9em;
+  }
+  h2 {
+    font-size: 1.7em;
+  }
+  h3 {
+    font-size: 1.3em;
+  }
+  h4 {
+    font-size: 1.05em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    color: $bcgov-font;
+    line-height: 1.2;
+    font-weight: bold;
+  }
+
+  p {
+    color: $bcgov-font;
+    line-height: 1.7;
+  }
+
+  // links
+  a {
+    color: $bcgov-link;
+    &:hover {
+      color: $bcgov-link-hover;
+    }
+  }
+
+  // Horizontal Rule
+  hr {
+    margin-bottom: 1em;
+    .orange {
+      border-top: 2px solid $bcgov-orange;
+    }
+  }
+
+  // General Transition Animation Behavior
+  .component-fade-enter-active,
+  .component-fade-leave-active {
+    transition: opacity 0.3s ease;
+  }
+  .component-fade-enter,
+  .component-fade-leave-to {
+    opacity: 0;
+  }
+
+  // Anchor and Tab Behavior
+  a,
+  .v-tab {
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+      button,
+      .v-icon {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .v-btn {
+    span > span {
+      font-weight: bold;
+    }
+
+    &:hover {
+      opacity: 0.8;
+      span > span {
+        text-decoration: underline;
+      }
+    }
+    &.v-btn--disabled {
+      color: #777;
+    }
+
+    &.v-btn--outlined {
+      border: 2px solid #fff;
+      &.v-btn--disabled {
+        border-color: rgba(0, 0, 0, 0.26);
+      }
+    }
+  }
+
+  .v-tooltip > .v-overlay__content {
+    background: rgba(97, 97, 97, 0.9) !important;
+  }
+
+  // Customized expand/collapse section
+  .nrmc-expand-collapse {
+    width: 100%;
+    min-height: 50px;
+
+    .v-expansion-panel--active {
+      margin-bottom: 20px;
+    }
+
+    .v-expansion-panel--active > .v-expansion-panel-title {
+      min-height: 50px;
+    }
+
+    .v-expansion-panel-title {
+      padding: 10px;
+      background-color: $bcgov-grey;
+      .icon {
+        order: 0;
+      }
+
+      .header {
+        order: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex: 1 auto;
+      }
+    }
+  }
+
+  ///////
+  ///// end moved from the main application
+  ///////
+
   // layout
   div[class^="col-"]:nth-child(n + 1) {
     padding-top: 0; // make nested columns line up vertically alongside components in non-nested adjacent columns
