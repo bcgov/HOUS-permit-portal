@@ -107,11 +107,17 @@ class Requirement < ApplicationRecord
       json.merge!({ data: { values: input_options["value_options"] } })
     end
 
-    if input_options["computed_compliance"].present?
-      json.merge!({ computedCompliance: input_options["computed_compliance"] })
-    end
+    json.merge!({ computedCompliance: input_options["computed_compliance"] }) if computed_compliance?
 
     json
+  end
+
+  def lookup_props(requirement_block_key = requirement_block&.key)
+    { key(requirement_block_key) => self }
+  end
+
+  def computed_compliance?
+    input_options["computed_compliance"].present?
   end
 
   private
