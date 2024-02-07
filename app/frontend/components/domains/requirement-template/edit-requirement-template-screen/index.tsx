@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, useDisclosure } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -16,6 +16,7 @@ import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "./builder-header"
 import { SectionsDisplay } from "./sections-display"
 import { SectionsDnd } from "./sections-dnd"
+import { SectionsSidebar } from "./sections-sidebar"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateUpdateParams {}
 
@@ -46,6 +47,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
 }
 
 export const EditRequirementTemplateScreen = observer(function EditRequirementTemplateScreen() {
+  const { isOpen: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
   const { requirementTemplateStore } = useMst()
   const { requirementTemplate, error } = useRequirementTemplate()
   const { t } = useTranslation()
@@ -87,9 +89,20 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       <FormProvider {...formMethods}>
         <BuilderHeader requirementTemplate={requirementTemplate} />
         <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
-          <SectionsDnd sections={watchedSectionsAttributes} />
+          {isReorderMode ? (
+            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} />
+          ) : (
+            <SectionsSidebar onEdit={openReorderMode} />
+          )}
           <Box flex={1} h={"full"}>
-            <HStack px={6} py={4} bg={"greys.grey03"} w={"full"} justifyContent={"flex-end"}>
+            <HStack
+              px={6}
+              py={4}
+              bg={"greys.grey03"}
+              w={"full"}
+              justifyContent={"flex-end"}
+              boxShadow={"elevations.elevation02"}
+            >
               <HStack spacing={4}>
                 <Button
                   variant={"primary"}

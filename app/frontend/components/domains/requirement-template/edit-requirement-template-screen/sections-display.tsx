@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useMst } from "../../../../setup/root"
-import { IRequirementTemplateSectionsAttribute } from "../../../../types/api-request"
+import { IRequirementTemplateSectionAttributes } from "../../../../types/api-request"
 import { RequirementBlockDisplay } from "../../requirements-library/requirement-block-display"
 import { RequirementsLibraryDrawer } from "../../requirements-library/requirements-library-drawer"
 import { IRequirementTemplateForm } from "./index"
@@ -22,7 +22,7 @@ export const SectionsDisplay = observer(function SectionsDisplay() {
 })
 
 const SectionDisplay = observer(
-  ({ section, sectionIndex }: { section: IRequirementTemplateSectionsAttribute; sectionIndex: number }) => {
+  ({ section, sectionIndex }: { section: IRequirementTemplateSectionAttributes; sectionIndex: number }) => {
     const { requirementBlockStore } = useMst()
     const { control } = useFormContext<IRequirementTemplateForm>()
 
