@@ -204,6 +204,63 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
             name: "index_requirements_on_requirement_block_id"
   end
 
+  create_table "step_code_data_entries",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_id"
+    t.integer "stage", null: false
+    t.string "model"
+    t.string "version"
+    t.string "weather_location"
+    t.decimal "fwdr"
+    t.string "p_file_no"
+    t.decimal "above_grade_heated_floor_area"
+    t.decimal "below_grade_heated_floor_area"
+    t.integer "dwelling_units_count"
+    t.decimal "baseloads"
+    t.integer "hdd"
+    t.decimal "aec"
+    t.decimal "ref_aec"
+    t.decimal "building_envelope_surface_area"
+    t.decimal "building_volume"
+    t.decimal "ach"
+    t.decimal "nla"
+    t.decimal "aux_energy_required"
+    t.decimal "proposed_gshl"
+    t.decimal "ref_gshl"
+    t.decimal "design_cooling_load"
+    t.decimal "ac_cooling_capacity"
+    t.decimal "air_heat_pump_cooling_capacity"
+    t.decimal "grounded_heat_pump_cooling_capacity"
+    t.decimal "water_heat_pump_cooling_capacity"
+    t.decimal "heating_furnace"
+    t.decimal "heating_boiler"
+    t.decimal "heating_combo"
+    t.decimal "electrical_consumption"
+    t.decimal "natural_gas_consumption"
+    t.decimal "propane_consumption"
+    t.decimal "district_energy_consumption"
+    t.decimal "district_energy_ef"
+    t.decimal "other_ghg_consumption"
+    t.decimal "other_ghg_ef"
+    t.decimal "hot_water"
+    t.decimal "cooking"
+    t.decimal "laundry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_id"],
+            name: "index_step_code_data_entries_on_step_code_id"
+  end
+
+  create_table "step_codes",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "supporting_documents",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -354,6 +411,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
