@@ -16,6 +16,8 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
 
+  before_create :assign_unique_number
+
   #stubs for UI
   alias number id
   def nickname
@@ -27,6 +29,41 @@ class PermitApplication < ApplicationRecord
     #need to look up jurisidcitional version and enablement as well
     requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type)
     requirement_template ? requirement_template.to_form_json : nil
+  end
+
+  def number_prefix
+    jurisdiction.prefix
+  end
+
+  def assign_unique_number
+    last_number =
+      jurisdiction
+        .permit_applications
+        .where("number LIKE ?", "#{number_prefix}-%")
+        .order(Arel.sql("LENGTH(number) DESC"), number: :desc)
+        .limit(1)
+        .pluck(:number)
+        .first
+
+    if last_number
+      number_parts = last_number.split("-")
+      sequence_part = number_parts[1..-1].join.to_i + 1 # Increment the sequence
+      new_number =
+        format(
+          "%s-%03d-%03d-%03d",
+          number_prefix,
+          sequence_part / 1_000_000 % 1000,
+          sequence_part / 1000 % 1000,
+          sequence_part % 1000,
+        )
+    else
+      # Start with the initial number if there are no previous numbers
+      new_number = format("%s-001-000-000", number_prefix)
+    end
+
+    # Assign the new number to the permit application
+    self.number = new_number
+    return new_number
   end
 
   private

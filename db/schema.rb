@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_06_012642) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_07_194117) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -81,6 +81,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_06_012642) do
     t.text "look_out_html"
     t.text "contact_summary_html"
     t.jsonb "map_position"
+    t.string "prefix", null: false
+    t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
   end
@@ -100,9 +102,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_06_012642) do
     t.string "pid"
     t.string "pin"
     t.jsonb "submission_data"
+    t.string "number"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
+    t.index ["number"],
+            name: "index_permit_applications_on_number",
+            unique: true
     t.index ["permit_type_id"],
             name: "index_permit_applications_on_permit_type_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
