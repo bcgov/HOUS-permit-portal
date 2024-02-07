@@ -223,17 +223,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_28_231537) do
             name: "index_requirements_on_requirement_block_id"
   end
 
-  create_table "step_code_checklists",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "step_code_id"
-    t.integer "stage", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
-  end
-
   create_table "step_code_data_entries",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -279,7 +268,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_28_231537) do
     t.decimal "laundry"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.jsonb "h2k_file_data"
     t.index ["step_code_id"],
             name: "index_step_code_data_entries_on_step_code_id"
   end
@@ -290,11 +278,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_28_231537) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.uuid "submitter_id"
-    t.uuid "permit_application_id"
-    t.index ["permit_application_id"],
-            name: "index_step_codes_on_permit_application_id"
-    t.index ["submitter_id"], name: "index_step_codes_on_submitter_id"
   end
 
   create_table "supporting_documents",
@@ -468,10 +451,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_28_231537) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
-  add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
-  add_foreign_key "step_codes", "permit_applications"
-  add_foreign_key "step_codes", "users", column: "submitter_id"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
