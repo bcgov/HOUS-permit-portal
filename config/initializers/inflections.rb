@@ -11,6 +11,9 @@
 # end
 
 # These inflection rules are supported but not enabled by default:
-# ActiveSupport::Inflector.inflections(:en) do |inflect|
-#   inflect.acronym "RESTful"
-# end
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym "MEUI" # Mechanical Energy Use Intensity
+  inflect.acronym "TEDI" # Thermal Energy Demand Intensity
+  inflect.acronym "GHG" # Greenhouse Gas
+  inflect.acronym "CO2" # Carbon Dioxide
+end

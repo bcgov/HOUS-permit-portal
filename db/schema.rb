@@ -88,6 +88,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
             name: "index_jurisdictions_on_regional_district_id"
   end
 
+  create_table "mechanical_energy_use_intensity_references",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.int4range "hdd"
+    t.numrange "conditioned_space_percent"
+    t.integer "step"
+    t.int4range "conditioned_space_area"
+    t.integer "meui"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[hdd conditioned_space_percent step conditioned_space_area],
+            name: "meui_composite_index",
+            unique: true
+  end
+
   create_table "permit_applications",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -202,6 +218,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
     t.integer "position"
     t.index ["requirement_block_id"],
             name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "step_code_checklists",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_id"
+    t.integer "stage", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 
   create_table "step_code_data_entries",
@@ -333,6 +360,26 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
             name: "idx_on_requirement_template_section_id_5469986497"
   end
 
+  create_table "thermal_energy_demand_intensity_references",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.int4range "hdd"
+    t.integer "step"
+    t.decimal "ach"
+    t.decimal "nla"
+    t.decimal "nlr"
+    t.integer "ltrh_over_300"
+    t.integer "ltrh_under_300"
+    t.integer "tedi"
+    t.integer "hdd_adjusted_tedi"
+    t.integer "gshl_over_300"
+    t.integer "gshl_under_300"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[hdd step], name: "tedi_composite_index", unique: true
+  end
+
   create_table "users",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -411,6 +458,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"

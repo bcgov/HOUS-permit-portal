@@ -141,3 +141,7 @@ RequirementTemplate.reindex
 # Requirments block will get created from requiremetms templates
 puts "Seeding requirements..."
 RequirementsFromXlsxSeeder.seed
+
+# Energy Step Code Reference Tables
+StepCode::MEUIReferencesSeeder.seed!
+StepCode::TEDIReferencesSeeder.seed!
