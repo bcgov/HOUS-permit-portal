@@ -5,6 +5,7 @@ import { useFieldArray, useFormContext } from "react-hook-form"
 import { useMst } from "../../../../setup/root"
 import { IRequirementTemplateSectionsAttribute } from "../../../../types/api-request"
 import { RequirementBlockDisplay } from "../../requirements-library/requirement-block-display"
+import { RequirementsLibraryDrawer } from "../../requirements-library/requirements-library-drawer"
 import { IRequirementTemplateForm } from "./index"
 
 export const SectionsDisplay = observer(function SectionsDisplay() {
@@ -25,7 +26,7 @@ const SectionDisplay = observer(
     const { requirementBlockStore } = useMst()
     const { control } = useFormContext<IRequirementTemplateForm>()
 
-    const { fields: sectionBlockFields } = useFieldArray({
+    const { fields: sectionBlockFields, append } = useFieldArray({
       name: `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`,
       control,
     })
@@ -36,7 +37,7 @@ const SectionDisplay = observer(
           <Text as={"h4"} fontWeight={700} fontSize={"2xl"}>
             {section.name}
           </Text>
-          <Stack w={"full"} maxW={"798px"} pl={0}>
+          <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
             {sectionBlockFields.map((sectionBlock, index) => (
               <RequirementBlockDisplay
                 as={"section"}
@@ -44,6 +45,13 @@ const SectionDisplay = observer(
                 requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
               />
             ))}
+            <RequirementsLibraryDrawer
+              defaultButtonProps={{ alignSelf: "center" }}
+              onUse={(requirementBlock, closeDrawer) => {
+                append({ requirementBlockId: requirementBlock.id })
+                closeDrawer()
+              }}
+            />
           </Stack>
         </Box>
       </Box>

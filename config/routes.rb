@@ -39,7 +39,7 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
 
-    resources :requirement_templates, only: %i[show create destroy] do
+    resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
       patch "restore", on: :member
     end
@@ -67,7 +67,7 @@ Rails.application.routes.draw do
 
     post "tags/search", to: "tags#index", as: :tags_search
 
-    get "storage/s3" => "storage#upload" #use a storage controller instead of shrine mount since we want api authentication before being able to access
+    get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
     get "storage/s3/download" => "storage#download"
     get "storage/s3/delete" => "storage#delete"
   end

@@ -4,7 +4,7 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IUser } from "../../models/user"
-import { IRequirementBlockParams, ITagSearchParams } from "../../types/api-request"
+import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IApiResponse,
@@ -163,6 +163,12 @@ export class Api {
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
+      requirementTemplate: params,
+    })
+  }
+
+  async updateRequirementTemplate(templateId: string, params: IRequirementTemplateUpdateParams) {
+    return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
       requirementTemplate: params,
     })
   }

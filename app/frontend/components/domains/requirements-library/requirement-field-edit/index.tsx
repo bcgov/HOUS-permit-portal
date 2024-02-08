@@ -304,6 +304,7 @@ const requirementsComponentMap = {
             </HStack>
           ))}
 
+          {/*  @ts-ignore*/}
           <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
             {t("requirementsLibrary.modals.addOptionButton")}
           </Button>

@@ -6,6 +6,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementTemplateModel } from "../models/requirement-template"
+import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields } from "../types/enums"
 import { toCamelCase } from "../utils/utility-funcitons"
 
@@ -91,6 +92,19 @@ export const RequirementTemplateStoreModel = types
         self.requirementTemplateMap.put(response.data)
         return response.data
       }
+    }),
+    updateRequirementTemplate: flow(function* (templateId: string, params: IRequirementTemplateUpdateParams) {
+      const response = yield* toGenerator(self.environment.api.updateRequirementTemplate(templateId, params))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+
+        return self.requirementTemplateMap.get(templateData.id)
+      }
+
+      return response.ok
     }),
   }))
 
