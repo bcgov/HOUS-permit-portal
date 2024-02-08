@@ -123,6 +123,7 @@ const options = {
           isRequired: "{{field}} is required",
           use: "Use",
           publish: "Publish",
+          neverMind: "Never mind",
         },
         contact: {
           fields: {
@@ -370,6 +371,10 @@ const options = {
             closeEditor: "Close Editor",
             sectionsSidebarTitle: "Contents",
             reorderButton: "Reorder",
+            removeConfirmationModal: {
+              title: "Are you sure you want to remove this section?",
+              body: "Any requirements inside this section will also be removed along with it.",
+            },
           },
           fields: {
             status: "Status",

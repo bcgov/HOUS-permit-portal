@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { IRequirementTemplateSectionAttributes } from "../../../../types/api-request"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
+import { RemoveConfirmationModal } from "../../../shared/remove-confirmation-modal"
 import { RequirementBlockDisplay } from "../../requirements-library/requirement-block-display"
 import { RequirementsLibraryDrawer } from "../../requirements-library/requirements-library-drawer"
 import { IRequirementTemplateForm } from "./index"
@@ -78,7 +79,7 @@ const SectionDisplay = observer(
               onSubmit={closeEditMode}
             />
 
-            {
+            {watchedSectionBlocks.length === 0 ? (
               <Button
                 leftIcon={<X />}
                 variant={"ghost"}
@@ -88,7 +89,14 @@ const SectionDisplay = observer(
               >
                 {t("ui.remove")}
               </Button>
-            }
+            ) : (
+              <RemoveConfirmationModal
+                title={t("requirementTemplate.edit.removeConfirmationModal.title")}
+                body={t("requirementTemplate.edit.removeConfirmationModal.body")}
+                onRemove={() => removeSection(sectionIndex)}
+                triggerButtonProps={{ visibility: "hidden" }}
+              />
+            )}
           </HStack>
           <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
             {watchedSectionBlocks.map((sectionBlock, index) => (
