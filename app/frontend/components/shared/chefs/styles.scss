@@ -207,10 +207,6 @@ $bcgov-alert-success: #dff0d8;
 
   // buttons
 
-  .btn {
-    @extend .v-btn;
-  }
-
   .btn.btn-primary {
     background-color: $bcgov-blue;
     border: none;
@@ -224,7 +220,6 @@ $bcgov-alert-success: #dff0d8;
     &:disabled,
     &[disabled="disabled"],
     &[disabled="disabled"] &:hover {
-      @extend .v-btn--disabled;
       cursor: default;
       text-decoration: none;
       background-color: rgba(0, 0, 0, 0.12);
