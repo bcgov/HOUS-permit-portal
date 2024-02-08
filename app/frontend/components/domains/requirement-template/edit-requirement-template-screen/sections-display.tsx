@@ -1,4 +1,5 @@
-import { Box, Stack } from "@chakra-ui/react"
+import { Box, Button, HStack, Stack, useDisclosure } from "@chakra-ui/react"
+import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -28,10 +29,16 @@ const SectionDisplay = observer(
   ({ section, sectionIndex }: { section: IRequirementTemplateSectionAttributes; sectionIndex: number }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
+    const { isOpen: isEditMode, onClose: closeEditMode, onOpen: openEditMode } = useDisclosure()
     const { t } = useTranslation()
 
-    const { append } = useFieldArray({
+    const { append: appendSectionBlocks } = useFieldArray({
       name: `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`,
+      control,
+    })
+
+    const { remove: removeSection } = useFieldArray({
+      name: `requirementTemplateSectionsAttributes`,
       control,
     })
 
@@ -44,24 +51,45 @@ const SectionDisplay = observer(
       <Box as={"section"} w={"full"}>
         <Box>
           <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
-          <EditableInputWithControls
-            aria-role={"heading"}
-            aria-level={4}
-            w={"fit-content"}
-            fontWeight={700}
-            fontSize={"2xl"}
-            initialHint={t("ui.clickToEdit")}
-            value={watchedSectionName || ""}
-            editableInputProps={{
-              ...register(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, { required: true }),
-              "aria-label": "Edit Section Name",
-            }}
-            color={R.isEmpty(watchedSectionName) ? "text.link" : undefined}
-            aria-label={"Edit Section Name"}
-            onCancel={(previousValue) =>
-              setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
+          <HStack
+            w={"full"}
+            justifyContent={"space-between"}
+            _hover={{ "button:nth-child(2)": { visibility: "visible" } }}
+          >
+            <EditableInputWithControls
+              onEdit={openEditMode}
+              aria-role={"heading"}
+              aria-level={4}
+              w={"fit-content"}
+              fontWeight={700}
+              fontSize={"2xl"}
+              initialHint={t("ui.clickToEdit")}
+              value={watchedSectionName || ""}
+              editableInputProps={{
+                ...register(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, { required: true }),
+                "aria-label": "Edit Section Name",
+              }}
+              color={R.isEmpty(watchedSectionName) ? "text.link" : undefined}
+              aria-label={"Edit Section Name"}
+              onCancel={(previousValue) => {
+                setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
+                closeEditMode()
+              }}
+              onSubmit={closeEditMode}
+            />
+
+            {
+              <Button
+                leftIcon={<X />}
+                variant={"ghost"}
+                color={"error"}
+                visibility={"hidden"}
+                onClick={() => removeSection(sectionIndex)}
+              >
+                {t("ui.remove")}
+              </Button>
             }
-          />
+          </HStack>
           <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
             {watchedSectionBlocks.map((sectionBlock, index) => (
               <RequirementBlockDisplay
@@ -73,7 +101,7 @@ const SectionDisplay = observer(
             <RequirementsLibraryDrawer
               defaultButtonProps={{ alignSelf: "center" }}
               onUse={(requirementBlock, closeDrawer) => {
-                append({ requirementBlockId: requirementBlock.id })
+                appendSectionBlocks({ requirementBlockId: requirementBlock.id })
                 closeDrawer()
               }}
             />

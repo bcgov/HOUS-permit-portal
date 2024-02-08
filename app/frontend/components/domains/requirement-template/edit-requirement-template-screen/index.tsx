@@ -86,7 +86,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       })
 
       // mark removed or moved templateSectionBlocks to be deleted
-      const deletedTemplateSectionBlockIds: ITemplateSectionBlockAttributes[] =
+      const deletedTemplateSectionBlocksAttributes: ITemplateSectionBlockAttributes[] =
         existingMSTSection?.sortedTemplateSectionBlocks
           .filter(
             (sectionBlock) =>
@@ -97,8 +97,22 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
           .map((sectionBlock) => ({ id: sectionBlock.id, _destroy: true })) ?? []
 
       // append the deleted templateSectionBlocks to request params
-      sectionAttributes.templateSectionBlocksAttributes.unshift(...deletedTemplateSectionBlockIds)
+      sectionAttributes.templateSectionBlocksAttributes.unshift(...deletedTemplateSectionBlocksAttributes)
     })
+
+    // mark removed sections to be deleted
+    const deletedTemplateSectionsAttributes: ITemplateSectionBlockAttributes[] =
+      requirementTemplate?.sortedRequirementTemplateSections
+        .filter(
+          (section) =>
+            !formattedData.requirementTemplateSectionsAttributes.find(
+              (sectionAttributes) => sectionAttributes.id === section.id
+            )
+        )
+        .map((section) => ({ id: section.id, _destroy: true })) ?? []
+
+    // append the deleted templateSections to request params
+    formattedData.requirementTemplateSectionsAttributes.unshift(...deletedTemplateSectionsAttributes)
 
     return formattedData
   }
