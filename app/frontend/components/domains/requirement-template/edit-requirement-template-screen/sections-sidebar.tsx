@@ -30,7 +30,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({ onEdit }: IPr
           {t("requirementTemplate.edit.sectionsSidebarTitle")}
         </Text>
         <Button variant={"secondary"} onClick={onEdit} size={"sm"}>
-          {t("requirementTemplate.edit.editReorderButton")}
+          {t("requirementTemplate.edit.reorderButton")}
         </Button>
       </HStack>
       <Stack w={"full"} spacing={4} alignItems={"flex-start"} py={2}>

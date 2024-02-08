@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex, Text, VStack } from "@chakra-ui/react"
 import {
   CollisionDetection,
   DndContext,
@@ -20,7 +20,6 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { Plus } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -162,10 +161,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
 
   return (
     <Box w={"368px"} as={"section"} h={"full"} boxShadow={"elevations.elevation01"}>
-      <HStack w={"full"} justifyContent={"space-between"} bg={"theme.blue"} py={5} px={4}>
-        <Button size={"sm"} variant={"secondaryInverse"} leftIcon={<Plus />} isDisabled>
-          {t("requirementTemplate.edit.addSectionButton")}
-        </Button>
+      <Flex w={"full"} justifyContent={"flex-end"} bg={"theme.blue"} py={5} px={4}>
         <ButtonGroup size={"sm"}>
           <Button variant={"primaryInverse"} onClick={() => onDone(dndSectionMap, sortedSectionIds)}>
             {t("ui.done")}
@@ -174,7 +170,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
             {t("ui.cancel")}
           </Button>
         </ButtonGroup>
-      </HStack>
+      </Flex>
       <Text as={"h3"} fontSize={"md"} color={"text.secondary"} fontWeight={700} py={1} px={4} bg={"greys.grey03"}>
         {t("requirementTemplate.edit.dndTitle")}
       </Text>
@@ -248,8 +244,6 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
     setActiveId(active.id)
     setClonedDndSectionMap(R.clone(dndSectionMap))
   }
-
-  const [isReorderMode, setIsReorderMode] = useState(false)
 
   function onDragCancel() {
     if (clonedDndSectionMap) {

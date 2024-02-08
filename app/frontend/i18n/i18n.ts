@@ -369,7 +369,7 @@ const options = {
             saveDraft: "Save as Draft",
             closeEditor: "Close Editor",
             sectionsSidebarTitle: "Contents",
-            editReorderButton: "Edit & Reorder",
+            reorderButton: "Reorder",
           },
           fields: {
             status: "Status",
