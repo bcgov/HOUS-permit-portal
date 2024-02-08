@@ -14,7 +14,7 @@ class Requirement < ApplicationRecord
          file: 7,
          simplephonenumber: 10,
          simpleemail: 11,
-         radio: 12
+         radio: 12,
        },
        _prefix: true
 
@@ -24,18 +24,18 @@ class Requirement < ApplicationRecord
 
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
-      type: "simpletextfield"
+      type: "simpletextfield",
     },
     number: {
       applyMaskOn: "change",
       mask: false,
-      inputFormat: "plain"
+      inputFormat: "plain",
     },
     date: {
       enableTime: false,
       datePicker: {
         disableWeekends: false,
-        disableWeekdays: false
+        disableWeekdays: false,
       },
       enableMinDateInput: false,
       enableMaxDateInput: false,
@@ -55,21 +55,21 @@ class Requirement < ApplicationRecord
         minDate: nil,
         disableWeekends: false,
         disableWeekdays: false,
-        maxDate: nil
-      }
+        maxDate: nil,
+      },
     },
     select: {
       widget: {
-        type: "choicesjs"
-      }
+        type: "choicesjs",
+      },
     },
     multi_option_select: {
       type: "select",
       multiple: true,
       widget: {
-        type: "choicesjs"
-      }
-    }
+        type: "choicesjs",
+      },
+    },
   }
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi $]
@@ -99,8 +99,8 @@ class Requirement < ApplicationRecord
       input: true,
       label: label,
       widget: {
-        type: "input"
-      }
+        type: "input",
+      },
     }.merge!(formio_type_options)
 
     if input_type_select? || input_type_multi_option_select?
@@ -135,19 +135,16 @@ class Requirement < ApplicationRecord
           type: "file",
           storage:
             (
-              if (
-                   !Rails.env.test? &&
-                     ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?
-                 )
+              if (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?)
                 "s3custom"
               else
                 nil
               end
-            )
+            ),
         }.tap do |file_hash|
-          file_hash["computedCompliance"] = input_options[
+          file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
             "computed_compliance"
-          ] if input_options["computed_compliance"].present?
+          ].present?
           file_hash["multiple"] = true if input_options["multiple"].present?
         end
       )
@@ -158,11 +155,9 @@ class Requirement < ApplicationRecord
   def validate_value_options
     return unless TYPES_WITH_VALUE_OPTIONS.include?(input_type.to_s)
 
-    if input_options.blank? || input_options["value_options"].blank? ||
-         !input_options["value_options"].is_a?(Array) ||
+    if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
-           option.is_a?(Hash) &&
-             (option.key?("label") && option["label"].is_a?(String)) &&
+           option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
              (option.key?("value") && option["value"].is_a?(String))
          }
       errors.add(:input_options, "must have value options defined")
@@ -170,16 +165,10 @@ class Requirement < ApplicationRecord
   end
 
   def validate_unit_for_number_inputs
-    unless input_type_number? &&
-             (input_options.present? && input_options["number_unit"].present?)
-      return
-    end
+    return unless input_type_number? && (input_options.present? && input_options["number_unit"].present?)
 
     if !NUMBER_UNITS.include?(input_options["number_unit"])
-      errors.add(
-        :input_options,
-        "the number_unit must be one of #{NUMBER_UNITS.join(", ")}"
-      )
+      errors.add(:input_options, "the number_unit must be one of #{NUMBER_UNITS.join(", ")}")
     end
   end
 end

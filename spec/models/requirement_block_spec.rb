@@ -24,8 +24,8 @@ RSpec.describe RequirementBlock, type: :model do
 
   describe "enums" do
     # TODO: remove xit tests when roles will be defined
-    xit { should define_enum_for(:sign_off_role).with_prefix(true).with_values(any: 0) }
-    xit { should define_enum_for(:reviewer_role).with_prefix(true).with_values(any: 0) }
+    it { should define_enum_for(:sign_off_role).with_prefix(true).with_values(any: 0) }
+    it { should define_enum_for(:reviewer_role).with_prefix(true).with_values(any: 0) }
   end
 
   describe "methods" do
