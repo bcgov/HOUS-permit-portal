@@ -24,8 +24,10 @@ export interface IRequirementBlockParams {
 
 export interface ITemplateSectionBlockAttributes {
   id?: string
+  requirementTemplateSectionId?: string
   requirementBlockId?: string
   position?: number
+  _destroy?: true
 }
 
 export interface IRequirementTemplateSectionAttributes {
@@ -33,6 +35,7 @@ export interface IRequirementTemplateSectionAttributes {
   name?: string
   position?: number
   templateSectionBlocksAttributes?: ITemplateSectionBlockAttributes[]
+  _destroy?: boolean
 }
 
 export interface IRequirementTemplateUpdateParams {

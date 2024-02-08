@@ -17,12 +17,21 @@ function preProcessor(snapshot) {
 }
 
 export const RequirementTemplateSectionModel = types.snapshotProcessor(
-  types.model("RequirementTemplateSectionModel", {
-    id: types.identifier,
-    name: types.maybeNull(types.string),
-    templateSectionBlockMap: types.map(TemplateSectionBlockModel),
-    sortedTemplateSectionBlocks: types.array(types.safeReference(TemplateSectionBlockModel)),
-  }),
+  types
+    .model("RequirementTemplateSectionModel", {
+      id: types.identifier,
+      name: types.maybeNull(types.string),
+      templateSectionBlockMap: types.map(TemplateSectionBlockModel),
+      sortedTemplateSectionBlocks: types.array(types.safeReference(TemplateSectionBlockModel)),
+    })
+    .views((self) => ({
+      hasTemplateSectionBlock(id: string) {
+        return self.templateSectionBlockMap.has(id)
+      },
+      getTemplateSectionBlockById(id: string) {
+        return self.templateSectionBlockMap.get(id)
+      },
+    })),
   { preProcessor }
 )
 

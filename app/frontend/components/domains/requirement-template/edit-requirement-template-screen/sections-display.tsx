@@ -24,12 +24,16 @@ export const SectionsDisplay = observer(function SectionsDisplay() {
 const SectionDisplay = observer(
   ({ section, sectionIndex }: { section: IRequirementTemplateSectionAttributes; sectionIndex: number }) => {
     const { requirementBlockStore } = useMst()
-    const { control } = useFormContext<IRequirementTemplateForm>()
+    const { control, watch } = useFormContext<IRequirementTemplateForm>()
 
-    const { fields: sectionBlockFields, append } = useFieldArray({
+    const { append } = useFieldArray({
       name: `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`,
       control,
     })
+
+    const watchedSectionBlocks = watch(
+      `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`
+    )
     return (
       <Box as={"section"} w={"full"}>
         <Box>
@@ -38,7 +42,7 @@ const SectionDisplay = observer(
             {section.name}
           </Text>
           <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
-            {sectionBlockFields.map((sectionBlock, index) => (
+            {watchedSectionBlocks.map((sectionBlock, index) => (
               <RequirementBlockDisplay
                 as={"section"}
                 key={sectionBlock.id}

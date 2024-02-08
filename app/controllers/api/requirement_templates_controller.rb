@@ -91,7 +91,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :id,
         :name,
         :position,
-        template_section_blocks_attributes: %i[id requirement_block_id position],
+        :_destroy,
+        template_section_blocks_attributes: %i[id requirement_block_id position _destroy],
       ],
     )
   end

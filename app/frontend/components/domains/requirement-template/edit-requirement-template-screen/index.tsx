@@ -10,7 +10,11 @@ import { useRequirementTemplate } from "../../../../hooks/resources/use-requirem
 import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { ITemplateSectionBlockModel } from "../../../../models/template-section-block"
 import { useMst } from "../../../../setup/root"
-import { IRequirementTemplateUpdateParams } from "../../../../types/api-request"
+import {
+  IRequirementTemplateSectionAttributes,
+  IRequirementTemplateUpdateParams,
+  ITemplateSectionBlockAttributes,
+} from "../../../../types/api-request"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "./builder-header"
@@ -56,6 +60,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const {
     reset,
     watch,
+    setValue,
     handleSubmit,
     formState: { isSubmitting, isValid },
   } = formMethods
@@ -75,22 +80,61 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   const onSubmit = handleSubmit(async (templateFormData) => {
     templateFormData.requirementTemplateSectionsAttributes.forEach((sectionAttributes, sectionIndex) => {
+      const existingMSTSection = requirementTemplate.getRequirementSectionById(sectionAttributes.id)
+
       sectionAttributes.position = sectionIndex
       sectionAttributes.templateSectionBlocksAttributes.forEach((sectionBlockAttributes, blockIndex) => {
+        // if the section is new or if the block is moved to this section
+        // from another section, then we set the id to null so that it get's created
+        // on the new section by rails.
+        if (!existingMSTSection || !existingMSTSection.hasTemplateSectionBlock(sectionBlockAttributes.id)) {
+          sectionBlockAttributes.id = null
+        }
         sectionBlockAttributes.position = blockIndex
       })
+
+      // mark removed or moved templateSectionBlocks to be deleted
+      const deletedTemplateSectionBlockIds: ITemplateSectionBlockAttributes[] =
+        existingMSTSection?.sortedTemplateSectionBlocks
+          .filter(
+            (sectionBlock) =>
+              !sectionAttributes.templateSectionBlocksAttributes.find(
+                (blockAttribute) => blockAttribute.id === sectionBlock.id
+              )
+          )
+          .map((sectionBlock) => ({ id: sectionBlock.id, _destroy: true })) ?? []
+
+      // append the deleted templateSectionBlocks to request params
+      sectionAttributes.templateSectionBlocksAttributes.unshift(...deletedTemplateSectionBlockIds)
     })
 
     return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, templateFormData)
   })
 
+  const onDndComplete = (
+    dndSectionMap: {
+      [key: string]: IRequirementTemplateSectionAttributes
+    },
+    sortedSectionsId: string[]
+  ) => {
+    const newTemplateSectionsAttributes: IRequirementTemplateSectionAttributes[] = sortedSectionsId.map((sectionID) => {
+      return {
+        ...dndSectionMap[sectionID],
+        requirementTemplateSectionsAttributes: R.clone(dndSectionMap[sectionID].templateSectionBlocksAttributes),
+      }
+    })
+
+    setValue("requirementTemplateSectionsAttributes", newTemplateSectionsAttributes)
+    closeReorderMode()
+  }
+
   return (
-    <Flex flexDir={"column"} w={"full"} flex={1} as="main">
+    <Flex flexDir={"column"} w={"full"} maxW={"full"} overflowX={"hidden"} flex={1} as="main">
       <FormProvider {...formMethods}>
         <BuilderHeader requirementTemplate={requirementTemplate} />
         <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
           {isReorderMode ? (
-            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} />
+            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
           ) : (
             <SectionsSidebar onEdit={openReorderMode} />
           )}

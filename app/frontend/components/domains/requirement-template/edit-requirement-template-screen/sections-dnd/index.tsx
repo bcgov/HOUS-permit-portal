@@ -167,7 +167,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
           {t("requirementTemplate.edit.addSectionButton")}
         </Button>
         <ButtonGroup size={"sm"}>
-          <Button variant={"primaryInverse"} onClick={() => onDone(dndSectionMap, sortedSectionIds)} isDisabled>
+          <Button variant={"primaryInverse"} onClick={() => onDone(dndSectionMap, sortedSectionIds)}>
             {t("ui.done")}
           </Button>
           <Button variant={"secondaryInverse"} onClick={onCancel}>
@@ -322,7 +322,10 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
           ...clonedPastSectionMap[overSection.id],
           templateSectionBlocksAttributes: [
             ...clonedOverSectionBlocks.slice(0, newIndex),
-            clonedActiveSectionBlocks[activeSectionBlockIndex],
+            {
+              ...clonedActiveSectionBlocks[activeSectionBlockIndex],
+              requirementTemplateSectionId: overSection.id,
+            },
             ...clonedOverSectionBlocks.slice(newIndex, clonedOverSectionBlocks.length),
           ],
         },

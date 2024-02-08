@@ -46,6 +46,12 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       get isDiscarded() {
         return self.discardedAt !== null
       },
+      hasRequirementSection(id: string) {
+        return self.requirementTemplateSectionMap.has(id)
+      },
+      getRequirementSectionById(id: string) {
+        return self.requirementTemplateSectionMap.get(id)
+      },
     }))
     .actions((self) => ({
       destroy: flow(function* () {
