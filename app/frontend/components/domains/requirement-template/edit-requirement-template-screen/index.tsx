@@ -1,8 +1,9 @@
-import { Box, Flex, useDisclosure } from "@chakra-ui/react"
+import { Flex, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { useRequirementTemplate } from "../../../../hooks/resources/use-requirement-template"
 import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { ITemplateSectionBlockModel } from "../../../../models/template-section-block"
@@ -33,6 +34,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     name: `requirementTemplateSectionsAttributes`,
     control,
   })
+  const { t } = useTranslation()
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
@@ -57,6 +59,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
   })
 
+  const hasNoSections = watchedSectionsAttributes.length === 0
   return (
     <Flex flexDir={"column"} w={"full"} maxW={"full"} overflowX={"hidden"} flex={1} as="main">
       <FormProvider {...formMethods}>
@@ -67,16 +70,29 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
           ) : (
             <SectionsSidebar onEdit={openReorderMode} />
           )}
-          <Box flex={1} h={"full"}>
+          <Flex flexDir={"column"} flex={1} h={"full"} bg={hasNoSections ? "greys.grey03" : undefined}>
+            {" "}
             <ControlsHeader
               onSaveDraft={onSaveDraft}
               onPublish={onPublish}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
             />
-
-            <SectionsDisplay />
-          </Box>
+            {hasNoSections ? (
+              <Flex
+                justifyContent={hasNoSections ? "center" : undefined}
+                alignItems={hasNoSections ? "center" : undefined}
+                flex={1}
+                w={"full"}
+              >
+                <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
+                  {t("requirementTemplate.edit.emptyTemplateSectionText")}
+                </Text>
+              </Flex>
+            ) : (
+              <SectionsDisplay />
+            )}
+          </Flex>
         </Flex>
       </FormProvider>
     </Flex>

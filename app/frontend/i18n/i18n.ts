@@ -375,6 +375,7 @@ const options = {
               title: "Are you sure you want to remove this section?",
               body: "Any requirements inside this section will also be removed along with it.",
             },
+            emptyTemplateSectionText: "Start by clicking the Add Section button",
           },
           fields: {
             status: "Status",
