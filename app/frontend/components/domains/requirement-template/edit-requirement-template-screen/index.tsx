@@ -12,6 +12,7 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../types/api-request"
+import { ERequirementTemplateStatus } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "./builder-header"
@@ -42,9 +43,17 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
 
-  const onSubmit = handleSubmit(async (templateFormData) => {
+  const onSaveDraft = handleSubmit(async (templateFormData) => {
     const formattedSubmitData = formatSubmitData(templateFormData)
 
+    formattedSubmitData.status = ERequirementTemplateStatus.draft
+    return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
+  })
+
+  const onPublish = handleSubmit(async (templateFormData) => {
+    const formattedSubmitData = formatSubmitData(templateFormData)
+
+    formattedSubmitData.status = ERequirementTemplateStatus.published
     return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
   })
 
@@ -59,7 +68,12 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             <SectionsSidebar onEdit={openReorderMode} />
           )}
           <Box flex={1} h={"full"}>
-            <ControlsHeader onSaveDraft={onSubmit} onAddSection={onAddSection} />
+            <ControlsHeader
+              onSaveDraft={onSaveDraft}
+              onPublish={onPublish}
+              onAddSection={onAddSection}
+              requirementTemplate={requirementTemplate}
+            />
 
             <SectionsDisplay />
           </Box>

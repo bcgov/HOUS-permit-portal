@@ -46,6 +46,12 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       get isDiscarded() {
         return self.discardedAt !== null
       },
+      get isDraft() {
+        return self.status === ERequirementTemplateStatus.draft
+      },
+      get isPublished() {
+        return self.status === ERequirementTemplateStatus.published
+      },
       hasRequirementSection(id: string) {
         return self.requirementTemplateSectionMap.has(id)
       },

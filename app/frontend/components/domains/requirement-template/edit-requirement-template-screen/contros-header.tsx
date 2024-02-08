@@ -1,18 +1,26 @@
 import { Button, HStack } from "@chakra-ui/react"
 import { CaretRight, Plus } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { IRequirementTemplateForm } from "./index"
 
 interface IProps {
   onPublish?: () => void
   onSaveDraft: () => void
   onAddSection: () => void
+  requirementTemplate: IRequirementTemplate
 }
 
-export function ControlsHeader({ onPublish, onSaveDraft, onAddSection }: IProps) {
+export const ControlsHeader = observer(function ControlsHeader({
+  requirementTemplate,
+  onPublish,
+  onSaveDraft,
+  onAddSection,
+}: IProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const {
@@ -36,13 +44,19 @@ export function ControlsHeader({ onPublish, onSaveDraft, onAddSection }: IProps)
       <HStack spacing={4}>
         <Button
           variant={"primary"}
-          isDisabled={isSubmitting || !isValid}
+          isDisabled={requirementTemplate.isPublished || isSubmitting || !isValid}
           isLoading={isSubmitting}
           onClick={onSaveDraft}
         >
           {t("requirementTemplate.edit.saveDraft")}
         </Button>
-        <Button variant={"primary"} rightIcon={<CaretRight />} isDisabled>
+        <Button
+          variant={"primary"}
+          rightIcon={<CaretRight />}
+          onClick={onPublish}
+          isDisabled={isSubmitting || !isValid}
+          isLoading={isSubmitting}
+        >
           {t("ui.publish")}
         </Button>
         <Button variant={"secondary"} isDisabled={isSubmitting} onClick={onClose}>
@@ -51,4 +65,4 @@ export function ControlsHeader({ onPublish, onSaveDraft, onAddSection }: IProps)
       </HStack>
     </HStack>
   )
-}
+})
