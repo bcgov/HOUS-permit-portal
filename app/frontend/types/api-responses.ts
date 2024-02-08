@@ -31,4 +31,4 @@ export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUr
 
 export interface IInvitationResponse extends IApiResponse<{ invited: IUser[]; emailTaken: IUser[] }, {}> {}
 
-export interface IOptionResponse extends IApiResponse<IOption[], IPageMeta> {}
+export interface IOptionResponse<T = string> extends IApiResponse<IOption<T>[], IPageMeta> {}

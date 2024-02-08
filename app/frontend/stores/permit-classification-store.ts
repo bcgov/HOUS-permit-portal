@@ -2,9 +2,8 @@ import { Instance, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { ActivityModel, IActivity, IPermitType, PermitTypeModel } from "../models/permit-classification"
+import { ActivityModel, PermitTypeModel } from "../models/permit-classification"
 import { EPermitClassificationType } from "../types/enums"
-import { IOption } from "../types/types"
 
 export const PermitClassificationStoreModel = types
   .model("PermitClassificationStore", {
@@ -64,21 +63,20 @@ export const PermitClassificationStoreModel = types
     }),
   }))
   .actions((self) => ({
-    fetchPermitTypeIdOptions: flow(function* () {
-      if (self.permitTypeMap.size === 0) yield self.fetchPermitClassifications()
-      return self.permitTypes.map((pt) => ({ label: pt.name, value: pt.id })) as IOption[]
+    fetchPermitTypeOptions: flow(function* (publishedOnly = false) {
+      const response = yield self.environment.api.fetchPermitClassificationOptions(
+        EPermitClassificationType.PermitType,
+        publishedOnly
+      )
+      return response.data.data
     }),
-    fetchActivityIdOptions: flow(function* () {
-      if (self.activityMap.size === 0) yield self.fetchPermitClassifications()
-      return self.activities.map((a) => ({ label: a.name, value: a.id })) as IOption[]
-    }),
-    fetchPermitTypeOptions: flow(function* () {
-      if (self.permitTypeMap.size === 0) yield self.fetchPermitClassifications()
-      return self.permitTypes.map((pt) => ({ label: pt.name, value: pt })) as IOption<IPermitType>[]
-    }),
-    fetchActivityOptions: flow(function* () {
-      if (self.activityMap.size === 0) yield self.fetchPermitClassifications()
-      return self.activities.map((a) => ({ label: a.name, value: a })) as IOption<IActivity>[]
+    fetchActivityOptions: flow(function* (publishedOnly = false, activityId = null) {
+      const response = yield self.environment.api.fetchPermitClassificationOptions(
+        EPermitClassificationType.Activity,
+        publishedOnly,
+        activityId
+      )
+      return response.data.data
     }),
   }))
 

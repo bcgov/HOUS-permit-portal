@@ -2,6 +2,7 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-tempate-screen"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
+import { IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
@@ -103,6 +104,20 @@ export class Api {
 
   async fetchPermitClassifications() {
     return this.client.get<IOptionResponse>(`/permit_classifications`)
+  }
+
+  async fetchPermitClassificationOptions(
+    type,
+    published = false,
+    permit_type_id: string = null,
+    activity_id: string = null
+  ) {
+    return this.client.post<IOptionResponse<IPermitType>>(`/permit_classifications/permit_classification_options`, {
+      type: type,
+      published: published,
+      permit_type_id: permit_type_id, // Use empty string if null
+      activity_id: activity_id, // Use empty string if null
+    })
   }
 
   async createJurisdiction(params) {

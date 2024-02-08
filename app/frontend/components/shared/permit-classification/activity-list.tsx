@@ -10,16 +10,17 @@ import { SharedSpinner } from "../base/shared-spinner"
 interface IPermitTypeRadioSelect extends FlexProps {
   fetchOptions: () => Promise<IOption<IActivity>[]>
   isLoading: boolean
+  permitTypeId?: string
 }
 
-export const ActivityList = ({ fetchOptions, isLoading, ...rest }: IPermitTypeRadioSelect) => {
+export const ActivityList = ({ fetchOptions, isLoading, permitTypeId, ...rest }: IPermitTypeRadioSelect) => {
   const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[]>([])
 
   useEffect(() => {
     ;(async () => {
       setActivityOptions(await fetchOptions())
     })()
-  }, [])
+  }, [permitTypeId])
 
   if (isLoading) return <SharedSpinner />
 
