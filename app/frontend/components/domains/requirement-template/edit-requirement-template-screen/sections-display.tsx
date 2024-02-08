@@ -33,7 +33,7 @@ const SectionDisplay = observer(
     const { isOpen: isEditMode, onClose: closeEditMode, onOpen: openEditMode } = useDisclosure()
     const { t } = useTranslation()
 
-    const { append: appendSectionBlocks } = useFieldArray({
+    const { append: appendSectionBlock, remove: removeSectionBlock } = useFieldArray({
       name: `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`,
       control,
     })
@@ -104,12 +104,13 @@ const SectionDisplay = observer(
                 as={"section"}
                 key={sectionBlock.id}
                 requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
+                onRemove={() => removeSectionBlock(index)}
               />
             ))}
             <RequirementsLibraryDrawer
               defaultButtonProps={{ alignSelf: "center" }}
               onUse={(requirementBlock, closeDrawer) => {
-                appendSectionBlocks({ requirementBlockId: requirementBlock.id })
+                appendSectionBlock({ requirementBlockId: requirementBlock.id })
                 closeDrawer()
               }}
             />

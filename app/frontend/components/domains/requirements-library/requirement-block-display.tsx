@@ -1,4 +1,5 @@
-import { Box, BoxProps, Flex, Text, VStack } from "@chakra-ui/react"
+import { Box, BoxProps, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -10,10 +11,12 @@ import { RequirementFieldDisplay } from "./requirement-field-display"
 
 interface IProps extends BoxProps {
   requirementBlock: IRequirementBlock
+  onRemove?: () => void
 }
 
 export const RequirementBlockDisplay = observer(function RequirementBlockDisplay({
   requirementBlock,
+  onRemove,
   ...containerProps
 }: IProps) {
   const { t } = useTranslation()
@@ -27,11 +30,20 @@ export const RequirementBlockDisplay = observer(function RequirementBlockDisplay
       borderRadius={"lg"}
       {...containerProps}
     >
-      <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>
+      <HStack spacing={0} py={3} px={6} w={"full"} background={"greys.grey04"}>
         <Text as={"h5"} fontWeight={700} fontSize={"base"}>
           {requirementBlock.displayName}
         </Text>
-      </Flex>
+        {onRemove && (
+          <IconButton
+            color={"text.primary"}
+            variant={"ghost"}
+            aria-label={"Remove Requirement Block"}
+            onClick={onRemove}
+            icon={<X size={16} />}
+          />
+        )}
+      </HStack>
       <Box pb={8}>
         <Box px={3}>
           {!isQuillEmpty(requirementBlock.displayDescription) && (
