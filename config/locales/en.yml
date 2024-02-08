@@ -149,6 +149,9 @@ en:
       create_success:
         title: ""
         message: "New template created successfully!"
+      update_success:
+        title: ""
+        message: "Template updated successfully!"
       create_error:
         title: Oops
         message: "%{error_message}"

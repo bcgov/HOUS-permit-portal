@@ -25,7 +25,6 @@ export const RequirementBlockDisplay = observer(function RequirementBlockDisplay
       border={"1px solid"}
       borderColor={"border.light"}
       borderRadius={"lg"}
-      mt={4}
       {...containerProps}
     >
       <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>

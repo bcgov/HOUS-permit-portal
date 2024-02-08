@@ -11,6 +11,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def update?
+    create?
+  end
+
   def destroy?
     create?
   end

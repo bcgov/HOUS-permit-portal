@@ -1,13 +1,10 @@
 class RequirementBlock < ApplicationRecord
-  searchkick searchable: %i[name requirement_labels associations],
-             word_start: %i[name requirement_labels associations]
+  searchkick searchable: %i[name requirement_labels associations], word_start: %i[name requirement_labels associations]
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
 
   has_many :template_section_blocks, dependent: :destroy
-  has_many :requirement_template_sections,
-           through: :requirement_template_section_requirement_blocks
-  has_many :requirement_templates, through: :template_section_blocks
+  has_many :requirement_template_sections, through: :template_section_blocks
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
 
@@ -26,7 +23,7 @@ class RequirementBlock < ApplicationRecord
       updated_at: updated_at,
       name: name,
       requirement_labels: requirements.pluck(:label),
-      associations: association_list
+      associations: association_list,
     }
   end
 
@@ -42,7 +39,7 @@ class RequirementBlock < ApplicationRecord
       label: name,
       input: false,
       tableView: false,
-      components: requirements.map { |r| r.to_form_json(key(section_key)) }
+      components: requirements.map { |r| r.to_form_json(key(section_key)) },
     }
   end
 

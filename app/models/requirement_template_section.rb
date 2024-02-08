@@ -4,6 +4,8 @@ class RequirementTemplateSection < ApplicationRecord
   has_many :template_section_blocks, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirement_blocks, through: :template_section_blocks
 
+  accepts_nested_attributes_for :template_section_blocks, allow_destroy: true
+
   def key
     "section#{id}"
   end

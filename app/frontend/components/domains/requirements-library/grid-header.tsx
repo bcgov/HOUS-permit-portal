@@ -1,7 +1,9 @@
-import { Box, Flex, GridItem, Text, styled } from "@chakra-ui/react"
+import { Box, Flex, GridItem, HStack, Text, Tooltip, styled } from "@chakra-ui/react"
+import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { ERequirementLibrarySortFields } from "../../../types/enums"
 import { SearchInput } from "../../shared/base/search-input"
@@ -26,7 +28,7 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
             {t("requirementsLibrary.index.tableHeading")}
           </Text>
-          <SearchInput searchModel={requirementBlockStore} />
+          <SearchInput searchModel={requirementBlockStore as ISearch} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -43,7 +45,24 @@ export const GridHeaders = observer(function GridHeaders() {
               px={4}
             >
               <Text>{getSortColumnHeader(field)}</Text>
-              <SortIcon<ERequirementLibrarySortFields> field={field} currentSort={sort} />
+              {field === ERequirementLibrarySortFields.associations ? (
+                <HStack w={"fit-content"} spacing={3}>
+                  <SortIcon<ERequirementLibrarySortFields>
+                    field={field}
+                    currentSort={sort}
+                    aria-label={`Sort ${getSortColumnHeader(field)} Icon`}
+                  />
+                  <Tooltip label={t("requirementsLibrary.associationsInfo")}>
+                    <Info aria-label={"Info Icon"} />
+                  </Tooltip>
+                </HStack>
+              ) : (
+                <SortIcon<ERequirementLibrarySortFields>
+                  field={field}
+                  currentSort={sort}
+                  aria-label={`Sort ${getSortColumnHeader(field)}`}
+                />
+              )}
             </Flex>
           </GridHeader>
         ))}

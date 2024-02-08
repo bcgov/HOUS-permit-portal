@@ -31,9 +31,6 @@ class Requirement < ApplicationRecord
       mask: false,
       inputFormat: "plain",
     },
-    multi_option_select: {
-      type: "select",
-    },
     date: {
       enableTime: false,
       datePicker: {

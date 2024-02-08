@@ -123,6 +123,8 @@ const options = {
           notAvailable: "Not available yet",
           isRequired: "{{field}} is required",
           download: "Download",
+          use: "Use",
+          publish: "Publish",
         },
         contact: {
           fields: {
@@ -218,6 +220,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
@@ -375,6 +378,9 @@ const options = {
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
             addSectionButton: "Add Section",
+            addRequirementButton: "Add Requirement",
+            saveDraft: "Save as Draft",
+            closeEditor: "Close Editor",
           },
           fields: {
             status: "Status",
