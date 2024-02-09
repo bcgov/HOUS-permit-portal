@@ -35,3 +35,39 @@ export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
 }
+
+export interface IFormJson {
+  id: string
+  key: string
+  input: false
+  tableView: false
+  components: IFormIOSection[]
+}
+
+export interface IFormIOSection {
+  id: string
+  key: string
+  type: "panel"
+  title: string
+  collapsible: true
+  initiallyCollapsed: false
+  components: IFormIOBlock[]
+}
+export interface IFormIOBlock {
+  id: string
+  legend: string
+  key: string
+  label: string
+  input: false
+  tableView: false
+  components: IFormIORequirement[]
+}
+
+export interface IFormIORequirement {
+  id: string
+  key: string
+  type: string
+  input: true
+  label: string
+  widget?: any
+}

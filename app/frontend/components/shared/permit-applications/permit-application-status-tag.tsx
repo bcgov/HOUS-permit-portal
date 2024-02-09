@@ -1,7 +1,12 @@
-import { Tag } from "@chakra-ui/react"
+import { Tag, TagProps } from "@chakra-ui/react"
 import React from "react"
+import { IPermitApplication } from "../../../models/permit-application"
 
-export const PermitApplicationTemplateStatusTag = ({ status }) => {
+interface IPermitApplicationStatusTagProps extends TagProps {
+  permitApplication: IPermitApplication
+}
+
+export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPermitApplicationStatusTagProps) => {
   return (
     <Tag
       p={1}
@@ -10,8 +15,9 @@ export const PermitApplicationTemplateStatusTag = ({ status }) => {
       borderColor="border.light"
       textTransform="uppercase"
       color="text.link"
+      {...rest}
     >
-      {status}
+      {permitApplication.status}
     </Tag>
   )
 }

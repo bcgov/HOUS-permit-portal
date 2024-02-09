@@ -4,6 +4,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.submitter_id == user.id
   end
 
+  def show?
+    index?
+  end
+
   # All user types can use the search permit application
   # but the actual endpoint requires that a @jurisdiction is set using the path param
   # Such routes are intended for reviewers/managers/admins

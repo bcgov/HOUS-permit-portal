@@ -5,7 +5,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
          :number,
          :created_at,
          :updated_at,
-         :requirements,
+         :form_json,
          :full_address,
          :pid,
          :pin,

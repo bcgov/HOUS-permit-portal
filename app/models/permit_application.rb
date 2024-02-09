@@ -39,7 +39,7 @@ class PermitApplication < ApplicationRecord
     "#{jurisdiction_name}: #{full_address || pid || pin || id}"
   end
 
-  def requirements
+  def form_json
     #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
     #need to look up jurisidcitional version and enablement as well
     requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type)

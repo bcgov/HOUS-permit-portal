@@ -37,12 +37,13 @@ const renderApp = (rootStore) => {
           </Helmet>
           <Flex
             flexDirection="column"
-            minH="100vh"
-            minW="100vw"
+            // minH="100vh"
+            // minW="100vw"
             h="100vh"
             w="100vw"
-            className="outerFlex"
+            id="outerFlex"
             bg="greys.white"
+            overflowX="hidden"
           >
             <Navigation />
           </Flex>

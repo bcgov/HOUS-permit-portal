@@ -40,7 +40,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     reset(formFormDefaults(requirementTemplate))
   }, [requirementTemplate?.isFullyLoaded])
 
-  if (error) return <ErrorScreen />
+  if (error) return <ErrorScreen error={error} />
   if (!requirementTemplate?.isFullyLoaded) return <LoadingScreen />
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")

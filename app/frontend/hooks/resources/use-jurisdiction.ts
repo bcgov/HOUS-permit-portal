@@ -23,7 +23,8 @@ export const useJurisdiction = () => {
           setCurrentJurisdiction(jurisdictionId)
         }
       } catch (e) {
-        setError(e instanceof Error ? e : new Error(t("errors.fetchJurisdiction")))
+        console.error(e.message)
+        setError(new Error(t("errors.fetchJurisdiction")))
       }
     })()
   }, [pathname])
