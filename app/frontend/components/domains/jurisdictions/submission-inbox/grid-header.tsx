@@ -30,7 +30,7 @@ export const GridHeaders = observer(function GridHeaders() {
           align="center"
         >
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
-            {t("user.index.tableHeading")}
+            {t("permitApplication.submissionInbox.tableHeading")}
           </Text>
           <SearchInput searchModel={userStore} />
         </GridItem>
