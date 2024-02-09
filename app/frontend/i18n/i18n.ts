@@ -212,6 +212,7 @@ const options = {
           },
           submissionInbox: {
             title: "Submissions Inbox",
+            tableHeading: "Permit Applications",
             submissionsSentTo: "All submissions are sent to: {{email}}",
           },
           new: {

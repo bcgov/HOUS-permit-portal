@@ -1,4 +1,4 @@
-import { Box, Flex, GridItem, HStack, Text, Tooltip, styled } from "@chakra-ui/react"
+import { Box, Flex, GridItem, HStack, Text, Tooltip } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -7,6 +7,7 @@ import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { ERequirementLibrarySortFields } from "../../../types/enums"
 import { SearchInput } from "../../shared/base/search-input"
+import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
@@ -71,14 +72,3 @@ export const GridHeaders = observer(function GridHeaders() {
     </Box>
   )
 })
-
-const GridHeader = styled(GridItem)
-GridHeader.defaultProps = {
-  fontSize: "sm",
-  py: 5,
-  color: "text.secondary",
-  fontWeight: 400,
-  borderTop: "1px solid",
-  borderBottom: "1px solid",
-  borderColor: "border.light",
-}

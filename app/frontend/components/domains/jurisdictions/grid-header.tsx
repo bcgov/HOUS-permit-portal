@@ -1,10 +1,11 @@
-import { Box, Flex, GridItem, Text, styled } from "@chakra-ui/react"
+import { Box, Flex, GridItem, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { EJurisdictionSortFields } from "../../../types/enums"
 import { SearchInput } from "../../shared/base/search-input"
+import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
@@ -52,14 +53,3 @@ export const GridHeaders = observer(function GridHeaders() {
     </Box>
   )
 })
-
-const GridHeader = styled(GridItem)
-GridHeader.defaultProps = {
-  fontSize: "sm",
-  py: 5,
-  color: "text.secondary",
-  fontWeight: 400,
-  borderTop: "1px solid",
-  borderBottom: "1px solid",
-  borderColor: "border.light",
-}
