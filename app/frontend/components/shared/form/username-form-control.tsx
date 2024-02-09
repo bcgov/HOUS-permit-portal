@@ -8,6 +8,7 @@ interface IUsernameFormControlProps extends FormControlProps {
   autoFocus?: boolean
   autoComplete?: string
   defaultValue?: string
+  required?: boolean
 }
 
 export const UsernameFormControl = ({
@@ -15,6 +16,7 @@ export const UsernameFormControl = ({
   autoFocus,
   autoComplete,
   defaultValue,
+  required,
   ...rest
 }: IUsernameFormControlProps) => {
   const { register, formState } = useFormContext()
@@ -27,7 +29,7 @@ export const UsernameFormControl = ({
         <Flex w="full" direction="column">
           <Input
             {...register("username", {
-              required: true,
+              required: required && t("ui.isRequired", { field: t("auth.usernameLabel") }),
               validate: {
                 satisfiesUsernameRegex: (str) =>
                   !validate || (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),

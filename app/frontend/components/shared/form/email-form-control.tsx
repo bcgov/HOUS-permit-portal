@@ -11,7 +11,12 @@ interface IEmailFormControlProps extends FormControlProps {
   fieldName?: string
 }
 
-export const EmailFormControl = ({ validate, fieldName = null, required = true, ...rest }: IEmailFormControlProps) => {
+export const EmailFormControl = ({
+  validate,
+  fieldName = "email",
+  required = true,
+  ...rest
+}: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
   const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)
@@ -22,8 +27,8 @@ export const EmailFormControl = ({ validate, fieldName = null, required = true, 
       <InputGroup>
         <Flex w="full" direction="column">
           <Input
-            {...register(fieldName || "email", {
-              required: true,
+            {...register(fieldName, {
+              required: required && t("ui.isRequired", { field: t("auth.emailLabel") }),
               validate: {
                 matchesEmailRegex: (str) => !validate || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
               },

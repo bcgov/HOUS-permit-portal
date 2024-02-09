@@ -26,7 +26,7 @@ interface IPasswordFormControlProps extends FormControlProps {
 export const PasswordFormControl = ({
   validate,
   label,
-  fieldName,
+  fieldName = "password",
   required = true,
   ...rest
 }: IPasswordFormControlProps) => {
@@ -41,8 +41,8 @@ export const PasswordFormControl = ({
       <InputGroup>
         <Flex w="full" direction="column">
           <Input
-            {...register(fieldName || "password", {
-              required: required,
+            {...register(fieldName, {
+              required: required && t("ui.isRequired", { field: label }),
               validate: {
                 matchesPasswordRegex: (str) =>
                   !required ||
