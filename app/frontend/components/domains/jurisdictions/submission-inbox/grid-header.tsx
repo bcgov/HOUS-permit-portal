@@ -3,19 +3,18 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
-import { EUserSortFields } from "../../../../types/enums"
+import { EPermitApplicationSortFields } from "../../../../types/enums"
 import { SearchInput } from "../../../shared/base/search-input"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SortIcon } from "../../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { jurisdictionStore } = useMst()
-  const { currentJurisdiction } = jurisdictionStore
+  const { permitApplicationStore } = useMst()
   const { userStore } = useMst()
 
-  const getSortColumnHeader = currentJurisdiction?.getUserSortColumnHeader
+  const getSortColumnHeader = permitApplicationStore?.getSortColumnHeader
 
-  const { toggleSort, sort } = userStore
+  const { toggleSort, sort } = permitApplicationStore
 
   const { t } = useTranslation()
 
@@ -37,7 +36,7 @@ export const GridHeaders = observer(function GridHeaders() {
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
-        {Object.values(EUserSortFields).map((field) => (
+        {Object.values(EPermitApplicationSortFields).map((field) => (
           <GridHeader key={field} role={"columnheader"}>
             <Flex
               w={"full"}
@@ -50,7 +49,7 @@ export const GridHeaders = observer(function GridHeaders() {
               px={4}
             >
               <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-              <SortIcon<EUserSortFields> field={field} currentSort={sort} />
+              <SortIcon<EPermitApplicationSortFields> field={field} currentSort={sort} />
             </Flex>
           </GridHeader>
         ))}

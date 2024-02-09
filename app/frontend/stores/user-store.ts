@@ -16,7 +16,7 @@ export const UserStoreModel = types
       currentUser: types.maybeNull(types.safeReference(UserModel)),
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
     }),
-    createSearchModel<EUserSortFields>("fetchUsers")
+    createSearchModel<EUserSortFields>("searchUsers")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -73,7 +73,7 @@ export const UserStoreModel = types
     }),
   }))
   .actions((self) => ({
-    fetchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+    searchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
         self.resetPages()
       }

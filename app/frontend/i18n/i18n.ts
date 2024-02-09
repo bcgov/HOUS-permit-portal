@@ -88,6 +88,7 @@ const options = {
           no: "No",
           show: "Show",
           hide: "Hide",
+          change: "Change",
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
@@ -124,6 +125,7 @@ const options = {
           use: "Use",
           publish: "Publish",
           neverMind: "Never mind",
+          download: "Download",
         },
         contact: {
           fields: {
@@ -201,6 +203,18 @@ const options = {
           applicationId: "Application ID",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
+          columns: {
+            number: "Application #",
+            permit_classification: "Types",
+            submitter: "Submitter",
+            submitted_at: "Submitted At",
+            status: "Status",
+          },
+          submissionInbox: {
+            title: "Submissions Inbox",
+            tableHeading: "Permit Applications",
+            submissionsSentTo: "All submissions are sent to: {{email}}",
+          },
           new: {
             locationHeading: "Location for permit",
             permitTypeHeading: "Permit type",
@@ -441,6 +455,8 @@ const options = {
             users: "Users",
             editTemplate: "Edit template",
             permitApplications: "Permit Applications",
+            submissionInbox: "Submission Inbox",
+            configuration: "Configure Jurisdiction",
           },
           questionSupport: "Question Support",
         },

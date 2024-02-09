@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :user do
     first_name { Faker::Name.first_name }
     last_name { Faker::Name.last_name }
-    username { "#{first_name}-#{last_name.first}" }
+    username { "#{first_name}-#{last_name.first}-#{[0..999].sample}" }
     email { "#{username}@example.com" }
     password { ENV["TESTING_DEFAULT_PASSWORD"] || "P@ssword1" }
 

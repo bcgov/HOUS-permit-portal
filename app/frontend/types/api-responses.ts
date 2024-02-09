@@ -1,4 +1,5 @@
 import { IJurisdiction } from "../models/jurisdiction"
+import { IPermitApplication } from "../models/permit-application"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
@@ -24,6 +25,8 @@ export interface IRequirementTemplateResponse extends IApiResponse<IRequirementT
 export interface IJurisdictionResponse extends IApiResponse<IJurisdiction[], IPageMeta> {}
 
 export interface IJurisdictionUserResponse extends IApiResponse<IUser[], IPageMeta> {}
+
+export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPermitApplication[], IPageMeta> {}
 
 export interface IResetPasswordResponse extends IApiResponse<{}, { redirectUrl: string }> {}
 
