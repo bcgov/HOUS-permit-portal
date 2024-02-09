@@ -1,5 +1,6 @@
 class PermitApplication < ApplicationRecord
-  searchkick searchable: %i[reverse_qualified_name], word_start: %i[reverse_qualified_name]
+  searchkick searchable: %i[number permit_classifications submitter status],
+             word_start: %i[number permit_classifications submitter status]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction

@@ -1,5 +1,5 @@
 class Api::PermitApplicationsController < Api::ApplicationController
-  include Api::Concerns::Search::PermitApplications
+  include Api::Concerns::Search::JurisdictionPermitApplications
   before_action :set_permit_application, only: %i[show update] #destroy
   before_action :set_jurisdiction, only: %i[index]
 
