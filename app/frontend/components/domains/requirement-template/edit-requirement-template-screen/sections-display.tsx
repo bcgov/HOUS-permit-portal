@@ -105,6 +105,8 @@ const SectionDisplay = observer(
                 key={sectionBlock.id}
                 requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
                 onRemove={() => removeSectionBlock(index)}
+                isEditable
+                showEditWarning
               />
             ))}
             <RequirementsLibraryDrawer
