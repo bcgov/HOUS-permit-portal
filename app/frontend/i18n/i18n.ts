@@ -246,6 +246,7 @@ const options = {
               dataValidation: "Data Validation",
             },
             addOptionButton: "Add another option",
+            editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
           },
           fields: {
             name: "Name",
