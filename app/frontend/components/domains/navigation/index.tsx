@@ -6,6 +6,7 @@ import { useMst } from "../../../setup/root"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
@@ -20,8 +21,8 @@ import { JurisdictionUserIndexScreen } from "../jurisdictions/users"
 import { LandingScreen } from "../landing"
 import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
+import { EditPermitApplicationScreen } from "../permit-application/edit-permit-application-screen"
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
-import { PermitApplicationScreen } from "../permit-application/permit-application-screen"
 import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
@@ -95,7 +96,12 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const submitterOnlyRoutes = <></>
+  const submitterOnlyRoutes = (
+    <>
+      <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+    </>
+  )
+
   return (
     <Routes location={location}>
       {loggedIn ? (
@@ -103,7 +109,6 @@ const AppRoutes = observer(() => {
           <Route path="/" element={<HomeScreen />} />
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-          <Route path="/permit-applications/:id" element={<PermitApplicationScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
 
@@ -124,6 +129,8 @@ const AppRoutes = observer(() => {
         </>
       )}
       <Route path="/contact" element={<ContactScreen />} />
+
+      <Route path="*" element={<NotFoundScreen />} />
     </Routes>
   )
 })

@@ -34,11 +34,11 @@ class RequirementBlock < ApplicationRecord
   def to_form_json(section_key = nil)
     {
       id: id,
-      legend: name,
       key: key(section_key),
-      label: name,
-      input: false,
-      tableView: false,
+      type: "panel",
+      title: name,
+      collapsible: true,
+      initially_collapsed: false,
       components: requirements.map { |r| r.to_form_json(key(section_key)) },
     }
   end

@@ -100,6 +100,10 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
   }
 
+  async fetchPermitApplication(id) {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }

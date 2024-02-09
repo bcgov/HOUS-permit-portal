@@ -62,7 +62,7 @@ export const JurisdictionScreen = observer(() => {
     reset(getDefaultJurisdictionValues())
   }, [currentJurisdiction?.id])
 
-  if (error) return <ErrorScreen />
+  if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
   const { qualifiedName, update } = currentJurisdiction

@@ -63,7 +63,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
 
   const navigate = useNavigate()
 
-  if (error) return <ErrorScreen />
+  if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
   return (

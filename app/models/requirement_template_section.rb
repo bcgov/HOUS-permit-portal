@@ -14,9 +14,9 @@ class RequirementTemplateSection < ApplicationRecord
     {
       id: id,
       key: key,
-      type: "panel",
+      type: "container",
       title: name,
-      collapsible: true,
+      collapsible: false,
       initially_collapsed: false,
       components: requirement_blocks.map { |rb| rb.to_form_json(key) },
     }

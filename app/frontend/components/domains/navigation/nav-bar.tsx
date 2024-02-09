@@ -53,7 +53,6 @@ export const NavBar = observer(() => {
       <Box
         as="nav"
         w="full"
-        position="sticky"
         top={0}
         bg={currentUser?.isAdmin ? "theme.blue" : "greys.white"}
         color={currentUser?.isAdmin ? "greys.white" : "theme.blue"}

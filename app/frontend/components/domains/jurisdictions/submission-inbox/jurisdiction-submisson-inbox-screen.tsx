@@ -16,7 +16,7 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
-import { PermitApplicationTemplateStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
+import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { GridHeaders } from "./grid-header"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
@@ -29,7 +29,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   useSearch(permitApplicationStore, [currentJurisdiction?.id])
 
-  if (error) return <ErrorScreen />
+  if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
   return (
@@ -89,7 +89,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     )}
                   </SearchGridItem>
                   <SearchGridItem>
-                    <PermitApplicationTemplateStatusTag status={pa.status} />
+                    <PermitApplicationStatusTag permitApplication={pa} />
                   </SearchGridItem>
                   <SearchGridItem>
                     <Button variant="primary" leftIcon={<Download />}>
