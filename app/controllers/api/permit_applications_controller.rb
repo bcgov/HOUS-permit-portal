@@ -1,7 +1,6 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionPermitApplications
-  before_action :set_permit_application, only: %i[show update] #destroy
-  before_action :set_jurisdiction, only: %i[index]
+  before_action :set_permit_application, only: %i[show update]
 
   def show
     authorize @permit_application
