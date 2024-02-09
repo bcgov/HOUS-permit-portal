@@ -28,7 +28,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       site: null as IOption,
     },
   })
-  const { handleSubmit, formState, control } = formMethods
+  const { handleSubmit, formState, control, watch } = formMethods
   const { isSubmitting } = formState
   const { geocoderStore, permitClassificationStore } = useMst()
   const { fetchSiteOptions } = geocoderStore
@@ -37,6 +37,8 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const onSubmit = (formValues) => {
     // TODO
   }
+
+  const permitTypeWatch = watch("permitType")
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
@@ -48,7 +50,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={12} w="full" bg="greys.white">
-              <Flex as="section" direction="column">
+              <Flex as="section" direction="column" gap={2}>
                 <YellowLineSmall />
                 <Heading fontSize="xl">{t("permitApplication.new.locationHeading")}</Heading>
                 <Controller
@@ -74,7 +76,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   }}
                 />
               </Flex>
-              <Flex as="section" direction="column">
+              <Flex as="section" direction="column" gap={2}>
                 <YellowLineSmall />
                 <Heading fontSize="xl">{t("permitApplication.new.permitTypeHeading")}</Heading>
                 <Controller
@@ -84,7 +86,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     return (
                       <PermitTypeRadioSelect
                         w="full"
-                        fetchOptions={fetchPermitTypeOptions}
+                        fetchOptions={() => fetchPermitTypeOptions(true)}
                         onChange={onChange}
                         value={value}
                         isLoading={isLoading}
@@ -93,11 +95,17 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   }}
                 />
               </Flex>
-              <Flex as="section" direction="column">
-                <YellowLineSmall />
-                <Heading fontSize="xl">{t("permitApplication.new.workTypeHeading")}</Heading>
-                <ActivityList fetchOptions={fetchActivityOptions} isLoading={isLoading} />
-              </Flex>
+              {permitTypeWatch && (
+                <Flex as="section" direction="column" gap={2}>
+                  <YellowLineSmall />
+                  <Heading fontSize="xl">{t("permitApplication.new.workTypeHeading")}</Heading>
+                  <ActivityList
+                    fetchOptions={() => fetchActivityOptions(true, permitTypeWatch)}
+                    permitTypeId={permitTypeWatch}
+                    isLoading={isLoading}
+                  />
+                </Flex>
+              )}
               <BackButton isDisabled={isSubmitting} />
             </Flex>
           </FormProvider>

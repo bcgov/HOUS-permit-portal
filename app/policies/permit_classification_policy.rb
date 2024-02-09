@@ -3,6 +3,10 @@ class PermitClassificationPolicy < ApplicationPolicy
     true
   end
 
+  def permit_classification_options?
+    index?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

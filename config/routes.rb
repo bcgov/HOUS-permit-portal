@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     end
 
     resources :permit_classifications, only: %i[index] do
+      post "permit_classification_options", on: :collection
     end
 
     resources :geocoder, only: %i[] do

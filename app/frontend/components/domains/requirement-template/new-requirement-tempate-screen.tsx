@@ -21,7 +21,7 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
   const { t } = useTranslation()
   const {
     requirementTemplateStore: { createRequirementTemplate },
-    permitClassificationStore: { fetchPermitTypeIdOptions, fetchActivityIdOptions },
+    permitClassificationStore: { fetchPermitTypeOptions, fetchActivityOptions },
   } = useMst()
 
   const formMethods = useForm<TCreateRequirementTemplateFormData>({
@@ -58,13 +58,15 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
 
             <Flex gap={8} w="full" as="section">
               <AsyncRadioGroup
+                valueField="id"
                 label={t("requirementTemplate.fields.permitType")}
-                fetchOptions={fetchPermitTypeIdOptions}
+                fetchOptions={fetchPermitTypeOptions}
                 fieldName={"permitTypeId"}
               />
               <AsyncRadioGroup
+                valueField="id"
                 label={t("requirementTemplate.fields.activity")}
-                fetchOptions={fetchActivityIdOptions}
+                fetchOptions={fetchActivityOptions}
                 fieldName={"activityId"}
               />
             </Flex>
