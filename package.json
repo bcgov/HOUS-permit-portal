@@ -67,6 +67,7 @@
     "react-leaflet": "^4.2.1",
     "react-password-strength-bar": "^0.4.1",
     "react-quill": "^2.0.0",
+    "react-remove-scroll": "^2.5.7",
     "react-router-dom": "^6.20.0",
     "react-select": "^5.8.0"
   },

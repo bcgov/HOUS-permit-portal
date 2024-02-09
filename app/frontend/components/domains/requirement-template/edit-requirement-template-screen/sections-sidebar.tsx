@@ -8,9 +8,10 @@ import { IRequirementTemplateForm } from "./index"
 
 interface IProps {
   onEdit?: () => void
+  onItemClick?: (id: string) => void
 }
 
-export const SectionsSidebar = observer(function SectionsSidebar({ onEdit }: IProps) {
+export const SectionsSidebar = observer(function SectionsSidebar({ onEdit, onItemClick }: IProps) {
   const { t } = useTranslation()
   const { watch } = useFormContext<IRequirementTemplateForm>()
   const { requirementBlockStore } = useMst()
@@ -24,6 +25,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({ onEdit }: IPr
       borderRight={"1px solid"}
       borderColor={"border.light"}
       boxShadow={"elevations.elevation01"}
+      overflow={"auto"}
     >
       <HStack w={"full"} justifyContent={"space-between"} bg={"greys.grey03"} py={5} px={4}>
         <Text as={"h3"} fontSize={"sm"} fontWeight={400} color={"text.secondary"} textTransform={"uppercase"}>
@@ -46,6 +48,8 @@ export const SectionsSidebar = observer(function SectionsSidebar({ onEdit }: IPr
                   py={2}
                   m={0}
                   _hover={{ textDecoration: "underline" }}
+                  onClick={() => onItemClick?.(section.id)}
+                  cursor={"pointer"}
                 >
                   {section.name}
                 </Heading>
@@ -60,6 +64,8 @@ export const SectionsSidebar = observer(function SectionsSidebar({ onEdit }: IPr
                           pr={4}
                           py={2}
                           _hover={{ textDecoration: "underline" }}
+                          onClick={() => onItemClick?.(sectionBlock.id)}
+                          cursor={"pointer"}
                         >
                           {requirementBlockStore?.getRequirementBlockById(sectionBlock.requirementBlockId)?.name}
                         </Text>

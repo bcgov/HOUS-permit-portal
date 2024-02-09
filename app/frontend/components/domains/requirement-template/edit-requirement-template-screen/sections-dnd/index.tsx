@@ -160,7 +160,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
   }, [dndSectionMap])
 
   return (
-    <Box w={"368px"} as={"section"} h={"full"} boxShadow={"elevations.elevation01"}>
+    <Box w={"368px"} as={"section"} h={"full"} boxShadow={"elevations.elevation01"} overflow={"auto"}>
       <Flex w={"full"} justifyContent={"flex-end"} bg={"theme.blue"} py={5} px={4}>
         <ButtonGroup size={"sm"}>
           <Button variant={"primaryInverse"} onClick={() => onDone(dndSectionMap, sortedSectionIds)}>

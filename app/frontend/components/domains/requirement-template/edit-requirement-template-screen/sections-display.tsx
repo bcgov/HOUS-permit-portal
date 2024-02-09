@@ -11,7 +11,7 @@ import { EditableInputWithControls } from "../../../shared/editable-input-with-c
 import { RemoveConfirmationModal } from "../../../shared/remove-confirmation-modal"
 import { RequirementBlockDisplay } from "../../requirements-library/requirement-block-display"
 import { RequirementsLibraryDrawer } from "../../requirements-library/requirements-library-drawer"
-import { IRequirementTemplateForm } from "./index"
+import { IRequirementTemplateForm, formScrollToId } from "./index"
 
 export const SectionsDisplay = observer(function SectionsDisplay() {
   const { watch } = useFormContext<IRequirementTemplateForm>()
@@ -49,75 +49,74 @@ const SectionDisplay = observer(
 
     const watchedSectionName = watch(`requirementTemplateSectionsAttributes.${sectionIndex}.name`)
     return (
-      <Box as={"section"} w={"full"}>
-        <Box>
-          <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
-          <HStack
-            w={"full"}
-            justifyContent={"space-between"}
-            _hover={{ "button:nth-child(2)": { visibility: "visible" } }}
-          >
-            <EditableInputWithControls
-              onEdit={openEditMode}
-              aria-role={"heading"}
-              aria-level={4}
-              w={"fit-content"}
-              fontWeight={700}
-              fontSize={"2xl"}
-              initialHint={t("ui.clickToEdit")}
-              value={watchedSectionName || ""}
-              editableInputProps={{
-                ...register(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, { required: true }),
-                "aria-label": "Edit Section Name",
-              }}
-              color={R.isEmpty(watchedSectionName) ? "text.link" : undefined}
-              aria-label={"Edit Section Name"}
-              onCancel={(previousValue) => {
-                setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
-                closeEditMode()
-              }}
-              onSubmit={closeEditMode}
-            />
+      <Box as={"section"} w={"full"} id={formScrollToId(section.id)}>
+        <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
+        <HStack
+          w={"full"}
+          justifyContent={"space-between"}
+          _hover={{ "button:nth-of-type(1)": { visibility: "visible" } }}
+        >
+          <EditableInputWithControls
+            onEdit={openEditMode}
+            role={"heading"}
+            aria-level={4}
+            w={"fit-content"}
+            fontWeight={700}
+            fontSize={"2xl"}
+            initialHint={t("ui.clickToEdit")}
+            value={watchedSectionName || ""}
+            editableInputProps={{
+              ...register(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, { required: true }),
+              "aria-label": "Edit Section Name",
+            }}
+            color={R.isEmpty(watchedSectionName) ? "text.link" : undefined}
+            aria-label={"Edit Section Name"}
+            onCancel={(previousValue) => {
+              setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
+              closeEditMode()
+            }}
+            onSubmit={closeEditMode}
+          />
 
-            {watchedSectionBlocks.length === 0 ? (
-              <Button
-                leftIcon={<X />}
-                variant={"ghost"}
-                color={"error"}
-                visibility={"hidden"}
-                onClick={() => removeSection(sectionIndex)}
-              >
-                {t("ui.remove")}
-              </Button>
-            ) : (
-              <RemoveConfirmationModal
-                title={t("requirementTemplate.edit.removeConfirmationModal.title")}
-                body={t("requirementTemplate.edit.removeConfirmationModal.body")}
-                onRemove={() => removeSection(sectionIndex)}
-                triggerButtonProps={{ visibility: "hidden" }}
-              />
-            )}
-          </HStack>
-          <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
-            {watchedSectionBlocks.map((sectionBlock, index) => (
-              <RequirementBlockDisplay
-                as={"section"}
-                key={sectionBlock.id}
-                requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
-                onRemove={() => removeSectionBlock(index)}
-                isEditable
-                showEditWarning
-              />
-            ))}
-            <RequirementsLibraryDrawer
-              defaultButtonProps={{ alignSelf: "center" }}
-              onUse={(requirementBlock, closeDrawer) => {
-                appendSectionBlock({ requirementBlockId: requirementBlock.id })
-                closeDrawer()
-              }}
+          {watchedSectionBlocks.length === 0 ? (
+            <Button
+              leftIcon={<X />}
+              variant={"ghost"}
+              color={"error"}
+              visibility={"hidden"}
+              onClick={() => removeSection(sectionIndex)}
+            >
+              {t("ui.remove")}
+            </Button>
+          ) : (
+            <RemoveConfirmationModal
+              title={t("requirementTemplate.edit.removeConfirmationModal.title")}
+              body={t("requirementTemplate.edit.removeConfirmationModal.body")}
+              onRemove={() => removeSection(sectionIndex)}
+              triggerButtonProps={{ visibility: "hidden" }}
             />
-          </Stack>
-        </Box>
+          )}
+        </HStack>
+        <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
+          {watchedSectionBlocks.map((sectionBlock, index) => (
+            <RequirementBlockDisplay
+              as={"section"}
+              id={formScrollToId(sectionBlock.id)}
+              key={sectionBlock.id}
+              requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
+              onRemove={() => removeSectionBlock(index)}
+              isEditable
+              showEditWarning
+            />
+          ))}
+          <RequirementsLibraryDrawer
+            defaultButtonProps={{ alignSelf: "center" }}
+            onUse={(requirementBlock, closeDrawer) => {
+              appendSectionBlock({ requirementBlockId: requirementBlock.id })
+              closeDrawer()
+            }}
+          />
+        </Stack>
       </Box>
     )
   }

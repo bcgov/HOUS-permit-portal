@@ -4,6 +4,7 @@ import * as R from "ramda"
 import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { RemoveScroll } from "react-remove-scroll"
 import { useRequirementTemplate } from "../../../../hooks/resources/use-requirement-template"
 import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { ITemplateSectionBlockModel } from "../../../../models/template-section-block"
@@ -23,6 +24,9 @@ import { SectionsDnd } from "./sections-dnd"
 import { SectionsSidebar } from "./sections-sidebar"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateUpdateParams {}
+
+const scrollToIdPrefix = "template-builder-scroll-to-id-"
+export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 
 export const EditRequirementTemplateScreen = observer(function EditRequirementTemplateScreen() {
   const { isOpen: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
@@ -61,42 +65,59 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   const hasNoSections = watchedSectionsAttributes.length === 0
   return (
-    <Flex flexDir={"column"} w={"full"} maxW={"full"} overflowX={"hidden"} flex={1} as="main">
-      <FormProvider {...formMethods}>
-        <BuilderHeader requirementTemplate={requirementTemplate} />
-        <Flex flex={1} borderTop={"1px solid"} borderColor={"border.base"}>
-          {isReorderMode ? (
-            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
-          ) : (
-            <SectionsSidebar onEdit={openReorderMode} />
-          )}
-          <Flex flexDir={"column"} flex={1} h={"full"} bg={hasNoSections ? "greys.grey03" : undefined}>
-            {" "}
-            <ControlsHeader
-              onSaveDraft={onSaveDraft}
-              onPublish={onPublish}
-              onAddSection={onAddSection}
-              requirementTemplate={requirementTemplate}
-            />
-            {hasNoSections ? (
-              <Flex
-                justifyContent={hasNoSections ? "center" : undefined}
-                alignItems={hasNoSections ? "center" : undefined}
-                flex={1}
-                w={"full"}
-              >
-                <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
-                  {t("requirementTemplate.edit.emptyTemplateSectionText")}
-                </Text>
-              </Flex>
+    // the height 1px is needed other wise scroll does not work
+    // as it seems like the browser has issues calculating height for flex=1 containers
+    <RemoveScroll style={{ width: "100%", flex: "1", height: "1px" }}>
+      <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
+        <FormProvider {...formMethods}>
+          <BuilderHeader requirementTemplate={requirementTemplate} />
+          <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
+            {isReorderMode ? (
+              <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
             ) : (
-              <SectionsDisplay />
+              <SectionsSidebar onEdit={openReorderMode} onItemClick={scrollIntoView} />
             )}
+            <Flex
+              flexDir={"column"}
+              flex={1}
+              h={"full"}
+              bg={hasNoSections ? "greys.grey03" : undefined}
+              overflow={"auto"}
+            >
+              <ControlsHeader
+                onSaveDraft={onSaveDraft}
+                onPublish={onPublish}
+                onAddSection={onAddSection}
+                requirementTemplate={requirementTemplate}
+              />
+              {hasNoSections ? (
+                <Flex
+                  justifyContent={hasNoSections ? "center" : undefined}
+                  alignItems={hasNoSections ? "center" : undefined}
+                  flex={1}
+                  w={"full"}
+                >
+                  <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
+                    {t("requirementTemplate.edit.emptyTemplateSectionText")}
+                  </Text>
+                </Flex>
+              ) : (
+                <SectionsDisplay />
+              )}
+            </Flex>
           </Flex>
-        </Flex>
-      </FormProvider>
-    </Flex>
+        </FormProvider>
+      </Flex>
+    </RemoveScroll>
   )
+
+  function scrollIntoView(id: string) {
+    const element = document.getElementById(formScrollToId(id))
+
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
 
   function formatSubmitData(formData: IRequirementTemplateForm) {
     const formattedData = R.clone(formData)
