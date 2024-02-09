@@ -8,12 +8,18 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+puts "Seeding permit classifications..."
 PermitClassificationSeeder.seed
+
+puts "Seeding jurisdictions..."
 
 # Creating Jurisdictions
 JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
+north_van = Jurisdiction.find_by(name: "North Vancouver")
+
+puts "Seeding users..."
 5.times do |n|
   suffix = n == 0 ? "" : n
   User.find_or_create_by(username: "super_admin#{suffix}") do |user|
@@ -31,7 +37,7 @@ jurisdictions = Jurisdiction.all
     user.last_name = "McUser"
     user.email = "review_manager#{suffix}@example.com"
     user.password = "P@ssword1"
-    user.jurisdiction = jurisdictions.first
+    user.jurisdiction = north_van
     user.confirmed_at = Time.now
   end
 
@@ -41,7 +47,7 @@ jurisdictions = Jurisdiction.all
     user.last_name = "McUser"
     user.email = "reviewer#{suffix}@example.com"
     user.password = "P@ssword1"
-    user.jurisdiction = jurisdictions.first
+    user.jurisdiction = north_van
     user.confirmed_at = Time.now
   end
 
@@ -57,7 +63,6 @@ end
 
 User.reindex
 
-PermitClassificationSeeder.seed
 activity1 = Activity.find_by_code("new_construction")
 activity2 = Activity.find_by_code("demolition")
 
@@ -65,6 +70,7 @@ activity2 = Activity.find_by_code("demolition")
 permit_type1 = PermitType.find_by_code("low_residential")
 permit_type2 = PermitType.find_by_code("medium_residential")
 
+puts "Seeding contacts..."
 if PermitApplication.first.blank?
   jurisdictions
     .first(10)
@@ -82,7 +88,9 @@ if PermitApplication.first.blank?
         end
       end
     end
+
   # Creating Permit Applications
+  puts "Seeding permit applications..."
   submitters = User.where(role: "submitter")
   20.times do
     PermitApplication.create(
@@ -94,11 +102,17 @@ if PermitApplication.first.blank?
   end
   # Seed a North Vancouver Example
   4.times do
-    j = Jurisdiction.where(name: "North Vancouver").sample
-    pid = (j.locality_type == "corporation of the city") ? "013228544" : "008535981"
+    pid =
+      (
+        if (north_van.locality_type == "corporation of the city")
+          "013228544"
+        else
+          "008535981"
+        end
+      )
     full_address =
       (
-        if (j.locality_type == "corporation of the city")
+        if (north_van.locality_type == "corporation of the city")
           "323 18TH ST E, NORTH VANCOUVER, BC, V7L 2X8"
         else
           "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
@@ -106,7 +120,7 @@ if PermitApplication.first.blank?
       )
     PermitApplication.create(
       submitter: submitters.sample,
-      jurisdiction: j,
+      jurisdiction: north_van,
       activity: activity1,
       permit_type: permit_type1,
       full_address: full_address,
@@ -115,6 +129,7 @@ if PermitApplication.first.blank?
   end
 end
 
+puts "Seeding requirement templates..."
 # Create RequirementTemplate records
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
 RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
@@ -124,4 +139,5 @@ RequirementTemplate.reindex
 
 # Requrements from seeder are idempotent
 # Requirments block will get created from requiremetms templates
+puts "Seeding requirements..."
 RequirementsFromXlsxSeeder.seed

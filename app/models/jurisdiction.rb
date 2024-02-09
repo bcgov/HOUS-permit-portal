@@ -18,12 +18,31 @@ class Jurisdiction < ApplicationRecord
 
   accepts_nested_attributes_for :contacts
 
+  before_create :assign_unique_prefix
+
   def review_managers
     users.review_managers
   end
 
   def reviewers
     users.reviewers
+  end
+
+  def assign_unique_prefix
+    # Initial prefix from the first letter of the qualifier and the name
+    prefix_base = "#{qualifier.first}#{name.first.capitalize}"
+    prefix = prefix_base
+    counter = 1
+
+    # Loop until a unique prefix is found
+    while Jurisdiction.exists?(prefix: prefix)
+      next_letter = name[counter] || ""
+      prefix = "#{prefix_base}#{next_letter.capitalize}"
+      counter += 1
+    end
+
+    # Update the jurisdiction with the unique prefix
+    self.prefix = prefix
   end
 
   def self.locality_types
