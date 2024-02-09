@@ -42,7 +42,8 @@ class PermitApplication < ApplicationRecord
   def requirements
     #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
     #need to look up jurisidcitional version and enablement as well
-    requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type)
+    requirement_template =
+      RequirementTemplate.find_by(activity: activity, permit_type: permit_type)
     requirement_template ? requirement_template.to_form_json : nil
   end
 
@@ -69,7 +70,7 @@ class PermitApplication < ApplicationRecord
           number_prefix,
           sequence_part / 1_000_000 % 1000,
           sequence_part / 1000 % 1000,
-          sequence_part % 1000,
+          sequence_part % 1000
         )
     else
       # Start with the initial number if there are no previous numbers
@@ -89,6 +90,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def submitter_must_have_role
-    errors.add(:submitter, "must have the submitter role") unless submitter&.submitter?
+    unless submitter&.submitter?
+      errors.add(:submitter, "must have the submitter role")
+    end
   end
 end
