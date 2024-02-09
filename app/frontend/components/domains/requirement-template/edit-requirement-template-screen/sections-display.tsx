@@ -9,7 +9,7 @@ import { useMst } from "../../../../setup/root"
 import { IRequirementTemplateSectionAttributes } from "../../../../types/api-request"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { RemoveConfirmationModal } from "../../../shared/remove-confirmation-modal"
-import { RequirementBlockDisplay } from "../../requirements-library/requirement-block-display"
+import { RequirementBlockAccordion } from "../../requirements-library/requirement-block-accordion"
 import { RequirementsLibraryDrawer } from "../../requirements-library/requirements-library-drawer"
 import { IRequirementTemplateForm, formScrollToId } from "./index"
 
@@ -99,7 +99,7 @@ const SectionDisplay = observer(
         </HStack>
         <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
           {watchedSectionBlocks.map((sectionBlock, index) => (
-            <RequirementBlockDisplay
+            <RequirementBlockAccordion
               as={"section"}
               id={formScrollToId(sectionBlock.id)}
               key={sectionBlock.id}
