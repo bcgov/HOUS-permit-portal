@@ -1,4 +1,4 @@
-import { ENumberUnit, ERequirementType, ETagType } from "./enums"
+import { ENumberUnit, ERequirementTemplateStatus, ERequirementType, ETagType } from "./enums"
 import { IOption } from "./types"
 
 export interface IRequirementsAttribute {
@@ -22,22 +22,26 @@ export interface IRequirementBlockParams {
   requirementsAttributes: IRequirementsAttribute[]
 }
 
-export interface ITemplateSectionBlocksAttribute {
+export interface ITemplateSectionBlockAttributes {
   id?: string
+  requirementTemplateSectionId?: string
   requirementBlockId?: string
   position?: number
+  _destroy?: true
 }
 
-export interface IRequirementTemplateSectionsAttribute {
+export interface IRequirementTemplateSectionAttributes {
   id?: string
   name?: string
   position?: number
-  templateSectionBlocksAttributes?: ITemplateSectionBlocksAttribute[]
+  templateSectionBlocksAttributes?: ITemplateSectionBlockAttributes[]
+  _destroy?: boolean
 }
 
 export interface IRequirementTemplateUpdateParams {
+  status?: ERequirementTemplateStatus
   description?: string | null
-  requirementTemplateSectionsAttributes?: IRequirementTemplateSectionsAttribute[]
+  requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 
 export interface ITagSearchParams {

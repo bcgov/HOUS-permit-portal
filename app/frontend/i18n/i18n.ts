@@ -123,6 +123,7 @@ const options = {
           isRequired: "{{field}} is required",
           use: "Use",
           publish: "Publish",
+          neverMind: "Never mind",
         },
         contact: {
           fields: {
@@ -245,6 +246,7 @@ const options = {
               dataValidation: "Data Validation",
             },
             addOptionButton: "Add another option",
+            editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
           },
           fields: {
             name: "Name",
@@ -368,6 +370,13 @@ const options = {
             addRequirementButton: "Add Requirement",
             saveDraft: "Save as Draft",
             closeEditor: "Close Editor",
+            sectionsSidebarTitle: "Contents",
+            reorderButton: "Reorder",
+            removeConfirmationModal: {
+              title: "Are you sure you want to remove this section?",
+              body: "Any requirements inside this section will also be removed along with it.",
+            },
+            emptyTemplateSectionText: "Start by clicking the Add Section button",
           },
           fields: {
             status: "Status",

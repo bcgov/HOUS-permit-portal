@@ -13,9 +13,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      meta: {
                        total_pages: @search.total_pages,
                        total_count: @search.total_count,
-                       current_page: @search.current_page,
+                       current_page: @search.current_page
                      },
-                     blueprint: RequirementTemplateBlueprint,
+                     blueprint: RequirementTemplateBlueprint
                    }
   end
 
@@ -24,11 +24,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     render_success @requirement_template,
                    nil,
-                   { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
   end
 
   def create
-    @requirement_template = RequirementTemplate.build(requirement_template_params)
+    @requirement_template =
+      RequirementTemplate.build(requirement_template_params)
     authorize @requirement_template
 
     if @requirement_template.save
@@ -38,7 +44,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     else
       render_error "requirement_template.create_error",
                    message_opts: {
-                     error_message: @requirement_template.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_template.errors.full_messages.join(", ")
                    }
     end
   end
@@ -49,11 +56,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.update(requirement_template_params)
       render_success @requirement_template,
                      "requirement_template.update_success",
-                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
     else
       render_error "requirement_template.update_error",
                    message_opts: {
-                     error_message: @requirement_template.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_template.errors.full_messages.join(", ")
                    }
     end
   end
@@ -61,7 +74,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def destroy
     authorize @requirement_template
     if @requirement_template.discard
-      render_success(@requirement_template, "requirement_template.destroy_success")
+      render_success(
+        @requirement_template,
+        "requirement_template.destroy_success"
+      )
     else
       render_error "requirement_template.destroy_error"
     end
@@ -70,7 +86,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def restore
     authorize @requirement_template
     if @requirement_template.update(discarded_at: nil)
-      render_success(@requirement_template, "requirement_template.restore_success")
+      render_success(
+        @requirement_template,
+        "requirement_template.restore_success"
+      )
     else
       render_error "requirement_template.restore_error", {}
     end
@@ -87,12 +106,19 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       :description,
       :activity_id,
       :permit_type_id,
+      :status,
       requirement_template_sections_attributes: [
         :id,
         :name,
         :position,
-        template_section_blocks_attributes: %i[id requirement_block_id position],
-      ],
+        :_destroy,
+        template_section_blocks_attributes: %i[
+          id
+          requirement_block_id
+          position
+          _destroy
+        ]
+      ]
     )
   end
 end

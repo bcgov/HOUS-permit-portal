@@ -18,7 +18,7 @@ interface IProps {
 const stubVersion = "v.2024.01.01"
 export const BuilderHeader = observer(function BuilderHeader({ requirementTemplate }: IProps) {
   const { t } = useTranslation()
-  const { register, watch } = useFormContext<IRequirementTemplateForm>()
+  const { register, watch, setValue } = useFormContext<IRequirementTemplateForm>()
   const watchedDescription = watch("description")
   return (
     <Container as={"header"} maxW={"container.lg"} px={8}>
@@ -58,6 +58,7 @@ export const BuilderHeader = observer(function BuilderHeader({ requirementTempla
             }}
             color={R.isEmpty(watchedDescription) ? "text.link" : undefined}
             aria-label={"Edit Template Description"}
+            onCancel={(previousValue) => setValue("description", previousValue)}
           />
         </HStack>
         <HStack>

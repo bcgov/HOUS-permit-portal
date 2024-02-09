@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex, Text, VStack } from "@chakra-ui/react"
 import {
   CollisionDetection,
   DndContext,
@@ -20,13 +20,12 @@ import {
   useSensors,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { Plus } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
-  IRequirementTemplateSectionsAttribute,
-  ITemplateSectionBlocksAttribute,
+  IRequirementTemplateSectionAttributes,
+  ITemplateSectionBlockAttributes,
 } from "../../../../../types/api-request"
 import { DroppableSection } from "./droppable-section"
 import { RequirementBlock } from "./requirement-block"
@@ -46,22 +45,29 @@ const dropAnimation: DropAnimation = {
 }
 
 interface IProps {
-  sections: IRequirementTemplateSectionsAttribute[]
+  sections: IRequirementTemplateSectionAttributes[]
+  onDone?: (
+    dndSectionMap: {
+      [key: string]: IRequirementTemplateSectionAttributes
+    },
+    sortedSectionsId: string[]
+  ) => void
+  onCancel?: () => void
 }
 
-function formSectionsMapFromSections(sections: IRequirementTemplateSectionsAttribute[]) {
-  return sections.reduce<{ [key: string]: IRequirementTemplateSectionsAttribute }>((acc, section) => {
+function formSectionsMapFromSections(sections: IRequirementTemplateSectionAttributes[]) {
+  return sections.reduce<{ [key: string]: IRequirementTemplateSectionAttributes }>((acc, section) => {
     acc[section.id] = section
     return acc
   }, {})
 }
 
-export function SectionsDnd({ sections }: IProps) {
+export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
   const { t } = useTranslation()
   const [dndSectionMap, setDndSectionMap] = useState(() => formSectionsMapFromSections(sections))
   const [sortedSectionIds, setSortedSectionIds] = useState(Object.keys(dndSectionMap))
   const [clonedDndSectionMap, setClonedDndSectionMap] = useState<{
-    [key: string]: IRequirementTemplateSectionsAttribute
+    [key: string]: IRequirementTemplateSectionAttributes
   } | null>(null)
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
@@ -154,16 +160,17 @@ export function SectionsDnd({ sections }: IProps) {
   }, [dndSectionMap])
 
   return (
-    <Box w={"368px"} as={"section"}>
-      <HStack w={"full"} justifyContent={"space-between"} bg={"theme.blue"} py={5} px={4}>
-        <Button size={"sm"} variant={"secondaryInverse"} leftIcon={<Plus />} isDisabled>
-          {t("requirementTemplate.edit.addSectionButton")}
-        </Button>
-        <ButtonGroup size={"sm"} isDisabled>
-          <Button variant={"primaryInverse"}>{t("ui.onlySave")}</Button>
-          <Button variant={"secondaryInverse"}>{t("ui.cancel")}</Button>
+    <Box w={"368px"} as={"section"} h={"full"} boxShadow={"elevations.elevation01"}>
+      <Flex w={"full"} justifyContent={"flex-end"} bg={"theme.blue"} py={5} px={4}>
+        <ButtonGroup size={"sm"}>
+          <Button variant={"primaryInverse"} onClick={() => onDone(dndSectionMap, sortedSectionIds)}>
+            {t("ui.done")}
+          </Button>
+          <Button variant={"secondaryInverse"} onClick={onCancel}>
+            {t("ui.cancel")}
+          </Button>
         </ButtonGroup>
-      </HStack>
+      </Flex>
       <Text as={"h3"} fontSize={"md"} color={"text.secondary"} fontWeight={700} py={1} px={4} bg={"greys.grey03"}>
         {t("requirementTemplate.edit.dndTitle")}
       </Text>
@@ -309,7 +316,10 @@ export function SectionsDnd({ sections }: IProps) {
           ...clonedPastSectionMap[overSection.id],
           templateSectionBlocksAttributes: [
             ...clonedOverSectionBlocks.slice(0, newIndex),
-            clonedActiveSectionBlocks[activeSectionBlockIndex],
+            {
+              ...clonedActiveSectionBlocks[activeSectionBlockIndex],
+              requirementTemplateSectionId: overSection.id,
+            },
             ...clonedOverSectionBlocks.slice(newIndex, clonedOverSectionBlocks.length),
           ],
         },
@@ -321,11 +331,11 @@ export function SectionsDnd({ sections }: IProps) {
     return id in dndSectionMap
   }
 
-  function getSectionById(id: UniqueIdentifier): IRequirementTemplateSectionsAttribute | undefined {
+  function getSectionById(id: UniqueIdentifier): IRequirementTemplateSectionAttributes | undefined {
     return dndSectionMap[id]
   }
 
-  function getSectionBlockById(id: UniqueIdentifier): ITemplateSectionBlocksAttribute | undefined {
+  function getSectionBlockById(id: UniqueIdentifier): ITemplateSectionBlockAttributes | undefined {
     const sectionWithBlock = Object.values(dndSectionMap).find(
       (section) => section.templateSectionBlocksAttributes.findIndex((blockAttribute) => blockAttribute.id === id) > -1
     )

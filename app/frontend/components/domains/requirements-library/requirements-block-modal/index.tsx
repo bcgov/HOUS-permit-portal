@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonProps,
   HStack,
   Modal,
   ModalBody,
@@ -11,6 +12,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { resetForm } from "@formio/react"
+import { Warning } from "@phosphor-icons/react"
 import { autorun } from "mobx"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -28,10 +30,14 @@ export interface IRequirementBlockForm extends IRequirementBlockParams {
 
 interface IRequirementsBlockProps {
   requirementBlock?: IRequirementBlock
+  showEditWarning?: boolean
+  triggerButtonProps?: Partial<ButtonProps>
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   requirementBlock,
+  showEditWarning,
+  triggerButtonProps,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -102,6 +108,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         variant={requirementBlock ? "link" : "primary"}
         textDecoration={requirementBlock ? "underline" : undefined}
         onClick={onOpen}
+        {...triggerButtonProps}
       >
         <Text as={"span"} textOverflow={"ellipsis"} overflow={"hidden"} whiteSpace={"nowrap"}>
           {requirementBlock ? t("ui.edit") : t("requirementsLibrary.modals.create.triggerButton")}
@@ -135,6 +142,21 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                 </HStack>
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
+                {showEditWarning && (
+                  <HStack
+                    spacing={2}
+                    w={"full"}
+                    my={8}
+                    p={4}
+                    border={"1px solid"}
+                    borderColor={"semantic.warning"}
+                    bg={"semantic.warningLight"}
+                    borderRadius={"lg"}
+                  >
+                    <Warning aria-label={"Warning icon"} />
+                    <Text>{t("requirementsLibrary.modals.editWarning")}</Text>
+                  </HStack>
+                )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup />
                   <FieldsSetup />

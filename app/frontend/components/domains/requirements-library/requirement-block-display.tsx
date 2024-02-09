@@ -1,4 +1,5 @@
-import { Box, BoxProps, Flex, Text, VStack } from "@chakra-ui/react"
+import { Box, BoxProps, HStack, IconButton, Text, VStack } from "@chakra-ui/react"
+import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -7,15 +8,28 @@ import { ERequirementType } from "../../../types/enums"
 import { isQuillEmpty } from "../../../utils/utility-funcitons"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { RequirementFieldDisplay } from "./requirement-field-display"
+import { RequirementsBlockModal } from "./requirements-block-modal"
 
-interface IProps extends BoxProps {
+type TProps = {
   requirementBlock: IRequirementBlock
-}
+  onRemove?: () => void
+} & BoxProps &
+  (
+    | { isEditable?: never; showEditWarning?: never }
+    | { isEditable: true; showEditWarning?: boolean }
+    | {
+        isEditable: false
+        showEditWarning?: never
+      }
+  )
 
 export const RequirementBlockDisplay = observer(function RequirementBlockDisplay({
   requirementBlock,
+  onRemove,
+  isEditable,
+  showEditWarning,
   ...containerProps
-}: IProps) {
+}: TProps) {
   const { t } = useTranslation()
 
   return (
@@ -27,11 +41,35 @@ export const RequirementBlockDisplay = observer(function RequirementBlockDisplay
       borderRadius={"lg"}
       {...containerProps}
     >
-      <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>
-        <Text as={"h5"} fontWeight={700} fontSize={"base"}>
-          {requirementBlock.displayName}
-        </Text>
-      </Flex>
+      <HStack py={3} px={6} w={"full"} background={"greys.grey04"} justifyContent={"space-between"}>
+        <HStack spacing={0}>
+          <Text as={"h5"} fontWeight={700} fontSize={"base"}>
+            {requirementBlock.displayName}
+          </Text>
+          {onRemove && (
+            <IconButton
+              color={"text.primary"}
+              variant={"ghost"}
+              aria-label={"Remove Requirement Block"}
+              onClick={onRemove}
+              icon={<X size={16} />}
+            />
+          )}
+        </HStack>
+        {isEditable && (
+          <RequirementsBlockModal
+            showEditWarning={showEditWarning}
+            requirementBlock={requirementBlock}
+            triggerButtonProps={{
+              color: "text.primary",
+              textDecoration: "none",
+              _hover: {
+                textDecoration: "underline",
+              },
+            }}
+          />
+        )}
+      </HStack>
       <Box pb={8}>
         <Box px={3}>
           {!isQuillEmpty(requirementBlock.displayDescription) && (

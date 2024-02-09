@@ -9,10 +9,18 @@ import { radii } from "./foundations/border-radii"
 import { colors } from "./foundations/colors"
 import { fontSizes } from "./foundations/font-sizes"
 import { fonts } from "./foundations/fonts"
+import { shadows } from "./foundations/shadows"
 import { sizes } from "./foundations/sizes"
 import { space } from "./foundations/space"
 
+const styles = {
+  global: {
+    body: {
+      color: "text.primary", // Set your desired default body font color
+    },
+  },
+}
 const components = { Button, FormLabel, Input, Link, Text, Table }
-const overrides = { colors, fonts, fontSizes, sizes, radii, space, components }
+const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
 
 export const theme = extendTheme(overrides)
