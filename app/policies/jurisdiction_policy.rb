@@ -23,6 +23,10 @@ class JurisdictionPolicy < ApplicationPolicy
     update?
   end
 
+  def search_permit_applications?
+    update?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

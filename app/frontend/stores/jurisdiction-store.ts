@@ -18,7 +18,7 @@ export const JurisdictionStoreModel = types
       currentJurisdiction: types.maybeNull(types.reference(JurisdictionModel)),
       sort: types.maybeNull(types.frozen<ISort<EJurisdictionSortFields>>()),
     }),
-    createSearchModel<EJurisdictionSortFields>("fetchJurisdictions")
+    createSearchModel<EJurisdictionSortFields>("searchJurisdictions")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -54,13 +54,13 @@ export const JurisdictionStoreModel = types
         return response.data
       }
     }),
-    fetchJurisdictions: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+    searchJurisdictions: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
         self.resetPages()
       }
 
       const response = yield* toGenerator(
-        self.environment.api.fetchJurisdictions({
+        self.environment.api.searchJurisdictions({
           query: self.query,
           sort: self.sort,
           page: opts?.page ?? self.currentPage,

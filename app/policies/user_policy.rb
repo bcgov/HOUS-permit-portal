@@ -11,10 +11,13 @@ class UserPolicy < ApplicationPolicy
     invite?
   end
 
-  # This method is used as a scope in jurisdiciton user search
   def index?
     (user.super_admin? && record.review_manager?) ||
       (user.review_manager? && user.jurisdiction_id == record.jurisdiction_id)
+  end
+
+  def search_users?
+    index?
   end
 
   def destroy?

@@ -22,6 +22,7 @@ export const PermitApplicationModel = types
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     requirements: types.maybeNull(types.frozen({})),
     submissionData: types.maybeNull(types.frozen({})),
+    submittedAt: types.maybeNull(types.Date),
     createdAt: types.Date,
     updatedAt: types.Date,
   })
