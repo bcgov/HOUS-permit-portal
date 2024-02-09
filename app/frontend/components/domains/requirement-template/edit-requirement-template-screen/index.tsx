@@ -1,7 +1,8 @@
-import { Flex, Text, useDisclosure } from "@chakra-ui/react"
+import { Button, Flex, Stack, Text, useDisclosure } from "@chakra-ui/react"
+import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
@@ -39,6 +40,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     control,
   })
   const { t } = useTranslation()
+  const rightContainerRef = useRef<HTMLDivElement>()
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
@@ -83,6 +85,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               h={"full"}
               bg={hasNoSections ? "greys.grey03" : undefined}
               overflow={"auto"}
+              ref={rightContainerRef}
             >
               <ControlsHeader
                 onSaveDraft={onSaveDraft}
@@ -107,6 +110,12 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             </Flex>
           </Flex>
         </FormProvider>
+        <Stack spacing={4} position={"fixed"} bottom={6} right={6} alignItems={"flex-end"}>
+          <Button variant={"greyButton"} leftIcon={<ArrowUp />} pl={"0.6125rem"} onClick={scrollToTop}>
+            {t("requirementTemplate.edit.goToTop")}
+          </Button>
+          <Button variant={"greyButton"}>{t("requirementTemplate.edit.collapseAll")}</Button>
+        </Stack>
       </Flex>
     </RemoveScroll>
   )
@@ -183,6 +192,10 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
     setValue("requirementTemplateSectionsAttributes", newTemplateSectionsAttributes)
     closeReorderMode()
+  }
+
+  function scrollToTop() {
+    rightContainerRef.current?.scrollTo({ behavior: "smooth", top: 0 })
   }
 
   function onAddSection() {
