@@ -4,16 +4,16 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  AccordionProps,
   Box,
-  BoxProps,
   HStack,
   IconButton,
-  Text,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../models/requirement-block"
 import { ERequirementType } from "../../../types/enums"
@@ -25,7 +25,8 @@ import { RequirementsBlockModal } from "./requirements-block-modal"
 type TProps = {
   requirementBlock: IRequirementBlock
   onRemove?: () => void
-} & BoxProps &
+  triggerForceCollapse?: boolean
+} & Partial<AccordionProps> &
   (
     | { isEditable?: never; showEditWarning?: never }
     | { isEditable: true; showEditWarning?: boolean }
@@ -40,8 +41,17 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   onRemove,
   isEditable,
   showEditWarning,
+  triggerForceCollapse,
+  ...accordionProps
 }: TProps) {
   const { t } = useTranslation()
+  const { isOpen, onToggle, onClose } = useDisclosure({ defaultIsOpen: true })
+
+  useEffect(() => {
+    if (triggerForceCollapse) {
+      onClose()
+    }
+  }, [triggerForceCollapse])
 
   return (
     <Accordion
@@ -51,15 +61,16 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
       borderColor={"border.light"}
       borderRadius={"lg"}
       allowToggle
-      defaultIndex={0}
+      index={isOpen ? 0 : null}
+      {...accordionProps}
     >
       <AccordionItem>
         <Box as={"h5"} w={"full"} background={"greys.grey04"} m={0}>
-          <AccordionButton py={3} px={6} display={"flex"} justifyContent={"space-between"}>
+          <AccordionButton py={3} px={6} display={"flex"} justifyContent={"space-between"} onClick={onToggle}>
             <HStack spacing={0}>
-              <Text fontWeight={700} fontSize={"base"}>
+              <Box fontWeight={700} fontSize={"base"}>
                 {requirementBlock.displayName}
-              </Text>
+              </Box>
               {onRemove && (
                 <IconButton
                   color={"text.primary"}

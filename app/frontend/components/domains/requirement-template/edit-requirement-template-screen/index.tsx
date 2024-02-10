@@ -2,7 +2,7 @@ import { Button, Flex, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
@@ -41,6 +41,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   })
   const { t } = useTranslation()
   const rightContainerRef = useRef<HTMLDivElement>()
+  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
@@ -105,7 +106,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
                   </Text>
                 </Flex>
               ) : (
-                <SectionsDisplay />
+                <SectionsDisplay shouldCollapseAll={shouldCollapseAll} />
               )}
             </Flex>
           </Flex>
@@ -114,11 +115,21 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
           <Button variant={"greyButton"} leftIcon={<ArrowUp />} pl={"0.6125rem"} onClick={scrollToTop}>
             {t("requirementTemplate.edit.goToTop")}
           </Button>
-          <Button variant={"greyButton"}>{t("requirementTemplate.edit.collapseAll")}</Button>
+          <Button variant={"greyButton"} onClick={onCollapseAll}>
+            {t("requirementTemplate.edit.collapseAll")}
+          </Button>
         </Stack>
       </Flex>
     </RemoveScroll>
   )
+
+  function onCollapseAll() {
+    setShouldCollapseAll(true)
+
+    setTimeout(() => {
+      setShouldCollapseAll(false)
+    }, 500)
+  }
 
   function scrollIntoView(id: string) {
     const element = document.getElementById(formScrollToId(id))

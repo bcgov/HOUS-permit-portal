@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Stack, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, HStack, Stack } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -13,24 +13,35 @@ import { RequirementBlockAccordion } from "../../requirements-library/requiremen
 import { RequirementsLibraryDrawer } from "../../requirements-library/requirements-library-drawer"
 import { IRequirementTemplateForm, formScrollToId } from "./index"
 
-export const SectionsDisplay = observer(function SectionsDisplay() {
+interface IProps {
+  shouldCollapseAll?: boolean
+}
+
+export const SectionsDisplay = observer(function SectionsDisplay({ shouldCollapseAll }: IProps) {
   const { watch } = useFormContext<IRequirementTemplateForm>()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
 
   return (
     <Stack w={"full"} alignItems={"flex-start"} spacing={16} p={16}>
       {watchedSections.map((section, index) => (
-        <SectionDisplay key={section.id} section={section} sectionIndex={index} />
+        <SectionDisplay key={section.id} section={section} sectionIndex={index} shouldCollapseAll={shouldCollapseAll} />
       ))}
     </Stack>
   )
 })
 
 const SectionDisplay = observer(
-  ({ section, sectionIndex }: { section: IRequirementTemplateSectionAttributes; sectionIndex: number }) => {
+  ({
+    section,
+    sectionIndex,
+    shouldCollapseAll,
+  }: {
+    section: IRequirementTemplateSectionAttributes
+    sectionIndex: number
+    shouldCollapseAll?: boolean
+  }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
-    const { isOpen: isEditMode, onClose: closeEditMode, onOpen: openEditMode } = useDisclosure()
     const { t } = useTranslation()
 
     const { append: appendSectionBlock, remove: removeSectionBlock } = useFieldArray({
@@ -57,7 +68,6 @@ const SectionDisplay = observer(
           _hover={{ "button:nth-of-type(1)": { visibility: "visible" } }}
         >
           <EditableInputWithControls
-            onEdit={openEditMode}
             role={"heading"}
             aria-level={4}
             w={"fit-content"}
@@ -73,9 +83,7 @@ const SectionDisplay = observer(
             aria-label={"Edit Section Name"}
             onCancel={(previousValue) => {
               setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
-              closeEditMode()
             }}
-            onSubmit={closeEditMode}
           />
 
           {watchedSectionBlocks.length === 0 ? (
@@ -105,6 +113,7 @@ const SectionDisplay = observer(
               key={sectionBlock.id}
               requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
               onRemove={() => removeSectionBlock(index)}
+              triggerForceCollapse={shouldCollapseAll}
               isEditable
               showEditWarning
             />
