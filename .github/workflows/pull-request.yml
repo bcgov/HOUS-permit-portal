@@ -56,8 +56,9 @@ jobs:
           bundle install
       - name: Setup Test Database
         run: |
-          bundle exec rake db:create
-          bundle exec rake db:schema:load
+          bundle exec rails db:create
+          bundle exec rails db:schema:load
+          bundle exec rails db:migrate
       - name: Run RSpec
         run: |
           bundle exec rspec
