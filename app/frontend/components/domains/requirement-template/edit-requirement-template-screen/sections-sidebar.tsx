@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Heading, HStack, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Divider, Heading, HeadingProps, HStack, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useFormContext } from "react-hook-form"
@@ -9,13 +9,24 @@ import { IRequirementTemplateForm } from "./index"
 interface IProps {
   onEdit?: () => void
   onItemClick?: (id: string) => void
+  sectionIdToHighlight: null | string
 }
 
-export const SectionsSidebar = observer(function SectionsSidebar({ onEdit, onItemClick }: IProps) {
+export const SectionsSidebar = observer(function SectionsSidebar({
+  onEdit,
+  onItemClick,
+  sectionIdToHighlight,
+}: IProps) {
   const { t } = useTranslation()
   const { watch } = useFormContext<IRequirementTemplateForm>()
   const { requirementBlockStore } = useMst()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
+  const highLightedSectionStyles: Partial<HeadingProps> = {
+    bg: "theme.blueLight",
+    color: "text.link",
+    borderLeft: "4px solid",
+    borderColor: "theme.blueAlt",
+  }
 
   return (
     <Box
@@ -37,6 +48,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({ onEdit, onIte
       </HStack>
       <Stack w={"full"} spacing={4} alignItems={"flex-start"} py={2}>
         {watchedSections?.map((section, index) => {
+          const isHighlightedSection = sectionIdToHighlight === section.id
           return (
             <React.Fragment key={section.id}>
               <Box as={"section"} w={"full"}>
@@ -50,6 +62,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({ onEdit, onIte
                   _hover={{ textDecoration: "underline" }}
                   onClick={() => onItemClick?.(section.id)}
                   cursor={"pointer"}
+                  {...(isHighlightedSection ? highLightedSectionStyles : {})}
                 >
                   {section.name}
                 </Heading>

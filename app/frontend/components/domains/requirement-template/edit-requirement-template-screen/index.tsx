@@ -42,6 +42,30 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const { t } = useTranslation()
   const rightContainerRef = useRef<HTMLDivElement>()
   const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
+
+  const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
+
+  useEffect(() => {
+    const options = {
+      root: rightContainerRef?.current,
+      rootMargin: "0px",
+      threshold: 0.1,
+    }
+
+    const observer = new IntersectionObserver(handleSectionIntersection, options)
+
+    Object.values(sectionRefs.current).forEach((ref) => {
+      if (ref) {
+        observer.observe(ref)
+      }
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [watchedSectionsAttributes])
 
   useEffect(() => {
     reset(formFormDefaults(requirementTemplate))
@@ -49,8 +73,6 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   if (error) return <ErrorScreen />
   if (!requirementTemplate?.isFullyLoaded) return <LoadingScreen />
-
-  const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
 
   const onSaveDraft = handleSubmit(async (templateFormData) => {
     const formattedSubmitData = formatSubmitData(templateFormData)
@@ -67,6 +89,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   })
 
   const hasNoSections = watchedSectionsAttributes.length === 0
+
+  const currentSectionId = (() => {
+    const orderedInViewSections = watchedSectionsAttributes.filter((section) => sectionsInViewStatuses[section.id])
+
+    return orderedInViewSections?.[0]?.id ?? null
+  })()
+
   return (
     // the height 1px is needed other wise scroll does not work
     // as it seems like the browser has issues calculating height for flex=1 containers
@@ -78,7 +107,11 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             {isReorderMode ? (
               <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
             ) : (
-              <SectionsSidebar onEdit={openReorderMode} onItemClick={scrollIntoView} />
+              <SectionsSidebar
+                onEdit={openReorderMode}
+                onItemClick={scrollIntoView}
+                sectionIdToHighlight={currentSectionId}
+              />
             )}
             <Flex
               flexDir={"column"}
@@ -106,7 +139,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
                   </Text>
                 </Flex>
               ) : (
-                <SectionsDisplay shouldCollapseAll={shouldCollapseAll} />
+                <SectionsDisplay shouldCollapseAll={shouldCollapseAll} setSectionRef={setSectionRef} />
               )}
             </Flex>
           </Flex>
@@ -218,6 +251,29 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     prependToSectionsAttributes({
       name: `${defaultName} ${numUneditedNewSections + 1}`,
       templateSectionBlocksAttributes: [],
+    })
+  }
+
+  function setSectionRef(el: HTMLElement, id: string) {
+    sectionRefs.current[id] = el
+  }
+
+  // modified use case from https://stackoverflow.com/questions/57992340/how-to-get-first-visible-body-element-on-screen-with-pure-javascript
+  function handleSectionIntersection(entries: IntersectionObserverEntry[]) {
+    setSectionsInViewStatuses((pastState) => {
+      const newState = { ...pastState }
+
+      entries.forEach((entry) => {
+        const sectionId = entry.target.getAttribute("data-section-id")
+
+        if (entry.isIntersecting) {
+          newState[sectionId] = true
+        } else {
+          newState[sectionId] = false
+        }
+      })
+
+      return newState
     })
   }
 })

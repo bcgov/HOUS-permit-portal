@@ -15,16 +15,17 @@ import { IRequirementTemplateForm, formScrollToId } from "./index"
 
 interface IProps {
   shouldCollapseAll?: boolean
+  setSectionRef: (el: HTMLElement, id: string) => void
 }
 
-export const SectionsDisplay = observer(function SectionsDisplay({ shouldCollapseAll }: IProps) {
+export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) {
   const { watch } = useFormContext<IRequirementTemplateForm>()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
 
   return (
     <Stack w={"full"} alignItems={"flex-start"} spacing={16} p={16}>
       {watchedSections.map((section, index) => (
-        <SectionDisplay key={section.id} section={section} sectionIndex={index} shouldCollapseAll={shouldCollapseAll} />
+        <SectionDisplay key={section.id} section={section} sectionIndex={index} {...props} />
       ))}
     </Stack>
   )
@@ -35,10 +36,12 @@ const SectionDisplay = observer(
     section,
     sectionIndex,
     shouldCollapseAll,
+    setSectionRef,
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
     shouldCollapseAll?: boolean
+    setSectionRef: (el: HTMLElement, id: string) => void
   }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -60,7 +63,13 @@ const SectionDisplay = observer(
 
     const watchedSectionName = watch(`requirementTemplateSectionsAttributes.${sectionIndex}.name`)
     return (
-      <Box as={"section"} w={"full"} id={formScrollToId(section.id)}>
+      <Box
+        ref={(el) => setSectionRef(el, section.id)}
+        as={"section"}
+        w={"full"}
+        id={formScrollToId(section.id)}
+        data-section-id={section.id}
+      >
         <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
         <HStack
           w={"full"}
