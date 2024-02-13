@@ -148,7 +148,6 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             value: t("requirementsLibrary.modals.defaultRequirementLabel"),
                           }),
                           "aria-label": "Edit Label",
-                          // w: `calc(100% - ${isRequirementInEditMode(field.id) ? "280px" : "60px"})`,
                         },
                       }}
                       editableHelperTextProps={{

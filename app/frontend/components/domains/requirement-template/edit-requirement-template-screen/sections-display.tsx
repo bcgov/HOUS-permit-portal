@@ -74,6 +74,7 @@ const SectionDisplay = observer(
         <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
         <HStack
           w={"full"}
+          maxW={"798px"}
           justifyContent={"space-between"}
           _hover={{ "button:nth-of-type(1)": { visibility: "visible" } }}
         >
