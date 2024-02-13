@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -22,8 +22,11 @@ export const FieldsSetup = observer(function FieldsSetup() {
     control,
     name: "requirementsAttributes",
   })
-  const [requirementToEdit, setRequirementToEdit] = useState<string | null>()
-  const [isAnyEditOptionsMenuOpen, setIsAnyEditOptionsMenuOpen] = useState<boolean>(false)
+  const [requirementIdsToEdit, setRequirementIdsToEdit] = useState<Record<string, boolean>>({})
+
+  const toggleRequirementToEdit = (requirementId: string) => {
+    setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
+  }
 
   const onUseRequirement = (requirementType: ERequirementType) => {
     append({
@@ -50,7 +53,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
   const hasFields = fields.length > 0
 
   function isRequirementInEditMode(id: string) {
-    return requirementToEdit === id
+    return !!requirementIdsToEdit[id]
   }
 
   return (
@@ -110,13 +113,13 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   _hover={{
                     bg: "theme.blueLight",
                     "& .requirement-edit-btn": {
-                      visibility: isRequirementInEditMode(field.id) ? "hidden" : "visible",
+                      visibility: "visible",
                     },
                   }}
                   _focus={{
                     bg: "theme.blueLight",
                     "& .requirement-edit-btn": {
-                      visibility: isRequirementInEditMode(field.id) ? "hidden" : "visible",
+                      visibility: "visible",
                     },
                   }}
                   tabIndex={0}
@@ -124,9 +127,6 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   pt={index !== 0 ? 1 : 0}
                   pb={5}
                   pos={"relative"}
-                  onMouseLeave={() => {
-                    isRequirementInEditMode(field.id) && !isAnyEditOptionsMenuOpen && setRequirementToEdit(null)
-                  }}
                 >
                   <Box
                     w={"full"}
@@ -141,13 +141,14 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       requirementType={requirementType}
                       editableLabelProps={{
                         color: "text.link",
+                        w: `calc(100% - 220px)`,
                         editableInputProps: {
                           ...register(`requirementsAttributes.${index}.label`, {
                             required: true,
                             value: t("requirementsLibrary.modals.defaultRequirementLabel"),
                           }),
                           "aria-label": "Edit Label",
-                          w: "calc(100% - 60px)",
+                          // w: `calc(100% - ${isRequirementInEditMode(field.id) ? "280px" : "60px"})`,
                         },
                       }}
                       editableHelperTextProps={{
@@ -221,7 +222,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       label={watch(`requirementsAttributes.${index}.label`)}
                       helperText={watchedHint}
                       labelProps={{
-                        w: "calc(100% - 60px)",
+                        w: `calc(100% - 60px})`,
                       }}
                       unit={
                         requirementType === ERequirementType.number
@@ -236,31 +237,27 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       }}
                     />
                   </Box>
-                  <Button
-                    className={"requirement-edit-btn"}
-                    variant={"primary"}
-                    pos={"absolute"}
-                    right={0}
-                    top={0}
-                    size={"sm"}
-                    visibility={"hidden"}
-                    onClick={() => {
-                      setRequirementToEdit(field.id)
-                    }}
-                  >
-                    {t("ui.edit")}
-                  </Button>
-                  {isRequirementInEditMode(field.id) && (
-                    <OptionsMenu
-                      menuButtonProps={{
-                        pos: "absolute",
-                        right: 0,
-                        top: 0,
+                  <HStack pos={"absolute"} right={0} top={0} spacing={4}>
+                    {isRequirementInEditMode(field.id) && (
+                      <OptionsMenu
+                        menuButtonProps={{
+                          size: "sm",
+                        }}
+                        onRemove={() => remove(index)}
+                      />
+                    )}
+                    <Button
+                      className={"requirement-edit-btn"}
+                      visibility={isRequirementInEditMode(field.id) ? "visible" : "hidden"}
+                      variant={"primary"}
+                      size={"sm"}
+                      onClick={() => {
+                        toggleRequirementToEdit(field.id)
                       }}
-                      onRemove={() => remove(index)}
-                      emitOpenState={(isOpen) => setIsAnyEditOptionsMenuOpen(isOpen)}
-                    />
-                  )}
+                    >
+                      {t(isRequirementInEditMode(field.id) ? "ui.done" : "ui.edit")}
+                    </Button>
+                  </HStack>
                 </Box>
               )
             })}
