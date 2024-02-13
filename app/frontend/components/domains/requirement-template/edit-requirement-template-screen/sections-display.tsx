@@ -5,6 +5,7 @@ import * as R from "ramda"
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { v4 as uuidv4 } from "uuid"
 import { useMst } from "../../../../setup/root"
 import { IRequirementTemplateSectionAttributes } from "../../../../types/api-request"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
@@ -130,7 +131,7 @@ const SectionDisplay = observer(
           <RequirementsLibraryDrawer
             defaultButtonProps={{ alignSelf: "center" }}
             onUse={(requirementBlock, closeDrawer) => {
-              appendSectionBlock({ requirementBlockId: requirementBlock.id })
+              appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
               closeDrawer()
             }}
           />
