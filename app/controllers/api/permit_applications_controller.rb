@@ -2,6 +2,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionPermitApplications
   before_action :set_permit_application, only: %i[show update]
 
+  def index
+    @permit_applications = policy_scope(PermitApplication)
+    render_success @permit_applications, nil, { blueprint: PermitApplicationBlueprint }
+  end
+
   def show
     authorize @permit_application
     render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
