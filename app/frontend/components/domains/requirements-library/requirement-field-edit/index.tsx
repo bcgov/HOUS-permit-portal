@@ -2,11 +2,7 @@ import {
   Box,
   Button,
   Checkbox,
-  CheckboxGroup,
   CheckboxProps,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   FormLabelProps,
   HStack,
   IconButton,
@@ -329,25 +325,133 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.checkbox]: function <TFieldValues>({
-    label,
-    helperText,
-    options = defaultOptions,
+    multiOptionProps,
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
   }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for checkbox requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...labelProps}>
-          {label || t("requirementsLibrary.requirementTypeLabels.multiSelectCheckbox")}
-        </FormLabel>
-        <CheckboxGroup>
-          <Stack>
-            {options.map((option) => (
-              <Checkbox value={option}>{option}</Checkbox>
-            ))}
-          </Stack>
-        </CheckboxGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <Stack>
+          {fields.map((field, idx) => (
+            <HStack key={field.id}>
+              <Box
+                border={"1px solid"}
+                borderColor={"border.light"}
+                bg={"white"}
+                w={"16px"}
+                h={"16px"}
+                borderRadius={"sm"}
+              />
+              <Input
+                bg={"white"}
+                size={"sm"}
+                value={getOptionValue(idx).label}
+                onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                w={"150px"}
+              />
+              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
+            </HStack>
+          ))}
+
+          {/*  @ts-ignore*/}
+          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            {t("requirementsLibrary.modals.addOptionButton")}
+          </Button>
+          <EditableInputWithControls
+            initialHint={t("requirementsLibrary.modals.addHelpText")}
+            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+            {...editableHelperTextProps}
+          />
+        </Stack>
+
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
+    )
+  },
+  [ERequirementType.select]: function <TFieldValues>({
+    multiOptionProps,
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for select requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
+    return (
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <Stack>
+          {fields.map((field, idx) => (
+            <HStack key={field.id}>
+              <Input
+                bg={"white"}
+                size={"sm"}
+                value={getOptionValue(idx).label}
+                onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                w={"150px"}
+              />
+              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
+            </HStack>
+          ))}
+
+          {/*  @ts-ignore*/}
+          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            {t("requirementsLibrary.modals.addOptionButton")}
+          </Button>
+          <EditableInputWithControls
+            initialHint={t("requirementsLibrary.modals.addHelpText")}
+            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+            {...editableHelperTextProps}
+          />
+        </Stack>
+
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
     )
   },
 }

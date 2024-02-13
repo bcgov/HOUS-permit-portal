@@ -188,24 +188,28 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             }
                           : undefined
                       }
-                      multiOptionProps={{
-                        useFieldArrayProps: {
-                          control,
-                          name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
-                        },
-                        onOptionValueChange: (optionNIndex, optionValue) => {
-                          setValue(
-                            `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
-                            optionValue
-                          )
-                          setValue(
-                            `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
-                            optionValue
-                          )
-                        },
-                        getOptionValue: (idx) =>
-                          watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
-                      }}
+                      multiOptionProps={
+                        isMultiOptionRequirement(requirementType)
+                          ? {
+                              useFieldArrayProps: {
+                                control,
+                                name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
+                              },
+                              onOptionValueChange: (optionNIndex, optionValue) => {
+                                setValue(
+                                  `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
+                                  optionValue
+                                )
+                                setValue(
+                                  `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
+                                  optionValue
+                                )
+                              },
+                              getOptionValue: (idx) =>
+                                watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
+                            }
+                          : undefined
+                      }
                     />
                   </Box>
                   <Box

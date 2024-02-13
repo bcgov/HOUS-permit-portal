@@ -132,7 +132,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                 <HStack>
                   <Button
                     variant={"primary"}
-                    type={"submit"}
                     isDisabled={isSubmitting || !isValid}
                     isLoading={isSubmitting}
                     onClick={handleSubmit(onSubmit)}
