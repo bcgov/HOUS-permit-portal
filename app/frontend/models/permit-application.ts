@@ -3,7 +3,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
-import { IFormIOBlock, IFormJson } from "../types/types"
+import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { UserModel } from "./user"
@@ -22,7 +22,7 @@ export const PermitApplicationModel = types
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
-    submissionData: types.maybeNull(types.frozen({})),
+    submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     submittedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
@@ -45,6 +45,9 @@ export const PermitApplicationModel = types
         }, [] as IFormIOBlock[])
         .filter((outNull) => outNull)
     },
+    blockKey(sectionId, blockId) {
+      return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
+    },
   }))
   .views((self) => ({
     getBlockById: (blockId: string) => {
@@ -53,11 +56,24 @@ export const PermitApplicationModel = types
     indexOfBlockId: (blockId: string) => {
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)
     },
-    blockClass(sectionId, blockId) {
-      return `formio-component-formSubmissionDataRSTsection${sectionId}|RB${blockId}`
+    getBlockClass(sectionId, blockId) {
+      return `formio-component-${self.blockKey(sectionId, blockId)}`
     },
-    get blockClasses() {
+    get getBlockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
+    },
+    getIsBlockPopulated(sectionId, blockId) {
+      const keyPrefix = self.blockKey(sectionId, blockId)
+      const atLeastOnePrefixKey = Object.keys(self.submissionData).some((key) => key.startsWith(keyPrefix))
+      if (!atLeastOnePrefixKey) return false
+
+      for (const key in self.submissionData.data) {
+        if (key.startsWith(keyPrefix) && !self.submissionData[key]) {
+          // Found a key starting with keyPrefix but its value is falsy
+          return false
+        }
+      }
+      return true
     },
   }))
   .actions((self) => ({

@@ -15,7 +15,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def update
     authorize @permit_application
 
-    if @permit_application.save
+    if @permit_application.update(permit_application_params)
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.create_error",

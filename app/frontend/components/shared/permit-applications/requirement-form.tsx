@@ -1,54 +1,36 @@
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, HStack, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
-  emitCurrentSectionId: (sectionId: string) => void
 }
 
-export const RequirementForm = observer(({ permitApplication, emitCurrentSectionId }: IRequirementFormProps) => {
-  const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses } = permitApplication
-  const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
+export const RequirementForm = observer(({ permitApplication }: IRequirementFormProps) => {
+  const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, getBlockClasses } = permitApplication
   const isMounted = useMountStatus()
 
   useEffect(() => {
     if (!isMounted) return
 
     const formComponentNodes = document.querySelectorAll(".formio-component")
-    const sectionNodes = Array.from(formComponentNodes).filter((node) =>
-      Array.from(node.classList).find((className) => className.includes("formio-component-section"))
-    )
 
     const blockNodes = Array.from(formComponentNodes).filter((node) =>
-      Array.from(node.classList).some((className) => blockClasses.includes(className))
+      Array.from(node.classList).some((className) => getBlockClasses.includes(className))
     )
-
-    const sectionOptions = {
-      rootMargin: "0px",
-      threshold: 1,
-    }
-
     const viewportHeight = window.innerHeight // Get the viewport height
     const topValue = -viewportHeight / 2 + 10
     const bottomValue = -viewportHeight / 2 + 10
     const rootMarginValue = `${topValue}px 0px ${bottomValue}px 0px`
     const blockOptions = {
       rootMargin: rootMarginValue,
-      threshold: 0.05, // Adjust threshold based on needs
+      threshold: 0.01, // Adjust threshold based on needs
     }
 
-    const sectionObserver = new IntersectionObserver(handleSectionIntersection, sectionOptions)
     const blockObserver = new IntersectionObserver(handleBlockIntersection, blockOptions)
-
-    Object.values(sectionNodes).forEach((ref) => {
-      if (ref) {
-        sectionObserver.observe(ref)
-      }
-    })
 
     Object.values(blockNodes).forEach((ref) => {
       if (ref) {
@@ -57,40 +39,9 @@ export const RequirementForm = observer(({ permitApplication, emitCurrentSection
     })
 
     return () => {
-      sectionObserver.disconnect()
+      blockObserver.disconnect()
     }
   }, [formJson, isMounted, window.innerHeight])
-
-  const currentSectionId = (() => {
-    const orderedInViewSections = (formJson?.components ?? []).filter((section) => sectionsInViewStatuses[section.id])
-
-    return orderedInViewSections?.[0]?.id ?? formJson?.components[0].id
-  })()
-
-  useEffect(() => {
-    emitCurrentSectionId(currentSectionId)
-  }, [currentSectionId])
-
-  function handleSectionIntersection(entries: IntersectionObserverEntry[]) {
-    setSectionsInViewStatuses((pastState) => {
-      const newState = { ...pastState }
-
-      entries.forEach((entry) => {
-        const sectionIdClass = Array.from(entry.target.classList).find((className) =>
-          className.includes("formio-component-section")
-        )
-        const sectionId = sectionIdClass?.replace("formio-component-section", "")
-
-        if (entry.isIntersecting) {
-          newState[sectionId] = true
-        } else {
-          newState[sectionId] = false
-        }
-      })
-
-      return newState
-    })
-  }
 
   function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
     const entry = entries.filter((en) => en.isIntersecting)[0]

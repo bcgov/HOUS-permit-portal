@@ -71,3 +71,7 @@ export interface IFormIORequirement {
   label: string
   widget?: any
 }
+
+export interface ISubmissionData {
+  data: any[]
+}
