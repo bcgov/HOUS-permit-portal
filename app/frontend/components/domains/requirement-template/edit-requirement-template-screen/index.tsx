@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
+import { v4 as uuidv4 } from "uuid"
 import { useRequirementTemplate } from "../../../../hooks/resources/use-requirement-template"
 import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { ITemplateSectionBlockModel } from "../../../../models/template-section-block"
@@ -178,10 +179,15 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     formattedData.requirementTemplateSectionsAttributes.forEach((sectionAttributes, sectionIndex) => {
       const existingMSTSection = requirementTemplate.getRequirementSectionById(sectionAttributes.id)
 
+      // if this is a new section, set id null to mark it to be created
+      // on the backend
+      if (!existingMSTSection) {
+        sectionAttributes.id = null
+      }
       sectionAttributes.position = sectionIndex
       sectionAttributes.templateSectionBlocksAttributes.forEach((sectionBlockAttributes, blockIndex) => {
         // if the section is new or if the block is moved to this section
-        // from another section, then we set the id to null so that it get's created
+        // from another section, then we set the id to null so that it gets created
         // on the new section by rails.
         if (!existingMSTSection || !existingMSTSection.hasTemplateSectionBlock(sectionBlockAttributes.id)) {
           sectionBlockAttributes.id = null
@@ -249,6 +255,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     ).length
 
     prependToSectionsAttributes({
+      id: uuidv4(),
       name: `${defaultName} ${numUneditedNewSections + 1}`,
       templateSectionBlocksAttributes: [],
     })
