@@ -69,16 +69,21 @@ class RequirementsFromXlsxSeeder
     (4..sheet.last_row).each do |row_index|
       begin
         # https://www.vishalon.net/blog/excel-column-letter-to-number-quick-reference but -1 for ruby
-        # if column A(0) Section, C(2) Fieldset and L(11) value
+        # if column A(0) Section, C(2) Requirement Block Internal Name C(2) Requirement Block Display Name and L(11) value
 
         # go through each requirement block and add them to each section
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
+          internal_name = sheet.row(row_index)[1]&.strip
+          display_name = sheet.row(row_index)[2]&.strip
+          internal_name = display_name if internal_name.blank?
+
           rb =
-            RequirementBlock.where(name: sheet.row(row_index)[2].strip).first_or_create!(
-              name: sheet.row(row_index)[2].strip,
-              display_name: sheet.row(row_index)[2].strip,
+            RequirementBlock.where(name: internal_name).first_or_create!(
+              name: internal_name,
+              display_name: display_name,
+              display_description: sheet.row(row_index)[3]&.strip,
             )
 
           req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
