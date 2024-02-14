@@ -66,4 +66,10 @@ class PermitClassificationSeeder
       end
     end
   end
+
+  def self.clear
+    Requirement.destroy_all
+    RequirementBlock.destroy_all
+    RequirementTemplateSection.destroy_all
+  end
 end
