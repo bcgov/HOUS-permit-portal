@@ -36,7 +36,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const { requirementTemplate, error } = useRequirementTemplate()
   const formMethods = useForm({ defaultValues: formFormDefaults(requirementTemplate) })
   const { control, reset, watch, setValue, handleSubmit } = formMethods
-  const { prepend: prependToSectionsAttributes } = useFieldArray({
+  const { append: appendToSectionsAttributes } = useFieldArray({
     name: `requirementTemplateSectionsAttributes`,
     control,
   })
@@ -254,11 +254,17 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       sectionAttributes.name?.startsWith(defaultName)
     ).length
 
-    prependToSectionsAttributes({
+    const sectionAttributes = {
       id: uuidv4(),
       name: `${defaultName} ${numUneditedNewSections + 1}`,
       templateSectionBlocksAttributes: [],
-    })
+    }
+
+    appendToSectionsAttributes(sectionAttributes)
+
+    setTimeout(() => {
+      scrollIntoView(sectionAttributes.id)
+    }, 200)
   }
 
   function setSectionRef(el: HTMLElement, id: string) {
