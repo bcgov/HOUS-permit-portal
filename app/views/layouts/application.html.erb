@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Building Permit Hub</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+<head>
+  <title>Building Permit Hub</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <%= vite_client_tag %>
-    <%= vite_typescript_tag 'application.tsx' %>
-  </head>
+  <%= vite_client_tag %>
+  <%= vite_react_refresh_tag %>
+  <%= vite_typescript_tag 'application.tsx' %>
+</head>
 
-  <body>
-    <%= yield %>
-  </body>
+<body>
+<%= yield %>
+</body>
 </html>
