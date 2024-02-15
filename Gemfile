@@ -39,7 +39,7 @@ gem "dry-container", "0.8.0"
 gem "omniauth-keycloak", "1.5.1"
 gem "omniauth-rails_csrf_protection", "1.0.1"
 
-gem "blueprinter", "~> 0.30.0"
+gem "blueprinter", "~> 1.0.2"
 
 gem "awesome_print", "~> 1.9"
 gem "sidekiq", "~> 7.2.0"

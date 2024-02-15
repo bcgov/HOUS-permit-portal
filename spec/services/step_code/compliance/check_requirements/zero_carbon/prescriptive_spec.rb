@@ -13,9 +13,9 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
   let(:other_requirement) { :zero_carbon }
 
   before :each do
-    allow(subject).to receive(:heating_requirement) { heating_requirement }
-    allow(subject).to receive(:hot_water_requirement) { hot_water_requirement }
-    allow(subject).to receive(:other_requirement) { other_requirement }
+    allow(subject).to receive(:prescriptive_heating_requirement) { heating_requirement }
+    allow(subject).to receive(:prescriptive_hot_water_requirement) { hot_water_requirement }
+    allow(subject).to receive(:prescriptive_other_requirement) { other_requirement }
   end
 
   context "when heating requirement is not met" do

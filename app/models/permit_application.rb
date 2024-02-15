@@ -11,6 +11,7 @@ class PermitApplication < ApplicationRecord
 
   #The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
+  has_one :step_code
 
   has_many :supporting_documents, dependent: :destroy
   accepts_nested_attributes_for :supporting_documents, allow_destroy: true
@@ -23,6 +24,8 @@ class PermitApplication < ApplicationRecord
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
+  delegate :energy_step_required, to: :jurisdiction, allow_nil: true
+  delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
 
   before_create :assign_unique_number
   before_save :set_submitted_at, if: :status_changed?
