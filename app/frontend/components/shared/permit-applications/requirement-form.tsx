@@ -1,10 +1,11 @@
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Box, Button, HStack, VStack } from "@chakra-ui/react"
+import { Box, Button, HStack, VStack } from "@chakra-ui/react"
 import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { handleScrollToTop } from "../../../utils/utility-funcitons"
 import { Form } from "../chefs"
 
 interface IRequirementFormProps {
@@ -15,6 +16,8 @@ export const RequirementForm = observer(({ permitApplication }: IRequirementForm
   const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses } = permitApplication
   const isMounted = useMountStatus()
   const { t } = useTranslation()
+
+  const [formInstance, setFormInstance] = useState<any>(null)
 
   const boxRef = useRef<HTMLDivElement>(null)
 
@@ -29,13 +32,6 @@ export const RequirementForm = observer(({ permitApplication }: IRequirementForm
       document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
     }
     setAllCollapsed((cur) => !cur)
-  }
-
-  const handleScrollToTop = () => {
-    document.getElementById("outerFlex").scrollTo({
-      top: 0,
-      behavior: "instant",
-    })
   }
 
   useEffect(() => {
@@ -99,24 +95,8 @@ export const RequirementForm = observer(({ permitApplication }: IRequirementForm
     setSelectedTabIndex(indexOfBlockId(blockId))
   }
 
-  //if there is no permit application provdided, you cannto run the key items like submit OR file upload.
   const onSubmit = (submission: any) => {
     permitApplication.update({ submissionData: submission })
-    if (permitApplication) {
-      //error on saving should be handled by error pipeline
-    } else {
-      alert("This is a sample render, you can only submit a real permit applicaiton.")
-    }
-  }
-
-  if (!permitApplication) {
-    return (
-      <Alert status="error">
-        <AlertIcon />
-        <AlertTitle>You are not rendering a Permit Application or Requirement Preview</AlertTitle>
-        <AlertDescription>Please have </AlertDescription>
-      </Alert>
-    )
   }
 
   return (
@@ -127,14 +107,17 @@ export const RequirementForm = observer(({ permitApplication }: IRequirementForm
             form={formJson}
             submission={submissionData}
             onSubmit={onSubmit}
+            onFormLoad={(instance: any) => {
+              setFormInstance(instance)
+            }}
             options={permitApplication ? {} : { readOnly: true }}
           />
         </Box>
-        <VStack position="fixed" top="50%" right={8} w="136px" zIndex={11}>
-          <Button w="full" onClick={togglePanelCollapse}>
+        <VStack position="fixed" top="50%" right={8} w="136px" zIndex={11} gap={4}>
+          <Button w="full" onClick={togglePanelCollapse} variant="grey">
             {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
           </Button>
-          <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />}>
+          <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="grey">
             {t("ui.toTop")}
           </Button>
         </VStack>
