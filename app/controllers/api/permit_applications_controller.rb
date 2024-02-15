@@ -16,6 +16,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     authorize @permit_application
 
     if @permit_application.save
+      AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.create_error",

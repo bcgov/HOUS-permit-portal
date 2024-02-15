@@ -56,6 +56,14 @@ class RequirementTemplate < ApplicationRecord
     }
   end
 
+  def lookup_props
+    array_of_req_pairs = requirement_template_sections.map(&:lookup_props).flatten
+    array_of_req_pairs.reduce({}) do |obj, pair|
+      key, value = pair.flatten
+      obj.merge({ key => value })
+    end
+  end
+
   def search_data
     {
       description: description,

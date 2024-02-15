@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe AutomatedCompliance::DigitalSealValidator do
   it "raises an error if no document provided" do
-    expect { AutomatedCompliance::DigitalSealValidator.new.call(nil) }.to raise_error
+    expect { AutomatedCompliance::DigitalSealValidator.new.call(nil) }.to raise_error { ArgumentError }
   end
 
   context "document provided" do

@@ -15,6 +15,8 @@ jobs:
       DATABASE_URL: postgres://user:password@localhost:5432/test_db
       ELASTICSEARCH_URL: http://localhost:9200
       CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
+      GEO_ALR_REST_URL: https://alr_rest_url_stub/arcserver/rest/services
+      GEO_LTSA_PARCELMAP_REST_URL: https://ltsa_parcel_map_url_stub/arcserver/rest/services
     services:
       postgres:
         image: postgres:16
