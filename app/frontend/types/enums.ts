@@ -105,3 +105,41 @@ export enum ENumberUnit {
   sqm = "sqm",
   sqft = "sqft",
 }
+
+export enum EStepCodeChecklistStage {
+  preConstruction = "pre_construction",
+  midConstruction = "mid_construction",
+  asBuilt = "as_built",
+}
+
+export enum EStepCodeCompliancePath {
+  stepCodeERS = "step_code_ers",
+  stepCodeNECB = "step_code_necb",
+  passiveHouse = "passive_house",
+  stepCode = "step_code",
+}
+
+export enum EStepCodeAirtightnessValue {
+  twoPointFive = "two_point_five",
+  threePointTwo = "three_point_two",
+}
+
+export enum EStepCodeEPCTestingTargetType {
+  ach = "ach",
+  nla = "nla",
+  nlr = "nlr",
+}
+
+export enum EStepCodeBuildingType {
+  laneway = "laneway",
+  singleDetached = "single_detached",
+  doulbleDetached = "double_detached",
+  row = "row",
+  multiPlex = "multi_plex",
+  singleDetachedWithSuite = "single_detached_with_suite",
+  lowRiseMURB = "low_rise_murb",
+  stackedDuplex = "stacked_duplex",
+  triplex = "triplex",
+  retail = "retail",
+  other = "other",
+}

@@ -5,8 +5,6 @@ class StepCode::Compliance::CheckRequirements::Energy::MEUI < StepCode::Complian
     (meui != 0 && meui <= meui_requirement) || meui_percent_improvement >= meui_percent_improvement_requirement
   end
 
-  private
-
   def meui
     @meui ||= energy_target / total_heated_floor_area * KWH_PER_GJ
   end

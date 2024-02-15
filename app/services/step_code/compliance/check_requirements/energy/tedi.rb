@@ -7,8 +7,6 @@ class StepCode::Compliance::CheckRequirements::Energy::TEDI < StepCode::Complian
     (tedi != 0 && tedi <= tedi_requirement) || tedi_hlr_percent >= tedi_hlr_percent_requirement
   end
 
-  private
-
   def tedi
     @tedi ||= total(:aux_energy_required) / 1000 / total_heated_floor_area * KWH_PER_GJ
   end

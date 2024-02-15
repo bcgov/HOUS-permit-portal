@@ -8,6 +8,8 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
 
+  has_one :step_code
+
   has_many :supporting_documents, dependent: :destroy
   accepts_nested_attributes_for :supporting_documents, allow_destroy: true
 
@@ -19,6 +21,8 @@ class PermitApplication < ApplicationRecord
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
+  delegate :energy_step_required, to: :jurisdiction, allow_nil: true
+  delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
 
   before_create :assign_unique_number
   before_save :set_submitted_at, if: :status_changed?
