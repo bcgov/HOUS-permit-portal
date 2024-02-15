@@ -24,7 +24,16 @@ export const ChecklistSideBar = observer(({ permitApplication }: IChecklistSideB
 
   return (
     <Flex direction="column" boxShadow="md" w={378}>
-      <Box position="fixed" left={0} bottom={0} top={0} overflowY="auto" border="1px solid" borderColor="greys.grey02">
+      <Box
+        position="fixed"
+        left={0}
+        bottom={0}
+        top={0}
+        overflowY="auto"
+        border="1px solid"
+        borderColor="greys.grey02"
+        maxW={378}
+      >
         <Tabs orientation="vertical" index={selectedTabIndex} w="full" pt={160}>
           <TabList w="full" border={0}>
             {formJson.components.map((section) => {
