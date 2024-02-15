@@ -52,7 +52,7 @@ const ActivityBox = ({ activity }: IActivityBoxProps) => {
     >
       <Flex gap={8}>
         <Flex direction="column" gap={3} flex={1}>
-          <Heading fontSize="lg" color={activity.enabled ? "text.link" : "greys.grey90"}>
+          <Heading as="h3" fontSize="lg" color={activity.enabled ? "text.link" : "greys.grey90"}>
             {activity.name}
           </Heading>
           <Flex gap={3} justify="space-between" className="between">

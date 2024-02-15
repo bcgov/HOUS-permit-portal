@@ -57,7 +57,9 @@ export const Footer = observer(() => {
                     <Image alt="site logo" src={"/images/logo.svg"} />
                   </Box>
                   <Flex direction="column" gap={4} flex={3}>
-                    <Heading size="md">{t("site.titleLong")}</Heading>
+                    <Heading as="h3" size="md">
+                      {t("site.titleLong")}
+                    </Heading>
                     <Flex direction={{ base: "column", md: "row" }} flex={1} gap={{ base: 8, md: 0 }}>
                       <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
                         <RouterLink to="/" color="text.primary">

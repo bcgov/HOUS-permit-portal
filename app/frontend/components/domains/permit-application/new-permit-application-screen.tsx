@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
-import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
@@ -51,7 +50,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={12} w="full" bg="greys.white">
               <Flex as="section" direction="column" gap={2}>
-                <YellowLineSmall />
                 <Heading fontSize="xl">{t("permitApplication.new.locationHeading")}</Heading>
                 <Controller
                   name="site"
@@ -77,7 +75,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                 />
               </Flex>
               <Flex as="section" direction="column" gap={2}>
-                <YellowLineSmall />
                 <Heading fontSize="xl">{t("permitApplication.new.permitTypeHeading")}</Heading>
                 <Controller
                   name="permitType"
@@ -97,7 +94,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {permitTypeWatch && (
                 <Flex as="section" direction="column" gap={2}>
-                  <YellowLineSmall />
                   <Heading fontSize="xl">{t("permitApplication.new.workTypeHeading")}</Heading>
                   <ActivityList
                     fetchOptions={() => fetchActivityOptions(true, permitTypeWatch)}

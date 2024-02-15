@@ -47,7 +47,7 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
   return (
     <CenterContainer>
       <Flex direction="column" gap={6} w="full" p={10} border="solid 1px" borderColor="border.light" bg="greys.white">
-        <Heading>
+        <Heading as="h3">
           {t("user.acceptInvitation")} {jurisdictionName}
         </Heading>
         <form action={`/api/auth/keycloak`} method="post">

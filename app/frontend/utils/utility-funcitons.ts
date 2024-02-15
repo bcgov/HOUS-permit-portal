@@ -62,3 +62,18 @@ export function isQuillEmpty(value: string) {
 export function parseBoolean(value: string): boolean {
   return value.toLowerCase() === "true"
 }
+
+export function handleScrollToTop() {
+  document.getElementById("outerFlex").scrollTo({
+    top: 0,
+    behavior: "instant",
+  })
+}
+
+export function handleScrollToBottom() {
+  const outerFlex = document.getElementById("outerFlex")
+  outerFlex.scrollTo({
+    top: outerFlex.scrollHeight - outerFlex.clientHeight,
+    behavior: "instant",
+  })
+}

@@ -8,7 +8,6 @@ import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
-import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
@@ -86,7 +85,6 @@ export const JurisdictionScreen = observer(() => {
                   <EditableMap currentJurisdiction={currentJurisdiction} />
                 </Show>
                 <Flex as="section" flex={1} direction="column" gap={4}>
-                  <YellowLineSmall mt={4} />
                   <Heading>{t("jurisdiction.title")}</Heading>
                   <JurisdictionQuillFormController
                     control={control}
@@ -102,7 +100,6 @@ export const JurisdictionScreen = observer(() => {
               <Flex direction={{ base: "column", md: "row" }} gap={6}>
                 <Flex direction="column" flex={3}>
                   <Flex as="section" direction="column" gap={2}>
-                    <YellowLineSmall mt={4} />
                     <Heading>{t("jurisdiction.checklist")}</Heading>
                     <JurisdictionQuillFormController
                       control={control}
@@ -122,7 +119,7 @@ export const JurisdictionScreen = observer(() => {
                   border="1px solid"
                   borderColor="border.light"
                 >
-                  <Heading>{t("jurisdiction.lookOut")}</Heading>
+                  <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
                   <JurisdictionQuillFormController
                     control={control}
                     label={t("jurisdiction.edit.displayLookOutLabel")}
@@ -134,7 +131,7 @@ export const JurisdictionScreen = observer(() => {
 
               <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                 <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
-                  <Heading color="greys.white" fontSize="xl">
+                  <Heading as="h3" color="greys.white" fontSize="xl">
                     {t("jurisdiction.contactInfo")}
                   </Heading>
                 </Box>

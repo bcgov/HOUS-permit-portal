@@ -21,14 +21,14 @@ export const HomeScreenBox = ({ icon, title, description, href, useViewText }: I
         <Flex direction="column" gap={3} flex={1}>
           <Flex color="text.link">
             {icon}
-            <Heading fontSize="xl" ml={2}>
+            <Heading as="h3" fontSize="xl" ml={2}>
               {title}
             </Heading>
           </Flex>
           <Text ml={8}>{description}</Text>
         </Flex>
         <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />}>
-          <Heading fontSize="lg" color="text.link">
+          <Heading as="h3" fontSize="lg" color="text.link">
             {useViewText ? t("ui.view") : t("ui.manage")}
           </Heading>
         </RouterLinkButton>

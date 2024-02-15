@@ -126,6 +126,9 @@ const options = {
           publish: "Publish",
           neverMind: "Never mind",
           download: "Download",
+          expandAll: "Expand all",
+          collapseAll: "Collapse all",
+          toTop: "Go to top",
         },
         contact: {
           fields: {

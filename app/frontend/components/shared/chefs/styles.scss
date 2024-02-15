@@ -1,7 +1,7 @@
+@import "formiojs/dist/formio.form.css";
 @import url("https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900");
 @import url("https://fonts.googleapis.com/css?family=Material+Icons");
 @import "bootstrap/dist/css/bootstrap.min.css";
-@import "formiojs/dist/formio.form.css";
 
 // Variables
 $bcgov-blue: #003366;
@@ -329,5 +329,34 @@ $bcgov-alert-success: #dff0d8;
     background-color: transparent;
     color: grey;
     padding: 30px;
+  }
+}
+
+@mixin yellowBarHeader {
+  line-height: 150%;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 8px;
+    border-top: 4px solid #fcba19;
+  }
+}
+
+h2 {
+  @include yellowBarHeader;
+}
+
+.form-wrapper {
+  .formio-section-container > label {
+    @include yellowBarHeader;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    margin-bottom: 24px !important;
   }
 }
