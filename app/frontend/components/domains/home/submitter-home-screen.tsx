@@ -15,7 +15,7 @@ export const SubmitterHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
       <div>Submitter Home</div>
 
       <RouterLinkButton to={`/permit-applications`} variant="tertiary">
-        <Heading fontSize="lg" color="text.link">
+        <Heading as="h3" fontSize="lg" color="text.link">
           Permit Applications
         </Heading>
       </RouterLinkButton>

@@ -38,7 +38,6 @@ class RequirementBlock < ApplicationRecord
       type: "panel",
       title: name,
       collapsible: true,
-      # initially_collapsed: true,
       collapsed: false,
       components: requirements.map { |r| r.to_form_json(key(section_key)) },
     }

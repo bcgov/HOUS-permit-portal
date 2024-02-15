@@ -34,7 +34,9 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             justify="space-between"
             direction={{ base: "column", md: "row" }}
           >
-            <Heading fontSize="2xl">{t("permitApplication.drafts")}</Heading>
+            <Heading as="h3" fontSize="2xl">
+              {t("permitApplication.drafts")}
+            </Heading>
             <Flex direction="column">
               <Text>{t("ui.sortBy")}</Text>
               <Select mt={1} defaultValue="date-asc" placeholder="Select option">

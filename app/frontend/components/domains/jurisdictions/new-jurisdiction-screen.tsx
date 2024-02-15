@@ -54,7 +54,7 @@ export const NewJurisdictionScreen = observer(() => {
                 <Box background="greys.grey03" p={6} w="full">
                   <VStack>
                     <Text>{jurisdiction.qualifier}</Text>
-                    <Heading>{jurisdiction.name}</Heading>
+                    <Heading as="h3">{jurisdiction.name}</Heading>
                   </VStack>
                 </Box>
                 <Text fontWeight="bold" fontSize="lg">

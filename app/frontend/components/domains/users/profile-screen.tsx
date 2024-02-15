@@ -57,7 +57,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" w="full" gap={6}>
-            <Heading>{t("user.myProfile")}</Heading>
+            <Heading as="h3">{t("user.myProfile")}</Heading>
             <InputGroup>
               <Flex direction="column" w="full">
                 <FormLabel>{t("auth.role")}</FormLabel>

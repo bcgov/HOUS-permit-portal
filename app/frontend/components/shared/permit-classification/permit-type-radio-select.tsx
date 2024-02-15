@@ -89,7 +89,7 @@ export const PermitTypeRadioCard = (props: IPermitTypeRadioCardProps) => {
         <Flex direction="column" w="full">
           <Flex gap={4} flex={1}>
             <Circle size="15px" bg={isChecked ? "theme.blueAlt" : "greys.grey02"} zIndex={10} />
-            <Heading fontSize="lg" mb={0}>
+            <Heading as="h3" fontSize="lg" mb={0}>
               {permitType.name}
             </Heading>
           </Flex>

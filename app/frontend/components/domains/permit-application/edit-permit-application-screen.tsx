@@ -41,7 +41,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             permitApplication={currentPermitApplication}
           />
           <Flex direction="column">
-            <Heading fontSize="xl" mb={0}>
+            <Heading as="h3" fontSize="xl" mb={0}>
               {nickname}
             </Heading>
             <Text>{permitTypeAndActivity}</Text>
@@ -92,7 +92,7 @@ export const ChecklistSideBar = observer(({ permitApplication }: IChecklistSideB
             {formJson.components.map((section) => {
               return (
                 <Box key={section.key}>
-                  <Heading fontSize="md" textTransform="uppercase" px={4} py={2}>
+                  <Heading as="h3" fontSize="md" textTransform="uppercase" px={4} py={2}>
                     {section.title}
                   </Heading>
                   {section?.components?.map((block) => {

@@ -75,7 +75,9 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
             {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
           </Text>
         </Flex>
-        <Heading fontSize="2xl">{currentJurisdiction.name}</Heading>
+        <Heading as="h3" fontSize="2xl">
+          {currentJurisdiction.name}
+        </Heading>
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap={6}>
