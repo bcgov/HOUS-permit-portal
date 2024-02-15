@@ -9,11 +9,10 @@ class RequirementTemplate < ApplicationRecord
   has_many :requirement_template_sections,
            -> { order(position: :asc) },
            dependent: :destroy
-  has_many :jurisdiction_requirement_templates
-  has_many :jurisdictions, through: :jurisdiction_requirement_templates
   has_many :template_versions,
            -> { order(version_date: :desc) },
            dependent: :destroy
+  has_many :jurisdiction_template_version_customizations
 
   validate :scheduled_for_presence_if_scheduled
 

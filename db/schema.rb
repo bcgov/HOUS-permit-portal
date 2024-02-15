@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_15_223336) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -53,15 +53,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
-  create_table "jurisdiction_requirement_templates", force: :cascade do |t|
+  create_table "jurisdiction_template_version_customizations",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.jsonb "customizationsa", default: {}
     t.uuid "jurisdiction_id", null: false
-    t.uuid "requirement_template_id", null: false
+    t.uuid "template_version_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id"],
-            name: "index_jurisdiction_requirement_templates_on_jurisdiction_id"
-    t.index ["requirement_template_id"],
-            name: "idx_on_requirement_template_id_df1d54db04"
+    t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
+    t.index ["template_version_id"],
+            name: "idx_on_template_version_id_8359a99333"
   end
 
   create_table "jurisdictions",
@@ -284,7 +287,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
     t.jsonb "form_json", default: {}
     t.jsonb "requirement_blocks_json", default: {}
     t.json "version_diff", default: {}
-    t.date "version_date"
+    t.date "version_date", null: false
     t.integer "status", default: 0
     t.uuid "requirement_templates_id"
     t.datetime "created_at", null: false
@@ -350,8 +353,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "contacts", "jurisdictions"
-  add_foreign_key "jurisdiction_requirement_templates", "jurisdictions"
-  add_foreign_key "jurisdiction_requirement_templates", "requirement_templates"
+  add_foreign_key "jurisdiction_template_version_customizations",
+                  "jurisdictions"
+  add_foreign_key "jurisdiction_template_version_customizations",
+                  "template_versions"
   add_foreign_key "jurisdictions",
                   "jurisdictions",
                   column: "regional_district_id"

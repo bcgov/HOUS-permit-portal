@@ -5,7 +5,7 @@ class CreateTemplateVersions < ActiveRecord::Migration[7.1]
       t.jsonb :form_json, default: {}
       t.jsonb :requirement_blocks_json, default: {}
       t.json :version_diff, default: {}
-      t.date :version_date, default: {}
+      t.date :version_date, null: false
       t.integer :status, default: 0
       t.references :requirement_templates, foreign_key: true, type: :uuid, index: true
 
