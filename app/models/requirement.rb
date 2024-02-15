@@ -129,6 +129,13 @@ class Requirement < ApplicationRecord
       json.merge!({ computedCompliance: input_options["computed_compliance"] })
     end
 
+    if input_options["conditional"].present?
+      #assumption that conditional is only within the same requirement block for now
+      conditional = input_options["conditional"]
+      conditional.merge!("when" => "#{requirement_block_key}|#{conditional["when"]}") if conditional["when"].present?
+      json.merge!({ conditional: conditional })
+    end
+
     json
   end
 
