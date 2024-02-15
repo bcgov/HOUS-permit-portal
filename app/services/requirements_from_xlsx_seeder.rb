@@ -31,6 +31,12 @@ class RequirementsFromXlsxSeeder
     RequirementTemplate.reindex
   end
 
+  def self.clear
+    Requirement.destroy_all
+    RequirementBlock.destroy_all
+    RequirementTemplateSection.destroy_all
+  end
+
   private
 
   def self.setup_requirement_template(activity, permit_type, sheet, valid_rows, errors)
