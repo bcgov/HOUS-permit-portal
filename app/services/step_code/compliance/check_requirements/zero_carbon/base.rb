@@ -13,6 +13,10 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
     @step = step
   end
 
+  def total_ghg
+    @total_ghg ||= other_ghg + district_energy_ghg + propane_ghg + natural_gas_ghg + electricity_ghg
+  end
+
   private
 
   def stage
@@ -29,10 +33,6 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
 
   def total_heated_floor_area
     @total_heated_floor_area ||= total(:above_grade_heated_floor_area) + total(:below_grade_heated_floor_area)
-  end
-
-  def total_ghg
-    @total_ghg ||= other_ghg + district_energy_ghg + propane_ghg + natural_gas_ghg + electricity_ghg
   end
 
   def electricity_ghg

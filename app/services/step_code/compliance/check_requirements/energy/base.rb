@@ -6,6 +6,10 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
     @step = step
   end
 
+  def total_heated_floor_area
+    @total_heated_floor_area ||= total(:above_grade_heated_floor_area) + total(:below_grade_heated_floor_area)
+  end
+
   private
 
   attr_reader :checklist, :step
@@ -16,10 +20,6 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
 
   def total(field)
     checklist.data_entries.where(stage: stage).sum(field)
-  end
-
-  def total_heated_floor_area
-    @total_heated_floor_area ||= total(:above_grade_heated_floor_area) + total(:below_grade_heated_floor_area)
   end
 
   def tedi_reference

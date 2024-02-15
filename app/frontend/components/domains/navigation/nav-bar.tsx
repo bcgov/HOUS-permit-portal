@@ -134,7 +134,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
 
   const adminOrManagerItems = <></>
 
-  const submitterOnlyItems = <></>
+  const submitterOnlyItems = <NavMenuItem label={t("home.stepCodes")} to={"/step-codes"} />
 
   return (
     <Menu>
