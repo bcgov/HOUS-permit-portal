@@ -30,6 +30,7 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def to_form_json
+    # TODO: Update content into en.yml
     {
       id: id,
       key: key,
@@ -39,17 +40,56 @@ class RequirementTemplate < ApplicationRecord
         requirement_template_sections.map(&:to_form_json).concat(
           [
             {
-              key: "submit",
-              size: "md",
-              type: "button",
-              block: false,
-              input: true,
-              label: "Submit",
-              theme: "primary",
-              action: "submit",
-              widget: {
-                type: "input",
-              },
+              id: "section-completion-id",
+              key: "section-completion-key",
+              type: "container",
+              title: "Completion",
+              label: "Completion",
+              custom_class: "formio-section-container",
+              hide_label: false,
+              collapsible: false,
+              initially_collapsed: false,
+              components: [
+                id: "section-signoff-id",
+                key: "section-signoff-key",
+                type: "panel",
+                title: "Sign and Submit",
+                collapsible: true,
+                collapsed: false,
+                components: [
+                  {
+                    type: "checkbox",
+                    key: "signed",
+                    title: "Sign Off",
+                    label:
+                      "Lorem Ipsum I hereby certify that the information provided in this application is true, complete, and accurate to the best of my knowledge and belief. By checking this box, I am electronically signing this application and agree to abide by the terms and conditions of the permit and all applicable laws and regulations.",
+                    inputType: "checkbox",
+                    input: true,
+                    defaultValue: false,
+                  },
+                  {
+                    key: "submit",
+                    size: "md",
+                    type: "button",
+                    block: false,
+                    input: true,
+                    title: "Submit",
+                    label: "Submit",
+                    theme: "primary",
+                    action: "submit",
+                    widget: {
+                      type: "input",
+                    },
+                    disabled: false, # Initially disabled, assuming client-side logic will enable it
+                    show: false,
+                    conditional: {
+                      show: true,
+                      when: "signed",
+                      eq: "true",
+                    },
+                  },
+                ],
+              ],
             },
           ],
         ),

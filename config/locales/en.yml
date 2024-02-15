@@ -29,6 +29,9 @@
 
 en:
   activerecord:
+    attributes:
+      user:
+        uid: BCeID
     errors:
       models:
         supporting_document:
@@ -36,6 +39,11 @@ en:
             file:
               max_size: "must not be larger than %{max_size} bytes"
               not_valid_file_type: "must be a pdf, jpg, or png"
+        user:
+          attributes:
+            uid:
+              taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+
   arbitrary_message_construct:
     devise:
       failure:
@@ -190,6 +198,22 @@ en:
       update_success:
         title: ""
         message: "Jurisdiction successfully updated!"
+    permit_application:
+      create_error:
+        title: Oops
+        message: "%{error_message}"
+      create_success:
+        title: ""
+        message: "New permit_application created successfully!"
+      update_error:
+        title: Oops
+        message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Permit application successfully saved as draft!"
+      submit_error:
+        title: Oops
+        message: "%{error_message}"
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
@@ -197,13 +221,3 @@ en:
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found
-  activerecord:
-    attributes:
-      user:
-        uid: BCeID
-    errors:
-      models:
-        user:
-          attributes:
-            uid:
-              taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.

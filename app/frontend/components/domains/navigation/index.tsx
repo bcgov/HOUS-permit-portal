@@ -23,6 +23,7 @@ import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { EditPermitApplicationScreen } from "../permit-application/edit-permit-application-screen"
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
+import { SuccessfulSubmissionScreen } from "../permit-application/successful-submission"
 import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
@@ -99,6 +100,7 @@ const AppRoutes = observer(() => {
   const submitterOnlyRoutes = (
     <>
       <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+      <Route path="/permit-applications/sucessful-submission" element={<SuccessfulSubmissionScreen />} />
     </>
   )
 

@@ -472,6 +472,7 @@ const options = {
             permitApplications: "Permit Applications",
             submissionInbox: "Submission Inbox",
             configuration: "Configure Jurisdiction",
+            sucessfulSubmission: "Application submitted",
           },
           questionSupport: "Question Support",
         },

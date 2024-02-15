@@ -2,10 +2,11 @@ import * as humps from "humps"
 import * as R from "ramda"
 
 const SUBMISSION_DATA_REGEX = /^formSubmissionData/
+const SECTION_PREFIX_REGEX = /^section/
 
 export const camelizeResponse = (data: { [key: string]: any }) => {
   return humps.camelizeKeys(data, function (key, convert) {
-    return SUBMISSION_DATA_REGEX.test(key) ? key : convert(key)
+    return SUBMISSION_DATA_REGEX.test(key) || SECTION_PREFIX_REGEX.test(key) ? key : convert(key)
   })
 }
 

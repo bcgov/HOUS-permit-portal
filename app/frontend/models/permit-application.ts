@@ -105,6 +105,16 @@ export const PermitApplicationModel = types
       }
       return response
     }),
+
+    submit: flow(function* (params) {
+      const response = yield self.environment.api.submitPermitApplication(self.id, params)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+      }
+      return response
+    }),
+
     setSelectedTabIndex: (index: number) => {
       self.selectedTabIndex = index
     },

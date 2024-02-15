@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Heading, Tab, TabIndicator, TabList, Tabs } from "@chakra-ui/react"
+import { Box, Divider, Flex, Heading, Tab, TabIndicator, TabList, Tabs, Text } from "@chakra-ui/react"
 import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -54,12 +54,16 @@ export const ChecklistSideBar = observer(({ permitApplication }: IChecklistSideB
                         textAlign="left"
                         onClick={() => handleTabsChange(indexOfBlockId(block.id), section.id, block.id)}
                       >
-                        {getIsBlockPopulated(section.id, block.id) ? (
-                          <CheckCircle color="#2E8540" size={18} />
-                        ) : (
-                          <CircleDashed color="#A19F9D" size={18} />
-                        )}{" "}
-                        {block.title}
+                        <Flex align="center">
+                          <Box w={5} mr={2}>
+                            {getIsBlockPopulated(section.id, block.id) ? (
+                              <CheckCircle color="#2E8540" size={18} />
+                            ) : (
+                              <CircleDashed color="#A19F9D" size={18} />
+                            )}{" "}
+                          </Box>
+                          <Text>{block.title}</Text>
+                        </Flex>
                       </Tab>
                     )
                   })}
