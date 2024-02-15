@@ -7,7 +7,10 @@ class CreateTemplateVersions < ActiveRecord::Migration[7.1]
       t.json :version_diff, default: {}
       t.date :version_date, null: false
       t.integer :status, default: 0
-      t.references :requirement_template, foreign_key: true, type: :uuid, index: true
+      t.references :requirement_template,
+                   foreign_key: true,
+                   type: :uuid,
+                   index: true
 
       t.timestamps
     end
