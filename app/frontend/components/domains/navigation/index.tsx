@@ -26,6 +26,7 @@ import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
+import { StepCodeChecklistsScreen } from "../step-code"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
 import { ProfileScreen } from "../users/profile-screen"
@@ -106,6 +107,7 @@ const AppRoutes = observer(() => {
           <Route path="/permit-applications/:id" element={<PermitApplicationScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+          <Route path="/step-code-checklists" element={<StepCodeChecklistsScreen />} />
 
           {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
           {currentUser?.isSuperAdmin && superAdminOnlyRoutes}

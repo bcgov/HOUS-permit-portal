@@ -12,11 +12,14 @@ export const SubmitterHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
 
   return (
     <Container>
-      <div>Submitter Home</div>
-
       <RouterLinkButton to={`/permit-applications`} variant="tertiary">
         <Heading fontSize="lg" color="text.link">
           Permit Applications
+        </Heading>
+      </RouterLinkButton>
+      <RouterLinkButton to={`/step-code-checklists`} variant="tertiary">
+        <Heading fontSize="lg" color="text.link">
+          Step Code Checklists
         </Heading>
       </RouterLinkButton>
     </Container>

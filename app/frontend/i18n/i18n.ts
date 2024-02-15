@@ -310,6 +310,16 @@ const options = {
             },
           },
         },
+        stepCode: {
+          new: {
+            districtEnergyEF: "District Energy EF",
+            districtEnergyConsumption: "District Energy Consumption",
+            otherGHGEF: "Other GHG EF",
+            otherGHGConsumption: "Other GHG Consumption",
+            h2kFile: "Hot2000 File",
+            create: "Create",
+          },
+        },
         home: {
           jurisdictionsTitle: "Jurisdictions",
           jurisdictionsDescription: "Invite or remove Managers or Reviewers in the Building Permit Hub System.",
@@ -459,6 +469,7 @@ const options = {
             permitApplications: "Permit Applications",
             submissionInbox: "Submission Inbox",
             configuration: "Configure Jurisdiction",
+            stepCodeChecklists: "Step Code Checklists",
           },
           questionSupport: "Question Support",
         },

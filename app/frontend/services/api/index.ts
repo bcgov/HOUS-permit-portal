@@ -4,6 +4,7 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
 import { IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
+import { IStepCode } from "../../models/step-code"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
 import {
@@ -211,5 +212,9 @@ export class Api {
 
   async restoreRequirementTemplate(id) {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
+  }
+
+  async createStepCode(stepCode: IStepCode) {
+    return this.client.post<ApiResponse<IStepCode>>("/step_codes", { stepCode })
   }
 }

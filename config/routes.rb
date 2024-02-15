@@ -67,6 +67,8 @@ Rails.application.routes.draw do
       patch "restore", on: :member
     end
 
+    resources :step_codes, only: %i[create]
+
     post "tags/search", to: "tags#index", as: :tags_search
 
     get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access

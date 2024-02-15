@@ -7,6 +7,7 @@ import { IPermitClassificationStore, PermitClassificationStoreModel } from "./pe
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
+import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
 import { IUserStore, UserStoreModel } from "./user-store"
 
@@ -22,6 +23,7 @@ export const RootStoreModel = types
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
+    stepCodeStore: types.optional(StepCodeStoreModel, {}),
   })
   .extend(withEnvironment())
   .views((self) => ({}))
@@ -37,4 +39,5 @@ export interface IRootStore extends IStateTreeNode {
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
   geocoderStore: IGeocoderStore
+  stepCodeStore: IStepCodeStore
 }
