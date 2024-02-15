@@ -6,8 +6,8 @@ import { useMst } from "../../../setup/root"
 import { BackButton } from "../../shared/buttons/back-button"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
-import { TextFormControl } from "../../shared/form/text-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 import { RouterLink } from "../../shared/navigation/router-link"
 
@@ -58,10 +58,10 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               </Flex>
               <Box border="1px solid" borderColor="border.light" padding={6}>
                 <UsernameFormControl validate autoFocus />
-                <EmailFormControl mb={4} validate />
-                <TextFormControl label={t("auth.userFirstNameLabel")} fieldName="firstName" mb={4} required={true} />
-                <TextFormControl label={t("auth.userLastNameLabel")} fieldName="lastName" mb={4} required={true} />
-                <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" mb={4} required={false} />
+                <EmailFormControl mb={4} validate required />
+                <TextFormControl label={t("auth.userFirstNameLabel")} fieldName="firstName" mb={4} required />
+                <TextFormControl label={t("auth.userLastNameLabel")} fieldName="lastName" mb={4} required />
+                <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" mb={4} />
                 <FormControl>
                   <Controller
                     name="certified"

@@ -18,8 +18,8 @@ import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { EmailFormControl } from "../../shared/form/email-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
-import { TextFormControl } from "../../shared/form/text-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 
 interface IProfileScreenProps {}
@@ -68,19 +68,14 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             </InputGroup>
             <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
               <UsernameFormControl isDisabled />
-              <EmailFormControl mb={4} />
+              <EmailFormControl required mb={4} />
               <Flex gap={{ base: 4, md: 6 }} mb={4} direction={{ base: "column", md: "row" }}>
-                <TextFormControl label={t("user.firstName")} fieldName="firstName" />
-                <TextFormControl label={t("user.lastName")} fieldName="lastName" />
+                <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
+                <TextFormControl label={t("user.lastName")} fieldName="lastName" required />
               </Flex>
               {currentUser.isSubmitter && (
                 <>
-                  <TextFormControl
-                    label={t("auth.organizationLabel")}
-                    fieldName="organization"
-                    required={false}
-                    mb={4}
-                  />
+                  <TextFormControl label={t("auth.organizationLabel")} fieldName="organization" mb={4} />
                   <FormControl>
                     <Controller
                       name="certified"

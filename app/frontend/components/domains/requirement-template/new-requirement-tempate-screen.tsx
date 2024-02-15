@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
 import { AsyncRadioGroup } from "../../shared/base/inputs/async-radio-group"
-import { TextFormControl } from "../../shared/form/text-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 
 export type TCreateRequirementTemplateFormData = {
   description: string
@@ -72,7 +72,7 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
             </Flex>
 
             <Flex direction="column" as="section" w="full">
-              <TextFormControl label={t("requirementTemplate.fields.description")} fieldName={"description"} />
+              <TextFormControl label={t("requirementTemplate.fields.description")} fieldName={"description"} required />
               <Text fontSize="sm" color="border.base">
                 {t("requirementTemplate.new.descriptionHelpText")}
               </Text>

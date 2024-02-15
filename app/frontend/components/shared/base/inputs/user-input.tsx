@@ -41,7 +41,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
             )}
           />
         </FormControl>
-        <EmailFormControl fieldName={`users.${index}.email`} flex={3} validate />
+        <EmailFormControl fieldName={`users.${index}.email`} flex={3} validate required />
         <NameFormControl label="First Name (optional)" index={index} subFieldName="firstName" />
         <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
         {invited && (
