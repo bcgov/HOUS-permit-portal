@@ -331,3 +331,32 @@ $bcgov-alert-success: #dff0d8;
     padding: 30px;
   }
 }
+
+@mixin yellowBarHeader {
+  line-height: 150%;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 8px;
+    border-top: 4px solid #fcba19;
+  }
+}
+
+.yellow-bar-header {
+  @include yellowBarHeader;
+}
+
+.form-wrapper {
+  .formio-section-container > label {
+    @include yellowBarHeader;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    margin-bottom: 24px !important;
+  }
+}

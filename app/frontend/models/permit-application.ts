@@ -59,7 +59,7 @@ export const PermitApplicationModel = types
     getBlockClass(sectionId, blockId) {
       return `formio-component-${self.blockKey(sectionId, blockId)}`
     },
-    get getBlockClasses() {
+    get blockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
     },
     getIsBlockPopulated(sectionId, blockId) {
