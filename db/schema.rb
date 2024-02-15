@@ -276,6 +276,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
             name: "idx_on_requirement_template_section_id_5469986497"
   end
 
+  create_table "template_versions",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.jsonb "denormalized_template_json", default: {}
+    t.jsonb "form_json", default: {}
+    t.jsonb "requirement_blocks_json", default: {}
+    t.json "version_diff", default: {}
+    t.date "version_date"
+    t.integer "status", default: 0
+    t.uuid "requirement_templates_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requirement_templates_id"],
+            name: "index_template_versions_on_requirement_templates_id"
+  end
+
   create_table "users",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -358,5 +375,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
+  add_foreign_key "template_versions",
+                  "requirement_templates",
+                  column: "requirement_templates_id"
   add_foreign_key "users", "jurisdictions"
 end
