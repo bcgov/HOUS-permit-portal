@@ -107,7 +107,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       <Button
         variant={requirementBlock ? "link" : "primary"}
         textDecoration={requirementBlock ? "underline" : undefined}
-        onClick={onOpen}
+        onClick={(e) => {
+          e.stopPropagation()
+          onOpen()
+        }}
         {...triggerButtonProps}
       >
         <Text as={"span"} textOverflow={"ellipsis"} overflow={"hidden"} whiteSpace={"nowrap"}>

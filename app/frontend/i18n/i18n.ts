@@ -391,6 +391,8 @@ const options = {
               body: "Any requirements inside this section will also be removed along with it.",
             },
             emptyTemplateSectionText: "Start by clicking the Add Section button",
+            goToTop: "Go to top",
+            collapseAll: "Collapse All",
           },
           fields: {
             status: "Status",

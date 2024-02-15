@@ -63,6 +63,17 @@ export const Button = {
       },
       _disabled: { ...disabledStyles, bg: "transparent" },
     },
+    greyButton: {
+      bg: "greys.grey03",
+      color: "text.primary",
+      borderWidth: 1,
+      borderColor: "border.light",
+      _hover: {
+        bg: "lighten.100",
+        _disabled: { ...disabledStyles },
+        _hover: { bg: "greys.grey02", borderColor: "border.base" },
+      },
+    },
     link: {
       color: "text.link",
       fontWeight: "normal",
