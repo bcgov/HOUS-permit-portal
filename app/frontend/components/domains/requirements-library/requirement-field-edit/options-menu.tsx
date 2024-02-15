@@ -1,9 +1,9 @@
 import {
   Button,
+  ButtonProps,
   HStack,
   Menu,
   MenuButton,
-  MenuButtonProps,
   MenuDivider,
   MenuItem,
   MenuList,
@@ -16,7 +16,7 @@ import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 interface IProps {
-  menuButtonProps?: Partial<MenuButtonProps>
+  menuButtonProps?: Partial<ButtonProps>
   onRemove?: () => void
   emitOpenState?: (isOpen: boolean) => void
 }
