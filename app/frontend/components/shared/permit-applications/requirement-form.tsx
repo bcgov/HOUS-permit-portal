@@ -3,6 +3,7 @@ import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { handleScrollToTop } from "../../../utils/utility-funcitons"
@@ -10,14 +11,14 @@ import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
+  onFormChange: (submission: any) => void
 }
 
-export const RequirementForm = observer(({ permitApplication }: IRequirementFormProps) => {
+export const RequirementForm = observer(({ permitApplication, onFormChange }: IRequirementFormProps) => {
   const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses } = permitApplication
   const isMounted = useMountStatus()
   const { t } = useTranslation()
-
-  const [formInstance, setFormInstance] = useState<any>(null)
+  const navigate = useNavigate()
 
   const boxRef = useRef<HTMLDivElement>(null)
 
@@ -95,8 +96,10 @@ export const RequirementForm = observer(({ permitApplication }: IRequirementForm
     setSelectedTabIndex(indexOfBlockId(blockId))
   }
 
-  const onSubmit = (submission: any) => {
-    permitApplication.update({ submissionData: submission })
+  const onSubmit = async (submission: any) => {
+    if (await permitApplication.submit({ submissionData: submission })) {
+      navigate("/permit-applications/sucessful-submission")
+    }
   }
 
   return (
@@ -105,11 +108,9 @@ export const RequirementForm = observer(({ permitApplication }: IRequirementForm
         <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
           <Form
             form={formJson}
+            onChange={onFormChange}
             submission={submissionData}
             onSubmit={onSubmit}
-            onFormLoad={(instance: any) => {
-              setFormInstance(instance)
-            }}
             options={permitApplication ? {} : { readOnly: true }}
           />
         </Box>

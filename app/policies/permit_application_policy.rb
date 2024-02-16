@@ -26,7 +26,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update?
-    record.submitter == user
+    record.draft? && record.submitter == user
+  end
+
+  def submit?
+    update?
   end
 
   #we may want to separate an admin update to a secondary policy

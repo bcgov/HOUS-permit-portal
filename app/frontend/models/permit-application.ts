@@ -103,8 +103,18 @@ export const PermitApplicationModel = types
         const { data: permitApplication } = response.data
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
-      return response
+      return response.ok
     }),
+
+    submit: flow(function* (params) {
+      const response = yield self.environment.api.submitPermitApplication(self.id, params)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+      }
+      return response.ok
+    }),
+
     setSelectedTabIndex: (index: number) => {
       self.selectedTabIndex = index
     },

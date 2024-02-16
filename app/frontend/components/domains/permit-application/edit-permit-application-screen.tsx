@@ -1,7 +1,7 @@
 import { Box, Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { handleScrollToBottom } from "../../../utils/utility-funcitons"
@@ -17,11 +17,25 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
 
+  // Tracks the submission data from the onChange event for saving as draft
+  const [mirroredSubmissionState, setMirroredSubmissionState] = useState(null)
+
+  const onFormChange = (submission: any) => {
+    if (submission.isValid) {
+      delete submission.changed
+      delete submission.isValid
+      setMirroredSubmissionState(submission)
+    }
+  }
+
+  const handleClickSave = () => {
+    currentPermitApplication.update({ submissionData: mirroredSubmissionState })
+  }
+
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
 
   const { permitTypeAndActivity, formJson, nickname } = currentPermitApplication
-
   return (
     <>
       <Flex
@@ -49,7 +63,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           </Flex>
         </HStack>
         <HStack gap={4}>
-          <Button variant="primary">{t("permitApplication.edit.saveDraft")}</Button>
+          <Button variant="primary" onClick={handleClickSave}>
+            {t("permitApplication.edit.saveDraft")}
+          </Button>
           <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
             {t("permitApplication.edit.submit")}
           </Button>
@@ -60,7 +76,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           <ChecklistSideBar permitApplication={currentPermitApplication} />
           {formJson && (
             <Flex direction="column" pl={24} py={24} pr={288}>
-              <RequirementForm permitApplication={currentPermitApplication} />
+              <RequirementForm permitApplication={currentPermitApplication} onFormChange={onFormChange} />
             </Flex>
           )}
         </Box>

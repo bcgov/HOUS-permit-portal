@@ -35,11 +35,11 @@ RSpec.describe RequirementBlock, type: :model do
       expect(form_json.reject { |key| key === :components }).to eq (
            {
              id: requirement_block.id,
-             legend: requirement_block.name,
              key: requirement_block.key,
-             label: requirement_block.name,
-             input: false,
-             tableView: false,
+             title: requirement_block.name,
+             type: "panel",
+             collapsible: true,
+             collapsed: false,
            }
          )
 

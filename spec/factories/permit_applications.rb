@@ -4,5 +4,6 @@ FactoryBot.define do
     association :jurisdiction
     permit_type { PermitType.first || association(:permit_type) }
     activity { Activity.first || association(:activity) }
+    status { :draft }
   end
 end
