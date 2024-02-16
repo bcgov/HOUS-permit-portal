@@ -11,7 +11,7 @@ objects:
     kind: Deployment
     metadata:
       annotations:
-        image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"${STAGE}-hous-permit-portal:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"${STAGE}-hous-permit-portal\")].image"}]'
+        image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"${STAGE}-hous-permit-portal:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"${STAGE}-hous-permit-portal-sidekiq\")].image"}]'
       labels:
         app: ${STAGE}-hous-permit-portal-sidekiq
       name: ${STAGE}-hous-permit-portal-sidekiq
@@ -60,10 +60,10 @@ objects:
                   protocol: TCP
               resources:
                 limits:
-                  cpu: 100m
+                  cpu: 200m
                   memory: 512Mi
                 requests:
-                  cpu: 50m
+                  cpu: 100m
                   memory: 512Mi
               terminationMessagePath: /${STAGE}/termination-log
               terminationMessagePolicy: File
