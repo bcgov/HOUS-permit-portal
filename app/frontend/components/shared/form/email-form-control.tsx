@@ -11,12 +11,7 @@ interface IEmailFormControlProps extends FormControlProps {
   fieldName?: string
 }
 
-export const EmailFormControl = ({
-  validate,
-  fieldName = "email",
-  required = true,
-  ...rest
-}: IEmailFormControlProps) => {
+export const EmailFormControl = ({ validate, fieldName = "email", required, ...rest }: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
   const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)

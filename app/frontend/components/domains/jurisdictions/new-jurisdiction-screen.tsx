@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { AsyncRadioGroup } from "../../shared/base/inputs/async-radio-group"
-import { TextFormControl } from "../../shared/form/text-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 export type TCreateJurisdictionFormData = {
@@ -89,7 +89,7 @@ export const NewJurisdictionScreen = observer(() => {
                       />
                     </Center>
                     <Box w="50%">
-                      <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} />
+                      <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
                     </Box>
                   </Flex>
                 </Flex>
