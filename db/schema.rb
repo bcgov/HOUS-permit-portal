@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_15_223336) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -289,11 +289,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_223336) do
     t.json "version_diff", default: {}
     t.date "version_date", null: false
     t.integer "status", default: 0
-    t.uuid "requirement_templates_id"
+    t.uuid "requirement_template_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["requirement_templates_id"],
-            name: "index_template_versions_on_requirement_templates_id"
+    t.index ["requirement_template_id"],
+            name: "index_template_versions_on_requirement_template_id"
   end
 
   create_table "users",
@@ -380,8 +380,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_223336) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
-  add_foreign_key "template_versions",
-                  "requirement_templates",
-                  column: "requirement_templates_id"
+  add_foreign_key "template_versions", "requirement_templates"
   add_foreign_key "users", "jurisdictions"
 end
