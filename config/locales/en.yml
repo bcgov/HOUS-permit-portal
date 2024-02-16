@@ -221,3 +221,10 @@ en:
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found
+  formio:
+    requirement_template:
+      completion_title: "Completion"
+      signoff_panel_title: "Sign and Submit"
+      signoff_checkbox_title: "Sign Off"
+      signoff_checkbox_label: "Lorem Ipsum I hereby certify that the information provided in this application is true, complete, and accurate to the best of my knowledge and belief. By checking this box, I am electronically signing this application and agree to abide by the terms and conditions of the permit and all applicable laws and regulations."
+      signoff_submit_title: "Submit"

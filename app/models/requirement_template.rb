@@ -30,7 +30,6 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def to_form_json
-    # TODO: Update content into en.yml
     {
       id: id,
       key: key,
@@ -43,8 +42,8 @@ class RequirementTemplate < ApplicationRecord
               id: "section-completion-id",
               key: "section-completion-key",
               type: "container",
-              title: "Completion",
-              label: "Completion",
+              title: I18n.t("formio.requirement_template.completion_title"),
+              label: I18n.t("formio.requirement_template.completion_title"),
               custom_class: "formio-section-container",
               hide_label: false,
               collapsible: false,
@@ -53,16 +52,15 @@ class RequirementTemplate < ApplicationRecord
                 id: "section-signoff-id",
                 key: "section-signoff-key",
                 type: "panel",
-                title: "Sign and Submit",
+                title: I18n.t("formio.requirement_template.signoff_panel_title"),
                 collapsible: true,
                 collapsed: false,
                 components: [
                   {
                     type: "checkbox",
                     key: "signed",
-                    title: "Sign Off",
-                    label:
-                      "Lorem Ipsum I hereby certify that the information provided in this application is true, complete, and accurate to the best of my knowledge and belief. By checking this box, I am electronically signing this application and agree to abide by the terms and conditions of the permit and all applicable laws and regulations.",
+                    title: I18n.t("formio.requirement_template.signoff_checkbox_title"),
+                    label: I18n.t("formio.requirement_template.signoff_checkbox_label"),
                     inputType: "checkbox",
                     input: true,
                     defaultValue: false,
@@ -73,14 +71,14 @@ class RequirementTemplate < ApplicationRecord
                     type: "button",
                     block: false,
                     input: true,
-                    title: "Submit",
-                    label: "Submit",
+                    title: I18n.t("formio.requirement_template.signoff_submit_title"),
+                    label: I18n.t("formio.requirement_template.signoff_submit_title"),
                     theme: "primary",
                     action: "submit",
                     widget: {
                       type: "input",
                     },
-                    disabled: false, # Initially disabled, assuming client-side logic will enable it
+                    disabled: false,
                     show: false,
                     conditional: {
                       show: true,
