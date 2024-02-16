@@ -4,9 +4,6 @@ import React from "react"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 export const SuccessfulSubmissionScreen = observer(() => {
-  // const { t } = useTranslation()
-  // const {} = useMst()
-
   return (
     <Container>
       <Heading>Submission success!</Heading>
