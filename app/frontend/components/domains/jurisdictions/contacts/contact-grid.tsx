@@ -17,7 +17,7 @@ interface IContactGridProps {
 export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
   const { jurisdictionStore } = useMst()
   const { currentJurisdiction } = jurisdictionStore
-
+  const { t } = useTranslation()
   const { control } = useFormContext()
 
   const { fields, append, remove } = useFieldArray({
@@ -60,7 +60,7 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
                 <Phone size={32} />
                 <Flex direction="column" flex={1}>
                   <Heading as="h3" fontSize="md">
-                    Telephone
+                    {t("contact.fields.phoneNumber")}
                   </Heading>
                   <Link href={`tel:+${contact.phoneNumber}`}>{contact.phoneNumber}</Link>
                 </Flex>
@@ -69,7 +69,7 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
                 <Envelope size={32} />
                 <Flex direction="column" flex={1}>
                   <Heading as="h3" fontSize="md">
-                    Email
+                    {t("contact.fields.email")}
                   </Heading>
                   <Link href={`mailto:${contact.email}`}>{contact.email}</Link>
                 </Flex>
