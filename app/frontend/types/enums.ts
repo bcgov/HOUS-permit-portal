@@ -90,8 +90,9 @@ export enum ERequirementType {
   signature = "signature",
   generalContact = "general_contact",
   fileUpload = "file",
-  simplePhoneNumber = "simplephonenumber",
-  simpleEmail = "simpleemail",
+  phone = "phone",
+  email = "email",
+  bcaddress = "bcaddress",
 }
 
 export enum ENumberUnit {
