@@ -4,9 +4,19 @@ FactoryBot.define do
     association :permit_type, factory: :permit_type
     status { :published }
 
-    # Add additional attributes for RequirementTemplate here if needed
+    factory :requirement_template_with_sections do
+      transient { template_count { 5 } }
 
-    #default a template with some municipality and regional district
+      after(:create) do |template, evaluator|
+        template.requirement_template_sections << create_list(
+          :requirement_template_section,
+          evaluator.template_count,
+          requirement_template: template,
+        )
+      end
+    end
+
+    # default a template with some municipality and regional district
     factory :requirement_template_with_compliance do
       after(:create) do |template|
         create_list(:requirement_template_section, 1, requirement_template: template).each do |section|
