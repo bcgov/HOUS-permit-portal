@@ -31,7 +31,7 @@ if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
 
   echo "*** Preparing Database..."
   
-  ./bin/rails db:prepare
+  ./bin/rails db:migrate
 fi
 
 exec "$@"

@@ -107,7 +107,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       <Button
         variant={requirementBlock ? "link" : "primary"}
         textDecoration={requirementBlock ? "underline" : undefined}
-        onClick={onOpen}
+        onClick={(e) => {
+          e.stopPropagation()
+          onOpen()
+        }}
         {...triggerButtonProps}
       >
         <Text as={"span"} textOverflow={"ellipsis"} overflow={"hidden"} whiteSpace={"nowrap"}>
@@ -129,7 +132,6 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                 <HStack>
                   <Button
                     variant={"primary"}
-                    type={"submit"}
                     isDisabled={isSubmitting || !isValid}
                     isLoading={isSubmitting}
                     onClick={handleSubmit(onSubmit)}

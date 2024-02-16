@@ -14,6 +14,7 @@
     "@types/ramda": "^0.29.9",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
+    "@vitejs/plugin-react": "^4.2.1",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "^7.22.0",
     "husky": "^8.0.3",
@@ -67,6 +68,7 @@
     "react-leaflet": "^4.2.1",
     "react-password-strength-bar": "^0.4.1",
     "react-quill": "^2.0.0",
+    "react-remove-scroll": "^2.5.7",
     "react-router-dom": "^6.20.0",
     "react-select": "^5.8.0"
   },

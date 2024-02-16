@@ -20,6 +20,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     submission_section.each { |key, value| submission_section[key] = nil }
 
     if @permit_application.update(permit_application_params)
+      AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       render_success @permit_application, "permit_application.update_success", { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.update_error",
@@ -36,6 +37,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     if signed &&
          @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
+      AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.submit_error",

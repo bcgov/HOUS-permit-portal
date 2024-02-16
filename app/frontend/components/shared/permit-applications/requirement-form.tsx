@@ -115,10 +115,10 @@ export const RequirementForm = observer(({ permitApplication, onFormChange }: IR
           />
         </Box>
         <VStack position="fixed" top="50%" right={8} w="136px" zIndex={11} gap={4}>
-          <Button w="full" onClick={togglePanelCollapse} variant="grey">
+          <Button w="full" onClick={togglePanelCollapse} variant="greyButton">
             {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
           </Button>
-          <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="grey">
+          <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
             {t("ui.toTop")}
           </Button>
         </VStack>

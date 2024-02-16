@@ -6,8 +6,8 @@ import { useSearchParams } from "react-router-dom"
 import { useQuickSubmit } from "../../../hooks/use-quick-submit"
 import { useMst } from "../../../setup/root"
 import { CenterContainer } from "../../shared/containers/center-container"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
-import { TextFormControl } from "../../shared/form/text-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
 
 interface IAcceptInvitationScreenProps {}
@@ -70,8 +70,8 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
               <Input hidden={true} {...register("invitationToken")} />
               <UsernameFormControl validate autoComplete="off" mb={0} />
               <Flex gap={4} w="full">
-                <TextFormControl label="First Name" fieldName="firstName" />
-                <TextFormControl label="Last Name" fieldName="lastName" />
+                <TextFormControl label="First Name" fieldName="firstName" required />
+                <TextFormControl label="Last Name" fieldName="lastName" required />
               </Flex>
               <PasswordFormControl validate mb={0} />
               <Text>{t("auth.passwordRequirements")}</Text>

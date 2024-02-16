@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { IContact } from "../../../../types/types"
 import { EmailFormControl } from "../../../shared/form/email-form-control"
-import { TextFormControl } from "../../../shared/form/text-form-control"
+import { TextFormControl } from "../../../shared/form/input-form-control"
 import { Can } from "../../../shared/user/can"
 
 interface IContactGridProps {
@@ -118,20 +118,16 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
       <Flex justify="flex-end">
         <IconButton variant="tertiary" icon={<X />} aria-label={"remove contact"} onClick={() => remove(index)} />
       </Flex>
-      <TextFormControl label={t("contact.fields.name")} fieldName={`contactsAttributes.${index}.name`} />
-      <TextFormControl label={t("contact.fields.title")} fieldName={`contactsAttributes.${index}.title`} />
-      <TextFormControl label={t("contact.fields.department")} fieldName={`contactsAttributes.${index}.department`} />
-      <EmailFormControl validate fieldName={`contactsAttributes.${index}.email`} required={false} />
+      <TextFormControl label={t("contact.fields.name")} fieldName={`contactsAttributes.${index}.name`} required />
+      <TextFormControl label={t("contact.fields.title")} fieldName={`contactsAttributes.${index}.title`} required />
       <TextFormControl
-        label={t("contact.fields.phoneNumber")}
-        fieldName={`contactsAttributes.${index}.phoneNumber`}
-        required={false}
+        label={t("contact.fields.department")}
+        fieldName={`contactsAttributes.${index}.department`}
+        required
       />
-      <TextFormControl
-        label={t("contact.fields.extension")}
-        fieldName={`contactsAttributes.${index}.extension`}
-        required={false}
-      />
+      <EmailFormControl validate fieldName={`contactsAttributes.${index}.email`} />
+      <TextFormControl label={t("contact.fields.phoneNumber")} fieldName={`contactsAttributes.${index}.phoneNumber`} />
+      <TextFormControl label={t("contact.fields.extension")} fieldName={`contactsAttributes.${index}.extension`} />
     </Flex>
   )
 }
