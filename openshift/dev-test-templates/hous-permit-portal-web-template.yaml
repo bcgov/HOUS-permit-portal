@@ -52,7 +52,7 @@ objects:
             deployment: ${STAGE}-hous-permit-portal
         spec:
           containers:
-            - image: image-registry.openshift-image-registry.svc:5000/bb18ab-${STAGE}/${STAGE}-hous-permit-portal@sha256:ae0ab92fc6eb1b337d5dfa8880f1968e4945a3de49725a308c73104f18b7957c
+            - image: image-registry.openshift-image-registry.svc:5000/bb18ab-${STAGE}/${STAGE}-hous-permit-portal:latest
               imagePullPolicy: IfNotPresent
               name: ${STAGE}-hous-permit-portal
               ports:
