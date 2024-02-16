@@ -38,7 +38,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
 
   useSearch(userStore, [currentJurisdiction?.id, showArchived])
 
-  if (error) return <ErrorScreen />
+  if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
   return (

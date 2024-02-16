@@ -126,6 +126,9 @@ const options = {
           publish: "Publish",
           neverMind: "Never mind",
           download: "Download",
+          expandAll: "Expand all",
+          collapseAll: "Collapse all",
+          toTop: "Go to top",
         },
         contact: {
           fields: {
@@ -200,7 +203,6 @@ const options = {
           lastUpdated: "Last updated",
           seeBestPracticesLink: "See best practices for",
           ask: "Ask a question",
-          applicationId: "Application ID",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
           columns: {
@@ -215,10 +217,20 @@ const options = {
             tableHeading: "Permit Applications",
             submissionsSentTo: "All submissions are sent to: {{email}}",
           },
+          fields: {
+            number: "Application #",
+          },
           new: {
             locationHeading: "Location for permit",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work Type",
+          },
+          edit: {
+            saveDraft: "Save and finish later",
+            submit: "Submit application",
+            permit: "Permit",
+            fullAddress: "Full Address",
+            pidPin: "PID / PIN",
           },
         },
         requirementsLibrary: {
@@ -333,8 +345,9 @@ const options = {
         },
         admin: {},
         errors: {
-          fetchJurisdiction: "Something went wrong fetching jurisdiction",
-          fetchRequirementTemplate: "Something went wrong fetching requirement template",
+          fetchJurisdiction: "Something went wrong fetching the jurisdiction",
+          fetchPermitApplication: "Something went wrong fetching the permit application",
+          fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchOptions: "Something went wrong fetching options",
         },
         user: {
@@ -447,6 +460,8 @@ const options = {
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
           somethingWrong: "Something went wrong",
+          pageNotFound: "404 - The page you are looking for could not be found",
+          seeConsoleForDetails: "See the browser console for details",
           breadcrumb: {
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
@@ -459,6 +474,7 @@ const options = {
             permitApplications: "Permit Applications",
             submissionInbox: "Submission Inbox",
             configuration: "Configure Jurisdiction",
+            sucessfulSubmission: "Application submitted",
           },
           questionSupport: "Question Support",
         },

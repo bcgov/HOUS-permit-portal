@@ -37,7 +37,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"} gap={6}>
           <Box>
-            <Heading fontSize={"4xl"} color={"text.primary"}>
+            <Heading as="h3" fontSize={"4xl"} color={"text.primary"}>
               {t("requirementTemplate.index.title")}
             </Heading>
             <Text color={"text.secondary"} mt={1}>

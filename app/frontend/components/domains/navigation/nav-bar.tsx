@@ -11,6 +11,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Portal,
   Show,
   Spacer,
   Text,
@@ -53,7 +54,6 @@ export const NavBar = observer(() => {
       <Box
         as="nav"
         w="full"
-        position="sticky"
         top={0}
         bg={currentUser?.isAdmin ? "theme.blue" : "greys.white"}
         color={currentUser?.isAdmin ? "greys.white" : "theme.blue"}
@@ -69,7 +69,7 @@ export const NavBar = observer(() => {
               />
             </RouterLink>
             <Show above="md">
-              <Heading fontSize="2xl" fontWeight="normal">
+              <Heading as="h3" fontSize="2xl" fontWeight="normal">
                 {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Heading>
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
@@ -145,21 +145,23 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       >
         {t("site.menu")}
       </MenuButton>
-      <MenuList>
-        {loggedIn ? (
-          <>
-            <NavMenuItem label={t("site.home")} to={"/"} />
-            {currentUser?.isSuperAdmin && superAdminOnlyItems}
-            {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
-            {currentUser?.isSubmitter && submitterOnlyItems}
-            <Divider borderWidth="1px" />
-            <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-            <NavMenuItem label={t("auth.logout")} to="/" onClick={logout} />
-          </>
-        ) : (
-          <NavMenuItem label={t("auth.login")} to="/login" />
-        )}
-      </MenuList>
+      <Portal>
+        <MenuList zIndex={10}>
+          {loggedIn ? (
+            <>
+              <NavMenuItem label={t("site.home")} to={"/"} />
+              {currentUser?.isSuperAdmin && superAdminOnlyItems}
+              {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+              {currentUser?.isSubmitter && submitterOnlyItems}
+              <Divider borderWidth="1px" />
+              <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
+              <NavMenuItem label={t("auth.logout")} to="/" onClick={logout} />
+            </>
+          ) : (
+            <NavMenuItem label={t("auth.login")} to="/login" />
+          )}
+        </MenuList>
+      </Portal>
     </Menu>
   )
 })

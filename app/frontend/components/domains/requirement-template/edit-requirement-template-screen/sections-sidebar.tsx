@@ -53,6 +53,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
             <React.Fragment key={section.id}>
               <Box as={"section"} w={"full"}>
                 <Heading
+                  as="h3"
                   fontSize={"sm"}
                   fontWeight={700}
                   pl={6}

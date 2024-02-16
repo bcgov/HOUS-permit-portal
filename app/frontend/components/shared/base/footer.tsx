@@ -28,6 +28,7 @@ export const Footer = observer(() => {
           justifySelf="flex-end"
           borderTop="2px solid"
           borderColor="border.light"
+          zIndex={10}
         >
           <Flex
             direction={{ base: "column", md: "row" }}
@@ -53,10 +54,12 @@ export const Footer = observer(() => {
               <Flex direction="column" gap={8}>
                 <Flex direction={{ base: "column", md: "row" }} gap={12}>
                   <Box flex={1}>
-                    <Image alt={t("site.logo")} src={"/images/logo.svg"} />
+                    <Image alt="site logo" src={"/images/logo.svg"} />
                   </Box>
                   <Flex direction="column" gap={4} flex={3}>
-                    <Heading size="md">{t("site.titleLong")}</Heading>
+                    <Heading as="h3" size="md">
+                      {t("site.titleLong")}
+                    </Heading>
                     <Flex direction={{ base: "column", md: "row" }} flex={1} gap={{ base: 8, md: 0 }}>
                       <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
                         <RouterLink to="/" color="text.primary">

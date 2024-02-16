@@ -100,6 +100,10 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
   }
 
+  async fetchPermitApplication(id) {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
@@ -175,6 +179,10 @@ export class Api {
 
   async updatePermitApplication(id, params) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, params)
+  }
+
+  async submitPermitApplication(id, params) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, params)
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {

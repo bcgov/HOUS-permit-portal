@@ -1,6 +1,6 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionPermitApplications
-  before_action :set_permit_application, only: %i[show update]
+  before_action :set_permit_application, only: %i[show update submit]
 
   def index
     @permit_applications = policy_scope(PermitApplication)
@@ -15,11 +15,32 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def update
     authorize @permit_application
 
-    if @permit_application.save
+    # always reset the submission section keys until actual submission
+    submission_section = permit_application_params["submission_data"]["data"]["section-completion-key"]
+    submission_section.each { |key, value| submission_section[key] = nil }
+
+    if @permit_application.update(permit_application_params)
+      AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
+      render_success @permit_application, "permit_application.update_success", { blueprint: PermitApplicationBlueprint }
+    else
+      render_error "permit_application.update_error",
+                   message_opts: {
+                     error_message: @permit_application.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def submit
+    authorize @permit_application
+
+    signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
+
+    if signed &&
+         @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
       AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
-      render_error "permit_application.create_error",
+      render_error "permit_application.submit_error",
                    message_opts: {
                      error_message: @permit_application.errors.full_messages.join(", "),
                    }

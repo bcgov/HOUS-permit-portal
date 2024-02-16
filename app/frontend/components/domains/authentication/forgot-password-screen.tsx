@@ -45,7 +45,7 @@ export const ForgotPasswordScreen = ({}: IForgotPasswordScreenProps) => {
             bg="greys.white"
           >
             <Flex gap={2} direction="column">
-              <Heading>{t("auth.forgotPassword")}</Heading>
+              <Heading as="h3">{t("auth.forgotPassword")}</Heading>
               <Text>{t("auth.forgotPasswordInstructions")}</Text>
             </Flex>
             <UsernameFormControl />

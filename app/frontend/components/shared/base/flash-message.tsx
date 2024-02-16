@@ -47,7 +47,11 @@ const CustomToast = ({ title, description, status }: ToastProps) => {
       <Flex align="flex-start" gap={2}>
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
         <Flex direction="column" gap={2}>
-          {title && <Heading fontSize="md">{title}</Heading>}
+          {title && (
+            <Heading as="h3" fontSize="md">
+              {title}
+            </Heading>
+          )}
           {description && <Text>{description}</Text>}
         </Flex>
       </Flex>

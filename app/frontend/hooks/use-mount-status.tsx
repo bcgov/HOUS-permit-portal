@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-function useMountStatus() {
+export function useMountStatus() {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {

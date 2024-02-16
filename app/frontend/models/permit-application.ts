@@ -3,6 +3,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
+import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { UserModel } from "./user"
@@ -20,9 +21,10 @@ export const PermitApplicationModel = types
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
-    requirements: types.maybeNull(types.frozen({})),
-    submissionData: types.maybeNull(types.frozen({})),
+    formJson: types.maybeNull(types.frozen<IFormJson>()),
+    submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     submittedAt: types.maybeNull(types.Date),
+    selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
     updatedAt: types.Date,
   })
@@ -34,6 +36,47 @@ export const PermitApplicationModel = types
     },
     get permitTypeAndActivity() {
       return `${self.activity.name} ${self.permitType.name}`.trim()
+    },
+    get flattenedBlocks() {
+      return self.formJson.components
+        .reduce((acc, section) => {
+          const blocks = section.components
+          return acc.concat(blocks)
+        }, [] as IFormIOBlock[])
+        .filter((outNull) => outNull)
+    },
+    blockKey(sectionId, blockId) {
+      return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
+    },
+  }))
+  .views((self) => ({
+    getBlockById: (blockId: string) => {
+      return self.flattenedBlocks.find((block) => block.id === blockId)
+    },
+    indexOfBlockId: (blockId: string) => {
+      return self.flattenedBlocks.findIndex((block) => block.id === blockId)
+    },
+    getBlockClass(sectionId, blockId) {
+      return `formio-component-${self.blockKey(sectionId, blockId)}`
+    },
+    get blockClasses() {
+      return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
+    },
+    getIsBlockPopulated(sectionId, blockId) {
+      const keyPrefix = self.blockKey(sectionId, blockId)
+
+      if (!self.submissionData) return false
+      const atLeastOnePrefixKey = Object.keys(self.submissionData).some((key) => key.startsWith(keyPrefix))
+
+      if (!atLeastOnePrefixKey) return false
+
+      for (const key in self.submissionData.data) {
+        if (key.startsWith(keyPrefix) && !self.submissionData[key]) {
+          // Found a key starting with keyPrefix but its value is falsy
+          return false
+        }
+      }
+      return true
     },
   }))
   .actions((self) => ({
@@ -60,8 +103,21 @@ export const PermitApplicationModel = types
         const { data: permitApplication } = response.data
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
-      return response
+      return response.ok
     }),
+
+    submit: flow(function* (params) {
+      const response = yield self.environment.api.submitPermitApplication(self.id, params)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+      }
+      return response.ok
+    }),
+
+    setSelectedTabIndex: (index: number) => {
+      self.selectedTabIndex = index
+    },
   }))
 
 export interface IPermitApplication extends Instance<typeof PermitApplicationModel> {}

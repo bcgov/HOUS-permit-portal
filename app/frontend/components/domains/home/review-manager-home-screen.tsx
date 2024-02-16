@@ -13,7 +13,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
   const { userStore } = useMst()
   const { currentUser } = userStore
 
-  if (!currentUser?.jurisdiction) return <ErrorScreen />
+  if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   const jurisdiction = currentUser.jurisdiction
 
   return (

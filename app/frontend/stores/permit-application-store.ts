@@ -14,6 +14,7 @@ export const PermitApplicationStoreModel = types
   .compose(
     types.model("PermitApplicationStore", {
       permitApplicationMap: types.map(PermitApplicationModel),
+      currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
     }),
     createSearchModel<EPermitApplicationSortFields>("searchPermitApplications")
   )
@@ -37,6 +38,14 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
+    __beforeMergeUpdate(permitApplicationData) {
+      const pad = permitApplicationData
+      if (!pad?.jurisdiction?.id) return pad
+
+      self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
+      self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
+      return R.mergeRight(pad, { jurisdiction: pad.jurisdiction.id, submitter: pad.submitter.id })
+    },
     __beforeMergeUpdateAll(permitApplicationsData) {
       //find all unique jurisdictions
       const jurisdictionsUniq = R.uniqBy(
@@ -50,10 +59,9 @@ export const PermitApplicationStoreModel = types
         permitApplicationsData.map((pa) => pa.submitter)
       )
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
-
       //return the remapped Data
       return R.map(
-        (c) => R.mergeRight(c, { jurisdiction: c["jurisdiction"]["id"], submitter: c["submitter"]["id"] }),
+        (pa) => R.mergeRight(pa, { jurisdiction: pa.jurisdiction.id, submitter: pa.submitter.id }),
         permitApplicationsData
       )
     },
@@ -102,6 +110,20 @@ export const PermitApplicationStoreModel = types
       }
       return response.ok
     }),
+    fetchPermitApplication: flow(function* (id: string) {
+      let permitApplication = self.getPermitApplicationById(id)
+      if (!permitApplication) {
+        // PermitApplication not found in the map, fetch from API
+        const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
+        if (ok && response.data) {
+          self.mergeUpdate(response.data, "permitApplicationMap")
+        }
+      }
+      return permitApplication
+    }),
+    setCurrentPermitApplication(permitApplicationId) {
+      self.currentPermitApplication = permitApplicationId
+    },
   }))
 
 export interface IPermitApplicationStore extends Instance<typeof PermitApplicationStoreModel> {}

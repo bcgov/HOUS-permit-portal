@@ -63,7 +63,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
 
   const navigate = useNavigate()
 
-  if (error) return <ErrorScreen />
+  if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction) return <LoadingScreen />
 
   return (
@@ -75,7 +75,9 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
             {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
           </Text>
         </Flex>
-        <Heading fontSize="2xl">{currentJurisdiction.name}</Heading>
+        <Heading as="h3" fontSize="2xl">
+          {currentJurisdiction.name}
+        </Heading>
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap={6}>

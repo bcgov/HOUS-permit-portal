@@ -24,7 +24,11 @@ export const withMerge =
        * @typeParam T - Typeof the MST Model
        */
       mergeUpdate(resourceData: T, collectionName: string) {
-        self["__beforeMergeUpdate"] && self["__beforeMergeUpdate"](resourceData)
+        let resourceDataToUpdate = resourceData
+        if (self["__beforeMergeUpdate"]) {
+          resourceDataToUpdate = self["__beforeMergeUpdate"](resourceData)
+        }
+
         const existingResource = self[collectionName].get(resourceData.id) || {}
 
         /**
@@ -34,9 +38,9 @@ export const withMerge =
          * This prevents non-API (e.g. UI/UX) fields on the map model from being overridden
          */
         if (existingResource["__mergeUpdate"]) {
-          existingResource["__mergeUpdate"](resourceData)
+          existingResource["__mergeUpdate"](resourceDataToUpdate)
         } else {
-          const newData = R.mergeDeepLeft(resourceData, existingResource)
+          const newData = R.mergeDeepLeft(resourceDataToUpdate, existingResource)
           self[collectionName].put(newData)
         }
       },
