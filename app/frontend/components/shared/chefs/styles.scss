@@ -359,4 +359,8 @@ h2 {
   .card {
     margin-bottom: 24px !important;
   }
+
+  .fa::before {
+    display: none;
+  }
 }
