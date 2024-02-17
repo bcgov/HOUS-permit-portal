@@ -83,7 +83,7 @@ export enum ERequirementType {
   address = "address",
   date = "date",
   number = "number",
-  textArea = "text_area",
+  textArea = "textarea",
   radio = "radio",
   checkbox = "checkbox",
   select = "select",
