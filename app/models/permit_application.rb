@@ -43,7 +43,7 @@ class PermitApplication < ApplicationRecord
     #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
     #need to look up jurisidcitional version and enablement as well
 
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type)&.to_form_json
+    RequirementTemplate.find_by(activity: activity, permit_type: permit_type, status: "published")&.to_form_json
   end
 
   def number_prefix
@@ -99,7 +99,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def requirements_lookups
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type)&.lookup_props
+    RequirementTemplate.find_by(activity: activity, permit_type: permit_type, status: "published")&.lookup_props
   end
 
   #TODO: move automated compliance and field empties into concern or service?

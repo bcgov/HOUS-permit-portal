@@ -89,11 +89,15 @@ export const RequirementForm = observer(({ permitApplication, onFormChange }: IR
     const entry = entries.filter((en) => en.isIntersecting)[0]
     if (!entry) return
 
-    const classNameParts = Array.from(entry.target.classList)
-      .find((className) => className.includes("formio-component-formSubmissionDataRSTsection"))
-      .split("|")
-    const blockId = classNameParts[classNameParts.length - 1].slice(-36)
-    setSelectedTabIndex(indexOfBlockId(blockId))
+    const itemWithSectionClassName = Array.from(entry.target.classList).find((className) =>
+      className.includes("formio-component-formSubmissionDataRSTsection")
+    )
+
+    if (itemWithSectionClassName) {
+      const classNameParts = itemWithSectionClassName.split("|")
+      const blockId = classNameParts[classNameParts.length - 1].slice(-36)
+      setSelectedTabIndex(indexOfBlockId(blockId))
+    }
   }
 
   const onSubmit = async (submission: any) => {
