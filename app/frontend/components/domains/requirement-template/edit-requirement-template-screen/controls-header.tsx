@@ -29,6 +29,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
   }
+  const isSubmitDisabled = requirementTemplate.isPublished || isSubmitting || !isValid
   return (
     <HStack
       px={6}
@@ -42,19 +43,14 @@ export const ControlsHeader = observer(function ControlsHeader({
         {t("requirementTemplate.edit.addSectionButton")}
       </Button>
       <HStack spacing={4}>
-        <Button
-          variant={"primary"}
-          isDisabled={requirementTemplate.isPublished || isSubmitting || !isValid}
-          isLoading={isSubmitting}
-          onClick={onSaveDraft}
-        >
+        <Button variant={"primary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
           {t("requirementTemplate.edit.saveDraft")}
         </Button>
         <Button
           variant={"primary"}
           rightIcon={<CaretRight />}
           onClick={onPublish}
-          isDisabled={isSubmitting || !isValid}
+          isDisabled={isSubmitDisabled}
           isLoading={isSubmitting}
         >
           {t("ui.publish")}

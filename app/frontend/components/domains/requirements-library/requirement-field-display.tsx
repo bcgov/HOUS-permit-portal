@@ -129,8 +129,10 @@ const requirementsComponentMap = {
         </FormLabel>
         <RadioGroup defaultValue="1">
           <Stack>
-            {options.map((option) => (
-              <Radio value={option}>{option}</Radio>
+            {options.map((option, index) => (
+              <Radio key={index} value={option}>
+                {option}
+              </Radio>
             ))}
           </Stack>
         </RadioGroup>
@@ -148,8 +150,10 @@ const requirementsComponentMap = {
         </FormLabel>
         <CheckboxGroup>
           <Stack>
-            {options.map((option) => (
-              <Checkbox value={option}>{option}</Checkbox>
+            {options.map((option, index) => (
+              <Checkbox key={index} value={option}>
+                {option}
+              </Checkbox>
             ))}
           </Stack>
         </CheckboxGroup>
@@ -171,8 +175,8 @@ const requirementsComponentMap = {
           {label ?? t("requirementsLibrary.requirementTypeLabels.select")}
         </FormLabel>
         <Select placeholder={"Select"} color={"greys.grey01"} value={""} isReadOnly {...selectProps}>
-          {options.map((option) => (
-            <option value={option} style={{ width: "100%" }}>
+          {options.map((option, index) => (
+            <option key={index} value={option} style={{ width: "100%" }}>
               {option}
             </option>
           ))}

@@ -42,6 +42,8 @@ export const RequirementTemplateStoreModel = types
           })
         })
       }
+
+      return requirementTemplate
     },
   }))
 
