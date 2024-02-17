@@ -2,6 +2,7 @@ FactoryBot.define do
   factory :requirement_template do
     association :activity, factory: :activity
     association :permit_type, factory: :permit_type
+    status { :published }
 
     # Add additional attributes for RequirementTemplate here if needed
 
