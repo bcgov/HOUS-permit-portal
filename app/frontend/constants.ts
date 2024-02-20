@@ -13,6 +13,8 @@ export const getUnitOptionLabel = (unit?: ENumberUnit) => {
     in: t("requirementsLibrary.unitLabels.option.in"),
     ft: t("requirementsLibrary.unitLabels.option.ft"),
     mi: t("requirementsLibrary.unitLabels.option.mi"),
+    sqm: t("requirementsLibrary.unitLabels.option.sqm"),
+    sqft: t("requirementsLibrary.unitLabels.option.sqft"),
   }
 
   return unit === undefined ? t("requirementsLibrary.unitLabels.option.noUnit") : unitToLabel[unit]
@@ -26,12 +28,14 @@ export const getUnitDisplayLabel = (unit?: ENumberUnit) => {
     in: t("requirementsLibrary.unitLabels.display.in"),
     ft: t("requirementsLibrary.unitLabels.display.ft"),
     mi: t("requirementsLibrary.unitLabels.display.mi"),
+    sqm: t("requirementsLibrary.unitLabels.display.sqm"),
+    sqft: t("requirementsLibrary.unitLabels.display.sqft"),
   }
 
   return unit === undefined ? t("requirementsLibrary.unitLabels.display.noUnit") : unitToLabel[unit]
 }
 
 export const unitGroups: { [key: string]: ENumberUnit[] } = {
-  metric: [ENumberUnit.mm, ENumberUnit.cm, ENumberUnit.m],
-  imperial: [ENumberUnit.in, ENumberUnit.ft, ENumberUnit.mi],
+  metric: [ENumberUnit.mm, ENumberUnit.cm, ENumberUnit.m, ENumberUnit.sqm],
+  imperial: [ENumberUnit.in, ENumberUnit.ft, ENumberUnit.mi, ENumberUnit.sqft],
 }

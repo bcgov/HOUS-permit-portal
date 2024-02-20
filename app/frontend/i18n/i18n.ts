@@ -310,6 +310,8 @@ const options = {
               in: "in - inches",
               ft: "ft - feet",
               mi: "mi - miles",
+              sqm: "sqm - sq meters",
+              sqft: "sqft - sq feet",
             },
             display: {
               noUnit: "(no unit)",
@@ -319,6 +321,8 @@ const options = {
               in: "inches (in)",
               ft: "feet (ft)",
               mi: "miles (mi)",
+              sqm: "sq meters (sqm)",
+              sqft: "sq feet (sqft)",
             },
           },
         },

@@ -102,4 +102,6 @@ export enum ENumberUnit {
   in = "in",
   ft = "ft",
   mi = "mi",
+  sqm = "sqm",
+  sqft = "sqft",
 }
