@@ -43,7 +43,12 @@ en:
           attributes:
             uid:
               taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
-
+        jurisdiction_requirement_template:
+          attributes:
+            requirement_template:
+              not_published: "must be associated with a published requirement template"
+              not_unique_to_scope: "should be unique per permit_type_id and activity_id within the same jurisdiction"
+          
   arbitrary_message_construct:
     devise:
       failure:

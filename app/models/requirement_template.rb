@@ -11,6 +11,7 @@ class RequirementTemplate < ApplicationRecord
   has_many :jurisdictions, through: :jurisdiction_requirement_templates
 
   validate :scheduled_for_presence_if_scheduled
+  validate :validate_unique_published_classification_in_jurisdiction, if: -> { published? }
 
   before_create :set_default_version
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
@@ -20,6 +21,25 @@ class RequirementTemplate < ApplicationRecord
   include Discard::Model
 
   accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
+
+  def validate_unique_published_classification_in_jurisdiction
+    jurisdictions.each do |jurisdiction|
+      duplicates =
+        jurisdiction
+          .requirement_templates
+          .where(status: "published", permit_type_id: permit_type_id, activity_id: activity_id)
+          .where.not(id: id)
+
+      if duplicates.exists?
+        errors.add(
+          :base,
+          I18n.t(
+            "activerecord.errors.models.jurisdiction_requirement_template.attributes.requirement_template.not_unique_to_scope",
+          ),
+        )
+      end
+    end
+  end
 
   def jurisdictions_size
     jurisdictions.size
