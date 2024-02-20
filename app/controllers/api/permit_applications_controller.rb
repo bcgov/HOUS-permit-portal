@@ -4,30 +4,42 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def index
     @permit_applications = policy_scope(PermitApplication)
-    render_success @permit_applications, nil, { blueprint: PermitApplicationBlueprint }
+    render_success @permit_applications,
+                   nil,
+                   { blueprint: PermitApplicationBlueprint }
   end
 
   def show
     authorize @permit_application
-    render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
+    render_success @permit_application,
+                   nil,
+                   { blueprint: PermitApplicationBlueprint }
   end
 
   def update
     authorize @permit_application
 
     # always reset the submission section keys until actual submission
-    submission_section = permit_application_params["submission_data"]["data"]["section-completion-key"]
+    submission_section =
+      permit_application_params["submission_data"]["data"][
+        "section-completion-key"
+      ]
     submission_section.each { |key, value| submission_section[key] = nil }
 
-    if @permit_application.update(permit_application_params)
+    if @permit_application.update(
+         extract_s3_uploads_from_params(permit_application_params)
+       )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       end
-      render_success @permit_application, "permit_application.update_success", { blueprint: PermitApplicationBlueprint }
+      render_success @permit_application,
+                     "permit_application.update_success",
+                     { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.update_error",
                    message_opts: {
-                     error_message: @permit_application.errors.full_messages.join(", "),
+                     error_message:
+                       @permit_application.errors.full_messages.join(", ")
                    }
     end
   end
@@ -35,28 +47,60 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def submit
     authorize @permit_application
 
-    signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
+    signed =
+      permit_application_params["submission_data"]["data"][
+        "section-completion-key"
+      ][
+        "signed"
+      ]
 
     if signed &&
-         @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
+         @permit_application.update(
+           extract_s3_uploads_from_params(
+             permit_application_params.merge(
+               status: :submitted,
+               signed_off_at: Time.current
+             )
+           )
+         )
       AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
-      render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
+      render_success @permit_application,
+                     nil,
+                     { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.submit_error",
                    message_opts: {
-                     error_message: @permit_application.errors.full_messages.join(", "),
+                     error_message:
+                       @permit_application.errors.full_messages.join(", ")
                    }
     end
   end
 
   def create
+    attributes =
+      Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(
+        pid: permit_application_params[:pid]
+      )
+    jurisdiction =
+      Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
+    @permit_application =
+      PermitApplication.build(
+        permit_application_params.to_h.merge(
+          submitter: current_user,
+          jurisdiction: jurisdiction
+        )
+      )
     authorize @permit_application
-    if @permit_application.update(extract_s3_uploads_from_params(permit_application_params))
-      render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
+
+    if @permit_application.save
+      render_success @permit_application,
+                     "permit_application.create_success",
+                     { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.create_error",
                    message_opts: {
-                     error_message: @permit_application.errors.full_messages.join(", "),
+                     error_message:
+                       @permit_application.errors.full_messages.join(", ")
                    }
     end
   end
@@ -69,9 +113,19 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def permit_application_params #params for submitters
     params
-      .permit(:activity, :permit_type, :full_address, :pin, :pid, supporting_documents_attributes: [:file])
+      .require(:permit_application)
+      .permit(
+        :activity_id,
+        :permit_type_id,
+        :full_address,
+        :pin,
+        :pid,
+        supporting_documents_attributes: [:file]
+      )
       .tap do |whitelisted|
-        whitelisted[:submission_data] = params[:submission_data].permit! if params[:submission_data]
+        whitelisted[:submission_data] = params[
+          :submission_data
+        ].permit! if params[:submission_data]
         #inject file attachments to the supporting documents relationship for permit applications here
       end
   end
@@ -87,7 +141,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
       keys_set = data.keys.to_set
       keys_to_check = %w[storage filename]
       all_included = keys_to_check.all? { |key| keys_set.include?(key) }
-      all_included ? files << data : data.each { |_, value| find_nested_files(value, files) }
+      if all_included
+        files << data
+      else
+        data.each { |_, value| find_nested_files(value, files) }
+      end
     elsif data.is_a?(Array)
       data.each { |value| find_nested_files(value, files) }
     end
@@ -97,7 +155,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def extract_s3_uploads_from_params(params_permitted)
     files = find_nested_files(params_permitted[:submission_data].to_h)
     if files.present?
-      mapped_attributes = files.map { |file| { "file" => file.slice(*%w[id storage filename metadata]) } }
+      mapped_attributes =
+        files.map do |file|
+          { "file" => file.slice(*%w[id storage filename metadata]) }
+        end
       params_permitted.merge(supporting_documents_attributes: mapped_attributes)
     else
       params_permitted

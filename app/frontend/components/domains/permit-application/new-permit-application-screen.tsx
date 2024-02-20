@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
@@ -17,27 +18,42 @@ export type TSearchAddressFormData = {
 
 interface INewPermitApplicationScreenProps {}
 
+export type TCreatePermitApplicationFormData = {
+  pid: string
+  permitTypeId: string
+  activityId: string
+  site?: IOption
+}
+
 export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScreenProps) => {
   const { t } = useTranslation()
-  const formMethods = useForm({
+  const formMethods = useForm<TCreatePermitApplicationFormData>({
     mode: "onChange",
     defaultValues: {
       pid: "",
-      permitType: "",
+      permitTypeId: "",
+      activityId: "",
       site: null as IOption,
     },
   })
   const { handleSubmit, formState, control, watch } = formMethods
   const { isSubmitting } = formState
-  const { geocoderStore, permitClassificationStore } = useMst()
+  const { geocoderStore, permitClassificationStore, permitApplicationStore } = useMst()
   const { fetchSiteOptions } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions, isLoading } = permitClassificationStore
+  const navigate = useNavigate()
 
-  const onSubmit = (formValues) => {
-    // TODO
+  const onSubmit = async (formValues) => {
+    const params = { ...formValues, fullAddress: formValues.site.label }
+    console.log(params)
+    const permitApplication = await permitApplicationStore.createPermitApplication(params)
+    if (permitApplication) {
+      navigate(`/permit-applications/${permitApplication.id}/edit`)
+    }
   }
 
-  const permitTypeWatch = watch("permitType")
+  const permitTypeIdWatch = watch("permitTypeId")
+  const pidWatch = watch("pid")
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
@@ -74,30 +90,32 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   }}
                 />
               </Flex>
-              <Flex as="section" direction="column" gap={2}>
-                <Heading fontSize="xl">{t("permitApplication.new.permitTypeHeading")}</Heading>
-                <Controller
-                  name="permitType"
-                  control={control}
-                  render={({ field: { onChange, value } }) => {
-                    return (
-                      <PermitTypeRadioSelect
-                        w="full"
-                        fetchOptions={() => fetchPermitTypeOptions(true)}
-                        onChange={onChange}
-                        value={value}
-                        isLoading={isLoading}
-                      />
-                    )
-                  }}
-                />
-              </Flex>
-              {permitTypeWatch && (
+              {pidWatch && (
+                <Flex as="section" direction="column" gap={2}>
+                  <Heading fontSize="xl">{t("permitApplication.new.permitTypeHeading")}</Heading>
+                  <Controller
+                    name="permitTypeId"
+                    control={control}
+                    render={({ field: { onChange, value } }) => {
+                      return (
+                        <PermitTypeRadioSelect
+                          w="full"
+                          fetchOptions={() => fetchPermitTypeOptions(true)}
+                          onChange={onChange}
+                          value={value}
+                          isLoading={isLoading}
+                        />
+                      )
+                    }}
+                  />
+                </Flex>
+              )}
+              {permitTypeIdWatch && (
                 <Flex as="section" direction="column" gap={2}>
                   <Heading fontSize="xl">{t("permitApplication.new.workTypeHeading")}</Heading>
                   <ActivityList
-                    fetchOptions={() => fetchActivityOptions(true, permitTypeWatch)}
-                    permitTypeId={permitTypeWatch}
+                    fetchOptions={() => fetchActivityOptions(true, permitTypeIdWatch)}
+                    permitTypeId={permitTypeIdWatch}
                     isLoading={isLoading}
                   />
                 </Flex>

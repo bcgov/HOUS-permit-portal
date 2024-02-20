@@ -9,7 +9,17 @@ class Api::PermitClassificationsController < Api::ApplicationController
     begin
       permit_classifications =
         if activity_option_params[:published].present?
-          query = RequirementTemplate.includes(:permit_type).includes(:activity)
+          query =
+            if activity_option_params[:pid].present?
+              attributes =
+                Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: permit_application_params[:pid])
+
+              jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
+
+              jurisdiction.permit_templates
+            else
+              RequirementTemplate
+            end.includes(:permit_type).includes(:activity)
 
           query = query.where(permit_type_id: activity_option_params[:permit_type_id]) if activity_option_params[
             :permit_type_id
@@ -19,6 +29,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
             :activity_id
           ].present?
 
+          # &:activities or &:permit_types
           query.map(&activity_option_params[:type].underscore.to_sym).uniq
         else
           PermitClassification.where(type: activity_option_params[:type])
@@ -35,6 +46,6 @@ class Api::PermitClassificationsController < Api::ApplicationController
   private
 
   def activity_option_params
-    params.permit(%i[type published permit_type_id activity_id])
+    params.permit(%i[type pid published permit_type_id activity_id])
   end
 end

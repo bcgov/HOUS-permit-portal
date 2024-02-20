@@ -1,6 +1,9 @@
 class Jurisdiction < ApplicationRecord
   include ActionView::Helpers::SanitizeHelper
-  searchkick searchable: %i[reverse_qualified_name], word_start: %i[reverse_qualified_name]
+  searchkick searchable: %i[reverse_qualified_name qualified_name],
+             word_start: %i[reverse_qualified_name qualified_name],
+             word_middle: %i[reverse_qualified_name qualified_name],
+             word_end: %i[reverse_qualified_name qualified_name]
 
   # Associations
   has_many :permit_applications
@@ -49,9 +52,22 @@ class Jurisdiction < ApplicationRecord
     find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(:locality_type)
   end
 
+  def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
+    name = attributes["MUNICIPALITY"]
+    regional_district_name = attributes["REGIONAL_DISTRICT"]
+
+    named_params = { fields: %w[reverse_qualified_name qualified_name], misspellings: { edit_distance: 1 } }
+    return(
+      SubDistrict.search(name, **named_params).first ||
+        RegionalDistrict.search(regional_district_name, **named_params).first
+    )
+  end
+
   def search_data
     {
+      qualified_name: qualified_name,
       reverse_qualified_name: reverse_qualified_name,
+      type: type,
       updated_at: updated_at,
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,

@@ -1,10 +1,10 @@
-import { Box, Flex, FlexProps, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, FlexProps, Heading, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import React, { useEffect, useState } from "react"
+import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IActivity } from "../../../models/permit-classification"
 import { IOption } from "../../../types/types"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { SharedSpinner } from "../base/shared-spinner"
 
 interface IPermitTypeRadioSelect extends FlexProps {
@@ -40,6 +40,10 @@ interface IActivityBoxProps {
 const ActivityBox = ({ activity }: IActivityBoxProps) => {
   const { t } = useTranslation()
 
+  const { setValue, formState, watch } = useFormContext()
+
+  const siteWatch = watch("site")
+
   return (
     <Box
       borderRadius="lg"
@@ -61,15 +65,19 @@ const ActivityBox = ({ activity }: IActivityBoxProps) => {
             </Box>
             <Box w="fit-content" className="aroundLink">
               {activity.enabled ? (
-                <RouterLinkButton
+                <Button
+                  type="submit"
+                  disabled={!siteWatch}
+                  isDisabled={!siteWatch}
+                  onClick={() => setValue("activityId", activity.id)}
                   variant="link"
                   rightIcon={<CaretRight size={24} />}
-                  to={"#"}
                   fontWeight="bold"
                   fontSize="lg"
+                  isLoading={formState.isSubmitting}
                 >
                   {t("ui.select")}
-                </RouterLinkButton>
+                </Button>
               ) : (
                 <Text color="greys.grey01" fontWeight="bold" fontSize="lg" noOfLines={{ base: 2, md: 1 }}>
                   {t("ui.notAvailable")}
