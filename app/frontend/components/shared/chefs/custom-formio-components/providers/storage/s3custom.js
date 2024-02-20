@@ -1,65 +1,6 @@
+import { requestPresignedUrl, uploadFileInChunks } from "../../../../../../utils/uploads"
 /* tslint:disable */
 const s3custom = function Provider(formio) {
-  const requestPresignedUrl = (file, fileName, url) => {
-    const params = new URLSearchParams({
-      filename: fileName,
-      type: file.type,
-      size: file.size,
-    })
-
-    return fetch(url == "undefined" ? `/api/storage/s3?${params.toString()}` : `${url}?${params.toString()}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    })
-  }
-
-  const uploadFileInChunks = async (signedUrl, headers, file, progressCallback, chunkSize = 1 * 1024 * 1024) => {
-    // Default chunk size is 1MB
-    let start = 0
-
-    // Function to upload a single chunk
-    async function uploadChunk(chunk, chunkNumber, contentRange) {
-      const response = await fetch(signedUrl, {
-        method: "PUT",
-        headers: Object.assign({}, headers, {
-          // "Content-Type": "application/octet-stream",
-          // "Content-Range": contentRange,
-          "Content-Length": chunk.size,
-          "Transfer-Encoding": "chunked",
-        }),
-        body: chunk,
-      })
-
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status} during chunk ${chunkNumber} upload.`)
-      }
-    }
-
-    // Iterate over the file in chunks and upload each chunk
-    let chunkNumber = 0
-
-    let chunkUnits = Math.ceil(file.size / chunkSize)
-    while (start < file.size) {
-      let end = start + chunkSize
-      const chunk = file.slice(start, end)
-      const contentRange = `bytes ${start}-${end - 1}/${file.size}`
-
-      // Await ensures each chunk is uploaded before the next one starts
-      await uploadChunk(chunk, chunkNumber, contentRange)
-      chunkNumber++
-      console.log(`calling callback - ${chunkNumber} / ${chunkUnits}`)
-      progressCallback(
-        file,
-        new ProgressEvent("progress", { lengthComputable: true, loaded: chunkNumber, total: chunkUnits })
-      ) //update in format required
-
-      start = end
-    }
-  }
-
   return {
     title: "s3custom",
     name: "s3custom",
