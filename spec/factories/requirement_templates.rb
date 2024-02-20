@@ -5,12 +5,24 @@ FactoryBot.define do
     status { :published }
 
     factory :requirement_template_with_sections do
-      transient { template_count { 5 } }
+      transient { sections_count { 5 } }
 
       after(:create) do |template, evaluator|
         template.requirement_template_sections << create_list(
           :requirement_template_section,
-          evaluator.template_count,
+          evaluator.sections_count,
+          requirement_template: template,
+        )
+      end
+    end
+
+    factory :full_requirement_template do
+      transient { sections_count { 5 } }
+
+      after(:create) do |template, evaluator|
+        template.requirement_template_sections << create_list(
+          :requirement_template_section_with_template_section_blocks,
+          evaluator.sections_count,
           requirement_template: template,
         )
       end

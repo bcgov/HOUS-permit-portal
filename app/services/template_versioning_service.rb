@@ -5,16 +5,16 @@ class TemplateVersioningService
     self.requirement_template = requirement_template
   end
 
-  def schedule(version_date)
+  def schedule!(version_date)
     if !is_valid_schedule_version_date?(version_date)
       raise StandardError.new("Version date must be in the future and after latest scheduled version date")
     end
 
     template_version =
       requirement_template.template_versions.build(
-        denormalized_template_json: RequirementTemplateBlueprint.render_as_json(requirement_template),
+        denormalized_template_json: RequirementTemplateBlueprint.render_as_hash(requirement_template, view: :extended),
         form_json: requirement_template.to_form_json,
-        requirement_blocks_json: form_requirement_blocks_json,
+        requirement_blocks_json: form_requirement_blocks_hash,
         version_diff: diff_of_current_changes_and_last_version,
         version_date: version_date,
         status: "scheduled",
@@ -27,7 +27,7 @@ class TemplateVersioningService
 
   private
 
-  def form_requirement_blocks_json
+  def form_requirement_blocks_hash
     requirement_blocks_json = {}
 
     requirement_template.requirement_template_sections.each do |template_section|
@@ -36,7 +36,7 @@ class TemplateVersioningService
       end
     end
 
-    requirement_blocks_json.to_json
+    requirement_blocks_json
   end
 
   def is_valid_schedule_version_date?(version_date)
