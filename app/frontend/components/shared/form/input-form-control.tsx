@@ -35,6 +35,10 @@ export const NumberFormControl = (props: IInputFormControlProps) => {
   return <InputFormControl {...R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props)} />
 }
 
+export const FileFormControl = (props: IInputFormControlProps) => {
+  return <InputFormControl {...R.mergeDeepRight({ inputProps: { type: "file" } }, props)} />
+}
+
 const InputFormControl = ({
   label,
   fieldName,

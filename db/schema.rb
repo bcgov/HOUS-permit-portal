@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_13_234941) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_18_020706) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -121,6 +121,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_13_234941) do
     t.jsonb "submission_data"
     t.string "number"
     t.datetime "submitted_at"
+    t.datetime "signed_off_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -275,6 +276,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_13_234941) do
     t.decimal "laundry"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "h2k_file_data"
     t.index ["step_code_id"],
             name: "index_step_code_data_entries_on_step_code_id"
   end
@@ -285,6 +287,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_13_234941) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "submitter_id"
+    t.uuid "permit_application_id"
+    t.index ["permit_application_id"],
+            name: "index_step_codes_on_permit_application_id"
+    t.index ["submitter_id"], name: "index_step_codes_on_submitter_id"
   end
 
   create_table "supporting_documents",
@@ -459,6 +466,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_13_234941) do
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
+  add_foreign_key "step_codes", "permit_applications"
+  add_foreign_key "step_codes", "users", column: "submitter_id"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"

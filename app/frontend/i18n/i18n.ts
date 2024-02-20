@@ -312,10 +312,10 @@ const options = {
         },
         stepCode: {
           new: {
-            districtEnergyEF: "District Energy EF",
+            districtEnergyEf: "District Energy EF",
             districtEnergyConsumption: "District Energy Consumption",
-            otherGHGEF: "Other GHG EF",
-            otherGHGConsumption: "Other GHG Consumption",
+            otherGhgEf: "Other GHG EF",
+            otherGhgConsumption: "Other GHG Consumption",
             h2kFile: "Hot2000 File",
             create: "Create",
           },

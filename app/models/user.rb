@@ -32,6 +32,9 @@ class User < ApplicationRecord
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
 
+  #TODO: step codes list should combine direct step codes and those that are related via permit applications
+  has_many :step_codes, foreign_key: "submitter_id", dependent: :destroy
+
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
