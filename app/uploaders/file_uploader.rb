@@ -15,10 +15,10 @@ class FileUploader < Shrine
       # Construct the path with support for derivatives
       path = [model, identifier]
       path << derivative.to_s if derivative # Append derivative name if present
-      path << super # Call the original generate_location method for the filename
+      # path << super # Call the original generate_location method for the filename
 
       # Join the path components
-      File.join(*path)
+      File.join(path)
     else
       super # Fallback to the default behavior if no record is available
     end
