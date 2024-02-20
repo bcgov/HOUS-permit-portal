@@ -42,7 +42,7 @@ class TemplateVersioningService
   def is_valid_schedule_version_date?(version_date)
     last_version = requirement_template.template_versions.order(version_date: :desc).first
 
-    version_date > Date.current && (last_version.blank? || version_date <= last_version.version_date)
+    version_date > Date.current && (last_version.blank? || version_date >= last_version.version_date)
   end
 
   def diff_of_current_changes_and_last_version

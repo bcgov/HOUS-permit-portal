@@ -13,6 +13,20 @@ RSpec.describe TemplateVersioningService, type: :service do
         expect(template_version.version_date).to eq(version_date)
         expect(template_version.status).to eq("scheduled")
       end
+
+      it "schedules a new template version for the future and and after last version" do
+        version_date = Date.tomorrow
+        template_version = service.schedule!(version_date)
+
+        new_version_date = Date.tomorrow.tomorrow
+        new_template_version = service.schedule!(new_version_date)
+
+        expect(template_version.version_date).to eq(version_date)
+        expect(template_version.status).to eq("scheduled")
+
+        expect(new_template_version.version_date).to eq(new_version_date)
+        expect(new_template_version.status).to eq("scheduled")
+      end
     end
 
     context "when the version date is not valid" do
@@ -20,6 +34,16 @@ RSpec.describe TemplateVersioningService, type: :service do
         version_date = Date.yesterday
 
         expect { service.schedule!(version_date) }.to raise_error(
+          StandardError,
+          "Version date must be in the future and after latest scheduled version date",
+        )
+      end
+
+      it "raises an error when a new template version is scheduled to be before an existing template version" do
+        version_date = Date.tomorrow.tomorrow
+        template_version = service.schedule!(version_date)
+
+        expect { service.schedule!(Date.tomorrow) }.to raise_error(
           StandardError,
           "Version date must be in the future and after latest scheduled version date",
         )
