@@ -30,7 +30,7 @@ class PermitApplication < ApplicationRecord
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       status: status,
-      jurisdiction_id: jurisdiction.id
+      jurisdiction_id: jurisdiction.id,
     }
   end
 
@@ -42,10 +42,7 @@ class PermitApplication < ApplicationRecord
   def form_json
     #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
     #need to look up jurisidcitional version and enablement as well
-    jurisdiction
-      .requirement_templates
-      .find_by(activity: activity, permit_type: permit_type)
-      &.to_form_json
+    jurisdiction.template_form_json(activity, permit_type)
   end
 
   def number_prefix
@@ -88,7 +85,7 @@ class PermitApplication < ApplicationRecord
           number_prefix,
           new_integer / 1_000_000 % 1000,
           new_integer / 1000 % 1000,
-          new_integer % 1000
+          new_integer % 1000,
         )
     else
       # Start with the initial number if there are no previous numbers
@@ -101,11 +98,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def requirements_lookups
-    RequirementTemplate.find_by(
-      activity: activity,
-      permit_type: permit_type,
-      status: "published"
-    )&.lookup_props
+    RequirementTemplate.find_by(activity: activity, permit_type: permit_type, status: "published")&.lookup_props
   end
 
   #TODO: move automated compliance and field empties into concern or service?
@@ -124,10 +117,7 @@ class PermitApplication < ApplicationRecord
   def submission_field_is_empty?(field_id, requirement)
     return true if submission_data.blank?
     if requirement.input_options.dig("computed_compliance", "value_on")
-      supporting_documents
-        .find_by_id(submission_data.dig("data", field_id, "id"))
-        &.compliance_data
-        .blank?
+      supporting_documents.find_by_id(submission_data.dig("data", field_id, "id"))&.compliance_data.blank?
     else
       submission_data.dig("data", field_id).blank?
     end
@@ -142,8 +132,7 @@ class PermitApplication < ApplicationRecord
 
   def automated_compliance_requirements_for_module(compliance_module_name)
     automated_compliance_requirements.select do |field_id, req|
-      req.input_options.dig("computed_compliance", "module") ==
-        compliance_module_name
+      req.input_options.dig("computed_compliance", "module") == compliance_module_name
     end
   end
 
@@ -155,8 +144,6 @@ class PermitApplication < ApplicationRecord
   end
 
   def submitter_must_have_role
-    unless submitter&.submitter?
-      errors.add(:submitter, "must have the submitter role")
-    end
+    errors.add(:submitter, "must have the submitter role") unless submitter&.submitter?
   end
 end

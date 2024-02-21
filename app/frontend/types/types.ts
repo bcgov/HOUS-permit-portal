@@ -68,6 +68,7 @@ export interface IFormIORequirement {
   key: string
   type: string
   input: true
+  validation: { required: boolean }
   label: string
   widget?: any
 }

@@ -45,6 +45,9 @@ export const PermitApplicationModel = types
         }, [] as IFormIOBlock[])
         .filter((outNull) => outNull)
     },
+    sectionKey(sectionId) {
+      return `section${sectionId}`
+    },
     blockKey(sectionId, blockId) {
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
@@ -63,16 +66,24 @@ export const PermitApplicationModel = types
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
     },
     getIsBlockPopulated(sectionId, blockId) {
-      const keyPrefix = self.blockKey(sectionId, blockId)
+      const sectionKey = self.sectionKey(sectionId)
+      const blockKey = self.blockKey(sectionId, blockId)
 
       if (!self.submissionData) return false
-      const atLeastOnePrefixKey = Object.keys(self.submissionData).some((key) => key.startsWith(keyPrefix))
 
-      if (!atLeastOnePrefixKey) return false
+      const sectionObject = self.submissionData.data[sectionKey]
 
-      for (const key in self.submissionData.data) {
-        if (key.startsWith(keyPrefix) && !self.submissionData[key]) {
-          // Found a key starting with keyPrefix but its value is falsy
+      if (!sectionObject) return false
+
+      const atLeastOneRequiredPrefixKey = Object.keys(sectionObject).some((key) => {
+        return key.startsWith(blockKey)
+      })
+
+      if (!atLeastOneRequiredPrefixKey) return false
+
+      for (const key in sectionObject) {
+        if (key.startsWith(blockKey) && !sectionObject[key]) {
+          // Found a key starting with blockKey but its value is falsy
           return false
         }
       }

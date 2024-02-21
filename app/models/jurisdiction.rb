@@ -11,7 +11,7 @@ class Jurisdiction < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_requirement_templates
-  has_many :requirement_templates, through: :jurisdiction_requirement_templates
+  # has_many :requirement_templates, through: :jurisdiction_requirement_templates
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
@@ -22,6 +22,18 @@ class Jurisdiction < ApplicationRecord
   accepts_nested_attributes_for :contacts
 
   before_create :assign_unique_prefix
+
+  def requirement_templates
+    # TODO: THIS IS STUBBED FOR NOW
+    # big changes are coming to the jurisdiction specific form templates, so just use all for now
+    RequirementTemplate.all
+  end
+
+  def template_form_json(activity, permit_type)
+    # TODO: THIS IS STUBBED FOR NOW
+    # big changes are coming to the jurisdiction specific form templates, so just use any template that has sections for now
+    RequirementTemplateSection.first.requirement_template.to_form_json
+  end
 
   def review_managers
     users.review_managers

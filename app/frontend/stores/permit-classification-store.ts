@@ -68,6 +68,7 @@ export const PermitClassificationStoreModel = types
         EPermitClassificationType.PermitType,
         publishedOnly,
         null,
+        null,
         pid
       )
       return response.data.data

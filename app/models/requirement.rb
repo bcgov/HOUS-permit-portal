@@ -35,8 +35,12 @@ class Requirement < ApplicationRecord
     email: {
       type: "simpleemail",
     },
+    # TODO: figure out why these address fields don't work
+    # address: {
+    #   type: "simpleaddressadvanced",
+    # },
     address: {
-      type: "simpleaddressadvanced",
+      type: "simpletextfield",
     },
     bcaddress: {
       type: "bcaddress",
@@ -115,6 +119,9 @@ class Requirement < ApplicationRecord
       key: key(requirement_block_key),
       type: input_type,
       input: true,
+      validation: {
+        required: true,
+      },
       label: label,
       widget: {
         type: "input",

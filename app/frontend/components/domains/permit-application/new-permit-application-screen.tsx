@@ -100,7 +100,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                       return (
                         <PermitTypeRadioSelect
                           w="full"
-                          fetchOptions={() => fetchPermitTypeOptions(true)}
+                          fetchOptions={() => fetchPermitTypeOptions(true, pidWatch)}
                           onChange={onChange}
                           value={value}
                           isLoading={isLoading}
