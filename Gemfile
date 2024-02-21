@@ -69,6 +69,7 @@ group :development, :test do
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "vcr", "~> 6.2"
+  gem "timecop", "~> 0.9.8"
 end
 
 group :development do
@@ -89,3 +90,4 @@ group :development do
 end
 
 gem "faraday-multipart", "~> 1.0"
+
