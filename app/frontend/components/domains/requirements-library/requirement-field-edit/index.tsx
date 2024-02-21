@@ -99,6 +99,82 @@ const requirementsComponentMap = {
     )
   },
 
+  [ERequirementType.phone]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    return (
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <i className="fa fa-phone"></i>
+          </InputLeftElement>
+          <Input bg={"white"} isReadOnly />
+        </InputGroup>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
+    )
+  },
+
+  [ERequirementType.email]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    return (
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <i className="fa fa-envelope"></i>
+          </InputLeftElement>
+          <Input bg={"white"} isReadOnly />
+        </InputGroup>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
+    )
+  },
+
   [ERequirementType.address]: function <TFieldValues>({
     editableLabelProps,
     editableHelperTextProps,

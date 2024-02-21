@@ -299,6 +299,8 @@ const options = {
             signature: "Signature",
             generalContact: "General Contact",
             fileUpload: "File Upload",
+            phone: "Phone",
+            email: "E-mail",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
           unitLabels: {

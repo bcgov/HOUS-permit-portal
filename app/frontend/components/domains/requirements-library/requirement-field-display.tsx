@@ -55,6 +55,42 @@ const requirementsComponentMap = {
     )
   },
 
+  [ERequirementType.phone]({ label, helperText, labelProps }: TRequirementProps) {
+    const { t } = useTranslation()
+    return (
+      <FormControl isReadOnly>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.phone")}
+        </FormLabel>
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <i className="fa fa-phone"></i>
+          </InputLeftElement>
+          <Input bg={"white"} />
+        </InputGroup>
+        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      </FormControl>
+    )
+  },
+
+  [ERequirementType.email]({ label, helperText, labelProps }: TRequirementProps) {
+    const { t } = useTranslation()
+    return (
+      <FormControl isReadOnly>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.email")}
+        </FormLabel>
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <i className="fa fa-envelope"></i>
+          </InputLeftElement>
+          <Input bg={"white"} />
+        </InputGroup>
+        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      </FormControl>
+    )
+  },
+
   [ERequirementType.address]({ label, helperText, labelProps }: TRequirementProps) {
     const { t } = useTranslation()
     return (
