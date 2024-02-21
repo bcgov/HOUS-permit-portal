@@ -16,6 +16,7 @@ export const PermitApplicationStoreModel = types
     types.model("PermitApplicationStore", {
       permitApplicationMap: types.map(PermitApplicationModel),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
+      isFetchingPermitApplications: types.optional(types.boolean, false),
     }),
     createSearchModel<EPermitApplicationSortFields>("searchPermitApplications")
   )
@@ -111,12 +112,14 @@ export const PermitApplicationStoreModel = types
     }),
     // Example of an asynchronous action to fetch permitapplications from an API
     fetchPermitApplications: flow(function* () {
+      self.isFetchingPermitApplications = true
       const response: any = yield self.environment.api.fetchPermitApplications()
       if (response.ok) {
         let responseData = response.data.data
         self.mergeUpdateAll(responseData, "permitApplicationMap")
         //TODO: add pagination
       }
+      self.isFetchingPermitApplications = false
       return response.ok
     }),
     fetchPermitApplication: flow(function* (id: string) {
