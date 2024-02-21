@@ -80,6 +80,8 @@ export enum ETagType {
 
 export enum ERequirementType {
   text = "text",
+  phone = "phone",
+  email = "email",
   address = "address",
   date = "date",
   number = "number",
@@ -87,11 +89,9 @@ export enum ERequirementType {
   radio = "radio",
   checkbox = "checkbox",
   select = "select",
+  file = "file",
   signature = "signature",
   generalContact = "general_contact",
-  fileUpload = "file",
-  phone = "phone",
-  email = "email",
   bcaddress = "bcaddress",
 }
 
