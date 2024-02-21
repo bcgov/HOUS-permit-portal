@@ -119,15 +119,15 @@ class Requirement < ApplicationRecord
       key: key(requirement_block_key),
       type: input_type,
       input: true,
-      validation: {
-        required: true,
-        # required: false
-      },
       label: label,
       widget: {
         type: "input",
       },
     }.merge!(formio_type_options)
+
+    json.merge!({ description: hint }) if hint
+
+    json.merge!({ validate: { required: true } }) if required
 
     if input_type_select? || input_type_multi_option_select?
       json.merge!({ data: { values: input_options["value_options"] } })
