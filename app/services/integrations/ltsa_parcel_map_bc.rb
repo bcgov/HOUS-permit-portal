@@ -6,15 +6,20 @@ class Integrations::LtsaParcelMapBc
     @api_path = parsed_url.path
   end
 
+  def get_details_by_pid(
+    pid:,
+    fields: "PID,PARCEL_STATUS,PARCEL_NAME,PARCEL_CLASS,OWNER_TYPE,MUNICIPALITY,REGIONAL_DISTRICT,WHEN_UPDATED,FEATURE_AREA_SQM"
+  )
+    @client.get(
+      "query?f=json&returnIdsOnly=false&returnCountOnly=false&where=PID='#{pid}'&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=#{fields}",
+    )
+  end
+
   def get_feature_attributes_by_pid(
     pid:,
     fields: "PID,PARCEL_STATUS,PARCEL_NAME,PARCEL_CLASS,OWNER_TYPE,MUNICIPALITY,REGIONAL_DISTRICT,WHEN_UPDATED,FEATURE_AREA_SQM"
   )
-    response =
-      @client.get(
-        "query?f=json&returnIdsOnly=false&returnCountOnly=false&where=PID='#{pid}'&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=#{fields}",
-      )
-
+    response = get_details_by_pid(pid: pid, fields: fields)
     if response.success?
       #assumes there is one layer to these features at the moment
       return response.body.dig("features", 0, "attributes")
