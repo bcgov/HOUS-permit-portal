@@ -89,7 +89,7 @@ export enum ERequirementType {
   select = "select",
   signature = "signature",
   generalContact = "general_contact",
-  fileUpload = "file",
+  file = "file",
   phone = "phone",
   email = "email",
   bcaddress = "bcaddress",

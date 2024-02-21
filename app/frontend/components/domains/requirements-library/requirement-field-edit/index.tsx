@@ -454,6 +454,39 @@ const requirementsComponentMap = {
       </Stack>
     )
   },
+
+  [ERequirementType.file]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    return (
+      <Stack spacing={4}>
+        <EditableInputWithControls
+          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
+          {...editableLabelProps}
+        />
+        <i className="fa fa-cloud-upload"></i>
+        <EditableInputWithControls
+          initialHint={t("requirementsLibrary.modals.addHelpText")}
+          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+          {...editableHelperTextProps}
+        />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
+    )
+  },
 }
 
 type TProps<TFieldValues> = {

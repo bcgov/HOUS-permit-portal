@@ -185,6 +185,19 @@ const requirementsComponentMap = {
       </FormControl>
     )
   },
+
+  [ERequirementType.file]({ label, helperText, labelProps }: TRequirementProps) {
+    const { t } = useTranslation()
+    return (
+      <FormControl isReadOnly>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.fileUpload")}
+        </FormLabel>
+        <i className="fa fa-cloud-upload"></i>
+        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      </FormControl>
+    )
+  },
 }
 
 type TProps = { requirementType: ERequirementType } & TRequirementProps
