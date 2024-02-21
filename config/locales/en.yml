@@ -43,7 +43,6 @@ en:
           attributes:
             uid:
               taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
-
   arbitrary_message_construct:
     devise:
       failure:
@@ -204,7 +203,7 @@ en:
         message: "%{error_message}"
       create_success:
         title: ""
-        message: "New permit_application created successfully!"
+        message: "New permit application started!"
       update_error:
         title: Oops
         message: "%{error_message}"
@@ -226,5 +225,5 @@ en:
       completion_title: "Completion"
       signoff_panel_title: "Sign and Submit"
       signoff_checkbox_title: "Sign Off"
-      signoff_checkbox_label: "Lorem Ipsum I hereby certify that the information provided in this application is true, complete, and accurate to the best of my knowledge and belief. By checking this box, I am electronically signing this application and agree to abide by the terms and conditions of the permit and all applicable laws and regulations."
+      signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Submit"

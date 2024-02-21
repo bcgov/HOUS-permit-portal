@@ -42,8 +42,7 @@ class PermitApplication < ApplicationRecord
   def form_json
     #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
     #need to look up jurisidcitional version and enablement as well
-
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type, status: "published")&.to_form_json
+    jurisdiction.template_form_json(activity, permit_type)
   end
 
   def number_prefix

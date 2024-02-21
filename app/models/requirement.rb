@@ -35,8 +35,12 @@ class Requirement < ApplicationRecord
     email: {
       type: "simpleemail",
     },
+    # TODO: figure out why these address fields don't work
+    # address: {
+    #   type: "simpleaddressadvanced",
+    # },
     address: {
-      type: "simpleaddressadvanced",
+      type: "simpletextfield",
     },
     bcaddress: {
       type: "bcaddress",
@@ -120,6 +124,10 @@ class Requirement < ApplicationRecord
         type: "input",
       },
     }.merge!(formio_type_options)
+
+    json.merge!({ description: hint }) if hint
+
+    json.merge!({ validate: { required: true } }) if required
 
     if input_type_select? || input_type_multi_option_select?
       json.merge!({ data: { values: input_options["value_options"] } })

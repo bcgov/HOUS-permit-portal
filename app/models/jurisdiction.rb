@@ -1,6 +1,9 @@
 class Jurisdiction < ApplicationRecord
   include ActionView::Helpers::SanitizeHelper
-  searchkick searchable: %i[reverse_qualified_name], word_start: %i[reverse_qualified_name]
+  searchkick searchable: %i[reverse_qualified_name qualified_name],
+             word_start: %i[reverse_qualified_name qualified_name],
+             word_middle: %i[reverse_qualified_name qualified_name],
+             word_end: %i[reverse_qualified_name qualified_name]
 
   # Associations
   has_many :permit_applications
@@ -8,7 +11,7 @@ class Jurisdiction < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_requirement_templates
-  has_many :requirement_templates, through: :jurisdiction_requirement_templates
+  # has_many :requirement_templates, through: :jurisdiction_requirement_templates
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
@@ -19,6 +22,18 @@ class Jurisdiction < ApplicationRecord
   accepts_nested_attributes_for :contacts
 
   before_create :assign_unique_prefix
+
+  def requirement_templates
+    # TODO: THIS IS STUBBED FOR NOW
+    # big changes are coming to the jurisdiction specific form templates, so just use all for now
+    RequirementTemplate.all
+  end
+
+  def template_form_json(activity, permit_type)
+    # TODO: THIS IS STUBBED FOR NOW
+    # big changes are coming to the jurisdiction specific form templates, so just use any template that has sections for now
+    RequirementTemplateSection.first.requirement_template.to_form_json
+  end
 
   def review_managers
     users.review_managers
@@ -49,9 +64,22 @@ class Jurisdiction < ApplicationRecord
     find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(:locality_type)
   end
 
+  def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
+    name = attributes["MUNICIPALITY"]
+    regional_district_name = attributes["REGIONAL_DISTRICT"]
+
+    named_params = { fields: %w[reverse_qualified_name qualified_name], misspellings: { edit_distance: 1 } }
+    return(
+      SubDistrict.search(name, **named_params).first ||
+        RegionalDistrict.search(regional_district_name, **named_params).first
+    )
+  end
+
   def search_data
     {
+      qualified_name: qualified_name,
       reverse_qualified_name: reverse_qualified_name,
+      type: type,
       updated_at: updated_at,
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,

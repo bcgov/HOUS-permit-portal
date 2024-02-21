@@ -1,4 +1,5 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
+import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-tempate-screen"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
@@ -116,13 +117,15 @@ export class Api {
     type,
     published = false,
     permit_type_id: string = null,
-    activity_id: string = null
+    activity_id: string = null,
+    pid: string = null
   ) {
     return this.client.post<IOptionResponse<IPermitType>>(`/permit_classifications/permit_classification_options`, {
-      type: type,
-      published: published,
-      permit_type_id: permit_type_id, // Use empty string if null
-      activity_id: activity_id, // Use empty string if null
+      type,
+      published,
+      permit_type_id,
+      activity_id,
+      pid,
     })
   }
 
@@ -147,6 +150,10 @@ export class Api {
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
       params
     )
+  }
+
+  async createPermitApplication(params: TCreatePermitApplicationFormData) {
+    return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
   }
 
   async createRequirementBlock(params: IRequirementBlockParams) {

@@ -1,6 +1,7 @@
 import { t } from "i18next"
 import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
+import { TCreatePermitApplicationFormData } from "../components/domains/permit-application/new-permit-application-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -15,6 +16,7 @@ export const PermitApplicationStoreModel = types
     types.model("PermitApplicationStore", {
       permitApplicationMap: types.map(PermitApplicationModel),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
+      isFetchingPermitApplications: types.optional(types.boolean, false),
     }),
     createSearchModel<EPermitApplicationSortFields>("searchPermitApplications")
   )
@@ -67,6 +69,14 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
+    createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
+      const { ok, data: response } = yield self.environment.api.createPermitApplication(formData)
+      if (ok && response.data) {
+        self.mergeUpdate(response.data, "permitApplicationMap")
+        return response.data
+      }
+      return false
+    }),
     // Action to add a new PermitApplication
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
@@ -102,12 +112,14 @@ export const PermitApplicationStoreModel = types
     }),
     // Example of an asynchronous action to fetch permitapplications from an API
     fetchPermitApplications: flow(function* () {
+      self.isFetchingPermitApplications = true
       const response: any = yield self.environment.api.fetchPermitApplications()
       if (response.ok) {
         let responseData = response.data.data
         self.mergeUpdateAll(responseData, "permitApplicationMap")
         //TODO: add pagination
       }
+      self.isFetchingPermitApplications = false
       return response.ok
     }),
     fetchPermitApplication: flow(function* (id: string) {

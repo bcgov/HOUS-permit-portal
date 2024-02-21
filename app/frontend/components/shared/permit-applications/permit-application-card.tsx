@@ -54,7 +54,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             fontSize="lg"
             fontWeight="bold"
             color="text.link"
-            to={`${id}/edit`}
+            to={`permit-applications/${id}/edit`}
             rightIcon={<CaretRight size={16} />}
           >
             {nickname}
@@ -103,7 +103,11 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               {number}
             </Text>
           </Show>
-          <RouterLinkButton to={`${id}/edit`} variant="primary" w={{ base: "full", md: "fit-content" }}>
+          <RouterLinkButton
+            to={`permit-applications/${id}/edit`}
+            variant="primary"
+            w={{ base: "full", md: "fit-content" }}
+          >
             {t("ui.resume")}
           </RouterLinkButton>
         </Flex>

@@ -63,10 +63,13 @@ export const PermitClassificationStoreModel = types
     }),
   }))
   .actions((self) => ({
-    fetchPermitTypeOptions: flow(function* (publishedOnly = false) {
+    fetchPermitTypeOptions: flow(function* (publishedOnly = false, pid = null) {
       const response = yield self.environment.api.fetchPermitClassificationOptions(
         EPermitClassificationType.PermitType,
-        publishedOnly
+        publishedOnly,
+        null,
+        null,
+        pid
       )
       return response.data.data
     }),

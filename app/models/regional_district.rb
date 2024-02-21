@@ -5,5 +5,10 @@ class RegionalDistrict < Jurisdiction
     "regional district"
   end
 
+  def self.search(*args, **kwargs)
+    updated_kwargs = kwargs.merge({ where: { type: self.name } })
+    Jurisdiction.search(*args, **updated_kwargs)
+  end
+
   private
 end
