@@ -54,32 +54,9 @@ export const PermitApplicationModel = types
     isRequiredKey(key) {
       let retValue = null
       self.formJson?.components?.forEach((section) => {
-        // if (
-        //   key ===
-        //     "formSubmissionDataRSTsectionfb9400a1-21ff-44fa-9f2d-4094d26cc667|RB1d2f3a02-3627-41b3-afad-b00968f54af9|cell" &&
-        //   section.key === "sectionfb9400a1-21ff-44fa-9f2d-4094d26cc667"
-        // ) {
-        //   debugger
-        // }
         section?.components?.forEach((block) => {
-          // if (
-          //   key ===
-          //     "formSubmissionDataRSTsectionfb9400a1-21ff-44fa-9f2d-4094d26cc667|RB1d2f3a02-3627-41b3-afad-b00968f54af9|cell" &&
-          //   block.key ==
-          //     "formSubmissionDataRSTsectionfb9400a1-21ff-44fa-9f2d-4094d26cc667|RB1d2f3a02-3627-41b3-afad-b00968f54af9"
-          // ) {
-          //   debugger
-          // }
           block?.components?.forEach((input) => {
-            // if (
-            //   key ===
-            //     "formSubmissionDataRSTsectionfb9400a1-21ff-44fa-9f2d-4094d26cc667|RB1d2f3a02-3627-41b3-afad-b00968f54af9|cell" &&
-            //   input.key === key
-            // ) {
-            //   debugger
-            // }
             if (input.key === key) {
-              // debugger
               retValue = input?.validation?.required
             }
           })
@@ -122,16 +99,6 @@ export const PermitApplicationModel = types
 
       const atLeastOneRequiredKey = self.blockHasRequiredKey(sectionId, blockId)
 
-      // if (sectionId == "2a00bdfc-a9ee-4b58-8db4-54e5213e5040" && blockId == "ef2cc94a-d768-42fc-9bc8-2df1878201dc") {
-      //   // Legal assessment block
-      //   debugger
-      // }
-
-      // if (sectionId == "4699c3fb-d77e-486e-b223-687395873a9c" && blockId == "ef86b667-3444-4ebc-9310-c235bdde51e4") {
-      //   // Site plan block
-      //   debugger
-      // }
-
       if (!atLeastOneRequiredKey) return true
 
       const isEmpty = !Object.keys(sectionObject).some((key) => {
@@ -140,22 +107,7 @@ export const PermitApplicationModel = types
 
       if (isEmpty) return false
 
-      // const atLeastOnePrefixKey = Object.keys(sectionObject).some((key) => {
-      //   return key.startsWith(blockKey)
-      // })
-
-      // if (!atLeastOnePrefixKey) return false
-
       for (const key in sectionObject) {
-        if (
-          sectionId == "4699c3fb-d77e-486e-b223-687395873a9c" &&
-          blockId == "ef86b667-3444-4ebc-9310-c235bdde51e4" &&
-          key.startsWith(blockKey)
-        ) {
-          // Site plan block
-          // debugger
-          // self.isRequiredKey(key)
-        }
         if (
           key.startsWith(blockKey) &&
           (!sectionObject[key] || sectionObject[key].length === 0) &&
