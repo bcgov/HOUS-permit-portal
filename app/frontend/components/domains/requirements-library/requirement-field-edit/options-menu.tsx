@@ -43,7 +43,7 @@ export const OptionsMenu = observer(function UnitSelect({ menuButtonProps, onRem
             textDecoration: "underline",
           },
         }}
-        righIcon={<CaretDown />}
+        rightIcon={<CaretDown />}
         {...menuButtonProps}
       >
         <HStack justifyContent={"space-between"} w={"full"}>

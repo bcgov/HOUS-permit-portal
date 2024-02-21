@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   CheckboxProps,
-  FormLabelProps,
   HStack,
   IconButton,
   Input,
@@ -15,7 +14,7 @@ import {
 import { CalendarBlank, MapPin, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { Controller, FieldValues, useFieldArray } from "react-hook-form"
+import { Controller, FieldValues, useController, useFieldArray } from "react-hook-form"
 import { FieldPath, UseFieldArrayProps } from "react-hook-form/dist/types"
 import { UseControllerProps } from "react-hook-form/dist/types/controller"
 import { useTranslation } from "react-i18next"
@@ -27,22 +26,18 @@ import {
 } from "../../../shared/editable-input-with-controls"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 
-const labelProps: Partial<FormLabelProps> = {
-  fontWeight: 700,
+interface IControlProps<TFieldValues extends FieldValues> {
+  controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
 }
 
 type TRequirementEditProps<TFieldValues extends FieldValues> = {
   label?: string
   options?: string[]
   helperText?: string
-  editableLabelProps?: IEditableInputWithControlsProps
-  editableHelperTextProps?: IEditableInputWithControlsProps
-  checkboxProps: {
-    controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
-  } & Partial<CheckboxProps>
-  unitSelectProps?: {
-    controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
-  }
+  editableLabelProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
+  editableHelperTextProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
+  checkboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
+  unitSelectProps?: IControlProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
@@ -50,20 +45,44 @@ type TRequirementEditProps<TFieldValues extends FieldValues> = {
   }
 }
 
-const helperTextStyles = {
-  fontWeight: 400,
-  color: "text.secondary",
-  fontSize: "sm",
-  controlsProps: {
-    iconButtonProps: {
-      sx: {
-        svg: { width: "12px !important", height: "12px !important" },
-      },
-    },
-  },
-}
+const EditableLabel = observer(function EditableLabel<TFieldValues extends FieldValues>({
+  controlProps,
+  ...editableLabelProps
+}: TRequirementEditProps<TFieldValues>["editableLabelProps"]) {
+  const {
+    field: { onChange, value },
+  } = useController(controlProps)
+  const { t } = useTranslation()
+  return (
+    <EditableInputWithControls
+      initialHint={t("ui.clickToEdit")}
+      defaultValue={(value as string) || t("requirementsLibrary.modals.defaultRequirementLabel")}
+      onSubmit={onChange}
+      onCancel={onChange}
+      {...editableLabelProps}
+    />
+  )
+})
 
-const defaultOptions = ["Option", "Option"]
+const EditableHelperText = observer(function EditableLabel<TFieldValues extends FieldValues>({
+  controlProps,
+  ...editableHelperTextProps
+}: TRequirementEditProps<TFieldValues>["editableLabelProps"]) {
+  const {
+    field: { onChange, value },
+  } = useController(controlProps)
+  const { t } = useTranslation()
+  return (
+    <EditableInputWithControls
+      initialHint={t("requirementsLibrary.modals.addHelpText")}
+      placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
+      defaultValue={(value as string) || ""}
+      onSubmit={onChange}
+      onCancel={onChange}
+      {...editableHelperTextProps}
+    />
+  )
+})
 
 const requirementsComponentMap = {
   [ERequirementType.text]: function <TFieldValues>({
@@ -76,16 +95,10 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <Input bg={"white"} isReadOnly />
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
+
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
@@ -109,21 +122,14 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <InputGroup>
           <InputLeftElement pointerEvents="none">
             <i className="fa fa-phone"></i>
           </InputLeftElement>
           <Input bg={"white"} isReadOnly />
         </InputGroup>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
@@ -147,21 +153,14 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <InputGroup>
           <InputLeftElement pointerEvents="none">
             <i className="fa fa-envelope"></i>
           </InputLeftElement>
           <Input bg={"white"} isReadOnly />
         </InputGroup>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
@@ -185,21 +184,14 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <InputGroup>
           <InputLeftElement>
             <MapPin />
           </InputLeftElement>
           <Input bg={"white"} isReadOnly />
         </InputGroup>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
@@ -220,23 +212,17 @@ const requirementsComponentMap = {
   }: TRequirementEditProps<TFieldValues>) {
     const { t } = useTranslation()
     const { controlProps, ...restCheckboxProps } = checkboxProps
+
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <InputGroup w={"166px"}>
           <InputLeftElement>
             <CalendarBlank />
           </InputLeftElement>
           <Input bg={"white"} isReadOnly />
         </InputGroup>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
@@ -268,10 +254,7 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <HStack>
           <Input bg={"white"} isReadOnly w={"130px"} />
           <Controller<TFieldValues>
@@ -279,11 +262,7 @@ const requirementsComponentMap = {
             render={({ field: { onChange, value } }) => <UnitSelect value={value as ENumberUnit} onChange={onChange} />}
           />
         </HStack>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...checkboxControlProps}
           render={({ field: checkboxField }) => (
@@ -307,16 +286,9 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} isReadOnly />
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (
@@ -350,10 +322,7 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <Stack>
           {fields.map((field, idx) => (
             <HStack key={field.id}>
@@ -380,11 +349,7 @@ const requirementsComponentMap = {
           <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
             {t("requirementsLibrary.modals.addOptionButton")}
           </Button>
-          <EditableInputWithControls
-            initialHint={t("requirementsLibrary.modals.addHelpText")}
-            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-            {...editableHelperTextProps}
-          />
+          <EditableHelperText {...editableHelperTextProps} />
         </Stack>
 
         <Controller<TFieldValues>
@@ -420,10 +385,7 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <Stack>
           {fields.map((field, idx) => (
             <HStack key={field.id}>
@@ -450,11 +412,7 @@ const requirementsComponentMap = {
           <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
             {t("requirementsLibrary.modals.addOptionButton")}
           </Button>
-          <EditableInputWithControls
-            initialHint={t("requirementsLibrary.modals.addHelpText")}
-            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-            {...editableHelperTextProps}
-          />
+          <EditableHelperText {...editableHelperTextProps} />
         </Stack>
 
         <Controller<TFieldValues>
@@ -489,10 +447,7 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <Stack>
           {fields.map((field, idx) => (
             <HStack key={field.id}>
@@ -511,11 +466,7 @@ const requirementsComponentMap = {
           <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
             {t("requirementsLibrary.modals.addOptionButton")}
           </Button>
-          <EditableInputWithControls
-            initialHint={t("requirementsLibrary.modals.addHelpText")}
-            placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-            {...editableHelperTextProps}
-          />
+          <EditableHelperText {...editableHelperTextProps} />
         </Stack>
 
         <Controller<TFieldValues>
@@ -541,16 +492,9 @@ const requirementsComponentMap = {
 
     return (
       <Stack spacing={4}>
-        <EditableInputWithControls
-          defaultValue={t("requirementsLibrary.modals.defaultRequirementLabel")}
-          {...editableLabelProps}
-        />
+        <EditableLabel {...editableLabelProps} />
         <i className="fa fa-cloud-upload"></i>
-        <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.addHelpText")}
-          placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-          {...editableHelperTextProps}
-        />
+        <EditableHelperText {...editableHelperTextProps} />
         <Controller<TFieldValues>
           {...controlProps}
           render={({ field: checkboxField }) => (

@@ -2,7 +2,7 @@ import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
-import { Controller, useFieldArray, useFormContext } from "react-hook-form"
+import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementsAttribute } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
@@ -22,6 +22,14 @@ export const FieldsSetup = observer(function FieldsSetup() {
     control,
     name: "requirementsAttributes",
   })
+  const {
+    field: { onChange: onDisplayNameChange, value: displayNameValue },
+  } = useController({
+    control,
+    name: "displayName",
+    rules: { required: true },
+  })
+
   const [requirementIdsToEdit, setRequirementIdsToEdit] = useState<Record<string, boolean>>({})
 
   const toggleRequirementToEdit = (requirementId: string) => {
@@ -48,8 +56,6 @@ export const FieldsSetup = observer(function FieldsSetup() {
     })
   }
 
-  const watchedDisplayName = watch("displayName")
-
   const hasFields = fields.length > 0
 
   function isRequirementInEditMode(id: string) {
@@ -67,12 +73,10 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
             fontWeight={700}
-            value={watchedDisplayName}
-            editableInputProps={{
-              ...register("displayName", { required: true }),
-              "aria-label": "Edit Display Name",
-            }}
-            color={R.isEmpty(watchedDisplayName) ? "text.link" : undefined}
+            defaultValue={displayNameValue || ""}
+            onSubmit={onDisplayNameChange}
+            onCancel={onDisplayNameChange}
+            color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
             aria-label={"Edit Display Name"}
           />
         </Flex>
@@ -140,15 +144,14 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     <RequirementFieldEdit<IRequirementBlockForm>
                       requirementType={requirementType}
                       editableLabelProps={{
+                        controlProps: {
+                          control: control,
+                          name: `requirementsAttributes.${index}.label`,
+                          rules: { required: true },
+                        },
                         color: "text.link",
                         w: `calc(100% - 220px)`,
-                        editableInputProps: {
-                          ...register(`requirementsAttributes.${index}.label`, {
-                            required: true,
-                            value: t("requirementsLibrary.modals.defaultRequirementLabel"),
-                          }),
-                          "aria-label": "Edit Label",
-                        },
+                        "aria-label": "Edit Label",
                       }}
                       editableHelperTextProps={{
                         getStateBasedEditableProps: (isEditing) =>
@@ -158,10 +161,11 @@ export const FieldsSetup = observer(function FieldsSetup() {
                                 color: !!watchedHint ? "text.secondary" : "text.link",
                                 textDecoration: watchedHint ? undefined : "underline",
                               },
-                        editableInputProps: {
-                          ...register(`requirementsAttributes.${index}.hint`),
-                          "aria-label": "Edit Helper Text",
+                        controlProps: {
+                          control: control,
+                          name: `requirementsAttributes.${index}.hint`,
                         },
+                        "aria-label": "Edit Helper Text",
                       }}
                       checkboxProps={{
                         controlProps: {
