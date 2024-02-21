@@ -6,9 +6,10 @@ import { IPermitApplication } from "../../../models/permit-application"
 
 interface IChecklistSideBarProps {
   permitApplication: IPermitApplication
+  completedSections: object
 }
 
-export const ChecklistSideBar = observer(({ permitApplication }: IChecklistSideBarProps) => {
+export const ChecklistSideBar = observer(({ permitApplication, completedSections }: IChecklistSideBarProps) => {
   const { formJson } = permitApplication
   const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass, getIsBlockPopulated } =
     permitApplication
@@ -56,7 +57,7 @@ export const ChecklistSideBar = observer(({ permitApplication }: IChecklistSideB
                       >
                         <Flex align="center">
                           <Box w={5} mr={2}>
-                            {getIsBlockPopulated(section.id, block.id) ? (
+                            {completedSections[block.key] ? (
                               <CheckCircle color="#2E8540" size={18} />
                             ) : (
                               <CircleDashed color="#A19F9D" size={18} />

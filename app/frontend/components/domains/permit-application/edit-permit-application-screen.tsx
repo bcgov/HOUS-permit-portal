@@ -19,6 +19,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   // Tracks the submission data from the onChange event for saving as draft
   const [mirroredSubmissionState, setMirroredSubmissionState] = useState(null)
+  const [completedSections, setCompletedSections] = useState({})
 
   const onFormChange = (submission: any) => {
     if (submission.isValid) {
@@ -73,10 +74,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       </Flex>
       <Flex as="main" direction="column" w="full" bg="greys.white" key={"permit-application-show"}>
         <Box w="full">
-          <ChecklistSideBar permitApplication={currentPermitApplication} />
+          <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
           {formJson && (
             <Flex direction="column" pl={24} py={24} pr={288}>
-              <RequirementForm permitApplication={currentPermitApplication} onFormChange={onFormChange} />
+              <RequirementForm
+                permitApplication={currentPermitApplication}
+                onFormChange={onFormChange}
+                onCompletedSectionsChange={setCompletedSections}
+              />
             </Flex>
           )}
         </Box>

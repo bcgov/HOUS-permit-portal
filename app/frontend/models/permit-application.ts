@@ -51,33 +51,8 @@ export const PermitApplicationModel = types
     blockKey(sectionId, blockId) {
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
-    isRequiredKey(key) {
-      let retValue = null
-      self.formJson?.components?.forEach((section) => {
-        section?.components?.forEach((block) => {
-          block?.components?.forEach((input) => {
-            if (input.key === key) {
-              retValue = input?.validation?.required
-            }
-          })
-        })
-      })
-      return retValue
-    },
   }))
   .views((self) => ({
-    blockHasRequiredKey(sectionId, blockId) {
-      const sectionKey = self.sectionKey(sectionId)
-      const blockKey = self.blockKey(sectionId, blockId)
-      const section = self.formJson?.components?.find((c) => c.key === sectionKey)
-      const block = section?.components?.find((b) => b.key === blockKey)
-      return block?.components?.some((i) => i?.validation?.required === true)
-    },
-  }))
-  .views((self) => ({
-    getBlockById: (blockId: string) => {
-      return self.flattenedBlocks.find((block) => block.id === blockId)
-    },
     indexOfBlockId: (blockId: string) => {
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)
     },
@@ -86,38 +61,6 @@ export const PermitApplicationModel = types
     },
     get blockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
-    },
-    getIsBlockPopulated(sectionId, blockId) {
-      const sectionKey = self.sectionKey(sectionId)
-      const blockKey = self.blockKey(sectionId, blockId)
-
-      if (!self.submissionData) return false
-
-      const sectionObject = self.submissionData.data[sectionKey]
-
-      if (!sectionObject) return false
-
-      const atLeastOneRequiredKey = self.blockHasRequiredKey(sectionId, blockId)
-
-      if (!atLeastOneRequiredKey) return true
-
-      const isEmpty = !Object.keys(sectionObject).some((key) => {
-        return key.startsWith(blockKey)
-      })
-
-      if (isEmpty) return false
-
-      for (const key in sectionObject) {
-        if (
-          key.startsWith(blockKey) &&
-          (!sectionObject[key] || sectionObject[key].length === 0) &&
-          self.isRequiredKey(key)
-        ) {
-          // Found a key starting with blockKey but its value is falsy
-          return false
-        }
-      }
-      return true
     },
   }))
   .actions((self) => ({
