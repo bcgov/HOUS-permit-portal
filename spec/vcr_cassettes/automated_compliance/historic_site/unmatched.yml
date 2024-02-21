@@ -1,0 +1,162 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: "<GEO_LTSA_PARCELMAP_REST_URL>/whse/bcgw_pub_whse_human_cultural_economic/MapServer/1/query?f=json&outFields=%2A&returnGeometry=true&where=HISTORIC_SITE_IND%3D%27Y%27+AND+PARCEL_DESCRIPTION%3D%27004920414%27"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      date:
+      - Tue, 13 Feb 2024 00:55:20 GMT
+      server:
+      - ''
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - 1; mode=block
+      vary:
+      - Origin
+      cache-control:
+      - max-age=0,must-revalidate
+      etag:
+      - db4a24e1
+      x-esri-ftiles-cache-compress:
+      - 'true'
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json;charset=UTF-8
+      content-length:
+      - '935'
+      access-control-allow-origin:
+      - "(null)"
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-methods:
+      - POST, GET, OPTIONS, HEAD
+      access-control-allow-headers:
+      - X-Requested-With, Referer, Origin, Content-Type, SOAPAction, Authorization,
+        Accept
+      access-control-max-age:
+      - '1000'
+      x-frame-options:
+      - allow-from (null)
+    body:
+      encoding: UTF-8
+      string: '{"displayFieldName":"COMMON_SITE_NAME","fieldAliases":{"HISTORIC_ENVIRONMENT_ID":"HISTORIC_ENVIRONMENT_ID","HISTORIC_ENVIRONMENT_SITE_ID":"HISTORIC_ENVIRONMENT_SITE_ID","BORDENNUMBER":"BORDENNUMBER","HISTORIC_SITE_IND":"HISTORIC_SITE_IND","REGISTRATION_STATUS":"REGISTRATION_STATUS","COMMON_SITE_NAME":"COMMON_SITE_NAME","OTHER_SITE_NAMES":"OTHER_SITE_NAMES","PARCEL_DESCRIPTION":"PARCEL_DESCRIPTION","STREET_NUMBER":"STREET_NUMBER","STREET_NAME":"STREET_NAME","LOCALITY":"LOCALITY","PROVINCE":"PROVINCE","JURISDICTION_NAMES":"JURISDICTION_NAMES","RECOGNITION_GOVERNMENT":"RECOGNITION_GOVERNMENT","RECOGNITION_GOVERNMENT_LEVEL":"RECOGNITION_GOVERNMENT_LEVEL","RECOGNITION_TYPE":"RECOGNITION_TYPE","RECOGNITION_START_DATE":"RECOGNITION_START_DATE","CONSTRUCTION_YEAR":"CONSTRUCTION_YEAR","CONSTRUCTION_YEAR_QUALIFIER":"CONSTRUCTION_YEAR_QUALIFIER","CONSTRUCTION_YEAR_DATETTYPE":"CONSTRUCTION_YEAR_DATETTYPE","STMT_OF_SIGNIFICANCE_DESC":"STMT_OF_SIGNIFICANCE_DESC","CRHP_IND":"CRHP_IND","ARCHITECT_NAMES":"ARCHITECT_NAMES","BUILDER_NAMES":"BUILDER_NAMES","CURRENT_FUNCTIONAL_CATEGORIES":"CURRENT_FUNCTIONAL_CATEGORIES","HISTORIC_FUNCTIONAL_CATEGORIES":"HISTORIC_FUNCTIONAL_CATEGORIES","AREA_HECTARES":"AREA_HECTARES","FEATURE_AREA_SQM":"FEATURE_AREA_SQM","FEATURE_LENGTH_M":"FEATURE_LENGTH_M","OBJECTID":"OBJECTID","SHAPE.AREA":"SHAPE.AREA","SHAPE.LEN":"SHAPE.LEN"},"geometryType":"esriGeometryPolygon","spatialReference":{"wkid":102190,"latestWkid":3005},"fields":[{"name":"HISTORIC_ENVIRONMENT_ID","type":"esriFieldTypeInteger","alias":"HISTORIC_ENVIRONMENT_ID"},{"name":"HISTORIC_ENVIRONMENT_SITE_ID","type":"esriFieldTypeInteger","alias":"HISTORIC_ENVIRONMENT_SITE_ID"},{"name":"BORDENNUMBER","type":"esriFieldTypeString","alias":"BORDENNUMBER","length":13},{"name":"HISTORIC_SITE_IND","type":"esriFieldTypeString","alias":"HISTORIC_SITE_IND","length":1},{"name":"REGISTRATION_STATUS","type":"esriFieldTypeString","alias":"REGISTRATION_STATUS","length":20},{"name":"COMMON_SITE_NAME","type":"esriFieldTypeString","alias":"COMMON_SITE_NAME","length":150},{"name":"OTHER_SITE_NAMES","type":"esriFieldTypeString","alias":"OTHER_SITE_NAMES","length":600},{"name":"PARCEL_DESCRIPTION","type":"esriFieldTypeString","alias":"PARCEL_DESCRIPTION","length":100},{"name":"STREET_NUMBER","type":"esriFieldTypeString","alias":"STREET_NUMBER","length":10},{"name":"STREET_NAME","type":"esriFieldTypeString","alias":"STREET_NAME","length":50},{"name":"LOCALITY","type":"esriFieldTypeString","alias":"LOCALITY","length":50},{"name":"PROVINCE","type":"esriFieldTypeString","alias":"PROVINCE","length":10},{"name":"JURISDICTION_NAMES","type":"esriFieldTypeString","alias":"JURISDICTION_NAMES","length":1400},{"name":"RECOGNITION_GOVERNMENT","type":"esriFieldTypeString","alias":"RECOGNITION_GOVERNMENT","length":65},{"name":"RECOGNITION_GOVERNMENT_LEVEL","type":"esriFieldTypeString","alias":"RECOGNITION_GOVERNMENT_LEVEL","length":30},{"name":"RECOGNITION_TYPE","type":"esriFieldTypeString","alias":"RECOGNITION_TYPE","length":40},{"name":"RECOGNITION_START_DATE","type":"esriFieldTypeDate","alias":"RECOGNITION_START_DATE","length":8},{"name":"CONSTRUCTION_YEAR","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR","length":10},{"name":"CONSTRUCTION_YEAR_QUALIFIER","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR_QUALIFIER","length":10},{"name":"CONSTRUCTION_YEAR_DATETTYPE","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR_DATETTYPE","length":20},{"name":"STMT_OF_SIGNIFICANCE_DESC","type":"esriFieldTypeString","alias":"STMT_OF_SIGNIFICANCE_DESC","length":4000},{"name":"CRHP_IND","type":"esriFieldTypeString","alias":"CRHP_IND","length":1},{"name":"ARCHITECT_NAMES","type":"esriFieldTypeString","alias":"ARCHITECT_NAMES","length":300},{"name":"BUILDER_NAMES","type":"esriFieldTypeString","alias":"BUILDER_NAMES","length":300},{"name":"CURRENT_FUNCTIONAL_CATEGORIES","type":"esriFieldTypeString","alias":"CURRENT_FUNCTIONAL_CATEGORIES","length":500},{"name":"HISTORIC_FUNCTIONAL_CATEGORIES","type":"esriFieldTypeString","alias":"HISTORIC_FUNCTIONAL_CATEGORIES","length":500},{"name":"AREA_HECTARES","type":"esriFieldTypeDouble","alias":"AREA_HECTARES"},{"name":"FEATURE_AREA_SQM","type":"esriFieldTypeDouble","alias":"FEATURE_AREA_SQM"},{"name":"FEATURE_LENGTH_M","type":"esriFieldTypeDouble","alias":"FEATURE_LENGTH_M"},{"name":"OBJECTID","type":"esriFieldTypeOID","alias":"OBJECTID"},{"name":"SHAPE.AREA","type":"esriFieldTypeDouble","alias":"SHAPE.AREA"},{"name":"SHAPE.LEN","type":"esriFieldTypeDouble","alias":"SHAPE.LEN"}],"features":[]}'
+  recorded_at: Tue, 13 Feb 2024 00:55:20 GMT
+- request:
+    method: get
+    uri: "<GEO_LTSA_PARCELMAP_REST_URL>/whse/bcgw_pub_whse_cadastre/MapServer/0/query?f=json&outFields=PID&returnCountOnly=false&returnGeometry=true&returnIdsOnly=false&spatialRel=esriSpatialRelIntersects&where=PID%3D%27004920414%27"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      date:
+      - Tue, 13 Feb 2024 00:55:20 GMT
+      server:
+      - ''
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - 1; mode=block
+      vary:
+      - Origin
+      cache-control:
+      - max-age=0,must-revalidate
+      etag:
+      - 8f1ced7
+      x-esri-ftiles-cache-compress:
+      - 'true'
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json;charset=UTF-8
+      content-length:
+      - '506'
+      access-control-allow-origin:
+      - "(null)"
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-methods:
+      - POST, GET, OPTIONS, HEAD
+      access-control-allow-headers:
+      - X-Requested-With, Referer, Origin, Content-Type, SOAPAction, Authorization,
+        Accept
+      access-control-max-age:
+      - '1000'
+      x-frame-options:
+      - allow-from (null)
+    body:
+      encoding: UTF-8
+      string: '{"displayFieldName":"PARCEL_NAME","fieldAliases":{"PID":"PID"},"geometryType":"esriGeometryPolygon","spatialReference":{"wkid":102190,"latestWkid":3005},"fields":[{"name":"PID","type":"esriFieldTypeString","alias":"PID","length":9}],"features":[{"attributes":{"PID":"004920414"},"geometry":{"rings":[[[1209646.6718000006,478712.6707000006],[1209657.1593999993,478724.16860000044],[1209660.7565000001,478720.8694000002],[1209670.4297000002,478731.4824000001],[1209729.9145999998,478677.30650000088],[1209696.8468999993,478641.31709999964],[1209690.3472000007,478647.05480000004],[1209683.4916999992,478652.36229999922],[1209676.3089000005,478657.21770000085],[1209668.8285000008,478661.60080000013],[1209661.0814999994,478665.49340000004],[1209653.1001999993,478668.87939999998],[1209644.9174000006,478671.74479999952],[1209636.5672999993,478674.07770000026],[1209628.0843000002,478675.86840000004],[1209611.5759999994,478678.76170000061],[1209644.4203999992,478714.71629999951],[1209646.6718000006,478712.6707000006]]]}}]}'
+  recorded_at: Tue, 13 Feb 2024 00:55:20 GMT
+- request:
+    method: get
+    uri: "<GEO_LTSA_PARCELMAP_REST_URL>/whse/bcgw_pub_whse_human_cultural_economic/MapServer/1/query?f=json&geometry=%7B%22rings%22%3A%5B%5B%5B1209646.6718000006%2C478712.6707000006%5D%2C%5B1209657.1593999993%2C478724.16860000044%5D%2C%5B1209660.7565000001%2C478720.8694000002%5D%2C%5B1209670.4297000002%2C478731.4824000001%5D%2C%5B1209729.9145999998%2C478677.3065000009%5D%2C%5B1209696.8468999993%2C478641.31709999964%5D%2C%5B1209690.3472000007%2C478647.05480000004%5D%2C%5B1209683.4916999992%2C478652.3622999992%5D%2C%5B1209676.3089000005%2C478657.21770000085%5D%2C%5B1209668.8285000008%2C478661.60080000013%5D%2C%5B1209661.0814999994%2C478665.49340000004%5D%2C%5B1209653.1001999993%2C478668.8794%5D%2C%5B1209644.9174000006%2C478671.7447999995%5D%2C%5B1209636.5672999993%2C478674.07770000026%5D%2C%5B1209628.0843000002%2C478675.86840000004%5D%2C%5B1209611.5759999994%2C478678.7617000006%5D%2C%5B1209644.4203999992%2C478714.7162999995%5D%2C%5B1209646.6718000006%2C478712.6707000006%5D%5D%5D%7D&geometryType=esriGeometryPolygon&outFields=%2A&returnGeometry=true&spatialRel=esriSpatialRelIntersects&where=HISTORIC_SITE_IND%3D%27Y%27"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      date:
+      - Tue, 13 Feb 2024 00:55:20 GMT
+      server:
+      - ''
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - 1; mode=block
+      vary:
+      - Origin
+      cache-control:
+      - max-age=0,must-revalidate
+      etag:
+      - db4a24e1
+      x-esri-ftiles-cache-compress:
+      - 'true'
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json;charset=UTF-8
+      content-length:
+      - '935'
+      access-control-allow-origin:
+      - "(null)"
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-methods:
+      - POST, GET, OPTIONS, HEAD
+      access-control-allow-headers:
+      - X-Requested-With, Referer, Origin, Content-Type, SOAPAction, Authorization,
+        Accept
+      access-control-max-age:
+      - '1000'
+      x-frame-options:
+      - allow-from (null)
+    body:
+      encoding: UTF-8
+      string: '{"displayFieldName":"COMMON_SITE_NAME","fieldAliases":{"HISTORIC_ENVIRONMENT_ID":"HISTORIC_ENVIRONMENT_ID","HISTORIC_ENVIRONMENT_SITE_ID":"HISTORIC_ENVIRONMENT_SITE_ID","BORDENNUMBER":"BORDENNUMBER","HISTORIC_SITE_IND":"HISTORIC_SITE_IND","REGISTRATION_STATUS":"REGISTRATION_STATUS","COMMON_SITE_NAME":"COMMON_SITE_NAME","OTHER_SITE_NAMES":"OTHER_SITE_NAMES","PARCEL_DESCRIPTION":"PARCEL_DESCRIPTION","STREET_NUMBER":"STREET_NUMBER","STREET_NAME":"STREET_NAME","LOCALITY":"LOCALITY","PROVINCE":"PROVINCE","JURISDICTION_NAMES":"JURISDICTION_NAMES","RECOGNITION_GOVERNMENT":"RECOGNITION_GOVERNMENT","RECOGNITION_GOVERNMENT_LEVEL":"RECOGNITION_GOVERNMENT_LEVEL","RECOGNITION_TYPE":"RECOGNITION_TYPE","RECOGNITION_START_DATE":"RECOGNITION_START_DATE","CONSTRUCTION_YEAR":"CONSTRUCTION_YEAR","CONSTRUCTION_YEAR_QUALIFIER":"CONSTRUCTION_YEAR_QUALIFIER","CONSTRUCTION_YEAR_DATETTYPE":"CONSTRUCTION_YEAR_DATETTYPE","STMT_OF_SIGNIFICANCE_DESC":"STMT_OF_SIGNIFICANCE_DESC","CRHP_IND":"CRHP_IND","ARCHITECT_NAMES":"ARCHITECT_NAMES","BUILDER_NAMES":"BUILDER_NAMES","CURRENT_FUNCTIONAL_CATEGORIES":"CURRENT_FUNCTIONAL_CATEGORIES","HISTORIC_FUNCTIONAL_CATEGORIES":"HISTORIC_FUNCTIONAL_CATEGORIES","AREA_HECTARES":"AREA_HECTARES","FEATURE_AREA_SQM":"FEATURE_AREA_SQM","FEATURE_LENGTH_M":"FEATURE_LENGTH_M","OBJECTID":"OBJECTID","SHAPE.AREA":"SHAPE.AREA","SHAPE.LEN":"SHAPE.LEN"},"geometryType":"esriGeometryPolygon","spatialReference":{"wkid":102190,"latestWkid":3005},"fields":[{"name":"HISTORIC_ENVIRONMENT_ID","type":"esriFieldTypeInteger","alias":"HISTORIC_ENVIRONMENT_ID"},{"name":"HISTORIC_ENVIRONMENT_SITE_ID","type":"esriFieldTypeInteger","alias":"HISTORIC_ENVIRONMENT_SITE_ID"},{"name":"BORDENNUMBER","type":"esriFieldTypeString","alias":"BORDENNUMBER","length":13},{"name":"HISTORIC_SITE_IND","type":"esriFieldTypeString","alias":"HISTORIC_SITE_IND","length":1},{"name":"REGISTRATION_STATUS","type":"esriFieldTypeString","alias":"REGISTRATION_STATUS","length":20},{"name":"COMMON_SITE_NAME","type":"esriFieldTypeString","alias":"COMMON_SITE_NAME","length":150},{"name":"OTHER_SITE_NAMES","type":"esriFieldTypeString","alias":"OTHER_SITE_NAMES","length":600},{"name":"PARCEL_DESCRIPTION","type":"esriFieldTypeString","alias":"PARCEL_DESCRIPTION","length":100},{"name":"STREET_NUMBER","type":"esriFieldTypeString","alias":"STREET_NUMBER","length":10},{"name":"STREET_NAME","type":"esriFieldTypeString","alias":"STREET_NAME","length":50},{"name":"LOCALITY","type":"esriFieldTypeString","alias":"LOCALITY","length":50},{"name":"PROVINCE","type":"esriFieldTypeString","alias":"PROVINCE","length":10},{"name":"JURISDICTION_NAMES","type":"esriFieldTypeString","alias":"JURISDICTION_NAMES","length":1400},{"name":"RECOGNITION_GOVERNMENT","type":"esriFieldTypeString","alias":"RECOGNITION_GOVERNMENT","length":65},{"name":"RECOGNITION_GOVERNMENT_LEVEL","type":"esriFieldTypeString","alias":"RECOGNITION_GOVERNMENT_LEVEL","length":30},{"name":"RECOGNITION_TYPE","type":"esriFieldTypeString","alias":"RECOGNITION_TYPE","length":40},{"name":"RECOGNITION_START_DATE","type":"esriFieldTypeDate","alias":"RECOGNITION_START_DATE","length":8},{"name":"CONSTRUCTION_YEAR","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR","length":10},{"name":"CONSTRUCTION_YEAR_QUALIFIER","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR_QUALIFIER","length":10},{"name":"CONSTRUCTION_YEAR_DATETTYPE","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR_DATETTYPE","length":20},{"name":"STMT_OF_SIGNIFICANCE_DESC","type":"esriFieldTypeString","alias":"STMT_OF_SIGNIFICANCE_DESC","length":4000},{"name":"CRHP_IND","type":"esriFieldTypeString","alias":"CRHP_IND","length":1},{"name":"ARCHITECT_NAMES","type":"esriFieldTypeString","alias":"ARCHITECT_NAMES","length":300},{"name":"BUILDER_NAMES","type":"esriFieldTypeString","alias":"BUILDER_NAMES","length":300},{"name":"CURRENT_FUNCTIONAL_CATEGORIES","type":"esriFieldTypeString","alias":"CURRENT_FUNCTIONAL_CATEGORIES","length":500},{"name":"HISTORIC_FUNCTIONAL_CATEGORIES","type":"esriFieldTypeString","alias":"HISTORIC_FUNCTIONAL_CATEGORIES","length":500},{"name":"AREA_HECTARES","type":"esriFieldTypeDouble","alias":"AREA_HECTARES"},{"name":"FEATURE_AREA_SQM","type":"esriFieldTypeDouble","alias":"FEATURE_AREA_SQM"},{"name":"FEATURE_LENGTH_M","type":"esriFieldTypeDouble","alias":"FEATURE_LENGTH_M"},{"name":"OBJECTID","type":"esriFieldTypeOID","alias":"OBJECTID"},{"name":"SHAPE.AREA","type":"esriFieldTypeDouble","alias":"SHAPE.AREA"},{"name":"SHAPE.LEN","type":"esriFieldTypeDouble","alias":"SHAPE.LEN"}],"features":[]}'
+  recorded_at: Tue, 13 Feb 2024 00:55:20 GMT
+recorded_with: VCR 6.2.0
