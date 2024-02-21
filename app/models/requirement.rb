@@ -121,6 +121,7 @@ class Requirement < ApplicationRecord
       input: true,
       validation: {
         required: true,
+        # required: false
       },
       label: label,
       widget: {
