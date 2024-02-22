@@ -54,7 +54,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             fontSize="lg"
             fontWeight="bold"
             color="text.link"
-            to={`permit-applications/${id}/edit`}
+            to={`/permit-applications/${id}/edit`}
             rightIcon={<CaretRight size={16} />}
           >
             {nickname}
@@ -104,7 +104,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             </Text>
           </Show>
           <RouterLinkButton
-            to={`permit-applications/${id}/edit`}
+            to={`/permit-applications/${id}/edit`}
             variant="primary"
             w={{ base: "full", md: "fit-content" }}
           >
