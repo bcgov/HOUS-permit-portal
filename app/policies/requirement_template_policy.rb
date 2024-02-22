@@ -15,6 +15,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def schedule?
+    create?
+  end
+
   def destroy?
     create?
   end

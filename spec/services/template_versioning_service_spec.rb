@@ -47,6 +47,16 @@ RSpec.describe TemplateVersioningService, type: :service do
           "Version date must be in the future and after latest scheduled version date",
         )
       end
+
+      it "raises an error when a new template version is scheduled for the same day as an existing template version" do
+        version_date = Date.tomorrow
+        template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+
+        expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
+          StandardError,
+          "Version date must be in the future and after latest scheduled version date",
+        )
+      end
     end
 
     context "state of the template" do
