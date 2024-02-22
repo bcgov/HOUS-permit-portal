@@ -7,6 +7,7 @@ The application relies on various deployments and services in order to run. Thes
 There are helm charts available for each major service / application. Right now they are:
 
 - App (includes web, workers, etc.)
+- Crunchy Postgres (used for production HA PG - uses: https://github.com/bcgov/crunchy-postgres v0.6.0)
 
 Run each helm chart by going into the respective folder and issuing helm commands, here are some examples:
 
