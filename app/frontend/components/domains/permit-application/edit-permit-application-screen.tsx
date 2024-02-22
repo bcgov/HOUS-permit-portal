@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { useInterval } from "../../../hooks/use-interval"
 import { handleScrollToBottom } from "../../../utils/utility-funcitons"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -22,16 +23,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const [completedSections, setCompletedSections] = useState({})
 
   const onFormChange = (submission: any) => {
-    if (submission.isValid) {
-      delete submission.changed
-      delete submission.isValid
-      setMirroredSubmissionState(submission)
-    }
+    delete submission.changed
+    delete submission.isValid
+    setMirroredSubmissionState(submission)
   }
 
-  const handleClickSave = () => {
+  const handleSave = () => {
     currentPermitApplication.update({ submissionData: mirroredSubmissionState })
   }
+
+  useInterval(handleSave, 60000) // save progress every minute
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
@@ -64,7 +65,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           </Flex>
         </HStack>
         <HStack gap={4}>
-          <Button variant="primary" onClick={handleClickSave}>
+          <Button variant="primary" onClick={handleSave}>
             {t("permitApplication.edit.saveDraft")}
           </Button>
           <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
