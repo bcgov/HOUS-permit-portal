@@ -1,0 +1,40 @@
+STAGE: dev
+appName: "hous-permit-portal"
+
+route:
+  spec:
+    host: "hous-permit-portal.apps.silver.devops.gov.bc.ca"
+
+vaultNamespace: "bb18ab-nonprod"
+
+deployments:
+  - process: web
+    replicaCount: 1
+    spec:
+      containers:
+        includeCommand: false
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+  - process: worker
+    replicaCount: 1
+    spec:
+      containers:
+        includeCommand: true
+        command:
+          - /bin/sh
+          - "-c"
+        args:
+          - >-
+            set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec sidekiq -C ./config/sidekiq_qa.yml
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi

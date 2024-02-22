@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
+  name: "{{ .Values.STAGE }}-{{ .Values.appName }}-route"
+  namespace: "bb18ab-{{ .Values.STAGE }}"
+spec:
+  host: "{{ .Values.route.spec.host }}"
+  port:
+    targetPort: 3000-tcp
+  # manage certs manually for now
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: "{{ .Values.STAGE }}-{{ .Values.appName }}-web"
+    weight: 100
+  wildcardPolicy: None

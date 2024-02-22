@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
+  name: allow-from-openshift-ingress
+  namespace: "bb18ab-{{ .Values.STAGE }}"
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network.openshift.io/policy-group: ingress
+  podSelector: {}
+  policyTypes:
+    - Ingress
+status: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
+  name: allow-same-namespace
+  namespace: "bb18ab-{{ .Values.STAGE }}"
+spec:
+  ingress:
+    - from:
+        - podSelector: {}
+  podSelector: {}
+  policyTypes:
+    - Ingress
+status: {}
