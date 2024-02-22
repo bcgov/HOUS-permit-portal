@@ -10,17 +10,15 @@ namespace :db do
     # oc rsync ~/seeds/HOUS-permit-portal/TEST/ test-hous-permit-portal-6b7dc5bff8-z48wq:/app/tmp/
     csv_file_path = Rails.root.join("tmp", "user_data.csv")
 
+    i = 0
+    # Will acquire 3 jurisdictions because Nanaimo is 2
+    jurisdictions = Jurisdiction.where(name: %w[Nanaimo Vancouver])
     CSV.foreach(csv_file_path, headers: true) do |row|
       # first_name,last_name,email,username,role,password
-      i = 0
-      jurisdictions =
-        Jurisdiction.where(name: ["Nanaimo", "Vancouver", "The Capital"])
-
       if row["role"] == "reviewer" || row["role"] == "review_manager"
-        j = jurisdictions[i % 4]
+        j = jurisdictions[i % 3]
         i += 1
       end
-
       User.create!(
         first_name: row["first_name"],
         last_name: row["last_name"],
