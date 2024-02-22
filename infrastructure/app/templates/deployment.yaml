@@ -60,7 +60,9 @@ spec:
           terminationMessagePath: "/{{ $.Values.STAGE }}/termination-log"
           terminationMessagePolicy: File
           {{- if .spec.containers.includeCommand }}
-          command: {{ .spec.containers.command }}
+          command:
+          - /bin/sh
+          - '-c'
           args: {{ .spec.containers.args }}
           {{- end }}
       dnsPolicy: ClusterFirst

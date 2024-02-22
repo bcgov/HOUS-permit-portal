@@ -25,9 +25,6 @@ deployments:
     spec:
       containers:
         includeCommand: true
-        command:
-          - /bin/sh
-          - "-c"
         args:
           - >-
             set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec sidekiq -C ./config/sidekiq_qa.yml
