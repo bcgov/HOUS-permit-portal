@@ -29,7 +29,11 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
           <LoadingScreen />
         ) : (
           <Flex as="section" direction="column" p={6} gap={6}>
-            <RouterLinkButton to="new" variant="primary" alignSelf={{ base: "center", md: "flex-start" }}>
+            <RouterLinkButton
+              to="/permit-applicaiton/new"
+              variant="primary"
+              alignSelf={{ base: "center", md: "flex-start" }}
+            >
               {t("permitApplication.start")}
             </RouterLinkButton>
             <Flex

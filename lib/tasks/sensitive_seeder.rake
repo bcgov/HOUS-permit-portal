@@ -8,13 +8,14 @@ namespace :db do
     csv_file_path = Rails.root.join("tmp", "seeds", "user_data.csv")
 
     CSV.foreach(csv_file_path, headers: true) do |row|
-      # first_name,last_name,email,username,role
+      # first_name,last_name,email,username,role,password
       User.create!(
         first_name: row["first_name"],
-        last_name: row["last_name"], # Make sure this matches the CSV header exactly
+        last_name: row["last_name"],
         email: row["email"],
         username: row["username"],
-        role: row["role"] # Assuming you have a 'role' attribute; adjust as necessary
+        role: row["role"],
+        password: row["password"]
       ).confirm
     rescue ActiveRecord::RecordInvalid => e
       puts "Skipping invalid user record: #{e.message}"
