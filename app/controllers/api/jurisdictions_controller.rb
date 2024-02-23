@@ -1,7 +1,7 @@
 class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::Jurisdictions
   include Api::Concerns::Search::JurisdictionUsers
-  include Api::Concerns::Search::JurisdictionPermitApplications
+  include Api::Concerns::Search::PermitApplications
 
   before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
@@ -90,7 +90,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_permit_applications
     authorize @jurisdiction
     perform_permit_application_search
-    authorized_results = apply_search_authorization(@permit_application_search.results, "search_permit_applications")
+    authorized_results = apply_search_authorization(@permit_application_search.results, "index")
     render_success authorized_results,
                    nil,
                    {

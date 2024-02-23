@@ -15,16 +15,12 @@ RSpec.describe PermitApplicationPolicy do
   context "for a submitter" do
     let(:user) { submitter }
 
-    it "permits index" do
-      expect(subject.index?).to be true
-    end
-
     it "permits show" do
       expect(subject.show?).to be true
     end
 
     it "permits search on own application" do
-      expect(subject.search_permit_applications?).to be true
+      expect(subject.index?).to be true
     end
 
     it "permits create" do
@@ -50,7 +46,7 @@ RSpec.describe PermitApplicationPolicy do
     let(:user) { FactoryBot.create(:user, :review_manager, jurisdiction_id: jurisdiction.id) }
 
     it "permits search" do
-      expect(subject.search_permit_applications?).to be true
+      expect(subject.index?).to be true
     end
   end
 
@@ -58,7 +54,7 @@ RSpec.describe PermitApplicationPolicy do
     let(:user) { FactoryBot.create(:user, :super_admin) }
 
     it "permits search" do
-      expect(subject.search_permit_applications?).to be true
+      expect(subject.index?).to be true
     end
   end
 

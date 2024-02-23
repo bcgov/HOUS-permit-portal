@@ -1,10 +1,22 @@
 class Api::PermitApplicationsController < Api::ApplicationController
-  include Api::Concerns::Search::JurisdictionPermitApplications
+  include Api::Concerns::Search::PermitApplications
+
   before_action :set_permit_application, only: %i[show update submit]
+  skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
-    @permit_applications = policy_scope(PermitApplication)
-    render_success @permit_applications, nil, { blueprint: PermitApplicationBlueprint }
+    perform_permit_application_search
+    authorized_results = apply_search_authorization(@permit_application_search.results)
+    render_success authorized_results,
+                   nil,
+                   {
+                     meta: {
+                       total_pages: @permit_application_search.total_pages,
+                       total_count: @permit_application_search.total_count,
+                       current_page: @permit_application_search.current_page,
+                     },
+                     blueprint: PermitApplicationBlueprint,
+                   }
   end
 
   def show

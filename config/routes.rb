@@ -7,11 +7,11 @@ Rails.application.routes.draw do
     Sidekiq::Web.use Rack::Auth::Basic do |username, password|
       ActiveSupport::SecurityUtils.secure_compare(
         ::Digest::SHA256.hexdigest(username),
-        ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME']),
+        ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_USERNAME"]),
       ) &
         ActiveSupport::SecurityUtils.secure_compare(
           ::Digest::SHA256.hexdigest(password),
-          ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD']),
+          ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_PASSWORD"]),
         )
     end
   end
@@ -73,7 +73,8 @@ Rails.application.routes.draw do
       get "pid", on: :collection
     end
 
-    resources :permit_applications, only: %i[index create update show] do
+    resources :permit_applications, only: %i[create update show] do
+      post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
     end
 

@@ -31,6 +31,7 @@ class PermitApplication < ApplicationRecord
       submitted_at: submitted_at,
       status: status,
       jurisdiction_id: jurisdiction.id,
+      submitter_id: submitter.id,
     }
   end
 

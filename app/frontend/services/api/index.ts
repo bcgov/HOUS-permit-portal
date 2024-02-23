@@ -145,11 +145,13 @@ export class Api {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
 
-  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
-    return this.client.post<IJurisdictionPermitApplicationResponse>(
-      `/jurisdictions/${jurisdictionId}/permit_applications/search`,
-      params
-    )
+  async fetchPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+    return jurisdictionId
+      ? this.client.post<IJurisdictionPermitApplicationResponse>(
+          `/jurisdictions/${jurisdictionId}/permit_applications/search`,
+          params
+        )
+      : this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
   async createPermitApplication(params: TCreatePermitApplicationFormData) {
@@ -178,10 +180,6 @@ export class Api {
 
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
-  }
-
-  async fetchPermitApplications() {
-    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
   }
 
   async updatePermitApplication(id, params) {

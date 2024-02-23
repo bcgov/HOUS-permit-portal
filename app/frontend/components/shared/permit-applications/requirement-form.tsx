@@ -136,7 +136,7 @@ export const RequirementForm = observer(
               onBlur={onBlur}
             />
           </Box>
-          <VStack position="fixed" top="50%" right={8} w="136px" zIndex={11} gap={4}>
+          <VStack position="fixed" bottom={8} right={12} w="136px" zIndex={11} gap={4}>
             <Button w="full" onClick={togglePanelCollapse} variant="greyButton">
               {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
             </Button>

@@ -16,7 +16,7 @@ export const UserStoreModel = types
       currentUser: types.maybeNull(types.safeReference(UserModel)),
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
     }),
-    createSearchModel<EUserSortFields>("searchUsers")
+    createSearchModel<EUserSortFields>("searchUsers", Object.values(EUserSortFields))
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -91,6 +91,7 @@ export const UserStoreModel = types
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "usersMap")
+
         self.rootStore.jurisdictionStore.currentJurisdiction.setTableUsers(response.data.data)
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
