@@ -1,4 +1,4 @@
-import { Container, Heading, HStack, Tag, Text, VStack } from "@chakra-ui/react"
+import { Container, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -14,8 +14,6 @@ interface IProps {
   requirementTemplate: IRequirementTemplate
 }
 
-// TODO: remove stub version when versioning is implemented
-const stubVersion = "v.2024.01.01"
 export const BuilderHeader = observer(function BuilderHeader({ requirementTemplate }: IProps) {
   const { t } = useTranslation()
   const { register, watch, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -63,9 +61,10 @@ export const BuilderHeader = observer(function BuilderHeader({ requirementTempla
         </HStack>
         <HStack>
           <TemplateStatusTag requirementTemplate={requirementTemplate} />
-          <Tag py={1} px={2} borderRadius="sm" backgroundColor={"greys.grey03"} color={"text.secondary"}>
-            {stubVersion}
-          </Tag>
+          {/*  TODO: versioning is changing, implement later*/}
+          {/*<Tag py={1} px={2} borderRadius="sm" backgroundColor={"greys.grey03"} color={"text.secondary"}>*/}
+          {/*  {stubVersion}*/}
+          {/*</Tag>*/}
         </HStack>
       </VStack>
     </Container>

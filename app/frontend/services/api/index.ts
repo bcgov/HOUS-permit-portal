@@ -212,6 +212,7 @@ export class Api {
     })
   }
 
+  // we send the versionDate as string instead of date as we want to strip off timezone info
   async scheduleRequirementTemplate(
     templateId: string,
     {
@@ -219,7 +220,7 @@ export class Api {
       versionDate,
     }: {
       requirementTemplate?: IRequirementTemplateUpdateParams
-      versionDate: Date
+      versionDate: string
     }
   ) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {

@@ -53,7 +53,7 @@ export const RemoveConfirmationModal = observer(function RemoveConfirmationModal
           <ModalCloseButton />
           {body && <ModalBody>{body}</ModalBody>}
 
-          <ModalFooter>
+          <ModalFooter justifyContent={"flex-start"}>
             <ButtonGroup spacing={4}>
               <Button variant={"primary"} onClick={() => onRemove(onClose)}>
                 {t("ui.remove")}
