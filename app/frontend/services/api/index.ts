@@ -220,8 +220,8 @@ export class Api {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
-  async fetchPid(siteId: string) {
-    return this.client.get<ApiResponse<string>>(`/geocoder/pid`, { siteId })
+  async fetchPids(siteId: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
   }
 
   async destroyRequirementTemplate(id) {

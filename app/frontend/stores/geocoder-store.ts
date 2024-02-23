@@ -19,8 +19,8 @@ export const GeocoderStoreModel = types
       }
       return response.ok
     }),
-    fetchPid: flow(function* (siteId: string) {
-      const response: any = yield self.environment.api.fetchPid(siteId)
+    fetchPids: flow(function* (siteId: string) {
+      const response: any = yield self.environment.api.fetchPids(siteId)
       if (response.ok) {
         let responseData = response.data
         return responseData

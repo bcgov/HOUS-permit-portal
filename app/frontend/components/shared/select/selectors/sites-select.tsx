@@ -1,11 +1,11 @@
-import { Input as ChakraInput, Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
-import React, { useCallback } from "react"
-import { useFormContext } from "react-hook-form"
+import React, { useCallback, useState } from "react"
+import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ControlProps, InputProps, OptionProps, components } from "react-select"
+import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
@@ -19,7 +19,8 @@ type TSitesSelectProps = {
 export const SitesSelect = observer(
   ({ fetchOptions, onChange, selectedOption, stylesToMerge, ...rest }: TSitesSelectProps) => {
     const { geocoderStore } = useMst()
-    const { fetchPid } = geocoderStore
+    const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
+    const { fetchPids } = geocoderStore
 
     const fetchSiteOptions = (address: string, callback: (options) => void) => {
       if (address.length > 3) {
@@ -29,18 +30,18 @@ export const SitesSelect = observer(
       } else callback([])
     }
 
-    const { register, setValue } = useFormContext()
+    const { setValue, control } = useFormContext()
     const { t } = useTranslation()
 
     const handleChange = (option: IOption) => {
       onChange(option)
       if (option) {
-        fetchPid(option.value).then((pid: string) => {
-          setValue("pid", pid)
+        fetchPids(option.value).then((pids: string[]) => {
+          // debugger
+          setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
         })
-      } else {
-        setValue("pid", null)
       }
+      setValue("pid", null)
     }
 
     const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
@@ -86,14 +87,26 @@ export const SitesSelect = observer(
           <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
           <InputGroup>
             <Flex w="full" direction="column">
-              <ChakraInput
+              <Controller
+                name="pid"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <Select
+                    options={pidOptions}
+                    value={pidOptions.find((option) => option.value === value.value)}
+                    onChange={(val) => onChange(val)}
+                  />
+                )}
+              />
+
+              {/* <ChakraInput
                 {...register("pid", {
                   required: true,
                 })}
                 disabled
                 bg="greys.white"
                 type={"text"}
-              />
+              /> */}
             </Flex>
           </InputGroup>
         </FormControl>

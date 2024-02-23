@@ -39,8 +39,8 @@ class Wrappers::Geocoder < Wrappers::Base
     get("/parcels/pids/#{site_id}.#{OUTPUT_FORMAT}")
   end
 
-  def pid(site_id)
-    get("/parcels/pids/#{site_id}.#{OUTPUT_FORMAT}")["pids"]
+  def pids(site_id)
+    get("/parcels/pids/#{site_id}.#{OUTPUT_FORMAT}")["pids"].split(",")
   end
 
   def subsites(site_id)
