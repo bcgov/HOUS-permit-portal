@@ -27,4 +27,14 @@ class Integrations::LtsaParcelMapBc
       raise Errors::FeatureAttributesRetrievalError
     end
   end
+
+  def get_coordinates_by_pid(pid)
+    response = get_details_by_pid(pid: pid)
+    if response.success?
+      #assumes there is one layer to these features at the moment
+      return response.body.dig("features", 0, "geometry", "rings", 0, 0)
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
+  end
 end

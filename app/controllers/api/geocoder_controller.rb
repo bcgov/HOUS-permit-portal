@@ -5,20 +5,27 @@ class Api::GeocoderController < Api::ApplicationController
   def site_options
     authorize :geocoder, :site_options?
     begin
-      wrapper = Wrappers::Geocoder.new
-      options = wrapper.site_options(geocoder_params[:address])
-      render_success options, nil, { blueprint: OptionBlueprint }
+      if geocoder_params[:address].present?
+        wrapper = Wrappers::Geocoder.new
+        options = wrapper.site_options(geocoder_params[:address])
+        render_success options, nil, { blueprint: OptionBlueprint }
+      elsif geocoder_params[:pid].present?
+        coordinates = Integrations::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+        wrapper = Wrappers::Geocoder.new
+        options = wrapper.site_options(nil, coordinates)
+        render_success options, nil, { blueprint: OptionBlueprint }
+      end
     rescue StandardError => e
       render_error "geocoder.site_options_error" and return
     end
   end
 
-  def pid
+  def pids
     authorize :geocoder, :pid?
     begin
       wrapper = Wrappers::Geocoder.new
-      pid = wrapper.pid(geocoder_params[:site_id])
-      render json: pid, status: :ok
+      pids = wrapper.pids(geocoder_params[:site_id])
+      render json: pids, status: :ok
     rescue StandardError => e
       render_error "geocoder.pid_error" and return
     end
@@ -27,6 +34,6 @@ class Api::GeocoderController < Api::ApplicationController
   private
 
   def geocoder_params
-    params.permit(:address, :site_id)
+    params.permit(:address, :site_id, :pid)
   end
 end

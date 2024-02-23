@@ -7,11 +7,11 @@ Rails.application.routes.draw do
     Sidekiq::Web.use Rack::Auth::Basic do |username, password|
       ActiveSupport::SecurityUtils.secure_compare(
         ::Digest::SHA256.hexdigest(username),
-        ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME']),
+        ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_USERNAME"]),
       ) &
         ActiveSupport::SecurityUtils.secure_compare(
           ::Digest::SHA256.hexdigest(password),
-          ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD']),
+          ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_PASSWORD"]),
         )
     end
   end
@@ -70,7 +70,7 @@ Rails.application.routes.draw do
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection
-      get "pid", on: :collection
+      get "pids", on: :collection
     end
 
     resources :permit_applications, only: %i[index create update show] do

@@ -1,25 +1,29 @@
-import { Input as ChakraInput, Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
-import React, { useCallback } from "react"
-import { useFormContext } from "react-hook-form"
+import * as R from "ramda"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ControlProps, InputProps, OptionProps, components } from "react-select"
+import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
-  fetchOptions: (query: string) => Promise<IOption[]>
+  setSiteSelected: (boolean) => void
+  fetchOptions: (address?: string, pid?: string) => Promise<IOption[]>
   onChange: (option: IOption) => void
   selectedOption: IOption
 } & Partial<TAsyncSelectProps>
 
 export const SitesSelect = observer(
-  ({ fetchOptions, onChange, selectedOption, stylesToMerge, ...rest }: TSitesSelectProps) => {
+  ({ fetchOptions, onChange, selectedOption, stylesToMerge, setSiteSelected, ...rest }: TSitesSelectProps) => {
     const { geocoderStore } = useMst()
-    const { fetchPid } = geocoderStore
+    const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
+    const { fetchPids, fetchingPids } = geocoderStore
+    const pidSelectRef = useRef(null)
 
     const fetchSiteOptions = (address: string, callback: (options) => void) => {
       if (address.length > 3) {
@@ -29,21 +33,30 @@ export const SitesSelect = observer(
       } else callback([])
     }
 
-    const { register, setValue } = useFormContext()
+    const { setValue, control, watch } = useFormContext()
+    const pidWatch = watch("pid")
+    const siteWatch = watch("site")
     const { t } = useTranslation()
 
     const handleChange = (option: IOption) => {
       onChange(option)
       if (option) {
-        fetchPid(option.value).then((pid: string) => {
-          setValue("pid", pid)
+        fetchPids(option.value).then((pids: string[]) => {
+          setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
         })
-      } else {
-        setValue("pid", null)
+      }
+      setValue("pid", null)
+      const selectControl = pidSelectRef.current.controlRef
+      if (selectControl) {
+        selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
       }
     }
 
     const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
+
+    useEffect(() => {
+      setSiteSelected(!!pidWatch || !!(!fetchingPids && siteWatch && R.isEmpty(pidOptions)))
+    }, [pidWatch, siteWatch, pidOptions, fetchingPids])
 
     return (
       <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
@@ -86,13 +99,25 @@ export const SitesSelect = observer(
           <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
           <InputGroup>
             <Flex w="full" direction="column">
-              <ChakraInput
-                {...register("pid", {
-                  required: true,
-                })}
-                disabled
-                bg="greys.white"
-                type={"text"}
+              <Controller
+                name="pid"
+                control={control}
+                rules={{
+                  required:
+                    pidOptions.length > 0 ? t("ui.isRequired", { field: t("permitApplication.pidLabel") }) : false,
+                }}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <Select
+                      options={pidOptions}
+                      ref={pidSelectRef}
+                      value={pidOptions.find((option) => option.value === value?.value)}
+                      onChange={(option) => {
+                        onChange(option.value)
+                      }}
+                    />
+                  )
+                }}
               />
             </Flex>
           </InputGroup>
