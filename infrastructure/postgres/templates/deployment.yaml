@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"postgresql-15:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"postgres\")].image"}]'
+  labels:
+    app: postgres
+  name: postgres
+  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      deployment: postgres
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-secrets.env: "{{ .Values.vaultNamespace }}/{{ .Values.STAGE }}/postgres"
+        vault.hashicorp.com/agent-inject-template-secrets.env: |
+          {{`{{- with secret "`}}{{ printf "%s/%s/postgres" .Values.vaultNamespace .Values.STAGE }}{{ `" -}}`}}
+          {{`{{- range $k, $v := .Data.data }}`}}
+          {{ `{{ $k }}={{ $v }}{{ end -}}` }}
+          {{`{{- end }}`}}
+        vault.hashicorp.com/agent-limits-cpu: 50m
+        vault.hashicorp.com/agent-limits-mem: 100Mi
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/agent-requests-cpu: 10m
+        vault.hashicorp.com/agent-requests-mem: 25Mi
+        vault.hashicorp.com/auth-path: auth/k8s-silver
+        vault.hashicorp.com/namespace: platform-services
+        vault.hashicorp.com/role: "{{ .Values.vaultNamespace }}"
+      labels:
+        app: postgres
+        deployment: postgres
+    spec:
+      containers:
+        - args:
+            - set -a; . /vault/secrets/secrets.env; set +a; exec run-postgresql
+          command:
+            - /bin/sh
+            - -c
+          image: quay.io/fedora/postgresql-15@sha256:60d6192fde182d7d225739438b9beee160b8b75cf3f1d04d7504a779afd4d0c4
+          imagePullPolicy: IfNotPresent
+          name: postgres
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "{{ .Values.deployment.spec.containers.resources.limits.cpu }}"
+              memory: "{{ .Values.deployment.spec.containers.resources.limits.memory }}"
+            requests:
+              cpu: "{{ .Values.deployment.spec.containers.resources.requests.cpu }}"
+              memory: "{{ .Values.deployment.spec.containers.resources.requests.memory }}"
+          terminationMessagePath: "/{{ .Values.STAGE }}/termination-log"
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: postgres-volume
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: "{{ .Values.OPENSHIFT_NAMESPACE}}-vault"
+      serviceAccountName: "{{ .Values.OPENSHIFT_NAMESPACE}}-vault"
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: "postgres-{{ .Values.STAGE }}-hous-permit-portal"
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1
