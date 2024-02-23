@@ -1,6 +1,6 @@
 apiVersion: v2
 name: redis
-description: Single node Redis deployment
+description: Single node Postgres deployment
 
 # A chart can be either an 'application' or a 'library' chart.
 #
