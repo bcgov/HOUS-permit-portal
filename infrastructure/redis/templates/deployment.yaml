@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"redis:7.2.4"},"fieldPath":"spec.template.spec.containers[?(@.name==\"redis\")].image"}]'
+  labels:
+    app: redis
+  name: redis
+  namespace: "{{ .Values.OPENSHIFT_NAMESPACE}}-{{ .Values.STAGE }}"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: redis
+      deployment: redis
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-secrets.env: "{{ .Values.vaultNamespace }}/{{ .Values.STAGE }}/redis"
+        vault.hashicorp.com/agent-inject-template-secrets.env: |
+          {{`{{- with secret "`}}{{ printf "%s/%s/redis" .Values.vaultNamespace .Values.STAGE }}{{ `" -}}`}}
+          {{`{{- range $k, $v := .Data.data }}`}}
+          {{ `{{ $k }}={{ $v }}{{ end -}}` }}
+          {{`{{- end }}`}}
+        vault.hashicorp.com/agent-limits-cpu: 50m
+        vault.hashicorp.com/agent-limits-mem: 100Mi
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/agent-requests-cpu: 10m
+        vault.hashicorp.com/agent-requests-mem: 25Mi
+        vault.hashicorp.com/auth-path: auth/k8s-silver
+        vault.hashicorp.com/namespace: platform-services
+        vault.hashicorp.com/role: "{{ .Values.vaultNamespace }}"
+      labels:
+        app: redis
+        deployment: redis
+    spec:
+      containers:
+        - args:
+            - set -a; . /vault/secrets/secrets.env; set +a; exec docker-entrypoint.sh
+              redis-server --requirepass ${REDIS_PASSWORD}
+          command:
+            - /bin/sh
+            - -c
+          image: docker.io/library/redis:7.2.4
+          imagePullPolicy: IfNotPresent
+          name: redis
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "{{ .Values.deployment.spec.containers.resources.limits.cpu }}"
+              memory: "{{ .Values.deployment.spec.containers.resources.limits.memory }}"
+            requests:
+              cpu: "{{ .Values.deployment.spec.containers.resources.requests.cpu }}"
+              memory: "{{ .Values.deployment.spec.containers.resources.requests.memory }}"
+          terminationMessagePath: "/{{ .Values.STAGE }}/termination-log"
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /data
+              name: redis-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: "{{ .Values.OPENSHIFT_NAMESPACE }}-vault"
+      serviceAccountName: "{{ .Values.OPENSHIFT_NAMESPACE }}-vault"
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: "redis-{{ .Values.STAGE }}-hous-permit-portal"

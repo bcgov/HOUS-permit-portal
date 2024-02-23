@@ -4,7 +4,7 @@ metadata:
   labels:
     app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
   name: allow-from-openshift-ingress
-  namespace: "bb18ab-{{ .Values.STAGE }}"
+  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   ingress:
     - from:
@@ -22,7 +22,7 @@ metadata:
   labels:
     app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
   name: allow-same-namespace
-  namespace: "bb18ab-{{ .Values.STAGE }}"
+  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   ingress:
     - from:

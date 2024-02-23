@@ -1,3 +1,4 @@
+OPENSHIFT_NAMESPACE: bb18ab
 STAGE: dev
 appName: "hous-permit-portal"
 

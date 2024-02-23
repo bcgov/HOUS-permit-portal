@@ -4,7 +4,7 @@ metadata:
   labels:
     app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
   name: "{{ .Values.STAGE }}-{{ .Values.appName }}"
-  namespace: "bb18ab-{{ .Values.STAGE }}"
+  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   internalTrafficPolicy: Cluster
   ipFamilies:

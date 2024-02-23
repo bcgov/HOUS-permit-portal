@@ -7,7 +7,7 @@ metadata:
   labels:
     app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
   name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
-  namespace: "bb18ab-{{ $.Values.STAGE }}"
+  namespace: "{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}"
 spec:
   progressDeadlineSeconds: 600
   replicas: {{ .replicaCount }}
@@ -44,7 +44,7 @@ spec:
         deployment: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
     spec:
       containers:
-        - image: "image-registry.openshift-image-registry.svc:5000/bb18ab-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
+        - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
           imagePullPolicy: IfNotPresent
           name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
           ports:
@@ -69,8 +69,8 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
-      serviceAccount: bb18ab-vault
-      serviceAccountName: bb18ab-vault
+      serviceAccount: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
+      serviceAccountName: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
       terminationGracePeriodSeconds: 30
 ---
  {{- end }}
