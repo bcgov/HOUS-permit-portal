@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+annotations:
+  image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"elasticsearch:7.17.16"},"fieldPath":"spec.template.spec.containers[?(@.name==\"elasticsearch\")].image"}]'
+labels:
+  app: elasticsearch
+name: elasticsearch
+namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
+spec:
+progressDeadlineSeconds: 600
+replicas: "{{ .Values.replicaCount }}"
+selector:
+  matchLabels:
+    app: elasticsearch
+    deployment: elasticsearch
+strategy:
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
+  type: RollingUpdate
+template:
+  metadata:
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-secret-secrets.env: "{{ .Values.vaultNamespace }}/{{ .Values.STAGE }}/elasticsearch"
+      vault.hashicorp.com/agent-inject-template-secrets.env: |
+        {{`{{- with secret "`}}{{ printf "%s/%s/elasticsearch" .Values.vaultNamespace .Values.STAGE }}{{ `" -}}`}}
+        {{`{{- range $k, $v := .Data.data }}`}}
+        {{ `{{ $k }}={{ $v }}{{ end -}}` }}
+        {{`{{- end }}`}}
+      vault.hashicorp.com/agent-limits-cpu: 50m
+      vault.hashicorp.com/agent-limits-mem: 100Mi
+      vault.hashicorp.com/agent-pre-populate-only: "true"
+      vault.hashicorp.com/agent-requests-cpu: 10m
+      vault.hashicorp.com/agent-requests-mem: 25Mi
+      vault.hashicorp.com/auth-path: auth/k8s-silver
+      vault.hashicorp.com/namespace: platform-services
+      vault.hashicorp.com/role: "{{ .Values.vaultNamespace }}"
+    labels:
+      app: elasticsearch
+      deployment: elasticsearch
+  spec:
+    containers:
+      command:
+        - /bin/sh
+        - "-c"
+      args:
+        - >-
+          set -a; . /vault/secrets/secrets.env; set +a;  exec /bin/tini -- /usr/local/bin/docker-entrypoint.sh
+      env:
+        - name: discovery.type
+          value: single-node
+        - name: xpack.security.enabled
+          value: "false"
+      image: docker.io/library/elasticsearch@sha256:2701b3b14cede7427a1b1c431329d116c148b046e0fd51e1692ff4fc7b85609d
+      imagePullPolicy: IfNotPresent
+      name: elasticsearch
+      ports:
+        - containerPort: 9200
+          protocol: TCP
+        - containerPort: 9300
+          protocol: TCP
+      resources:
+        limits:
+          cpu: 250m
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+      terminationMessagePath: /${STAGE}/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+        - mountPath: /usr/share/elasticsearch/data
+          name: elasticsearch-data
+    dnsPolicy: ClusterFirst
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: "{{ .Values.OPENSHIFT_NAMESPACE}}-vault"
+    serviceAccountName: "{{ .Values.OPENSHIFT_NAMESPACE}}-vault"
+    terminationGracePeriodSeconds: 30
+    volumes:
+      - name: elasticsearch-data
+        persistentVolumeClaim:
+          claimName: "elasticsearch-{{ .Values.STAGE }}-hous-permit-portal"

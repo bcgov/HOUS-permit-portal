@@ -8,7 +8,7 @@ metadata:
   name: postgres
   namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
-  replicas: 1
+  replicas: "{{ .Values.replicaCount }}"
   selector:
     matchLabels:
       app: postgres
@@ -75,6 +75,3 @@ spec:
         - name: postgres-volume
           persistentVolumeClaim:
             claimName: "postgres-{{ .Values.STAGE }}-hous-permit-portal"
-  readyReplicas: 1
-  replicas: 1
-  updatedReplicas: 1

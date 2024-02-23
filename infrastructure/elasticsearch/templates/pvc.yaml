@@ -4,8 +4,8 @@ metadata:
   finalizers:
     - kubernetes.io/pvc-protection
   labels:
-    app: postgres
-  name: "postgres-{{ .Values.STAGE }}-hous-permit-portal"
+    app: elasticsearch
+  name: "elasticsearch-{{ .Values.STAGE }}-hous-permit-portal"
   namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   accessModes:

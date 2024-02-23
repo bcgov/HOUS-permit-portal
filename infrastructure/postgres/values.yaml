@@ -3,11 +3,13 @@ STAGE: dev
 
 vaultNamespace: bb18ab-nonprod
 
+replicaCount: 1
+
 pvc:
   spec:
     resources:
       requests:
-        storage: 1Gi
+        storage: 2Gi
 
 deployment:
   spec:
