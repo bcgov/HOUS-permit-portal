@@ -1,0 +1,54 @@
+redis:
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+    podAnnotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-secret-secrets.env: "bb18ab-prod/prod/redis"
+      vault.hashicorp.com/agent-inject-template-secrets.env: |
+        {{`{{- with secret "bb18ab-prod/prod/redis" -}}`}}
+        {{`{{ .Data.data.REDIS_PASSWORD }}`}}
+        {{`{{- end }}`}}
+      vault.hashicorp.com/agent-limits-cpu: 50m
+      vault.hashicorp.com/agent-limits-mem: 100Mi
+      vault.hashicorp.com/agent-pre-populate-only: "true"
+      vault.hashicorp.com/agent-requests-cpu: 10m
+      vault.hashicorp.com/agent-requests-mem: 25Mi
+      vault.hashicorp.com/auth-path: auth/k8s-silver
+      vault.hashicorp.com/namespace: platform-services
+      vault.hashicorp.com/role: bb18ab-prod
+  replica:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+    podAnnotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-secret-secrets.env: "bb18ab-prod/prod/redis"
+      vault.hashicorp.com/agent-inject-template-secrets.env: |
+        {{`{{- with secret "bb18ab-prod/prod/redis" -}}`}}
+        {{`{{ .Data.data.REDIS_PASSWORD }}`}}
+        {{`{{- end }}`}}
+      vault.hashicorp.com/agent-limits-cpu: 50m
+      vault.hashicorp.com/agent-limits-mem: 100Mi
+      vault.hashicorp.com/agent-pre-populate-only: "true"
+      vault.hashicorp.com/agent-requests-cpu: 10m
+      vault.hashicorp.com/agent-requests-mem: 25Mi
+      vault.hashicorp.com/auth-path: auth/k8s-silver
+      vault.hashicorp.com/namespace: platform-services
+      vault.hashicorp.com/role: bb18ab-prod

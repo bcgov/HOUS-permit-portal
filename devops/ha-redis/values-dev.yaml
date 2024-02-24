@@ -1,0 +1,24 @@
+redis:
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+  replica:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
