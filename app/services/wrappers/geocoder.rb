@@ -11,19 +11,20 @@ class Wrappers::Geocoder < Wrappers::Base
 
   OUTPUT_FORMAT = "json"
 
-  def site_options(address_string)
-    r =
-      get(
-        "/addresses.#{OUTPUT_FORMAT}",
-        {
-          # addressString: "525 Superior Street, Victoria, BC"
-          addressString: address_string,
-          locationDescriptor: "parcelPoint",
-          autoComplete: true,
-          brief: true,
-          maxResults: 10,
-        },
-      )
+  def site_options(address_string = nil, coordinates = nil)
+    site_params = {
+      # addressString: "525 Superior Street, Victoria, BC"
+      locationDescriptor: "parcelPoint",
+      autoComplete: true,
+      brief: true,
+      maxResults: 10,
+    }
+
+    site_params[:addressString] = address_string if address_string.present?
+    site_params[:parcelPoint] = coordinates.join(",") if coordinates.present?
+
+    r = get("/addresses.#{OUTPUT_FORMAT}", site_params)
+
     return(
       r["features"]
         .filter { |f| f["properties"]["siteID"].present? }

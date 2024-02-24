@@ -2,7 +2,7 @@ import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
-import React, { useCallback, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
@@ -48,6 +48,10 @@ export const SitesSelect = observer(
         selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
       }
     }
+
+    useEffect(() => {
+      // temporary test
+    }, [])
 
     const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 

@@ -5,9 +5,17 @@ class Api::GeocoderController < Api::ApplicationController
   def site_options
     authorize :geocoder, :site_options?
     begin
-      wrapper = Wrappers::Geocoder.new
-      options = wrapper.site_options(geocoder_params[:address])
-      render_success options, nil, { blueprint: OptionBlueprint }
+      if geocoder_params[:address].present?
+        wrapper = Wrappers::Geocoder.new
+        options = wrapper.site_options(geocoder_params[:address])
+        render_success options, nil, { blueprint: OptionBlueprint }
+      elsif permit_application_params[:pid].present?
+        coordinates = Integrations::LtsaParcelMapBc.new.get_coordinates_by_pid(pid: permit_application_params[:pid])
+
+        wrapper = Wrappers::Geocoder.new
+        options = wrapper.site_options(nil, coordinates)
+        render_success options, nil, { blueprint: OptionBlueprint }
+      end
     rescue StandardError => e
       render_error "geocoder.site_options_error" and return
     end
