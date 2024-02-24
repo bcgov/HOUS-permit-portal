@@ -2,7 +2,7 @@ import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
@@ -21,6 +21,7 @@ export const SitesSelect = observer(
     const { geocoderStore } = useMst()
     const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
     const { fetchPids } = geocoderStore
+    const pidSelectRef = useRef(null)
 
     const fetchSiteOptions = (address: string, callback: (options) => void) => {
       if (address.length > 3) {
@@ -42,6 +43,10 @@ export const SitesSelect = observer(
         })
       }
       setValue("pid", null)
+      const selectControl = pidSelectRef.current.controlRef
+      if (selectControl) {
+        selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+      }
     }
 
     const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
@@ -90,13 +95,18 @@ export const SitesSelect = observer(
               <Controller
                 name="pid"
                 control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Select
-                    options={pidOptions}
-                    value={pidOptions.find((option) => option.value === value.value)}
-                    onChange={(val) => onChange(val)}
-                  />
-                )}
+                render={({ field: { onChange, value } }) => {
+                  return (
+                    <Select
+                      options={pidOptions}
+                      ref={pidSelectRef}
+                      value={pidOptions.find((option) => option.value === value?.value)}
+                      onChange={(option) => {
+                        onChange(option.value)
+                      }}
+                    />
+                  )
+                }}
               />
 
               {/* <ChakraInput
