@@ -10,9 +10,8 @@ class StepCode < ApplicationRecord
   has_many :checklists, class_name: "StepCodeChecklist", dependent: :destroy
   has_one :pre_construction_checklist, -> { where(stage: :pre_construction) }, class_name: "StepCodeChecklist"
 
-  after_create :create_pre_construction_checklist
-
   accepts_nested_attributes_for :data_entries
+  accepts_nested_attributes_for :pre_construction_checklist
 
   validates :name, presence: true
 end

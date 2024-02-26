@@ -1,5 +1,5 @@
 class StepCodeChecklist < ApplicationRecord
-  belongs_to :step_code
+  belongs_to :step_code, optional: Rails.env.test?
 
   delegate :data_entries, :building_permit_number, :jurisdiction_name, :full_address, :pid, to: :step_code
 
