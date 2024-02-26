@@ -11,8 +11,8 @@ export const GeocoderStoreModel = types
   .extend(withEnvironment())
   .views((self) => ({}))
   .actions((self) => ({
-    fetchSiteOptions: flow(function* (address: string) {
-      const response: any = yield self.environment.api.fetchSiteOptions(address)
+    fetchSiteOptions: flow(function* (address: string, pid: string = null) {
+      const response: any = yield self.environment.api.fetchSiteOptions(address, pid)
       if (response.ok) {
         let responseData = response.data.data
         return responseData

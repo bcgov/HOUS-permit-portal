@@ -2,6 +2,7 @@ import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -11,13 +12,14 @@ import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
-  fetchOptions: (query: string) => Promise<IOption[]>
+  setSiteSelected: (boolean) => void
+  fetchOptions: (address?: string, pid?: string) => Promise<IOption[]>
   onChange: (option: IOption) => void
   selectedOption: IOption
 } & Partial<TAsyncSelectProps>
 
 export const SitesSelect = observer(
-  ({ fetchOptions, onChange, selectedOption, stylesToMerge, ...rest }: TSitesSelectProps) => {
+  ({ fetchOptions, onChange, selectedOption, stylesToMerge, setSiteSelected, ...rest }: TSitesSelectProps) => {
     const { geocoderStore } = useMst()
     const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
     const { fetchPids } = geocoderStore
@@ -31,14 +33,15 @@ export const SitesSelect = observer(
       } else callback([])
     }
 
-    const { setValue, control } = useFormContext()
+    const { setValue, control, watch } = useFormContext()
+    const pidWatch = watch("pid")
+    const siteWatch = watch("site")
     const { t } = useTranslation()
 
     const handleChange = (option: IOption) => {
       onChange(option)
       if (option) {
         fetchPids(option.value).then((pids: string[]) => {
-          // debugger
           setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
         })
       }
@@ -49,11 +52,11 @@ export const SitesSelect = observer(
       }
     }
 
-    useEffect(() => {
-      // temporary test
-    }, [])
-
     const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
+
+    useEffect(() => {
+      setSiteSelected(!!pidWatch || !!(siteWatch && R.isEmpty(pidOptions)))
+    }, [pidWatch, siteWatch, pidOptions])
 
     return (
       <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
@@ -99,6 +102,10 @@ export const SitesSelect = observer(
               <Controller
                 name="pid"
                 control={control}
+                rules={{
+                  required:
+                    pidOptions.length > 0 ? t("ui.isRequired", { field: t("permitApplication.pidLabel") }) : false,
+                }}
                 render={({ field: { onChange, value } }) => {
                   return (
                     <Select
@@ -112,15 +119,6 @@ export const SitesSelect = observer(
                   )
                 }}
               />
-
-              {/* <ChakraInput
-                {...register("pid", {
-                  required: true,
-                })}
-                disabled
-                bg="greys.white"
-                type={"text"}
-              /> */}
             </Flex>
           </InputGroup>
         </FormControl>

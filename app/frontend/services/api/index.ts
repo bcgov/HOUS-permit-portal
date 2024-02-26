@@ -216,8 +216,8 @@ export class Api {
     })
   }
 
-  async fetchSiteOptions(address: string) {
-    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
+  async fetchSiteOptions(address: string, pid: string = null) {
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
   }
 
   async fetchPids(siteId: string) {
