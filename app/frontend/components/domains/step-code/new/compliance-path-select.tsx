@@ -14,8 +14,8 @@ import { CaretDown } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useMst } from "../../../../../setup/root"
-import { EStepCodeCompliancePath } from "../../../../../types/enums"
+import { useMst } from "../../../../setup/root"
+import { EStepCodeCompliancePath } from "../../../../types/enums"
 import { translationPrefix } from "./translation-prefix"
 
 interface IProps {
@@ -46,7 +46,7 @@ export const CompliancePathSelect = observer(function CompliancePathSelect({ onC
               >
                 {value
                   ? t(`${translationPrefix}.compliancePath.options.${value}`)
-                  : t(`${translationPrefix}.compliancePath.select`)}
+                  : t(`${translationPrefix}.compliancePath.label`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
