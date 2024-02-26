@@ -18,11 +18,11 @@ import {
 } from "../../../../types/api-request"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { BuilderHeader } from "./builder-header"
+import { SectionsSidebar } from "../sections-sidebar"
 import { ControlsHeader } from "./controls-header"
+import { EditableBuilderHeader } from "./editable-builder-header"
 import { SectionsDisplay } from "./sections-display"
 import { SectionsDnd } from "./sections-dnd"
-import { SectionsSidebar } from "./sections-sidebar"
 
 export interface IRequirementTemplateForm extends IRequirementTemplateUpdateParams {}
 
@@ -31,7 +31,7 @@ export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 
 export const EditRequirementTemplateScreen = observer(function EditRequirementTemplateScreen() {
   const { isOpen: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
-  const { requirementTemplateStore } = useMst()
+  const { requirementTemplateStore, requirementBlockStore } = useMst()
   const { requirementTemplate, error } = useRequirementTemplate()
   const formMethods = useForm({ defaultValues: formFormDefaults(requirementTemplate) })
   const { control, reset, watch, setValue, handleSubmit } = formMethods
@@ -46,6 +46,15 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
+
+  const denormalizedSections = watchedSectionsAttributes.map((section) => ({
+    id: section.id,
+    name: section.name,
+    templateSectionBlocks: section.templateSectionBlocksAttributes.map((sectionBlock) => ({
+      id: sectionBlock.id,
+      requirementBlock: requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId),
+    })),
+  }))
 
   useEffect(() => {
     const options = {
@@ -106,7 +115,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     <RemoveScroll style={{ width: "100%", flex: "1", height: "1px" }}>
       <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
         <FormProvider {...formMethods}>
-          <BuilderHeader requirementTemplate={requirementTemplate} />
+          <EditableBuilderHeader requirementTemplate={requirementTemplate} />
           <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
             {isReorderMode ? (
               <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
@@ -115,6 +124,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
                 onEdit={openReorderMode}
                 onItemClick={scrollIntoView}
                 sectionIdToHighlight={currentSectionId}
+                sections={denormalizedSections}
               />
             )}
             <Flex

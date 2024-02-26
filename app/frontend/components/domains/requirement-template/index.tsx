@@ -4,6 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
+import { ETemplateVersionStatus } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -61,7 +62,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
               return (
                 <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
                   <SearchGridItem>
-                    <TemplateStatusTag requirementTemplate={rt} />
+                    <TemplateStatusTag status={ETemplateVersionStatus.draft} />
                   </SearchGridItem>
                   <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
                   <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>

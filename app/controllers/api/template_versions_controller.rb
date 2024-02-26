@@ -1,5 +1,8 @@
 class Api::TemplateVersionsController < Api::ApplicationController
-  before_action :set_template_version, only: %i[show]
+  before_action :set_template_version, only: :show
+
+  def index
+  end
 
   def show
     authorize @template_version

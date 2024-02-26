@@ -24,6 +24,9 @@ export const TemplateVersionStoreModel = types
 
       if (response.ok) {
         const templateVersion = response.data.data
+
+        templateVersion.isFullyLoaded = true
+
         self.mergeUpdate(templateVersion, "templateVersionMap")
 
         return self.getTemplateVersionById(templateVersion.id)

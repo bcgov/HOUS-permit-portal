@@ -247,6 +247,6 @@ export class Api {
   }
 
   async fetchTemplateVersion(id: string) {
-    return this.client.get<ApiResponse<ITemplateVersion>>(`/template_version/${id}`)
+    return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
   }
 }

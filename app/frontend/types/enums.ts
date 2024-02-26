@@ -22,10 +22,11 @@ export enum ERequirementTemplateStatus {
   draft = "draft",
 }
 
-export enum ETemplateVerionStatus {
+export enum ETemplateVersionStatus {
   published = "published",
   scheduled = "scheduled",
   deprecated = "deprecated",
+  draft = "draft",
 }
 
 export enum EUserRoles {

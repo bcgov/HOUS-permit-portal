@@ -15,15 +15,15 @@ import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { IRequirementBlock } from "../../../models/requirement-block"
 import { ERequirementType } from "../../../types/enums"
+import { IDenormalizedRequirement, IDenormalizedRequirementBlock } from "../../../types/types"
 import { isQuillEmpty } from "../../../utils/utility-funcitons"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
 type TProps = {
-  requirementBlock: IRequirementBlock
+  requirementBlock: IDenormalizedRequirementBlock
   onRemove?: () => void
   triggerForceCollapse?: boolean
 } & Partial<AccordionProps> &
@@ -125,7 +125,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             px={3}
             mt={isQuillEmpty(requirementBlock.displayDescription) ? 5 : 0}
           >
-            {requirementBlock.requirements.map((requirement, index) => {
+            {requirementBlock.requirements.map((requirement: IDenormalizedRequirement, index) => {
               const requirementType = requirement.inputType
               return (
                 <Box
@@ -148,9 +148,13 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                     <RequirementFieldDisplay
                       requirementType={requirementType}
                       label={requirement.label}
-                      helperText={requirementBlock.hint}
-                      unit={requirementType === ERequirementType.number ? requirement?.numberUnit ?? null : undefined}
-                      options={requirement?.valueOptions?.map((option) => option.label)}
+                      helperText={requirement?.hint}
+                      unit={
+                        requirementType === ERequirementType.number
+                          ? requirement?.inputOptions?.numberUnit ?? null
+                          : undefined
+                      }
+                      options={requirement?.inputOptions?.valueOptions?.map((option) => option.label)}
                       selectProps={{
                         maxW: "339px",
                       }}

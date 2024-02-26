@@ -432,6 +432,7 @@ const options = {
             published: "Published",
             scheduled: "Scheduled",
             draft: "Draft",
+            deprecated: "Deprecated",
           },
           index: {
             tableHeading: "Templates",
@@ -479,6 +480,7 @@ const options = {
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
             invite: "Invite",
+            templateVersions: "Template Versions",
             requirementsLibrary: "Requirements Library",
             requirementTemplates: "Permit Templates Catalogue",
             edit: "Edit",
