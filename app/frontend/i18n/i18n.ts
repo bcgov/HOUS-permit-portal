@@ -355,6 +355,7 @@ const options = {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
+          fetchTemplateVersion: "Something went wrong fetching the template version",
           fetchOptions: "Something went wrong fetching options",
         },
         user: {

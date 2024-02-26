@@ -7,7 +7,7 @@ import { IPermitClassificationStore, PermitClassificationStoreModel } from "./pe
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
-import { TemplateVersionStoreModel } from "./template-version-store"
+import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
 import { IUserStore, UserStoreModel } from "./user-store"
 
@@ -38,6 +38,6 @@ export interface IRootStore extends IStateTreeNode {
   userStore: IUserStore
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
-  templateVersionStore: IRequirementTemplateStoreModel
+  templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
 }

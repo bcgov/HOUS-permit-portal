@@ -58,6 +58,8 @@ Rails.application.routes.draw do
       patch "restore", on: :member
     end
 
+    resources :template_versions, only: %i[show]
+
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
