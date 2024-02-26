@@ -344,6 +344,15 @@ const options = {
             create: "Create",
             addData: "Add Data",
             selectPermitApplication: "Select Permit Application",
+            compliancePath: {
+              label: "Compliance Path",
+              options: {
+                step_code_ers: "9.36.6 BC Energy Step Code ERS",
+                step_code_necb: "9.36.6 BC Energy Step Code NECB",
+                passive_house: "9.36.6 Passive House",
+                step_code: "9.36.5 BC Energy Step Code",
+              },
+            },
           },
         },
         stepCodeChecklist: {
@@ -378,15 +387,6 @@ const options = {
             },
             codeComplianceSummary: {
               heading: "B: Code Compliance Summary",
-              compliancePath: {
-                select: "Compliance Path",
-                options: {
-                  step_code_ers: "9.36.6 BC Energy Step Code ERS",
-                  step_code_necb: "9.36.6 BC Energy Step Code NECB",
-                  passive_house: "9.36.6 Passive House",
-                  step_code: "9.36.5 BC Energy Step Code",
-                },
-              },
               energyStepCode: {
                 heading: "Energy Step Code",
                 stepRequired: "Step Required",

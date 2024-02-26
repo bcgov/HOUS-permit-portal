@@ -9,6 +9,7 @@ import { useMst } from "../../../../setup/root"
 import { requestPresignedUrl, uploadFileInChunks } from "../../../../utils/uploads"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FileFormControl, NumberFormControl, TextFormControl } from "../../../shared/form/input-form-control"
+import { CompliancePathSelect } from "./compliance-path-select"
 import { PermitApplicationSelect } from "./permit-application-select"
 
 export const NewStepCodeForm = observer(function NewStepCodeForm() {
@@ -30,7 +31,11 @@ export const NewStepCodeForm = observer(function NewStepCodeForm() {
 
   const formMethods = useForm({
     mode: "onChange",
-    defaultValues: { permitApplicationId: null, dataEntriesAttributes: [dataEntryAttributes] },
+    defaultValues: {
+      permitApplicationId: null,
+      preConstructionChecklistAttributes: { compliancePath: null },
+      dataEntriesAttributes: [dataEntryAttributes],
+    },
   })
   const { control, handleSubmit, setValue, setError, clearErrors, formState } = formMethods
   const { isValid, isSubmitting } = formState
@@ -144,6 +149,15 @@ export const NewStepCodeForm = observer(function NewStepCodeForm() {
                       rules={{ required: true }}
                       render={({ field: { onChange, value } }) => (
                         <PermitApplicationSelect onChange={onChange} value={value} />
+                      )}
+                    />
+
+                    <Controller
+                      control={control}
+                      name="preConstructionChecklistAttributes.compliancePath"
+                      rules={{ required: true }}
+                      render={({ field: { onChange, value } }) => (
+                        <CompliancePathSelect onChange={onChange} value={value} />
                       )}
                     />
 
