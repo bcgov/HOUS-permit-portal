@@ -42,21 +42,15 @@ export const combineComplianceHints = (formJson, formattedComplianceData) => {
     const section = key.split("|")[0].replace("formSubmissionDataRST", "")
     const rb = key.split("|").slice(0, 2).join("|")
 
-    const sectionIndex = updatedJson?.["components"]?.findIndex((c) => c["key"] == section)
-    const rbIndex = updatedJson?.["components"]?.[sectionIndex]?.["components"]?.findIndex((c) => c["key"] == rb)
-    const itemIndex = updatedJson?.["components"]?.[sectionIndex]?.["components"]?.[rbIndex]?.["components"]?.findIndex(
-      (c) => c["key"] == key
-    )
+    // Find the indexes of section and rb once and directly access the item
+    let item = updatedJson.components
+      ?.find((c) => c.key === section)
+      ?.components?.find((c) => c.key === rb)
+      ?.components?.find((c) => c.key === key)
 
-    const defaultDesc =
-      updatedJson?.["components"]?.[sectionIndex]?.["components"]?.[rbIndex]?.["components"]?.[itemIndex]?.[
-        "description"
-      ]
-
-    if (defaultDesc) {
-      const combinedValue = value
-      updatedJson["components"][sectionIndex]["components"][rbIndex]["components"][itemIndex]["description"] =
-        combinedValue
+    // Update the description if the item is found
+    if (item && item.description) {
+      item.description = value
     }
   }
   return updatedJson

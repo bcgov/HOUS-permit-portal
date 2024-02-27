@@ -4,6 +4,8 @@ class SupportingDocumentPolicy < ApplicationPolicy
       record.permit_application.jurisdiction.id == user.jurisdiction_id
     elsif user.submitter?
       record.permit_application.submitter_id == user.id
+    else
+      false
     end
   end
 end

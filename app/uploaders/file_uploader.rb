@@ -9,7 +9,7 @@ class FileUploader < Shrine
   def generate_location(io, derivative: nil, **options)
     record = options[:record]
     if record
-      # model = record.class.name.underscore # e.g., the supporting_document
+      #The default is (supporting document) model, but we want to ignore it: model = record.class.name.underscore
       parent_model = record.permit_application.class.name.underscore #permit application nesting
       parent_id = record.permit_application.id
       identifier = record.id || "temp" # Use 'temp' if record ID is nil

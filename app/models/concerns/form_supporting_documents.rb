@@ -18,9 +18,6 @@ module FormSupportingDocuments
                 sd.compliance_data["result"].map do |signer|
                   "#{signer["signatureFieldName"]} signed at #{signer.dig("signatureTimestamp", "date")}"
                 end,
-            # "status" => sd.compliance_data["status"],
-            # "error" => sd.compliance_data["error"],
-            # "signatures" => sd.compliance_data["result"].map{|signer| {"name" => signer["signatureFieldName"], "timestamp" => signer.dig("signatureTimestamp", "date"), "signed" => signer.dig("signatureTimestamp", "signed")}}
           }
         end
     grouped_compliance_data
