@@ -46,12 +46,30 @@ class RequirementsFromXlsxSeeder
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
-      RequirementTemplate.where(activity: activity, permit_type: permit_type, status: "published").first_or_create(
+      RequirementTemplate.where(activity: activity, permit_type: permit_type).first_or_create(
         activity: activity,
         permit_type: permit_type,
-        status: "published",
       )
     setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
+
+    requirement_template.reload
+
+    force_a_published_template_version(requirement_template)
+  end
+
+  def self.force_a_published_template_version(requirement_template)
+    return if requirement_template.published_template_version.present?
+
+    version_date = Date.yesterday
+    template_version = nil
+
+    Timecop.freeze(version_date - 1) do
+      template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+    end
+
+    return if template_version.blank?
+
+    Timecop.freeze(version_date) { template_version = TemplateVersioningService.publish_version!(template_version) }
   end
 
   def self.setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)

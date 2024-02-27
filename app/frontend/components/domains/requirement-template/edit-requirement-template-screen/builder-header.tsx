@@ -64,8 +64,11 @@ export const BuilderHeader = observer(function BuilderHeader({
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}
         </HStack>
         <HStack alignItems={"flex-start"} spacing={2}>
-          <TemplateStatusTag status={status} scheduledFor={versionDate} />
-          {status === ETemplateVersionStatus.published && <VersionTag versionDate={versionDate} />}
+          <TemplateStatusTag
+            status={status}
+            scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
+          />
+          {status === ETemplateVersionStatus.published && versionDate && <VersionTag versionDate={versionDate} />}
         </HStack>
       </VStack>
     </Container>

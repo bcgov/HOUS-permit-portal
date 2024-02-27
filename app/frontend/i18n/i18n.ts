@@ -131,6 +131,7 @@ const options = {
           collapseAll: "Collapse all",
           toTop: "Go to top",
           confirm: "Confirm",
+          close: "Close",
         },
         contact: {
           fields: {

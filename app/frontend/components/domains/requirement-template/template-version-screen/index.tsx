@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
-import { ETemplateVersionStatus } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "../edit-requirement-template-screen/builder-header"
@@ -70,9 +69,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
         <BuilderHeader
           requirementTemplate={denormalizedTemplate}
           status={templateVersion.status}
-          versionDate={
-            templateVersion.status === ETemplateVersionStatus.scheduled ? templateVersion.versionDate : undefined
-          }
+          versionDate={templateVersion.versionDate}
         />
         <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
           <SectionsSidebar
@@ -97,7 +94,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               boxShadow={"elevations.elevation02"}
             >
               <Button variant={"secondary"} onClick={onClose}>
-                {t("requirementTemplate.edit.closeEditor")}
+                {t("ui.close")}
               </Button>
             </Flex>
             <SectionsDisplay
