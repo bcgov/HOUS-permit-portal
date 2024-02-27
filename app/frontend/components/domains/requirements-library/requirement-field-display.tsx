@@ -234,6 +234,19 @@ const requirementsComponentMap = {
       </FormControl>
     )
   },
+
+  [ERequirementType.energyStepCode]({ label, helperText, labelProps }: TRequirementProps) {
+    const { t } = useTranslation()
+    return (
+      <FormControl isReadOnly>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.energyStepCode")}
+        </FormLabel>
+        <i className="fa fa-bolt"></i>
+        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      </FormControl>
+    )
+  },
 }
 
 type TProps = { requirementType: ERequirementType } & TRequirementProps

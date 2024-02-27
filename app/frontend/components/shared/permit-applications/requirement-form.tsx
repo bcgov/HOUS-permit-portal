@@ -104,6 +104,16 @@ export const RequirementForm = observer(
       }
     }
 
+    useEffect(() => {
+      const handleCustomEvent = (event) => {
+        navigate("step_code")
+      }
+      document.addEventListener("openStepCode", handleCustomEvent)
+      return () => {
+        document.removeEventListener("openStepCode", handleCustomEvent)
+      }
+    }, [])
+
     const onSubmit = async (submission: any) => {
       if (await permitApplication.submit({ submissionData: submission })) {
         navigate("/permit-applications/sucessful-submission")
