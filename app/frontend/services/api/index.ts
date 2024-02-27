@@ -212,6 +212,22 @@ export class Api {
     })
   }
 
+  async scheduleRequirementTemplate(
+    templateId: string,
+    {
+      requirementTemplate,
+      versionDate,
+    }: {
+      requirementTemplate?: IRequirementTemplateUpdateParams
+      versionDate: Date
+    }
+  ) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
+      requirementTemplate,
+      versionDate,
+    })
+  }
+
   async fetchSiteOptions(address: string) {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }

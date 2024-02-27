@@ -6,14 +6,24 @@ class RequirementTemplate < ApplicationRecord
   belongs_to :activity
   belongs_to :permit_type
 
-  has_many :requirement_template_sections, -> { order(position: :asc) }, dependent: :destroy
-  has_many :template_versions, -> { order(version_date: :desc) }, dependent: :destroy
+  has_many :requirement_template_sections,
+           -> { order(position: :asc) },
+           dependent: :destroy
+  has_many :template_versions,
+           -> { order(version_date: :desc) },
+           dependent: :destroy
   has_many :scheduled_template_versions,
-           -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
+           -> do
+             where(template_versions: { status: "scheduled" }).order(
+               version_date: :desc
+             )
+           end,
            class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
 
-  has_one :published_template_version, -> { where(state: "published") }, class_name: "TemplateVersion"
+  has_one :published_template_version,
+          -> { where(state: "published") },
+          class_name: "TemplateVersion"
 
   validate :scheduled_for_presence_if_scheduled
 
@@ -24,7 +34,8 @@ class RequirementTemplate < ApplicationRecord
 
   include Discard::Model
 
-  accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
+  accepts_nested_attributes_for :requirement_template_sections,
+                                allow_destroy: true
 
   def key
     "requirementtemplate#{id}"
@@ -53,18 +64,25 @@ class RequirementTemplate < ApplicationRecord
                 id: "section-signoff-id",
                 key: "section-signoff-key",
                 type: "panel",
-                title: I18n.t("formio.requirement_template.signoff_panel_title"),
+                title:
+                  I18n.t("formio.requirement_template.signoff_panel_title"),
                 collapsible: true,
                 collapsed: false,
                 components: [
                   {
                     type: "checkbox",
                     key: "signed",
-                    title: I18n.t("formio.requirement_template.signoff_checkbox_title"),
-                    label: I18n.t("formio.requirement_template.signoff_checkbox_label"),
+                    title:
+                      I18n.t(
+                        "formio.requirement_template.signoff_checkbox_title"
+                      ),
+                    label:
+                      I18n.t(
+                        "formio.requirement_template.signoff_checkbox_label"
+                      ),
                     inputType: "checkbox",
                     input: true,
-                    defaultValue: false,
+                    defaultValue: false
                   },
                   {
                     key: "submit",
@@ -72,31 +90,38 @@ class RequirementTemplate < ApplicationRecord
                     type: "button",
                     block: false,
                     input: true,
-                    title: I18n.t("formio.requirement_template.signoff_submit_title"),
-                    label: I18n.t("formio.requirement_template.signoff_submit_title"),
+                    title:
+                      I18n.t(
+                        "formio.requirement_template.signoff_submit_title"
+                      ),
+                    label:
+                      I18n.t(
+                        "formio.requirement_template.signoff_submit_title"
+                      ),
                     theme: "primary",
                     action: "submit",
                     widget: {
-                      type: "input",
+                      type: "input"
                     },
                     disabled: false,
                     show: false,
                     conditional: {
                       show: true,
                       when: "signed",
-                      eq: "true",
-                    },
-                  },
-                ],
-              ],
-            },
-          ],
-        ),
+                      eq: "true"
+                    }
+                  }
+                ]
+              ]
+            }
+          ]
+        )
     }
   end
 
   def lookup_props
-    array_of_req_pairs = requirement_template_sections.map(&:lookup_props).flatten
+    array_of_req_pairs =
+      requirement_template_sections.map(&:lookup_props).flatten
     array_of_req_pairs.reduce({}) do |obj, pair|
       key, value = pair.flatten
       obj.merge({ key => value })
@@ -110,7 +135,7 @@ class RequirementTemplate < ApplicationRecord
       version: version,
       permit_type: permit_type.name,
       activity: activity.name,
-      discarded: discarded_at.present?,
+      discarded: discarded_at.present?
     }
   end
 
@@ -125,7 +150,9 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def scheduled_for_presence_if_scheduled
-    errors.add(:scheduled_for, "must be set when status is 'scheduled'") if scheduled? && scheduled_for.blank?
+    if scheduled? && scheduled_for.blank?
+      errors.add(:scheduled_for, "must be set when status is 'scheduled'")
+    end
   end
 
   def set_default_version

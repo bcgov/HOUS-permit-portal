@@ -163,6 +163,9 @@ en:
       update_success:
         title: ""
         message: "Template updated successfully!"
+      schedule_success:
+        title: ""
+        message: "Template scheduled to be published successfully!"
       create_error:
         title: Oops
         message: "%{error_message}"
@@ -173,6 +176,9 @@ en:
         title: Oops
         message: "Something went wrong archiving the template"
       update_error:
+        title: Oops
+        message: "%{error_message}"
+      schedule_error:
         title: Oops
         message: "%{error_message}"
       delete_error:
