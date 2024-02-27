@@ -107,7 +107,7 @@ class RequirementTemplate < ApplicationRecord
     {
       description: description,
       status: status,
-      version: version,
+      current_version: published_template_version&.version_date,
       permit_type: permit_type.name,
       activity: activity.name,
       discarded: discarded_at.present?,
