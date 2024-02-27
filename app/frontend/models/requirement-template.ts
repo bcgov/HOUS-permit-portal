@@ -2,7 +2,7 @@ import { addDays, isAfter, isSameDay, max } from "date-fns"
 import { Instance, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ERequirementTemplateStatus, ETemplateVerionStatus } from "../types/enums"
+import { ERequirementTemplateStatus, ETemplateVersionStatus } from "../types/enums"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
@@ -11,7 +11,7 @@ function preProcessor(snapshot) {
   const processedSnapShot = {
     ...snapshot,
     scheduledTemplateVersions: snapshot.templateVersions
-      ?.filter((version) => version.status === ETemplateVerionStatus.scheduled)
+      ?.filter((version) => version.status === ETemplateVersionStatus.scheduled)
       .map((version) => version.id),
     publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
   }

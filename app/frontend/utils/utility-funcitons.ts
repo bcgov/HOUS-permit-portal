@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import { ERequirementType } from "../types/enums"
 import { TDebouncedFunction } from "../types/types"
 
@@ -76,4 +77,8 @@ export function handleScrollToBottom() {
     top: outerFlex.scrollHeight - outerFlex.clientHeight,
     behavior: "instant",
   })
+}
+
+export function formatTemplateVersion(versionDate: Date) {
+  return `v.${format(versionDate, "yyyy.MM.dd")}`
 }

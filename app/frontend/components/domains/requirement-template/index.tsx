@@ -10,11 +10,10 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ToggleArchivedButton } from "../../shared/buttons/show-archived-button"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
-import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { ManageRequirementTemplateMenu } from "../../shared/requirement-template/mange-requirement-template-menu"
-import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
+import { VersionTag } from "../../shared/version-tag"
 import { GridHeaders } from "./grid-header"
+import { TenmplateVersionsSidebar } from "./template-versions-sidebar"
 
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore } = useMst()
@@ -49,7 +48,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="repeat(3, 1fr) 2fr repeat(3, 1fr)">
+        <SearchGrid templateColumns="repeat(2, 1fr) 2fr repeat(3, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -60,19 +59,17 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
             tableRequirementTemplates.map((rt) => {
               return (
                 <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
-                  <SearchGridItem>
-                    <TemplateStatusTag requirementTemplate={rt} />
-                  </SearchGridItem>
                   <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
                   <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
                   <SearchGridItem>{rt.description}</SearchGridItem>
-                  <SearchGridItem>{rt.version}</SearchGridItem>
+                  <SearchGridItem>
+                    {rt.publishedTemplateVersion?.versionDate ? (
+                      <VersionTag versionDate={rt.publishedTemplateVersion.versionDate} />
+                    ) : null}
+                  </SearchGridItem>
                   <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
                   <SearchGridItem>
-                    <Flex justify="space-between" w="full" gap={2}>
-                      <RouterLink to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLink>
-                      <ManageRequirementTemplateMenu requirementTemplate={rt} searchModel={requirementTemplateStore} />
-                    </Flex>
+                    <TenmplateVersionsSidebar requirementTemplate={rt} />
                   </SearchGridItem>
                 </Box>
               )

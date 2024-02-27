@@ -22,10 +22,11 @@ export enum ERequirementTemplateStatus {
   draft = "draft",
 }
 
-export enum ETemplateVerionStatus {
+export enum ETemplateVersionStatus {
   published = "published",
   scheduled = "scheduled",
   deprecated = "deprecated",
+  draft = "draft",
 }
 
 export enum EUserRoles {
@@ -59,11 +60,10 @@ export enum EUserSortFields {
 }
 
 export enum ERequirementTemplateSortFields {
-  status = "status",
   permitType = "permit_type",
   activity = "activity",
   description = "description",
-  version = "version",
+  currentVersion = "current_version",
   jurisdictionsSize = "jurisdictions_size",
 }
 
