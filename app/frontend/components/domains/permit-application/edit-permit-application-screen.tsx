@@ -26,6 +26,13 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     const submissionData = formio.data
     try {
       const response = await currentPermitApplication.update({ submissionData: { data: submissionData } })
+      if (response.ok && response.data.data.frontEndFormUpdate) {
+        for (const [key, value] of Object.entries(response.data.data.frontEndFormUpdate)) {
+          let componentToSet = formio.getComponent(key)
+          componentToSet.setValue(value)
+        }
+        //update file hashes that have been changed
+      }
     } catch (e) {}
   }
 

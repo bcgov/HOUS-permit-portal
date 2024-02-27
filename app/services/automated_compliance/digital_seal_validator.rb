@@ -7,11 +7,10 @@ class AutomatedCompliance::DigitalSealValidator < AutomatedCompliance::Base
     uploaded_file.open do
       response = Integrations::DigitalSealValidator.new.call(uploaded_file.download, supporting_document.file.mime_type)
       if response.success
-        supporting_document.update(compliance_data: { status: "success", result: response.signatures })
+        return(supporting_document.update(compliance_data: { status: "success", result: response.signatures }))
       else
-        supporting_document.update(compliance_data: { status: "failed", error: response.error })
+        return(supporting_document.update(compliance_data: { status: "failed", error: response.error }))
       end
-      return
     end
     supporting_document.update(
       compliance_data: {

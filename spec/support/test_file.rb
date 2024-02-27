@@ -5,7 +5,7 @@ module TestData
     attacher = Shrine::Attacher.new
     attacher.set(uploaded_file)
 
-    attacher.column_data # or attacher.data in case of postgres jsonb column
+    attacher.data # or attacher.data in case of postgres jsonb column
   end
 
   def uploaded_file

@@ -10,7 +10,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
          :pid,
          :pin,
          :submission_data,
-         :submitted_at
+         :submitted_at,
+         :formatted_compliance_data,
+         :front_end_form_update
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint

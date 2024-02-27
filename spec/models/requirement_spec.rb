@@ -99,6 +99,18 @@ RSpec.describe Requirement, type: :model do
         expect(requirement_2.position).to eq(1)
       end
     end
+
+    context "files" do
+      it "enforces number inputs are valid without a unit" do
+        file_requirement = build(:requirement, requirement_code: "test_file", input_type: "file")
+        expect(file_requirement.valid?).to eq(true)
+      end
+
+      it "enforces number inputs are valid without a unit" do
+        file_requirement = build(:requirement, requirement_code: "test_fail", input_type: "file")
+        expect(file_requirement.valid?).to eq(false)
+      end
+    end
   end
 
   describe "enums" do

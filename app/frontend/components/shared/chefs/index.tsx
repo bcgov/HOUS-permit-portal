@@ -2,7 +2,7 @@
 import { Form, Formio } from "@formio/react"
 import "./styles.scss"
 
-import ChefsFormioComponents from "./custom-formio-components"
+import ChefsFormioComponents from "./additional-formio"
 
 Formio.use(ChefsFormioComponents)
 

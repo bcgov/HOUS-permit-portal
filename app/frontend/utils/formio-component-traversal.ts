@@ -1,5 +1,4 @@
 import * as R from "ramda"
-
 const findPanelComponents = (components) => {
   let panelComponents = []
 
@@ -34,6 +33,31 @@ export const getCompletedSectionsFromForm = (rootComponent) => {
 
     return (completedSections[panelComponent?.component?.key] = complete)
   })
-  console.log(completedSections)
   return completedSections
+}
+
+export const combineComplianceHints = (formJson, formattedComplianceData) => {
+  let updatedJson = formJson
+  for (const [key, value] of Object.entries(formattedComplianceData)) {
+    const section = key.split("|")[0].replace("formSubmissionDataRST", "")
+    const rb = key.split("|").slice(0, 2).join("|")
+
+    const sectionIndex = updatedJson?.["components"]?.findIndex((c) => c["key"] == section)
+    const rbIndex = updatedJson?.["components"]?.[sectionIndex]?.["components"]?.findIndex((c) => c["key"] == rb)
+    const itemIndex = updatedJson?.["components"]?.[sectionIndex]?.["components"]?.[rbIndex]?.["components"]?.findIndex(
+      (c) => c["key"] == key
+    )
+
+    const defaultDesc =
+      updatedJson?.["components"]?.[sectionIndex]?.["components"]?.[rbIndex]?.["components"]?.[itemIndex]?.[
+        "description"
+      ]
+
+    if (defaultDesc) {
+      const combinedValue = value
+      updatedJson["components"][sectionIndex]["components"][rbIndex]["components"][itemIndex]["description"] =
+        combinedValue
+    }
+  }
+  return updatedJson
 }

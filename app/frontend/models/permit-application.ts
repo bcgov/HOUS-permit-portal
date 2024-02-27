@@ -4,6 +4,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
 import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
+import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { UserModel } from "./user"
@@ -23,6 +24,7 @@ export const PermitApplicationModel = types
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
+    formattedComplianceData: types.maybeNull(types.frozen()),
     submittedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
@@ -44,6 +46,10 @@ export const PermitApplicationModel = types
           return acc.concat(blocks)
         }, [] as IFormIOBlock[])
         .filter((outNull) => outNull)
+    },
+    get formattedFormJson() {
+      //merge the formattedComliance data.  This should trigger a form redraw when it is updated
+      return combineComplianceHints(self.formJson, self.formattedComplianceData)
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
@@ -87,7 +93,7 @@ export const PermitApplicationModel = types
         const { data: permitApplication } = response.data
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
-      return response.ok
+      return response
     }),
 
     submit: flow(function* (params) {

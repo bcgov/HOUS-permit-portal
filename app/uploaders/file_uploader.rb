@@ -9,13 +9,20 @@ class FileUploader < Shrine
   def generate_location(io, derivative: nil, **options)
     record = options[:record]
     if record
-      model = record.class.name.underscore # e.g., 'user' for User model
+      # model = record.class.name.underscore # e.g., the supporting_document
+      parent_model = record.permit_application.class.name.underscore #permit application nesting
+      parent_id = record.permit_application.id
       identifier = record.id || "temp" # Use 'temp' if record ID is nil
 
       # Construct the path with support for derivatives
-      path = [model, identifier]
+      path = [parent_model, parent_id, identifier]
       path << derivative.to_s if derivative # Append derivative name if present
-      # path << super # Call the original generate_location method for the filename
+
+      if record[:file_data]["storage"] == "cache"
+        path << record[:file_data]["id"] #get the same name as it did in the cache
+      else
+        path << super # Call the original generate_location method for the filename
+      end
 
       # Join the path components
       File.join(path)
