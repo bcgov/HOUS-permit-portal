@@ -100,6 +100,7 @@ export enum ERequirementType {
   signature = "signature",
   generalContact = "general_contact",
   bcaddress = "bcaddress",
+  energyStepCode = "energy_step_code",
 }
 
 export enum ENumberUnit {

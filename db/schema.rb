@@ -322,8 +322,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_28_231537) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", null: false
     t.uuid "permit_application_id"
+    t.string "name", null: false
     t.index ["permit_application_id"],
             name: "index_step_codes_on_permit_application_id"
   end

@@ -325,6 +325,7 @@ const options = {
             fileUpload: "File Upload",
             phone: "Phone",
             email: "E-mail",
+            energyStepCode: "Energy Step Code",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
           unitLabels: {
