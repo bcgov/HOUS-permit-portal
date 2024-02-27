@@ -129,6 +129,7 @@ const options = {
           expandAll: "Expand all",
           collapseAll: "Collapse all",
           toTop: "Go to top",
+          confirm: "Confirm",
         },
         contact: {
           fields: {
@@ -412,6 +413,11 @@ const options = {
             emptyTemplateSectionText: "Start by clicking the Add Section button",
             goToTop: "Go to top",
             collapseAll: "Collapse All",
+            scheduleModalTitle: "Publish permit?",
+            scheduleModalBody:
+              "Once you publish, local governments and submitters will be able to see and use this new version of the form.",
+            scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
+            scheduleModalCancelMessage: "Changes were not scheduled.",
           },
           fields: {
             status: "Status",

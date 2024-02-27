@@ -38,7 +38,8 @@ class TemplateVersioningService
 
     template_version =
       requirement_template.template_versions.build(
-        denormalized_template_json: RequirementTemplateBlueprint.render_as_hash(requirement_template, view: :extended),
+        denormalized_template_json:
+          RequirementTemplateBlueprint.render_as_hash(requirement_template, view: :template_snapshot),
         form_json: requirement_template.to_form_json,
         requirement_blocks_json: form_requirement_blocks_hash(requirement_template),
         version_diff: diff_of_current_changes_and_last_version,

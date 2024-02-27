@@ -22,6 +22,12 @@ export enum ERequirementTemplateStatus {
   draft = "draft",
 }
 
+export enum ETemplateVerionStatus {
+  published = "published",
+  scheduled = "scheduled",
+  deprecated = "deprecated",
+}
+
 export enum EUserRoles {
   submitter = "submitter",
   reviewManager = "review_manager",

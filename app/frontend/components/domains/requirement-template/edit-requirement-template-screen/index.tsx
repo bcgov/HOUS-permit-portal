@@ -16,7 +16,6 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../types/api-request"
-import { ERequirementTemplateStatus } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderHeader } from "./builder-header"
@@ -78,16 +77,20 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const onSaveDraft = handleSubmit(async (templateFormData) => {
     const formattedSubmitData = formatSubmitData(templateFormData)
 
-    formattedSubmitData.status = ERequirementTemplateStatus.draft
     return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
   })
 
-  const onPublish = handleSubmit(async (templateFormData) => {
-    const formattedSubmitData = formatSubmitData(templateFormData)
+  const onSchedule = async (date: Date) => {
+    await handleSubmit(async (templateFormData) => {
+      const formattedSubmitData = formatSubmitData(templateFormData)
 
-    formattedSubmitData.status = ERequirementTemplateStatus.published
-    return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
-  })
+      return await requirementTemplateStore.scheduleRequirementTemplate(
+        requirementTemplate.id,
+        formattedSubmitData,
+        date
+      )
+    })()
+  }
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
@@ -124,7 +127,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             >
               <ControlsHeader
                 onSaveDraft={onSaveDraft}
-                onPublish={onPublish}
+                onScheduleDate={onSchedule}
                 onAddSection={onAddSection}
                 requirementTemplate={requirementTemplate}
               />

@@ -1,5 +1,5 @@
 import { Button, HStack } from "@chakra-ui/react"
-import { CaretRight, Plus } from "@phosphor-icons/react"
+import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useFormContext } from "react-hook-form"
@@ -7,9 +7,10 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../../models/requirement-template"
 import { IRequirementTemplateForm } from "./index"
+import { PublishScheduleModal } from "./publish-schedule-modal"
 
 interface IProps {
-  onPublish?: () => void
+  onScheduleDate?: (date: Date) => void
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
@@ -17,7 +18,7 @@ interface IProps {
 
 export const ControlsHeader = observer(function ControlsHeader({
   requirementTemplate,
-  onPublish,
+  onScheduleDate,
   onSaveDraft,
   onAddSection,
 }: IProps) {
@@ -29,7 +30,8 @@ export const ControlsHeader = observer(function ControlsHeader({
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
   }
-  const isSubmitDisabled = requirementTemplate.isPublished || isSubmitting || !isValid
+  const isSubmitDisabled = !!requirementTemplate.discardedAt || isSubmitting || !isValid
+
   return (
     <HStack
       px={6}
@@ -46,15 +48,14 @@ export const ControlsHeader = observer(function ControlsHeader({
         <Button variant={"primary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
           {t("requirementTemplate.edit.saveDraft")}
         </Button>
-        <Button
-          variant={"primary"}
-          rightIcon={<CaretRight />}
-          onClick={onPublish}
-          isDisabled={isSubmitDisabled}
-          isLoading={isSubmitting}
-        >
-          {t("ui.publish")}
-        </Button>
+        <PublishScheduleModal
+          minDate={requirementTemplate.nextAvailableScheduleDate}
+          onScheduleConfirm={onScheduleDate}
+          triggerButtonProps={{
+            isDisabled: isSubmitDisabled,
+          }}
+        />
+
         <Button variant={"secondary"} isDisabled={isSubmitting} onClick={onClose}>
           {t("requirementTemplate.edit.closeEditor")}
         </Button>

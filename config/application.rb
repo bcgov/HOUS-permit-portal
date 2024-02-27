@@ -33,7 +33,7 @@ module HousPermitPortal
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = "Pacific Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # we will be using dotenv locally and Hashicorp Vault in production so disable default rails master.key
