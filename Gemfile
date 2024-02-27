@@ -56,7 +56,7 @@ gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
-gem 'discard', '~> 1.2'
+gem "discard", "~> 1.2"
 gem "faraday", "~> 2.9.0"
 gem "factory_bot", "~> 6.4"
 
@@ -69,6 +69,11 @@ group :development, :test do
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "vcr", "~> 6.2"
+  # brew install geos
+  # bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
+  gem "rgeo"
+  # brew install proj
+  gem "rgeo-proj4"
 end
 
 group :development do

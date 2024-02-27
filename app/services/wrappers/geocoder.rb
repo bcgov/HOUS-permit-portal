@@ -12,6 +12,7 @@ class Wrappers::Geocoder < Wrappers::Base
   OUTPUT_FORMAT = "json"
 
   def site_options(address_string = nil, coordinates = nil)
+    binding.pry
     site_params = {
       # addressString: "525 Superior Street, Victoria, BC"
       locationDescriptor: "parcelPoint",
@@ -46,5 +47,11 @@ class Wrappers::Geocoder < Wrappers::Base
 
   def subsites(site_id)
     get("/sites/#{site_id}/subsites.#{OUTPUT_FORMAT}")
+  end
+
+  def site_from_coordinates(coordinates)
+    r = get("/addresses.#{OUTPUT_FORMAT}", { parcelPoint: coordinates.join(",") })
+    binding.pry
+    return r
   end
 end

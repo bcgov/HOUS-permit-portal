@@ -22,10 +22,10 @@ export const SitesSelect = observer(
   ({ fetchOptions, onChange, selectedOption, stylesToMerge, setSiteSelected, ...rest }: TSitesSelectProps) => {
     const { geocoderStore } = useMst()
     const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-    const { fetchPids } = geocoderStore
+    const { fetchPids, fetchSiteOptionsForPid } = geocoderStore
     const pidSelectRef = useRef(null)
 
-    const fetchSiteOptions = (address: string, callback: (options) => void) => {
+    const fetchSiteOptionsForAddress = (address: string, callback: (options) => void) => {
       if (address.length > 3) {
         fetchOptions(address).then((options: IOption[]) => {
           callback(options)
@@ -52,11 +52,15 @@ export const SitesSelect = observer(
       }
     }
 
-    const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
+    const debouncedFetchOptions = useCallback(debounce(fetchSiteOptionsForAddress, 1000), [])
 
     useEffect(() => {
       setSiteSelected(!!pidWatch || !!(siteWatch && R.isEmpty(pidOptions)))
     }, [pidWatch, siteWatch, pidOptions])
+
+    useEffect(() => {
+      fetchSiteOptionsForPid("001711067")
+    }, [])
 
     return (
       <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>

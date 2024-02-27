@@ -31,6 +31,9 @@ class Api::GeocoderController < Api::ApplicationController
     end
   end
 
+  def addresses_from_pid
+  end
+
   private
 
   def geocoder_params

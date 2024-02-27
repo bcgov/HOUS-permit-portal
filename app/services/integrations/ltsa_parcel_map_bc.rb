@@ -1,3 +1,6 @@
+require "rgeo"
+require "rgeo/proj4"
+
 class Integrations::LtsaParcelMapBc
   attr_accessor :client, :api_path
   def initialize
@@ -21,7 +24,7 @@ class Integrations::LtsaParcelMapBc
   )
     response = get_details_by_pid(pid: pid, fields: fields)
     if response.success?
-      #assumes there is one layer to these features at the moment
+      # assumes there is one layer to these features at the moment
       return response.body.dig("features", 0, "attributes")
     else
       raise Errors::FeatureAttributesRetrievalError
@@ -31,8 +34,44 @@ class Integrations::LtsaParcelMapBc
   def get_coordinates_by_pid(pid)
     response = get_details_by_pid(pid: pid)
     if response.success?
-      #assumes there is one layer to these features at the moment
-      return response.body.dig("features", 0, "geometry", "rings", 0, 0)
+      # assumes there is one layer to these features at the moment
+      geometry = response.body.dig("features", 0, "geometry")
+      factory =
+        RGeo::Cartesian.factory(
+          srid: response.body.dig("spatialReference", "latestWkid"), # 3005
+        )
+      outer_ring = factory.linear_ring(geometry["rings"][0].map { |coords| factory.point(*coords) })
+      # Create the polygon
+      rgeo_polygon = factory.polygon(outer_ring)
+
+      # Calculate the centroid
+      centroid = rgeo_polygon.centroid
+
+      source_projection = RGeo::CoordSys::Proj4.create("EPSG:3005")
+
+      # source_projection = RGeo::CoordSys::Proj4.create('+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
+
+      target_projection = RGeo::CoordSys::Proj4.create("EPSG:3857")
+
+      # geography = RGeo::Geos.factory(coord_sys: "EPSG:3005", srid: 3005)
+      target_factory = RGeo::Geos.factory(coord_sys: "EPSG:3857", srid: 3857)
+
+      geo_point = RGeo::Feature.cast(centroid, project: true, factory: target_factory)
+
+      binding.pry
+
+      geo_point
+
+      # r =
+      #   RGeo::CoordSys::Proj4.transform_coords(
+      #     source_projection,
+      #     target_projection,
+      #     centroid.x,
+      #     centroid.y,
+      #     nil
+      #   )
+
+      # return r.map { |latlng| (latlng / 100_000).round(7) }
     else
       raise Errors::FeatureAttributesRetrievalError
     end

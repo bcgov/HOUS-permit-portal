@@ -357,6 +357,9 @@ GEM
     responders (3.1.1)
       actionpack (>= 5.2)
       railties (>= 5.2)
+    rgeo (3.0.1)
+    rgeo-proj4 (4.0.0)
+      rgeo (~> 3.0.0)
     roo (2.10.0)
       nokogiri (~> 1)
       rubyzip (>= 1.3.0, < 3.0.0)
@@ -484,6 +487,8 @@ DEPENDENCIES
   pundit (~> 2.3.1)
   rails (~> 7.1.2)
   redis (~> 5.0.8)
+  rgeo
+  rgeo-proj4
   roo (~> 2.10)
   rspec-rails (~> 6.1.0)
   searchkick (~> 5.3.1)

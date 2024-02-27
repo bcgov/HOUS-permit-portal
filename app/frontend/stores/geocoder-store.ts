@@ -11,8 +11,8 @@ export const GeocoderStoreModel = types
   .extend(withEnvironment())
   .views((self) => ({}))
   .actions((self) => ({
-    fetchSiteOptions: flow(function* (address: string, pid: string = null) {
-      const response: any = yield self.environment.api.fetchSiteOptions(address, pid)
+    fetchSiteOptionsForAddress: flow(function* (address: string, pid: string = null) {
+      const response: any = yield self.environment.api.fetchSiteOptions(address)
       if (response.ok) {
         let responseData = response.data.data
         return responseData
@@ -21,6 +21,14 @@ export const GeocoderStoreModel = types
     }),
     fetchPids: flow(function* (siteId: string) {
       const response: any = yield self.environment.api.fetchPids(siteId)
+      if (response.ok) {
+        let responseData = response.data
+        return responseData
+      }
+      return response.ok
+    }),
+    fetchSiteOptionsForPid: flow(function* (pid: string) {
+      const response: any = yield self.environment.api.fetchSiteOptions(null, pid)
       if (response.ok) {
         let responseData = response.data
         return responseData

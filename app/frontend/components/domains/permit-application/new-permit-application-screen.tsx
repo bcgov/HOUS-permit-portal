@@ -39,7 +39,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const { handleSubmit, formState, control, watch } = formMethods
   const { isSubmitting } = formState
   const { geocoderStore, permitClassificationStore, permitApplicationStore } = useMst()
-  const { fetchSiteOptions } = geocoderStore
+  const { fetchSiteOptionsForAddress } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions, isLoading } = permitClassificationStore
   const navigate = useNavigate()
   const [siteSelected, setSiteSelected] = useState(false)
@@ -77,7 +77,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                       <SitesSelect
                         setSiteSelected={setSiteSelected}
                         onChange={onChange}
-                        fetchOptions={fetchSiteOptions}
+                        fetchOptions={fetchSiteOptionsForAddress}
                         placeholder={undefined}
                         selectedOption={value}
                         styles={{
