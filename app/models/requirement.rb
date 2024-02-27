@@ -138,7 +138,10 @@ class Requirement < ApplicationRecord
     if input_options["conditional"].present?
       # assumption that conditional is only within the same requirement block for now
       conditional = input_options["conditional"]
-      conditional.merge!("when" => "#{requirement_block_key}|#{conditional["when"]}") if conditional["when"].present?
+      section = PermitApplication.section_from_key(requirement_block_key)
+      if conditional["when"].present?
+        conditional.merge!("when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}")
+      end
       json.merge!({ conditional: conditional })
     end
 

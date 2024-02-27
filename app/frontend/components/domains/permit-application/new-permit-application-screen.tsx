@@ -46,7 +46,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
   const onSubmit = async (formValues) => {
     const params = { ...formValues, fullAddress: formValues.site.label }
-    console.log(params)
     const permitApplication = await permitApplicationStore.createPermitApplication(params)
     if (permitApplication) {
       navigate(`/permit-applications/${permitApplication.id}/edit`)
