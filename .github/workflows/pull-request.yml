@@ -17,6 +17,10 @@ jobs:
       CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
       GEO_ALR_REST_URL: https://alr_rest_url_stub/arcserver/rest/services
       GEO_LTSA_PARCELMAP_REST_URL: https://ltsa_parcel_map_url_stub/arcserver/rest/services
+      MIN_ZERO_CARBON_STEP: "1"
+      MAX_ZERO_CARBON_STEP: "5"
+      MIN_ENERGY_STEP: "3"
+      MAX_ENERGY_STEP: "4"
     services:
       postgres:
         image: postgres:16

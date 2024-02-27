@@ -42,7 +42,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
              permit_application_params.merge(status: :submitted, signed_off_at: Time.current),
            ),
          )
-      AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
+        if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
+          AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
+        end
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.submit_error",

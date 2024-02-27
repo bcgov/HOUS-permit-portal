@@ -1,4 +1,12 @@
-import { ENumberUnit, ESortDirection } from "./enums"
+import { IPermitApplication } from "../models/permit-application"
+import {
+  ENumberUnit,
+  ESortDirection,
+  EStepCodeAirtightnessValue,
+  EStepCodeBuildingType,
+  EStepCodeCompliancePath,
+  EStepCodeEPCTestingTargetType,
+} from "./enums"
 
 export type TLatLngTuple = [number, number]
 
@@ -75,4 +83,12 @@ export interface IFormIORequirement {
 
 export interface ISubmissionData {
   data: any[]
+}
+
+export interface IStepCodeSelectOptions {
+  compliancePaths: EStepCodeCompliancePath[]
+  airtightnessValues: EStepCodeAirtightnessValue[]
+  epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
+  permitApplications: Partial<IPermitApplication>[]
+  buildingTypes: EStepCodeBuildingType[]
 }

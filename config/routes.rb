@@ -7,11 +7,11 @@ Rails.application.routes.draw do
     Sidekiq::Web.use Rack::Auth::Basic do |username, password|
       ActiveSupport::SecurityUtils.secure_compare(
         ::Digest::SHA256.hexdigest(username),
-        ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME']),
+        ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_USERNAME"]),
       ) &
         ActiveSupport::SecurityUtils.secure_compare(
           ::Digest::SHA256.hexdigest(password),
-          ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD']),
+          ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_PASSWORD"]),
         )
     end
   end
@@ -80,6 +80,10 @@ Rails.application.routes.draw do
     resource :profile, only: [:update], controller: "users"
     resources :users, only: [:destroy] do
       patch "restore", on: :member
+    end
+
+    resources :step_codes, only: %i[index create], shallow: true do
+      resources :step_code_checklists, only: %i[index show update]
     end
 
     post "tags/search", to: "tags#index", as: :tags_search

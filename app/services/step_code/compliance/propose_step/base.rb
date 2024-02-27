@@ -1,8 +1,6 @@
 class StepCode::Compliance::ProposeStep::Base
   attr_accessor :step, :final_step_reached
-
-  MIN_REQUIRED_STEP = 3
-  MAX_STEP = 5
+  attr_reader :checklist
 
   def initialize(checklist:)
     @checklist = checklist
@@ -10,26 +8,32 @@ class StepCode::Compliance::ProposeStep::Base
 
   def call
     self.final_step_reached = false
-    self.step = MIN_REQUIRED_STEP
+    self.step = min_required_step
 
-    until final_step_reached || step > MAX_STEP
+    until final_step_reached || step > max_step
       if requirements_met?
         self.step += 1
       else
-        self.step = nil if step == MIN_REQUIRED_STEP
+        self.step = nil if step == min_required_step
         self.final_step_reached = true
       end
     end
-    self.step = step - 1 if step && step > MIN_REQUIRED_STEP
+    self.step = step - 1 if step && step > min_required_step
     return self
   end
 
   private
 
-  attr_reader :checklist
-
   def requirements_met?
     checkers.all? { |c| self.send(c).requirements_met? }
+  end
+
+  def min_required_step
+    raise NotImplementedError, "#{__method__} is not implemented"
+  end
+
+  def max_step
+    raise NotImplementedError, "#{__method__} is not implemented"
   end
 
   def checkers
