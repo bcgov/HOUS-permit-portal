@@ -5,7 +5,7 @@ import { withRootStore } from "../lib/with-root-store"
 export const GeocoderStoreModel = types
   .model("GeocoderStoreModel")
   .props({
-    // flashMessage: types.optional(FlashMessageModel, {}),
+    fetchingPids: types.optional(types.boolean, false),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -20,11 +20,13 @@ export const GeocoderStoreModel = types
       return response.ok
     }),
     fetchPids: flow(function* (siteId: string) {
+      self.fetchingPids = true
       const response: any = yield self.environment.api.fetchPids(siteId)
       if (response.ok) {
         let responseData = response.data
         return responseData
       }
+      self.fetchingPids = false
       return response.ok
     }),
   }))
