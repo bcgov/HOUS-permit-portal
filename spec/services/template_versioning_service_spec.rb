@@ -67,7 +67,7 @@ RSpec.describe TemplateVersioningService, type: :service do
 
       it "saves the current requirement template state to denormalized_template_json" do
         expected_denormalized_template_json =
-          RequirementTemplateBlueprint.render_as_json(requirement_template, view: :extended)
+          RequirementTemplateBlueprint.render_as_json(requirement_template, view: :template_snapshot)
 
         template_version.denormalized_template_json.should eq(expected_denormalized_template_json)
       end
