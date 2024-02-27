@@ -23,16 +23,17 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
-  def requirement_templates
+  def published_templates
     # TODO: THIS IS STUBBED FOR NOW
     # big changes are coming to the jurisdiction specific form templates, so just use all for now
-    RequirementTemplate.all
+    TemplateVersion.where(status: "published")
   end
 
   def template_form_json(activity, permit_type)
-    # TODO: THIS IS STUBBED FOR NOW
-    # big changes are coming to the jurisdiction specific form templates, so just use any template that has sections for now
-    RequirementTemplateSection.first.requirement_template.to_form_json
+    r_t = RequirementTemplate.where(activity: activity, permit_type: permit_type)&.first
+    return {} if r_t.blank? || r_t.published_template_version.blank?
+
+    return r_t.published_template_version.form_json
   end
 
   def review_managers

@@ -15,7 +15,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
                 Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: classification_option_params[:pid])
 
               jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
-              jurisdiction.requirement_templates
+              jurisdiction.published_templates
             else
               RequirementTemplate
             end.includes(:permit_type).includes(:activity)
