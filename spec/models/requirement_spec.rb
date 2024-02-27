@@ -101,12 +101,12 @@ RSpec.describe Requirement, type: :model do
     end
 
     context "files" do
-      it "enforces number inputs are valid without a unit" do
+      it "enforces file valid when code ending in _file" do
         file_requirement = build(:requirement, requirement_code: "test_file", input_type: "file")
         expect(file_requirement.valid?).to eq(true)
       end
 
-      it "enforces number inputs are valid without a unit" do
+      it "enforces file invalid when code not ending in _file" do
         file_requirement = build(:requirement, requirement_code: "test_fail", input_type: "file")
         expect(file_requirement.valid?).to eq(false)
       end

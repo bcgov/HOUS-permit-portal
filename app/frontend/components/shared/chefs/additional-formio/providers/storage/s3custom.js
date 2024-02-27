@@ -27,15 +27,14 @@ const s3custom = function Provider(formio) {
 
         // Step 2: Upload the file directly to the storage service using the pre-signed URL
         // Dell ECS S3 does not support POST object, we need to use PUT and chunked transfer encoding
-        const result = await uploadFileInChunks(
+        await uploadFileInChunks(
           presignedData.signedUrls,
           presignedData.headers,
           file,
           progressCallback,
           1 * 1024 * 1024
         )
-
-        // result.url
+        //if there is an error along the way, it will throw and an error
 
         return {
           storage: "s3custom",
