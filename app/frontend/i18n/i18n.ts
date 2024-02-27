@@ -129,6 +129,8 @@ const options = {
           expandAll: "Expand all",
           collapseAll: "Collapse all",
           toTop: "Go to top",
+          asc: "Ascending",
+          desc: "Descending",
         },
         contact: {
           fields: {

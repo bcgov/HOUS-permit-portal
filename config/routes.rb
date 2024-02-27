@@ -73,7 +73,8 @@ Rails.application.routes.draw do
       get "pids", on: :collection
     end
 
-    resources :permit_applications, only: %i[index create update show] do
+    resources :permit_applications, only: %i[create update show] do
+      post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
     end
 

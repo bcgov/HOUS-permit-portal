@@ -26,6 +26,7 @@ export const colors = {
     base: "#606060",
     dark: "#323130",
     light: "#D9D9D9",
+    input: "#CCCCCC",
   },
   error: "#D9292F",
   success: "#2E8540",

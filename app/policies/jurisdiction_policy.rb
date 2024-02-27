@@ -16,7 +16,7 @@ class JurisdictionPolicy < ApplicationPolicy
   end
 
   def update?
-    user.super_admin? || (user.review_manager? && user.jurisdiction_id == record.id)
+    user.super_admin? || (user.staff? && user.jurisdiction_id == record.id)
   end
 
   def search_users?
@@ -24,6 +24,7 @@ class JurisdictionPolicy < ApplicationPolicy
   end
 
   def search_permit_applications?
+    # note that this applies to the jurisdiction, not the permit applications
     update?
   end
 

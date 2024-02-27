@@ -78,6 +78,10 @@ class User < ApplicationRecord
     accept_invitation! if valid?
   end
 
+  def staff?
+    reviewer? || review_manager? || super_admin?
+  end
+
   private
 
   def refresh_search_index

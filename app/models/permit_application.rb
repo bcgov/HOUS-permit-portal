@@ -1,6 +1,6 @@
 class PermitApplication < ApplicationRecord
-  searchkick searchable: %i[number permit_classifications submitter status],
-             word_start: %i[number permit_classifications submitter status]
+  searchkick searchable: %i[number nickname permit_classifications submitter status],
+             word_start: %i[number nickname permit_classifications submitter status]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
@@ -26,11 +26,13 @@ class PermitApplication < ApplicationRecord
   def search_data
     {
       number: number,
+      nickname: nickname,
       permit_classifications: "#{permit_type.name} #{activity.name}",
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       status: status,
       jurisdiction_id: jurisdiction.id,
+      submitter_id: submitter.id,
     }
   end
 

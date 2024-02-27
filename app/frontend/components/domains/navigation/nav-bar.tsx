@@ -117,11 +117,10 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
 
-  const navigate = useNavigate()
-
   const handleClickLogout = async () => {
     await logout()
-    navigate("/")
+    // Do a full browser refresh to slightly enhance security
+    window.location.href = "/"
   }
 
   const superAdminOnlyItems = (
