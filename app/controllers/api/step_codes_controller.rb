@@ -37,6 +37,7 @@ class Api::StepCodesController < Api::ApplicationController
     params.require(:step_code).permit(
       :name,
       :permit_application_id,
+      pre_construction_checklist_attributes: [:compliance_path],
       data_entries_attributes: [
         :district_energy_ef,
         :district_energy_consumption,

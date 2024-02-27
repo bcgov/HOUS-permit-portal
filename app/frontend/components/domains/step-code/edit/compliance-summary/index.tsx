@@ -2,11 +2,10 @@ import { HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import { useFormContext } from "react-hook-form"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
-import { CompliancePathSelect } from "./compliance-path-select"
 import { translationPrefix } from "./translation-prefix"
 
 interface IProps {
@@ -18,10 +17,12 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
 
   return (
     <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
-      <Controller
-        control={control}
-        name="compliancePath"
-        render={({ field: { onChange, value } }) => <CompliancePathSelect onChange={onChange} value={value} />}
+      <TextFormControl
+        label={t(`${translationPrefix}.compliancePath.label`)}
+        inputProps={{
+          isDisabled: true,
+          value: t(`${translationPrefix}.compliancePath.options.${checklist.compliancePath}`),
+        }}
       />
 
       {/* Step Requirements */}
