@@ -1,4 +1,4 @@
-import { Container, Flex, Heading } from "@chakra-ui/react"
+import { Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -10,6 +10,7 @@ import { EPermitApplicationSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { SearchInput } from "../../shared/base/search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
@@ -55,11 +56,17 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             <Heading as="h3" fontSize="2xl">
               {t("permitApplication.drafts")}
             </Heading>
-            <SortSelect
-              searchModel={permitApplicationStore}
-              i18nPrefix="permitApplication"
-              sortFields={Object.values(EPermitApplicationSortFields)}
-            />
+            <Flex align="flex-end" gap={4}>
+              <FormControl w="fit-content">
+                <FormLabel>{t("ui.search")}</FormLabel>
+                <SearchInput searchModel={permitApplicationStore} />
+              </FormControl>
+              <SortSelect
+                searchModel={permitApplicationStore}
+                i18nPrefix="permitApplication"
+                sortFields={Object.values(EPermitApplicationSortFields)}
+              />
+            </Flex>
           </Flex>
 
           {isSearching ? (
