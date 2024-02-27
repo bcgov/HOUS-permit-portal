@@ -216,12 +216,12 @@ export class Api {
     })
   }
 
-  async fetchSiteOptions(address: string) {
-    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
+  async fetchSiteOptions(address: string, pid: string = null) {
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
   }
 
-  async fetchPid(siteId: string) {
-    return this.client.get<ApiResponse<string>>(`/geocoder/pid`, { siteId })
+  async fetchPids(siteId: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
   }
 
   async destroyRequirementTemplate(id) {
