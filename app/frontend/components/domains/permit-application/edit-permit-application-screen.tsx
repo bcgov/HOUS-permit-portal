@@ -1,11 +1,12 @@
 import { Box, Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
-import { handleScrollToBottom } from "../../../utils/utility-funcitons"
+import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
@@ -18,10 +19,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
   const formRef = useRef(null)
+  const isStepCode = R.test(/.*\/step-code$/, window.location.pathname)
 
   const [completedSections, setCompletedSections] = useState({})
 
   const handleSave = async () => {
+    if (isStepCode) return
     const formio = formRef.current
     const submissionData = formio.data
     try {
@@ -41,19 +44,24 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
 
+  const scrollToBottom = () => {
+    handleScrollToBottom("permitApplicationFieldsContainer")
+  }
+
   const { permitTypeAndActivity, formJson, nickname } = currentPermitApplication
 
   return (
-    <>
+    <Box as="main" overflow="auto" h="full">
       <Flex
+        id="permitHeader"
+        position="sticky"
+        top={0}
+        zIndex={10}
         w="full"
         p={6}
         bg="theme.blue"
         justify="space-between"
         color="greys.white"
-        position="sticky"
-        top={0}
-        zIndex={10}
         maxH="96px"
       >
         <HStack gap={4}>
@@ -73,25 +81,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           <Button variant="primary" onClick={handleSave}>
             {t("permitApplication.edit.saveDraft")}
           </Button>
-          <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
+          <Button rightIcon={<CaretRight />} onClick={scrollToBottom}>
             {t("permitApplication.edit.submit")}
           </Button>
         </HStack>
       </Flex>
-      <Flex as="main" direction="column" w="full" bg="greys.white" key={"permit-application-show"}>
-        <Box w="full">
-          <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
-          {formJson && (
-            <Flex direction="column" pl={24} py={24} pr={288}>
-              <RequirementForm
-                formRef={formRef}
-                permitApplication={currentPermitApplication}
-                onCompletedSectionsChange={setCompletedSections}
-              />
-            </Flex>
-          )}
-        </Box>
+      <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
+        <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
+        {formJson && (
+          <Flex flex={1} direction="column" p={24}>
+            <RequirementForm
+              formRef={formRef}
+              permitApplication={currentPermitApplication}
+              onCompletedSectionsChange={setCompletedSections}
+            />
+          </Flex>
+        )}
       </Flex>
-    </>
+    </Box>
   )
 })

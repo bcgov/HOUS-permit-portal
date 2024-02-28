@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_28_235438) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -308,7 +308,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
     t.decimal "laundry"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "h2k_file_data"
+    t.jsonb "h2k_file_data"
     t.index ["step_code_id"],
             name: "index_step_code_data_entries_on_step_code_id"
   end
@@ -320,7 +320,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "permit_application_id"
-    t.string "name", null: false
     t.index ["permit_application_id"],
             name: "index_step_codes_on_permit_application_id"
   end

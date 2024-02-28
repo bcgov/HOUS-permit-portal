@@ -45,9 +45,14 @@ export const PermitApplicationStoreModel = types
       const pad = permitApplicationData
       if (!pad?.jurisdiction?.id) return pad
 
+      pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
       self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
       self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
-      return R.mergeRight(pad, { jurisdiction: pad.jurisdiction.id, submitter: pad.submitter.id })
+      return R.mergeRight(pad, {
+        jurisdiction: pad.jurisdiction.id,
+        submitter: pad.submitter.id,
+        stepCode: pad.stepCode?.id,
+      })
     },
     __beforeMergeUpdateAll(permitApplicationsData) {
       //find all unique jurisdictions
@@ -62,9 +67,18 @@ export const PermitApplicationStoreModel = types
         permitApplicationsData.map((pa) => pa.submitter)
       )
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
+
+      self.rootStore.stepCodeStore.mergeUpdateAll(
+        R.reject(
+          R.isNil,
+          permitApplicationsData.map((pa) => pa.stepCode)
+        ),
+        "stepCodesMap"
+      )
       //return the remapped Data
       return R.map(
-        (pa) => R.mergeRight(pa, { jurisdiction: pa.jurisdiction.id, submitter: pa.submitter.id }),
+        (pa) =>
+          R.mergeRight(pa, { jurisdiction: pa.jurisdiction.id, submitter: pa.submitter.id, stepCode: pa.stepCode?.id }),
         permitApplicationsData
       )
     },
@@ -131,8 +145,9 @@ export const PermitApplicationStoreModel = types
       }
       return permitApplication
     }),
-    setCurrentPermitApplication(permitApplicationId) {
-      self.currentPermitApplication = permitApplicationId
+    setCurrentPermitApplication(permitApplication?: IPermitApplication) {
+      self.currentPermitApplication = permitApplication
+      permitApplication?.stepCode && self.rootStore.stepCodeStore.setCurrentStepCode(permitApplication.stepCode)
     },
   }))
 

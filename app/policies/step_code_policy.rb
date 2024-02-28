@@ -3,12 +3,16 @@ class StepCodePolicy < ApplicationPolicy
     user.submitter?
   end
 
-  def show?
-    record.submitter_id == user.id
+  def select_options?
+    true
   end
 
   def update?
-    record.submitter_id == user.id
+    record.submitter == user
+  end
+
+  def destroy?
+    update?
   end
 
   class Scope < Scope

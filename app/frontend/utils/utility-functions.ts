@@ -63,15 +63,15 @@ export function parseBoolean(value: string): boolean {
   return value.toLowerCase() === "true"
 }
 
-export function handleScrollToTop() {
-  document.getElementById("outerFlex").scrollTo({
+export function handleScrollToTop(elementId: string) {
+  document.getElementById(elementId).scrollTo({
     top: 0,
     behavior: "instant",
   })
 }
 
-export function handleScrollToBottom() {
-  const outerFlex = document.getElementById("outerFlex")
+export function handleScrollToBottom(elementId: string) {
+  const outerFlex = document.getElementById(elementId)
   outerFlex.scrollTo({
     top: outerFlex.scrollHeight - outerFlex.clientHeight,
     behavior: "instant",

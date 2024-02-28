@@ -240,6 +240,10 @@ export class Api {
     return this.client.post<ApiResponse<IStepCode>>("/step_codes", { stepCode })
   }
 
+  async deleteStepCode(id: string) {
+    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
   async fetchStepCodeChecklist(id: string) {
     return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
   }

@@ -3,7 +3,7 @@ import { MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ChangeEvent, useCallback } from "react"
 import { ISearch } from "../../../lib/create-search-model"
-import { debounce } from "../../../utils/utility-funcitons"
+import { debounce } from "../../../utils/utility-functions"
 
 interface IProps<TSearchModel extends ISearch> {
   searchModel: TSearchModel

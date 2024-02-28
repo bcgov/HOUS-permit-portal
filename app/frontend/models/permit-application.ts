@@ -7,6 +7,7 @@ import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
+import { StepCodeModel } from "./step-code"
 import { UserModel } from "./user"
 
 export const PermitApplicationModel = types
@@ -29,6 +30,7 @@ export const PermitApplicationModel = types
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
     updatedAt: types.Date,
+    stepCode: types.maybeNull(types.reference(StepCodeModel)),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

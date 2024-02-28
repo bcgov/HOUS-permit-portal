@@ -28,9 +28,7 @@ import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
-import { StepCodeChecklistsScreen } from "../step-code"
-import { EditStepCodeChecklistForm } from "../step-code/edit"
-import { NewStepCodeForm } from "../step-code/new/new"
+import { StepCodeForm } from "../step-code"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
 import { ProfileScreen } from "../users/profile-screen"
@@ -55,14 +53,16 @@ export const Navigation = observer(() => {
 
       <NavBar />
 
-      {isValidating ? (
-        <LoadingScreen />
-      ) : (
-        <>
-          <AppRoutes />
-          <Footer />
-        </>
-      )}
+      <Box overflow="auto" h="full" id="outerScrollContainer">
+        {isValidating ? (
+          <LoadingScreen />
+        ) : (
+          <>
+            <AppRoutes />
+            <Footer />
+          </>
+        )}
+      </Box>
     </BrowserRouter>
   )
 })
@@ -71,6 +71,7 @@ const AppRoutes = observer(() => {
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
   const location = useLocation()
+  const background = location.state && location.state.background
 
   const { userStore } = useMst()
   const { currentUser } = userStore
@@ -102,7 +103,9 @@ const AppRoutes = observer(() => {
 
   const submitterOnlyRoutes = (
     <>
-      <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+      <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
+        <Route path="step-code" element={<StepCodeForm />} />
+      </Route>
       <Route
         path="/permit-applications/:permitApplicationId/sucessful-submission"
         element={<SuccessfulSubmissionScreen />}
@@ -111,40 +114,43 @@ const AppRoutes = observer(() => {
   )
 
   return (
-    <Routes location={location}>
-      {loggedIn ? (
-        <>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/step-codes" element={<StepCodeChecklistsScreen />} />
-          <Route path="/step-codes/new" element={<NewStepCodeForm />} />
-          <Route
-            path="/step-codes/:stepCodeId/checklists/:stepCodeChecklistId"
-            element={<EditStepCodeChecklistForm />}
-          />
+    <>
+      <Routes location={background || location}>
+        {loggedIn ? (
+          <>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
 
-          {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
-          {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
-          {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
-          {currentUser?.isSubmitter && submitterOnlyRoutes}
-        </>
-      ) : (
-        <>
-          <Route path="/" element={<LandingScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-          <Route path="/reset-password" element={<ResetPasswordScreen />} />
-          <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
-          <Route path="/register" element={<RegisterScreen />} />
-        </>
+            {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
+            {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
+            {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
+            {currentUser?.isSubmitter && submitterOnlyRoutes}
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<LandingScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+            <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+            <Route path="/reset-password" element={<ResetPasswordScreen />} />
+            <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+            <Route path="/register" element={<RegisterScreen />} />
+          </>
+        )}
+        <Route path="/contact" element={<ContactScreen />} />
+
+        <Route path="*" element={<NotFoundScreen />} />
+      </Routes>
+      {background && (
+        <Routes>
+          {currentUser?.isSubmitter && (
+            <Route path="/permit-applications/:permitApplicationId/edit/step-code" element={<StepCodeForm />} />
+          )}
+        </Routes>
       )}
-      <Route path="/contact" element={<ContactScreen />} />
-
-      <Route path="*" element={<NotFoundScreen />} />
-    </Routes>
+    </>
   )
 })

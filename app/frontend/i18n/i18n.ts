@@ -346,23 +346,39 @@ const options = {
           },
         },
         stepCode: {
-          index: {
-            heading: "Step Codes",
-            newStepCode: "New Step Code",
+          title: "Step Code Auto-Compliance Tool",
+          subTitle: "Automatically generate your BC Energy Step Code Compliance Report",
+          checklistGuide: "See Checklist Guide",
+          saveAndGoBack: "Save and Go Back",
+          back: "Back to Permit Application",
+          restart: "Restart",
+          info: {
+            title: "BC Step Code Compliance Checklist - Part 9 Buildings",
+            energy: "Energy Step Code",
+            zeroCarbon: "Zero Carbon Step Code",
+            performancePaths: {
+              title: "For Performance Paths:",
+              ers: "9.36.6. BC Energy Step Code ERS",
+              necb: "9.36.6. BC Energy Step Code NECB",
+              passive: "9.36.6. Passive House",
+              stepCode: "9.36.5 BC Energy Step Code",
+            },
+            more: {
+              prompt: "More details can be found at ",
+              link: "energystepcode.ca",
+            },
           },
-          new: {
-            heading: "Create Step Code",
-            name: "Name",
-            districtEnergyEF: "District Energy EF",
-            districtEnergyConsumption: "District Energy Consumption",
-            otherGhgEf: "Other GHG EF",
-            otherGhgConsumption: "Other GHG Consumption",
-            h2kFile: "Hot2000 File",
-            create: "Create",
-            addData: "Add Data",
-            selectPermitApplication: "Select Permit Application",
+          drawingsWarning: {
+            title: "Before you start",
+            description:
+              "Please make sure you have finished uploading all your finalized drawings before generating the report. If you make changes to your uploaded drawings after import, you will need to go through this Step Code Auto-Compliance Tool again.",
+          },
+          import: {
+            title: "Import",
+            selectFile: "Select .h2k file",
             compliancePath: {
-              label: "Compliance Path",
+              label: "BC Building Code Performance Compliance Path:",
+              select: "Select",
               options: {
                 step_code_ers: "9.36.6 BC Energy Step Code ERS",
                 step_code_necb: "9.36.6 BC Energy Step Code NECB",
@@ -370,11 +386,20 @@ const options = {
                 step_code: "9.36.5 BC Energy Step Code",
               },
             },
+            districtEnergyEF: "District Energy EF",
+            districtEnergyConsumption: "District Energy Consumption",
+            otherGhgEf: "Other GHG EF",
+            otherGhgConsumption: "Other GHG Consumption",
+            create: "Create",
+            addData: "Add Data",
+          },
+          index: {
+            heading: "Step Codes",
+            newStepCode: "New Step Code",
           },
         },
         stepCodeChecklist: {
           edit: {
-            update: "Save",
             projectInfo: {
               heading: "A: Project Information",
               permitNum: "Building Permit #",

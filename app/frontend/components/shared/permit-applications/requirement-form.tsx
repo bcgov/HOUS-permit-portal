@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Flex,
-  HStack,
   Heading,
   Modal,
   ModalBody,
@@ -19,11 +18,11 @@ import { observer } from "mobx-react-lite"
 
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
-import { handleScrollToTop } from "../../../utils/utility-funcitons"
+import { handleScrollToTop } from "../../../utils/utility-functions"
 import { Form } from "../chefs"
 
 interface IRequirementFormProps {
@@ -39,6 +38,7 @@ export const RequirementForm = observer(
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
+    const location = useLocation()
 
     const boxRef = useRef<HTMLDivElement>(null)
 
@@ -135,7 +135,7 @@ export const RequirementForm = observer(
 
     useEffect(() => {
       const handleCustomEvent = (event) => {
-        navigate("step_code")
+        navigate("step-code", { state: { background: location } })
       }
       document.addEventListener("openStepCode", handleCustomEvent)
       return () => {
@@ -164,29 +164,30 @@ export const RequirementForm = observer(
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
+    const scrollToTop = () => {
+      handleScrollToTop("outerScrollContainer")
+      handleScrollToTop("permitApplicationFieldsContainer")
+    }
+
     return (
       <>
-        <VStack position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
-          <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
-            <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
-              <Form
-                form={formattedFormJson}
-                formReady={formReady}
-                submission={submissionData}
-                onSubmit={onFormSubmit}
-                options={permitApplication ? {} : { readOnly: true }}
-                onBlur={onBlur}
-              />
-            </Box>
-            <VStack position="fixed" bottom={8} right={12} w="136px" zIndex={11} gap={4}>
-              <Button w="full" onClick={togglePanelCollapse} variant="greyButton">
-                {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
-              </Button>
-              <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
-                {t("ui.toTop")}
-              </Button>
-            </VStack>
-          </HStack>
+        <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} mb={20} ref={boxRef}>
+          <Form
+            form={formattedFormJson}
+            formReady={formReady}
+            submission={submissionData}
+            onSubmit={onFormSubmit}
+            options={permitApplication ? {} : { readOnly: true }}
+            onBlur={onBlur}
+          />
+        </Box>
+        <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
+          <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
+            {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
+          </Button>
+          <Button w="136px" onClick={scrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
+            {t("ui.toTop")}
+          </Button>
         </VStack>
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">

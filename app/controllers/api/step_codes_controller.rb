@@ -3,18 +3,7 @@ class Api::StepCodesController < Api::ApplicationController
     @step_codes = policy_scope(StepCode)
     render_success @step_codes,
                    nil,
-                   {
-                     blueprint: StepCodeBlueprint,
-                     meta: {
-                       select_options:
-                         StepCodeChecklist.select_options.merge(
-                           {
-                             permit_applications:
-                               current_user.permit_applications.map { |pa| { id: pa.id, number: pa.number } },
-                           },
-                         ),
-                     },
-                   }
+                   { blueprint: StepCodeBlueprint, meta: { select_options: StepCodeChecklist.select_options } }
   end
 
   # POST /api/step_codes
@@ -29,6 +18,14 @@ class Api::StepCodesController < Api::ApplicationController
     render_success @step_code, "step_code.create_success", { blueprint: StepCodeBlueprint }
   rescue StandardError => e
     render_error "step_code.create_error", message_opts: { error_message: e }
+  end
+
+  # DELETE /api/step_codes/:id
+  def destroy
+    @step_code = StepCode.find(params[:id])
+    authorize @step_code
+    @step_code.destroy!
+    render json: {}, status: :ok
   end
 
   private

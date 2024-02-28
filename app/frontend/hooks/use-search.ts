@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { ISearch } from "../lib/create-search-model"
 import { ESortDirection } from "../types/enums"
-import { parseBoolean } from "../utils/utility-funcitons"
+import { parseBoolean } from "../utils/utility-functions"
 
 export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => {
   useEffect(() => {

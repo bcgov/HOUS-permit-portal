@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { isUUID, toCamelCase } from "../../../utils/utility-funcitons"
+import { isUUID, toCamelCase } from "../../../utils/utility-functions"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
 type TBreadcrumbSegment = { href: string; title: string }

@@ -83,7 +83,7 @@ Rails.application.routes.draw do
       patch "restore", on: :member
     end
 
-    resources :step_codes, only: %i[index create], shallow: true do
+    resources :step_codes, only: %i[index create destroy], shallow: true do
       resources :step_code_checklists, only: %i[index show update]
     end
 

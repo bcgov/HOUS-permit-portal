@@ -8,7 +8,6 @@ import { StepCodeChecklistModel } from "./step-code-checklist"
 export const StepCodeModel = types
   .model("StepCodeModel", {
     id: types.identifier,
-    name: types.string,
     checklistsMap: types.map(StepCodeChecklistModel),
   })
   .extend(withEnvironment())

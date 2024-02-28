@@ -6,7 +6,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Portal,
   StackDivider,
   VStack,
 } from "@chakra-ui/react"
@@ -15,15 +14,15 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../setup/root"
-import { EStepCodeBuildingType } from "../../../../../types/enums"
+import { EStepCodeEPCTestingTargetType } from "../../../../../types/enums"
 import { translationPrefix } from "./translation-prefix"
 
 interface IProps {
   onChange: (event: any) => void
-  value: EStepCodeBuildingType
+  value: EStepCodeEPCTestingTargetType
 }
 
-export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChange, value }: IProps) {
+export const EPCTestingTargetTypeSelect = observer(function EPCTestingTargetTypeSelect({ onChange, value }: IProps) {
   const {
     stepCodeStore: { selectOptions },
   } = useMst()
@@ -45,34 +44,32 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
                 shadow="base"
               >
                 {value
-                  ? t(`${translationPrefix}.buildingType.options.${value}`)
-                  : t(`${translationPrefix}.buildingType.select`)}
+                  ? t(`${translationPrefix}.epcTestingTargetType.options.${value}`)
+                  : t(`${translationPrefix}.epcTestingTargetType.select`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
-          <Portal>
-            <PopoverContent minW={320}>
-              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-                {selectOptions.buildingTypes.map((value) => (
-                  <Flex
-                    key={value}
-                    onClick={() => {
-                      onChange(value)
-                      onClose()
-                    }}
-                    px={2}
-                    py={1.5}
-                    w="full"
-                    cursor="pointer"
-                    _hover={{ bg: "hover.blue" }}
-                  >
-                    {t(`${translationPrefix}.buildingType.options.${value}`)}
-                  </Flex>
-                ))}
-              </VStack>
-            </PopoverContent>
-          </Portal>
+          <PopoverContent minW={320}>
+            <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
+              {selectOptions.epcTestingTargetTypes.map((value) => (
+                <Flex
+                  key={value}
+                  onClick={() => {
+                    onChange(value)
+                    onClose()
+                  }}
+                  px={2}
+                  py={1.5}
+                  w="full"
+                  cursor="pointer"
+                  _hover={{ bg: "hover.blue" }}
+                >
+                  {t(`${translationPrefix}.epcTestingTargetType.options.${value}`)}
+                </Flex>
+              ))}
+            </VStack>
+          </PopoverContent>
         </>
       )}
     </Popover>

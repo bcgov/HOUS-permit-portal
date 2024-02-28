@@ -6,7 +6,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Portal,
   StackDivider,
   VStack,
 } from "@chakra-ui/react"
@@ -51,28 +50,26 @@ export const AirtightnessSelect = observer(function AirtightnessSelect({ onChang
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
-          <Portal>
-            <PopoverContent minW={320}>
-              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-                {selectOptions.airtightnessValues.map((value) => (
-                  <Flex
-                    key={value}
-                    onClick={() => {
-                      onChange(value)
-                      onClose()
-                    }}
-                    px={2}
-                    py={1.5}
-                    w="full"
-                    cursor="pointer"
-                    _hover={{ bg: "hover.blue" }}
-                  >
-                    {t(`${translationPrefix}.airtightnessValue.options.${value}`)}
-                  </Flex>
-                ))}
-              </VStack>
-            </PopoverContent>
-          </Portal>
+          <PopoverContent minW={320}>
+            <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
+              {selectOptions.airtightnessValues.map((value) => (
+                <Flex
+                  key={value}
+                  onClick={() => {
+                    onChange(value)
+                    onClose()
+                  }}
+                  px={2}
+                  py={1.5}
+                  w="full"
+                  cursor="pointer"
+                  _hover={{ bg: "hover.blue" }}
+                >
+                  {t(`${translationPrefix}.airtightnessValue.options.${value}`)}
+                </Flex>
+              ))}
+            </VStack>
+          </PopoverContent>
         </>
       )}
     </Popover>

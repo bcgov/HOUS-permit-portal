@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
-import { isUUID } from "../../utils/utility-funcitons"
+import { isUUID } from "../../utils/utility-functions"
 
 export const useJurisdiction = () => {
   const { jurisdictionId } = useParams()

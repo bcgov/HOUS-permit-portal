@@ -2,7 +2,7 @@ import { Box, BoxProps, Button, ButtonProps, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { isQuillEmpty } from "../../../../utils/utility-funcitons"
+import { isQuillEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
 
 type TProps = {

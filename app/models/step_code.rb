@@ -12,6 +12,4 @@ class StepCode < ApplicationRecord
 
   accepts_nested_attributes_for :data_entries
   accepts_nested_attributes_for :pre_construction_checklist
-
-  validates :name, presence: true
 end
