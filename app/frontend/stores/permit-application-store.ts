@@ -17,7 +17,6 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
-      isFetchingPermitApplications: types.optional(types.boolean, false),
     }),
     createSearchModel<EPermitApplicationSortFields>("searchPermitApplications")
   )
@@ -105,7 +104,6 @@ export const PermitApplicationStoreModel = types
           perPage: opts?.countPerPage ?? self.countPerPage,
         }
       )
-
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
         // dual purpose method also serves the submitters

@@ -5,5 +5,6 @@ FactoryBot.define do
     permit_type { PermitType.first || association(:permit_type) }
     activity { Activity.first || association(:activity) }
     status { :draft }
+    sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
   end
 end

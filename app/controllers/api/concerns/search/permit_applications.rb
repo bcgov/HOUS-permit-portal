@@ -23,7 +23,6 @@ module Api::Concerns::Search::PermitApplications
     elsif @jurisdiction.present?
       search_conditions[:where] = { jurisdiction_id: @jurisdiction.id }
     end
-
     @permit_application_search = PermitApplication.search(query, **search_conditions)
   end
 

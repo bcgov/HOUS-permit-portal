@@ -45,7 +45,6 @@ export const JurisdictionModel = types
       const sortByCreatedAt = R.sort<IContact>((a, b) => (a.createdAt as number) - (b.createdAt as number))
 
       return sortByCreatedAt(self.contacts)[0]
-      // return self.contacts[0]
     },
   }))
   .actions((self) => ({

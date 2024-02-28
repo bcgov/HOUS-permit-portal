@@ -247,6 +247,8 @@ const options = {
             permit: "Permit",
             fullAddress: "Full Address",
             pidPin: "PID / PIN",
+            clickToWriteNickname: "Click to write a nickname",
+            wasSubmitted: "Application was submitted on {{ date }}",
           },
         },
         requirementsLibrary: {

@@ -17,6 +17,7 @@ import {
 import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
+import { format } from "date-fns"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -26,6 +27,7 @@ import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-funcitons"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
+import { CustomToast } from "../base/flash-message"
 import { Form } from "../chefs"
 
 interface IRequirementFormProps {
@@ -157,8 +159,16 @@ export const RequirementForm = observer(
 
     return (
       <>
-        <VStack position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
+        <Flex direction="column" gap={4} position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
           <ErrorsBox errorBox={errorBoxData} />
+          {permitApplication?.submittedAt && (
+            <CustomToast
+              description={t("permitApplication.edit.wasSubmitted", {
+                date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
+              })}
+              status="info"
+            />
+          )}
           <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
             <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
               <Form
@@ -166,7 +176,7 @@ export const RequirementForm = observer(
                 formReady={formReady}
                 submission={submissionData}
                 onSubmit={onFormSubmit}
-                options={permitApplication ? {} : { readOnly: true }}
+                options={permitApplication ? { readOnly: !!permitApplication.submittedAt } : { readOnly: true }}
                 onBlur={onBlur}
               />
             </Box>
@@ -179,7 +189,7 @@ export const RequirementForm = observer(
               </Button>
             </VStack>
           </HStack>
-        </VStack>
+        </Flex>
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">
             <ModalOverlay />
@@ -213,7 +223,6 @@ export const RequirementForm = observer(
                   </Flex>
                 </Flex>
               </ModalBody>
-              {/* Add ModalBody, ModalFooter or any other content you need here */}
             </ModalContent>
           </Modal>
         )}
