@@ -1,5 +1,6 @@
 import { t } from "i18next"
 import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { EUserSortFields } from "../types/enums"
 import { IContact, TLatLngTuple } from "../types/types"
@@ -36,6 +37,15 @@ export const JurisdictionModel = types
     getUserSortColumnHeader(field: EUserSortFields) {
       //@ts-ignore
       return t(`user.fields.${toCamelCase(field)}`)
+    },
+    get primaryContact() {
+      if (self.contacts.length === 0) return null
+      if (self.contacts.length === 1) return self.contacts[0]
+
+      const sortByCreatedAt = R.sort<IContact>((a, b) => (a.createdAt as number) - (b.createdAt as number))
+
+      return sortByCreatedAt(self.contacts)[0]
+      // return self.contacts[0]
     },
   }))
   .actions((self) => ({
