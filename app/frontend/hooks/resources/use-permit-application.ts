@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
-import { isUUID } from "../../utils/utility-funcitons"
+import { isUUID } from "../../utils/utility-functions"
 
 export const usePermitApplication = () => {
   const { permitApplicationId } = useParams()
@@ -17,10 +17,10 @@ export const usePermitApplication = () => {
   useEffect(() => {
     ;(async () => {
       try {
-        setCurrentPermitApplication(null)
+        setCurrentPermitApplication()
         if (isUUID(permitApplicationId)) {
-          await fetchPermitApplication(permitApplicationId)
-          setCurrentPermitApplication(permitApplicationId)
+          const permitApplication = await fetchPermitApplication(permitApplicationId)
+          setCurrentPermitApplication(permitApplication)
         }
       } catch (e) {
         console.error(e)

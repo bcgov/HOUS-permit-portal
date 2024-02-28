@@ -16,6 +16,7 @@ import { space } from "./foundations/space"
 const styles = {
   global: {
     body: {
+      overflowX: "hidden",
       color: "text.primary", // Set your desired default body font color
     },
   },

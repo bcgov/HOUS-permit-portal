@@ -5,7 +5,7 @@ import ReactQuill, { Quill, ReactQuillProps } from "react-quill"
 // importing Quill CSS directly from NPM package doesn't work with Vite
 // instead, we import from this CSS file which imports the CSS from the CDN URL
 // this URL is specific to the current quill versions and should be updated accordingly
-import { isQuillEmpty } from "../../../utils/utility-funcitons"
+import { isQuillEmpty } from "../../../utils/utility-functions"
 import { CustomImageBlot } from "./custom-extensions/image-blot"
 import { CustomLinkBlot } from "./custom-extensions/link-blot"
 import ImageUploader from "./custom-extensions/quill-image-uploader/imageUploader.js"

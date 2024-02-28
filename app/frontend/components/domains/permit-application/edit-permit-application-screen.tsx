@@ -1,13 +1,14 @@
 import { Box, Button, Flex, HStack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
 import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
-import { handleScrollToBottom } from "../../../utils/utility-funcitons"
+import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
@@ -36,11 +37,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const nicknameWatch = watch("nickname")
+  const isStepCode = R.test(/step-code/, window.location.pathname)
 
   const [completedSections, setCompletedSections] = useState({})
 
   const handleSave = async () => {
-    if (currentPermitApplication.isSubmitted) return
+    if (currentPermitApplication.isSubmitted || isStepCode) return
 
     const formio = formRef.current
     const submissionData = formio.data
@@ -84,21 +86,25 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
 
+  const scrollToBottom = () => {
+    handleScrollToBottom("permitApplicationFieldsContainer")
+  }
+
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
-    <>
+    <Box as="main" overflow="auto" h="full">
       <Flex
-        w="full"
-        p={6}
-        bg="theme.blue"
-        justify="space-between"
-        color="greys.white"
+        id="permitHeader"
         position="sticky"
         top={0}
         zIndex={10}
+        w="full"
+        px={6}
         py={3}
-        maxH="200"
+        bg="theme.blue"
+        justify="space-between"
+        color="greys.white"
       >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
@@ -167,25 +173,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             <Button variant="primary" onClick={handleClickFinishLater}>
               {t("permitApplication.edit.saveDraft")}
             </Button>
-            <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
+            <Button rightIcon={<CaretRight />} onClick={scrollToBottom}>
               {t("permitApplication.edit.submit")}
             </Button>
           </HStack>
         )}
       </Flex>
-      <Flex as="main" direction="column" w="full" bg="greys.white" key={"permit-application-show"}>
-        <Box w="full">
-          <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
-          {formJson && (
-            <Flex direction="column" pl={24} py={24} pr={288}>
-              <RequirementForm
-                formRef={formRef}
-                permitApplication={currentPermitApplication}
-                onCompletedSectionsChange={setCompletedSections}
-              />
-            </Flex>
-          )}
-        </Box>
+      <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
+        <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
+        {formJson && (
+          <Flex flex={1} direction="column" p={24}>
+            <RequirementForm
+              formRef={formRef}
+              permitApplication={currentPermitApplication}
+              onCompletedSectionsChange={setCompletedSections}
+            />
+          </Flex>
+        )}
       </Flex>
       {isOpen && (
         <ContactSummaryModal
@@ -195,6 +199,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
-    </>
+    </Box>
   )
 })

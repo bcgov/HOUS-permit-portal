@@ -1,15 +1,20 @@
-import { Button, Center, Container, HStack, Heading, StackDivider, Text, VStack } from "@chakra-ui/react"
-import { t } from "i18next"
+import { Center, Container, Flex, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { useMst } from "../../../setup/root"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { StepCodeChecklistForm } from "./checklist"
+import { DrawingsWarning } from "./drawings-warning"
+import { H2KImport } from "./import"
+import { Info } from "./info"
+import { Title } from "./title"
 
-export const StepCodeChecklistsScreen = observer(function StepCodeChecklistsScreen() {
+export const StepCodeForm = observer(function NewStepCodeForm() {
   const {
-    stepCodeStore: { isLoaded, fetchStepCodes, stepCodes },
+    stepCodeStore: { isLoaded, fetchStepCodes, currentStepCode },
   } = useMst()
+
+  const navHeight = document.getElementById("mainNav").offsetHeight
 
   useEffect(() => {
     const fetch = async () => await fetchStepCodes()
@@ -17,34 +22,39 @@ export const StepCodeChecklistsScreen = observer(function StepCodeChecklistsScre
   }, [isLoaded])
 
   return (
-    <Container>
-      <Heading>{t("stepCode.index.heading")}</Heading>
+    <Flex
+      flex={1}
+      w="full"
+      h="full"
+      maxH={`calc(100vh - ${navHeight}px)`}
+      overflow="auto"
+      pos="absolute"
+      top={`${navHeight}px`}
+      zIndex={11}
+      bg="white"
+    >
       <Suspense
         fallback={
-          <Center p={50} flex={1}>
+          <Center p={50}>
             <SharedSpinner />
           </Center>
         }
       >
         {isLoaded && (
-          <VStack divider={<StackDivider borderColor="border.light" />}>
-            {stepCodes.map((stepCode) => (
-              <HStack key={stepCode.id} w="full" justify="space-between">
-                <Text>{stepCode.name}</Text>
-                <Button
-                  as={RouterLinkButton}
-                  to={`/step-codes/${stepCode.id}/checklists/${stepCode.preConstructionChecklist.id}`}
-                >
-                  View
-                </Button>
-              </HStack>
-            ))}
-          </VStack>
+          <Container my={10} maxW="container.md">
+            {!currentStepCode ? (
+              <VStack spacing={8} align="start" w="full" pb={20}>
+                <Title />
+                <Info />
+                <DrawingsWarning />
+                <H2KImport />
+              </VStack>
+            ) : (
+              <StepCodeChecklistForm />
+            )}
+          </Container>
         )}
       </Suspense>
-      <Button as={RouterLinkButton} to="/step-codes/new">
-        {t("stepCode.index.newStepCode")}
-      </Button>
-    </Container>
+    </Flex>
   )
 })
