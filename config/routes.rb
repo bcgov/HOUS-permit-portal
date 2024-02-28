@@ -7,11 +7,11 @@ Rails.application.routes.draw do
     Sidekiq::Web.use Rack::Auth::Basic do |username, password|
       ActiveSupport::SecurityUtils.secure_compare(
         ::Digest::SHA256.hexdigest(username),
-        ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME']),
+        ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_USERNAME"]),
       ) &
         ActiveSupport::SecurityUtils.secure_compare(
           ::Digest::SHA256.hexdigest(password),
-          ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD']),
+          ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_PASSWORD"]),
         )
     end
   end
@@ -54,8 +54,11 @@ Rails.application.routes.draw do
 
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
+      post "schedule", to: "requirement_templates#schedule", on: :member
       patch "restore", on: :member
     end
+
+    resources :template_versions, only: %i[show]
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"

@@ -32,8 +32,14 @@ function isTemplateEditPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isTemplateVersionPath(path: string): boolean {
+  const regex = /^\/template-versions\/([a-f\d-]+)$/
+
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
-  const matchers: Array<(path: string) => boolean> = [(path) => path === "/", isTemplateEditPath]
+  const matchers: Array<(path: string) => boolean> = [(path) => path === "/", isTemplateEditPath, isTemplateVersionPath]
 
   return matchers.some((matcher) => matcher(path))
 }

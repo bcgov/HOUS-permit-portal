@@ -39,3 +39,5 @@ export const unitGroups: { [key: string]: ENumberUnit[] } = {
   metric: [ENumberUnit.mm, ENumberUnit.cm, ENumberUnit.m, ENumberUnit.sqm],
   imperial: [ENumberUnit.in, ENumberUnit.ft, ENumberUnit.mi, ENumberUnit.sqft],
 }
+
+export const datefnsAppDateFormat = "yyyy/MM/dd"

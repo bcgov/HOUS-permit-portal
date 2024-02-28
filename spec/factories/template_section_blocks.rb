@@ -1,7 +1,6 @@
 FactoryBot.define do
   factory :template_section_block do
-    requirement_template_section { nil }
-    requirement_block { nil }
-    position { 1 }
+    association :requirement_template_section
+    association :requirement_block, factory: :requirement_block_with_requirements
   end
 end

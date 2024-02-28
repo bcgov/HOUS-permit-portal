@@ -5,6 +5,7 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
 import { IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
+import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
 import {
@@ -212,6 +213,23 @@ export class Api {
     })
   }
 
+  // we send the versionDate as string instead of date as we want to strip off timezone info
+  async scheduleRequirementTemplate(
+    templateId: string,
+    {
+      requirementTemplate,
+      versionDate,
+    }: {
+      requirementTemplate?: IRequirementTemplateUpdateParams
+      versionDate: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
+      requirementTemplate,
+      versionDate,
+    })
+  }
+
   async fetchSiteOptions(address: string) {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
@@ -226,5 +244,9 @@ export class Api {
 
   async restoreRequirementTemplate(id) {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
+  }
+
+  async fetchTemplateVersion(id: string) {
+    return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
   }
 }

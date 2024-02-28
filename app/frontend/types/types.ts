@@ -1,4 +1,5 @@
-import { ENumberUnit, ESortDirection } from "./enums"
+import { IActivity, IPermitType } from "../models/permit-classification"
+import { ENumberUnit, ERequirementType, ESortDirection } from "./enums"
 
 export type TLatLngTuple = [number, number]
 
@@ -53,6 +54,7 @@ export interface IFormIOSection {
   initiallyCollapsed: false
   components: IFormIOBlock[]
 }
+
 export interface IFormIOBlock {
   id: string
   legend: string
@@ -75,4 +77,40 @@ export interface IFormIORequirement {
 
 export interface ISubmissionData {
   data: any[]
+}
+
+export interface IDenormalizedRequirement {
+  id: string
+  label: string
+  inputType: ERequirementType
+  inputOptions: IRequirementOptions
+  hint?: string | null
+}
+
+export interface IDenormalizedRequirementBlock {
+  id: string
+  name: string
+  description?: string
+  displayName: string
+  displayDescription?: string
+  requirements: IDenormalizedRequirement[]
+}
+
+export interface IDenormalizedTemplateSectionBlock {
+  id: string
+  requirementBlock: IDenormalizedRequirementBlock
+}
+
+export interface IDenormalizedRequirementTemplateSection {
+  id: string
+  name: string
+  templateSectionBlocks: IDenormalizedTemplateSectionBlock[]
+}
+
+export interface IDenormalizedTemplate {
+  id: string
+  description?: string
+  permitType: IPermitType
+  activity: IActivity
+  requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
