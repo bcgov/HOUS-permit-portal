@@ -13,13 +13,14 @@ import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
-  onFormChange: (submission: any) => void
   onCompletedSectionsChange?: (sections: any) => void
+  formRef: any
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onFormChange, onCompletedSectionsChange }: IRequirementFormProps) => {
-    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses } = permitApplication
+  ({ permitApplication, onCompletedSectionsChange, formRef }: IRequirementFormProps) => {
+    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson } =
+      permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -117,6 +118,7 @@ export const RequirementForm = observer(
     }
 
     const formReady = (rootComponent) => {
+      formRef.current = rootComponent
       if (onCompletedSectionsChange) {
         onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
       }
@@ -127,8 +129,7 @@ export const RequirementForm = observer(
         <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
           <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
             <Form
-              form={formJson}
-              onChange={onFormChange}
+              form={formattedFormJson}
               formReady={formReady}
               submission={submissionData}
               onSubmit={onSubmit}

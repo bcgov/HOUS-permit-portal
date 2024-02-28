@@ -46,11 +46,12 @@ Shrine.plugin :presign_endpoint,
                 lambda { |request|
                   filename = request.params["filename"]
                   type = request.params["type"]
+
                   {
                     method: :put,
                     content_disposition: ContentDisposition.attachment(filename),
                     content_type: type,
-                    content_md5: request.params["checksum"],
+                    # content_md5: request.params["checksum"],
                     # transfer_encoding: "chunked",
                   }
                 }
@@ -58,8 +59,9 @@ Shrine.plugin :presign_endpoint,
 class Shrine::Storage::S3
   def presign_put(id, options)
     obj = object(id)
-    url = obj.presigned_url(:put, options)
 
+    signed_urls = [obj.presigned_url(:put, options)]
+    url = Shrine.storages[:cache].url(id, public: false, expires_in: 3600)
     # When any of these options are specified, the corresponding request
     # headers must be included in the upload request.
     headers = {}
@@ -70,6 +72,6 @@ class Shrine::Storage::S3
     headers["Content-Language"] = options[:content_language] if options[:content_language]
     headers["Content-MD5"] = options[:content_md5] if options[:content_md5]
 
-    { method: :put, url: url, headers: headers, key: obj.key }
+    { method: :put, url: url, signedUrls: signed_urls, headers: headers, key: obj.key }
   end
 end

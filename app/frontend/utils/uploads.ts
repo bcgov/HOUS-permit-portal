@@ -3,6 +3,7 @@ export const requestPresignedUrl = (file, fileName, url = "undefined") => {
     filename: fileName,
     type: file.type,
     size: file.size,
+    // checksum: file.checksum,
   })
 
   return fetch(url == "undefined" ? `/api/storage/s3?${params.toString()}` : `${url}?${params.toString()}`, {
@@ -34,7 +35,7 @@ export const uploadChunk = async (signedUrl, headers, chunk, chunkNumber, conten
 }
 
 export const uploadFileInChunks = async (
-  signedUrl,
+  signedUrls,
   headers,
   file,
   progressCallback = undefined,
@@ -53,11 +54,10 @@ export const uploadFileInChunks = async (
     let end = start + chunkSize
     const chunk = file.slice(start, end)
     const contentRange = `bytes ${start}-${end - 1}/${file.size}`
-
+    const signedUrl = signedUrls[chunkNumber]
     // Await ensures each chunk is uploaded before the next one starts
     await uploadChunk(signedUrl, headers, chunk, chunkNumber, contentRange)
     chunkNumber++
-    console.log(`calling callback - ${chunkNumber} / ${chunkUnits}`)
 
     if (progressCallback) {
       progressCallback(
@@ -70,6 +70,6 @@ export const uploadFileInChunks = async (
   }
 
   return {
-    url: signedUrl,
+    url: signedUrls[-1],
   }
 }

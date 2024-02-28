@@ -1,7 +1,7 @@
 import { Box, Button, Flex, HStack, Heading, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
@@ -17,19 +17,23 @@ interface IEditPermitApplicationScreenProps {}
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
+  const formRef = useRef(null)
 
-  // Tracks the submission data from the onChange event for saving as draft
-  const [mirroredSubmissionState, setMirroredSubmissionState] = useState(null)
   const [completedSections, setCompletedSections] = useState({})
 
-  const onFormChange = (submission: any) => {
-    delete submission.changed
-    delete submission.isValid
-    setMirroredSubmissionState(submission)
-  }
-
-  const handleSave = () => {
-    currentPermitApplication.update({ submissionData: mirroredSubmissionState })
+  const handleSave = async () => {
+    const formio = formRef.current
+    const submissionData = formio.data
+    try {
+      const response = await currentPermitApplication.update({ submissionData: { data: submissionData } })
+      if (response.ok && response.data.data.frontEndFormUpdate) {
+        for (const [key, value] of Object.entries(response.data.data.frontEndFormUpdate)) {
+          let componentToSet = formio.getComponent(key)
+          componentToSet.setValue(value)
+        }
+        //update file hashes that have been changed
+      }
+    } catch (e) {}
   }
 
   useInterval(handleSave, 60000) // save progress every minute
@@ -38,6 +42,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (!currentPermitApplication) return <LoadingScreen />
 
   const { permitTypeAndActivity, formJson, nickname } = currentPermitApplication
+
   return (
     <>
       <Flex
@@ -79,8 +84,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           {formJson && (
             <Flex direction="column" pl={24} py={24} pr={288}>
               <RequirementForm
+                formRef={formRef}
                 permitApplication={currentPermitApplication}
-                onFormChange={onFormChange}
                 onCompletedSectionsChange={setCompletedSections}
               />
             </Flex>

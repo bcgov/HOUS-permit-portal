@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -86,6 +86,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
+  end
+
+  create_table "mechanical_energy_use_intensity_references",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.int4range "hdd"
+    t.numrange "conditioned_space_percent"
+    t.integer "step"
+    t.int4range "conditioned_space_area"
+    t.integer "meui"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[hdd conditioned_space_percent step conditioned_space_area],
+            name: "meui_composite_index",
+            unique: true
   end
 
   create_table "permit_applications",
@@ -204,15 +220,90 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
             name: "index_requirements_on_requirement_block_id"
   end
 
+  create_table "step_code_checklists",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_id"
+    t.integer "stage", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
+  end
+
+  create_table "step_code_data_entries",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_id"
+    t.integer "stage", null: false
+    t.string "model"
+    t.string "version"
+    t.string "weather_location"
+    t.decimal "fwdr"
+    t.string "p_file_no"
+    t.decimal "above_grade_heated_floor_area"
+    t.decimal "below_grade_heated_floor_area"
+    t.integer "dwelling_units_count"
+    t.decimal "baseloads"
+    t.integer "hdd"
+    t.decimal "aec"
+    t.decimal "ref_aec"
+    t.decimal "building_envelope_surface_area"
+    t.decimal "building_volume"
+    t.decimal "ach"
+    t.decimal "nla"
+    t.decimal "aux_energy_required"
+    t.decimal "proposed_gshl"
+    t.decimal "ref_gshl"
+    t.decimal "design_cooling_load"
+    t.decimal "ac_cooling_capacity"
+    t.decimal "air_heat_pump_cooling_capacity"
+    t.decimal "grounded_heat_pump_cooling_capacity"
+    t.decimal "water_heat_pump_cooling_capacity"
+    t.decimal "heating_furnace"
+    t.decimal "heating_boiler"
+    t.decimal "heating_combo"
+    t.decimal "electrical_consumption"
+    t.decimal "natural_gas_consumption"
+    t.decimal "propane_consumption"
+    t.decimal "district_energy_consumption"
+    t.decimal "district_energy_ef"
+    t.decimal "other_ghg_consumption"
+    t.decimal "other_ghg_ef"
+    t.decimal "hot_water"
+    t.decimal "cooking"
+    t.decimal "laundry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "h2k_file_data"
+    t.index ["step_code_id"],
+            name: "index_step_code_data_entries_on_step_code_id"
+  end
+
+  create_table "step_codes",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "submitter_id"
+    t.uuid "permit_application_id"
+    t.index ["permit_application_id"],
+            name: "index_step_codes_on_permit_application_id"
+    t.index ["submitter_id"], name: "index_step_codes_on_submitter_id"
+  end
+
   create_table "supporting_documents",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "permit_application_id", null: false
-    t.string "file_data"
+    t.jsonb "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "compliance_data"
+    t.string "data_key"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"
   end
@@ -274,6 +365,26 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
             name: "index_template_section_blocks_on_requirement_block_id"
     t.index ["requirement_template_section_id"],
             name: "idx_on_requirement_template_section_id_5469986497"
+  end
+
+  create_table "thermal_energy_demand_intensity_references",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.int4range "hdd"
+    t.integer "step"
+    t.decimal "ach"
+    t.decimal "nla"
+    t.decimal "nlr"
+    t.integer "ltrh_over_300"
+    t.integer "ltrh_under_300"
+    t.integer "tedi"
+    t.integer "hdd_adjusted_tedi"
+    t.integer "gshl_over_300"
+    t.integer "gshl_under_300"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[hdd step], name: "tedi_composite_index", unique: true
   end
 
   create_table "users",
@@ -354,6 +465,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_15_233532) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "step_code_checklists", "step_codes"
+  add_foreign_key "step_code_data_entries", "step_codes"
+  add_foreign_key "step_codes", "permit_applications"
+  add_foreign_key "step_codes", "users", column: "submitter_id"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"

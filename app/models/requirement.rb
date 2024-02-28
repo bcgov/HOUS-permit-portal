@@ -24,6 +24,8 @@ class Requirement < ApplicationRecord
   before_create :set_requirement_code
   validate :validate_value_options
   validate :validate_unit_for_number_inputs
+  validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
+  validates_format_of :requirement_code, with: /\_file/, if: Proc.new { |req| req.input_type == "file" }
 
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
@@ -125,7 +127,16 @@ class Requirement < ApplicationRecord
       },
     }.merge!(formio_type_options)
 
-    json.merge!({ description: hint }) if hint
+    if hint || computed_compliance?
+      description =
+        if computed_compliance?
+          "<div><div data-compliance='#{input_options.dig("computed_compliance", "module")}'>Compliance Check: #{input_options.dig("computed_compliance", "module")}</div><div>#{hint}</div></div>"
+        else
+          "<div>#{hint}</div>"
+        end
+
+      json.merge!({ description: description })
+    end
 
     json.merge!({ validate: { required: true } }) if required
 
@@ -138,7 +149,10 @@ class Requirement < ApplicationRecord
     if input_options["conditional"].present?
       # assumption that conditional is only within the same requirement block for now
       conditional = input_options["conditional"]
-      conditional.merge!("when" => "#{requirement_block_key}|#{conditional["when"]}") if conditional["when"].present?
+      section = PermitApplication.section_from_key(requirement_block_key)
+      if conditional["when"].present?
+        conditional.merge!("when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}")
+      end
       json.merge!({ conditional: conditional })
     end
 
