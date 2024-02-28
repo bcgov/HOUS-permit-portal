@@ -37,7 +37,7 @@ export const PermitApplicationModel = types
       return self.jurisdiction.name
     },
     get permitTypeAndActivity() {
-      return `${self.activity.name} ${self.permitType.name}`.trim()
+      return `${self.activity.name} - ${self.permitType.name}`.trim()
     },
     get flattenedBlocks() {
       return self.formJson.components

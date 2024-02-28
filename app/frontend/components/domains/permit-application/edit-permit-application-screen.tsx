@@ -72,7 +72,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
 
-  const { permitTypeAndActivity, formJson, nickname } = currentPermitApplication
+  const { permitTypeAndActivity, formJson, number } = currentPermitApplication
 
   return (
     <>
@@ -85,14 +85,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         position="sticky"
         top={0}
         zIndex={10}
-        maxH="96px"
+        py={3}
+        maxH="112px"
       >
         <HStack gap={4} flex={1}>
-          <PermitApplicationStatusTag
-            bg="transparent"
-            color="greys.white"
-            permitApplication={currentPermitApplication}
-          />
+          <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
           <Flex direction="column" w="full">
             <form onSubmit={handleSubmit(onSubmitMetadata)}>
               <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
@@ -132,6 +129,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </form>
 
             <Text>{permitTypeAndActivity}</Text>
+            <Text mt={1}>
+              {t("permitApplication.fields.number")}:{" "}
+              <Text as="span" fontWeight={700}>
+                {number}
+              </Text>
+            </Text>
           </Flex>
         </HStack>
         <HStack gap={4}>

@@ -35,7 +35,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedSections
         borderColor="greys.grey02"
         maxW={378}
       >
-        <Tabs orientation="vertical" index={selectedTabIndex} w="full" pt={160}>
+        <Tabs orientation="vertical" index={selectedTabIndex} w="full" pt={195}>
           <TabList w="full" border={0}>
             {formJson.components.map((section) => {
               return (
