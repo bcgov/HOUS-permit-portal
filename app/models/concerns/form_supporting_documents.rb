@@ -31,15 +31,15 @@ module FormSupportingDocuments
     update(params)
     #shrine runs the conversion from cache to storage after commit, deal with this case upon identification of a match of existing files
 
-    assign_attributes(front_end_form_update: file_fields_to_merge) #remaps all ids to not use the cache/ format and goes to the permanetn storage format
+    assign_attributes(front_end_form_update: file_fields_to_merge!) #remaps all ids to not use the cache/ format and goes to the permanetn storage format
     save #save the result (submission data changes)
     return true
   end
 
-  def file_fields_to_merge #NOTE THIS MODIFIES THE UNDERLYING FIELDS TO BE MERGED ON THE SUBMISSION_DATA HASH
+  def file_fields_to_merge! #NOTE THIS MODIFIES THE UNDERLYING FIELDS TO BE MERGED ON THE SUBMISSION_DATA HASH
     #find supporting docs that are created that have data key and match based on storage id
     docs_in_storage = supporting_documents.select(:id, :data_key, :file_data)
-    find_file_fields_and_transform_hash(submission_data, {}) do |file_field_key, file_array|
+    find_file_fields_and_transform_hash!(submission_data, {}) do |file_field_key, file_array|
       file_array.map { |file| remap_cache_to_storage_ids(file_field_key, file, docs_in_storage) }.compact
     end
   end

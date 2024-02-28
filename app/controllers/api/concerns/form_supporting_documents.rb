@@ -5,7 +5,7 @@ module Api::Concerns::FormSupportingDocuments
 
   def extract_s3_uploads_from_params(params_permitted)
     @mapped_attributes =
-      find_file_fields_and_transform(params_permitted[:submission_data].to_h, []) do |file_field_key, file_array|
+      find_file_fields_and_transform!(params_permitted[:submission_data].to_h, []) do |file_field_key, file_array|
         file_array.map { |file| remap_attributes_for_create(file_field_key, file) }.compact
       end
 

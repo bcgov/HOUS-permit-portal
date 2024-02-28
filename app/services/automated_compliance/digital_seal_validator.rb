@@ -9,7 +9,14 @@ class AutomatedCompliance::DigitalSealValidator < AutomatedCompliance::Base
       if response.success
         return(supporting_document.update(compliance_data: { status: "success", result: response.signatures }))
       else
-        return(supporting_document.update(compliance_data: { status: "failed", error: response.error }))
+        return(
+          supporting_document.update(
+            compliance_data: {
+              status: "failed",
+              error: "Unable to run digital seal validator integration - #{response.error}",
+            },
+          )
+        )
       end
     end
     supporting_document.update(
