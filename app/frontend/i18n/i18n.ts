@@ -131,6 +131,7 @@ const options = {
           toTop: "Go to top",
           asc: "Ascending",
           desc: "Descending",
+          returnHome: "Return to home",
         },
         contact: {
           fields: {
@@ -226,6 +227,19 @@ const options = {
             locationHeading: "Location for permit",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work Type",
+            submitted: "Your application has been submitted",
+            hearBack: "If you don't hear back by Lorem days,",
+            contactInstruction:
+              "here are instructions of what to do and the local government building permit to contact. Instruction text here lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            whatsNextTitle: "What's next?",
+            ready: "Ready to submit this application?",
+            bySubmitting: "By submitting this application",
+            confirmation: "Lorem ipsum submitting blah de blah filler lorem",
+            yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
+            whatsNext:
+              "Lorem ipsum what to expext next. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+            emailed:
+              "A confirmation email has also been sent to the applicant and {{ jurisdictionName }}'s building permit office",
           },
           edit: {
             saveDraft: "Save and finish later",

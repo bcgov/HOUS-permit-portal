@@ -1,4 +1,19 @@
-import { Box, Button, HStack, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  VStack,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
@@ -105,9 +120,16 @@ export const RequirementForm = observer(
       }
     }
 
-    const onSubmit = async (submission: any) => {
-      if (await permitApplication.submit({ submissionData: submission })) {
-        navigate("/permit-applications/sucessful-submission")
+    const [imminentSubmission, setImminentSubmission] = useState(null)
+
+    const onFormSubmit = async (submission: any) => {
+      setImminentSubmission(submission)
+      onOpen()
+    }
+
+    const onModalSubmit = async () => {
+      if (await permitApplication.submit({ submissionData: imminentSubmission })) {
+        navigate(`/permit-applications/${permitApplication.id}/sucessful-submission`)
       }
     }
 
@@ -124,29 +146,70 @@ export const RequirementForm = observer(
       }
     }
 
+    const { isOpen, onOpen, onClose } = useDisclosure()
+
     return (
-      <VStack position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
-        <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
-          <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
-            <Form
-              form={formattedFormJson}
-              formReady={formReady}
-              submission={submissionData}
-              onSubmit={onSubmit}
-              options={permitApplication ? {} : { readOnly: true }}
-              onBlur={onBlur}
-            />
-          </Box>
-          <VStack position="fixed" bottom={8} right={12} w="136px" zIndex={11} gap={4}>
-            <Button w="full" onClick={togglePanelCollapse} variant="greyButton">
-              {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
-            </Button>
-            <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
-              {t("ui.toTop")}
-            </Button>
-          </VStack>
-        </HStack>
-      </VStack>
+      <>
+        <VStack position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
+          <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
+            <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
+              <Form
+                form={formattedFormJson}
+                formReady={formReady}
+                submission={submissionData}
+                onSubmit={onFormSubmit}
+                options={permitApplication ? {} : { readOnly: true }}
+                onBlur={onBlur}
+              />
+            </Box>
+            <VStack position="fixed" bottom={8} right={12} w="136px" zIndex={11} gap={4}>
+              <Button w="full" onClick={togglePanelCollapse} variant="greyButton">
+                {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
+              </Button>
+              <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
+                {t("ui.toTop")}
+              </Button>
+            </VStack>
+          </HStack>
+        </VStack>
+        {isOpen && (
+          <Modal onClose={onClose} isOpen={isOpen} size="2xl">
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>
+                <ModalCloseButton fontSize="11px" />
+              </ModalHeader>
+              <ModalBody py={6}>
+                <Flex direction="column" gap={8}>
+                  <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
+                  <Box
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor="semantic.warning"
+                    backgroundColor="semantic.warningLight"
+                    px={6}
+                    py={3}
+                  >
+                    <Heading as="h3" fontSize="lg">
+                      {t("permitApplication.new.bySubmitting")}
+                    </Heading>
+                    <Text>{t("permitApplication.new.confirmation")}</Text>
+                  </Box>
+                  <Flex justify="center" gap={6}>
+                    <Button onClick={onModalSubmit} variant="primary">
+                      {t("ui.submit")}
+                    </Button>
+                    <Button onClick={onClose} variant="secondary">
+                      {t("ui.neverMind")}
+                    </Button>
+                  </Flex>
+                </Flex>
+              </ModalBody>
+              {/* Add ModalBody, ModalFooter or any other content you need here */}
+            </ModalContent>
+          </Modal>
+        )}
+      </>
     )
   }
 )

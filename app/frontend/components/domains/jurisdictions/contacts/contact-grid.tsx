@@ -1,13 +1,14 @@
-import { Flex, Grid, GridItem, Heading, IconButton, Link } from "@chakra-ui/react"
-import { Envelope, Phone, Plus, X } from "@phosphor-icons/react"
+import { Flex, Grid, IconButton } from "@chakra-ui/react"
+import { Plus, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { ReactNode } from "react"
+import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { IContact } from "../../../../types/types"
 import { EmailFormControl } from "../../../shared/form/email-form-control"
 import { TextFormControl } from "../../../shared/form/input-form-control"
+import { ContactCard } from "../../../shared/jurisdiction/contact-card"
 import { Can } from "../../../shared/user/can"
 
 interface IContactGridProps {
@@ -17,7 +18,7 @@ interface IContactGridProps {
 export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
   const { jurisdictionStore } = useMst()
   const { currentJurisdiction } = jurisdictionStore
-  const { t } = useTranslation()
+
   const { control } = useFormContext()
 
   const { fields, append, remove } = useFieldArray({
@@ -49,33 +50,7 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
         isEditing ? (
           <ContactFields key={contact.id} index={index} remove={remove} />
         ) : (
-          <ContactGridItem key={contact.id}>
-            <Heading as="h3" fontSize="lg">
-              {contact.name}
-            </Heading>
-            {contact.department && `${contact.department} - `}
-            {contact.title}
-            <Flex mt={2} direction={{ base: "column", md: "row" }} gap={2}>
-              <Flex flex={1} gap={4}>
-                <Phone size={32} />
-                <Flex direction="column" flex={1}>
-                  <Heading as="h3" fontSize="md">
-                    {t("contact.fields.phoneNumber")}
-                  </Heading>
-                  <Link href={`tel:+${contact.phoneNumber}`}>{contact.phoneNumber}</Link>
-                </Flex>
-              </Flex>
-              <Flex flex={1} gap={4}>
-                <Envelope size={32} />
-                <Flex direction="column" flex={1}>
-                  <Heading as="h3" fontSize="md">
-                    {t("contact.fields.email")}
-                  </Heading>
-                  <Link href={`mailto:${contact.email}`}>{contact.email}</Link>
-                </Flex>
-              </Flex>
-            </Flex>
-          </ContactGridItem>
+          <ContactCard colSpan={{ sm: 1, md: 1 }} key={contact.id} contact={contact} />
         )
       )}
       {isEditing && (
@@ -129,26 +104,5 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
       <TextFormControl label={t("contact.fields.phoneNumber")} fieldName={`contactsAttributes.${index}.phoneNumber`} />
       <TextFormControl label={t("contact.fields.extension")} fieldName={`contactsAttributes.${index}.extension`} />
     </Flex>
-  )
-}
-
-interface IContactBoxProps {
-  children: ReactNode
-}
-
-const ContactGridItem = ({ children }: IContactBoxProps) => {
-  return (
-    <GridItem
-      as="section"
-      colSpan={{ sm: 1, md: 1 }}
-      borderRadius="sm"
-      border="1px solid"
-      borderColor="border.light"
-      h="fit-content"
-      minH="195px"
-      p={4}
-    >
-      {children}
-    </GridItem>
   )
 }
