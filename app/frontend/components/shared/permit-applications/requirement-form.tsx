@@ -22,8 +22,10 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-funcitons"
+import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { Form } from "../chefs"
 
 interface IRequirementFormProps {
@@ -43,7 +45,7 @@ export const RequirementForm = observer(
     const boxRef = useRef<HTMLDivElement>(null)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
-
+    const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
 
     const togglePanelCollapse = () => {
@@ -137,6 +139,11 @@ export const RequirementForm = observer(
       if (onCompletedSectionsChange) {
         onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
       }
+      setErrorBoxData(
+        containerComponent.root.errors.map((error) => {
+          return { label: error.component.label, id: error.component.id, class: error.component.class }
+        })
+      )
     }
 
     const formReady = (rootComponent) => {
@@ -151,6 +158,7 @@ export const RequirementForm = observer(
     return (
       <>
         <VStack position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
+          <ErrorsBox errorBox={errorBoxData} />
           <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
             <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
               <Form
