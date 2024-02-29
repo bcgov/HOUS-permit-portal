@@ -39,6 +39,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
 
       render_success options, nil, { blueprint: PermitClassificationOptionBlueprint }
     rescue StandardError => e
+      puts e.inspect
       render_error "permit_classification.options_error" and return
     end
   end
