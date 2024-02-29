@@ -1,6 +1,6 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -42,10 +42,10 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const { fetchSiteOptions } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions, isLoading } = permitClassificationStore
   const navigate = useNavigate()
+  const [siteSelected, setSiteSelected] = useState(false)
 
   const onSubmit = async (formValues) => {
     const params = { ...formValues, fullAddress: formValues.site.label }
-    console.log(params)
     const permitApplication = await permitApplicationStore.createPermitApplication(params)
     if (permitApplication) {
       navigate(`/permit-applications/${permitApplication.id}/edit`)
@@ -54,6 +54,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
   const permitTypeIdWatch = watch("permitTypeId")
   const pidWatch = watch("pid")
+  const siteWatch = watch("site")
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
@@ -73,6 +74,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   render={({ field: { onChange, value } }) => {
                     return (
                       <SitesSelect
+                        setSiteSelected={setSiteSelected}
                         onChange={onChange}
                         fetchOptions={fetchSiteOptions}
                         placeholder={undefined}
@@ -90,7 +92,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   }}
                 />
               </Flex>
-              {pidWatch && (
+              {siteSelected && (
                 <Flex as="section" direction="column" gap={2}>
                   <Heading fontSize="xl">{t("permitApplication.new.permitTypeHeading")}</Heading>
                   <Controller

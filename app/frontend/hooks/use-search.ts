@@ -6,6 +6,7 @@ import { parseBoolean } from "../utils/utility-funcitons"
 export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => {
   useEffect(() => {
     // This is necessary for preventing failed calls, IE when the currentJursidiction for user search is undefined
+
     if (dependencyArray.some((dep) => dep == null)) return
 
     const queryParams = new URLSearchParams(location.search)

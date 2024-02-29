@@ -1,0 +1,65 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: "<GEO_LTSA_PARCELMAP_REST_URL>/whse/bcgw_pub_whse_human_cultural_economic/MapServer/1/query?f=json&outFields=%2A&returnGeometry=true&where=HISTORIC_SITE_IND%3D%27Y%27+AND+PARCEL_DESCRIPTION%3D%27000561444%27"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      date:
+      - Tue, 13 Feb 2024 00:46:54 GMT
+      server:
+      - ''
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - 1; mode=block
+      vary:
+      - Origin
+      cache-control:
+      - max-age=0,must-revalidate
+      etag:
+      - '46813049'
+      x-esri-ftiles-cache-compress:
+      - 'true'
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json;charset=UTF-8
+      content-length:
+      - '1527'
+      access-control-allow-origin:
+      - "(null)"
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-methods:
+      - POST, GET, OPTIONS, HEAD
+      access-control-allow-headers:
+      - X-Requested-With, Referer, Origin, Content-Type, SOAPAction, Authorization,
+        Accept
+      access-control-max-age:
+      - '1000'
+      x-frame-options:
+      - allow-from (null)
+    body:
+      encoding: UTF-8
+      string: '{"displayFieldName":"COMMON_SITE_NAME","fieldAliases":{"HISTORIC_ENVIRONMENT_ID":"HISTORIC_ENVIRONMENT_ID","HISTORIC_ENVIRONMENT_SITE_ID":"HISTORIC_ENVIRONMENT_SITE_ID","BORDENNUMBER":"BORDENNUMBER","HISTORIC_SITE_IND":"HISTORIC_SITE_IND","REGISTRATION_STATUS":"REGISTRATION_STATUS","COMMON_SITE_NAME":"COMMON_SITE_NAME","OTHER_SITE_NAMES":"OTHER_SITE_NAMES","PARCEL_DESCRIPTION":"PARCEL_DESCRIPTION","STREET_NUMBER":"STREET_NUMBER","STREET_NAME":"STREET_NAME","LOCALITY":"LOCALITY","PROVINCE":"PROVINCE","JURISDICTION_NAMES":"JURISDICTION_NAMES","RECOGNITION_GOVERNMENT":"RECOGNITION_GOVERNMENT","RECOGNITION_GOVERNMENT_LEVEL":"RECOGNITION_GOVERNMENT_LEVEL","RECOGNITION_TYPE":"RECOGNITION_TYPE","RECOGNITION_START_DATE":"RECOGNITION_START_DATE","CONSTRUCTION_YEAR":"CONSTRUCTION_YEAR","CONSTRUCTION_YEAR_QUALIFIER":"CONSTRUCTION_YEAR_QUALIFIER","CONSTRUCTION_YEAR_DATETTYPE":"CONSTRUCTION_YEAR_DATETTYPE","STMT_OF_SIGNIFICANCE_DESC":"STMT_OF_SIGNIFICANCE_DESC","CRHP_IND":"CRHP_IND","ARCHITECT_NAMES":"ARCHITECT_NAMES","BUILDER_NAMES":"BUILDER_NAMES","CURRENT_FUNCTIONAL_CATEGORIES":"CURRENT_FUNCTIONAL_CATEGORIES","HISTORIC_FUNCTIONAL_CATEGORIES":"HISTORIC_FUNCTIONAL_CATEGORIES","AREA_HECTARES":"AREA_HECTARES","FEATURE_AREA_SQM":"FEATURE_AREA_SQM","FEATURE_LENGTH_M":"FEATURE_LENGTH_M","OBJECTID":"OBJECTID","SHAPE.AREA":"SHAPE.AREA","SHAPE.LEN":"SHAPE.LEN"},"geometryType":"esriGeometryPolygon","spatialReference":{"wkid":102190,"latestWkid":3005},"fields":[{"name":"HISTORIC_ENVIRONMENT_ID","type":"esriFieldTypeInteger","alias":"HISTORIC_ENVIRONMENT_ID"},{"name":"HISTORIC_ENVIRONMENT_SITE_ID","type":"esriFieldTypeInteger","alias":"HISTORIC_ENVIRONMENT_SITE_ID"},{"name":"BORDENNUMBER","type":"esriFieldTypeString","alias":"BORDENNUMBER","length":13},{"name":"HISTORIC_SITE_IND","type":"esriFieldTypeString","alias":"HISTORIC_SITE_IND","length":1},{"name":"REGISTRATION_STATUS","type":"esriFieldTypeString","alias":"REGISTRATION_STATUS","length":20},{"name":"COMMON_SITE_NAME","type":"esriFieldTypeString","alias":"COMMON_SITE_NAME","length":150},{"name":"OTHER_SITE_NAMES","type":"esriFieldTypeString","alias":"OTHER_SITE_NAMES","length":600},{"name":"PARCEL_DESCRIPTION","type":"esriFieldTypeString","alias":"PARCEL_DESCRIPTION","length":100},{"name":"STREET_NUMBER","type":"esriFieldTypeString","alias":"STREET_NUMBER","length":10},{"name":"STREET_NAME","type":"esriFieldTypeString","alias":"STREET_NAME","length":50},{"name":"LOCALITY","type":"esriFieldTypeString","alias":"LOCALITY","length":50},{"name":"PROVINCE","type":"esriFieldTypeString","alias":"PROVINCE","length":10},{"name":"JURISDICTION_NAMES","type":"esriFieldTypeString","alias":"JURISDICTION_NAMES","length":1400},{"name":"RECOGNITION_GOVERNMENT","type":"esriFieldTypeString","alias":"RECOGNITION_GOVERNMENT","length":65},{"name":"RECOGNITION_GOVERNMENT_LEVEL","type":"esriFieldTypeString","alias":"RECOGNITION_GOVERNMENT_LEVEL","length":30},{"name":"RECOGNITION_TYPE","type":"esriFieldTypeString","alias":"RECOGNITION_TYPE","length":40},{"name":"RECOGNITION_START_DATE","type":"esriFieldTypeDate","alias":"RECOGNITION_START_DATE","length":8},{"name":"CONSTRUCTION_YEAR","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR","length":10},{"name":"CONSTRUCTION_YEAR_QUALIFIER","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR_QUALIFIER","length":10},{"name":"CONSTRUCTION_YEAR_DATETTYPE","type":"esriFieldTypeString","alias":"CONSTRUCTION_YEAR_DATETTYPE","length":20},{"name":"STMT_OF_SIGNIFICANCE_DESC","type":"esriFieldTypeString","alias":"STMT_OF_SIGNIFICANCE_DESC","length":4000},{"name":"CRHP_IND","type":"esriFieldTypeString","alias":"CRHP_IND","length":1},{"name":"ARCHITECT_NAMES","type":"esriFieldTypeString","alias":"ARCHITECT_NAMES","length":300},{"name":"BUILDER_NAMES","type":"esriFieldTypeString","alias":"BUILDER_NAMES","length":300},{"name":"CURRENT_FUNCTIONAL_CATEGORIES","type":"esriFieldTypeString","alias":"CURRENT_FUNCTIONAL_CATEGORIES","length":500},{"name":"HISTORIC_FUNCTIONAL_CATEGORIES","type":"esriFieldTypeString","alias":"HISTORIC_FUNCTIONAL_CATEGORIES","length":500},{"name":"AREA_HECTARES","type":"esriFieldTypeDouble","alias":"AREA_HECTARES"},{"name":"FEATURE_AREA_SQM","type":"esriFieldTypeDouble","alias":"FEATURE_AREA_SQM"},{"name":"FEATURE_LENGTH_M","type":"esriFieldTypeDouble","alias":"FEATURE_LENGTH_M"},{"name":"OBJECTID","type":"esriFieldTypeOID","alias":"OBJECTID"},{"name":"SHAPE.AREA","type":"esriFieldTypeDouble","alias":"SHAPE.AREA"},{"name":"SHAPE.LEN","type":"esriFieldTypeDouble","alias":"SHAPE.LEN"}],"features":[{"attributes":{"HISTORIC_ENVIRONMENT_ID":138851,"HISTORIC_ENVIRONMENT_SITE_ID":10,"BORDENNUMBER":"DcRt-184","HISTORIC_SITE_IND":"Y","REGISTRATION_STATUS":"Registered","COMMON_SITE_NAME":"Johnston
+        House","OTHER_SITE_NAMES":"Mrs. H.L. Johnston House","PARCEL_DESCRIPTION":"000561444","STREET_NUMBER":"1275","STREET_NAME":"St.
+        David Street","LOCALITY":"Oak Bay","PROVINCE":"BC","JURISDICTION_NAMES":"GIS
+        Municipalities: Oak Bay; GIS RegionalDistrict: Capital","RECOGNITION_GOVERNMENT":"Oak
+        Bay","RECOGNITION_GOVERNMENT_LEVEL":"Municipal","RECOGNITION_TYPE":"Community
+        Heritage Register","RECOGNITION_START_DATE":1112054400000,"CONSTRUCTION_YEAR":"1922","CONSTRUCTION_YEAR_QUALIFIER":"Circa","CONSTRUCTION_YEAR_DATETTYPE":"Construction","STMT_OF_SIGNIFICANCE_DESC":"Local
+        Government: Situated on a well treed corner lot, the Johnston House is a front-gabled,
+        1 1/2 story, Craftsman style building in the Marina area.  It has a front
+        gable roof with two dormers, a wide front porch supported by four pillars,
+        and a full basement.","CRHP_IND":"Y","ARCHITECT_NAMES":"H.L. Johnston","BUILDER_NAMES":null,"CURRENT_FUNCTIONAL_CATEGORIES":"Residence","HISTORIC_FUNCTIONAL_CATEGORIES":"Residence","AREA_HECTARES":0.09765,"FEATURE_AREA_SQM":976.4696,"FEATURE_LENGTH_M":132.7035,"OBJECTID":11006902,"SHAPE.AREA":0,"SHAPE.LEN":0},"geometry":{"rings":[[[1199446.2149999999,382471.54399999976],[1199445.4619999994,382493.53099999949],[1199489.7799999993,382495.07100000046],[1199490.5010000002,382473.03500000015],[1199485.8969999999,382472.87099999934],[1199446.2149999999,382471.54399999976]]]}}]}'
+  recorded_at: Tue, 13 Feb 2024 00:46:55 GMT
+recorded_with: VCR 6.2.0

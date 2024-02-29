@@ -146,11 +146,13 @@ export class Api {
     return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
 
-  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
-    return this.client.post<IJurisdictionPermitApplicationResponse>(
-      `/jurisdictions/${jurisdictionId}/permit_applications/search`,
-      params
-    )
+  async fetchPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+    return jurisdictionId
+      ? this.client.post<IJurisdictionPermitApplicationResponse>(
+          `/jurisdictions/${jurisdictionId}/permit_applications/search`,
+          params
+        )
+      : this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
   async createPermitApplication(params: TCreatePermitApplicationFormData) {
@@ -181,16 +183,16 @@ export class Api {
     return this.client.post<string[]>(`/tags/search`, { search: params })
   }
 
-  async fetchPermitApplications() {
-    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications`)
-  }
-
   async updatePermitApplication(id, params) {
-    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, params)
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, {
+      permitApplication: params,
+    })
   }
 
   async submitPermitApplication(id, params) {
-    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, params)
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
+      permitApplication: params,
+    })
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
@@ -230,12 +232,12 @@ export class Api {
     })
   }
 
-  async fetchSiteOptions(address: string) {
-    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
+  async fetchSiteOptions(address: string, pid: string = null) {
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
   }
 
-  async fetchPid(siteId: string) {
-    return this.client.get<ApiResponse<string>>(`/geocoder/pid`, { siteId })
+  async fetchPids(siteId: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
   }
 
   async destroyRequirementTemplate(id) {

@@ -1,12 +1,16 @@
 class PermitApplication < ApplicationRecord
-  searchkick searchable: %i[number permit_classifications submitter status],
-             word_start: %i[number permit_classifications submitter status]
+  include FormSupportingDocuments
+  searchkick searchable: %i[number nickname permit_classifications submitter status],
+             word_start: %i[number nickname permit_classifications submitter status]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
 
   belongs_to :permit_type
   belongs_to :activity
+
+  #The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
+  attr_accessor :front_end_form_update
 
   has_many :supporting_documents, dependent: :destroy
   accepts_nested_attributes_for :supporting_documents, allow_destroy: true
@@ -26,11 +30,13 @@ class PermitApplication < ApplicationRecord
   def search_data
     {
       number: number,
+      nickname: nickname,
       permit_classifications: "#{permit_type.name} #{activity.name}",
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       status: status,
       jurisdiction_id: jurisdiction.id,
+      submitter_id: submitter.id,
     }
   end
 

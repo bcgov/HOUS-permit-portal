@@ -102,7 +102,10 @@ const AppRoutes = observer(() => {
   const submitterOnlyRoutes = (
     <>
       <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
-      <Route path="/permit-applications/sucessful-submission" element={<SuccessfulSubmissionScreen />} />
+      <Route
+        path="/permit-applications/:permitApplicationId/sucessful-submission"
+        element={<SuccessfulSubmissionScreen />}
+      />
     </>
   )
 

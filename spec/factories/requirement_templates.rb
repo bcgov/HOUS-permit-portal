@@ -62,5 +62,28 @@ FactoryBot.define do
         end
       end
     end
+
+    factory :requirement_template_with_heritage do
+      after(:create) do |template|
+        create_list(:requirement_template_section, 1, requirement_template: template).each do |section|
+          create_list(:requirement_block, 1).each do |block|
+            create(:template_section_block, requirement_template_section: section, requirement_block: block)
+            create(
+              :requirement,
+              requirement_code: "heritage_resource",
+              requirement_block: block,
+              input_type: :checkbox,
+              input_options: {
+                value_options: [{ value: "true", label: "Yes" }, { value: "false", label: "No" }],
+                computed_compliance: {
+                  module: "HistoricSite",
+                  value: "HISTORIC_SITE_IND",
+                },
+              },
+            )
+          end
+        end
+      end
+    end
   end
 end

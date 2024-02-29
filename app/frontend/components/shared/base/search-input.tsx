@@ -27,7 +27,7 @@ export const SearchInput = observer(function SearchInput<TSearchModel extends IS
   }
 
   return (
-    <InputGroup as={"section"} w={"224px"} bg={"white"} {...inputGroupProps}>
+    <InputGroup as={"section"} w={"250px"} bg={"white"} {...inputGroupProps}>
       <Input
         title={"search input"}
         type={"search"}
@@ -35,6 +35,8 @@ export const SearchInput = observer(function SearchInput<TSearchModel extends IS
         fontSize={"sm"}
         onChange={onSearch}
         value={query ?? ""}
+        h="38px"
+        borderColor="border.input"
         {...inputProps}
       />
       <InputLeftElement color={"greys.gresearcy01"}>

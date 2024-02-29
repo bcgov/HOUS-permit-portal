@@ -121,8 +121,13 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const { t } = useTranslation()
   const { sessionStore, userStore } = useMst()
   const { currentUser } = userStore
-
   const { logout, loggedIn } = sessionStore
+
+  const handleClickLogout = async () => {
+    await logout()
+    // Do a full browser refresh to slightly enhance security
+    window.location.href = "/"
+  }
 
   const superAdminOnlyItems = (
     <>
@@ -161,7 +166,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
               {currentUser?.isSubmitter && submitterOnlyItems}
               <Divider borderWidth="1px" />
               <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-              <NavMenuItem label={t("auth.logout")} to="/" onClick={logout} />
+              <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
             </>
           ) : (
             <NavMenuItem label={t("auth.login")} to="/login" />

@@ -1,5 +1,4 @@
 import * as R from "ramda"
-
 const findPanelComponents = (components) => {
   let panelComponents = []
 
@@ -34,6 +33,25 @@ export const getCompletedSectionsFromForm = (rootComponent) => {
 
     return (completedSections[panelComponent?.component?.key] = complete)
   })
-  console.log(completedSections)
   return completedSections
+}
+
+export const combineComplianceHints = (formJson, formattedComplianceData) => {
+  let updatedJson = formJson
+  for (const [key, value] of Object.entries(formattedComplianceData)) {
+    const section = key.split("|")[0].replace("formSubmissionDataRST", "")
+    const rb = key.split("|").slice(0, 2).join("|")
+
+    // Find the indexes of section and rb once and directly access the item
+    let item = updatedJson.components
+      ?.find((c) => c.key === section)
+      ?.components?.find((c) => c.key === rb)
+      ?.components?.find((c) => c.key === key)
+
+    // Update the description if the item is found
+    if (item && item.description) {
+      item.description = value
+    }
+  }
+  return updatedJson
 }

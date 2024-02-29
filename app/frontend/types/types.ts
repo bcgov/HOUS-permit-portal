@@ -10,6 +10,7 @@ export interface IContact {
   title?: string
   phoneNumber?: string
   email?: string
+  createdAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
 export interface ISort<TField = string> {

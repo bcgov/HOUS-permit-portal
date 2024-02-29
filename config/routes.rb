@@ -74,10 +74,11 @@ Rails.application.routes.draw do
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection
-      get "pid", on: :collection
+      get "pids", on: :collection
     end
 
-    resources :permit_applications, only: %i[index create update show] do
+    resources :permit_applications, only: %i[create update show] do
+      post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
     end
 
@@ -90,7 +91,7 @@ Rails.application.routes.draw do
 
     get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
     get "storage/s3/download" => "storage#download"
-    get "storage/s3/delete" => "storage#delete"
+    delete "storage/s3/delete" => "storage#delete"
   end
 
   root to: "home#index"

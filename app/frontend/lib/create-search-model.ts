@@ -61,12 +61,12 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       search: flow(function* (opts?: TFetchOptions) {
         return yield self.fetchData({ reset: true, ...opts })
       }),
-      applySort(sort: ISort<TSortField>, opts?: TFetchOptions) {
+      applySort(sort: ISort<TSortField>) {
         setQueryParam("sortDirection", sort.direction)
         setQueryParam("sortField", sort.field as string)
         self.sort = sort
       },
-      clearSort(opts?: TFetchOptions) {
+      clearSort() {
         setQueryParam("sort", undefined)
         self.sort = null
       },
@@ -77,7 +77,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         // descending -> ascending -> unsorted
         if (self.sort && self.sort.field == sortField && self.sort.direction == ESortDirection.ascending) {
           // return to unsorted state
-          self.clearSort(opts)
+          self.clearSort()
           yield self.fetchData(opts)
         } else {
           // apply the next sort state

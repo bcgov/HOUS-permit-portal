@@ -15,6 +15,7 @@ export const PermitApplicationStoreModel = types
   .compose(
     types.model("PermitApplicationStore", {
       permitApplicationMap: types.map(PermitApplicationModel),
+      tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
       isFetchingPermitApplications: types.optional(types.boolean, false),
     }),
@@ -69,6 +70,11 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
+    setTablePermitApplications: (permitApplications) => {
+      self.tablePermitApplications = permitApplications.map((pa) => pa.id)
+    },
+  }))
+  .actions((self) => ({
     createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
       const { ok, data: response } = yield self.environment.api.createPermitApplication(formData)
       if (ok && response.data) {
@@ -90,8 +96,8 @@ export const PermitApplicationStoreModel = types
         self.resetPages()
       }
 
-      const response = yield self.environment.api.fetchJurisdictionPermitApplications(
-        self.rootStore.jurisdictionStore.currentJurisdiction.id,
+      const response = yield self.environment.api.fetchPermitApplications(
+        self.rootStore?.jurisdictionStore?.currentJurisdiction?.id,
         {
           query: self.query,
           sort: self.sort,
@@ -102,24 +108,16 @@ export const PermitApplicationStoreModel = types
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
-        self.rootStore.jurisdictionStore.currentJurisdiction.setTablePermitApplications(response.data.data)
+        // dual purpose method also serves the submitters
+        ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
+          response.data.data
+        )
+
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
       }
-      return response.ok
-    }),
-    // Example of an asynchronous action to fetch permitapplications from an API
-    fetchPermitApplications: flow(function* () {
-      self.isFetchingPermitApplications = true
-      const response: any = yield self.environment.api.fetchPermitApplications()
-      if (response.ok) {
-        let responseData = response.data.data
-        self.mergeUpdateAll(responseData, "permitApplicationMap")
-        //TODO: add pagination
-      }
-      self.isFetchingPermitApplications = false
       return response.ok
     }),
     fetchPermitApplication: flow(function* (id: string) {
