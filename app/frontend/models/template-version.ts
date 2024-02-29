@@ -8,6 +8,7 @@ export const TemplateVersionModel = types
     id: types.identifier,
     status: types.enumeration(Object.values(ETemplateVersionStatus)),
     versionDate: types.Date,
+    updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     isFullyLoaded: types.optional(types.boolean, false),
   })

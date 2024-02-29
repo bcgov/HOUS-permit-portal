@@ -83,6 +83,7 @@ const options = {
             "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
         },
         ui: {
+          manage: "Manage",
           preview: "Preview",
           back: "Back",
           backHome: "Back to home",
@@ -635,8 +636,13 @@ const options = {
         errors: {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
+          fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
+          fetchActivityOptions: "Something went wrong fetching the activity options",
+          fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
+          fetchTemplateVersions: "Something went wrong fetching template versions",
+          fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchOptions: "Something went wrong fetching options",
         },
         user: {
@@ -750,6 +756,15 @@ const options = {
             lastUpdated: "Last updated",
           },
         },
+        digitalBuildingPermits: {
+          index: {
+            title: "Digital Building Permits",
+            selectPermit: "Select a digital permit:",
+            workType: "Work Type",
+            manageButton: "Manage",
+            lastUpdated: "Last updated",
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "BC Building Permit Hub",
@@ -777,6 +792,7 @@ const options = {
           pageNotFound: "404 - The page you are looking for could not be found",
           seeConsoleForDetails: "See the browser console for details",
           breadcrumb: {
+            profile: "Profile",
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
             invite: "Invite",
@@ -791,6 +807,7 @@ const options = {
             configuration: "Configure Jurisdiction",
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
+            digitalBuildingPermits: "Digital Building Permits",
           },
           questionSupport: "Question Support",
         },
