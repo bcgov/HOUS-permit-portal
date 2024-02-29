@@ -2,11 +2,15 @@ require "rails_helper"
 
 RSpec.describe PermitApplication, type: :model do
   describe "associations" do
+    subject { build_stubbed(:permit_application) }
+
     it { should belong_to(:submitter).class_name("User") }
     it { should belong_to(:jurisdiction) }
   end
 
   describe "enums" do
+    subject { build_stubbed(:permit_application) }
+
     it { should define_enum_for(:status).with_values(draft: 0, submitted: 1, viewed: 2) }
   end
 
