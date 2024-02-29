@@ -1,5 +1,5 @@
-import { Box, Button, Flex, HStack, Text, Tooltip } from "@chakra-ui/react"
-import { CaretRight } from "@phosphor-icons/react"
+import { Box, Button, Flex, HStack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
+import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -14,6 +14,7 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
+import { ContactSummaryModal } from "./contact-summary-modal"
 
 interface IEditPermitApplicationScreenProps {}
 
@@ -39,10 +40,15 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const [completedSections, setCompletedSections] = useState({})
 
   const handleSave = async () => {
+    if (currentPermitApplication.isSubmitted) return
+
     const formio = formRef.current
     const submissionData = formio.data
     try {
-      const response = await currentPermitApplication.update({ submissionData: { data: submissionData } })
+      const response = await currentPermitApplication.update({
+        submissionData: { data: submissionData },
+        nickname: nicknameWatch,
+      })
       if (response.ok && response.data.data.frontEndFormUpdate) {
         for (const [key, value] of Object.entries(response.data.data.frontEndFormUpdate)) {
           let componentToSet = formio.getComponent(key)
@@ -58,9 +64,13 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     navigate("/")
   }
 
-  const onSubmitMetadata = (formValues) => {
-    currentPermitApplication.update(formValues)
+  const handleDownloadApplication = () => {
+    // TODO: APPLICATION DOWNLOAD
   }
+
+  // const onSubmitMetadata = (formValues) => {
+  //   currentPermitApplication.update(formValues)
+  // }
 
   useInterval(handleSave, 60000) // save progress every minute
 
@@ -69,10 +79,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     reset(getDefaultPermitApplicationMetadataValues())
   }, [currentPermitApplication?.nickname])
 
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
 
-  const { permitTypeAndActivity, formJson, number } = currentPermitApplication
+  const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
     <>
@@ -91,16 +103,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
           <Flex direction="column" w="full">
-            <form onSubmit={handleSubmit(onSubmitMetadata)}>
+            <form>
               <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
                 <Box>
                   <EditableInputWithControls
                     w="full"
                     initialHint={t("permitApplication.edit.clickToWriteNickname")}
                     value={nicknameWatch || ""}
+                    isDisabled={isSubmitted}
                     controlsProps={{
                       iconButtonProps: {
                         color: "greys.white",
+                        display: isSubmitted ? "none" : "block",
                       },
                       saveButtonProps: { display: "none" },
                     }}
@@ -114,7 +128,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                           message: t("ui.invalidInput"),
                         },
                       }),
-                      onBlur: handleSubmit(onSubmitMetadata),
+                      onBlur: handleSave,
                       "aria-label": "Edit Nickname",
                     }}
                     editablePreviewProps={{
@@ -137,14 +151,28 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Text>
           </Flex>
         </HStack>
-        <HStack gap={4}>
-          <Button variant="primary" onClick={handleClickFinishLater}>
-            {t("permitApplication.edit.saveDraft")}
-          </Button>
-          <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
-            {t("permitApplication.edit.submit")}
-          </Button>
-        </HStack>
+        {isSubmitted ? (
+          <HStack>
+            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onOpen}>
+              {t("permitApplication.show.contactsSummary")}
+            </Button>
+            <Button variant="primary" onClick={handleDownloadApplication}>
+              {t("permitApplication.show.downloadApplication")}
+            </Button>
+            <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
+              {t("ui.backHome")}
+            </Button>
+          </HStack>
+        ) : (
+          <HStack gap={4}>
+            <Button variant="primary" onClick={handleClickFinishLater}>
+              {t("permitApplication.edit.saveDraft")}
+            </Button>
+            <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
+              {t("permitApplication.edit.submit")}
+            </Button>
+          </HStack>
+        )}
       </Flex>
       <Flex as="main" direction="column" w="full" bg="greys.white" key={"permit-application-show"}>
         <Box w="full">
@@ -160,6 +188,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           )}
         </Box>
       </Flex>
+      {isOpen && (
+        <ContactSummaryModal
+          isOpen={isOpen}
+          onOpen={onOpen}
+          onClose={onClose}
+          permitApplication={currentPermitApplication}
+        />
+      )}
     </>
   )
 })

@@ -163,7 +163,7 @@ export const RequirementForm = observer(
           <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.submittedAt && (
             <CustomToast
-              description={t("permitApplication.edit.wasSubmitted", {
+              description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
               })}
               status="info"
@@ -176,7 +176,7 @@ export const RequirementForm = observer(
                 formReady={formReady}
                 submission={submissionData}
                 onSubmit={onFormSubmit}
-                options={permitApplication ? { readOnly: !!permitApplication.submittedAt } : { readOnly: true }}
+                options={permitApplication ? { readOnly: permitApplication.isSubmitted } : { readOnly: true }}
                 onBlur={onBlur}
               />
             </Box>

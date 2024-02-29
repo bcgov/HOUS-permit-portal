@@ -37,13 +37,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
         AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       end
       render_success @permit_application,
-                     (
-                       if permit_application_params["submission_data"].present?
-                         "permit_application.save_draft_success"
-                       else
-                         "permit_application.update_success"
-                       end
-                     ),
+                     ("permit_application.save_draft_success"),
                      { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.update_error",
@@ -55,7 +49,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def submit
     authorize @permit_application
-
     signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
 
     #for submissions, we do not run the automated compliance as that should have already been complete

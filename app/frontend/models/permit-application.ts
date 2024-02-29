@@ -57,6 +57,9 @@ export const PermitApplicationModel = types
     blockKey(sectionId, blockId) {
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
+    get isSubmitted() {
+      return !!self.submittedAt
+    },
   }))
   .views((self) => ({
     indexOfBlockId: (blockId: string) => {
@@ -67,6 +70,42 @@ export const PermitApplicationModel = types
     },
     get blockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
+    },
+    get contacts() {
+      return [
+        {
+          title: "STUBBED",
+          name: "John Doe",
+          organization: "Acme Corp",
+          email: "johndoe@example.com",
+          phone: "555-1234",
+          address: "1234 Elm Street, Anytown, AT 12345",
+        },
+        {
+          title: "STUBBED",
+          name: "Jane Smith",
+          organization: "Widget Inc",
+          email: "janesmith@example.com",
+          phone: "555-5678",
+          address: "5678 Oak Avenue, Anycity, AC 67890",
+        },
+        {
+          title: "STUBBED",
+          name: "Sam Johnson",
+          organization: "Gadgets LLC",
+          email: "samjohnson@example.com",
+          phone: "555-9101",
+          address: "9101 Pine Road, Somewhere, SW 10112",
+        },
+        {
+          title: "STUBBED",
+          name: "Alex Lee",
+          organization: "Innovatech",
+          email: "alexlee@example.com",
+          phone: "555-1213",
+          address: "1213 Maple Lane, Nowhere, NW 21314",
+        },
+      ]
     },
   }))
   .actions((self) => ({

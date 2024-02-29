@@ -207,9 +207,6 @@ en:
       update_error:
         title: Oops
         message: "%{error_message}"
-      update_success:
-        title: ""
-        message: "Permit application successfully updated!"
       save_draft_success:
         title: ""
         message: "Permit application successfully saved as draft!"

@@ -61,6 +61,14 @@ export enum ERequirementTemplateSortFields {
   jurisdictionsSize = "jurisdictions_size",
 }
 
+export enum EContactSortFields {
+  title = "title",
+  name = "name",
+  organization = "organization",
+  email = "email",
+  phone = "phone",
+  address = "address",
+}
 export enum EPermitApplicationSortFields {
   number = "number",
   permitClassification = "permit_classification",

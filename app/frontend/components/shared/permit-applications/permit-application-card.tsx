@@ -108,7 +108,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             variant="primary"
             w={{ base: "full", md: "fit-content" }}
           >
-            {t("ui.resume")}
+            {permitApplication.isSubmitted ? t("ui.view") : t("ui.resume")}
           </RouterLinkButton>
         </Flex>
       </Flex>
