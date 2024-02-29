@@ -77,3 +77,9 @@ export interface IFormIORequirement {
 export interface ISubmissionData {
   data: any[]
 }
+
+export interface IErrorsBoxData {
+  id: string
+  label: string
+  class: string
+}

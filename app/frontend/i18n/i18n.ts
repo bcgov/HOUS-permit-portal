@@ -428,6 +428,10 @@ const options = {
             emptyTemplateSectionText: "Start by clicking the Add Section button",
             goToTop: "Go to top",
             collapseAll: "Collapse All",
+            errorsBox: {
+              title: "There are {{count}} fields with errors on the page.",
+              instructions: "Please fix the following before submitting:",
+            },
           },
           fields: {
             status: "Status",
