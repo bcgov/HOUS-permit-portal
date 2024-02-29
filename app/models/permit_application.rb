@@ -19,6 +19,7 @@ class PermitApplication < ApplicationRecord
 
   validate :submitter_must_have_role
   validates :nickname, presence: true
+  validates :number, presence: true
 
   enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
 
@@ -26,7 +27,8 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
 
-  before_create :assign_unique_number, :assign_default_nickname
+  before_validation :assign_default_nickname, on: :create
+  before_validation :assign_unique_number, on: :create
   before_save :set_submitted_at, if: :status_changed?
 
   def search_data
@@ -54,7 +56,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}"
+    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number
@@ -101,7 +103,7 @@ class PermitApplication < ApplicationRecord
     end
 
     # Assign the new number to the permit application
-    self.number = new_number
+    self.number = new_number if self.number.blank?
     return new_number
   end
 
