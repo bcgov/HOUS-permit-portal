@@ -12,6 +12,7 @@ import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/p
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { SubmissionDownloadModal } from "./submission-download-modal"
 
 export const ReviewPermitApplicationScreen = observer(() => {
   const { currentPermitApplication, error } = usePermitApplication()
@@ -21,9 +22,13 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const [completedSections, setCompletedSections] = useState({})
 
-  const handleDownloadApplication = () => {}
+  const handleClickDownloadApplication = () => {
+    onContactsClose()
+    onDownloadOpen()
+  }
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+  const { isOpen: isDownloadOpen, onOpen: onDownloadOpen, onClose: onDownloadClose } = useDisclosure()
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
@@ -57,10 +62,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
           </Flex>
         </HStack>
         <HStack>
-          <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onOpen}>
+          <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
             {t("permitApplication.show.contactsSummary")}
           </Button>
-          <Button variant="primary" onClick={handleDownloadApplication}>
+          <Button variant="primary" onClick={handleClickDownloadApplication}>
             {t("permitApplication.show.downloadApplication")}
           </Button>
           <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
@@ -80,11 +85,20 @@ export const ReviewPermitApplicationScreen = observer(() => {
           </Flex>
         )}
       </Flex>
-      {isOpen && (
+      {isContactsOpen && (
         <ContactSummaryModal
-          isOpen={isOpen}
-          onOpen={onOpen}
-          onClose={onClose}
+          isOpen={isContactsOpen}
+          onOpen={onContactsOpen}
+          onClose={onContactsClose}
+          handleClickDownload={handleClickDownloadApplication}
+          permitApplication={currentPermitApplication}
+        />
+      )}
+      {isDownloadOpen && (
+        <SubmissionDownloadModal
+          isOpen={isDownloadOpen}
+          onOpen={onDownloadOpen}
+          onClose={onDownloadClose}
           permitApplication={currentPermitApplication}
         />
       )}

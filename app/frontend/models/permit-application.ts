@@ -3,7 +3,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
-import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
+import { IDownloadableFile, IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
@@ -32,6 +32,10 @@ export const PermitApplicationModel = types
     createdAt: types.Date,
     updatedAt: types.Date,
     stepCode: types.maybeNull(types.reference(StepCodeModel)),
+    supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
+    zipfileSize: types.maybeNull(types.number),
+    zipfileName: types.maybeNull(types.string),
+    zipfileUrl: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -86,7 +90,6 @@ export const PermitApplicationModel = types
         R.chain(R.prop("components")), // Flatten nested components into a single array
         R.reduce((acc, { id, title }) => ({ ...acc, [id]: title }), {}) // Create an ID to title mapping
       )(self.formJson)
-
       // Convert each section's object into an array of [key, value] pairs
       const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
 
@@ -114,8 +117,10 @@ export const PermitApplicationModel = types
         }
       })
 
-      // Filter out any contacts that have empty values for all fields
-      return unfilteredContacts.filter((contact) => R.values(R.omit(["id", "title"], contact)).some((value) => value))
+      return unfilteredContacts.filter((contact) => {
+        const omitted = R.omit(["id", "title"], contact)
+        return R.keys(omitted).length > 0 && R.values(omitted).some((value) => value && !R.isEmpty(value))
+      })
     },
   }))
   .actions((self) => ({

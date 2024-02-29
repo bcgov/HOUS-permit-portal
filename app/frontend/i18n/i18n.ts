@@ -264,6 +264,9 @@ const options = {
             contactsSummary: "Contacts Summary",
             downloadApplication: "Download application",
             contactSummaryHeading: "List of all contacts on this application",
+            downloadHeading: "Download application",
+            downloadPrompt: "Choose specific files or entire package:",
+            downloadZip: "Download all as .zip",
           },
         },
         requirementsLibrary: {

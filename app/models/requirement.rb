@@ -194,6 +194,8 @@ class Requirement < ApplicationRecord
   end
 
   def formio_type_options
+    return unless input_type.present?
+
     if (input_type.to_sym == :file)
       return(
         {

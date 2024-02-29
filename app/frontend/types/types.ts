@@ -137,3 +137,9 @@ export interface IStepCodeSelectOptions {
   permitApplications: Partial<IPermitApplication>[]
   buildingTypes: EStepCodeBuildingType[]
 }
+
+export interface IDownloadableFile {
+  fileUrl: string
+  fileName: string
+  fileSize: number
+}

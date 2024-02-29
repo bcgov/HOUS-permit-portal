@@ -183,7 +183,7 @@ export const RequirementForm = observer(
           ref={boxRef}
         >
           <ErrorsBox errorBox={errorBoxData} />
-          {permitApplication?.submittedAt && (
+          {permitApplication?.isSubmitted && (
             <CustomToast
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),

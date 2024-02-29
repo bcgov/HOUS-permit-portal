@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_05_005745) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -131,6 +131,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
     t.datetime "signed_off_at"
     t.string "nickname"
     t.datetime "viewed_at"
+    t.jsonb "zipfile_data"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -227,6 +228,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
     t.integer "position"
     t.index ["requirement_block_id"],
             name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "step_code_building_characteristics_summaries",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_checklist_id", null: false
+    t.jsonb "roof_ceilings_lines", default: [{ "rsi" => nil, "details" => nil }]
+    t.jsonb "windows_glazed_doors_lines",
+            default: [
+              { "shgc" => nil, "details" => nil, "insulation_type" => "usi" }
+            ]
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_checklist_id"],
+            name: "idx_on_step_code_checklist_id_f0fc711627"
   end
 
   create_table "step_code_checklists",
@@ -341,6 +358,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
     t.datetime "updated_at", null: false
     t.jsonb "compliance_data"
     t.string "data_key"
+    t.boolean "is_zip"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"
   end
@@ -521,6 +539,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "step_code_building_characteristics_summaries",
+                  "step_code_checklists"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"
