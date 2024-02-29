@@ -4,6 +4,11 @@ on:
   push:
     branches: ["develop"]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch Name"
+        required: true
+        default: "develop"
 
 jobs:
   build-and-push-image:
@@ -20,6 +25,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.inputs.branch }}
           lfs: true
       - name: Build Docker Image
         uses: redhat-actions/buildah-build@v2
