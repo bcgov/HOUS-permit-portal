@@ -84,6 +84,7 @@ const options = {
         },
         ui: {
           back: "Back",
+          backHome: "Back to home",
           yes: "Yes",
           no: "No",
           show: "Show",
@@ -247,6 +248,13 @@ const options = {
             permit: "Permit",
             fullAddress: "Full Address",
             pidPin: "PID / PIN",
+            clickToWriteNickname: "Click to write a nickname",
+          },
+          show: {
+            wasSubmitted: "Application was submitted on {{ date }}",
+            contactsSummary: "Contacts Summary",
+            downloadApplication: "Download application",
+            contactSummaryHeading: "List of all contacts on this application",
           },
         },
         requirementsLibrary: {

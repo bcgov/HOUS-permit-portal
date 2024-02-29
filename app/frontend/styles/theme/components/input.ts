@@ -22,7 +22,7 @@ const styles = {
     outline: {
       field: {
         borderColor: "border.light",
-        _hover: { borderColor: "border.base" },
+        _hover: { borderColor: "greys.grey01" },
       },
     },
   },

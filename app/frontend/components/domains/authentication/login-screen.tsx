@@ -53,7 +53,7 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <VStack spacing={4}>
-              <Text>{t("auth.loginInstructions")}</Text>]{" "}
+              <Text>{t("auth.loginInstructions")}</Text>{" "}
               <Box w="full">
                 <UsernameFormControl autoFocus />
                 <PasswordFormControl />
