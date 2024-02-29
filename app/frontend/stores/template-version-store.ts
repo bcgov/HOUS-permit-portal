@@ -8,6 +8,7 @@ export const TemplateVersionStoreModel = types
   .model("TemplateVersionStoreModel")
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
+    templateVersionsByPermitTypeId: types.map(types.array(types.safeReference(TemplateVersionModel))),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -19,6 +20,24 @@ export const TemplateVersionStoreModel = types
     },
   }))
   .actions((self) => ({
+    fetchTemplateVersions: flow(function* (activityId?: string) {
+      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(activityId))
+
+      if (response.ok) {
+        const templateVersions = response.data.data
+
+        self.mergeUpdateAll(templateVersions, "templateVersionMap")
+
+        !!activityId &&
+          self.templateVersionsByPermitTypeId.set(
+            activityId,
+            templateVersions.map((templateVersion) => templateVersion.id)
+          )
+      }
+
+      return response.ok
+    }),
+
     fetchTemplateVersion: flow(function* (id: string) {
       const response = yield* toGenerator(self.environment.api.fetchTemplateVersion(id))
 

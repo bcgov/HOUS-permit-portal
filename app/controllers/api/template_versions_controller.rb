@@ -2,6 +2,14 @@ class Api::TemplateVersionsController < Api::ApplicationController
   before_action :set_template_version, only: :show
 
   def index
+    @template_versions =
+      if params[:activity_id].present?
+        policy_scope(TemplateVersion).where(activities: { id: params[:activity_id] })
+      else
+        policy_scope(TemplateVersion)
+      end
+
+    render_success @template_version
   end
 
   def show

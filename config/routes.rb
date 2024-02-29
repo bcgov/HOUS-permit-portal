@@ -59,7 +59,7 @@ Rails.application.routes.draw do
       patch "restore", on: :member
     end
 
-    resources :template_versions, only: %i[show]
+    resources :template_versions, only: %i[index show]
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
