@@ -72,40 +72,41 @@ export const PermitApplicationModel = types
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
     },
     get contacts() {
-      return [
-        {
-          title: "STUBBED",
-          name: "John Doe",
-          organization: "Acme Corp",
-          email: "johndoe@example.com",
-          phone: "555-1234",
-          address: "1234 Elm Street, Anytown, AT 12345",
-        },
-        {
-          title: "STUBBED",
-          name: "Jane Smith",
-          organization: "Widget Inc",
-          email: "janesmith@example.com",
-          phone: "555-5678",
-          address: "5678 Oak Avenue, Anycity, AC 67890",
-        },
-        {
-          title: "STUBBED",
-          name: "Sam Johnson",
-          organization: "Gadgets LLC",
-          email: "samjohnson@example.com",
-          phone: "555-9101",
-          address: "9101 Pine Road, Somewhere, SW 10112",
-        },
-        {
-          title: "STUBBED",
-          name: "Alex Lee",
-          organization: "Innovatech",
-          email: "alexlee@example.com",
-          phone: "555-1213",
-          address: "1213 Maple Lane, Nowhere, NW 21314",
-        },
-      ]
+      const blockIdToTitleMapping = R.pipe(
+        R.prop("components"), // Access the top-level components array
+        R.chain(R.prop("components")), // Flatten nested components into a single array
+        R.reduce((acc, { id, title }) => ({ ...acc, [id]: title }), {}) // Create an ID to title mapping
+      )(self.formJson)
+
+      // Convert each section's object into an array of [key, value] pairs
+      const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
+
+      // Flatten one level of arrays to get a single array of [key, value] pairs
+      const allFields = R.chain(R.identity, sectionsPairs)
+
+      // Group the fields by block identifier, e.g., "section1|block1", to aggregate all related fields together
+      const groupedByBlock = R.groupBy(([key, _]) => key.split("|").slice(0, 2).join("|"), allFields)
+
+      // Map over each block, obtaining ID and transforming them into the desired Contact object structure
+      const unfilteredContacts = R.keys(groupedByBlock).map((blockFieldsKey) => {
+        const keySplit = blockFieldsKey.split("|RB")
+        if (keySplit.length <= 1) return
+
+        const blockId = keySplit[keySplit.length - 1]
+        const blockObject = R.fromPairs(groupedByBlock[blockFieldsKey])
+        return {
+          id: blockId,
+          address: blockObject[R.keys(blockObject).find((key: string) => key.includes("address"))!],
+          cellNumber: blockObject[R.keys(blockObject).find((key: string) => key.includes("cell"))!],
+          email: blockObject[R.keys(blockObject).find((key: string) => key.includes("email"))!],
+          name: blockObject[R.keys(blockObject).find((key: string) => key.includes("individual_name"))!],
+          phone: blockObject[R.keys(blockObject).find((key: string) => key.includes("phone"))!],
+          title: blockIdToTitleMapping[blockId],
+        }
+      })
+
+      // Filter out any contacts that have empty values for all fields
+      return unfilteredContacts.filter((contact) => R.values(R.omit(["id", "title"], contact)).some((value) => value))
     },
   }))
   .actions((self) => ({
