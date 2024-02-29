@@ -47,12 +47,12 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
           <ModalCloseButton fontSize="11px" />
         </ModalHeader>
         <ModalBody py={6}>
-          <SearchGrid templateColumns="repeat(6, 1fr)">
+          <SearchGrid templateColumns="repeat(5, 1fr)">
             <Box display={"contents"} role={"rowgroup"}>
               <Box display={"contents"} role={"row"}>
                 <GridItem
                   as={Flex}
-                  gridColumn={"span 6"}
+                  gridColumn={"span 5"}
                   p={6}
                   bg={"greys.grey10"}
                   justifyContent={"space-between"}
@@ -77,7 +77,6 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
                       <Text textAlign="left" cursor="default">
                         {field}
                       </Text>
-                      {/* <SortIcon<EJurisdictionSortFields> field={field} currentSort={sort} /> */}
                     </Flex>
                   </GridHeader>
                 ))}
@@ -88,7 +87,6 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
               <Box key={contact.id} className={"contact-index-grid-row"} role={"row"} display={"contents"}>
                 <SearchGridItem key={`title-${contact.id}`}>{contact.title}</SearchGridItem>
                 <SearchGridItem key={`name-${contact.id}`}>{contact.name}</SearchGridItem>
-                <SearchGridItem key={`organization-${contact.id}`}>{contact.organization}</SearchGridItem>
                 <SearchGridItem key={`email-${contact.id}`}>{contact.email}</SearchGridItem>
                 <SearchGridItem key={`phone-${contact.id}`}>{contact.phone}</SearchGridItem>
                 <SearchGridItem key={`address-${contact.id}`}>{contact.address}</SearchGridItem>

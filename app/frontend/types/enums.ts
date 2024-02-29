@@ -64,7 +64,6 @@ export enum ERequirementTemplateSortFields {
 export enum EContactSortFields {
   title = "title",
   name = "name",
-  organization = "organization",
   email = "email",
   phone = "phone",
   address = "address",

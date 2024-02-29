@@ -98,7 +98,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         top={0}
         zIndex={10}
         py={3}
-        maxH="112px"
+        maxH="200"
       >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
