@@ -84,14 +84,14 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
               </Box>
             </Box>
 
-            {contacts.map((contact, index) => (
+            {contacts.map((contact) => (
               <Box key={contact.id} className={"contact-index-grid-row"} role={"row"} display={"contents"}>
-                <SearchGridItem key={`title-${index}`}>{contact.title}</SearchGridItem>
-                <SearchGridItem key={`name-${index}`}>{contact.name}</SearchGridItem>
-                <SearchGridItem key={`organization-${index}`}>{contact.organization}</SearchGridItem>
-                <SearchGridItem key={`email-${index}`}>{contact.email}</SearchGridItem>
-                <SearchGridItem key={`phone-${index}`}>{contact.phone}</SearchGridItem>
-                <SearchGridItem key={`address-${index}`}>{contact.address}</SearchGridItem>
+                <SearchGridItem key={`title-${contact.id}`}>{contact.title}</SearchGridItem>
+                <SearchGridItem key={`name-${contact.id}`}>{contact.name}</SearchGridItem>
+                <SearchGridItem key={`organization-${contact.id}`}>{contact.organization}</SearchGridItem>
+                <SearchGridItem key={`email-${contact.id}`}>{contact.email}</SearchGridItem>
+                <SearchGridItem key={`phone-${contact.id}`}>{contact.phone}</SearchGridItem>
+                <SearchGridItem key={`address-${contact.id}`}>{contact.address}</SearchGridItem>
               </Box>
             ))}
           </SearchGrid>

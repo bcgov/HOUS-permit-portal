@@ -54,9 +54,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def assign_default_nickname
-    nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}"
-    self.nickname = nickname
-    return nickname
+    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}"
   end
 
   def assign_unique_number

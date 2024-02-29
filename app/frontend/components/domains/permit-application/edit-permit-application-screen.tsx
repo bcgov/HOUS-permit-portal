@@ -116,7 +116,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         color: "greys.white",
                         display: isSubmitted ? "none" : "block",
                       },
-                      saveButtonProps: { display: "none" },
                     }}
                     editableInputProps={{
                       fontWeight: 700,
