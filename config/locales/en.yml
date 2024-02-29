@@ -213,6 +213,20 @@ en:
       submit_error:
         title: Oops
         message: "%{error_message}"
+    step_code:
+      create_success:
+        title: ""
+        message: "New step code created!"
+      create_error:
+        title: Oops
+        message: "%{error_message}"
+    step_code_checklist:
+      update_success:
+        title: ""
+        message: "Step code checklist updated!"
+      update_error:
+        title: Oops
+        message: "%{error_message}"
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
@@ -220,6 +234,7 @@ en:
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found
+
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -227,3 +242,4 @@ en:
       signoff_checkbox_title: "Sign Off"
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Submit"
+      energy_step_code: "Use Energy Step Code Tool"

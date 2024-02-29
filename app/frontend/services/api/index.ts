@@ -5,6 +5,8 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IPermitApplication } from "../../models/permit-application"
 import { IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
+import { IStepCode } from "../../models/step-code"
+import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
 import {
@@ -228,5 +230,25 @@ export class Api {
 
   async restoreRequirementTemplate(id) {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
+  }
+
+  async fetchStepCodes() {
+    return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
+  }
+
+  async createStepCode(stepCode: IStepCode) {
+    return this.client.post<ApiResponse<IStepCode>>("/step_codes", { stepCode })
+  }
+
+  async deleteStepCode(id: string) {
+    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async fetchStepCodeChecklist(id: string) {
+    return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
+  }
+
+  async updateStepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
   }
 }

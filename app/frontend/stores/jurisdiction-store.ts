@@ -8,7 +8,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
 import { ISort } from "../types/types"
-import { toCamelCase } from "../utils/utility-funcitons"
+import { toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
   .compose(

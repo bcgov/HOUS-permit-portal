@@ -6,7 +6,7 @@ import { Controller, useController, useFieldArray, useFormContext } from "react-
 import { useTranslation } from "react-i18next"
 import { IRequirementsAttribute } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
-import { isMultiOptionRequirement } from "../../../../utils/utility-funcitons"
+import { isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"

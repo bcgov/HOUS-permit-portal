@@ -1,7 +1,7 @@
 import { flow, Instance, types } from "mobx-state-tree"
 import { ESortDirection } from "../types/enums"
 import { ISort } from "../types/types"
-import { setQueryParam } from "../utils/utility-funcitons"
+import { setQueryParam } from "../utils/utility-functions"
 
 interface IFetchOptions {
   reset?: boolean

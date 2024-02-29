@@ -17,4 +17,5 @@ class PermitApplicationBlueprint < Blueprinter::Base
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint
   association :submitter, blueprint: UserBlueprint
+  association :step_code, blueprint: StepCodeBlueprint
 end

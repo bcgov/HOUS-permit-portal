@@ -507,6 +507,32 @@ const requirementsComponentMap = {
       </Stack>
     )
   },
+
+  [ERequirementType.energyStepCode]: function <TFieldValues>({
+    editableLabelProps,
+    editableHelperTextProps,
+    checkboxProps,
+  }) {
+    const { t } = useTranslation()
+    const { controlProps, ...restCheckboxProps } = checkboxProps
+
+    return (
+      <Stack spacing={4}>
+        <EditableLabel {...editableLabelProps} />
+        <i className="fa fa-bolt"></i>
+        <EditableHelperText {...editableHelperTextProps} />
+        <Controller<TFieldValues>
+          {...controlProps}
+          render={({ field: checkboxField }) => (
+            // @ts-ignore
+            <Checkbox {...restCheckboxProps} {...checkboxField}>
+              {t("requirementsLibrary.modals.optionalForSubmitters")}
+            </Checkbox>
+          )}
+        />
+      </Stack>
+    )
+  },
 }
 
 type TProps<TFieldValues> = {

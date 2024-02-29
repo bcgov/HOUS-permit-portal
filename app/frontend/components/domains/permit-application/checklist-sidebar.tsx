@@ -14,6 +14,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedSections
   const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass, getIsBlockPopulated } =
     permitApplication
 
+  const navHeight = document.getElementById("mainNav")?.offsetHeight
+  const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
+
   const handleTabsChange = (index: number, sectionId: string, blockId: string) => {
     setSelectedTabIndex(index)
     const className = getBlockClass(sectionId, blockId)
@@ -24,18 +27,16 @@ export const ChecklistSideBar = observer(({ permitApplication, completedSections
   }
 
   return (
-    <Flex direction="column" boxShadow="md" w={378}>
-      <Box
-        position="fixed"
-        left={0}
-        bottom={0}
-        top={0}
-        overflowY="auto"
-        border="1px solid"
-        borderColor="greys.grey02"
-        maxW={378}
-      >
-        <Tabs orientation="vertical" index={selectedTabIndex} w="full" pt={195}>
+    <Flex
+      direction="column"
+      boxShadow="md"
+      flexBasis={378}
+      position="sticky"
+      top={0}
+      maxH={`calc(100vh - ${navHeight + permitHeaderHeight}px)`}
+    >
+      <Box overflowY="auto" border="1px solid" borderColor="greys.grey02">
+        <Tabs orientation="vertical" index={selectedTabIndex} w="full">
           <TabList w="full" border={0}>
             {formJson.components.map((section) => {
               return (
