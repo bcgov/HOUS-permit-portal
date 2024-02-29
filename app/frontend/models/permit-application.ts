@@ -58,7 +58,7 @@ export const PermitApplicationModel = types
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
     get isSubmitted() {
-      return !!self.submittedAt
+      return self.status === EPermitApplicationStatus.submitted
     },
   }))
   .views((self) => ({
