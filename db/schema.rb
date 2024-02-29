@@ -51,7 +51,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_28_231537) do
     t.datetime "updated_at", null: false
     t.string "department"
     t.string "organization"
-    t.string "cell"
+    t.string "cell_number"
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
