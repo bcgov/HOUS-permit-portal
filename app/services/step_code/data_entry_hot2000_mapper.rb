@@ -167,7 +167,13 @@ class StepCode::DataEntryHot2000Mapper
 
   def electrical_consumption
     @electrical_consumption ||=
-      monthly_electrical_consumption.sum > 0 ? monthly_electrical_consumption.sum : annual_consumption
+      (
+        if monthly_electrical_consumption.sum > 0
+          monthly_electrical_consumption.sum
+        else
+          annual_consumption
+        end
+      )
   end
 
   def annual_electrical_consumption

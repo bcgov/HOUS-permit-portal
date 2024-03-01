@@ -1,26 +1,23 @@
 import { Box, Button, Divider, Heading, HeadingProps, HStack, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useMst } from "../../../../setup/root"
-import { IRequirementTemplateForm } from "./index"
+import { IDenormalizedRequirementTemplateSection } from "../../../types/types"
 
 interface IProps {
   onEdit?: () => void
   onItemClick?: (id: string) => void
   sectionIdToHighlight: null | string
+  sections: IDenormalizedRequirementTemplateSection[]
 }
 
 export const SectionsSidebar = observer(function SectionsSidebar({
   onEdit,
   onItemClick,
   sectionIdToHighlight,
+  sections,
 }: IProps) {
   const { t } = useTranslation()
-  const { watch } = useFormContext<IRequirementTemplateForm>()
-  const { requirementBlockStore } = useMst()
-  const watchedSections = watch("requirementTemplateSectionsAttributes")
   const highLightedSectionStyles: Partial<HeadingProps> = {
     bg: "theme.blueLight",
     color: "text.link",
@@ -38,16 +35,20 @@ export const SectionsSidebar = observer(function SectionsSidebar({
       boxShadow={"elevations.elevation01"}
       overflow={"auto"}
     >
-      <HStack w={"full"} justifyContent={"space-between"} bg={"greys.grey03"} py={5} px={4}>
-        <Text as={"h3"} fontSize={"sm"} fontWeight={400} color={"text.secondary"} textTransform={"uppercase"}>
-          {t("requirementTemplate.edit.sectionsSidebarTitle")}
-        </Text>
-        <Button variant={"secondary"} onClick={onEdit} size={"sm"}>
-          {t("requirementTemplate.edit.reorderButton")}
-        </Button>
-      </HStack>
+      {onEdit && (
+        <HStack w={"full"} justifyContent={"space-between"} bg={"greys.grey03"} py={5} px={4}>
+          <>
+            <Text as={"h3"} fontSize={"sm"} fontWeight={400} color={"text.secondary"} textTransform={"uppercase"}>
+              {t("requirementTemplate.edit.sectionsSidebarTitle")}
+            </Text>
+            <Button variant={"secondary"} onClick={onEdit} size={"sm"}>
+              {t("requirementTemplate.edit.reorderButton")}
+            </Button>
+          </>
+        </HStack>
+      )}
       <Stack w={"full"} spacing={4} alignItems={"flex-start"} py={2}>
-        {watchedSections?.map((section, index) => {
+        {sections?.map((section, index) => {
           const isHighlightedSection = sectionIdToHighlight === section.id
           return (
             <React.Fragment key={section.id}>
@@ -67,9 +68,9 @@ export const SectionsSidebar = observer(function SectionsSidebar({
                 >
                   {section.name}
                 </Heading>
-                {section.templateSectionBlocksAttributes.length > 0 && (
+                {section.templateSectionBlocks.length > 0 && (
                   <Box as={"ol"} sx={{ listStyle: "none" }} w={"full"} p={0} m={0}>
-                    {section.templateSectionBlocksAttributes.map((sectionBlock) => {
+                    {section.templateSectionBlocks.map((sectionBlock) => {
                       return (
                         <Text
                           as={"li"}
@@ -81,14 +82,14 @@ export const SectionsSidebar = observer(function SectionsSidebar({
                           onClick={() => onItemClick?.(sectionBlock.id)}
                           cursor={"pointer"}
                         >
-                          {requirementBlockStore?.getRequirementBlockById(sectionBlock.requirementBlockId)?.name}
+                          {sectionBlock.requirementBlock?.name}
                         </Text>
                       )
                     })}
                   </Box>
                 )}
               </Box>
-              {index < watchedSections.length - 1 && <Divider borderColor={"border.light"} m={0} />}
+              {index < sections.length - 1 && <Divider borderColor={"border.light"} m={0} />}
             </React.Fragment>
           )
         })}

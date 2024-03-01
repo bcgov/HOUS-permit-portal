@@ -1,0 +1,5 @@
+template_publish:
+  cron: "1 0 * * * America/Vancouver"
+  class: "TemplatePublishJob"
+  queue: default
+  active_job: false

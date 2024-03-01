@@ -1,4 +1,5 @@
 require "sidekiq/web"
+require "sidekiq/cron/web"
 
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -54,8 +55,11 @@ Rails.application.routes.draw do
 
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
+      post "schedule", to: "requirement_templates#schedule", on: :member
       patch "restore", on: :member
     end
+
+    resources :template_versions, only: %i[show]
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"

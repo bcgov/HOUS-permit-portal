@@ -83,6 +83,7 @@ const options = {
             "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
         },
         ui: {
+          preview: "Preview",
           back: "Back",
           backHome: "Back to home",
           yes: "Yes",
@@ -130,6 +131,8 @@ const options = {
           expandAll: "Expand all",
           collapseAll: "Collapse all",
           toTop: "Go to top",
+          confirm: "Confirm",
+          close: "Close",
           asc: "Ascending",
           desc: "Descending",
           returnHome: "Return to home",
@@ -616,6 +619,7 @@ const options = {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
+          fetchTemplateVersion: "Something went wrong fetching the template version",
           fetchOptions: "Something went wrong fetching options",
         },
         user: {
@@ -674,6 +678,11 @@ const options = {
             emptyTemplateSectionText: "Start by clicking the Add Section button",
             goToTop: "Go to top",
             collapseAll: "Collapse All",
+            scheduleModalTitle: "Publish permit?",
+            scheduleModalBody:
+              "Once you publish, local governments and submitters will be able to see and use this new version of the form.",
+            scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
+            scheduleModalCancelMessage: "Changes were not scheduled.",
             errorsBox: {
               title: "There are {{count}} fields with errors on the page.",
               instructions: "Please fix the following before submitting:",
@@ -684,13 +693,14 @@ const options = {
             permitType: "Permit Type",
             activity: "Work Type",
             description: "Description",
-            version: "Version",
+            currentVersion: "Current Version",
             jurisdictionsSize: "Used By",
           },
           status: {
             published: "Published",
             scheduled: "Scheduled",
             draft: "Draft",
+            deprecated: "Deprecated",
           },
           index: {
             tableHeading: "Templates",
@@ -706,6 +716,21 @@ const options = {
             descriptionHelpText:
               "Provide some context for managers and admin on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
+          },
+          versionSidebar: {
+            triggerButton: "Versions",
+            title: "Template Versions",
+            subtitlePrefix: "For:",
+            viewTemplateButton: "View template",
+            resumeDraftButton: "Resume draft",
+            unscheduleButton: "Unschedule",
+            listTitles: {
+              published: "Published",
+              draft: "Drafts",
+              scheduled: "Scheduled",
+              deprecated: "Deprecated",
+            },
+            lastUpdated: "Last updated",
           },
         },
         site: {
@@ -738,6 +763,7 @@ const options = {
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
             invite: "Invite",
+            templateVersions: "Template Versions",
             requirementsLibrary: "Requirements Library",
             requirementTemplates: "Permit Templates Catalogue",
             edit: "Edit",

@@ -56,9 +56,12 @@ gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
-gem 'discard', '~> 1.2'
+gem "discard", "~> 1.2"
 gem "faraday", "~> 2.9.0"
 gem "factory_bot", "~> 6.4"
+# The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
+gem "timecop", "~> 0.9.8"
+gem "sidekiq-cron", "~> 1.12"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -89,3 +92,4 @@ group :development do
 end
 
 gem "faraday-multipart", "~> 1.0"
+
