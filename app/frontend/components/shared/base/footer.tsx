@@ -4,7 +4,6 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../navigation/router-link"
 
 export const Footer = observer(() => {
@@ -12,11 +11,17 @@ export const Footer = observer(() => {
   const { userStore, sessionStore } = useMst()
   const { currentUser } = userStore
   const { t } = useTranslation()
-  const excludeFooterRoutes = ["/reset-password", "/accept-invitation", "/login", "/forgot-password", "/register"]
+  const excludeFooterRoutes = [
+    "/reset-password",
+    "/accept-invitation",
+    "/login",
+    "/forgot-password",
+    "/register",
+    "/permit-applications",
+  ]
 
   const shouldShowFooter =
-    (!sessionStore.loggedIn && !excludeFooterRoutes.includes(location.pathname)) ||
-    currentUser?.role === EUserRoles.submitter
+    !sessionStore.loggedIn || !excludeFooterRoutes.some((route) => location.pathname.startsWith(route))
 
   return (
     <>

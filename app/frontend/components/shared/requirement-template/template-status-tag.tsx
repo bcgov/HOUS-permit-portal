@@ -3,32 +3,35 @@ import { CheckSquareOffset, Clock, Pencil } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { ERequirementTemplateStatus } from "../../../types/enums"
+import { ETemplateVersionStatus } from "../../../types/enums"
 
 interface ITemplateStatusTagProps {
-  requirementTemplate
+  status: ETemplateVersionStatus
+  scheduledFor?: Date
 }
 
-const statusColors: { [key in ERequirementTemplateStatus]: string } = {
-  [ERequirementTemplateStatus.published]: "semantic.infoLight",
-  [ERequirementTemplateStatus.scheduled]: "semantic.successLight",
-  [ERequirementTemplateStatus.draft]: "semantic.warningLight",
+const statusColors: { [key in ETemplateVersionStatus]: string } = {
+  [ETemplateVersionStatus.published]: "semantic.infoLight",
+  [ETemplateVersionStatus.scheduled]: "semantic.successLight",
+  [ETemplateVersionStatus.draft]: "semantic.warningLight",
+  [ETemplateVersionStatus.deprecated]: "semantic.errorLight",
 }
 
-const statusBorderColors: { [key in ERequirementTemplateStatus]: string } = {
-  [ERequirementTemplateStatus.published]: "semantic.info",
-  [ERequirementTemplateStatus.scheduled]: "semantic.success",
-  [ERequirementTemplateStatus.draft]: "semantic.warning",
+const statusBorderColors: { [key in ETemplateVersionStatus]: string } = {
+  [ETemplateVersionStatus.published]: "semantic.info",
+  [ETemplateVersionStatus.scheduled]: "semantic.success",
+  [ETemplateVersionStatus.draft]: "semantic.warning",
+  [ETemplateVersionStatus.deprecated]: "semantic.error",
 }
 
-const statusIcons: { [key in ERequirementTemplateStatus]: ReactNode } = {
-  [ERequirementTemplateStatus.published]: <CheckSquareOffset />,
-  [ERequirementTemplateStatus.scheduled]: <Clock />,
-  [ERequirementTemplateStatus.draft]: <Pencil />,
+const statusIcons: { [key in ETemplateVersionStatus]: ReactNode } = {
+  [ETemplateVersionStatus.published]: <CheckSquareOffset />,
+  [ETemplateVersionStatus.scheduled]: <Clock />,
+  [ETemplateVersionStatus.draft]: <Pencil />,
+  [ETemplateVersionStatus.deprecated]: <></>,
 }
 
-export const TemplateStatusTag = ({ requirementTemplate }: ITemplateStatusTagProps) => {
-  const status = requirementTemplate.status as ERequirementTemplateStatus
+export const TemplateStatusTag = ({ status, scheduledFor }: ITemplateStatusTagProps) => {
   const color = statusColors[status]
   const borderColor = statusBorderColors[status]
   const { t } = useTranslation()
@@ -48,9 +51,9 @@ export const TemplateStatusTag = ({ requirementTemplate }: ITemplateStatusTagPro
           <Text>{t(`requirementTemplate.status.${status}`)}</Text>
         </HStack>
       </Tag>
-      {requirementTemplate.scheduledFor && (
+      {scheduledFor && (
         <Text fontSize="sm" fontWeight="bold">
-          {format(requirementTemplate.scheduledFor, "yyyy-MM-dd")}
+          {format(scheduledFor, "yyyy-MM-dd")}
         </Text>
       )}
     </Flex>

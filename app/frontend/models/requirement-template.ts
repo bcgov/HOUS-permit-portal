@@ -1,12 +1,20 @@
+import { addDays, isAfter, isSameDay, max } from "date-fns"
 import { Instance, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ERequirementTemplateStatus } from "../types/enums"
+import { ERequirementTemplateStatus, ETemplateVersionStatus } from "../types/enums"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
+import { TemplateVersionModel } from "./template-version"
 
 function preProcessor(snapshot) {
-  const processedSnapShot = { ...snapshot }
+  const processedSnapShot = {
+    ...snapshot,
+    scheduledTemplateVersions: snapshot.templateVersions
+      ?.filter((version) => version.status === ETemplateVersionStatus.scheduled)
+      .map((version) => version.id),
+    publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
+  }
 
   if (snapshot.requirementTemplateSections) {
     processedSnapShot.requirementTemplateSectionMap = snapshot.requirementTemplateSections.reduce((acc, section) => {
@@ -18,6 +26,7 @@ function preProcessor(snapshot) {
     )
     processedSnapShot.isFullyLoaded = true
   }
+
   return processedSnapShot
 }
 
@@ -27,8 +36,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       id: types.identifier,
       status: types.enumeration(Object.values(ERequirementTemplateStatus)),
       description: types.maybeNull(types.string),
-      version: types.maybeNull(types.string),
       jurisdictionsSize: types.optional(types.number, 0),
+      publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
+      scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
@@ -46,11 +56,19 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       get isDiscarded() {
         return self.discardedAt !== null
       },
-      get isDraft() {
-        return self.status === ERequirementTemplateStatus.draft
-      },
-      get isPublished() {
-        return self.status === ERequirementTemplateStatus.published
+      get nextAvailableScheduleDate() {
+        const tomorrow = addDays(new Date(), 1)
+
+        if (self.scheduledTemplateVersions.length === 0) {
+          return tomorrow
+        }
+        const latestDate = max(self.scheduledTemplateVersions.map((version) => version.versionDate))
+
+        if (isAfter(latestDate, tomorrow) || isSameDay(latestDate, tomorrow)) {
+          return addDays(latestDate, 1)
+        } else {
+          return tomorrow
+        }
       },
       hasRequirementSection(id: string) {
         return self.requirementTemplateSectionMap.has(id)

@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
@@ -27,6 +27,7 @@ import { SuccessfulSubmissionScreen } from "../permit-application/successful-sub
 import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
+import { TemplateVersionScreen } from "../requirement-template/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { StepCodeForm } from "../step-code"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
@@ -53,7 +54,7 @@ export const Navigation = observer(() => {
 
       <NavBar />
 
-      <Box overflow="auto" h="full" id="outerScrollContainer">
+      <Flex direction="column" overflow="auto" h="full" id="outerScrollContainer">
         {isValidating ? (
           <LoadingScreen />
         ) : (
@@ -62,7 +63,7 @@ export const Navigation = observer(() => {
             <Footer />
           </>
         )}
-      </Box>
+      </Flex>
     </BrowserRouter>
   )
 })
@@ -84,6 +85,7 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
+      <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
     </>
   )
 

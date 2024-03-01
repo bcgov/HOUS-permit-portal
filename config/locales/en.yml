@@ -162,7 +162,10 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "Template updated successfully!"
+        message: "This version has been saved as a draft."
+      schedule_success:
+        title: ""
+        message: "Permit has been scheduled to published."
       create_error:
         title: Oops
         message: "%{error_message}"
@@ -173,6 +176,9 @@ en:
         title: Oops
         message: "Something went wrong archiving the template"
       update_error:
+        title: Oops
+        message: "%{error_message}"
+      schedule_error:
         title: Oops
         message: "%{error_message}"
       delete_error:

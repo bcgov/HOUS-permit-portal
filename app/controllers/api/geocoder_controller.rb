@@ -16,7 +16,7 @@ class Api::GeocoderController < Api::ApplicationController
         render_success options, nil, { blueprint: OptionBlueprint }
       end
     rescue StandardError => e
-      render_error "geocoder.site_options_error" and return
+      render_error "geocoder.site_options_error", {}, e and return
     end
   end
 
@@ -27,7 +27,7 @@ class Api::GeocoderController < Api::ApplicationController
       pids = wrapper.pids(geocoder_params[:site_id])
       render json: pids, status: :ok
     rescue StandardError => e
-      render_error "geocoder.pid_error" and return
+      render_error "geocoder.pid_error", {}, e and return
     end
   end
 

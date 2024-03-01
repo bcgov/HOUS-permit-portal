@@ -7,8 +7,13 @@ class RequirementTemplate < ApplicationRecord
   belongs_to :permit_type
 
   has_many :requirement_template_sections, -> { order(position: :asc) }, dependent: :destroy
-  has_many :jurisdiction_requirement_templates
-  has_many :jurisdictions, through: :jurisdiction_requirement_templates
+  has_many :template_versions, -> { order(version_date: :desc) }, dependent: :destroy
+  has_many :scheduled_template_versions,
+           -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
+           class_name: "TemplateVersion"
+  has_many :jurisdiction_template_version_customizations
+
+  has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
 
   validate :scheduled_for_presence_if_scheduled
 
@@ -20,10 +25,6 @@ class RequirementTemplate < ApplicationRecord
   include Discard::Model
 
   accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
-
-  def jurisdictions_size
-    jurisdictions.size
-  end
 
   def key
     "requirementtemplate#{id}"
@@ -106,11 +107,15 @@ class RequirementTemplate < ApplicationRecord
     {
       description: description,
       status: status,
-      version: version,
+      current_version: published_template_version&.version_date,
       permit_type: permit_type.name,
       activity: activity.name,
       discarded: discarded_at.present?,
     }
+  end
+
+  def last_scheduled_version
+    scheduled_template_versions.first
   end
 
   private

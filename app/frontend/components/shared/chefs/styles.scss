@@ -345,11 +345,11 @@ $bcgov-alert-success: #dff0d8;
   }
 }
 
-h2 {
-  @include yellowBarHeader;
-}
-
 .form-wrapper {
+  h2 {
+    @include yellowBarHeader;
+  }
+
   .formio-section-container > label {
     @include yellowBarHeader;
     font-size: 24px;

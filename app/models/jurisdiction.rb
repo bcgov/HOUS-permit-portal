@@ -10,8 +10,7 @@ class Jurisdiction < ApplicationRecord
   has_many :contacts, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
-  has_many :jurisdiction_requirement_templates
-  # has_many :requirement_templates, through: :jurisdiction_requirement_templates
+  has_many :jurisdiction_template_version_customizations
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
@@ -61,14 +60,21 @@ class Jurisdiction < ApplicationRecord
   end
 
   def self.locality_types
-    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(:locality_type)
+    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(
+      :locality_type
+    )
   end
 
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
     name = attributes["MUNICIPALITY"]
     regional_district_name = attributes["REGIONAL_DISTRICT"]
 
-    named_params = { fields: %w[reverse_qualified_name qualified_name], misspellings: { edit_distance: 1 } }
+    named_params = {
+      fields: %w[reverse_qualified_name qualified_name],
+      misspellings: {
+        edit_distance: 1
+      }
+    }
     return(
       SubDistrict.search(name, **named_params).first ||
         RegionalDistrict.search(regional_district_name, **named_params).first
@@ -83,13 +89,18 @@ class Jurisdiction < ApplicationRecord
       updated_at: updated_at,
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,
-      permit_applications_size: permit_applications_size,
+      permit_applications_size: permit_applications_size
       # templates_used: "TODO",
     }
   end
 
   def self.custom_titleize_locality_type(locality_type)
-    locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
+    locality_type
+      .split
+      .map do |word|
+        %w[the of].include?(word.downcase) ? word.downcase : word.capitalize
+      end
+      .join(" ")
   end
 
   def qualifier
@@ -120,7 +131,8 @@ class Jurisdiction < ApplicationRecord
 
   def sanitize_html_fields
     attributes.each do |name, value|
-      self[name] = sanitize(value) if name.ends_with?("_html") && will_save_change_to_attribute?(name)
+      self[name] = sanitize(value) if name.ends_with?("_html") &&
+        will_save_change_to_attribute?(name)
     end
   end
 
