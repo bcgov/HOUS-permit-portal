@@ -37,18 +37,19 @@ export const SitesSelect = observer(function ({
   const { fetchPids, fetchingPids } = geocoderStore
   const pidSelectRef = useRef(null)
 
+  const { setValue, control, watch, reset } = useFormContext()
+  const pidWatch = watch(pidName)
+  const siteWatch = watch(siteName)
+  const { t } = useTranslation()
+
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
+        reset()
         callback(options)
       })
     } else callback([])
   }
-
-  const { setValue, control, watch } = useFormContext()
-  const pidWatch = watch(pidName)
-  const siteWatch = watch(siteName)
-  const { t } = useTranslation()
 
   const handleChange = (option: IOption) => {
     onChange(option)

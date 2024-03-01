@@ -138,14 +138,16 @@ export const PermitApplicationStoreModel = types
         // PermitApplication not found in the map, fetch from API
         const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
         if (ok && response.data) {
+          permitApplication = response.data
           self.mergeUpdate(response.data, "permitApplicationMap")
         }
       }
       return permitApplication
     }),
-    setCurrentPermitApplication(permitApplication?: IPermitApplication) {
-      self.currentPermitApplication = permitApplication
-      permitApplication?.stepCode && self.rootStore.stepCodeStore.setCurrentStepCode(permitApplication.stepCode)
+    setCurrentPermitApplication(permitApplicationId) {
+      self.currentPermitApplication = permitApplicationId
+      self.currentPermitApplication?.stepCode &&
+        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
   }))
 

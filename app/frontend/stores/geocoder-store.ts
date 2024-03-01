@@ -24,6 +24,7 @@ export const GeocoderStoreModel = types
       const response: any = yield self.environment.api.fetchPids(siteId)
       if (response.ok) {
         let responseData = response.data
+        self.fetchingPids = false
         return responseData
       }
       self.fetchingPids = false

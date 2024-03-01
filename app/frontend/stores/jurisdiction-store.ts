@@ -84,6 +84,7 @@ export const JurisdictionStoreModel = types
         // Jurisdiction not found in the map, fetch from API
         const { ok, data: response } = yield self.environment.api.fetchJurisdiction(id)
         if (ok && response.data) {
+          jurisdiction = response.data
           self.mergeUpdate(response.data, "jurisdictionMap")
         }
       }
