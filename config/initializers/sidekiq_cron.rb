@@ -1,4 +1,4 @@
-if !Rails.env.test?
+if !Rails.env.test? && ENV["DOCKER_BUILDING"].blank?
   require "sidekiq-cron"
 
   schedule_file = "config/sidekiq_cron_schedule.yml"
