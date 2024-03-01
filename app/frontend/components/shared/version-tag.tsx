@@ -1,6 +1,6 @@
 import { Tag } from "@chakra-ui/react"
 import React from "react"
-import { formatTemplateVersion } from "../../utils/utility-funcitons"
+import { formatTemplateVersion } from "../../utils/utility-functions"
 
 export function VersionTag({ versionDate }: { versionDate: Date }) {
   return (
