@@ -17,10 +17,10 @@ export const usePermitApplication = () => {
   useEffect(() => {
     ;(async () => {
       try {
-        setCurrentPermitApplication()
+        setCurrentPermitApplication(null)
         if (isUUID(permitApplicationId)) {
-          const permitApplication = await fetchPermitApplication(permitApplicationId)
-          setCurrentPermitApplication(permitApplication)
+          await fetchPermitApplication(permitApplicationId)
+          setCurrentPermitApplication(permitApplicationId)
         }
       } catch (e) {
         console.error(e)
