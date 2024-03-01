@@ -638,6 +638,7 @@ const options = {
           fetchPermitApplication: "Something went wrong fetching the permit application",
           fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
           fetchActivityOptions: "Something went wrong fetching the activity options",
+          workTypeNotFound: "Work type not found",
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",

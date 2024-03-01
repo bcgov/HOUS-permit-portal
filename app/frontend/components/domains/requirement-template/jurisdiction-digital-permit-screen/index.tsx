@@ -1,7 +1,8 @@
 import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, TabProps, Tabs, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
@@ -39,13 +40,34 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-  const { activityOptions, error: permitTypeOptionsError } = useActivityOptions({
+  const { activityOptions, error: activityOptionsError } = useActivityOptions({
     customErrorMessage: t("errors.fetchWorkTypeOptions"),
   })
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activityId = searchParams.get("activityId")
+
+  const navigateToActivityTab = (activityId: string, replace?: boolean) => {
+    setSearchParams({ activityId }, { replace })
+  }
+  useEffect(() => {
+    if (!activityOptions || activityOptionsError || activityId) {
+      return
+    }
+
+    const firstActivityId = activityOptions[0]?.value?.id
+
+    navigateToActivityTab(firstActivityId, true)
+  }, [activityId, activityOptions, activityOptionsError])
 
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
-  if (permitTypeOptionsError) return <ErrorScreen error={permitTypeOptionsError} />
-  if (!activityOptions) return <LoadingScreen />
+  if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
+  if (!activityOptions || (activityOptions && !activityId)) return <LoadingScreen />
+
+  const selectedTabIndex = activityOptions.findIndex((option) => option.value.id === activityId)
+
+  if (selectedTabIndex === -1) {
+    return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
+  }
 
   return (
     <Container maxW="container.lg" w="full" p={8} as="main">
@@ -56,21 +78,25 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
         <Text color="text.secondary" my={6}>
           {t("digitalBuildingPermits.index.selectPermit")}
         </Text>
-        <Tabs orientation="vertical" as="article" isLazy>
+        <Tabs orientation="vertical" as="article" index={selectedTabIndex} isLazy>
           <TabList borderLeft="none" w="200px">
             <Text as="h2" {...sharedTabTextStyles} fontWeight={700}>
               {t("digitalBuildingPermits.index.workType")}
             </Text>
-            {activityOptions.map((permitTypeOption) => (
-              <Tab key={permitTypeOption.value.id} {...tabStyles}>
-                {permitTypeOption.label}
+            {activityOptions.map((activityOption) => (
+              <Tab
+                key={activityOption.value.id}
+                onClick={() => navigateToActivityTab(activityOption.value.id)}
+                {...tabStyles}
+              >
+                {activityOption.label}
               </Tab>
             ))}
           </TabList>
           <TabPanels flex={1}>
-            {activityOptions.map((permitTypeOption) => (
-              <TabPanel key={permitTypeOption.value.id} w="100%">
-                <DigitalBuildingPermitsList activityId={permitTypeOption.value.id} />
+            {activityOptions.map((activityOption) => (
+              <TabPanel key={activityOption.value.id} w="100%">
+                <DigitalBuildingPermitsList activityId={activityOption.value.id} />
               </TabPanel>
             ))}
           </TabPanels>
