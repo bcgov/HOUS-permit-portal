@@ -203,6 +203,7 @@ RSpec.describe Requirement, type: :model do
           widget: {
             type: "input",
           },
+          values: options,
         }
 
         expect(form_json).to eq(expected_form_json)
@@ -287,17 +288,18 @@ RSpec.describe Requirement, type: :model do
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|multiOptionSelectRequirement",
-          type: "select",
           input: true,
-          multiple: true,
+          inputType: "checkbox",
+          key: "#{requirement.requirement_block.key}|multiOptionSelectRequirement",
           label: "Multi option select Requirement",
+          optionsLabelPosition: "right",
+          tableView: false,
+          type: "selectboxes",
           widget: {
-            type: "choicesjs",
+            type: "input",
           },
-          data: {
-            values: select_options,
-          },
+          optionsLabelPosition: "right",
+          values: select_options,
         }
 
         expect(form_json).to eq(expected_form_json)
