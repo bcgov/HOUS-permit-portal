@@ -318,7 +318,7 @@ const options = {
             number: "Number",
             textArea: "Text Area",
             radio: "Select Radio Options",
-            multiSelectCheckbox: "Multi-Select Checkboxes",
+            multiOptionSelect: "Multi-Select Checkboxes",
             select: "Single Select Dropdown",
             signature: "Signature",
             generalContact: "General Contact",

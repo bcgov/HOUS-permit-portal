@@ -87,20 +87,22 @@ export enum ETagType {
 
 export enum ERequirementType {
   text = "text",
-  phone = "phone",
-  email = "email",
-  address = "address",
-  date = "date",
   number = "number",
-  textArea = "textarea",
-  radio = "radio",
   checkbox = "checkbox",
   select = "select",
+  multiOptionSelect = "multi_option_select",
+  date = "date",
   file = "file",
-  signature = "signature",
-  generalContact = "general_contact",
+  phone = "phone",
+  email = "email",
+  radio = "radio",
+  address = "address",
   bcaddress = "bcaddress",
+  signature = "signature",
+  textArea = "textarea",
   energyStepCode = "energy_step_code",
+  generalContact = "general_contact",
+  professionalContact = "professional_contact",
 }
 
 export enum ENumberUnit {
