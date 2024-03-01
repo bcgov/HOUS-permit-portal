@@ -764,6 +764,8 @@ const options = {
             workType: "Work Type",
             manageButton: "Manage",
             lastUpdated: "Last updated",
+            emptyPermitsText:
+              "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
           },
         },
         site: {

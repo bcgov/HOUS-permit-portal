@@ -66,7 +66,7 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
 
   const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
 
-  if (selectedTabIndex === -1) {
+  if (enabledActivityOptions.length === 0 || selectedTabIndex === -1) {
     return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
   }
 
@@ -96,7 +96,7 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
           </TabList>
           <TabPanels flex={1}>
             {enabledActivityOptions.map((activityOption) => (
-              <TabPanel key={activityOption.value.id} w="100%">
+              <TabPanel key={activityOption.value.id} w="100%" pt={0}>
                 <DigitalBuildingPermitsList activityId={activityOption.value.id} />
               </TabPanel>
             ))}

@@ -24,7 +24,12 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
   if (!hasLoaded) return <LoadingScreen />
 
   return (
-    <Stack as="section" w="full" px={6}>
+    <Stack as="section" w={"min(100%, 866px)"} px={6}>
+      {templateVersions.length === 0 && (
+        <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"} alignSelf={"center"}>
+          {t("digitalBuildingPermits.index.emptyPermitsText")}
+        </Text>
+      )}
       {templateVersions.map((templateVersion) => {
         return (
           <Flex
@@ -32,7 +37,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
             border="1px solid"
             borderColor="border.light"
             borderRadius="lg"
-            w={"min(100%, 866px)"}
+            w="full"
             as="section"
             p={6}
           >
