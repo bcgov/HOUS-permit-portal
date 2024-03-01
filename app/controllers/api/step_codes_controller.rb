@@ -17,7 +17,7 @@ class Api::StepCodesController < Api::ApplicationController
 
     render_success @step_code, "step_code.create_success", { blueprint: StepCodeBlueprint }
   rescue StandardError => e
-    render_error "step_code.create_error", message_opts: { error_message: e }
+    render_error "step_code.create_error", { message_opts: { error_message: e.message } }, e
   end
 
   # DELETE /api/step_codes/:id
