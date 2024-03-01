@@ -33,10 +33,11 @@ interface IRequirementFormProps {
   permitApplication?: IPermitApplication
   onCompletedSectionsChange?: (sections: any) => void
   formRef: any
+  triggerSave: () => void
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedSectionsChange, formRef }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedSectionsChange, formRef, triggerSave }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson } =
       permitApplication
     const isMounted = useMountStatus()
@@ -138,12 +139,13 @@ export const RequirementForm = observer(
     }
 
     useEffect(() => {
-      const handleCustomEvent = (event) => {
+      const handleOpenStepCode = (event) => {
+        triggerSave()
         navigate("step-code", { state: { background: location } })
       }
-      document.addEventListener("openStepCode", handleCustomEvent)
+      document.addEventListener("openStepCode", handleOpenStepCode)
       return () => {
-        document.removeEventListener("openStepCode", handleCustomEvent)
+        document.removeEventListener("openStepCode", handleOpenStepCode)
       }
     }, [])
 

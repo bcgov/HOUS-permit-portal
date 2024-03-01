@@ -187,6 +187,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedSectionsChange={setCompletedSections}
+              triggerSave={handleSave}
             />
           </Flex>
         )}

@@ -89,11 +89,15 @@ class Requirement < ApplicationRecord
       },
     },
     multi_option_select: {
-      type: "select",
-      multiple: true,
-      widget: {
-        type: "choicesjs",
-      },
+      type: "selectboxes",
+      inputType: "checkbox",
+      optionsLabelPosition: "right",
+      tableView: false,
+      # type: "select",
+      # multiple: true,
+      # widget: {
+      #   type: "choicesjs",
+      # },
     },
     energy_step_code: {
       type: "button",
@@ -148,9 +152,9 @@ class Requirement < ApplicationRecord
 
     json.merge!({ validate: { required: true } }) if required
 
-    if input_type_select? || input_type_multi_option_select?
-      json.merge!({ data: { values: input_options["value_options"] } })
-    end
+    json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
+
+    json.merge!({ values: input_options["value_options"] }) if input_type_checkbox? || input_type_multi_option_select?
 
     json.merge!({ computedCompliance: input_options["computed_compliance"] }) if computed_compliance?
 
