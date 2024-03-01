@@ -3,6 +3,10 @@ import { GridRowHeader } from "./row-header"
 
 export const GridData = styled(GridRowHeader)
 GridData.defaultProps = {
-  borderRightWidth: 1,
   alignItems: "center",
+  py: 2.5,
+  px: 4,
+  borderColor: "borders.light",
+  borderTopWidth: 1,
+  borderLeftWidth: 1,
 }

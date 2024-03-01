@@ -175,8 +175,28 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_06_190337) do
     t.uuid "requirement_block_id", null: false
     t.integer "position"
     t.boolean "elective", default: false
-    t.index ["requirement_block_id"],
-            name: "index_requirements_on_requirement_block_id"
+    t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "step_code_checklist_id", null: false
+    t.jsonb "roof_ceilings_lines", default: [{}]
+    t.jsonb "above_grade_walls_lines", default: [{}]
+    t.jsonb "framings_lines", default: [{}]
+    t.jsonb "unheated_floors_lines", default: [{}]
+    t.jsonb "below_grade_walls_lines", default: [{}]
+    t.jsonb "slabs_lines", default: [{}]
+    t.jsonb "windows_glazed_doors", default: {"lines"=>[{}], "performance_type"=>"usi"}
+    t.jsonb "doors_lines", default: [{"performance_type"=>"rsi"}]
+    t.jsonb "airtightness", default: {}
+    t.jsonb "space_heating_cooling_lines", default: [{"variant"=>"principal"}, {"variant"=>"secondary"}]
+    t.jsonb "hot_water_lines", default: [{"performance_type"=>"ef"}]
+    t.jsonb "ventilation_lines", default: [{}]
+    t.jsonb "other_lines", default: [{}]
+    t.jsonb "fossil_fuels", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_checklist_id"], name: "idx_on_step_code_checklist_id_f0fc711627"
   end
 
   create_table "step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -409,6 +429,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_06_190337) do
   add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
   add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "step_code_building_characteristics_summaries", "step_code_checklists"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"

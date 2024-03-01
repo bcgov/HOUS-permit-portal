@@ -3,7 +3,7 @@ import { Plus, X } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React, { useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { requestPresignedUrl, uploadFileInChunks } from "../../../utils/uploads"
 import { FileFormControl, NumberFormControl } from "../../shared/form/input-form-control"
@@ -17,8 +17,6 @@ export const H2KImport = function StepCodeH2kImport() {
 
   const [isUploading, setIsUploading] = useState<Record<number, boolean>>({})
   const areAllUploaded = Object.values(isUploading).every((loading) => loading === false)
-
-  const navigate = useNavigate()
 
   const dataEntryAttributes = {
     districtEnergyEf: null,
