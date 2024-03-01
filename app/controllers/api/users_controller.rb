@@ -30,12 +30,12 @@ class Api::UsersController < Api::ApplicationController
     end
 
     render_success(@user, "user.update_success")
-  rescue ActiveRecord::RecordInvalid
+  rescue ActiveRecord::RecordInvalid => e
     # Handle any ActiveRecord exceptions here
     if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
-      render_error "user.update_password_error" and return
+      render_error "user.update_password_error", {}, e and return
     end
-    render_error "user.update_error"
+    render_error "user.update_error", {}, e
   end
 
   def destroy

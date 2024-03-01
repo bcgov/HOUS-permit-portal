@@ -93,7 +93,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
-    <Box as="main" overflow="auto" h="full">
+    <Box as="main" overflow="hidden" h="full">
       <Flex
         id="permitHeader"
         position="sticky"
