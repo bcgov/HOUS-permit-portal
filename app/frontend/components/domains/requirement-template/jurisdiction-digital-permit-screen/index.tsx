@@ -40,30 +40,31 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
-  const { activityOptions, error: activityOptionsError } = useActivityOptions({
+  const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
     customErrorMessage: t("errors.fetchWorkTypeOptions"),
   })
   const [searchParams, setSearchParams] = useSearchParams()
+  const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
   const activityId = searchParams.get("activityId")
 
   const navigateToActivityTab = (activityId: string, replace?: boolean) => {
     setSearchParams({ activityId }, { replace })
   }
   useEffect(() => {
-    if (!activityOptions || activityOptionsError || activityId) {
+    if (!enabledActivityOptions || activityOptionsError || activityId) {
       return
     }
 
-    const firstActivityId = activityOptions[0]?.value?.id
+    const firstActivityId = enabledActivityOptions[0]?.value?.id
 
     navigateToActivityTab(firstActivityId, true)
-  }, [activityId, activityOptions, activityOptionsError])
+  }, [activityId, enabledActivityOptions, activityOptionsError])
 
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
-  if (!activityOptions || (activityOptions && !activityId)) return <LoadingScreen />
+  if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
 
-  const selectedTabIndex = activityOptions.findIndex((option) => option.value.id === activityId)
+  const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
 
   if (selectedTabIndex === -1) {
     return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
@@ -83,7 +84,7 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
             <Text as="h2" {...sharedTabTextStyles} fontWeight={700}>
               {t("digitalBuildingPermits.index.workType")}
             </Text>
-            {activityOptions.map((activityOption) => (
+            {enabledActivityOptions.map((activityOption) => (
               <Tab
                 key={activityOption.value.id}
                 onClick={() => navigateToActivityTab(activityOption.value.id)}
@@ -94,7 +95,7 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
             ))}
           </TabList>
           <TabPanels flex={1}>
-            {activityOptions.map((activityOption) => (
+            {enabledActivityOptions.map((activityOption) => (
               <TabPanel key={activityOption.value.id} w="100%">
                 <DigitalBuildingPermitsList activityId={activityOption.value.id} />
               </TabPanel>
