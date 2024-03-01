@@ -26,7 +26,7 @@ export const FlashMessage = observer(() => {
   return null
 })
 
-const CustomToast = ({ title, description, status }: ToastProps) => {
+export const CustomToast = ({ title, description, status }: ToastProps) => {
   const iconMap = {
     success: <CheckCircle size={20} />,
     warning: <Warning size={20} />,

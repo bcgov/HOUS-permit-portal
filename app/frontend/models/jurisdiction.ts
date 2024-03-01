@@ -4,7 +4,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { EUserSortFields } from "../types/enums"
 import { IContact, TLatLngTuple } from "../types/types"
-import { toCamelCase } from "../utils/utility-funcitons"
+import { toCamelCase } from "../utils/utility-functions"
 import { PermitApplicationModel } from "./permit-application"
 import { UserModel } from "./user"
 
@@ -45,7 +45,6 @@ export const JurisdictionModel = types
       const sortByCreatedAt = R.sort<IContact>((a, b) => (a.createdAt as number) - (b.createdAt as number))
 
       return sortByCreatedAt(self.contacts)[0]
-      // return self.contacts[0]
     },
   }))
   .actions((self) => ({

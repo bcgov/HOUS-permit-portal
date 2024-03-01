@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
+ActiveRecord::Schema[7.1].define(version: 2024_02_29_183821) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -50,6 +50,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "department"
+    t.string "organization"
+    t.string "cell_number"
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
@@ -86,6 +88,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
     t.jsonb "map_position"
     t.string "prefix", null: false
     t.string "submission_email"
+    t.integer "energy_step_required"
+    t.integer "zero_carbon_step_required"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -125,6 +129,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
     t.string "number"
     t.datetime "submitted_at"
     t.datetime "signed_off_at"
+    t.string "nickname"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -223,6 +228,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
             name: "index_requirements_on_requirement_block_id"
   end
 
+  create_table "step_code_building_characteristics_summaries",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_checklist_id", null: false
+    t.jsonb "roof_ceilings_lines", default: [{ "rsi" => nil, "details" => nil }]
+    t.jsonb "windows_glazed_doors_lines",
+            default: [
+              { "shgc" => nil, "details" => nil, "insulation_type" => "usi" }
+            ]
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_checklist_id"],
+            name: "idx_on_step_code_checklist_id_f0fc711627"
+  end
+
   create_table "step_code_checklists",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -231,6 +252,36 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
     t.integer "stage", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "building_type"
+    t.integer "compliance_path"
+    t.text "completed_by"
+    t.datetime "completed_at"
+    t.text "completed_by_company"
+    t.text "completed_by_phone"
+    t.text "completed_by_address"
+    t.text "completed_by_email"
+    t.text "completed_by_service_organization"
+    t.text "energy_advisor_id"
+    t.boolean "site_visit_completed"
+    t.boolean "site_visit_date"
+    t.integer "testing_pressure"
+    t.integer "testing_pressure_direction"
+    t.integer "testing_result_type"
+    t.decimal "testing_result"
+    t.text "tester_name"
+    t.text "tester_company_name"
+    t.text "tester_email"
+    t.text "tester_phone"
+    t.text "home_state"
+    t.integer "compliance_status"
+    t.text "notes"
+    t.decimal "hvac_consumption"
+    t.decimal "dwh_heating_consumption"
+    t.decimal "ref_hvac_consumption"
+    t.decimal "ref_dwh_heating_consumption"
+    t.integer "epc_calculation_airtightness"
+    t.integer "epc_calculation_testing_target_type"
+    t.boolean "epc_calculation_compliance"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 
@@ -290,11 +341,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.uuid "submitter_id"
     t.uuid "permit_application_id"
     t.index ["permit_application_id"],
             name: "index_step_codes_on_permit_application_id"
-    t.index ["submitter_id"], name: "index_step_codes_on_submitter_id"
   end
 
   create_table "supporting_documents",
@@ -487,10 +536,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_22_203547) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "step_code_building_characteristics_summaries",
+                  "step_code_checklists"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"
-  add_foreign_key "step_codes", "users", column: "submitter_id"
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"

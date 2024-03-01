@@ -1,5 +1,14 @@
+import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
-import { ENumberUnit, ERequirementType, ESortDirection } from "./enums"
+import {
+  ENumberUnit,
+  ERequirementType,
+  ESortDirection,
+  EStepCodeAirtightnessValue,
+  EStepCodeBuildingType,
+  EStepCodeCompliancePath,
+  EStepCodeEPCTestingTargetType,
+} from "./enums"
 
 export type TLatLngTuple = [number, number]
 
@@ -114,4 +123,17 @@ export interface IDenormalizedTemplate {
   permitType: IPermitType
   activity: IActivity
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
+}
+export interface IErrorsBoxData {
+  id: string
+  label: string
+  class: string
+}
+
+export interface IStepCodeSelectOptions {
+  compliancePaths: EStepCodeCompliancePath[]
+  airtightnessValues: EStepCodeAirtightnessValue[]
+  epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
+  permitApplications: Partial<IPermitApplication>[]
+  buildingTypes: EStepCodeBuildingType[]
 }

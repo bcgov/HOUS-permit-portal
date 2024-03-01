@@ -10,7 +10,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields } from "../types/enums"
-import { toCamelCase } from "../utils/utility-funcitons"
+import { toCamelCase } from "../utils/utility-functions"
 
 export const RequirementTemplateStoreModel = types
   .compose(

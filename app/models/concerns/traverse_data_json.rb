@@ -4,6 +4,8 @@ module TraverseDataJson
   #used to take a hash, deeply search and flatten the results into a file array
   #block expects an array to be returned
   def find_file_fields_and_transform!(hash, files, &block)
+    return {} unless hash.present?
+
     hash.each do |key, value|
       if key.ends_with?("_file")
         files.concat(block.call(key, value)) if value.present?
@@ -26,6 +28,8 @@ module TraverseDataJson
   #used to take a hash, deeply search and map results back into a key hash
   #block expects a value to be there
   def find_file_fields_and_transform_hash!(hash, files_hash, &block)
+    return {} unless hash.present?
+
     hash.each do |key, value|
       if key.ends_with?("_file")
         files_hash[key] = block.call(key, value) if value.present?

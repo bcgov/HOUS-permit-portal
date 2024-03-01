@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Flex,
-  HStack,
   Heading,
   Modal,
   ModalBody,
@@ -17,13 +16,17 @@ import {
 import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
+import { format } from "date-fns"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
-import { handleScrollToTop } from "../../../utils/utility-funcitons"
+import { handleScrollToTop } from "../../../utils/utility-functions"
+import { ErrorsBox } from "../../domains/permit-application/errors-box"
+import { CustomToast } from "../base/flash-message"
 import { Form } from "../chefs"
 
 interface IRequirementFormProps {
@@ -39,11 +42,12 @@ export const RequirementForm = observer(
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
+    const location = useLocation()
 
     const boxRef = useRef<HTMLDivElement>(null)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
-
+    const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
 
     const togglePanelCollapse = () => {
@@ -133,10 +137,31 @@ export const RequirementForm = observer(
       }
     }
 
+    useEffect(() => {
+      const handleCustomEvent = (event) => {
+        navigate("step-code", { state: { background: location } })
+      }
+      document.addEventListener("openStepCode", handleCustomEvent)
+      return () => {
+        document.removeEventListener("openStepCode", handleCustomEvent)
+      }
+    }, [])
+
+    const onSubmit = async (submission: any) => {
+      if (await permitApplication.submit({ submissionData: submission })) {
+        navigate("/permit-applications/sucessful-submission")
+      }
+    }
+
     const onBlur = (containerComponent) => {
       if (onCompletedSectionsChange) {
         onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
       }
+      setErrorBoxData(
+        containerComponent.root.errors.map((error) => {
+          return { label: error.component.label, id: error.component.id, class: error.component.class }
+        })
+      )
     }
 
     const formReady = (rootComponent) => {
@@ -148,29 +173,39 @@ export const RequirementForm = observer(
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
+    const scrollToTop = () => {
+      handleScrollToTop("outerScrollContainer")
+      handleScrollToTop("permitApplicationFieldsContainer")
+    }
+
     return (
       <>
-        <VStack position="relative" left="378px" right={0} w="calc(100% - 378px)" h={"full"}>
-          <HStack spacing={10} w={"full"} h={"full"} alignItems={"flex-start"} pr={8}>
-            <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} ref={boxRef}>
-              <Form
-                form={formattedFormJson}
-                formReady={formReady}
-                submission={submissionData}
-                onSubmit={onFormSubmit}
-                options={permitApplication ? {} : { readOnly: true }}
-                onBlur={onBlur}
-              />
-            </Box>
-            <VStack position="fixed" bottom={8} right={12} w="136px" zIndex={11} gap={4}>
-              <Button w="full" onClick={togglePanelCollapse} variant="greyButton">
-                {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
-              </Button>
-              <Button w="full" onClick={handleScrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
-                {t("ui.toTop")}
-              </Button>
-            </VStack>
-          </HStack>
+        <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} mb={20} ref={boxRef}>
+          <ErrorsBox errorBox={errorBoxData} />
+          {permitApplication?.submittedAt && (
+            <CustomToast
+              description={t("permitApplication.show.wasSubmitted", {
+                date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
+              })}
+              status="info"
+            />
+          )}
+          <Form
+            form={formattedFormJson}
+            formReady={formReady}
+            submission={submissionData}
+            onSubmit={onFormSubmit}
+            options={permitApplication ? {} : { readOnly: true }}
+            onBlur={onBlur}
+          />
+        </Box>
+        <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
+          <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
+            {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
+          </Button>
+          <Button w="136px" onClick={scrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
+            {t("ui.toTop")}
+          </Button>
         </VStack>
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">
@@ -205,7 +240,6 @@ export const RequirementForm = observer(
                   </Flex>
                 </Flex>
               </ModalBody>
-              {/* Add ModalBody, ModalFooter or any other content you need here */}
             </ModalContent>
           </Modal>
         )}

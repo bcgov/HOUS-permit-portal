@@ -74,6 +74,9 @@ export const Button = {
         _hover: { bg: "greys.grey02", borderColor: "border.base" },
       },
     },
+    ghost: {
+      _hover: { bg: "lighten.100", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
+    },
     link: {
       color: "text.link",
       fontWeight: "normal",

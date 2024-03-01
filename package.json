@@ -65,7 +65,7 @@
     "rc-pagination": "^4.0.4",
     "react-datepicker": "^6.1.0",
     "react-helmet": "^6.1.0",
-    "react-hook-form": "^7.48.2",
+    "react-hook-form": "^7.50.1",
     "react-i18next": "^13.5.0",
     "react-leaflet": "^4.2.1",
     "react-password-strength-bar": "^0.4.1",

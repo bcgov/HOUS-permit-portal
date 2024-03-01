@@ -7,6 +7,7 @@ import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
+import { StepCodeModel } from "./step-code"
 import { UserModel } from "./user"
 
 export const PermitApplicationModel = types
@@ -29,6 +30,7 @@ export const PermitApplicationModel = types
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
     updatedAt: types.Date,
+    stepCode: types.maybeNull(types.reference(StepCodeModel)),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -37,7 +39,7 @@ export const PermitApplicationModel = types
       return self.jurisdiction.name
     },
     get permitTypeAndActivity() {
-      return `${self.activity.name} ${self.permitType.name}`.trim()
+      return `${self.activity.name} - ${self.permitType.name}`.trim()
     },
     get flattenedBlocks() {
       return self.formJson.components
@@ -57,6 +59,9 @@ export const PermitApplicationModel = types
     blockKey(sectionId, blockId) {
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
+    get isSubmitted() {
+      return self.status === EPermitApplicationStatus.submitted
+    },
   }))
   .views((self) => ({
     indexOfBlockId: (blockId: string) => {
@@ -67,6 +72,43 @@ export const PermitApplicationModel = types
     },
     get blockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
+    },
+    get contacts() {
+      const blockIdToTitleMapping = R.pipe(
+        R.prop("components"), // Access the top-level components array
+        R.chain(R.prop("components")), // Flatten nested components into a single array
+        R.reduce((acc, { id, title }) => ({ ...acc, [id]: title }), {}) // Create an ID to title mapping
+      )(self.formJson)
+
+      // Convert each section's object into an array of [key, value] pairs
+      const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
+
+      // Flatten one level of arrays to get a single array of [key, value] pairs
+      const allFields = R.chain(R.identity, sectionsPairs)
+
+      // Group the fields by block identifier, e.g., "section1|block1", to aggregate all related fields together
+      const groupedByBlock = R.groupBy(([key, _]) => key.split("|").slice(0, 2).join("|"), allFields)
+
+      // Map over each block, obtaining ID and transforming them into the desired Contact object structure
+      const unfilteredContacts = R.keys(groupedByBlock).map((blockFieldsKey) => {
+        const keySplit = blockFieldsKey.split("|RB")
+        if (keySplit.length <= 1) return
+
+        const blockId = keySplit[keySplit.length - 1]
+        const blockObject = R.fromPairs(groupedByBlock[blockFieldsKey])
+        return {
+          id: blockId,
+          address: blockObject[R.keys(blockObject).find((key: string) => key.includes("address"))!],
+          cellNumber: blockObject[R.keys(blockObject).find((key: string) => key.includes("cell"))!],
+          email: blockObject[R.keys(blockObject).find((key: string) => key.includes("email"))!],
+          name: blockObject[R.keys(blockObject).find((key: string) => key.includes("individual_name"))!],
+          phone: blockObject[R.keys(blockObject).find((key: string) => key.includes("phone"))!],
+          title: blockIdToTitleMapping[blockId],
+        }
+      })
+
+      // Filter out any contacts that have empty values for all fields
+      return unfilteredContacts.filter((contact) => R.values(R.omit(["id", "title"], contact)).some((value) => value))
     },
   }))
   .actions((self) => ({

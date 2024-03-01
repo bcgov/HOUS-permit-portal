@@ -18,12 +18,14 @@ import {
 } from "@chakra-ui/react"
 import { List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { StepCodeNavLinks } from "../step-code/nav-links"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -38,8 +40,19 @@ function isTemplateVersionPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isPermitApplicationEditPath(path: string): boolean {
+  const regex = /^\/permit-applications\/([a-f\d-]+)\/edit.*$/
+
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
-  const matchers: Array<(path: string) => boolean> = [(path) => path === "/", isTemplateEditPath, isTemplateVersionPath]
+  const matchers: Array<(path: string) => boolean> = [
+    (path) => path === "/",
+    isTemplateEditPath,
+    isTemplateVersionPath,
+    isPermitApplicationEditPath,
+  ]
 
   return matchers.some((matcher) => matcher(path))
 }
@@ -55,16 +68,22 @@ export const NavBar = observer(() => {
   const location = useLocation()
   const path = location.pathname
 
+  const isStepCode = R.test(/step-code/, path)
+
   return (
     <>
       <Box
         as="nav"
-        w="full"
+        id="mainNav"
+        position="sticky"
         top={0}
+        w="full"
         bg={currentUser?.isAdmin ? "theme.blue" : "greys.white"}
         color={currentUser?.isAdmin ? "greys.white" : "theme.blue"}
         zIndex={10}
-        shadow="md"
+        borderBottomWidth={2}
+        borderColor="border.light"
+        shadow="elevations.elevation01"
       >
         <Container maxW="container.lg">
           <Flex align="center" gap={2}>
@@ -75,16 +94,22 @@ export const NavBar = observer(() => {
               />
             </RouterLink>
             <Show above="md">
-              <Heading as="h3" fontSize="2xl" fontWeight="normal">
-                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
-              </Heading>
+              {isStepCode ? (
+                <Heading as="h3" fontSize="md" color="text.primary" fontWeight="bold">
+                  {t("stepCode.title")}
+                </Heading>
+              ) : (
+                <Heading as="h3" fontSize="2xl" fontWeight="normal">
+                  {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+                </Heading>
+              )}
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}
               </Text>
             </Show>
             <Spacer />
             <HStack gap={3}>
-              {currentUser?.isSubmitter && <NavBarSearch />}
+              {!isStepCode && currentUser?.isSubmitter && <NavBarSearch />}
               {currentUser?.jurisdiction && <Text color="greys.white">{currentUser.jurisdiction.name}</Text>}
               {currentUser?.isReviewer ||
                 currentUser?.isReviewManager ||
@@ -93,7 +118,8 @@ export const NavBar = observer(() => {
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
-              <NavBarMenu isAdmin={currentUser?.isAdmin} />
+              {!isStepCode && <NavBarMenu isAdmin={currentUser?.isAdmin} />}
+              {isStepCode && <StepCodeNavLinks />}
             </HStack>
           </Flex>
         </Container>

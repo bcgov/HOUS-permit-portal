@@ -1,7 +1,7 @@
 class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
-  searchkick searchable: %i[number nickname permit_classifications submitter status],
-             word_start: %i[number nickname permit_classifications submitter status]
+  searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
+             word_start: %i[number nickname full_address permit_classifications submitter status]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
@@ -11,6 +11,7 @@ class PermitApplication < ApplicationRecord
 
   #The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
+  has_one :step_code
 
   has_many :supporting_documents, dependent: :destroy
   accepts_nested_attributes_for :supporting_documents, allow_destroy: true
@@ -18,18 +19,25 @@ class PermitApplication < ApplicationRecord
   # Custom validation
 
   validate :submitter_must_have_role
+  validates :nickname, presence: true
+  validates :number, presence: true
+
   enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
 
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
+  delegate :energy_step_required, to: :jurisdiction, allow_nil: true
+  delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
 
-  before_create :assign_unique_number
+  before_validation :assign_default_nickname, on: :create
+  before_validation :assign_unique_number, on: :create
   before_save :set_submitted_at, if: :status_changed?
 
   def search_data
     {
       number: number,
+      nickname: nickname,
       nickname: nickname,
       permit_classifications: "#{permit_type.name} #{activity.name}",
       submitter: "#{submitter.name} #{submitter.email}",
@@ -40,11 +48,6 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  #stubs for UI
-  def nickname
-    "#{jurisdiction_name}: #{full_address || pid || pin || id}"
-  end
-
   def form_json
     #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
     #need to look up jurisidcitional version and enablement as well
@@ -53,6 +56,10 @@ class PermitApplication < ApplicationRecord
 
   def number_prefix
     jurisdiction.prefix
+  end
+
+  def assign_default_nickname
+    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number
@@ -99,7 +106,7 @@ class PermitApplication < ApplicationRecord
     end
 
     # Assign the new number to the permit application
-    self.number = new_number
+    self.number = new_number if self.number.blank?
     return new_number
   end
 

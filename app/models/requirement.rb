@@ -18,6 +18,7 @@ class Requirement < ApplicationRecord
          address: 13,
          bcaddress: 14,
          signature: 15,
+         energy_step_code: 16,
        },
        _prefix: true
 
@@ -93,6 +94,13 @@ class Requirement < ApplicationRecord
       widget: {
         type: "choicesjs",
       },
+    },
+    energy_step_code: {
+      type: "button",
+      action: "custom",
+      title: I18n.t("formio.requirement_template.energy_step_code"),
+      label: I18n.t("formio.requirement_template.energy_step_code"),
+      custom: "document.dispatchEvent(new Event('openStepCode'));",
     },
   }
 
