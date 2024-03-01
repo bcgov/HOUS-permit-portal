@@ -54,7 +54,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
   const permitTypeIdWatch = watch("permitTypeId")
   const pidWatch = watch("pid")
-  const siteWatch = watch("site")
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
