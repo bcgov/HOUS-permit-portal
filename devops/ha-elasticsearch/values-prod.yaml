@@ -2,11 +2,11 @@
 elasticsearch:
   master:
     replicaCount: 3
-    heapSize: "256m"
+    heapSize: "512m"
     resources:
       requests:
         cpu: "20m"
-        memory: "256Mi"
+        memory: "512Mi"
       limits:
         cpu: "150m"
         memory: "1024Mi"

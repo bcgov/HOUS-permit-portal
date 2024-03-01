@@ -26,6 +26,13 @@ elasticsearch:
       enabled: false
     containerSecurityContext:
       enabled: false
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 300
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 5
   data:
     replicaCount: 1
     networkPolicy:
@@ -48,6 +55,13 @@ elasticsearch:
       enabled: false
     containerSecurityContext:
       enabled: false
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 300
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 5
   coordinating:
     replicaCount: 0
   ingest:
