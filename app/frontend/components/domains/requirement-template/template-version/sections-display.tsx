@@ -1,9 +1,9 @@
 import { Box, HStack, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { formScrollToId } from "."
 import { IDenormalizedRequirementTemplateSection } from "../../../../types/types"
 import { RequirementBlockAccordion } from "../../requirements-library/requirement-block-accordion"
+import { formScrollToId } from "./template-version-screen"
 
 interface IProps {
   shouldCollapseAll?: boolean

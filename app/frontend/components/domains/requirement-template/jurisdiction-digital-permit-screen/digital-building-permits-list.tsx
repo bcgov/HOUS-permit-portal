@@ -57,7 +57,14 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
               <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
             </Stack>
 
-            <Button as={RouterLink} variant={"primary"} ml={4} textDecor={"none"} alignSelf={"center"} isDisabled>
+            <Button
+              to={`/digital-building-permits/${templateVersion.id}/edit`}
+              as={RouterLink}
+              variant={"primary"}
+              ml={4}
+              textDecor={"none"}
+              alignSelf={"center"}
+            >
               {t("ui.manage")}
             </Button>
           </Flex>

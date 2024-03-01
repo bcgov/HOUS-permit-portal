@@ -29,7 +29,8 @@ import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { JurisdictionDigitalPermitScreen } from "../requirement-template/jurisdiction-digital-permit-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
-import { TemplateVersionScreen } from "../requirement-template/template-version-screen"
+import { JurisdictionEditTemplateVersionScreen } from "../requirement-template/template-version/jurisdiction-edit-template-version-screen"
+import { TemplateVersionScreen } from "../requirement-template/template-version/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { StepCodeForm } from "../step-code"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
@@ -120,6 +121,10 @@ const AppRoutes = observer(() => {
 
   const revireMangaerOnlyRoutes = (
     <>
+      <Route
+        path="/digital-building-permits/:templateVersionId/edit"
+        element={<JurisdictionEditTemplateVersionScreen />}
+      />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
     </>
   )
