@@ -1,5 +1,5 @@
-import { Box, Button, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { Download } from "@phosphor-icons/react"
+import { Box, Center, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { ArrowSquareOut, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -16,7 +16,8 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
-import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
 import { GridHeaders } from "./grid-header"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
@@ -81,20 +82,32 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     </Flex>
                   </SearchGridItem>
                   <SearchGridItem>
-                    {pa.submittedAt && (
+                    {pa.isViewed ? (
+                      <Flex direction="column">
+                        <Text>{format(pa.viewedAt, "yyyy-MM-dd")}</Text>
+                        <Text>{format(pa.viewedAt, "hh:mm")}</Text>
+                      </Flex>
+                    ) : (
+                      <PermitApplicationViewedAtTag permitApplication={pa} />
+                    )}
+                  </SearchGridItem>
+                  <SearchGridItem>
+                    {pa.isSubmitted && (
                       <Flex direction="column">
                         <Text>{format(pa.submittedAt, "yyyy-MM-dd")}</Text>
                         <Text>{format(pa.submittedAt, "hh:mm")}</Text>
                       </Flex>
                     )}
                   </SearchGridItem>
-                  <SearchGridItem>
-                    <PermitApplicationStatusTag permitApplication={pa} />
-                  </SearchGridItem>
-                  <SearchGridItem>
-                    <Button variant="primary" leftIcon={<Download />}>
-                      {t("ui.download")}
-                    </Button>
+                  <SearchGridItem gap={2}>
+                    <IconButton variant="secondary" icon={<Download />} aria-label={"download"} />
+                    <RouterLinkButton
+                      variant="primary"
+                      rightIcon={<ArrowSquareOut />}
+                      to={`/permit-applications/${pa.id}`}
+                    >
+                      {t("ui.view")}
+                    </RouterLinkButton>
                   </SearchGridItem>
                 </Box>
               )

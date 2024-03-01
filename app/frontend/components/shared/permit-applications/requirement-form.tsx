@@ -33,7 +33,7 @@ interface IRequirementFormProps {
   permitApplication?: IPermitApplication
   onCompletedSectionsChange?: (sections: any) => void
   formRef: any
-  triggerSave: () => void
+  triggerSave?: () => void
 }
 
 export const RequirementForm = observer(
@@ -139,8 +139,8 @@ export const RequirementForm = observer(
     }
 
     useEffect(() => {
-      const handleOpenStepCode = (event) => {
-        triggerSave()
+      const handleOpenStepCode = (_event) => {
+        triggerSave?.()
         navigate("step-code", { state: { background: location } })
       }
       document.addEventListener("openStepCode", handleOpenStepCode)
@@ -148,12 +148,6 @@ export const RequirementForm = observer(
         document.removeEventListener("openStepCode", handleOpenStepCode)
       }
     }, [])
-
-    const onSubmit = async (submission: any) => {
-      if (await permitApplication.submit({ submissionData: submission })) {
-        navigate("/permit-applications/sucessful-submission")
-      }
-    }
 
     const onBlur = (containerComponent) => {
       if (onCompletedSectionsChange) {
@@ -182,7 +176,16 @@ export const RequirementForm = observer(
 
     return (
       <>
-        <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} mb={20} ref={boxRef}>
+        <Flex
+          direction="column"
+          as={"section"}
+          flex={1}
+          className={"form-wrapper"}
+          scrollMargin={96}
+          mb={20}
+          gap={8}
+          ref={boxRef}
+        >
           <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.submittedAt && (
             <CustomToast
@@ -200,7 +203,7 @@ export const RequirementForm = observer(
             options={permitApplication ? {} : { readOnly: true }}
             onBlur={onBlur}
           />
-        </Box>
+        </Flex>
         <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
           <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
             {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}

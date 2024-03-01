@@ -6,7 +6,7 @@ import { useSearch } from "../../../hooks/use-search"
 
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EPermitApplicationSortFields } from "../../../types/enums"
+import { EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -36,10 +36,10 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
   useSearch(permitApplicationStore, [])
 
   return (
-    <Flex as="main" direction="column" w="full" bg="greys.white">
+    <Flex as="main" direction="column" w="full" bg="greys.white" flex={1}>
       <BlueTitleBar title={t("permitApplication.indexTitle")} imageSrc={"/images/jurisdiction-bus.svg"} />
       <Container maxW="container.lg" pb={4}>
-        <Flex as="section" direction="column" p={6} gap={6}>
+        <Flex as="section" direction="column" p={6} gap={6} flex={1}>
           <RouterLinkButton
             to="/permit-applications/new"
             variant="primary"
@@ -64,13 +64,13 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
               <SortSelect
                 searchModel={permitApplicationStore}
                 i18nPrefix="permitApplication"
-                sortFields={Object.values(EPermitApplicationSortFields)}
+                sortFields={Object.values(EPermitApplicationSubmitterSortFields)}
               />
             </Flex>
           </Flex>
 
           {isSearching ? (
-            <Flex w="full">
+            <Flex w="full" flex={1}>
               <SharedSpinner h={50} w={50} />
             </Flex>
           ) : (

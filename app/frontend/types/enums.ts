@@ -78,8 +78,25 @@ export enum EPermitApplicationSortFields {
   number = "number",
   permitClassification = "permit_classification",
   submitter = "submitter",
-  submitted_at = "submitted_at",
+  submittedAt = "submitted_at",
+  viewedAt = "viewed_at",
   status = "status",
+}
+
+export enum EPermitApplicationSubmitterSortFields {
+  number = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  submittedAt = "submitted_at",
+  status = "status",
+}
+
+export enum EPermitApplicationReviewerSortFields {
+  number = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  viewedAt = "viewed_at",
+  submittedAt = "submitted_at",
 }
 
 export enum ESortDirection {

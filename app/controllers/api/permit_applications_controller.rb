@@ -21,7 +21,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def show
     authorize @permit_application
+
     render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
+
+    @permit_application.update_viewed_at if current_user.review_staff?
   end
 
   def update

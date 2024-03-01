@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
@@ -66,9 +67,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     navigate("/")
   }
 
-  const handleDownloadApplication = () => {
-    // TODO: APPLICATION DOWNLOAD
-  }
+  const handleDownloadApplication = () => {}
 
   // const onSubmitMetadata = (formValues) => {
   //   currentPermitApplication.update(formValues)
@@ -148,12 +147,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </form>
 
             <Text>{permitTypeAndActivity}</Text>
-            <Text mt={1}>
-              {t("permitApplication.fields.number")}:{" "}
-              <Text as="span" fontWeight={700}>
-                {number}
-              </Text>
-            </Text>
+            <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
         {isSubmitted ? (

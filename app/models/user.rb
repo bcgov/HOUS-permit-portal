@@ -82,6 +82,10 @@ class User < ApplicationRecord
     reviewer? || review_manager? || super_admin?
   end
 
+  def review_staff?
+    reviewer? || review_manager?
+  end
+
   private
 
   def refresh_search_index

@@ -136,6 +136,8 @@ const options = {
           asc: "Ascending",
           desc: "Descending",
           returnHome: "Return to home",
+          copied: "Copied to clipboard",
+          failedToCopy: "failed to copy to clipboard",
         },
         contact: {
           fields: {
@@ -211,12 +213,16 @@ const options = {
           seeBestPracticesLink: "See best practices for",
           ask: "Ask a question",
           pidLabel: "Parcel Identification (PID) No.",
+          // The key "new" appears to break this.
+          notViewed: "New",
+          viewed: "Viewed",
           addressLabel: "Address",
           columns: {
             number: "Application #",
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted At",
+            viewed_at: "Viewed At",
             status: "Status",
           },
           submissionInbox: {
