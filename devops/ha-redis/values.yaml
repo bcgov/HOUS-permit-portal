@@ -4,25 +4,25 @@ STAGE: dev
 redis:
   fullNameOverride: redis-ha
   architecture: replication
+  # Redis only exposed internally to the Openshift cluster
   auth:
-    enabled: true
+    enabled: false
+    sentinel: false
     usePasswordFiles: false # if this is enabeld it will use /opt/bitnami/redis/secrets/redis-password ---> we will instead use /vault/secrets/secrets.env which we have configured to have the password
   image:
     registry: docker.io
     repository: bitnami/redis
     tag: 7.2.4-debian-12-r9
-  serviceAccount:
-    create: false
-    name: "bb18ab-vault"
-  master:
-    extraEnvVars:
-      - name: REDIS_PASSWORD_FILE
-        value: "/vault/secrets/secrets.env"
-      - name: REDIS_MASTER_PASSWORD_FILE
-        value: "/vault/secrets/secrets.env"
+  sentinel:
+    enabled: true
     persistence:
-      enabled: true
-      size: 1Gi
+      enabled: false
+    containerPorts:
+      sentinel: 26379
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
     resources:
       requests:
         memory: "128Mi"
@@ -30,55 +30,24 @@ redis:
       limits:
         memory: "256Mi"
         cpu: "100m"
-    podAnnotations:
-      vault.hashicorp.com/agent-inject: "true"
-      vault.hashicorp.com/agent-inject-secret-secrets.env: "bb18ab-nonprod/dev/redis"
-      vault.hashicorp.com/agent-inject-template-secrets.env: |
-        {{`{{- with secret "bb18ab-nonprod/dev/redis" -}}`}}
-        {{`{{ .Data.data.REDIS_PASSWORD }}`}}
-        {{`{{- end }}`}}
-      vault.hashicorp.com/agent-limits-cpu: 50m
-      vault.hashicorp.com/agent-limits-mem: 100Mi
-      vault.hashicorp.com/agent-pre-populate-only: "true"
-      vault.hashicorp.com/agent-requests-cpu: 10m
-      vault.hashicorp.com/agent-requests-mem: 25Mi
-      vault.hashicorp.com/auth-path: auth/k8s-silver
-      vault.hashicorp.com/namespace: platform-services
-      vault.hashicorp.com/role: bb18ab-nonprod
-    serviceAccount:
-      create: false
-      name: "bb18ab-vault"
-    automountServiceAccountToken: true
-    podSecurityContext:
-      enabled: false
-    containerSecurityContext:
-      enabled: false
+  # don't need this since we are using sentinel, it will only look at replicas
+  # master:
+  #   persistence:
+  #     enabled: true
+  #     size: 1Gi
+  #   resources:
+  #     requests:
+  #       memory: "128Mi"
+  #       cpu: "20m"
+  #     limits:
+  #       memory: "256Mi"
+  #       cpu: "100m"
+  #   podSecurityContext:
+  #     enabled: false
+  #   containerSecurityContext:
+  #     enabled: false
   replica:
     replicaCount: 1
-    extraEnvVars:
-      - name: REDIS_PASSWORD_FILE
-        value: "/vault/secrets/secrets.env"
-      - name: REDIS_MASTER_PASSWORD_FILE
-        value: "/vault/secrets/secrets.env"
-    podAnnotations:
-      vault.hashicorp.com/agent-inject: "true"
-      vault.hashicorp.com/agent-inject-secret-secrets.env: "bb18ab-nonprod/dev/redis"
-      vault.hashicorp.com/agent-inject-template-secrets.env: |
-        {{`{{- with secret "bb18ab-nonprod/dev/redis" -}}`}}
-        {{`{{ .Data.data.REDIS_PASSWORD }}`}}
-        {{`{{- end }}`}}
-      vault.hashicorp.com/agent-limits-cpu: 50m
-      vault.hashicorp.com/agent-limits-mem: 100Mi
-      vault.hashicorp.com/agent-pre-populate-only: "true"
-      vault.hashicorp.com/agent-requests-cpu: 10m
-      vault.hashicorp.com/agent-requests-mem: 25Mi
-      vault.hashicorp.com/auth-path: auth/k8s-silver
-      vault.hashicorp.com/namespace: platform-services
-      vault.hashicorp.com/role: bb18ab-nonprod
-    serviceAccount:
-      create: false
-      name: "bb18ab-vault"
-    automountServiceAccountToken: true
     podSecurityContext:
       enabled: false
     containerSecurityContext:
