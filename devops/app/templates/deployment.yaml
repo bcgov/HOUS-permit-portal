@@ -45,7 +45,7 @@ spec:
     spec:
       containers:
         - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
           ports:
             - containerPort: 3000

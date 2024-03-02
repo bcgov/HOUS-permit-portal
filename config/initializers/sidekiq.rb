@@ -11,8 +11,8 @@ if ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation 
 
     Sidekiq.configure_server do |config|
       config.redis = redis_cfg
-      config.options[:queues] = %w[promote_asset_and_make_derivatives default]
-      config.options[:concurrency] = ENV["SIDEKIQ_CONCURRENCY"].to_i
+      config.queues = %w[promote_asset_and_make_derivatives default]
+      config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
     end
     Sidekiq.configure_client { |config| config.redis = redis_cfg }
 
