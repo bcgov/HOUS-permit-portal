@@ -9,12 +9,6 @@ if ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation 
       role: :master,
     }
 
-    redis_cfg = {
-      url: ENV["REDIS_SENTINEL_MASTER_SET_URL"],
-      sentinels: [{ host: ENV["REDIS_SENTINEL_HOST"], port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) }],
-      role: :master,
-    }
-
     Sidekiq.configure_server { |config| config.redis = redis_cfg }
     Sidekiq.configure_client { |config| config.redis = redis_cfg }
 
