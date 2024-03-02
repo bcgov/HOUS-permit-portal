@@ -15,6 +15,7 @@ redis:
     tag: 7.2.4-debian-12-r9
   sentinel:
     enabled: true
+    masterSet: "redisMasterSet"
     persistence:
       enabled: false
     containerPorts:

@@ -15,12 +15,12 @@ deployments:
         resources:
           requests:
             cpu: 50m
-            memory: 64Mi
+            memory: 128Mi
           limits:
             cpu: 200m
-            memory: 256Mi
+            memory: 512Mi
   - process: worker
-    replicaCount: 1
+    replicaCount: 2
     spec:
       containers:
         includeCommand: true
@@ -30,7 +30,7 @@ deployments:
         resources:
           requests:
             cpu: 50m
-            memory: 64Mi
+            memory: 128Mi
           limits:
             cpu: 200m
-            memory: 256Mi
+            memory: 512Mi
