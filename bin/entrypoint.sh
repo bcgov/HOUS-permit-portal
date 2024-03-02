@@ -4,6 +4,7 @@
 # -u          : a reference to any variable you haven't previously defined cause immediate exit
 # -o pipefail : prevents errors in a pipeline from being masked. If any command in a pipeline fails, 
 #               that return code will be used as the return code of the whole pipeline.
+export SKIP_DEPENDENCY_INITIALIZERS=true
 set -euo pipefail 
 
 # shellcheck disable=SC1091

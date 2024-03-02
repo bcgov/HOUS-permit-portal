@@ -46,7 +46,7 @@ RUN bundle exec bootsnap precompile app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 COPY config/database.yml.docker_precompile_dummy /app/config/database.yml
 # Also add a flag ASSET_PRECOMPILATION that we can use to stub Shrine
-RUN SECRET_KEY_BASE_DUMMY=1 DOCKER_BUILDING=true ./bin/rails assets:precompile
+RUN SECRET_KEY_BASE_DUMMY=1 SKIP_DEPENDENCY_INITIALIZERS=true ./bin/rails assets:precompile
 # RUN rm /app/config/database.yml
 
 # Final stage for app image
