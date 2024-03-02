@@ -9,11 +9,15 @@ if ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation 
       role: :master,
     }
 
-    Sidekiq.configure_server { |config| config.redis = redis_cfg }
+    Sidekiq.configure_server do |config|
+      config.redis = redis_cfg
+      config.options[:queues] = %w[promote_asset_and_make_derivatives default]
+      config.options[:concurrency] = ENV["SIDEKIQ_CONCURRENCY"].to_i
+    end
     Sidekiq.configure_client { |config| config.redis = redis_cfg }
 
     # # Don't load crons in test and dev mode
-    # schedule_file = "config/sidekiq_cron_schedule.yml"
-    # Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file) if File.exist?(schedule_file)
+    schedule_file = "config/sidekiq_cron_schedule.yml"
+    Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file) if File.exist?(schedule_file)
   end
 end

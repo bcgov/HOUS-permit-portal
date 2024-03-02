@@ -28,7 +28,7 @@ deployments:
         includeCommand: true
         args:
           - >-
-            set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec sidekiq -C ./config/sidekiq_qa.yml
+            set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec sidekiq
         resources:
           requests:
             cpu: 50m
