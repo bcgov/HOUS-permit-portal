@@ -2,8 +2,8 @@ import { Box, BoxProps, HStack, IconButton, IconButtonProps, Text } from "@chakr
 import { List as ListIcon } from "@phosphor-icons/react/dist/csr/List"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { IRequirementBlock } from "../../../../../models/requirement-block"
-import { useMst } from "../../../../../setup/root"
+import { IRequirementBlock } from "../../../../../../models/requirement-block"
+import { useMst } from "../../../../../../setup/root"
 
 export interface IRequirementBlockProps {
   containerProps?: Partial<BoxProps>

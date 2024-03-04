@@ -8,15 +8,15 @@ import { useTemplateVersion } from "../../../../hooks/resources/use-template-ver
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BuilderFloatingButtons } from "../builder-floating-buttons"
-import { BuilderHeader } from "../edit-requirement-template-screen/builder-header"
+import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { useSectionHighlight } from "../use-section-highlight"
-import { SectionsDisplay } from "./sections-display"
+import { BuilderHeader } from "./edit-requirement-template-screen/builder-header"
 
 const scrollToIdPrefix = "jurisdiction-edit-template-version-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 
-export const JurisdictionEditTemplateVersionScreen = observer(function TemplateVersionScreen() {
+export const JurisdictionEditDigitalPermitScreen = observer(function JurisdictionEditDigitalPermitScreen() {
   const { templateVersion, error } = useTemplateVersion()
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
   const { t } = useTranslation()

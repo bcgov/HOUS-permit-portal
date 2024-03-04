@@ -26,7 +26,7 @@ import { useTranslation } from "react-i18next"
 import {
   IRequirementTemplateSectionAttributes,
   ITemplateSectionBlockAttributes,
-} from "../../../../../types/api-request"
+} from "../../../../../../types/api-request"
 import { DroppableSection } from "./droppable-section"
 import { RequirementBlock } from "./requirement-block"
 import { Section } from "./section"
