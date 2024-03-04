@@ -1,6 +1,6 @@
 apiVersion: v2
-name: redis
-description: Single node Redis deployment
+name: postgres-crunchydb
+description: High Availability CrunchyDB Postgres Chart
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -22,3 +22,8 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.0.0"
+
+dependencies:
+  - name: crunchy-postgres
+    version: 0.6.1
+    repository: https://bcgov.github.io/crunchy-postgres/
