@@ -419,7 +419,6 @@ const options = {
               planVersion: "Plan Version",
               planDate: "Plan Date (based on the date Author signed it)",
               address: "Project Address",
-              // postalCode: "Postal Code",
               jurisdiction: "Municipality / District",
               pid: "PID or legal description",
               buildingType: {

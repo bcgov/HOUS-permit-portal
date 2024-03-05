@@ -43,8 +43,7 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
         label={t(`${translationPrefix}.address`)}
         inputProps={{ isDisabled: true, value: checklist.address || "" }}
       />
-      {/* TODO: postal code - is this needed or is included in address above? */}
-      {/* <TextFormControl label={t(`${translationPrefix}.postalCode`)} inputProps={{ isDisabled: true }} /> */}
+
       <TextFormControl
         label={t(`${translationPrefix}.jurisdiction`)}
         inputProps={{ isDisabled: true, value: checklist.jurisdictionName }}
