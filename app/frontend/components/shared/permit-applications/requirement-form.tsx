@@ -38,7 +38,7 @@ interface IRequirementFormProps {
 
 export const RequirementForm = observer(
   ({ permitApplication, onCompletedSectionsChange, formRef, triggerSave }: IRequirementFormProps) => {
-    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson } =
+    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
@@ -200,7 +200,7 @@ export const RequirementForm = observer(
             formReady={formReady}
             submission={submissionData}
             onSubmit={onFormSubmit}
-            options={permitApplication ? {} : { readOnly: true }}
+            options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
           />
         </Flex>

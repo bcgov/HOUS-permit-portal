@@ -63,6 +63,9 @@ export const PermitApplicationModel = types
     get isSubmitted() {
       return self.status === EPermitApplicationStatus.submitted
     },
+    get isDraft() {
+      return self.status === EPermitApplicationStatus.draft
+    },
     get isViewed() {
       return self.viewedAt !== null
     },
