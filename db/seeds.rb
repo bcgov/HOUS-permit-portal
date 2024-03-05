@@ -95,6 +95,8 @@ if PermitApplication.first.blank?
   20.times do
     PermitApplication.create(
       submitter_id: submitters.sample.id,
+      full_address: "123 Address st",
+      pid: "999999999",
       jurisdiction_id: jurisdictions.sample.id,
       activity_id: activity1.id,
       permit_type_id: permit_type1.id,

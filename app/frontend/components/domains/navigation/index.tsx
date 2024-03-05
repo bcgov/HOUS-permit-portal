@@ -23,6 +23,7 @@ import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { EditPermitApplicationScreen } from "../permit-application/edit-permit-application-screen"
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
+import { ReviewPermitApplicationScreen } from "../permit-application/review-permit-application-screen"
 import { SuccessfulSubmissionScreen } from "../permit-application/successful-submission"
 import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
@@ -100,6 +101,7 @@ const AppRoutes = observer(() => {
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
+      <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
     </>
   )
 

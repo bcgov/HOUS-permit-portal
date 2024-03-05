@@ -35,6 +35,9 @@ export const UserModel = types
     get isReviewer() {
       return self.role == EUserRoles.reviewer
     },
+    get isReviewStaff() {
+      return self.role == EUserRoles.reviewer || self.role == EUserRoles.reviewManager
+    },
     get isSubmitter() {
       return self.role == EUserRoles.submitter
     },

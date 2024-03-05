@@ -21,7 +21,7 @@ module Api::Concerns::Search::PermitApplications
     if current_user.submitter?
       search_conditions[:where] = { submitter_id: current_user.id }
     elsif @jurisdiction.present?
-      search_conditions[:where] = { jurisdiction_id: @jurisdiction.id }
+      search_conditions[:where] = { jurisdiction_id: @jurisdiction.id, status: %i[submitted viewed] }
     end
     @permit_application_search = PermitApplication.search(query, **search_conditions)
   end

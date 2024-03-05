@@ -40,10 +40,10 @@ class PermitApplication < ApplicationRecord
     {
       number: number,
       nickname: nickname,
-      nickname: nickname,
       permit_classifications: "#{permit_type.name} #{activity.name}",
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
+      viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
@@ -66,6 +66,10 @@ class PermitApplication < ApplicationRecord
 
   def assign_default_nickname
     self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+  end
+
+  def update_viewed_at
+    update(viewed_at: Time.current)
   end
 
   def assign_unique_number

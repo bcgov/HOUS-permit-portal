@@ -27,6 +27,7 @@ export const PermitApplicationModel = types
     submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     formattedComplianceData: types.maybeNull(types.frozen()),
     submittedAt: types.maybeNull(types.Date),
+    viewedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
     updatedAt: types.Date,
@@ -61,6 +62,12 @@ export const PermitApplicationModel = types
     },
     get isSubmitted() {
       return self.status === EPermitApplicationStatus.submitted
+    },
+    get isDraft() {
+      return self.status === EPermitApplicationStatus.draft
+    },
+    get isViewed() {
+      return self.viewedAt !== null
     },
   }))
   .views((self) => ({

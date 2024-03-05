@@ -3,14 +3,13 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
-import { EPermitApplicationSortFields } from "../../../../types/enums"
+import { EPermitApplicationReviewerSortFields, EPermitApplicationSortFields } from "../../../../types/enums"
 import { SearchInput } from "../../../shared/base/search-input"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SortIcon } from "../../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
   const { permitApplicationStore } = useMst()
-  const { userStore } = useMst()
 
   const getSortColumnHeader = permitApplicationStore?.getSortColumnHeader
 
@@ -32,27 +31,34 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
             {t("permitApplication.submissionInbox.tableHeading")}
           </Text>
-          <SearchInput searchModel={userStore} />
+          <SearchInput searchModel={permitApplicationStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
-        {Object.values(EPermitApplicationSortFields).map((field) => (
-          <GridHeader key={field} role={"columnheader"}>
-            <Flex
-              w={"full"}
-              as={"button"}
-              justifyContent={"space-between"}
-              cursor="pointer"
-              onClick={() => toggleSort(field)}
-              borderRight={"1px solid"}
-              borderColor={"border.light"}
-              px={4}
-            >
-              <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-              <SortIcon<EPermitApplicationSortFields> field={field} currentSort={sort} />
-            </Flex>
-          </GridHeader>
-        ))}
+        {Object.keys(EPermitApplicationReviewerSortFields)
+          .map((key) => {
+            let castField = EPermitApplicationReviewerSortFields[key] as EPermitApplicationSortFields
+            if (!EPermitApplicationReviewerSortFields[key]) return
+
+            return (
+              <GridHeader key={key} role={"columnheader"}>
+                <Flex
+                  w={"full"}
+                  as={"button"}
+                  justifyContent={"space-between"}
+                  cursor="pointer"
+                  onClick={() => toggleSort(castField)}
+                  borderRight={"1px solid"}
+                  borderColor={"border.light"}
+                  px={4}
+                >
+                  <Text textAlign="left">{getSortColumnHeader(castField)}</Text>
+                  <SortIcon<EPermitApplicationSortFields> field={castField} currentSort={sort} />
+                </Flex>
+              </GridHeader>
+            )
+          })
+          .filter((outNull) => outNull)}
         <GridHeader role={"columnheader"} />
       </Box>
     </Box>
