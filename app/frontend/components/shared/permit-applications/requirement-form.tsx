@@ -44,21 +44,13 @@ export const RequirementForm = observer(
     const { t } = useTranslation()
     const navigate = useNavigate()
     const location = useLocation()
-
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
-
-    const togglePanelCollapse = () => {
-      if (!allCollapsed) {
-        document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
-      } else {
-        document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
-      }
-      setAllCollapsed((cur) => !cur)
-    }
+    const [imminentSubmission, setImminentSubmission] = useState(null)
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -110,6 +102,26 @@ export const RequirementForm = observer(
       }
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
+    useEffect(() => {
+      const handleOpenStepCode = (_event) => {
+        triggerSave?.()
+        navigate("step-code", { state: { background: location } })
+      }
+      document.addEventListener("openStepCode", handleOpenStepCode)
+      return () => {
+        document.removeEventListener("openStepCode", handleOpenStepCode)
+      }
+    }, [])
+
+    const togglePanelCollapse = () => {
+      if (!allCollapsed) {
+        document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
+      } else {
+        document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
+      }
+      setAllCollapsed((cur) => !cur)
+    }
+
     function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
@@ -125,8 +137,6 @@ export const RequirementForm = observer(
       }
     }
 
-    const [imminentSubmission, setImminentSubmission] = useState(null)
-
     const onFormSubmit = async (submission: any) => {
       setImminentSubmission(submission)
       onOpen()
@@ -137,17 +147,6 @@ export const RequirementForm = observer(
         navigate(`/permit-applications/${permitApplication.id}/sucessful-submission`)
       }
     }
-
-    useEffect(() => {
-      const handleOpenStepCode = (_event) => {
-        triggerSave?.()
-        navigate("step-code", { state: { background: location } })
-      }
-      document.addEventListener("openStepCode", handleOpenStepCode)
-      return () => {
-        document.removeEventListener("openStepCode", handleOpenStepCode)
-      }
-    }, [])
 
     const onBlur = (containerComponent) => {
       if (onCompletedSectionsChange) {
@@ -166,9 +165,6 @@ export const RequirementForm = observer(
         onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
       }
     }
-
-    const { isOpen, onOpen, onClose } = useDisclosure()
-
     const scrollToTop = () => {
       handleScrollToTop("outerScrollContainer")
       handleScrollToTop("permitApplicationFieldsContainer")
