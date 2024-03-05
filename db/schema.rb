@@ -153,10 +153,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_06_190337) do
     t.uuid "permit_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "status", default: 0
     t.string "description"
-    t.string "version"
-    t.date "scheduled_for"
     t.datetime "discarded_at"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
@@ -177,7 +174,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_06_190337) do
     t.datetime "updated_at", null: false
     t.uuid "requirement_block_id", null: false
     t.integer "position"
-    t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
+    t.boolean "elective", default: false
+    t.index ["requirement_block_id"],
+            name: "index_requirements_on_requirement_block_id"
   end
 
   create_table "step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

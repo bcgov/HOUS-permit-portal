@@ -2,7 +2,6 @@ FactoryBot.define do
   factory :requirement_template do
     association :activity, factory: :activity
     association :permit_type, factory: :permit_type
-    status { :published }
 
     factory :requirement_template_with_sections do
       transient { sections_count { 5 } }

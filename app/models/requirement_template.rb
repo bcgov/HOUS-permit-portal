@@ -1,7 +1,7 @@
 class RequirementTemplate < ApplicationRecord
-  searchkick searchable: %i[description status version permit_type activity],
-             word_start: %i[description status version permit_type activity],
-             text_middle: %i[version description]
+  searchkick searchable: %i[description current_version permit_type activity],
+             word_start: %i[description current_version permit_type activity],
+             text_middle: %i[current_version description]
 
   belongs_to :activity
   belongs_to :permit_type
@@ -17,16 +17,13 @@ class RequirementTemplate < ApplicationRecord
 
   has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
 
-  validate :scheduled_for_presence_if_scheduled
-
-  before_create :set_default_version
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
-
-  enum status: { draft: 0, scheduled: 1, published: 2 }, _default: 0
 
   include Discard::Model
 
   accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
+
+  validate :unique_permit_and_activity_for_undiscarded, on: :create
 
   def key
     "requirementtemplate#{id}"
@@ -108,7 +105,6 @@ class RequirementTemplate < ApplicationRecord
   def search_data
     {
       description: description,
-      status: status,
       current_version: published_template_version&.version_date,
       permit_type: permit_type.name,
       activity: activity.name,
@@ -116,21 +112,17 @@ class RequirementTemplate < ApplicationRecord
     }
   end
 
-  def last_scheduled_version
-    scheduled_template_versions.first
-  end
-
   private
+
+  def unique_permit_and_activity_for_undiscarded
+    existing_record =
+      RequirementTemplate.find_by(permit_type_id: permit_type_id, activity_id: activity_id, discarded_at: nil)
+    if existing_record.present?
+      errors.add(:base, "There can only be one Requirement Template per permit_type and activity combination")
+    end
+  end
 
   def refresh_search_index
     RequirementTemplate.search_index.refresh
-  end
-
-  def scheduled_for_presence_if_scheduled
-    errors.add(:scheduled_for, "must be set when status is 'scheduled'") if scheduled? && scheduled_for.blank?
-  end
-
-  def set_default_version
-    self.version ||= "v. #{Date.today.strftime("%Y.%m.%d")}"
   end
 end
