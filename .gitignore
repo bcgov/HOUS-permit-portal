@@ -57,3 +57,5 @@ node_modules
 
 # scratchpad
 deleteme.*
+
+/devops/docker/**/*.tar.gz
