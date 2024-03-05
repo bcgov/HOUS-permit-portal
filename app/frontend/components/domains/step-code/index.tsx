@@ -41,7 +41,7 @@ export const StepCodeForm = observer(function NewStepCodeForm() {
         }
       >
         {isLoaded && (
-          <Container my={10} maxW="container.md">
+          <Container my={10} maxW="780px">
             {!currentStepCode ? (
               <VStack spacing={8} align="start" w="full" pb={20}>
                 <Title />
