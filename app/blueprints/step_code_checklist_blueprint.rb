@@ -20,7 +20,7 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
   view :project_info do
     # TODO: may not need these fields once step code is integrated with permit application flow
     # TODO: get build and postal code (TBD if needed?) from permit application
-    fields :building_permit_number, :jurisdiction_name, :pid, :building_type
+    fields :building_permit_number, :jurisdiction_name, :pid, :building_type, :plan_author, :plan_version, :plan_date
     field :full_address, name: :address
 
     field :dwelling_units_count do |checklist, _options|

@@ -28,10 +28,14 @@ class Jurisdiction < ApplicationRecord
     RequirementTemplate.all
   end
 
+  def published_requirement_template_version(activity, permit_type)
+    #eventually will fetch the jurisdictions pecific version
+    RequirementTemplate.find_by(activity: activity, permit_type: permit_type).published_template_version
+  end
+
   def template_form_json(activity, permit_type)
-    # TODO: THIS IS STUBBED FOR NOW
-    # big changes are coming to the jurisdiction specific form templates, so just use any template that has sections for now
-    RequirementTemplateSection.first.requirement_template.to_form_json
+    # published_requirement_template_version(activity, permit_type).form_json
+    RequirementTemplate.find_by(activity: activity, permit_type: permit_type).to_form_json
   end
 
   def review_managers
@@ -60,21 +64,14 @@ class Jurisdiction < ApplicationRecord
   end
 
   def self.locality_types
-    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(
-      :locality_type
-    )
+    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(:locality_type)
   end
 
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
     name = attributes["MUNICIPALITY"]
     regional_district_name = attributes["REGIONAL_DISTRICT"]
 
-    named_params = {
-      fields: %w[reverse_qualified_name qualified_name],
-      misspellings: {
-        edit_distance: 1
-      }
-    }
+    named_params = { fields: %w[reverse_qualified_name qualified_name], misspellings: { edit_distance: 1 } }
     return(
       SubDistrict.search(name, **named_params).first ||
         RegionalDistrict.search(regional_district_name, **named_params).first
@@ -89,18 +86,13 @@ class Jurisdiction < ApplicationRecord
       updated_at: updated_at,
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,
-      permit_applications_size: permit_applications_size
+      permit_applications_size: permit_applications_size,
       # templates_used: "TODO",
     }
   end
 
   def self.custom_titleize_locality_type(locality_type)
-    locality_type
-      .split
-      .map do |word|
-        %w[the of].include?(word.downcase) ? word.downcase : word.capitalize
-      end
-      .join(" ")
+    locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
   end
 
   def qualifier
@@ -131,8 +123,7 @@ class Jurisdiction < ApplicationRecord
 
   def sanitize_html_fields
     attributes.each do |name, value|
-      self[name] = sanitize(value) if name.ends_with?("_html") &&
-        will_save_change_to_attribute?(name)
+      self[name] = sanitize(value) if name.ends_with?("_html") && will_save_change_to_attribute?(name)
     end
   end
 

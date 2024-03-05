@@ -7,6 +7,8 @@ class RequirementTemplate < ApplicationRecord
   belongs_to :permit_type
 
   has_many :requirement_template_sections, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_blocks, through: :requirement_template_sections
+  has_many :requirements, through: :requirement_blocks
   has_many :template_versions, -> { order(version_date: :desc) }, dependent: :destroy
   has_many :scheduled_template_versions,
            -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },

@@ -8,18 +8,7 @@ module FormSupportingDocuments
 
     #data from individual documents
     grouped_compliance_data =
-      supporting_documents
-        .where.not(compliance_data: {})
-        .map do |sd|
-          {
-            "data_key" => sd.data_key,
-            "message" =>
-              sd.compliance_data["error"] ||
-                sd.compliance_data["result"].map do |signer|
-                  "#{signer["signatureFieldName"]} signed at #{signer.dig("signatureTimestamp", "date")}"
-                end,
-          }
-        end
+      supporting_documents.where.not(compliance_data: {}).map { |sd| sd.compliance_message_view }
     grouped_compliance_data
       .group_by { |sd| sd["data_key"] }
       .each { |key, value| joined[key] = value.map { |v| v["message"] }.uniq.join(",") }
