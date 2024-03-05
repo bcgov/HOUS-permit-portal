@@ -27,11 +27,23 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
         inputProps={{ isDisabled: true, value: checklist.builder || "" }}
       />
       <TextFormControl
+        label={t(`${translationPrefix}.planAuthor`)}
+        inputProps={{ isDisabled: true, value: checklist.planAuthor || "" }}
+      />
+      <TextFormControl
+        label={t(`${translationPrefix}.planVersion`)}
+        inputProps={{ isDisabled: true, value: checklist.planVersion || "" }}
+      />
+      <TextFormControl
+        label={t(`${translationPrefix}.planDate`)}
+        inputProps={{ isDisabled: true, value: checklist.planDate || "" }}
+      />
+
+      <TextFormControl
         label={t(`${translationPrefix}.address`)}
         inputProps={{ isDisabled: true, value: checklist.address || "" }}
       />
-      {/* TODO: postal code - is this needed or is included in address above? */}
-      <TextFormControl label={t(`${translationPrefix}.postalCode`)} inputProps={{ isDisabled: true }} />
+
       <TextFormControl
         label={t(`${translationPrefix}.jurisdiction`)}
         inputProps={{ isDisabled: true, value: checklist.jurisdictionName }}

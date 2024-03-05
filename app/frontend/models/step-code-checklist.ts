@@ -20,6 +20,10 @@ export const StepCodeChecklistModel = types
     address: types.maybeNull(types.string),
     jurisdictionName: types.maybeNull(types.string),
     pid: types.maybeNull(types.string),
+    // plan, assumed to be based on drawing upload on the permit application
+    planAuthor: types.maybeNull(types.string),
+    planVersion: types.maybeNull(types.string),
+    planDate: types.maybeNull(types.string),
     // model fields
     buildingType: types.maybeNull(types.enumeration<EStepCodeBuildingType[]>(Object.values(EStepCodeBuildingType))),
     dwellingUnitsCount: types.maybeNull(types.number),

@@ -415,8 +415,10 @@ const options = {
               heading: "A: Project Information",
               permitNum: "Building Permit #",
               builder: "Builder",
+              planAuthor: "Plan Author",
+              planVersion: "Plan Version",
+              planDate: "Plan Date (based on the date Author signed it)",
               address: "Project Address",
-              postalCode: "Postal Code",
               jurisdiction: "Municipality / District",
               pid: "PID or legal description",
               buildingType: {
