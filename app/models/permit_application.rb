@@ -11,7 +11,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
 
-  #The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
+  # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
   has_one :step_code
 
@@ -51,8 +51,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def form_json
-    #TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
-    #need to look up jurisidcitional version and enablement as well
+    # TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
+    # need to look up jurisidcitional version and enablement as well
     jurisdiction.template_form_json(activity, permit_type)
   end
 

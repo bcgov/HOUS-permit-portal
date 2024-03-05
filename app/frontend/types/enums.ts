@@ -16,12 +16,6 @@ export enum EPermitApplicationStatus {
   viewed = "viewed",
 }
 
-export enum ERequirementTemplateStatus {
-  published = "published",
-  scheduled = "scheduled",
-  draft = "draft",
-}
-
 export enum ETemplateVersionStatus {
   published = "published",
   scheduled = "scheduled",
@@ -74,6 +68,7 @@ export enum EContactSortFields {
   phone = "phone",
   address = "address",
 }
+
 export enum EPermitApplicationSortFields {
   number = "number",
   permitClassification = "permit_classification",

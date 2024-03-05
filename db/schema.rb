@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_05_210153) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -196,10 +196,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
     t.uuid "permit_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "status", default: 0
     t.string "description"
-    t.string "version"
-    t.date "scheduled_for"
     t.datetime "discarded_at"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"],
@@ -225,6 +222,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_04_184553) do
     t.datetime "updated_at", null: false
     t.uuid "requirement_block_id", null: false
     t.integer "position"
+    t.boolean "elective", default: false
     t.index ["requirement_block_id"],
             name: "index_requirements_on_requirement_block_id"
   end
