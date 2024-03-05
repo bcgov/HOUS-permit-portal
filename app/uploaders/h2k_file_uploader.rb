@@ -3,7 +3,7 @@ class H2kFileUploader < Shrine
 
   Attacher.validate do
     validate_max_size 100 * 1024 * 1024 #100 MB to start
-    validate_extension_inclusion %w[h2k], message: :not_valid_file_type
+    validate_extension_inclusion %w[h2k]
     # validate_mime_type %w[application/xml], message: :not_valid_file_type
   end
 
