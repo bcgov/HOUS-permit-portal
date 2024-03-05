@@ -1,13 +1,10 @@
 import { Box, HStack, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { IDenormalizedRequirementTemplateSection } from "../../../types/types"
+import { IDenormalizedRequirementBlock, IDenormalizedRequirementTemplateSection } from "../../../types/types"
 import { RequirementBlockAccordion } from "../requirements-library/requirement-block-accordion"
-import { formScrollToId } from "./screens/template-version-screen"
 
-interface IProps {
-  shouldCollapseAll?: boolean
-  setSectionRef: (el: HTMLElement, id: string) => void
+interface IProps extends Omit<ISectionDisplayProps, "section"> {
   sections: IDenormalizedRequirementTemplateSection[]
 }
 
@@ -23,16 +20,17 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
   )
 })
 
+interface ISectionDisplayProps {
+  section: IDenormalizedRequirementTemplateSection
+  shouldCollapseAll?: boolean
+  setSectionRef: (el: HTMLElement, id: string) => void
+  scrollToId?: string
+  formScrollToId: (recordId: string) => string
+  renderEdit?: (props: { denormalizedRequirementBlock: IDenormalizedRequirementBlock }) => JSX.Element
+}
+
 const SectionDisplay = observer(
-  ({
-    section,
-    shouldCollapseAll,
-    setSectionRef,
-  }: {
-    section: IDenormalizedRequirementTemplateSection
-    shouldCollapseAll?: boolean
-    setSectionRef: (el: HTMLElement, id: string) => void
-  }) => {
+  ({ section, shouldCollapseAll, setSectionRef, formScrollToId, renderEdit }: ISectionDisplayProps) => {
     const sectionBlocks = section.templateSectionBlocks
     const sectionName = section.name
 
@@ -41,7 +39,7 @@ const SectionDisplay = observer(
         ref={(el) => setSectionRef(el, section.id)}
         as={"section"}
         w={"full"}
-        id={formScrollToId(section.id)}
+        id={formScrollToId?.(section.id)}
         data-section-id={section.id}
       >
         <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
@@ -58,6 +56,12 @@ const SectionDisplay = observer(
               key={sectionBlock.id}
               requirementBlock={sectionBlock.requirementBlock}
               triggerForceCollapse={shouldCollapseAll}
+              isEditable={!!renderEdit}
+              renderEdit={
+                renderEdit
+                  ? () => renderEdit({ denormalizedRequirementBlock: sectionBlock.requirementBlock })
+                  : undefined
+              }
             />
           ))}
         </Stack>

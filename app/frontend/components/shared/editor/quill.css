@@ -9,7 +9,6 @@
   border-bottom-right-radius: 0.25rem;
   display: flex;
   flex-direction: column;
-  border: 0;
 }
 
 .ql-editor {

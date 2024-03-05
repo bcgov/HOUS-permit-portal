@@ -124,6 +124,7 @@ export interface IDenormalizedTemplate {
   activity: IActivity
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
 }
+
 export interface IErrorsBoxData {
   id: string
   label: string
@@ -136,4 +137,13 @@ export interface IStepCodeSelectOptions {
   epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
   permitApplications: Partial<IPermitApplication>[]
   buildingTypes: EStepCodeBuildingType[]
+}
+
+export interface IRequirementBlockCustomization {
+  tip?: string
+  electiveFields?: Array<string>
+}
+
+export interface ITemplateCustomization {
+  requirementBlockChanges?: Record<string, IRequirementBlockCustomization>
 }

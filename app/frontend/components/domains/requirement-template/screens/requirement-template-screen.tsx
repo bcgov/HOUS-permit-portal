@@ -13,7 +13,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { VersionTag } from "../../../shared/version-tag"
 import { GridHeaders } from "../grid-header"
-import { TenmplateVersionsSidebar } from "../template-versions-sidebar"
+import { TemplateVersionsSidebar } from "../template-versions-sidebar"
 
 export const RequirementTemplatesScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore } = useMst()
@@ -69,7 +69,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
                   </SearchGridItem>
                   <SearchGridItem>{rt.jurisdictionsSize}</SearchGridItem>
                   <SearchGridItem>
-                    <TenmplateVersionsSidebar requirementTemplate={rt} />
+                    <TemplateVersionsSidebar requirementTemplate={rt} />
                   </SearchGridItem>
                 </Box>
               )

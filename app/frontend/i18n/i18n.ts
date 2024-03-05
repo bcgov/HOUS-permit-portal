@@ -109,7 +109,6 @@ const options = {
           save: "Save Changes",
           onlySave: "Save",
           done: "Done",
-          manage: "Manage",
           view: "View",
           totalItems: "Total Items",
           doLater: "Do this later",
@@ -644,7 +643,11 @@ const options = {
           fetchTemplateVersion: "Something went wrong fetching the template version",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
+          fetchBuildingPermit: "Something went wrong fetching building permit",
+          fetchBuildingPermitJurisdictionChanges: "Something went wrong fetching building permit jurisdiction changes",
           fetchOptions: "Something went wrong fetching options",
+          fetchJurisdictionTemplateVersionCustomization:
+            "Something went wrong fetching jurisdiction template version customization",
         },
         user: {
           fields: {
@@ -766,6 +769,13 @@ const options = {
             lastUpdated: "Last updated",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
+          },
+          edit: {
+            requirementBlockSidebar: {
+              description:
+                "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
+              tipLabel: "Tip for submitters (optional)",
+            },
           },
         },
         site: {

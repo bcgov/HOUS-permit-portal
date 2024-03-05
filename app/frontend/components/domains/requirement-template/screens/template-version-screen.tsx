@@ -78,6 +78,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               sections={templateSections}
               shouldCollapseAll={shouldCollapseAll}
               setSectionRef={setSectionRef}
+              formScrollToId={formScrollToId}
             />
           </Flex>
         </Flex>

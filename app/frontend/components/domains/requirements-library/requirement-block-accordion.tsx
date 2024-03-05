@@ -26,6 +26,7 @@ type TProps = {
   requirementBlock: IDenormalizedRequirementBlock
   onRemove?: () => void
   triggerForceCollapse?: boolean
+  renderEdit?: () => JSX.Element
 } & Partial<AccordionProps> &
   (
     | { isEditable?: never; showEditWarning?: never }
@@ -42,6 +43,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   isEditable,
   showEditWarning,
   triggerForceCollapse,
+  renderEdit,
   ...accordionProps
 }: TProps) {
   const { t } = useTranslation()
@@ -85,7 +87,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               )}
             </HStack>
             <HStack spacing={2}>
-              {isEditable && (
+              {isEditable && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}
                   requirementBlock={requirementBlock}
@@ -98,6 +100,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   }}
                 />
               )}
+              {isEditable && renderEdit?.()}
               <AccordionIcon color={"text.primary"} />
             </HStack>
           </AccordionButton>

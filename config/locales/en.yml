@@ -240,6 +240,19 @@ en:
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found
+    jurisdiction_template_version_customization:
+      create_success:
+        title: ""
+        message: "Jurisdiction Template Customization created!"
+      update_success:
+        title: ""
+        message: "Jurisdiction Template Customization updated!"
+      create_error:
+        title: Oops
+        message: "Something went wrong creating Jurisdiction Template Customization"
+      update_error:
+        title: Oops
+        message: "Something went wrong updating Jurisdiction Template Customization"
 
   formio:
     requirement_template:

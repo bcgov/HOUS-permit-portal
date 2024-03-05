@@ -31,7 +31,8 @@ import { VersionTag } from "../../shared/version-tag"
 interface IProps {
   requirementTemplate: IRequirementTemplate
 }
-export const TenmplateVersionsSidebar = observer(function TemplateVersionsSidebar({ requirementTemplate }: IProps) {
+
+export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({ requirementTemplate }: IProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
   return (

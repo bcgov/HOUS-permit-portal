@@ -57,6 +57,9 @@ export const EditorWithPreview = observer(function EditorWithPreview({
       ".quill .ql-container": {
         fontSize: isEditable ? undefined : "sm",
       },
+      ".quill .ql-container.ql-snow": {
+        border: 0,
+      },
     },
     w: "full",
     minH: "1rem",
