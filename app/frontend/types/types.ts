@@ -141,7 +141,7 @@ export interface IStepCodeSelectOptions {
 
 export interface IRequirementBlockCustomization {
   tip?: string
-  electiveFields?: Array<string>
+  enabledElectiveFieldIds?: Array<string>
 }
 
 export interface ITemplateCustomization {

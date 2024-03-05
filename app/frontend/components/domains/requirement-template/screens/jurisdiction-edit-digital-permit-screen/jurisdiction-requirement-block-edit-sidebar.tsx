@@ -35,7 +35,7 @@ interface IProps {
 function formFormDefaults(customization: IRequirementBlockCustomization | undefined): ICustomizationForm {
   return {
     tip: customization?.tip,
-    electiveFields: customization?.electiveFields,
+    enabledElectiveFieldIds: customization?.enabledElectiveFieldIds,
   }
 }
 
