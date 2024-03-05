@@ -10,9 +10,11 @@ class Api::StepCodesController < Api::ApplicationController
   def create
     #save step code like normal
     authorize StepCode.new
-    @step_code = StepCode.create!(step_code_params)
-    @step_code.data_entries.each do |de|
-      StepCode::DataEntryFromHot2000.new(xml: Nokogiri.XML(de.h2k_file.read), data_entry: de).call if de.h2k_file
+    StepCode.transaction do
+      @step_code = StepCode.create!(step_code_params)
+      @step_code.data_entries.each do |de|
+        StepCode::DataEntryFromHot2000.new(xml: Nokogiri.XML(de.h2k_file.read), data_entry: de).call if de.h2k_file
+      end
     end
 
     render_success @step_code, "step_code.create_success", { blueprint: StepCodeBlueprint }
