@@ -7,7 +7,7 @@ class SupportingDocumentsZipper
   def initialize(permit_application_id)
     @permit_application = PermitApplication.find(permit_application_id)
     @temp_files = []
-    @file_path = Rails.root.join("tmp", "zipfile_#{permit_application_id}_#{Time.now.to_i}.zip")
+    @file_path = Rails.root.join("tmp", "#{@permit_application.number}_#{Time.now.to_i}.zip")
   end
 
   def perform
@@ -36,7 +36,7 @@ class SupportingDocumentsZipper
       permit_application.zipfile_data = uploaded_file.data
 
       unless permit_application.save
-        Rails.logger.error "Failed to upload zipfile: #{permit_application.errors.full_messages.join(", ")}"
+        Rails.logger.error "Failed to upload zip file: #{permit_application.errors.full_messages.join(", ")}"
       end
     end
   end

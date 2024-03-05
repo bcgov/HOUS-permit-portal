@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Heading, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Heading, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef, useState } from "react"
@@ -22,13 +22,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const [completedSections, setCompletedSections] = useState({})
 
-  const handleClickDownloadApplication = () => {
-    onContactsClose()
-    onDownloadOpen()
-  }
-
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
-  const { isOpen: isDownloadOpen, onOpen: onDownloadOpen, onClose: onDownloadClose } = useDisclosure()
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
@@ -61,17 +55,15 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
-        <HStack>
+        <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
           <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
             {t("permitApplication.show.contactsSummary")}
           </Button>
-          <Button variant="primary" onClick={handleClickDownloadApplication}>
-            {t("permitApplication.show.downloadApplication")}
-          </Button>
+          <SubmissionDownloadModal permitApplication={currentPermitApplication} />
           <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
             {t("ui.backHome")}
           </Button>
-        </HStack>
+        </Stack>
       </Flex>
       <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
         <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
@@ -90,15 +82,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
           isOpen={isContactsOpen}
           onOpen={onContactsOpen}
           onClose={onContactsClose}
-          handleClickDownload={handleClickDownloadApplication}
-          permitApplication={currentPermitApplication}
-        />
-      )}
-      {isDownloadOpen && (
-        <SubmissionDownloadModal
-          isOpen={isDownloadOpen}
-          onOpen={onDownloadOpen}
-          onClose={onDownloadClose}
           permitApplication={currentPermitApplication}
         />
       )}

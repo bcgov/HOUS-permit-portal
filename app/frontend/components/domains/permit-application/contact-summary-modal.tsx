@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Flex,
   GridItem,
   Heading,
@@ -14,7 +13,6 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Download } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -25,10 +23,9 @@ import { SearchGridItem } from "../../shared/grid/search-grid-item"
 
 export interface IContactSummaryModalProps extends ReturnType<typeof useDisclosure> {
   permitApplication: IPermitApplication
-  handleClickDownload: () => void
 }
 
-export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication, handleClickDownload }) => {
+export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication }) => {
   const { t } = useTranslation()
 
   const { contacts } = permitApplication
@@ -42,9 +39,6 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
             <Heading as="h1" textTransform={"capitalize"}>
               {t("permitApplication.show.contactsSummary")}
             </Heading>
-            <Button variant="link" leftIcon={<Download />} onClick={handleClickDownload}>
-              {t("permitApplication.show.downloadApplication")}
-            </Button>
           </Flex>
           <ModalCloseButton fontSize="11px" />
         </ModalHeader>

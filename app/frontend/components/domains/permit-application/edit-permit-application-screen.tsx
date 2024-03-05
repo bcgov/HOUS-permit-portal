@@ -1,5 +1,5 @@
 import { Box, Button, Flex, HStack, Stack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
-import { CaretRight, Download, Info } from "@phosphor-icons/react"
+import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
@@ -44,10 +44,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const [completedSections, setCompletedSections] = useState({})
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
-  const { isOpen: isDownloadOpen, onOpen: onDownloadOpen, onClose: onDownloadClose } = useDisclosure()
 
   const handleSave = async () => {
-    if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen || isDownloadOpen) return
+    if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
     const submissionData = formio.data
@@ -74,11 +73,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     if (success) {
       navigate("/")
     }
-  }
-
-  const handleClickDownloadApplication = () => {
-    onContactsClose()
-    onDownloadOpen()
   }
 
   useInterval(handleSave, 60000) // save progress every minute
@@ -161,9 +155,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
               {t("permitApplication.show.contactsSummary")}
             </Button>
-            <Button variant="primary" onClick={handleClickDownloadApplication} leftIcon={<Download />}>
-              {t("permitApplication.show.downloadApplication")}
-            </Button>
+            <SubmissionDownloadModal permitApplication={currentPermitApplication} />
             <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
               {t("ui.backHome")}
             </Button>
@@ -197,15 +189,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           isOpen={isContactsOpen}
           onOpen={onContactsOpen}
           onClose={onContactsClose}
-          handleClickDownload={handleClickDownloadApplication}
-          permitApplication={currentPermitApplication}
-        />
-      )}
-      {isDownloadOpen && (
-        <SubmissionDownloadModal
-          isOpen={isDownloadOpen}
-          onOpen={onDownloadOpen}
-          onClose={onDownloadClose}
           permitApplication={currentPermitApplication}
         />
       )}
