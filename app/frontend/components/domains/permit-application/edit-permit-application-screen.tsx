@@ -59,12 +59,17 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         }
         //update file hashes that have been changed
       }
-    } catch (e) {}
+      return response.ok
+    } catch (e) {
+      return false
+    }
   }
 
   const handleClickFinishLater = async () => {
-    await handleSave()
-    navigate("/")
+    const success = await handleSave()
+    if (success) {
+      navigate("/")
+    }
   }
 
   const handleDownloadApplication = () => {}
