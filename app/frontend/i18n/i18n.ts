@@ -83,6 +83,7 @@ const options = {
             "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
         },
         ui: {
+          tip: "Tip",
           manage: "Manage",
           preview: "Preview",
           back: "Back",

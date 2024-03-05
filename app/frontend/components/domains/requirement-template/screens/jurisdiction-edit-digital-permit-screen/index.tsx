@@ -175,6 +175,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                   />
                 )
               }}
+              requirementBlockCustomizations={watchedCustomizations?.requirementBlockChanges}
             />
           </Flex>
         </Flex>

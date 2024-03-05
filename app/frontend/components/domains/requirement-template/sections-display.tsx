@@ -1,7 +1,11 @@
 import { Box, HStack, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { IDenormalizedRequirementBlock, IDenormalizedRequirementTemplateSection } from "../../../types/types"
+import {
+  IDenormalizedRequirementBlock,
+  IDenormalizedRequirementTemplateSection,
+  IRequirementBlockCustomization,
+} from "../../../types/types"
 import { RequirementBlockAccordion } from "../requirements-library/requirement-block-accordion"
 
 interface IProps extends Omit<ISectionDisplayProps, "section"> {
@@ -27,10 +31,18 @@ interface ISectionDisplayProps {
   scrollToId?: string
   formScrollToId: (recordId: string) => string
   renderEdit?: (props: { denormalizedRequirementBlock: IDenormalizedRequirementBlock }) => JSX.Element
+  requirementBlockCustomizations?: Record<string, IRequirementBlockCustomization>
 }
 
 const SectionDisplay = observer(
-  ({ section, shouldCollapseAll, setSectionRef, formScrollToId, renderEdit }: ISectionDisplayProps) => {
+  ({
+    section,
+    shouldCollapseAll,
+    setSectionRef,
+    formScrollToId,
+    renderEdit,
+    requirementBlockCustomizations,
+  }: ISectionDisplayProps) => {
     const sectionBlocks = section.templateSectionBlocks
     const sectionName = section.name
 
@@ -62,6 +74,7 @@ const SectionDisplay = observer(
                   ? () => renderEdit({ denormalizedRequirementBlock: sectionBlock.requirementBlock })
                   : undefined
               }
+              requirementBlockCustomization={requirementBlockCustomizations?.[sectionBlock.requirementBlock.id]}
             />
           ))}
         </Stack>
