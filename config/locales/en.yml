@@ -38,7 +38,6 @@ en:
           attributes:
             file:
               max_size: "must not be larger than %{max_size} bytes"
-              not_valid_file_type: "must be a pdf, jpg, or png"
         user:
           attributes:
             uid:
