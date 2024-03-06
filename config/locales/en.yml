@@ -219,9 +219,9 @@ en:
         title: Oops
         message: "%{error_message}"
     step_code:
-      create_success:
+      h2k_imported:
         title: ""
-        message: "New step code created!"
+        message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
       create_error:
         title: Oops
         message: "%{error_message}"

@@ -3,10 +3,6 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
 
   fields :stage
 
-  field :name do |checklist, _options|
-    "#{checklist.stage.titleize} Checklist"
-  end
-
   view :extended do
     include_view :project_info
     include_view :compliance_summary
@@ -47,7 +43,12 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
            :completed_by_email,
            :completed_by_phone,
            :completed_by_address,
-           :energy_advisor_id
+           :energy_advisor_id,
+           :codeco
+
+    field :p_file_no do |checklist, _options|
+      checklist.data_entries.pluck(:p_file_no).join(", ")
+    end
   end
 
   view :building_characteristics_summary do

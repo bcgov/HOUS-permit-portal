@@ -136,8 +136,6 @@ const options = {
           asc: "Ascending",
           desc: "Descending",
           returnHome: "Return to home",
-          copied: "Copied to clipboard",
-          failedToCopy: "failed to copy to clipboard",
         },
         contact: {
           fields: {
@@ -213,16 +211,12 @@ const options = {
           seeBestPracticesLink: "See best practices for",
           ask: "Ask a question",
           pidLabel: "Parcel Identification (PID) No.",
-          // The key "new" appears to break this.
-          notViewed: "New",
-          viewed: "Viewed",
           addressLabel: "Address",
           columns: {
             number: "Application #",
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted At",
-            viewed_at: "Viewed At",
             status: "Status",
           },
           submissionInbox: {
@@ -417,18 +411,24 @@ const options = {
         },
         stepCodeChecklist: {
           edit: {
+            heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
+            notice: "Relevant data fields below has been filled in for you by Auto-Compliance.",
             projectInfo: {
+              stages: {
+                pre_construction: "Pre Construction",
+                mid_construction: "Mid Construction",
+                as_built: "As Built",
+              },
               heading: "A: Project Information",
               permitNum: "Building Permit #",
               builder: "Builder",
-              planAuthor: "Plan Author",
-              planVersion: "Plan Version",
-              planDate: "Plan Date (based on the date Author signed it)",
               address: "Project Address",
+              postalCode: "Postal Code",
               jurisdiction: "Municipality / District",
               pid: "PID or legal description",
               buildingType: {
-                select: "Select Building Type",
+                label: "Building Type",
+                placeholder: "Select",
                 options: {
                   laneway: "Laneway House",
                   single_detached: "Single Detached",
@@ -448,6 +448,7 @@ const options = {
             },
             codeComplianceSummary: {
               heading: "B: Code Compliance Summary",
+              required: "Required",
               compliancePath: {
                 label: "BC Building Code Performance Compliance Path:",
                 options: {
@@ -461,11 +462,22 @@ const options = {
                 heading: "Energy Step Code",
                 stepRequired: "Step Required",
                 stepProposed: "Proposed Step Achieved",
+                steps: {
+                  "3": "3",
+                  "4": "4",
+                  "5": "5",
+                },
               },
               zeroCarbonStepCode: {
                 heading: "Zero Carbon Step Code",
                 stepRequired: "Level Required",
                 stepProposed: "Proposed Step Achieved",
+                steps: {
+                  "1": "EL 1",
+                  "2": "EL 2",
+                  "3": "EL 3",
+                  "4": "EL 4",
+                },
               },
               planInfo: {
                 title: "Based on info provided by the builder & the following drawings:",
@@ -476,27 +488,34 @@ const options = {
             },
             completedBy: {
               heading: "C: Completed By",
-              name: "Full Name",
+              description:
+                "EA's working in teams may designate a contact person for this permit.  This person may or may not be the modeler.  The registration numbers must match the actual modelers registration.",
+              energyAdvisor: "Energy Advisor",
+              name: "Full name",
               date: "Date",
-              company: "Company Name",
-              organization: "Service Organization",
+              company: "Company name",
+              organization: "Service organization",
               phone: "Phone",
-              energyAdvisorId: "Energy Advisor ID",
+              energyAdvisorId: "Energy advisor ID#",
               address: "Address",
               email: "Email",
+              codeco: "CODECO placed in Field 8 of H2K",
+              yes: "Yes",
+              no: "No",
               pFile: "P File #",
             },
             energyPerformanceCompliance: {
               heading: "D: Energy Performance Compliance",
-              proposedHouseEnergyConsumption: "Proposed House Energy Consumption (GJ/year)",
-              referenceHouseRatedEnergyTarget: "Reference House Rated Energy Target (GJ/year)",
+              proposedHouseEnergyConsumption: "Proposed House Energy Consumption:",
+              referenceHouseRatedEnergyTarget: "Reference House Rated Energy Target:",
+              energyUnit: "GJ/year",
               hvac: "HVAC",
               dwhHeating: "DWH Heating",
               sum: "SUM",
               calculationAirtightness:
                 "The airtightness value used in the energy model calculations for the Proposed house is:",
               calculationTestingTarget: "OR Testing Target",
-              compliance: "The above calculation was performed in compliance with Subsection 9.36.5. of Division B:",
+              compliance: "The above calculation was performed in compliance with Subsection 9.36.5. of Division B",
               airtightnessValue: {
                 select: "Select",
                 options: {
@@ -565,7 +584,7 @@ const options = {
             },
             zeroCarbonStepCodeCompliance: {
               heading: "G: Zero Carbon Step Code Compliance",
-              proposedMetrics: "Proposed Mouse Metrics",
+              proposedMetrics: "Proposed House Metrics",
               stepRequirement: "Proposed Step Requirement",
               result: "Proposed House Result",
               passFail: "Proposed House Pass or Fail",
