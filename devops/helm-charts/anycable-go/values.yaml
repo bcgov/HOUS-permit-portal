@@ -1,11 +1,17 @@
-OPENSHIFT_NAMESPACE: bb18ab
-STAGE: dev
-
 anycable-go:
+  env:
+    # Assuming that Ruby RPC is available in K8s in the same namespace as anycable-rpc service (see next chapter)
+    anycableRpcHost: prod-hous-permit-portal-anycable-rpc:50051
+    anycableRedisUrl: "redis://redisMasterSet:6379/1"
+    anycableRedisSentinels: "redis-ha-headless:26379"
+    anycableDebug: 1
+  ingress:
+    enable: true
+    path: /cable
   resources:
-  requests:
-    cpu: 350m
-    memory: 400Mi
-  limits:
-    cpu: 350m
-    memory: 400Mi
+    requests:
+      cpu: 20m
+      memory: 128Mi
+    limits:
+      cpu: 150m
+      memory: 128Mi

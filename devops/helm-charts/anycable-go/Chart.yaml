@@ -25,5 +25,5 @@ appVersion: "1.0.0"
 
 dependencies:
   - name: anycable-go
-    version: 0.2.4
+    version: 0.5.11
     repository: https://helm.anycable.io/
