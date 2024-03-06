@@ -167,7 +167,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         },
                         "aria-label": "Edit Helper Text",
                       }}
-                      checkboxProps={{
+                      isOptionalCheckboxProps={{
                         controlProps: {
                           control: control,
                           rules: {
