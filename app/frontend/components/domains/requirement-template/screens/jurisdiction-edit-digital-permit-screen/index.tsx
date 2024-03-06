@@ -182,6 +182,11 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                     triggerButtonProps={{
                       isDisabled: isSubmitting,
                     }}
+                    onResetDefault={(requirementBlockId) =>
+                      jurisdictionTemplateVersionCustomization?.customizations?.requirementBlockChanges?.[
+                        requirementBlockId
+                      ]
+                    }
                   />
                 )
               }}

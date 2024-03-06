@@ -32,6 +32,7 @@ interface IProps {
   requirementBlockCustomization?: IRequirementBlockCustomization
   triggerButtonProps?: Partial<ButtonProps>
   onSave?: (requirementBlockId: string, customization: ICustomizationForm) => void
+  onResetDefault?: (requirementBlockId: string) => ICustomizationForm | undefined
 }
 
 function formFormDefaults(
@@ -51,6 +52,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
   requirementBlockCustomization,
   triggerButtonProps,
   onSave,
+  onResetDefault,
 }: IProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
@@ -129,6 +131,10 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
                   onDone={onSubmit}
                   onCancel={handleCancel}
                   onManageElectiveFields={() => setShowManageFieldsView(true)}
+                  onResetDefault={() => {
+                    const defaultCustomization = onResetDefault(requirementBlock.id)
+                    defaultCustomization && reset(formFormDefaults(electiveFields, defaultCustomization))
+                  }}
                 />
               )}
             </FormProvider>
@@ -144,11 +150,13 @@ const MainView = ({
   onDone,
   onCancel,
   onManageElectiveFields,
+  onResetDefault,
 }: {
   electiveFields: IDenormalizedRequirement[]
   onDone: () => void
   onCancel: () => void
   onManageElectiveFields: () => void
+  onResetDefault?: () => void
 }) => {
   const { t } = useTranslation()
   const { control, watch } = useFormContext<ICustomizationForm>()
@@ -182,17 +190,30 @@ const MainView = ({
           })}
         </Stack>
       </Box>
-      <Button variant={"link"} textDecoration={"underline"} onClick={onManageElectiveFields}>
-        {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageFieldsButton")}
-      </Button>
+      {electiveFields?.length > 0 && (
+        <Button variant={"link"} textDecoration={"underline"} onClick={onManageElectiveFields}>
+          {t("digitalBuildingPermits.edit.requirementBlockSidebar.manageFieldsButton")}
+        </Button>
+      )}
       <ButtonGroup size={"md"}>
-        <Button variant={"primary"} flex={1} onClick={onDone}>
+        <Button
+          variant={"primary"}
+          flex={1}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDone()
+          }}
+        >
           {t("ui.done")}
         </Button>
         <Button variant={"secondary"} flex={1} onClick={onCancel}>
           {t("ui.cancel")}
         </Button>
       </ButtonGroup>
+
+      <Button variant={"link"} textDecoration={"underline"} onClick={onResetDefault}>
+        {t("digitalBuildingPermits.edit.requirementBlockSidebar.resetToDefaults")}
+      </Button>
     </Stack>
   )
 }
