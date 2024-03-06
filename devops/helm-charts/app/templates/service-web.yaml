@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
-  name: "{{ .Values.STAGE }}-{{ .Values.appName }}"
+    app: "{{ .Values.STAGE }}-{{ .Values.appName }}-web"
+  name: "{{ .Values.STAGE }}-{{ .Values.appName }}-web"
   namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   internalTrafficPolicy: Cluster

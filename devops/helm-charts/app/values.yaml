@@ -36,3 +36,18 @@ deployments:
           limits:
             cpu: 200m
             memory: 256Mi
+  - process: anycable-rpc
+    replicaCount: 1
+    spec:
+      containers:
+        includeCommand: true
+        args:
+          - >-
+            set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec anycable --rpc-host=0.0.0.0:50051
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: "{{ .Values.STAGE }}-{{ .Values.appName }}-anycable-rpc"
+  name: "{{ .Values.STAGE }}-{{ .Values.appName }}-anycable-rpc"
+  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: 50051-tcp
+      port: 50051
+      protocol: TCP
+      targetPort: 50051
+  selector:
+    app: "{{ .Values.STAGE }}-{{ .Values.appName }}-anycable-rpc"
+    deployment: "{{ .Values.STAGE }}-{{ .Values.appName }}-anycable-rpc"
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

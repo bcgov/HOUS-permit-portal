@@ -1,0 +1,11 @@
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: dev
+
+anycable-go:
+  resources:
+  requests:
+    cpu: 350m
+    memory: 400Mi
+  limits:
+    cpu: 350m
+    memory: 400Mi
