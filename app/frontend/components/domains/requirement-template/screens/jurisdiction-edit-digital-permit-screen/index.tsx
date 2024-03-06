@@ -117,6 +117,16 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     <RemoveScroll style={{ width: "100%", height: "100%" }}>
       <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
         <BuilderHeader
+          breadCrumbs={[
+            {
+              href: "/digital-building-permits",
+              title: t("site.breadcrumb.digitalBuildingPermits"),
+            },
+            {
+              href: `/digital-building-permits/${templateVersion.id}/edit`,
+              title: t("site.breadcrumb.editPermit"),
+            },
+          ]}
           requirementTemplate={denormalizedTemplate}
           status={templateVersion.status}
           versionDate={templateVersion.versionDate}

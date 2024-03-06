@@ -44,6 +44,12 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     <RemoveScroll style={{ width: "100%", height: "100%" }}>
       <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
         <BuilderHeader
+          breadCrumbs={[
+            {
+              href: "/template-versions",
+              title: t("site.breadcrumb.templateVersions"),
+            },
+          ]}
           requirementTemplate={denormalizedTemplate}
           status={templateVersion.status}
           versionDate={templateVersion.versionDate}

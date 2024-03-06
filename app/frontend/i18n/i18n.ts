@@ -820,6 +820,7 @@ const options = {
             edit: "Edit",
             users: "Users",
             editTemplate: "Edit template",
+            editPermit: "Edit Permit",
             permitApplications: "Permit Applications",
             submissionInbox: "Submission Inbox",
             configuration: "Configure Jurisdiction",
