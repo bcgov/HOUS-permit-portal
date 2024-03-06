@@ -584,7 +584,7 @@ const options = {
             },
             zeroCarbonStepCodeCompliance: {
               heading: "G: Zero Carbon Step Code Compliance",
-              proposedMetrics: "Proposed Mouse Metrics",
+              proposedMetrics: "Proposed House Metrics",
               stepRequirement: "Proposed Step Requirement",
               result: "Proposed House Result",
               passFail: "Proposed House Pass or Fail",
