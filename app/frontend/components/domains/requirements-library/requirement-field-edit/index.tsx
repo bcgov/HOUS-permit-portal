@@ -30,13 +30,7 @@ interface IControlProps<TFieldValues extends FieldValues> {
   controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
 }
 
-type TRequirementEditProps<TFieldValues extends FieldValues> = {
-  label?: string
-  options?: string[]
-  helperText?: string
-  editableLabelProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
-  editableHelperTextProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
-  checkboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
+type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
   unitSelectProps?: IControlProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
@@ -45,7 +39,350 @@ type TRequirementEditProps<TFieldValues extends FieldValues> = {
   }
 }
 
-const EditableLabel = observer(function EditableLabel<TFieldValues extends FieldValues>({
+const requirementsComponentMap = {
+  [ERequirementType.text]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return <EditableGroup editableInput={<Input bg={"white"} isReadOnly />} {...props} />
+  },
+
+  [ERequirementType.phone]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return (
+      <EditableGroup
+        editableInput={
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <i className="fa fa-phone"></i>
+            </InputLeftElement>
+            <Input bg={"white"} isReadOnly />
+          </InputGroup>
+        }
+        {...props}
+      />
+    )
+  },
+
+  [ERequirementType.email]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return (
+      <EditableGroup
+        editableInput={
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <i className="fa fa-envelope"></i>
+            </InputLeftElement>
+            <Input bg={"white"} isReadOnly />
+          </InputGroup>
+        }
+        {...props}
+      />
+    )
+  },
+
+  [ERequirementType.address]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return (
+      <EditableGroup
+        editableInput={
+          <InputGroup>
+            <InputLeftElement>
+              <MapPin />
+            </InputLeftElement>
+            <Input bg={"white"} isReadOnly />
+          </InputGroup>
+        }
+        {...props}
+      />
+    )
+  },
+
+  [ERequirementType.date]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return (
+      <EditableGroup
+        editableInput={
+          <InputGroup w={"166px"}>
+            <InputLeftElement>
+              <CalendarBlank />
+            </InputLeftElement>
+            <Input bg={"white"} isReadOnly />
+          </InputGroup>
+        }
+        {...props}
+      />
+    )
+  },
+
+  [ERequirementType.number]: function <TFieldValues>({
+    unitSelectProps,
+    ...editableGroupProps
+  }: TRequirementEditProps<TFieldValues>) {
+    if (!unitSelectProps) {
+      import.meta.env.DEV && console.error("unitSelectProps is required for number requi  rement edit")
+      return null
+    }
+
+    const { controlProps: unitSelectControlProps } = unitSelectProps
+
+    return (
+      <EditableGroup
+        editableInput={
+          <HStack>
+            <Input bg={"white"} isReadOnly w={"130px"} />
+            <Controller<TFieldValues>
+              {...unitSelectControlProps}
+              render={({ field: { onChange, value } }) => (
+                <UnitSelect value={value as ENumberUnit} onChange={onChange} />
+              )}
+            />
+          </HStack>
+        }
+        {...editableGroupProps}
+      />
+    )
+  },
+
+  [ERequirementType.textArea]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return (
+      <EditableGroup
+        editableInput={<Textarea bg={"white"} _hover={{ borderColor: "border.base" }} isReadOnly />}
+        {...props}
+      />
+    )
+  },
+
+  [ERequirementType.radio]: function <TFieldValues>({
+    multiOptionProps,
+    ...editableGroupProps
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for radio requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
+    return (
+      <EditableGroup
+        multiOptionEditableInput={
+          <>
+            {fields.map((field, idx) => (
+              <HStack key={field.id}>
+                <Box
+                  border={"1px solid"}
+                  borderColor={"border.light"}
+                  bg={"white"}
+                  w={"16px"}
+                  h={"16px"}
+                  borderRadius={"100px"}
+                />
+                <Input
+                  bg={"white"}
+                  size={"sm"}
+                  value={getOptionValue(idx).label}
+                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  w={"150px"}
+                />
+                <IconButton
+                  aria-label={"remove option"}
+                  variant={"unstyled"}
+                  icon={<X />}
+                  onClick={() => remove(idx)}
+                />
+              </HStack>
+            ))}
+
+            {/*  @ts-ignore*/}
+            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+              {t("requirementsLibrary.modals.addOptionButton")}
+            </Button>
+          </>
+        }
+        {...editableGroupProps}
+      />
+    )
+  },
+
+  [ERequirementType.checkbox]: function <TFieldValues>({
+    multiOptionProps,
+    ...editableGroupProps
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for checkbox requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
+    return (
+      <EditableGroup
+        multiOptionEditableInput={
+          <>
+            {fields.map((field, idx) => (
+              <HStack key={field.id}>
+                <Box
+                  border={"1px solid"}
+                  borderColor={"border.light"}
+                  bg={"white"}
+                  w={"16px"}
+                  h={"16px"}
+                  borderRadius={"sm"}
+                />
+                <Input
+                  bg={"white"}
+                  size={"sm"}
+                  value={getOptionValue(idx).label}
+                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  w={"150px"}
+                />
+                <IconButton
+                  aria-label={"remove option"}
+                  variant={"unstyled"}
+                  icon={<X />}
+                  onClick={() => remove(idx)}
+                />
+              </HStack>
+            ))}
+
+            {/*  @ts-ignore*/}
+            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+              {t("requirementsLibrary.modals.addOptionButton")}
+            </Button>
+          </>
+        }
+        {...editableGroupProps}
+      />
+    )
+  },
+
+  [ERequirementType.multiOptionSelect]: function <TFieldValues>({
+    multiOptionProps,
+    ...editableGroupProps
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for multiOptionSelect requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
+    return (
+      <EditableGroup
+        multiOptionEditableInput={
+          <>
+            {fields.map((field, idx) => (
+              <HStack key={field.id}>
+                <Box
+                  border={"1px solid"}
+                  borderColor={"border.light"}
+                  bg={"white"}
+                  w={"16px"}
+                  h={"16px"}
+                  borderRadius={"sm"}
+                />
+                <Input
+                  bg={"white"}
+                  size={"sm"}
+                  value={getOptionValue(idx).label}
+                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  w={"150px"}
+                />
+                <IconButton
+                  aria-label={"remove option"}
+                  variant={"unstyled"}
+                  icon={<X />}
+                  onClick={() => remove(idx)}
+                />
+              </HStack>
+            ))}
+
+            {/*  @ts-ignore*/}
+            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+              {t("requirementsLibrary.modals.addOptionButton")}
+            </Button>
+          </>
+        }
+        {...editableGroupProps}
+      />
+    )
+  },
+
+  [ERequirementType.select]: function <TFieldValues>({
+    multiOptionProps,
+    ...editableGroupProps
+  }: TRequirementEditProps<TFieldValues>) {
+    const { t } = useTranslation()
+
+    if (!multiOptionProps) {
+      import.meta.env.DEV && console.error("multiOptionProps is required for select requirement edit")
+      return null
+    }
+
+    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+
+    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
+    return (
+      <EditableGroup
+        multiOptionEditableInput={
+          <>
+            {fields.map((field, idx) => (
+              <HStack key={field.id}>
+                <Input
+                  bg={"white"}
+                  size={"sm"}
+                  value={getOptionValue(idx).label}
+                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
+                  w={"150px"}
+                />
+                <IconButton
+                  aria-label={"remove option"}
+                  variant={"unstyled"}
+                  icon={<X />}
+                  onClick={() => remove(idx)}
+                />
+              </HStack>
+            ))}
+
+            {/*  @ts-ignore*/}
+            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+              {t("requirementsLibrary.modals.addOptionButton")}
+            </Button>
+          </>
+        }
+        {...editableGroupProps}
+      />
+    )
+  },
+
+  [ERequirementType.file]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
+    return <EditableGroup editableInput={<i className="fa fa-cloud-upload"></i>} {...props} />
+  },
+
+  [ERequirementType.energyStepCode]: function <TFieldValues>(props) {
+    return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
+  },
+}
+
+type TProps<TFieldValues> = {
+  requirementType: ERequirementType
+} & TRequirementEditProps<TFieldValues>
+
+export const RequirementFieldEdit = observer(function RequirementFieldDisplay<TFieldValues>({
+  requirementType,
+  ...rest
+}: TProps<TFieldValues>) {
+  return requirementsComponentMap[requirementType]?.(rest) ?? null
+})
+
+function EditableLabel<TFieldValues extends FieldValues>({
   controlProps,
   ...editableLabelProps
 }: TRequirementEditProps<TFieldValues>["editableLabelProps"]) {
@@ -62,9 +399,9 @@ const EditableLabel = observer(function EditableLabel<TFieldValues extends Field
       {...editableLabelProps}
     />
   )
-})
+}
 
-const EditableHelperText = observer(function EditableLabel<TFieldValues extends FieldValues>({
+function EditableHelperText<TFieldValues extends FieldValues>({
   controlProps,
   ...editableHelperTextProps
 }: TRequirementEditProps<TFieldValues>["editableLabelProps"]) {
@@ -82,534 +419,52 @@ const EditableHelperText = observer(function EditableLabel<TFieldValues extends 
       {...editableHelperTextProps}
     />
   )
-})
-
-const requirementsComponentMap = {
-  [ERequirementType.text]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <Input bg={"white"} isReadOnly />
-        <EditableHelperText {...editableHelperTextProps} />
-
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.phone]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <i className="fa fa-phone"></i>
-          </InputLeftElement>
-          <Input bg={"white"} isReadOnly />
-        </InputGroup>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.email]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <i className="fa fa-envelope"></i>
-          </InputLeftElement>
-          <Input bg={"white"} isReadOnly />
-        </InputGroup>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.address]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <InputGroup>
-          <InputLeftElement>
-            <MapPin />
-          </InputLeftElement>
-          <Input bg={"white"} isReadOnly />
-        </InputGroup>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.date]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <InputGroup w={"166px"}>
-          <InputLeftElement>
-            <CalendarBlank />
-          </InputLeftElement>
-          <Input bg={"white"} isReadOnly />
-        </InputGroup>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.number]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-    unitSelectProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps: checkboxControlProps, ...restCheckboxProps } = checkboxProps
-
-    if (!unitSelectProps) {
-      import.meta.env.DEV && console.error("unitSelectProps is required for number requi  rement edit")
-      return null
-    }
-
-    const { controlProps: unitSelectControlProps } = unitSelectProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <HStack>
-          <Input bg={"white"} isReadOnly w={"130px"} />
-          <Controller<TFieldValues>
-            {...unitSelectControlProps}
-            render={({ field: { onChange, value } }) => <UnitSelect value={value as ENumberUnit} onChange={onChange} />}
-          />
-        </HStack>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...checkboxControlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.textArea]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} isReadOnly />
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.radio]: function <TFieldValues>({
-    multiOptionProps,
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    if (!multiOptionProps) {
-      import.meta.env.DEV && console.error("multiOptionProps is required for radio requirement edit")
-      return null
-    }
-
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
-
-    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <Stack>
-          {fields.map((field, idx) => (
-            <HStack key={field.id}>
-              <Box
-                border={"1px solid"}
-                borderColor={"border.light"}
-                bg={"white"}
-                w={"16px"}
-                h={"16px"}
-                borderRadius={"100px"}
-              />
-              <Input
-                bg={"white"}
-                size={"sm"}
-                value={getOptionValue(idx).label}
-                onChange={(e) => onOptionValueChange(idx, e.target.value)}
-                w={"150px"}
-              />
-              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
-            </HStack>
-          ))}
-
-          {/*  @ts-ignore*/}
-          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
-            {t("requirementsLibrary.modals.addOptionButton")}
-          </Button>
-          <EditableHelperText {...editableHelperTextProps} />
-        </Stack>
-
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.checkbox]: function <TFieldValues>({
-    multiOptionProps,
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    if (!multiOptionProps) {
-      import.meta.env.DEV && console.error("multiOptionProps is required for checkbox requirement edit")
-      return null
-    }
-
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
-
-    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <Stack>
-          {fields.map((field, idx) => (
-            <HStack key={field.id}>
-              <Box
-                border={"1px solid"}
-                borderColor={"border.light"}
-                bg={"white"}
-                w={"16px"}
-                h={"16px"}
-                borderRadius={"sm"}
-              />
-              <Input
-                bg={"white"}
-                size={"sm"}
-                value={getOptionValue(idx).label}
-                onChange={(e) => onOptionValueChange(idx, e.target.value)}
-                w={"150px"}
-              />
-              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
-            </HStack>
-          ))}
-
-          {/*  @ts-ignore*/}
-          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
-            {t("requirementsLibrary.modals.addOptionButton")}
-          </Button>
-          <EditableHelperText {...editableHelperTextProps} />
-        </Stack>
-
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.multiOptionSelect]: function <TFieldValues>({
-    multiOptionProps,
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    if (!multiOptionProps) {
-      import.meta.env.DEV && console.error("multiOptionProps is required for checkbox requirement edit")
-      return null
-    }
-
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
-
-    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <Stack>
-          {fields.map((field, idx) => (
-            <HStack key={field.id}>
-              <Box
-                border={"1px solid"}
-                borderColor={"border.light"}
-                bg={"white"}
-                w={"16px"}
-                h={"16px"}
-                borderRadius={"sm"}
-              />
-              <Input
-                bg={"white"}
-                size={"sm"}
-                value={getOptionValue(idx).label}
-                onChange={(e) => onOptionValueChange(idx, e.target.value)}
-                w={"150px"}
-              />
-              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
-            </HStack>
-          ))}
-
-          {/*  @ts-ignore*/}
-          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
-            {t("requirementsLibrary.modals.addOptionButton")}
-          </Button>
-          <EditableHelperText {...editableHelperTextProps} />
-        </Stack>
-
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.select]: function <TFieldValues>({
-    multiOptionProps,
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    if (!multiOptionProps) {
-      import.meta.env.DEV && console.error("multiOptionProps is required for select requirement edit")
-      return null
-    }
-
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
-
-    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <Stack>
-          {fields.map((field, idx) => (
-            <HStack key={field.id}>
-              <Input
-                bg={"white"}
-                size={"sm"}
-                value={getOptionValue(idx).label}
-                onChange={(e) => onOptionValueChange(idx, e.target.value)}
-                w={"150px"}
-              />
-              <IconButton aria-label={"remove option"} variant={"unstyled"} icon={<X />} onClick={() => remove(idx)} />
-            </HStack>
-          ))}
-
-          {/*  @ts-ignore*/}
-          <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
-            {t("requirementsLibrary.modals.addOptionButton")}
-          </Button>
-          <EditableHelperText {...editableHelperTextProps} />
-        </Stack>
-
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.file]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <i className="fa fa-cloud-upload"></i>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
-
-  [ERequirementType.energyStepCode]: function <TFieldValues>({
-    editableLabelProps,
-    editableHelperTextProps,
-    checkboxProps,
-  }) {
-    const { t } = useTranslation()
-    const { controlProps, ...restCheckboxProps } = checkboxProps
-
-    return (
-      <Stack spacing={4}>
-        <EditableLabel {...editableLabelProps} />
-        <i className="fa fa-bolt"></i>
-        <EditableHelperText {...editableHelperTextProps} />
-        <Controller<TFieldValues>
-          {...controlProps}
-          render={({ field: checkboxField }) => (
-            // @ts-ignore
-            <Checkbox {...restCheckboxProps} {...checkboxField}>
-              {t("requirementsLibrary.modals.optionalForSubmitters")}
-            </Checkbox>
-          )}
-        />
-      </Stack>
-    )
-  },
 }
 
-type TProps<TFieldValues> = {
-  requirementType: ERequirementType
-} & TRequirementEditProps<TFieldValues>
+function IsOptionalCheckbox<TFieldValues extends FieldValues>({
+  controlProps,
+  ...checkboxProps
+}: TRequirementEditProps<TFieldValues>["isOptionalCheckboxProps"]) {
+  const { field } = useController(controlProps)
+  const { t } = useTranslation()
+  return (
+    <Checkbox {...checkboxProps} {...field}>
+      {t("requirementsLibrary.modals.optionalForSubmitters")}
+    </Checkbox>
+  )
+}
+
+type TEditableGroupProps<TFieldValues extends FieldValues> = {
+  editableLabelProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
+  editableHelperTextProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
+  isOptionalCheckboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
+  editableInput?: JSX.Element
+  multiOptionEditableInput?: JSX.Element
+}
+
+function EditableGroup<TFieldValues>({
+  editableLabelProps,
+  editableHelperTextProps,
+  editableInput,
+  multiOptionEditableInput,
+  isOptionalCheckboxProps,
+}: TEditableGroupProps<TFieldValues>) {
+  return (
+    <Stack spacing={4}>
+      <EditableLabel {...editableLabelProps} />
+      {editableInput}
+      {editableInput && <EditableHelperText {...editableHelperTextProps} />}
+      {multiOptionEditableInput && (
+        <Stack>
+          {multiOptionEditableInput}
+          <EditableHelperText {...editableHelperTextProps} />
+        </Stack>
+      )}
+      <IsOptionalCheckbox {...isOptionalCheckboxProps} />
+    </Stack>
+  )
+}
 
 export function hasRequirementFieldEditComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
 }
-
-export const RequirementFieldEdit = observer(function RequirementFieldDisplay<TFieldValues>({
-  requirementType,
-  ...rest
-}: TProps<TFieldValues>) {
-  return requirementsComponentMap[requirementType]?.(rest) ?? null
-})

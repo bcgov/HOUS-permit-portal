@@ -182,7 +182,7 @@ const requirementsComponentMap = {
     return (
       <FormControl isReadOnly>
         <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.multiSelectCheckbox")}
+          {label ?? t("requirementsLibrary.requirementTypeLabels.multiOptionSelect")}
         </FormLabel>
         <CheckboxGroup>
           <Stack>
