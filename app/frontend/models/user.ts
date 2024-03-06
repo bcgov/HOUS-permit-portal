@@ -47,6 +47,9 @@ export const UserModel = types
     get name() {
       return `${self.firstName} ${self.lastName}`
     },
+    get firstInitialLastName() {
+      return `${self.firstName[0]}${self.lastName}`
+    },
   }))
   .actions((self) => ({
     destroy: flow(function* () {

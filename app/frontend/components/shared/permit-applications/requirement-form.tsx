@@ -17,9 +17,11 @@ import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
+
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
+import { usePDF } from "react-to-pdf"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
@@ -51,6 +53,10 @@ export const RequirementForm = observer(
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
     const [imminentSubmission, setImminentSubmission] = useState(null)
+
+    // const { uploadFormPdf } = usePermitApplicationPdfUpload()
+
+    const { toPDF, targetRef } = usePDF({ filename: "page.pdf" })
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -143,6 +149,10 @@ export const RequirementForm = observer(
     }
 
     const onModalSubmit = async () => {
+      // await uploadFormPdf(permitApplication, formRef.current.component, imminentSubmission)
+
+      toPDF()
+
       if (await permitApplication.submit({ submissionData: imminentSubmission })) {
         navigate(`/permit-applications/${permitApplication.id}/sucessful-submission`)
       }
@@ -191,14 +201,16 @@ export const RequirementForm = observer(
               status="info"
             />
           )}
-          <Form
-            form={formattedFormJson}
-            formReady={formReady}
-            submission={submissionData}
-            onSubmit={onFormSubmit}
-            options={isDraft ? {} : { readOnly: true }}
-            onBlur={onBlur}
-          />
+          <div ref={targetRef}>
+            <Form
+              form={formattedFormJson}
+              formReady={formReady}
+              submission={submissionData}
+              onSubmit={onFormSubmit}
+              options={isDraft ? {} : { readOnly: true }}
+              onBlur={onBlur}
+            />
+          </div>
         </Flex>
         <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
           <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">

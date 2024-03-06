@@ -50,6 +50,8 @@
     "@types/react-dom": "^18.2.17",
     "apisauce": "^3.0.1",
     "date-fns": "^2.30.0",
+    "formio-export": "^0.3.0",
+    "formio-export-mc": "^0.3.32",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",
     "humps": "^2.0.1",
@@ -72,7 +74,8 @@
     "react-quill": "^2.0.0",
     "react-remove-scroll": "^2.5.7",
     "react-router-dom": "^6.20.0",
-    "react-select": "^5.8.0"
+    "react-select": "^5.8.0",
+    "react-to-pdf": "^1.0.1"
   },
   "overrides": {
     "vite": {
