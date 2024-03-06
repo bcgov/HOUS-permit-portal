@@ -49,7 +49,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
               <TextFormControl
                 inputProps={{
                   isDisabled: true,
-                  value: checklist.proposedEnergyStep,
+                  value: checklist.proposedEnergyStep || "-",
                   textAlign: "center",
                   fontWeight: "bold",
                 }}
@@ -77,7 +77,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
               <TextFormControl
                 inputProps={{
                   isDisabled: true,
-                  value: checklist.proposedZeroCarbonStep,
+                  value: checklist.proposedZeroCarbonStep || "-",
                   textAlign: "center",
                   fontWeight: "bold",
                 }}
