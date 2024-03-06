@@ -15,7 +15,7 @@ class Api::StepCodesController < Api::ApplicationController
       StepCode::DataEntryFromHot2000.new(xml: Nokogiri.XML(de.h2k_file.read), data_entry: de).call if de.h2k_file
     end
 
-    render_success @step_code, "step_code.create_success", { blueprint: StepCodeBlueprint }
+    render_success @step_code, "step_code.h2k_imported", { blueprint: StepCodeBlueprint }
   end
 
   # DELETE /api/step_codes/:id
