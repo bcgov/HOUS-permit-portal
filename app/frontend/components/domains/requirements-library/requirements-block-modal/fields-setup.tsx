@@ -245,6 +245,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       selectProps={{
                         maxW: "339px",
                       }}
+                      showAddLabelIndicator
                     />
                   </Box>
                   <HStack pos={"absolute"} right={0} top={0} spacing={4}>
