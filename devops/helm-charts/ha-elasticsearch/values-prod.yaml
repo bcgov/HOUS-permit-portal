@@ -8,7 +8,7 @@ elasticsearch:
         cpu: "20m"
         memory: "512Mi"
       limits:
-        cpu: "150m"
+        cpu: "100m"
         memory: "1024Mi"
     persistence:
       enabled: true
@@ -23,7 +23,7 @@ elasticsearch:
         cpu: "20m"
         memory: "1024Mi"
       limits:
-        cpu: "300m"
+        cpu: "150m"
         memory: "2048Mi"
     persistence:
       enabled: true
