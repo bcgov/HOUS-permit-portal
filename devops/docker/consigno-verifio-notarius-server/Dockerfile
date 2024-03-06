@@ -40,7 +40,7 @@ ENTRYPOINT ["./entrypoint.sh"]
 
 # Set up the entrypoint or command to run your CSA application
 # Adjust this to the specific commands you need to run your application
-CMD ["csa-service", "start"]
+# CMD ["csa-service", "start"]
 
 # Expose any ports your application needs
 EXPOSE 8080
