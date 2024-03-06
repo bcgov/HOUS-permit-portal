@@ -9,6 +9,7 @@ export const RequirementModel = types
     hint: types.maybeNull(types.string),
     inputType: types.enumeration<ERequirementType[]>(Object.values(ERequirementType)),
     inputOptions: types.frozen<IRequirementOptions>({}),
+    elective: types.boolean,
     createdAt: types.Date,
     updatedAt: types.Date,
   })
