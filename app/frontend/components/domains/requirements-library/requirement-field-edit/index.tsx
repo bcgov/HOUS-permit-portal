@@ -39,6 +39,15 @@ type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupPro
   }
 }
 
+type TEditableGroupProps<TFieldValues extends FieldValues> = {
+  editableLabelProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
+  editableHelperTextProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
+  isOptionalCheckboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
+  isElectiveCheckboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
+  editableInput?: JSX.Element
+  multiOptionEditableInput?: JSX.Element
+}
+
 const requirementsComponentMap = {
   [ERequirementType.text]: function <TFieldValues>(props: TRequirementEditProps<TFieldValues>) {
     return <EditableGroup editableInput={<Input bg={"white"} isReadOnly />} {...props} />
@@ -425,21 +434,40 @@ function IsOptionalCheckbox<TFieldValues extends FieldValues>({
   controlProps,
   ...checkboxProps
 }: TRequirementEditProps<TFieldValues>["isOptionalCheckboxProps"]) {
-  const { field } = useController(controlProps)
+  const {
+    field: { value, onChange, ...restField },
+  } = useController(controlProps)
   const { t } = useTranslation()
+
   return (
-    <Checkbox {...checkboxProps} {...field}>
+    //   This is checked inverse of the boolean value. This is because the db field is for "required", instead of
+    //   optional, and by default it should be required
+    <Checkbox
+      {...checkboxProps}
+      isChecked={value === undefined ? value : !value}
+      onChange={(e) => {
+        onChange(!e.target.checked)
+      }}
+      {...restField}
+    >
       {t("requirementsLibrary.modals.optionalForSubmitters")}
     </Checkbox>
   )
 }
 
-type TEditableGroupProps<TFieldValues extends FieldValues> = {
-  editableLabelProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
-  editableHelperTextProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
-  isOptionalCheckboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
-  editableInput?: JSX.Element
-  multiOptionEditableInput?: JSX.Element
+function IsElectiveCheckbox<TFieldValues extends FieldValues>({
+  controlProps,
+  ...checkboxProps
+}: TRequirementEditProps<TFieldValues>["isElectiveCheckboxProps"]) {
+  const {
+    field: { value, ...restField },
+  } = useController(controlProps)
+  const { t } = useTranslation()
+  return (
+    <Checkbox {...checkboxProps} isChecked={value} {...restField}>
+      {t("requirementsLibrary.modals.isAnElectiveField")}
+    </Checkbox>
+  )
 }
 
 function EditableGroup<TFieldValues>({
@@ -448,6 +476,7 @@ function EditableGroup<TFieldValues>({
   editableInput,
   multiOptionEditableInput,
   isOptionalCheckboxProps,
+  isElectiveCheckboxProps,
 }: TEditableGroupProps<TFieldValues>) {
   return (
     <Stack spacing={4}>
@@ -461,6 +490,7 @@ function EditableGroup<TFieldValues>({
         </Stack>
       )}
       <IsOptionalCheckbox {...isOptionalCheckboxProps} />
+      <IsElectiveCheckbox mt={"0.625rem"} {...isElectiveCheckboxProps} />
     </Stack>
   )
 }

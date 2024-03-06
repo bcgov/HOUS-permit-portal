@@ -293,6 +293,7 @@ const options = {
             addHelpText: "Add help text",
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
+            isAnElectiveField: "This is an elective field for Local Gov",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
