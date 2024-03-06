@@ -4,7 +4,7 @@ Rails.application.configure do
   # Specify AnyCable WebSocket server URL to use by JS client
   config.after_initialize do
     config.action_cable.url =
-      ActionCable.server.config.url = ENV.fetch("CABLE_URL", "/cable") if AnyCable::Rails.enabled?
+      ActionCable.server.config.url = ENV.fetch("ANYCABLE_URL", "/cable") if AnyCable::Rails.enabled?
   end
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -38,7 +38,7 @@ Rails.application.configure do
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "wss://example.com/cable"
-  # config.action_cable.allowed_request_origins = [ "http://example.com", /http:\/\/example.*/ ]
+  config.action_cable.allowed_request_origins = ENV["ANYCABLE_ALLOWED_REQUEST_ORIGINS"]
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   # Can be used together with config.force_ssl for Strict-Transport-Security and secure cookies.

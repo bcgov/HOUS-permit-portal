@@ -24,6 +24,7 @@ default: &default # Turn on/off access logs ("Started..." and "Finished...")
 
 development:
   <<: *default
+  redis_url: <%= ENV.fetch("ANYCABLE_DEV_REDIS_URL", "redis://localhost:6310/1") %>
 
 test:
   <<: *default
