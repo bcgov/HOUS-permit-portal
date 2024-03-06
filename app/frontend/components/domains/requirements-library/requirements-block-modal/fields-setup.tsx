@@ -170,12 +170,15 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       isOptionalCheckboxProps={{
                         controlProps: {
                           control: control,
-                          rules: {
-                            onChange: (e) => setValue(`requirementsAttributes.${index}.required`, !e.target.value),
-                          },
                           name: `requirementsAttributes.${index}.required`,
-                          // @ts-ignore
                           defaultValue: true,
+                        },
+                      }}
+                      isElectiveCheckboxProps={{
+                        controlProps: {
+                          control: control,
+                          name: `requirementsAttributes.${index}.elective`,
+                          // @ts-ignore
                         },
                       }}
                       unitSelectProps={
