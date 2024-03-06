@@ -384,7 +384,7 @@ type TProps<TFieldValues> = {
   requirementType: ERequirementType
 } & TRequirementEditProps<TFieldValues>
 
-export const RequirementFieldEdit = observer(function RequirementFieldDisplay<TFieldValues>({
+export const RequirementFieldEdit = observer(function RequirementFieldEdit<TFieldValues>({
   requirementType,
   ...rest
 }: TProps<TFieldValues>) {
