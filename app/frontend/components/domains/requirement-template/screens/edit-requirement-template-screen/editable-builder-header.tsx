@@ -19,6 +19,16 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
   const watchedDescription = watch("description")
   return (
     <BuilderHeader
+      breadCrumbs={[
+        {
+          href: "/requirement-templates",
+          title: t("site.breadcrumb.requirementTemplates"),
+        },
+        {
+          href: `/requirements-template${requirementTemplate.id}/edit`,
+          title: t("site.breadcrumb.editTemplate"),
+        },
+      ]}
       requirementTemplate={requirementTemplate}
       status={ETemplateVersionStatus.draft}
       renderDescription={() => (

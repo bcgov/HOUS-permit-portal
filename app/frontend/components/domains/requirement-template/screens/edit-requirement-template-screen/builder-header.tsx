@@ -13,6 +13,7 @@ interface IProps {
   renderDescription?: () => JSX.Element
   status?: ETemplateVersionStatus
   versionDate?: Date
+  breadCrumbs?: { href: string; title: string }[]
 }
 
 export const BuilderHeader = observer(function BuilderHeader({
@@ -20,26 +21,9 @@ export const BuilderHeader = observer(function BuilderHeader({
   status,
   versionDate,
   renderDescription,
+  breadCrumbs = [],
 }: IProps) {
   const { t } = useTranslation()
-  const breadCrumbs =
-    status === ETemplateVersionStatus.draft
-      ? [
-          {
-            href: "/requirement-templates",
-            title: t("site.breadcrumb.requirementTemplates"),
-          },
-          {
-            href: `/requirements-template${requirementTemplate.id}/edit`,
-            title: t("site.breadcrumb.editTemplate"),
-          },
-        ]
-      : [
-          {
-            href: "/template-versions",
-            title: t("site.breadcrumb.templateVersions"),
-          },
-        ]
 
   return (
     <Container as={"header"} maxW={"container.lg"} px={8}>
