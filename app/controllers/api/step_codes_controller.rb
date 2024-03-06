@@ -17,7 +17,7 @@ class Api::StepCodesController < Api::ApplicationController
       end
     end
 
-    render_success @step_code, "step_code.create_success", { blueprint: StepCodeBlueprint }
+    render_success @step_code, "step_code.h2k_imported", { blueprint: StepCodeBlueprint }
   end
 
   # DELETE /api/step_codes/:id

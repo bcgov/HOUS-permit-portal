@@ -12,7 +12,7 @@ interface IProps {
 
 export const ZeroCarbonStepCodeCompliance = observer(function ZeroCarbonStepCodeCompliance({ checklist }: IProps) {
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
+    <ChecklistSection heading={t(`${translationPrefix}.heading`)} isAutoFilled>
       <ZeroCarbonComplianceGrid checklist={checklist} />
     </ChecklistSection>
   )
