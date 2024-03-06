@@ -38,8 +38,7 @@ ENV PATH=${CSA_HOME}/bin:${PATH}
 COPY entrypoint.sh /
 ENTRYPOINT ["./entrypoint.sh"]
 
-# Set up the entrypoint or command to run your CSA application
-# Adjust this to the specific commands you need to run your application
+# See Entrypoint script above since we want to start in foreground we won't use csa-service start
 # CMD ["csa-service", "start"]
 
 # Expose any ports your application needs
