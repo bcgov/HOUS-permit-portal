@@ -6,5 +6,6 @@ FactoryBot.define do
     activity { Activity.first || association(:activity) }
     status { :draft }
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
+    association :template_version
   end
 end

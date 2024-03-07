@@ -96,5 +96,5 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
-  config.before(:each) { Sidekiq::Worker.clear_all }
+  config.before(:each) { Sidekiq::Worker.respond_to?(:clear_all) && Sidekiq::Worker.clear_all }
 end
