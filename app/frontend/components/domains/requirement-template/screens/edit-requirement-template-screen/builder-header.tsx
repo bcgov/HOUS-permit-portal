@@ -2,11 +2,11 @@ import { Container, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { ETemplateVersionStatus } from "../../../../types/enums"
-import { IDenormalizedTemplate } from "../../../../types/types"
-import { TemplateStatusTag } from "../../../shared/requirement-template/template-status-tag"
-import { VersionTag } from "../../../shared/version-tag"
-import { SubNavBar } from "../../navigation/sub-nav-bar"
+import { ETemplateVersionStatus } from "../../../../../types/enums"
+import { IDenormalizedTemplate } from "../../../../../types/types"
+import { TemplateStatusTag } from "../../../../shared/requirement-template/template-status-tag"
+import { VersionTag } from "../../../../shared/version-tag"
+import { SubNavBar } from "../../../navigation/sub-nav-bar"
 
 interface IProps {
   requirementTemplate: Pick<IDenormalizedTemplate, "id" | "description" | "activity" | "permitType">

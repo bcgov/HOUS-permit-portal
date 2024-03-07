@@ -3,11 +3,11 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useTemplateVersions } from "../../../../hooks/resources/use-template-versions"
-import { ErrorScreen } from "../../../shared/base/error-screen"
-import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { RouterLink } from "../../../shared/navigation/router-link"
-import { VersionTag } from "../../../shared/version-tag"
+import { useTemplateVersions } from "../../../../../hooks/resources/use-template-versions"
+import { ErrorScreen } from "../../../../shared/base/error-screen"
+import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { RouterLink } from "../../../../shared/navigation/router-link"
+import { VersionTag } from "../../../../shared/version-tag"
 
 interface IProps {
   activityId?: string
@@ -57,7 +57,14 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
               <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
             </Stack>
 
-            <Button as={RouterLink} variant={"primary"} ml={4} textDecor={"none"} alignSelf={"center"} isDisabled>
+            <Button
+              to={`/digital-building-permits/${templateVersion.id}/edit`}
+              as={RouterLink}
+              variant={"primary"}
+              ml={4}
+              textDecor={"none"}
+              alignSelf={"center"}
+            >
               {t("ui.manage")}
             </Button>
           </Flex>

@@ -1,7 +1,9 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-tempate-screen"
+import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
 import { IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
@@ -256,6 +258,34 @@ export class Api {
 
   async fetchTemplateVersion(id: string) {
     return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
+  }
+
+  async fetchJurisdictionTemplateVersionCustomization(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`
+    )
+  }
+
+  async createJurisdictionTemplateVersionCustomization(
+    templateId: string,
+    jurisdictionId: string,
+    jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
+  ) {
+    return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
+      { jurisdictionTemplateVersionCustomization }
+    )
+  }
+
+  async updateJurisdictionTemplateVersionCustomization(
+    templateId: string,
+    jurisdictionId: string,
+    jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
+  ) {
+    return this.client.put<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
+      { jurisdictionTemplateVersionCustomization }
+    )
   }
 
   async fetchStepCodes() {

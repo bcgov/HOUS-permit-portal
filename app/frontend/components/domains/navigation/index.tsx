@@ -25,11 +25,12 @@ import { EditPermitApplicationScreen } from "../permit-application/edit-permit-a
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
 import { ReviewPermitApplicationScreen } from "../permit-application/review-permit-application-screen"
 import { SuccessfulSubmissionScreen } from "../permit-application/successful-submission"
-import { RequirementTemplatesScreen } from "../requirement-template"
-import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
-import { JurisdictionDigitalPermitScreen } from "../requirement-template/jurisdiction-digital-permit-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
-import { TemplateVersionScreen } from "../requirement-template/template-version-screen"
+import { EditRequirementTemplateScreen } from "../requirement-template/screens/edit-requirement-template-screen"
+import { JurisdictionDigitalPermitScreen } from "../requirement-template/screens/jurisdiction-digital-permit-screen"
+import { JurisdictionEditDigitalPermitScreen } from "../requirement-template/screens/jurisdiction-edit-digital-permit-screen"
+import { RequirementTemplatesScreen } from "../requirement-template/screens/requirement-template-screen"
+import { TemplateVersionScreen } from "../requirement-template/screens/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { StepCodeForm } from "../step-code"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
@@ -118,8 +119,12 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const revireMangaerOnlyRoutes = (
+  const reviewManagerOnlyRoutes = (
     <>
+      <Route
+        path="/digital-building-permits/:templateVersionId/edit"
+        element={<JurisdictionEditDigitalPermitScreen />}
+      />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
     </>
   )
@@ -139,7 +144,7 @@ const AppRoutes = observer(() => {
             {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
             {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
             {currentUser?.isSubmitter && submitterOnlyRoutes}
-            {currentUser?.isReviewManager && revireMangaerOnlyRoutes}
+            {currentUser?.isReviewManager && reviewManagerOnlyRoutes}
           </>
         ) : (
           <>

@@ -7,6 +7,18 @@ class TemplateVersionPolicy < ApplicationPolicy
     !record.scheduled? || user.super_admin?
   end
 
+  def show_jurisdiction_template_version_cutomization?
+    true
+  end
+
+  def update_jurisdiction_template_version_cutomization?
+    show_jurisdiction_template_version_cutomization?
+  end
+
+  def create_jurisdiction_template_version_cutomization?
+    show_jurisdiction_template_version_cutomization?
+  end
+
   class Scope < Scope
     def resolve
       [] unless user.super_admin?

@@ -1,24 +1,25 @@
-import { Button, Flex, Stack, Text, useDisclosure } from "@chakra-ui/react"
-import { ArrowUp } from "@phosphor-icons/react"
+import { Flex, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
 import { v4 as uuidv4 } from "uuid"
-import { useRequirementTemplate } from "../../../../hooks/resources/use-requirement-template"
-import { IRequirementTemplate } from "../../../../models/requirement-template"
-import { ITemplateSectionBlockModel } from "../../../../models/template-section-block"
-import { useMst } from "../../../../setup/root"
+import { useRequirementTemplate } from "../../../../../hooks/resources/use-requirement-template"
+import { IRequirementTemplate } from "../../../../../models/requirement-template"
+import { ITemplateSectionBlockModel } from "../../../../../models/template-section-block"
+import { useMst } from "../../../../../setup/root"
 import {
   IRequirementTemplateSectionAttributes,
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
-} from "../../../../types/api-request"
-import { ErrorScreen } from "../../../shared/base/error-screen"
-import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { SectionsSidebar } from "../sections-sidebar"
+} from "../../../../../types/api-request"
+import { ErrorScreen } from "../../../../shared/base/error-screen"
+import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { BuilderFloatingButtons } from "../../builder-floating-buttons"
+import { SectionsSidebar } from "../../sections-sidebar"
+import { useSectionHighlight } from "../../use-section-highlight"
 import { ControlsHeader } from "./controls-header"
 import { EditableBuilderHeader } from "./editable-builder-header"
 import { SectionsDisplay } from "./sections-display"
@@ -40,12 +41,15 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     control,
   })
   const { t } = useTranslation()
-  const rightContainerRef = useRef<HTMLDivElement>()
   const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
   const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
+  const {
+    rootContainerRef: rightContainerRef,
+    sectionRefs,
+    sectionIdToHighlight: currentSectionId,
+  } = useSectionHighlight({ sections: watchedSectionsAttributes })
 
   const denormalizedSections = watchedSectionsAttributes.map((section) => ({
     id: section.id,
@@ -103,12 +107,6 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
-  const currentSectionId = (() => {
-    const orderedInViewSections = watchedSectionsAttributes.filter((section) => sectionsInViewStatuses[section.id])
-
-    return orderedInViewSections?.[0]?.id ?? null
-  })()
-
   return (
     // the height 1px is needed other wise scroll does not work
     // as it seems like the browser has issues calculating height for flex=1 containers
@@ -158,14 +156,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             </Flex>
           </Flex>
         </FormProvider>
-        <Stack spacing={4} position={"fixed"} bottom={6} right={6} alignItems={"flex-end"}>
-          <Button variant={"greyButton"} leftIcon={<ArrowUp />} pl={"0.6125rem"} onClick={scrollToTop}>
-            {t("requirementTemplate.edit.goToTop")}
-          </Button>
-          <Button variant={"greyButton"} onClick={onCollapseAll}>
-            {t("requirementTemplate.edit.collapseAll")}
-          </Button>
-        </Stack>
+        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
       </Flex>
     </RemoveScroll>
   )
