@@ -9,16 +9,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
     begin
       permit_classifications =
         if classification_option_params[:published].present?
-          query =
-            if classification_option_params[:pid].present?
-              attributes =
-                Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: classification_option_params[:pid])
-
-              jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
-              jurisdiction.requirement_templates
-            else
-              RequirementTemplate
-            end.includes(:permit_type).includes(:activity)
+          query = RequirementTemplate.with_published_version.includes(:permit_type).includes(:activity)
 
           query =
             query.where(permit_type_id: classification_option_params[:permit_type_id]) if classification_option_params[
