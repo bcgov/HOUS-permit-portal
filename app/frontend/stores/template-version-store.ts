@@ -34,8 +34,10 @@ export const TemplateVersionStoreModel = types
       if (response.ok) {
         const templateVersions = response.data.data
 
-        templateVersions.forEach((version) => (version.isFullyLoaded = true)),
-          self.mergeUpdateAll(templateVersions, "templateVersionMap")
+        templateVersions.forEach((version) => {
+          version.isFullyLoaded = true
+        })
+        self.mergeUpdateAll(templateVersions, "templateVersionMap")
 
         !!activityId &&
           self.templateVersionsByActivityId.set(

@@ -65,17 +65,19 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
                   }
                 />
               </Box>
-              <Box>
-                <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
-                  {t("requirementTemplate.versionSidebar.listTitles.draft")}
-                </Text>
+              {!requirementTemplate.isDiscarded && (
+                <Box>
+                  <Text as="h3" fontSize={"xl"} fontWeight={700} mb={2}>
+                    {t("requirementTemplate.versionSidebar.listTitles.draft")}
+                  </Text>
 
-                <VersionCard
-                  viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
-                  status={ETemplateVersionStatus.draft}
-                  updatedAt={requirementTemplate.updatedAt}
-                />
-              </Box>
+                  <VersionCard
+                    viewRoute={`/requirement-templates/${requirementTemplate.id}/edit`}
+                    status={ETemplateVersionStatus.draft}
+                    updatedAt={requirementTemplate.updatedAt}
+                  />
+                </Box>
+              )}
 
               <VersionsList
                 type={ETemplateVersionStatus.scheduled}

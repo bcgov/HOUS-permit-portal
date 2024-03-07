@@ -1,4 +1,4 @@
-import { ENumberUnit, ERequirementTemplateStatus, ERequirementType, ETagType } from "./enums"
+import { ENumberUnit, ERequirementType, ETagType } from "./enums"
 import { IOption } from "./types"
 
 export interface IRequirementsAttribute {
@@ -39,7 +39,6 @@ export interface IRequirementTemplateSectionAttributes {
 }
 
 export interface IRequirementTemplateUpdateParams {
-  status?: ERequirementTemplateStatus
   description?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }

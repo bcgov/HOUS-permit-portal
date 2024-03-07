@@ -1,6 +1,6 @@
 class RequirementTemplateBlueprint < Blueprinter::Base
   identifier :id
-  fields :status, :description, :scheduled_for, :discarded_at, :created_at, :updated_at
+  fields :description, :discarded_at, :created_at, :updated_at
 
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
