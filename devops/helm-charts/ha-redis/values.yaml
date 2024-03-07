@@ -2,7 +2,7 @@ OPENSHIFT_NAMESPACE: bb18ab
 STAGE: dev
 
 redis:
-  fullNameOverride: redis-ha
+  fullnameOverride: redis-ha
   architecture: replication
   # Redis only exposed internally to the Openshift cluster
   auth:

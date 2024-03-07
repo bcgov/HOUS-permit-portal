@@ -1,6 +1,6 @@
 ## Elasticsearch parameters
 elasticsearch:
-  fullNameOverride: elasticsearch-ha
+  fullnameOverride: elasticsearch-ha
   clusterName: "elasticsearch"
   sysctlImage:
     enabled: false
