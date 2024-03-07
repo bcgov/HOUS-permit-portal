@@ -15,6 +15,6 @@ spec:
     termination: edge
   to:
     kind: Service
-    name: "{{ .Values.STAGE }}-{{ .Values.appName }}"
+    name: "{{ .Values.STAGE }}-{{ .Values.appName }}-web"
     weight: 100
   wildcardPolicy: None
