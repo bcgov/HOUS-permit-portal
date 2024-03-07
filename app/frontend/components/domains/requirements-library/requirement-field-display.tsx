@@ -250,7 +250,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
   return (
-    <FormControl isReadOnly>
+    <FormControl w={"100%"} isReadOnly>
       <FormLabel {...defaultLabelProps} {...labelProps} color={!label && showAddLabelIndicator ? "error" : undefined}>
         {label ??
           (showAddLabelIndicator

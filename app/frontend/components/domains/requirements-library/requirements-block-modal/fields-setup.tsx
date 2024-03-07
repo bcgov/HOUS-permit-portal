@@ -1,9 +1,10 @@
-import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { getRequirementTypeLabel } from "../../../../constants"
 import { IRequirementsAttribute } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { isMultiOptionRequirement } from "../../../../utils/utility-functions"
@@ -15,6 +16,15 @@ import { RequirementFieldEdit } from "../requirement-field-edit"
 import { OptionsMenu } from "../requirement-field-edit/options-menu"
 import { IRequirementBlockForm } from "./index"
 
+const fieldContainerSharedProps = {
+  w: "full",
+  sx: {
+    "& input": {
+      maxW: "339px",
+    },
+  },
+  mt: 7,
+}
 export const FieldsSetup = observer(function FieldsSetup() {
   const { t } = useTranslation()
   const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
@@ -108,6 +118,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
             {fields.map((field, index) => {
               const watchedHint = watch(`requirementsAttributes.${index}.hint`)
+              const watchedElective = watch(`requirementsAttributes.${index}.elective`)
               const requirementType = (field as IRequirementsAttribute).inputType
               return (
                 <Box
@@ -116,14 +127,20 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   borderRadius={"sm"}
                   _hover={{
                     bg: "theme.blueLight",
-                    "& .requirement-edit-btn": {
-                      visibility: "visible",
+                    "& .requirement-edit-controls-container": {
+                      flexFlow: "row",
+                      ".requirement-edit-controls": {
+                        visibility: "visible",
+                      },
                     },
                   }}
                   _focus={{
                     bg: "theme.blueLight",
-                    "& .requirement-edit-btn": {
-                      visibility: "visible",
+                    "& .requirement-edit-controls-container": {
+                      flexFlow: "row",
+                      ".requirement-edit-controls": {
+                        visibility: "visible",
+                      },
                     },
                   }}
                   tabIndex={0}
@@ -132,15 +149,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   pb={5}
                   pos={"relative"}
                 >
-                  <Box
-                    w={"full"}
-                    sx={{
-                      "& input": {
-                        maxW: "339px",
-                      },
-                    }}
-                    display={isRequirementInEditMode(field.id) ? "block" : "none"}
-                  >
+                  <Box {...fieldContainerSharedProps} display={isRequirementInEditMode(field.id) ? "block" : "none"}>
                     <RequirementFieldEdit<IRequirementBlockForm>
                       requirementType={requirementType}
                       editableLabelProps={{
@@ -150,7 +159,6 @@ export const FieldsSetup = observer(function FieldsSetup() {
                           rules: { required: true },
                         },
                         color: "text.link",
-                        w: `calc(100% - 220px)`,
                         "aria-label": "Edit Label",
                       }}
                       editableHelperTextProps={{
@@ -219,21 +227,14 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     />
                   </Box>
                   <Box
-                    w={"full"}
-                    sx={{
-                      "& input": {
-                        maxW: "339px",
-                      },
-                    }}
+                    className={"requirement-display"}
                     display={!isRequirementInEditMode(field.id) ? "block" : "none"}
+                    {...fieldContainerSharedProps}
                   >
                     <RequirementFieldDisplay
                       requirementType={requirementType}
                       label={watch(`requirementsAttributes.${index}.label`)}
                       helperText={watchedHint}
-                      labelProps={{
-                        w: `calc(100% - 60px})`,
-                      }}
                       unit={
                         requirementType === ERequirementType.number
                           ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
@@ -257,17 +258,42 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         onRemove={() => remove(index)}
                       />
                     )}
-                    <Button
-                      className={"requirement-edit-btn"}
-                      visibility={isRequirementInEditMode(field.id) ? "visible" : "hidden"}
-                      variant={"primary"}
-                      size={"sm"}
-                      onClick={() => {
-                        toggleRequirementToEdit(field.id)
-                      }}
-                    >
-                      {t(isRequirementInEditMode(field.id) ? "ui.done" : "ui.edit")}
-                    </Button>
+                    <HStack className={"requirement-edit-controls-container"} flexFlow={"row-reverse"}>
+                      {watchedElective && !isRequirementInEditMode(field.id) && (
+                        <Tag
+                          bg={"theme.yellowLight"}
+                          color={"text.secondary"}
+                          fontWeight={700}
+                          fontSize={"xs"}
+                          visibility={isRequirementInEditMode(field.id) ? "hidden" : "visible"}
+                        >
+                          {t("requirementsLibrary.elective")}
+                        </Tag>
+                      )}
+                      {!isRequirementInEditMode(field.id) && (
+                        <Tag
+                          bg={"greys.grey03"}
+                          color={"text.secondary"}
+                          fontWeight={700}
+                          fontSize={"xs"}
+                          className={"requirement-edit-controls"}
+                          visibility={"hidden"}
+                        >
+                          {getRequirementTypeLabel(requirementType)}
+                        </Tag>
+                      )}
+                      <Button
+                        variant={"primary"}
+                        size={"sm"}
+                        onClick={() => {
+                          toggleRequirementToEdit(field.id)
+                        }}
+                        className={"requirement-edit-controls"}
+                        visibility={isRequirementInEditMode(field.id) ? "visible" : "hidden"}
+                      >
+                        {t(isRequirementInEditMode(field.id) ? "ui.done" : "ui.edit")}
+                      </Button>
+                    </HStack>
                   </HStack>
                 </Box>
               )

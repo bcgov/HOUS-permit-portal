@@ -11,6 +11,7 @@ export const colors = {
     blueGradient:
       "var(--Gradient-Blue-Background, linear-gradient(125deg, #142B43 -52.7%, #142B43 -52.68%, #054277 47.38%, #142B43 137.55%));",
     yellow: "#FCBA19",
+    yellowLight: "#FEF2D6",
   },
   greys: {
     white: "#FFFFFF",

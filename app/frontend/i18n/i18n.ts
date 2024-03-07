@@ -262,6 +262,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          elective: "Elective",
           associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
@@ -325,7 +326,7 @@ const options = {
             date: "Date",
             number: "Number",
             textArea: "Text Area",
-            radio: "Select Radio Options",
+            radio: "Radio Options",
             multiOptionSelect: "Multi-Select Checkboxes",
             select: "Single Select Dropdown",
             signature: "Signature",
