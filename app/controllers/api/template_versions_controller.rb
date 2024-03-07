@@ -49,7 +49,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      "jurisdiction_template_version_customization.create_success",
                      { blueprint: JurisdictionTemplateVersionCustomizationBlueprint }
     else
-      binding.pry
       render_error "jurisdiction_template_version_customization.create_error",
                    message_opts: {
                      error_message: @jurisdiction_template_version_customization.errors.full_messages.join(", "),
