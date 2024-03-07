@@ -1,10 +1,10 @@
 anycable-go:
+  replicas: 1
   env:
     # Assuming that Ruby RPC is available in K8s in the same namespace as anycable-rpc service (see next chapter)
     anycableRpcHost: prod-hous-permit-portal-anycable-rpc:50051
     anycableRedisUrl: "redis://redisMasterSet:6379/1"
     anycableRedisSentinels: "redis-ha-headless:26379"
-    anycableDebug: 1
   ingress:
     enable: true
     path: /cable
