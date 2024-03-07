@@ -250,6 +250,10 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
+  async fetchTemplateVersions(activityId?: string) {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId })
+  }
+
   async fetchTemplateVersion(id: string) {
     return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
   }

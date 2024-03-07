@@ -27,6 +27,7 @@ import { ReviewPermitApplicationScreen } from "../permit-application/review-perm
 import { SuccessfulSubmissionScreen } from "../permit-application/successful-submission"
 import { RequirementTemplatesScreen } from "../requirement-template"
 import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
+import { JurisdictionDigitalPermitScreen } from "../requirement-template/jurisdiction-digital-permit-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
 import { TemplateVersionScreen } from "../requirement-template/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
@@ -117,6 +118,12 @@ const AppRoutes = observer(() => {
     </>
   )
 
+  const revireMangaerOnlyRoutes = (
+    <>
+      <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
+    </>
+  )
+
   return (
     <>
       <Routes location={background || location}>
@@ -132,6 +139,7 @@ const AppRoutes = observer(() => {
             {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
             {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
             {currentUser?.isSubmitter && submitterOnlyRoutes}
+            {currentUser?.isReviewManager && revireMangaerOnlyRoutes}
           </>
         ) : (
           <>
