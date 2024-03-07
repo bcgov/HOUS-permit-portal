@@ -1,5 +1,20 @@
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: dev
+
+route:
+  spec:
+    host: "ws.buildingpermit.gov.bc.ca"
+    to:
+      name: "anycable-go"
+
 anycable-go:
+  nameOverride: "anycable-go"
+  fullNameOverride: "anycable-go"
   replicas: 1
+  image:
+    repository: anycable/anycable-go
+    tag: 1.4.8
+    pullPolicy: IfNotPresent
   env:
     # Assuming that Ruby RPC is available in K8s in the same namespace as anycable-rpc service (see next chapter)
     anycableRpcHost: prod-hous-permit-portal-anycable-rpc:50051

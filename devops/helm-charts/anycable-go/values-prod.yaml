@@ -1,3 +1,6 @@
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: prod
+
 anycable-go:
   replicas: 2
   resources:

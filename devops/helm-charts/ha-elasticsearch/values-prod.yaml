@@ -2,14 +2,14 @@
 elasticsearch:
   master:
     replicaCount: 3
-    heapSize: "256m"
+    heapSize: "512m"
     resources:
       requests:
         cpu: "20m"
         memory: "256Mi"
       limits:
-        cpu: "100m"
-        memory: "512Mi"
+        cpu: "150m"
+        memory: "1024Mi"
     persistence:
       enabled: true
       accessModes:
@@ -23,8 +23,8 @@ elasticsearch:
         cpu: "20m"
         memory: "1024Mi"
       limits:
-        cpu: "150m"
-        memory: "2048Mi"
+        cpu: "200m"
+        memory: "1512Mi"
     persistence:
       enabled: true
       accessModes:
