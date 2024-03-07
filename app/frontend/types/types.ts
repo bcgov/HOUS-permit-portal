@@ -40,6 +40,7 @@ export type TSearchParams<IModelSortFields> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  statusFilter?: string
 }
 
 export interface IRequirementOptions {

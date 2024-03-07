@@ -1,5 +1,5 @@
 import { flow, Instance, types } from "mobx-state-tree"
-import { ESortDirection } from "../types/enums"
+import { EPermitApplicationStatus, ESortDirection } from "../types/enums"
 import { ISort } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
@@ -8,6 +8,9 @@ interface IFetchOptions {
   page?: number
   countPerPage?: number
 }
+
+const filterableStatuses = Object.values(EPermitApplicationStatus)
+export type TFilterableStatus = (typeof filterableStatuses)[number]
 
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string
@@ -19,6 +22,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
       showArchived: types.optional(types.boolean, false),
+      statusFilter: types.maybeNull(types.enumeration(filterableStatuses)),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
@@ -46,6 +50,10 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       setShowArchived(bool) {
         setQueryParam("showArchived", bool.toString())
         self.showArchived = bool
+      },
+      setStatusFilter(status: TFilterableStatus) {
+        setQueryParam("statusFilter", status)
+        self.statusFilter = status
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
         if (fetchDataActionName in self) {

@@ -25,7 +25,7 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
 
-  enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
+  enum status: { draft: 0, submitted: 1 }, _default: 0
 
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
