@@ -2,6 +2,7 @@ import { Box, HStack, Stack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import {
+  IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
   IDenormalizedRequirementTemplateSection,
   IRequirementBlockCustomization,
@@ -32,6 +33,7 @@ interface ISectionDisplayProps {
   formScrollToId: (recordId: string) => string
   renderEdit?: (props: { denormalizedRequirementBlock: IDenormalizedRequirementBlock }) => JSX.Element
   requirementBlockCustomizations?: Record<string, IRequirementBlockCustomization>
+  hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
 }
 
 const SectionDisplay = observer(
@@ -42,6 +44,7 @@ const SectionDisplay = observer(
     formScrollToId,
     renderEdit,
     requirementBlockCustomizations,
+    hideElectiveField,
   }: ISectionDisplayProps) => {
     const sectionBlocks = section.templateSectionBlocks
     const sectionName = section.name
@@ -64,6 +67,7 @@ const SectionDisplay = observer(
           {sectionBlocks.map((sectionBlock) => (
             <RequirementBlockAccordion
               as={"section"}
+              hideElectiveField={hideElectiveField}
               id={formScrollToId(sectionBlock.id)}
               key={sectionBlock.id}
               requirementBlock={sectionBlock.requirementBlock}
