@@ -12,4 +12,20 @@ class StepCode < ApplicationRecord
 
   accepts_nested_attributes_for :data_entries
   accepts_nested_attributes_for :pre_construction_checklist
+
+  def plan_author
+    permit_application.step_code_plan_author
+  end
+
+  def plan_version
+    permit_application.step_code_plan_version
+  end
+
+  def plan_date
+    permit_application.step_code_plan_author
+  end
+
+  def builder
+    "" #replace with a config on permit application
+  end
 end

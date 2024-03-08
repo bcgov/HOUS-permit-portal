@@ -83,6 +83,8 @@ const options = {
             "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
         },
         ui: {
+          tip: "Tip",
+          manage: "Manage",
           preview: "Preview",
           back: "Back",
           backHome: "Back to home",
@@ -108,7 +110,6 @@ const options = {
           save: "Save Changes",
           onlySave: "Save",
           done: "Done",
-          manage: "Manage",
           view: "View",
           totalItems: "Total Items",
           doLater: "Do this later",
@@ -321,7 +322,7 @@ const options = {
             number: "Number",
             textArea: "Text Area",
             radio: "Select Radio Options",
-            multiSelectCheckbox: "Multi-Select Checkboxes",
+            multiOptionSelect: "Multi-Select Checkboxes",
             select: "Single Select Dropdown",
             signature: "Signature",
             generalContact: "General Contact",
@@ -411,7 +412,14 @@ const options = {
         },
         stepCodeChecklist: {
           edit: {
+            heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
+            notice: "Relevant data fields below has been filled in for you by Auto-Compliance.",
             projectInfo: {
+              stages: {
+                pre_construction: "Pre Construction",
+                mid_construction: "Mid Construction",
+                as_built: "As Built",
+              },
               heading: "A: Project Information",
               permitNum: "Building Permit #",
               builder: "Builder",
@@ -420,7 +428,8 @@ const options = {
               jurisdiction: "Municipality / District",
               pid: "PID or legal description",
               buildingType: {
-                select: "Select Building Type",
+                label: "Building Type",
+                placeholder: "Select",
                 options: {
                   laneway: "Laneway House",
                   single_detached: "Single Detached",
@@ -440,15 +449,36 @@ const options = {
             },
             codeComplianceSummary: {
               heading: "B: Code Compliance Summary",
+              required: "Required",
+              compliancePath: {
+                label: "BC Building Code Performance Compliance Path:",
+                options: {
+                  step_code_ers: "9.36.6 BC Energy Step Code ERS",
+                  step_code_necb: "9.36.6 BC Energy Step Code NECB",
+                  passive_house: "9.36.6 Passive House",
+                  step_code: "9.36.5 BC Energy Step Code",
+                },
+              },
               energyStepCode: {
                 heading: "Energy Step Code",
                 stepRequired: "Step Required",
                 stepProposed: "Proposed Step Achieved",
+                steps: {
+                  "3": "3",
+                  "4": "4",
+                  "5": "5",
+                },
               },
               zeroCarbonStepCode: {
                 heading: "Zero Carbon Step Code",
                 stepRequired: "Level Required",
                 stepProposed: "Proposed Step Achieved",
+                steps: {
+                  "1": "EL 1",
+                  "2": "EL 2",
+                  "3": "EL 3",
+                  "4": "EL 4",
+                },
               },
               planInfo: {
                 title: "Based on info provided by the builder & the following drawings:",
@@ -459,27 +489,34 @@ const options = {
             },
             completedBy: {
               heading: "C: Completed By",
-              name: "Full Name",
+              description:
+                "EA's working in teams may designate a contact person for this permit.  This person may or may not be the modeler.  The registration numbers must match the actual modelers registration.",
+              energyAdvisor: "Energy Advisor",
+              name: "Full name",
               date: "Date",
-              company: "Company Name",
-              organization: "Service Organization",
+              company: "Company name",
+              organization: "Service organization",
               phone: "Phone",
-              energyAdvisorId: "Energy Advisor ID",
+              energyAdvisorId: "Energy advisor ID#",
               address: "Address",
               email: "Email",
+              codeco: "CODECO placed in Field 8 of H2K",
+              yes: "Yes",
+              no: "No",
               pFile: "P File #",
             },
             energyPerformanceCompliance: {
               heading: "D: Energy Performance Compliance",
-              proposedHouseEnergyConsumption: "Proposed House Energy Consumption (GJ/year)",
-              referenceHouseRatedEnergyTarget: "Reference House Rated Energy Target (GJ/year)",
+              proposedHouseEnergyConsumption: "Proposed House Energy Consumption:",
+              referenceHouseRatedEnergyTarget: "Reference House Rated Energy Target:",
+              energyUnit: "GJ/year",
               hvac: "HVAC",
               dwhHeating: "DWH Heating",
               sum: "SUM",
               calculationAirtightness:
                 "The airtightness value used in the energy model calculations for the Proposed house is:",
               calculationTestingTarget: "OR Testing Target",
-              compliance: "The above calculation was performed in compliance with Subsection 9.36.5. of Division B:",
+              compliance: "The above calculation was performed in compliance with Subsection 9.36.5. of Division B",
               airtightnessValue: {
                 select: "Select",
                 options: {
@@ -548,7 +585,7 @@ const options = {
             },
             zeroCarbonStepCodeCompliance: {
               heading: "G: Zero Carbon Step Code Compliance",
-              proposedMetrics: "Proposed Mouse Metrics",
+              proposedMetrics: "Proposed House Metrics",
               stepRequirement: "Proposed Step Requirement",
               result: "Proposed House Result",
               passFail: "Proposed House Pass or Fail",
@@ -618,9 +655,19 @@ const options = {
         errors: {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
+          fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
+          fetchActivityOptions: "Something went wrong fetching the activity options",
+          workTypeNotFound: "Work type not found",
+          fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
+          fetchTemplateVersions: "Something went wrong fetching template versions",
+          fetchBuildingPermits: "Something went wrong fetching building permits",
+          fetchBuildingPermit: "Something went wrong fetching building permit",
+          fetchBuildingPermitJurisdictionChanges: "Something went wrong fetching building permit jurisdiction changes",
           fetchOptions: "Something went wrong fetching options",
+          fetchJurisdictionTemplateVersionCustomization:
+            "Something went wrong fetching jurisdiction template version customization",
         },
         user: {
           fields: {
@@ -733,6 +780,29 @@ const options = {
             lastUpdated: "Last updated",
           },
         },
+        digitalBuildingPermits: {
+          index: {
+            title: "Digital Building Permits",
+            selectPermit: "Select a digital permit:",
+            workType: "Work Type",
+            manageButton: "Manage",
+            lastUpdated: "Last updated",
+            emptyPermitsText:
+              "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
+          },
+          edit: {
+            requirementBlockSidebar: {
+              description:
+                "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
+              tipLabel: "Tip for submitters (optional)",
+              manageFieldsButton: "Manage elective field(s)",
+              resetToDefaults: "Reset to defaults",
+              selectFieldsTitle: "Select elective fields",
+              electiveFormFields: "Elective Form Fields",
+              addSelectedButton: "Add selected",
+            },
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "BC Building Permit Hub",
@@ -760,6 +830,7 @@ const options = {
           pageNotFound: "404 - The page you are looking for could not be found",
           seeConsoleForDetails: "See the browser console for details",
           breadcrumb: {
+            profile: "Profile",
             jurisdictions: "Manage Jurisdictions",
             new: "Create New",
             invite: "Invite",
@@ -769,11 +840,13 @@ const options = {
             edit: "Edit",
             users: "Users",
             editTemplate: "Edit template",
+            editPermit: "Edit Permit",
             permitApplications: "Permit Applications",
             submissionInbox: "Submission Inbox",
             configuration: "Configure Jurisdiction",
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
+            digitalBuildingPermits: "Digital Building Permits",
           },
           questionSupport: "Question Support",
         },

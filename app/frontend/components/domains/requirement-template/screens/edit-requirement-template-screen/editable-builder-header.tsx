@@ -3,9 +3,9 @@ import * as R from "ramda"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { IRequirementTemplate } from "../../../../models/requirement-template"
-import { ETemplateVersionStatus } from "../../../../types/enums"
-import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
+import { IRequirementTemplate } from "../../../../../models/requirement-template"
+import { ETemplateVersionStatus } from "../../../../../types/enums"
+import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { BuilderHeader } from "./builder-header"
 import { IRequirementTemplateForm } from "./index"
 
@@ -19,6 +19,16 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
   const watchedDescription = watch("description")
   return (
     <BuilderHeader
+      breadCrumbs={[
+        {
+          href: "/requirement-templates",
+          title: t("site.breadcrumb.requirementTemplates"),
+        },
+        {
+          href: `/requirements-template${requirementTemplate.id}/edit`,
+          title: t("site.breadcrumb.editTemplate"),
+        },
+      ]}
       requirementTemplate={requirementTemplate}
       status={ETemplateVersionStatus.draft}
       renderDescription={() => (

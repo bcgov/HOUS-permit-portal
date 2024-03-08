@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_07_004129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -130,6 +130,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
     t.datetime "submitted_at"
     t.datetime "signed_off_at"
     t.string "nickname"
+    t.datetime "viewed_at"
+    t.uuid "template_version_id", null: false
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -139,6 +141,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
     t.index ["permit_type_id"],
             name: "index_permit_applications_on_permit_type_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
+    t.index ["template_version_id"],
+            name: "index_permit_applications_on_template_version_id"
   end
 
   create_table "permit_classifications",
@@ -195,10 +199,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
     t.uuid "permit_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "status", default: 0
     t.string "description"
-    t.string "version"
-    t.date "scheduled_for"
     t.datetime "discarded_at"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"],
@@ -224,6 +225,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
     t.datetime "updated_at", null: false
     t.uuid "requirement_block_id", null: false
     t.integer "position"
+    t.boolean "elective", default: false
     t.index ["requirement_block_id"],
             name: "index_requirements_on_requirement_block_id"
   end
@@ -266,6 +268,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
     t.integer "epc_calculation_airtightness"
     t.integer "epc_calculation_testing_target_type"
     t.boolean "epc_calculation_compliance"
+    t.boolean "codeco"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 
@@ -511,6 +514,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_01_161648) do
   add_foreign_key "permit_applications",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates",

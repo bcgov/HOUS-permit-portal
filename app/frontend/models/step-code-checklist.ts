@@ -12,7 +12,6 @@ export const StepCodeChecklistModel = types
   .model("StepCodeChecklistModel", {
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
-    name: types.string,
     stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
     // permit application info
     buildingPermitNumber: types.maybeNull(types.string),
@@ -20,6 +19,10 @@ export const StepCodeChecklistModel = types
     address: types.maybeNull(types.string),
     jurisdictionName: types.maybeNull(types.string),
     pid: types.maybeNull(types.string),
+    // plan, assumed to be based on drawing upload on the permit application
+    planAuthor: types.maybeNull(types.string),
+    planVersion: types.maybeNull(types.string),
+    planDate: types.maybeNull(types.string),
     // model fields
     buildingType: types.maybeNull(types.enumeration<EStepCodeBuildingType[]>(Object.values(EStepCodeBuildingType))),
     dwellingUnitsCount: types.maybeNull(types.number),
@@ -34,6 +37,8 @@ export const StepCodeChecklistModel = types
     completedByEmail: types.maybeNull(types.string),
     completedByServiceOrganization: types.maybeNull(types.string),
     energyAdvisorId: types.maybeNull(types.string),
+    codeco: types.maybeNull(types.boolean),
+    pFileNo: types.maybeNull(types.string),
     siteVisitCompleted: types.maybeNull(types.boolean),
     siteVisitDate: types.maybeNull(types.Date),
     testingPressure: types.maybeNull(types.number),
@@ -61,6 +66,8 @@ export const StepCodeChecklistModel = types
     // calculated fields
     proposedEnergyStep: types.maybeNull(types.string),
     requiredEnergyStep: types.maybeNull(types.string),
+    minEnergyStep: types.maybeNull(types.string),
+    maxEnergyStep: types.maybeNull(types.string),
     meuiPassed: types.maybeNull(types.boolean),
     meui: types.maybeNull(types.string),
     meuiRequirement: types.maybeNull(types.string),
@@ -91,6 +98,8 @@ export const StepCodeChecklistModel = types
     softwareVersion: types.maybeNull(types.string),
     proposedZeroCarbonStep: types.maybeNull(types.string),
     requiredZeroCarbonStep: types.maybeNull(types.string),
+    minZeroCarbonStep: types.maybeNull(types.string),
+    maxZeroCarbonStep: types.maybeNull(types.string),
     co2Passed: types.maybeNull(types.boolean),
     co2: types.maybeNull(types.string),
     co2Requirement: types.maybeNull(types.string),
@@ -116,6 +125,12 @@ export const StepCodeChecklistModel = types
     },
     get defaultFormValues() {
       return getSnapshot(self)
+    },
+    get numberOfEnergySteps() {
+      return parseInt(self.maxEnergyStep) - parseInt(self.minEnergyStep) + 1
+    },
+    get numberOfZeroCarbonSteps() {
+      return parseInt(self.maxZeroCarbonStep) - parseInt(self.minZeroCarbonStep) + 1
     },
   }))
   .actions((self) => ({

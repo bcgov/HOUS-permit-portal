@@ -95,6 +95,8 @@ if PermitApplication.first.blank?
   20.times do
     PermitApplication.create(
       submitter_id: submitters.sample.id,
+      full_address: "123 Address st",
+      pid: "999999999",
       jurisdiction_id: jurisdictions.sample.id,
       activity_id: activity1.id,
       permit_type_id: permit_type1.id,
@@ -145,3 +147,15 @@ RequirementsFromXlsxSeeder.seed
 # Energy Step Code Reference Tables
 StepCode::MEUIReferencesSeeder.seed!
 StepCode::TEDIReferencesSeeder.seed!
+
+puts "Seeding jurisdiction customizations..."
+TemplateVersion
+  .limit(3)
+  .each do |template_version|
+    JurisdictionTemplateVersionCustomization.find_or_create_by(
+      jurisdiction: north_van,
+      template_version: template_version,
+    ) do |customization|
+      # any other data to add
+    end
+  end

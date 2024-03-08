@@ -49,7 +49,12 @@ export function setQueryParam(key: string, value: string) {
 }
 
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {
-  const multiOptionRequirementFields = [ERequirementType.radio, ERequirementType.checkbox, ERequirementType.select]
+  const multiOptionRequirementFields = [
+    ERequirementType.radio,
+    ERequirementType.checkbox,
+    ERequirementType.select,
+    ERequirementType.multiOptionSelect,
+  ]
   return multiOptionRequirementFields.includes(requirementType)
 }
 

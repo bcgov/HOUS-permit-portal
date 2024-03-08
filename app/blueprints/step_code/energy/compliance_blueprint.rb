@@ -6,6 +6,8 @@ class StepCode::Energy::ComplianceBlueprint < Blueprinter::Base
 
   field :step, name: :proposed_energy_step
   field :min_required_step, name: :required_energy_step
+  field :min_step, name: :min_energy_step
+  field :max_step, name: :max_energy_step
 
   field :fwdr do |compliance, _options|
     compliance.checklist.data_entries.sum(:fwdr)

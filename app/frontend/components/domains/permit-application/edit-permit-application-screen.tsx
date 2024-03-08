@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
@@ -58,17 +59,20 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         }
         //update file hashes that have been changed
       }
-    } catch (e) {}
+      return response.ok
+    } catch (e) {
+      return false
+    }
   }
 
   const handleClickFinishLater = async () => {
-    await handleSave()
-    navigate("/")
+    const success = await handleSave()
+    if (success) {
+      navigate("/")
+    }
   }
 
-  const handleDownloadApplication = () => {
-    // TODO: APPLICATION DOWNLOAD
-  }
+  const handleDownloadApplication = () => {}
 
   // const onSubmitMetadata = (formValues) => {
   //   currentPermitApplication.update(formValues)
@@ -93,7 +97,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
-    <Box as="main" overflow="auto" h="full">
+    <Box as="main" overflow="hidden" h="full">
       <Flex
         id="permitHeader"
         position="sticky"
@@ -148,12 +152,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </form>
 
             <Text>{permitTypeAndActivity}</Text>
-            <Text mt={1}>
-              {t("permitApplication.fields.number")}:{" "}
-              <Text as="span" fontWeight={700}>
-                {number}
-              </Text>
-            </Text>
+            <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
         {isSubmitted ? (

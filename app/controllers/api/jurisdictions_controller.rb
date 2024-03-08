@@ -121,7 +121,7 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def set_jurisdiction
     @jurisdiction = Jurisdiction.find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    render_error("misc.not_found_error", status: :not_found)
+  rescue ActiveRecord::RecordNotFound => e
+    render_error("misc.not_found_error", { status: :not_found }, e)
   end
 end

@@ -1,16 +1,17 @@
-import { Button, Flex, Stack } from "@chakra-ui/react"
-import { ArrowUp } from "@phosphor-icons/react"
+import { Button, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { BuilderHeader } from "../edit-requirement-template-screen/builder-header"
+import { BuilderFloatingButtons } from "../builder-floating-buttons"
+import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
-import { SectionsDisplay } from "./sections-display"
+import { useSectionHighlight } from "../use-section-highlight"
+import { BuilderHeader } from "./edit-requirement-template-screen/builder-header"
 
 const scrollToIdPrefix = "template-version-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
@@ -19,43 +20,19 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   const { templateVersion, error } = useTemplateVersion()
   const denormalizedTemplate = templateVersion?.denormalizedTemplateJson
   const { t } = useTranslation()
-  const rightContainerRef = useRef<HTMLDivElement>()
+  const {
+    rootContainerRef: rightContainerRef,
+    sectionRefs,
+    sectionIdToHighlight: currentSectionId,
+  } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
   const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
-  const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
   const navigate = useNavigate()
-
-  useEffect(() => {
-    const options = {
-      root: rightContainerRef?.current,
-      rootMargin: "0px",
-      threshold: 0.1,
-    }
-
-    const observer = new IntersectionObserver(handleSectionIntersection, options)
-
-    Object.values(sectionRefs.current).forEach((ref) => {
-      if (ref) {
-        observer.observe(ref)
-      }
-    })
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [denormalizedTemplate?.requirementTemplateSections])
 
   if (error) return <ErrorScreen error={error} />
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
   const templateSections = denormalizedTemplate?.requirementTemplateSections ?? []
   const hasNoSections = templateSections.length === 0
-
-  const currentSectionId = (() => {
-    const firstInViewSection = templateSections.find((section) => sectionsInViewStatuses[section.id])
-
-    return firstInViewSection?.id ?? null
-  })()
 
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
@@ -67,6 +44,12 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     <RemoveScroll style={{ width: "100%", height: "100%" }}>
       <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
         <BuilderHeader
+          breadCrumbs={[
+            {
+              href: "/template-versions",
+              title: t("site.breadcrumb.templateVersions"),
+            },
+          ]}
           requirementTemplate={denormalizedTemplate}
           status={templateVersion.status}
           versionDate={templateVersion.versionDate}
@@ -101,17 +84,11 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               sections={templateSections}
               shouldCollapseAll={shouldCollapseAll}
               setSectionRef={setSectionRef}
+              formScrollToId={formScrollToId}
             />
           </Flex>
         </Flex>
-        <Stack spacing={4} position={"fixed"} bottom={6} right={6} alignItems={"flex-end"}>
-          <Button variant={"greyButton"} leftIcon={<ArrowUp />} pl={"0.6125rem"} onClick={scrollToTop}>
-            {t("requirementTemplate.edit.goToTop")}
-          </Button>
-          <Button variant={"greyButton"} onClick={onCollapseAll}>
-            {t("requirementTemplate.edit.collapseAll")}
-          </Button>
-        </Stack>
+        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
       </Flex>
     </RemoveScroll>
   )
@@ -138,24 +115,5 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
   function setSectionRef(el: HTMLElement, id: string) {
     sectionRefs.current[id] = el
-  }
-
-  // modified use case from https://stackoverflow.com/questions/57992340/how-to-get-first-visible-body-element-on-screen-with-pure-javascript
-  function handleSectionIntersection(entries: IntersectionObserverEntry[]) {
-    setSectionsInViewStatuses((pastState) => {
-      const newState = { ...pastState }
-
-      entries.forEach((entry) => {
-        const sectionId = entry.target.getAttribute("data-section-id")
-
-        if (entry.isIntersecting) {
-          newState[sectionId] = true
-        } else {
-          newState[sectionId] = false
-        }
-      })
-
-      return newState
-    })
   }
 })

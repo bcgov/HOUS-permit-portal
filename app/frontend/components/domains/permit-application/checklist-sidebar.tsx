@@ -11,8 +11,7 @@ interface IChecklistSideBarProps {
 
 export const ChecklistSideBar = observer(({ permitApplication, completedSections }: IChecklistSideBarProps) => {
   const { formJson } = permitApplication
-  const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass, getIsBlockPopulated } =
-    permitApplication
+  const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass } = permitApplication
 
   const navHeight = document.getElementById("mainNav")?.offsetHeight
   const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight

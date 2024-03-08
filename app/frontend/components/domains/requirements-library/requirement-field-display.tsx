@@ -197,6 +197,28 @@ const requirementsComponentMap = {
       </FormControl>
     )
   },
+
+  [ERequirementType.multiOptionSelect]({ label, helperText, options = defaultOptions, labelProps }: TRequirementProps) {
+    const { t } = useTranslation()
+    return (
+      <FormControl isReadOnly>
+        <FormLabel {...defaultLabelProps} {...labelProps}>
+          {label ?? t("requirementsLibrary.requirementTypeLabels.multiOptionSelect")}
+        </FormLabel>
+        <CheckboxGroup>
+          <Stack>
+            {options.map((option, index) => (
+              <Checkbox key={index} value={option}>
+                {option}
+              </Checkbox>
+            ))}
+          </Stack>
+        </CheckboxGroup>
+        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      </FormControl>
+    )
+  },
+
   [ERequirementType.select]({
     label,
     helperText,

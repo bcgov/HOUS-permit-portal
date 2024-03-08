@@ -4,7 +4,7 @@ import { useLocation, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
-export const useTemplateVersion = () => {
+export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?: string } = {}) => {
   const { templateVersionId } = useParams()
   const { pathname } = useLocation()
   const { templateVersionStore } = useMst()
@@ -24,9 +24,9 @@ export const useTemplateVersion = () => {
         try {
           const isSuccess = await templateVersionStore.fetchTemplateVersion(templateVersionId)
 
-          !isSuccess && setError(new Error(t("errors.fetchTemplateVersion")))
+          !isSuccess && setError(new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
         } catch (e) {
-          setError(e instanceof Error ? e : new Error(t("errors.fetchTemplateVersion")))
+          setError(e instanceof Error ? e : new Error(customErrorMessage ?? t("errors.fetchTemplateVersion")))
         }
       })()
     }

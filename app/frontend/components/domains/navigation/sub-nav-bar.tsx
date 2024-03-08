@@ -65,6 +65,7 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
 
       const currentResourceMap = {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
+        "permit-applications": rootStore.permitApplicationStore.currentPermitApplication?.number,
       }
 
       const title = resourceNeeded

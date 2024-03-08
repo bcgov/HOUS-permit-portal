@@ -11,4 +11,7 @@ class StepCode::ZeroCarbon::ComplianceBlueprint < Blueprinter::Base
   field :required_zero_carbon_step do |compliance, _options|
     "EL#{compliance.min_required_step}"
   end
+
+  field :min_step, name: :min_zero_carbon_step
+  field :max_step, name: :max_zero_carbon_step
 end

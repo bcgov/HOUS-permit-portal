@@ -44,7 +44,8 @@ module BaseControllerMethods
   end
 
   # error_key maps to a translation key in en.yml
-  def render_error(error_key = nil, opts = {})
+  def render_error(error_key = nil, opts = {}, exception = nil)
+    Rails.logger.error "#{exception.message}\n#{exception.backtrace}" if exception.present?
     opts.reverse_merge!({ status: 400, meta: {} })
     message =
       (

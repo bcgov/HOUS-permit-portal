@@ -17,9 +17,9 @@ import { CaretRight } from "@phosphor-icons/react"
 import React, { useEffect } from "react"
 import "react-datepicker/dist/react-datepicker.css"
 import { useTranslation } from "react-i18next"
-import { useMst } from "../../../../setup/root"
-import { EFlashMessageStatus } from "../../../../types/enums"
-import { DatePicker } from "../../../shared/date-picker"
+import { useMst } from "../../../../../setup/root"
+import { EFlashMessageStatus } from "../../../../../types/enums"
+import { DatePicker } from "../../../../shared/date-picker"
 
 interface IProps {
   minDate: Date

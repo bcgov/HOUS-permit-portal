@@ -2,6 +2,7 @@ class StepCodeChecklist < ApplicationRecord
   belongs_to :step_code, optional: Rails.env.test?
 
   delegate :data_entries, :building_permit_number, :jurisdiction_name, :full_address, :pid, to: :step_code
+  delegate :plan_author, :plan_version, :plan_date, :builder, to: :step_code
 
   enum stage: %i[pre_construction mid_construction as_built]
   enum compliance_path: %i[step_code_ers step_code_necb passive_house step_code]

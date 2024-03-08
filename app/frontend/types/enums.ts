@@ -16,12 +16,6 @@ export enum EPermitApplicationStatus {
   viewed = "viewed",
 }
 
-export enum ERequirementTemplateStatus {
-  published = "published",
-  scheduled = "scheduled",
-  draft = "draft",
-}
-
 export enum ETemplateVersionStatus {
   published = "published",
   scheduled = "scheduled",
@@ -74,12 +68,30 @@ export enum EContactSortFields {
   phone = "phone",
   address = "address",
 }
+
 export enum EPermitApplicationSortFields {
   number = "number",
   permitClassification = "permit_classification",
   submitter = "submitter",
-  submitted_at = "submitted_at",
+  submittedAt = "submitted_at",
+  viewedAt = "viewed_at",
   status = "status",
+}
+
+export enum EPermitApplicationSubmitterSortFields {
+  number = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  submittedAt = "submitted_at",
+  status = "status",
+}
+
+export enum EPermitApplicationReviewerSortFields {
+  number = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  viewedAt = "viewed_at",
+  submittedAt = "submitted_at",
 }
 
 export enum ESortDirection {
@@ -93,20 +105,22 @@ export enum ETagType {
 
 export enum ERequirementType {
   text = "text",
-  phone = "phone",
-  email = "email",
-  address = "address",
-  date = "date",
   number = "number",
-  textArea = "textarea",
-  radio = "radio",
   checkbox = "checkbox",
   select = "select",
+  multiOptionSelect = "multi_option_select",
+  date = "date",
   file = "file",
-  signature = "signature",
-  generalContact = "general_contact",
+  phone = "phone",
+  email = "email",
+  radio = "radio",
+  address = "address",
   bcaddress = "bcaddress",
+  signature = "signature",
+  textArea = "textarea",
   energyStepCode = "energy_step_code",
+  generalContact = "general_contact",
+  professionalContact = "professional_contact",
 }
 
 export enum ENumberUnit {

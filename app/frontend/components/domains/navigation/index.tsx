@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
@@ -23,11 +23,14 @@ import { ContactScreen } from "../misc/contact-screen"
 import { PermitApplicationIndexScreen } from "../permit-application"
 import { EditPermitApplicationScreen } from "../permit-application/edit-permit-application-screen"
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
+import { ReviewPermitApplicationScreen } from "../permit-application/review-permit-application-screen"
 import { SuccessfulSubmissionScreen } from "../permit-application/successful-submission"
-import { RequirementTemplatesScreen } from "../requirement-template"
-import { EditRequirementTemplateScreen } from "../requirement-template/edit-requirement-template-screen"
 import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
-import { TemplateVersionScreen } from "../requirement-template/template-version-screen"
+import { EditRequirementTemplateScreen } from "../requirement-template/screens/edit-requirement-template-screen"
+import { JurisdictionDigitalPermitScreen } from "../requirement-template/screens/jurisdiction-digital-permit-screen"
+import { JurisdictionEditDigitalPermitScreen } from "../requirement-template/screens/jurisdiction-edit-digital-permit-screen"
+import { RequirementTemplatesScreen } from "../requirement-template/screens/requirement-template-screen"
+import { TemplateVersionScreen } from "../requirement-template/screens/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { StepCodeForm } from "../step-code"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
@@ -54,7 +57,7 @@ export const Navigation = observer(() => {
 
       <NavBar />
 
-      <Box overflow="auto" h="full" id="outerScrollContainer">
+      <Flex direction="column" overflow="auto" h="full" id="outerScrollContainer">
         {isValidating ? (
           <LoadingScreen />
         ) : (
@@ -63,7 +66,7 @@ export const Navigation = observer(() => {
             <Footer />
           </>
         )}
-      </Box>
+      </Flex>
     </BrowserRouter>
   )
 })
@@ -100,6 +103,7 @@ const AppRoutes = observer(() => {
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
+      <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
     </>
   )
 
@@ -112,6 +116,16 @@ const AppRoutes = observer(() => {
         path="/permit-applications/:permitApplicationId/sucessful-submission"
         element={<SuccessfulSubmissionScreen />}
       />
+    </>
+  )
+
+  const reviewManagerOnlyRoutes = (
+    <>
+      <Route
+        path="/digital-building-permits/:templateVersionId/edit"
+        element={<JurisdictionEditDigitalPermitScreen />}
+      />
+      <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
     </>
   )
 
@@ -130,6 +144,7 @@ const AppRoutes = observer(() => {
             {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
             {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
             {currentUser?.isSubmitter && submitterOnlyRoutes}
+            {currentUser?.isReviewManager && reviewManagerOnlyRoutes}
           </>
         ) : (
           <>
