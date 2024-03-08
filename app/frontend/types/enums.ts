@@ -208,3 +208,16 @@ export enum EFossilFuelsPresence {
   no = "no",
   unknown = "unknown",
 }
+
+export enum ERequirementContactFieldItemType {
+  firstName = "firstName",
+  lastName = "lastName",
+  email = "email",
+  phone = "phone",
+  address = "address",
+  organization = "organization",
+  businessName = "businessName",
+  businessLicense = "businessLicense",
+  professionalAssociation = "professionalAssociation",
+  professionalNumber = "professionalNumber",
+}
