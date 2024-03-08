@@ -12,6 +12,7 @@ class JurisdictionBlueprint < Blueprinter::Base
          :review_managers_size,
          :reviewers_size,
          :permit_applications_size,
+         :templates_used_size,
          :map_position,
          :created_at,
          :updated_at

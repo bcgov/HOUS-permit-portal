@@ -19,6 +19,7 @@ export const JurisdictionModel = types
     qualifier: types.string,
     reviewManagersSize: types.number,
     reviewersSize: types.number,
+    templatesUsedSize: types.number,
     permitApplicationsSize: types.number,
     descriptionHtml: types.maybeNull(types.string),
     checklistHtml: types.maybeNull(types.string),

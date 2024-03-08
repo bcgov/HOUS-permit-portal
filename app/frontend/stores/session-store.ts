@@ -7,6 +7,7 @@ export const SessionStoreModel = types
   .props({
     loggedIn: types.optional(types.boolean, false),
     isValidating: types.optional(types.boolean, true),
+    isLoggingOut: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -47,10 +48,14 @@ export const SessionStoreModel = types
       return self.handleLogin(response)
     }),
     logout: flow(function* () {
+      self.isLoggingOut = true
       const response: any = yield self.environment.api.logout()
       if (response.ok) {
         self.resetAuth()
       }
+      self.isLoggingOut = false
+      // Do a full browser refresh to enhance security
+      window.location.href = "/"
     }),
     requestPasswordReset: flow(function* (params) {
       const response = yield self.environment.api.requestPasswordReset(params)
