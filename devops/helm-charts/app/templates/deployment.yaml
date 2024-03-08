@@ -5,17 +5,16 @@ metadata:
   annotations:
     image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s-%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s-%s\\\")].image\"}]" $.Values.STAGE $.Values.appName $.Values.STAGE $.Values.appName .process }}'
   labels:
-    app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
-  name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
-  namespace: "{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}"
+    app: "{{ $.Values.appName }}-{{ .process }}"
+  name: "{{ $.Values.appName }}-{{ .process }}"
 spec:
   progressDeadlineSeconds: 600
   replicas: {{ .replicaCount }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
-      deployment: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
+      app: "{{ $.Values.appName }}-{{ .process }}"
+      deployment: "{{ $.Values.appName }}-{{ .process }}"
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -40,13 +39,13 @@ spec:
         vault.hashicorp.com/namespace: "platform-services"
         vault.hashicorp.com/role: '{{ $.Values.vaultNamespace }}'
       labels:
-        app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
-        deployment: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
+        app: "{{ $.Values.appName }}-{{ .process }}"
+        deployment: "{{ $.Values.appName }}-{{ .process }}"
     spec:
       containers:
         - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
           imagePullPolicy: Always
-          name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}-{{ .process }}"
+          name: "{{ $.Values.appName }}-{{ .process }}"
           ports:
             - containerPort: 3000
               protocol: TCP

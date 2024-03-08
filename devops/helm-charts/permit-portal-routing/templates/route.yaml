@@ -4,7 +4,6 @@ metadata:
   labels:
     app: "permit-portal-routing"
   name: "permit-portal-route"
-  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   host: "{{ .Values.route.spec.host }}"
   port:

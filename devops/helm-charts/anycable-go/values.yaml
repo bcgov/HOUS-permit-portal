@@ -1,12 +1,6 @@
 OPENSHIFT_NAMESPACE: bb18ab
 STAGE: dev
 
-route:
-  spec:
-    host: "wshpp.apps.silver.devops.gov.bc.ca"
-    to:
-      name: "anycable-go"
-
 anycable-go:
   nameOverride: "anycable-go"
   fullNameOverride: "anycable-go"
@@ -17,7 +11,7 @@ anycable-go:
     pullPolicy: IfNotPresent
   env:
     # Assuming that Ruby RPC is available in K8s in the same namespace as anycable-rpc service (see next chapter)
-    anycableRpcHost: prod-hous-permit-portal-anycable-rpc:50051
+    anycableRpcHost: hous-permit-portal-anycable-rpc:50051
     anycableRedisUrl: "redis://redisMasterSet:6379/1"
     anycableRedisSentinels: "redis-ha-headless:26379"
   ingress:

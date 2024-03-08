@@ -48,7 +48,7 @@ nginx:
       }
 
       location /cable { # Route websocket connections to /cable (anycable service)
-          proxy_pass http://anycable-go:8080; # Your anycable-go service
+          proxy_pass http://anycable-go:8080;
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection $connection_upgrade;
