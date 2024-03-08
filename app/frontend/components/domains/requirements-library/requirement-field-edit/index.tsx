@@ -1,51 +1,23 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  CheckboxProps,
-  HStack,
-  IconButton,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Stack,
-  Textarea,
-} from "@chakra-ui/react"
+import { Box, Button, HStack, IconButton, Input, InputGroup, InputLeftElement, Textarea } from "@chakra-ui/react"
 import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { Controller, FieldValues, useController, useFieldArray } from "react-hook-form"
-import { FieldPath, UseFieldArrayProps } from "react-hook-form/dist/types"
-import { UseControllerProps } from "react-hook-form/dist/types/controller"
+import { Controller, FieldValues, useFieldArray } from "react-hook-form"
+import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
-import {
-  EditableInputWithControls,
-  IEditableInputWithControlsProps,
-} from "../../../shared/editable-input-with-controls"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
+import { EditableGroup, TEditableGroupProps } from "./editable-group"
+import { IControlProps } from "./types"
 
-interface IControlProps<TFieldValues extends FieldValues> {
-  controlProps: Omit<UseControllerProps<TFieldValues, FieldPath<TFieldValues>>, "render">
-}
-
-type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
+export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
   unitSelectProps?: IControlProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
     getOptionValue: (idx: number) => IOption
   }
-}
-
-type TEditableGroupProps<TFieldValues extends FieldValues> = {
-  editableLabelProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
-  editableHelperTextProps?: IControlProps<TFieldValues> & Partial<IEditableInputWithControlsProps>
-  isOptionalCheckboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
-  isElectiveCheckboxProps: IControlProps<TFieldValues> & Partial<CheckboxProps>
-  editableInput?: JSX.Element
-  multiOptionEditableInput?: JSX.Element
 }
 
 const requirementsComponentMap = {
@@ -390,110 +362,6 @@ export const RequirementFieldEdit = observer(function RequirementFieldEdit<TFiel
 }: TProps<TFieldValues>) {
   return requirementsComponentMap[requirementType]?.(rest) ?? null
 })
-
-function EditableLabel<TFieldValues extends FieldValues>({
-  controlProps,
-  ...editableLabelProps
-}: TRequirementEditProps<TFieldValues>["editableLabelProps"]) {
-  const {
-    field: { onChange, value },
-  } = useController(controlProps)
-  const { t } = useTranslation()
-  return (
-    <EditableInputWithControls
-      initialHint={t("ui.clickToEdit")}
-      defaultValue={(value as string) || t("requirementsLibrary.modals.defaultRequirementLabel")}
-      onSubmit={onChange}
-      onCancel={onChange}
-      {...editableLabelProps}
-    />
-  )
-}
-
-function EditableHelperText<TFieldValues extends FieldValues>({
-  controlProps,
-  ...editableHelperTextProps
-}: TRequirementEditProps<TFieldValues>["editableLabelProps"]) {
-  const {
-    field: { onChange, value },
-  } = useController(controlProps)
-  const { t } = useTranslation()
-  return (
-    <EditableInputWithControls
-      initialHint={t("requirementsLibrary.modals.addHelpText")}
-      placeholder={t("requirementsLibrary.modals.helpTextPlaceHolder")}
-      defaultValue={(value as string) || ""}
-      onSubmit={onChange}
-      onCancel={onChange}
-      {...editableHelperTextProps}
-    />
-  )
-}
-
-function IsOptionalCheckbox<TFieldValues extends FieldValues>({
-  controlProps,
-  ...checkboxProps
-}: TRequirementEditProps<TFieldValues>["isOptionalCheckboxProps"]) {
-  const {
-    field: { value, onChange, ...restField },
-  } = useController(controlProps)
-  const { t } = useTranslation()
-
-  return (
-    //   This is checked inverse of the boolean value. This is because the db field is for "required", instead of
-    //   optional, and by default it should be required
-    <Checkbox
-      {...checkboxProps}
-      isChecked={value === undefined ? value : !value}
-      onChange={(e) => {
-        onChange(!e.target.checked)
-      }}
-      {...restField}
-    >
-      {t("requirementsLibrary.modals.optionalForSubmitters")}
-    </Checkbox>
-  )
-}
-
-function IsElectiveCheckbox<TFieldValues extends FieldValues>({
-  controlProps,
-  ...checkboxProps
-}: TRequirementEditProps<TFieldValues>["isElectiveCheckboxProps"]) {
-  const {
-    field: { value, ...restField },
-  } = useController(controlProps)
-  const { t } = useTranslation()
-  return (
-    <Checkbox {...checkboxProps} isChecked={value} {...restField}>
-      {t("requirementsLibrary.modals.isAnElectiveField")}
-    </Checkbox>
-  )
-}
-
-function EditableGroup<TFieldValues>({
-  editableLabelProps,
-  editableHelperTextProps,
-  editableInput,
-  multiOptionEditableInput,
-  isOptionalCheckboxProps,
-  isElectiveCheckboxProps,
-}: TEditableGroupProps<TFieldValues>) {
-  return (
-    <Stack spacing={4}>
-      <EditableLabel {...editableLabelProps} />
-      {editableInput}
-      {editableInput && <EditableHelperText {...editableHelperTextProps} />}
-      {multiOptionEditableInput && (
-        <Stack>
-          {multiOptionEditableInput}
-          <EditableHelperText {...editableHelperTextProps} />
-        </Stack>
-      )}
-      <IsOptionalCheckbox {...isOptionalCheckboxProps} />
-      <IsElectiveCheckbox mt={"0.625rem"} {...isElectiveCheckboxProps} />
-    </Stack>
-  )
-}
 
 export function hasRequirementFieldEditComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
