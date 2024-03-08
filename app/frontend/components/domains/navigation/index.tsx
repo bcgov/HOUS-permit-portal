@@ -14,6 +14,7 @@ import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
 import { HomeScreen } from "../home"
 import { ConfigurationManagementScreen } from "../home/review-manager/configuration-management-screen"
+import { EnergyStepRequirementsScreen } from "../home/review-manager/configuration-management-screen/energy-step-requirements-screen"
 import { JurisdictionIndexScreen } from "../jurisdictions/index"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
@@ -108,6 +109,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management"
         element={<ConfigurationManagementScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
+        element={<EnergyStepRequirementsScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
     </>

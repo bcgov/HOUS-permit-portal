@@ -97,9 +97,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
     t.text "contact_summary_html"
     t.jsonb "map_position"
     t.string "prefix", null: false
-    t.string "submission_email"
-    t.integer "energy_step_required"
-    t.integer "zero_carbon_step_required"
+    t.integer "energy_step_required", default: 3
+    t.integer "zero_carbon_step_required", default: 1
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -141,7 +140,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
     t.datetime "signed_off_at"
     t.string "nickname"
     t.datetime "viewed_at"
-    t.jsonb "zipfile_data"
     t.uuid "template_version_id", null: false
     t.jsonb "form_customizations_snapshot"
     t.string "reference_number"
@@ -163,13 +161,28 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.string "name", null: false
-    t.string "code", null: false
     t.string "type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "description"
     t.boolean "enabled"
-    t.index ["code"], name: "index_permit_classifications_on_code", unique: true
+    t.integer "code"
+  end
+
+  create_table "permit_type_submission_contacts",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id"
+    t.uuid "permit_type_id"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string "email", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_permit_type_submission_contacts_on_jurisdiction_id"
+    t.index ["permit_type_id"],
+            name: "index_permit_type_submission_contacts_on_permit_type_id"
   end
 
   create_table "requirement_blocks",
@@ -563,6 +576,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_type_submission_contacts", "jurisdictions"
+  add_foreign_key "permit_type_submission_contacts",
+                  "permit_classifications",
+                  column: "permit_type_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates",
                   "permit_classifications",

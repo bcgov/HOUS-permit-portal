@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Info } from "@phosphor-icons/react"
+import { FileText, Info } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
@@ -50,7 +50,17 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
               </HStack>
             </SectionBox>
 
-            <Grid templateColumns="repeat(2, 1fr)">
+            <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+              <GridItem>
+                <HomeScreenBox
+                  title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
+                  description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
+                  linkText={t("ui.edit")}
+                  icon={<FileText size="24px" color="--var(chakra-colors-text-primary)" />}
+                  href="energy-step"
+                  h="full"
+                />
+              </GridItem>
               <GridItem>
                 <HomeScreenBox
                   title={t(`${i18nPrefix}.jurisdictionAbout.title`)}
@@ -58,6 +68,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   linkText={t("ui.edit")}
                   icon={<Info size="24px" color="--var(chakra-colors-text-primary)" />}
                   href={`/jurisdictions/${currentJurisdiction.id}`}
+                  h="full"
                 />
               </GridItem>
             </Grid>

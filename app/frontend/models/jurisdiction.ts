@@ -32,6 +32,8 @@ export const JurisdictionModel = types
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
+    energyStepRequired: types.number,
+    zeroCarbonStepRequired: types.number,
   })
   .extend(withEnvironment())
   .views((self) => ({

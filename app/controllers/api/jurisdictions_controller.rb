@@ -25,11 +25,13 @@ class Api::JurisdictionsController < Api::ApplicationController
   def update
     authorize @jurisdiction
 
-    # Get current contact ids from the params
-    payload_contact_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
-    # Mark contacts not included in the current payload for destruction
-    @jurisdiction.contacts.each do |contact|
-      contact.mark_for_destruction unless payload_contact_ids.include?(contact.id.to_s)
+    if jurisdiction_params[:contacts_attributes]
+      # Get current contact ids from the params
+      payload_contact_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+      # Mark contacts not included in the current payload for destruction
+      @jurisdiction.contacts.each do |contact|
+        contact.mark_for_destruction unless payload_contact_ids.include?(contact.id.to_s)
+      end
     end
     if @jurisdiction.update(jurisdiction_params)
       render_success @jurisdiction, "jurisdiction.update_success", { blueprint: JurisdictionBlueprint }
@@ -113,6 +115,8 @@ class Api::JurisdictionsController < Api::ApplicationController
       :checklist_html,
       :look_out_html,
       :contact_summary_html,
+      :energy_step_required,
+      :zero_carbon_step_required,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[id name department title phone_number email],

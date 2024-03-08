@@ -32,6 +32,8 @@ class StepCodeChecklist < ApplicationRecord
       airtightness_values: epc_calculation_airtightnesses.keys,
       epc_testing_target_types: epc_calculation_testing_target_types.keys,
       building_types: building_types.keys,
+      energy_steps: (ENV["MIN_ENERGY_STEP"].to_i..ENV["MAX_ENERGY_STEP"].to_i).to_a,
+      zero_carbon_steps: (ENV["MIN_ZERO_CARBON_STEP"].to_i..ENV["MAX_ZERO_CARBON_STEP"].to_i).to_a,
       building_characteristics_summary: {
         performance_types: {
           windows_glazed_doors: StepCode::BuildingCharacteristics::WindowsGlazedDoors::PERFORMANCE_TYPES.keys,
