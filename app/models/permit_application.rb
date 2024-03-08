@@ -25,7 +25,7 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
 
-  enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
+  enum status: { draft: 0, submitted: 1 }, _default: 0
 
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
@@ -61,7 +61,7 @@ class PermitApplication < ApplicationRecord
 
   def current_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    jurisdiction.published_requirement_template_version(activity, permit_type)
+    RequirementTemplate.published_requirement_template_version(activity, permit_type)
   end
 
   def number_prefix

@@ -213,11 +213,18 @@ const options = {
           ask: "Ask a question",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
+          viewed: "Viewed",
+          notViewed: "New",
+          status: {
+            draft: "Draft Permits",
+            submitted: "Submitted Permits",
+          },
           columns: {
             number: "Application #",
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted At",
+            viewed_at: "Viewed At",
             status: "Status",
           },
           submissionInbox: {

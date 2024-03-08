@@ -24,11 +24,6 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
-  def published_requirement_template_version(activity, permit_type)
-    #eventually will fetch the jurisdictions pecific version
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type).published_template_version
-  end
-
   def review_managers
     users.review_managers
   end

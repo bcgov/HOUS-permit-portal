@@ -100,8 +100,11 @@ export const NavBar = observer(() => {
           <Flex align="center" gap={2}>
             <RouterLink to="/">
               <Image
+                fit="cover"
+                htmlHeight="64px"
+                htmlWidth="166px"
                 alt={t("site.linkHome")}
-                src={currentUser?.isAdmin ? "/images/logo-light.svg" : "/images/logo.svg"}
+                src={currentUser?.isAdmin ? "/images/logo-light.svg" : "/images/logo.png"}
               />
             </RouterLink>
             <Show above="md">
