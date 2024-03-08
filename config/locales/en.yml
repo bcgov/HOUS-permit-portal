@@ -42,6 +42,10 @@ en:
           attributes:
             uid:
               taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+  application_mailer:
+    subject_start: "BC Building Permit Hub"
+    subjects:
+      update_password_success: "You have successfully updated your password"
   arbitrary_message_construct:
     devise:
       failure:
@@ -109,6 +113,9 @@ en:
       invitation_accepted_success:
         title: Welcome
         message: You have successfully been onboarded onto BC Permit Hub and are now logged in.
+      confirmation_sent:
+        title: Success
+        message: You need to confirm your new email address. Please check your new email inbox.
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed

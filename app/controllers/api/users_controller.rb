@@ -23,13 +23,17 @@ class Api::UsersController < Api::ApplicationController
 
     ActiveRecord::Base.transaction do
       if password_params[:password].present?
-        raise ActiveRecord::RecordInvalid unless @user.update_with_password(password_params)
+        if @user.update_with_password(password_params)
+          UserMailer.new.send_update_password_success(@user)
+        else
+          raise ActiveRecord::RecordInvalid
+        end
       end
 
       raise ActiveRecord::RecordInvalid unless @user.update(user_params)
     end
 
-    render_success(@user, "user.update_success")
+    render_success(@user, email_changed? ? "user.confirmation_sent" : "user.update_success")
   rescue ActiveRecord::RecordInvalid => e
     # Handle any ActiveRecord exceptions here
     if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
@@ -57,6 +61,10 @@ class Api::UsersController < Api::ApplicationController
   end
 
   private
+
+  def email_changed?
+    user_params[:email] && user_params[:email] != @user.email
+  end
 
   def password_params
     params.require(:user).permit(:current_password, :password)
