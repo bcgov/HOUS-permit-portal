@@ -139,16 +139,7 @@ class Requirement < ApplicationRecord
       },
     }.merge!(formio_type_options)
 
-    if hint || computed_compliance?
-      description =
-        if computed_compliance?
-          "<div><div data-compliance='#{input_options.dig("computed_compliance", "module")}'>Compliance Check: #{input_options.dig("computed_compliance", "module")}</div><div>#{hint}</div></div>"
-        else
-          "<div>#{hint}</div>"
-        end
-
-      json.merge!({ description: description })
-    end
+    json.merge!({ description: hint }) if hint
 
     json.merge!({ validate: { required: !Rails.env.development? } }) if required
 

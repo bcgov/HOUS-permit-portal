@@ -64,6 +64,13 @@ class PermitApplication < ApplicationRecord
     RequirementTemplate.published_requirement_template_version(activity, permit_type)
   end
 
+  def form_customizations
+    jurisdiction
+      .jurisdiction_template_version_customizations
+      .find_by(template_version: current_template_version)
+      &.customizations
+  end
+
   def number_prefix
     jurisdiction.prefix
   end

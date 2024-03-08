@@ -13,7 +13,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
          :submission_data,
          :submitted_at,
          :formatted_compliance_data,
-         :front_end_form_update
+         :front_end_form_update,
+         :form_customizations
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint
