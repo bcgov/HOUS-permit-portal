@@ -2,9 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   labels:
-    app: "{{ .Values.STAGE }}-openshift-base"
+    app: "permit-portal-routing"
   name: allow-from-openshift-ingress
-  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   ingress:
     - from:
@@ -20,9 +19,8 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   labels:
-    app: "{{ .Values.STAGE }}-openshift-base"
+    app: "permit-portal-routing"
   name: allow-same-namespace
-  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
 spec:
   ingress:
     - from:

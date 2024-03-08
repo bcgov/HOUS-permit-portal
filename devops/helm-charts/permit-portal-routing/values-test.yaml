@@ -1,0 +1,3 @@
+route:
+  spec:
+    host: "test.buildingpermit.gov.bc.ca"

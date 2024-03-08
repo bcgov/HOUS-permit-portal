@@ -20,10 +20,7 @@ Devise.setup do |config|
     ]
   end
 
-  config.jwt_cookie do |jwt_cookie|
-    jwt_cookie.domain = ".#{ENV["APP_DOMAIN"]}" # set this to .<DOMAIN>.com so that cookies can be read on the subdomain
-    jwt_cookie.secure = ENV["SECURE_JWT_COOKIE"] == "true" || false
-  end
+  config.jwt_cookie { |jwt_cookie| jwt_cookie.secure = ENV["SECURE_JWT_COOKIE"] == "true" || false }
 
   config.omniauth :keycloak_openid,
                   ENV["KEYCLOAK_CLIENT"],

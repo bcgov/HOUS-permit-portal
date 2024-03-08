@@ -3,7 +3,7 @@ STAGE: dev
 
 route:
   spec:
-    host: "ws.buildingpermit.gov.bc.ca"
+    host: "wshpp.apps.silver.devops.gov.bc.ca"
     to:
       name: "anycable-go"
 

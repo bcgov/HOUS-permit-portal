@@ -10,7 +10,7 @@ metadata:
 spec:
   host: "{{ .Values.route.spec.host }}"
   port:
-    targetPort: 8080-tcp
+    targetPort: http
   # manage certs manually for now
   tls:
     insecureEdgeTerminationPolicy: Redirect

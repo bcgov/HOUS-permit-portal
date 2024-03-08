@@ -2,10 +2,6 @@ OPENSHIFT_NAMESPACE: bb18ab
 STAGE: dev
 appName: "hous-permit-portal"
 
-route:
-  spec:
-    host: "hous-permit-portal.apps.silver.devops.gov.bc.ca"
-
 vaultNamespace: "bb18ab-nonprod"
 
 deployments:

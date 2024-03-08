@@ -2,7 +2,7 @@ STAGE: prod
 
 route:
   spec:
-    host: "buildingpermit.gov.bc.ca"
+    host: "hpp.apps.silver.devops.gov.bc.ca"
 
 vaultNamespace: "bb18ab-prod"
 

@@ -1,6 +1,6 @@
 apiVersion: v2
-name: openshift-base
-description: Base helm chart to set a foundation for other charts
+name: permit-portal-routing
+description: Some foundational things (like networkpolicies) and nginx routing for the other services
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -22,3 +22,8 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.0.0"
+
+dependencies:
+  - name: nginx
+    version: "15.14.0"
+    repository: "https://charts.bitnami.com/bitnami"
