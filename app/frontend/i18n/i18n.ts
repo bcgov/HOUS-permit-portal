@@ -380,6 +380,18 @@ const options = {
             email: "E-mail",
             energyStepCode: "Energy Step Code",
           },
+          contactFieldItemLabels: {
+            firstName: "First Name",
+            lastName: "Last Name",
+            email: "Email",
+            phone: "Phone",
+            address: "Address",
+            organization: "Organization (optional)",
+            businessName: "Business Name",
+            businessLicense: "Business License",
+            professionalAssociation: "Professional Association",
+            professionalNumber: "Professional Number",
+          },
           descriptionMaxLength: "(Max length: 250 characters)",
           unitLabels: {
             option: {

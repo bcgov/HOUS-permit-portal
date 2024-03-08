@@ -11,7 +11,7 @@ import {
   Stack,
   Textarea,
 } from "@chakra-ui/react"
-import { CalendarBlank, MapPin, X } from "@phosphor-icons/react"
+import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FieldValues, useController, useFieldArray } from "react-hook-form"
@@ -59,7 +59,7 @@ const requirementsComponentMap = {
         editableInput={
           <InputGroup>
             <InputLeftElement pointerEvents="none">
-              <i className="fa fa-phone"></i>
+              <Phone />
             </InputLeftElement>
             <Input bg={"white"} isReadOnly />
           </InputGroup>
@@ -75,7 +75,7 @@ const requirementsComponentMap = {
         editableInput={
           <InputGroup>
             <InputLeftElement pointerEvents="none">
-              <i className="fa fa-envelope"></i>
+              <Envelope />
             </InputLeftElement>
             <Input bg={"white"} isReadOnly />
           </InputGroup>
