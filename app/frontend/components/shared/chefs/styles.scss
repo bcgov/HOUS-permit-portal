@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900");
 @import url("https://fonts.googleapis.com/css?family=Material+Icons");
 @import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
+@import url("https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css");
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "formiojs/dist/formio.form.css";
 
@@ -21,6 +22,9 @@ $bcgov-alert-error: #f2dede;
 $bcgov-alert-warning: #f9f1c6;
 $bcgov-alert-info: #d9eaf7;
 $bcgov-alert-success: #dff0d8;
+
+//blueAlt is bcgov-blue-secondary
+$blue-light: "#F6F9FC";
 
 /////////////////////////////////
 ///  override formio styles:
@@ -359,5 +363,35 @@ $bcgov-alert-success: #dff0d8;
 
   .card {
     margin-bottom: 24px !important;
+  }
+
+  .card-body {
+    padding: 24px !important;
+  }
+
+  .tips {
+    border-left: 4px solid;
+    border-color: $bcgov-blue-secondary;
+    background-color: $blue-light;
+    padding-left: var(--chakra-space-6);
+    padding-top: var(--chakra-space-3);
+    padding-bottom: var(--chakra-space-3);
+    padding-right: var(--chakra-space-6);
+    margin-top: 4px;
+    margin-bottom: 4px;
+
+    .tips-header {
+      color: $bcgov-blue-secondary;
+      .i {
+        background-color: $bcgov-blue-secondary;
+        height: 24px;
+        width: 24px;
+        margin-right: 6px;
+      }
+    }
+  }
+
+  .compliance {
+    background-color: $blue-light !important;
   }
 }

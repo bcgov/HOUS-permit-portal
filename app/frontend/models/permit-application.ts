@@ -26,6 +26,7 @@ export const PermitApplicationModel = types
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     formattedComplianceData: types.maybeNull(types.frozen()),
+    formCustomizations: types.maybeNull(types.frozen()),
     submittedAt: types.maybeNull(types.Date),
     viewedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
@@ -52,7 +53,7 @@ export const PermitApplicationModel = types
     },
     get formattedFormJson() {
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
-      return combineComplianceHints(self.formJson, self.formattedComplianceData)
+      return combineComplianceHints(self.formJson, self.formCustomizations, self.formattedComplianceData)
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
