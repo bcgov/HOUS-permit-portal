@@ -35,7 +35,7 @@ jobs:
           labels: |
             app=dev-hous-permit-portal
             git-sha=${{ github.sha }}
-          containerfiles: ./Dockerfile
+          containerfiles: ./devops/docker/app/Dockerfile
           build-args: DEBUG_BUILD=true
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
