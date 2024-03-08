@@ -7,6 +7,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
+import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
 import { ComplianceSummary } from "./compliance-summary"
 import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
@@ -73,7 +74,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                   <ProjectInfo checklist={checklist} />
                   <ComplianceSummary checklist={checklist} />
                   <CompletedBy checklist={checklist} />
-                  {/* TODO: Building Characteristics Summary */}
+                  <BuildingCharacteristicsSummary checklist={checklist} />
                   <EnergyPerformanceCompliance checklist={checklist} />
                   <EnergyStepCodeCompliance checklist={checklist} />
                   <ZeroCarbonStepCodeCompliance checklist={checklist} />
