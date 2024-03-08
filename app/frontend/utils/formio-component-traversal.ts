@@ -64,8 +64,8 @@ export const combineComplianceHints = (
       ?.components?.find((c) => c.key === key)
 
     // Update the description if the item is found
-    if (item && item.description) {
-      item.description = value
+    if (item && item.computedCompliance) {
+      item.computedComplianceResult = value
     }
   }
   return updatedJson

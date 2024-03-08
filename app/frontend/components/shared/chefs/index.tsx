@@ -25,6 +25,22 @@ Templates.current = {
       return template
     },
   },
+  label: {
+    form: (ctx) => {
+      let template = ""
+      if (ctx?.component?.computedCompliance) {
+        const computedComplianceText =
+          ctx?.component?.computedComplianceResult || `This field has compliance capability.`
+        template = template.concat(
+          `<div class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><i class="ph-fill ph-lightning-a"></i>
+          ${computedComplianceText}</div>`
+        )
+      }
+
+      template = template.concat(defaultLabelTemplate(ctx))
+      return template
+    },
+  },
 }
 
 Formio.use(ChefsFormioComponents)

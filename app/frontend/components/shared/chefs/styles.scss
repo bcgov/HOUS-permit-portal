@@ -393,5 +393,11 @@ $blue-light: "#F6F9FC";
 
   .compliance {
     background-color: $blue-light !important;
+    .i {
+      background-color: $bcgov-blue-secondary;
+      height: 24px;
+      width: 24px;
+      margin-right: 6px;
+    }
   }
 }
