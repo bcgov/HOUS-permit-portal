@@ -259,6 +259,7 @@ const ManageElectiveFieldsView = ({
               py={2}
             >
               <Checkbox
+                borderColor={"border.input"}
                 isChecked={enabledFieldIds.includes(requirementField.id)}
                 onChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
               />

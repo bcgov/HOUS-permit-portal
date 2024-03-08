@@ -262,6 +262,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          elective: "Elective",
           associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
@@ -275,6 +276,7 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
             create: {
@@ -293,6 +295,7 @@ const options = {
             addHelpText: "Add help text",
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
+            isAnElectiveField: "This is an elective field for Local Gov",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
@@ -316,17 +319,20 @@ const options = {
             requirementSku: "Generated unique identifier",
           },
           requirementTypeLabels: {
-            shortText: "Short Text",
+            text: "Short Text",
+            checkbox: "Checkbox",
             address: "Address",
+            bcaddress: "BC Address",
             date: "Date",
             number: "Number",
             textArea: "Text Area",
-            radio: "Select Radio Options",
+            radio: "Radio Options",
             multiOptionSelect: "Multi-Select Checkboxes",
             select: "Single Select Dropdown",
             signature: "Signature",
             generalContact: "General Contact",
-            fileUpload: "File Upload",
+            professionalContact: "Professional Contact",
+            file: "File Upload",
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
