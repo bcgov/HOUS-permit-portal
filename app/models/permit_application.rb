@@ -39,6 +39,13 @@ class PermitApplication < ApplicationRecord
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
 
+  def force_update_published_template_version
+    return unless Rails.env.development?
+    # for development purposes only
+
+    current_template_version.update(form_json: current_template_version.requirement_template.to_form_json)
+  end
+
   def search_data
     {
       number: number,

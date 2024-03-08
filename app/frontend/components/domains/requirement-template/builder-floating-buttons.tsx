@@ -15,7 +15,7 @@ export function BuilderFloatingButtons({ onScrollToTop, onCollapseAll }: IProps)
         {t("requirementTemplate.edit.goToTop")}
       </Button>
       <Button variant={"greyButton"} onClick={onCollapseAll}>
-        {t("requirementTemplate.edit.collapseAll")}
+        {t("ui.collapseAll")}
       </Button>
     </Stack>
   )
