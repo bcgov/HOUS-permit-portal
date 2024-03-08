@@ -2,7 +2,7 @@ import { Container, ContainerProps, Tab, TabList, Tabs } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ISearch } from "../../../lib/create-search-model"
+import { ISearch, TFilterableStatus } from "../../../lib/create-search-model"
 import { EPermitApplicationStatus } from "../../../types/enums"
 
 interface IPermitApplicationStatusTabsProps<TSearchModel extends ISearch> extends ContainerProps {
@@ -13,18 +13,21 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
   searchModel,
   ...rest
 }: IPermitApplicationStatusTabsProps<TSearchModel>) {
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const queryParams = new URLSearchParams(location.search)
+  const paramStatusFilter = queryParams.get("statusFilter") as TFilterableStatus
+
+  const statusToIndex = (status: EPermitApplicationStatus): number => {
+    const index = Object.values(EPermitApplicationStatus).indexOf(status)
+    return index === -1 ? 0 : index
+  }
+
   const { statusFilter, setStatusFilter, search } = searchModel
+  const [selectedIndex, setSelectedIndex] = useState(statusToIndex(statusFilter))
 
   const { t } = useTranslation()
 
   const indexToStatus = (i: number): EPermitApplicationStatus => {
     return Object.values(EPermitApplicationStatus)[i]
-  }
-
-  const statusToIndex = (status: EPermitApplicationStatus): number => {
-    const index = Object.values(EPermitApplicationStatus).indexOf(status)
-    return index === -1 ? 0 : index
   }
 
   const handleChange = (index: number) => {
@@ -34,8 +37,8 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
   }
 
   useEffect(() => {
-    setSelectedIndex(statusToIndex(statusFilter))
-  }, [statusFilter])
+    handleChange(statusToIndex(paramStatusFilter))
+  }, [])
 
   return (
     <Container maxW="container.lg" py={3} {...rest}>

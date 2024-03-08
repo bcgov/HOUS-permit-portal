@@ -24,7 +24,7 @@ module Api::Concerns::Search::PermitApplications
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
     # Only add the jurisdiction_id condition if @jurisdiction is present
     if current_user.submitter?
-      search_conditions[:where].merge({ submitter_id: current_user.id })
+      search_conditions[:where] = search_conditions[:where].merge({ submitter_id: current_user.id })
     elsif @jurisdiction.present?
       search_conditions[:where] = {
         jurisdiction_id: @jurisdiction.id,
@@ -32,7 +32,6 @@ module Api::Concerns::Search::PermitApplications
         status: %i[submitted],
       }
     end
-
     @permit_application_search = PermitApplication.search(query, **search_conditions)
   end
 

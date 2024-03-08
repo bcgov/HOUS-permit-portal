@@ -150,7 +150,7 @@ class Requirement < ApplicationRecord
       json.merge!({ description: description })
     end
 
-    json.merge!({ validate: { required: true } }) if required
+    json.merge!({ validate: { required: !Rails.env.development? } }) if required
 
     json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
 

@@ -61,7 +61,7 @@ class PermitApplication < ApplicationRecord
 
   def current_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    jurisdiction.published_requirement_template_version(activity, permit_type)
+    RequirementTemplate.published_requirement_template_version(activity, permit_type)
   end
 
   def number_prefix

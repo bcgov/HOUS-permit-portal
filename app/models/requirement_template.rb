@@ -97,6 +97,12 @@ class RequirementTemplate < ApplicationRecord
     }
   end
 
+  def self.published_requirement_template_version(activity, permit_type)
+    find_by(activity: activity, permit_type: permit_type).published_template_version
+  rescue NoMethodError => e
+    rails.logger.error e.message
+  end
+
   def lookup_props
     array_of_req_pairs = requirement_template_sections.map(&:lookup_props).flatten
     array_of_req_pairs.reduce({}) do |obj, pair|

@@ -224,6 +224,7 @@ const options = {
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted At",
+            viewed_at: "Viewed At",
             status: "Status",
           },
           submissionInbox: {
