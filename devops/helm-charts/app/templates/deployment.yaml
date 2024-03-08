@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s-%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s-%s\\\")].image\"}]" $.Values.STAGE $.Values.appName $.Values.STAGE $.Values.appName .process }}'
+    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s-%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s\\\")].image\"}]" $.Values.appName $.Values.STAGE $.Values.appName .process }}'
   labels:
     app: "{{ $.Values.appName }}-{{ .process }}"
   name: "{{ $.Values.appName }}-{{ .process }}"
@@ -24,9 +24,9 @@ spec:
     metadata:
       annotations:
         vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/agent-inject-secret-secrets.env: '{{ printf "%s/%s/%s-hous-permit-portal" $.Values.vaultNamespace $.Values.STAGE $.Values.STAGE }}'
+        vault.hashicorp.com/agent-inject-secret-secrets.env: '{{ printf "%s/%s/%s" $.Values.vaultNamespace $.Values.STAGE $.Values.appName}}'
         vault.hashicorp.com/agent-inject-template-secrets.env: |
-          {{`{{- with secret "`}}{{ printf "%s/%s/%s-%s" $.Values.vaultNamespace $.Values.STAGE $.Values.STAGE $.Values.appName }}{{ `" -}}`}}
+          {{`{{- with secret "`}}{{ printf "%s/%s/%s" $.Values.vaultNamespace $.Values.STAGE $.Values.appName }}{{ `" -}}`}}
           {{`{{- range $k, $v := .Data.data }}`}}
           {{ `{{ $k }}={{ $v }}{{ end -}}` }}
           {{`{{- end }}`}}
@@ -56,8 +56,6 @@ spec:
             requests:
               cpu: {{ .spec.containers.resources.requests.cpu }}
               memory: {{ .spec.containers.resources.requests.memory }}
-          terminationMessagePath: "/{{ $.Values.STAGE }}/termination-log"
-          terminationMessagePolicy: File
           {{- if .spec.containers.includeCommand }}
           command:
           - /bin/sh

@@ -23,6 +23,9 @@ COPY pdfalib-14.2.612-unix-x64.tar.gz /usr/lib/
 RUN tar -xf /opt/consigno-server-automation-2.16.9-unix-x64.tar.gz -C /opt/ && \
     rm /opt/consigno-server-automation-2.16.9-unix-x64.tar.gz
 
+# Modify log4j.xml to output to SYSTEM_OUT (so we can get logs in the foreground)
+COPY log4j.xml /opt/consigno-server-automation/conf/log4j.xml
+
 # Unpack the PDF/A lib package
 RUN tar -xf /usr/lib/pdfalib-14.2.612-unix-x64.tar.gz -C /usr/lib/ && \
     rm /usr/lib/pdfalib-14.2.612-unix-x64.tar.gz

@@ -2,9 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
-  name: "{{ .Values.STAGE }}-{{ .Values.appName }}"
-  namespace: "{{ .Values.OPENSHIFT_NAMESPACE }}-{{ .Values.STAGE }}"
+    app: "{{ .Values.appName }}"
+  name: "{{ .Values.appName }}"
 spec:
   internalTrafficPolicy: Cluster
   ipFamilies:
@@ -16,8 +15,8 @@ spec:
       protocol: TCP
       targetPort: 8080
   selector:
-    app: "{{ .Values.STAGE }}-{{ .Values.appName }}"
-    deployment: "{{ .Values.STAGE }}-{{ .Values.appName }}"
+    app: "{{ .Values.appName }}"
+    deployment: "{{ .Values.appName }}"
   sessionAffinity: None
   type: ClusterIP
 status:

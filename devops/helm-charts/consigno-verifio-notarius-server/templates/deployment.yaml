@@ -2,19 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s\\\")].image\"}]" $.Values.imageName $.Values.STAGE $.Values.appName}}'
+    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s\\\")].image\"}]" $.Values.imageName $.Values.appName}}'
   labels:
-    app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
-  name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
-  namespace: "{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}"
+    app: "{{ $.Values.appName }}"
+  name: "{{ $.Values.appName }}"
 spec:
   progressDeadlineSeconds: 600
   replicas: {{ .replicaCount }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
-      deployment: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
+      app: "{{ $.Values.appName }}"
+      deployment: "{{ $.Values.appName }}"
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -39,13 +38,13 @@ spec:
         vault.hashicorp.com/namespace: "platform-services"
         vault.hashicorp.com/role: '{{ $.Values.vaultNamespace }}'
       labels:
-        app: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
-        deployment: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
+        app: "{{ $.Values.appName }}"
+        deployment: "{{ $.Values.appName }}"
     spec:
       containers:
         - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.imageName }}:latest"
           imagePullPolicy: Always
-          name: "{{ $.Values.STAGE }}-{{ $.Values.appName }}"
+          name: "{{ $.Values.appName }}"
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -61,7 +60,7 @@ spec:
             requests:
               cpu: {{ $.Values.deployment.spec.containers.resources.requests.cpu }}
               memory: {{ $.Values.deployment.spec.containers.resources.requests.memory }}
-          terminationMessagePath: "/{{ $.Values.STAGE }}/termination-log"
+          terminationMessagePath: "/termination-log"
           terminationMessagePolicy: File
 
       dnsPolicy: ClusterFirst

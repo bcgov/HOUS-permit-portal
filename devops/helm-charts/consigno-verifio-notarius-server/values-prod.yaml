@@ -1,5 +1,4 @@
 STAGE: prod
-
 vaultNamespace: "bb18ab-prod"
 
 deployment:
@@ -12,4 +11,4 @@ deployment:
           memory: 128Mi
         limits:
           cpu: 100m
-          memory: 384Mi
+          memory: 512Mi
