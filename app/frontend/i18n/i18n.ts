@@ -715,8 +715,18 @@ const options = {
           requirementsLibraryTitle: "Requirements Library",
           requirementsLibraryDescription:
             "Create and manage requirement blocks that can be used inside of permit templates.",
-          contentManagementTitle: "Content Management",
-          contentManagementDescription: "Customize content in one centralized place.",
+          configurationManagement: {
+            title: "Configuration Management",
+            description: "Customize content in one centralized place.",
+            editPermission: "Only managers are able to edit.",
+            jurisdictionNameLabel: "Name of local jurisdiction",
+            jurisdictionLocationLabel: "Location",
+            jurisdictionAbout: {
+              title: "My Jurisdiction's About Page",
+              description:
+                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
+            },
+          },
           superAdminTitle: "Admin Home",
           submissionsInboxTitle: "Submissions Inbox",
           submissionsInboxDescription: "View all submitted building permit applications.",
@@ -915,7 +925,7 @@ const options = {
             "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
           breadcrumb: {
             profile: "Profile",
-            jurisdictions: "Manage Jurisdictions",
+            jurisdictions: "Jurisdictions",
             new: "Create New",
             invite: "Invite",
             templateVersions: "Template Versions",
@@ -932,6 +942,7 @@ const options = {
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital Building Permits",
             contact: "Contact Us",
+            configurationManagement: "Configuration Management",
           },
           questionSupport: "Question Support",
         },

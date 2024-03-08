@@ -13,8 +13,8 @@ import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
 import { ResetPasswordScreen } from "../authentication/reset-password-screen"
 import { HomeScreen } from "../home"
+import { ConfigurationManagementScreen } from "../home/review-manager/configuration-management-screen"
 import { JurisdictionIndexScreen } from "../jurisdictions/index"
-import { JurisdictionConfigurationScreen } from "../jurisdictions/jurisdiction-configuration-screen"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
 import { JurisdictionSubmissionInboxScreen } from "../jurisdictions/submission-inbox/jurisdiction-submisson-inbox-screen"
@@ -99,13 +99,16 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId/configuration" element={<JurisdictionConfigurationScreen />} />
     </>
   )
 
   const managerOrReviewerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management"
+        element={<ConfigurationManagementScreen />}
+      />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
     </>
   )
