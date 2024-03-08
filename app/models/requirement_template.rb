@@ -33,68 +33,70 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def to_form_json
-    {
-      id: id,
-      key: key,
-      input: false,
-      tableView: false,
-      components:
-        requirement_template_sections.map(&:to_form_json).concat(
-          [
-            {
-              id: "section-completion-id",
-              key: "section-completion-key",
-              type: "container",
-              title: I18n.t("formio.requirement_template.completion_title"),
-              label: I18n.t("formio.requirement_template.completion_title"),
-              custom_class: "formio-section-container",
-              hide_label: false,
-              collapsible: false,
-              initially_collapsed: false,
-              components: [
-                id: "section-signoff-id",
-                key: "section-signoff-key",
-                type: "panel",
-                title: I18n.t("formio.requirement_template.signoff_panel_title"),
-                collapsible: true,
-                collapsed: false,
+    JSON.parse(
+      {
+        id: id,
+        key: key,
+        input: false,
+        tableView: false,
+        components:
+          requirement_template_sections.map(&:to_form_json).concat(
+            [
+              {
+                id: "section-completion-id",
+                key: "section-completion-key",
+                type: "container",
+                title: I18n.t("formio.requirement_template.completion_title"),
+                label: I18n.t("formio.requirement_template.completion_title"),
+                custom_class: "formio-section-container",
+                hide_label: false,
+                collapsible: false,
+                initially_collapsed: false,
                 components: [
-                  {
-                    type: "checkbox",
-                    key: "signed",
-                    title: I18n.t("formio.requirement_template.signoff_checkbox_title"),
-                    label: I18n.t("formio.requirement_template.signoff_checkbox_label"),
-                    inputType: "checkbox",
-                    input: true,
-                    defaultValue: false,
-                  },
-                  {
-                    key: "submit",
-                    size: "md",
-                    type: "button",
-                    block: false,
-                    input: true,
-                    title: I18n.t("formio.requirement_template.signoff_submit_title"),
-                    label: I18n.t("formio.requirement_template.signoff_submit_title"),
-                    theme: "primary",
-                    action: "submit",
-                    widget: {
-                      type: "input",
+                  id: "section-signoff-id",
+                  key: "section-signoff-key",
+                  type: "panel",
+                  title: I18n.t("formio.requirement_template.signoff_panel_title"),
+                  collapsible: true,
+                  collapsed: false,
+                  components: [
+                    {
+                      type: "checkbox",
+                      key: "signed",
+                      title: I18n.t("formio.requirement_template.signoff_checkbox_title"),
+                      label: I18n.t("formio.requirement_template.signoff_checkbox_label"),
+                      inputType: "checkbox",
+                      input: true,
+                      defaultValue: false,
                     },
-                    disabled: false,
-                    show: false,
-                    conditional: {
-                      show: true,
-                      when: "signed",
-                      eq: "true",
+                    {
+                      key: "submit",
+                      size: "md",
+                      type: "button",
+                      block: false,
+                      input: true,
+                      title: I18n.t("formio.requirement_template.signoff_submit_title"),
+                      label: I18n.t("formio.requirement_template.signoff_submit_title"),
+                      theme: "primary",
+                      action: "submit",
+                      widget: {
+                        type: "input",
+                      },
+                      disabled: false,
+                      show: false,
+                      conditional: {
+                        show: true,
+                        when: "signed",
+                        eq: "true",
+                      },
                     },
-                  },
+                  ],
                 ],
-              ],
-            },
-          ],
-        ),
-    }
+              },
+            ],
+          ),
+      }.to_json,
+    )
   end
 
   def self.published_requirement_template_version(activity, permit_type)
