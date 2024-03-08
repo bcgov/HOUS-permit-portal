@@ -3,7 +3,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EPermitApplicationStatus } from "../types/enums"
-import { IFormIOBlock, IFormJson, ISubmissionData } from "../types/types"
+import { IFormIOBlock, IFormJson, ISubmissionData, ITemplateCustomization } from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
@@ -26,7 +26,7 @@ export const PermitApplicationModel = types
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     formattedComplianceData: types.maybeNull(types.frozen()),
-    formCustomizations: types.maybeNull(types.frozen()),
+    formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
     submittedAt: types.maybeNull(types.Date),
     viewedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
