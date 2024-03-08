@@ -1,5 +1,13 @@
 STAGE: test
 
-route:
+deployment:
+  replicaCount: 1
   spec:
-    host: "test.buildingpermit.gov.bc.ca"
+    containers:
+      resources:
+        requests:
+          cpu: 150m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
