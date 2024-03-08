@@ -165,8 +165,6 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
 
   const handleClickLogout = async () => {
     await logout()
-    // Do a full browser refresh to slightly enhance security
-    window.location.href = "/"
   }
 
   const superAdminOnlyItems = (

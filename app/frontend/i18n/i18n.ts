@@ -887,6 +887,8 @@ const options = {
           somethingWrong: "Something went wrong",
           pageNotFound: "404 - The page you are looking for could not be found",
           seeConsoleForDetails: "See the browser console for details",
+          accessibility: "Accessibility",
+          copyright: "Copyright",
           breadcrumb: {
             profile: "Profile",
             jurisdictions: "Manage Jurisdictions",
@@ -905,6 +907,7 @@ const options = {
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital Building Permits",
+            contact: "Contact Us",
           },
           questionSupport: "Question Support",
         },
