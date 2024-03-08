@@ -10,6 +10,7 @@ class PermitApplication < ApplicationRecord
 
   belongs_to :permit_type
   belongs_to :activity
+  belongs_to :template_version
 
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
@@ -31,9 +32,11 @@ class PermitApplication < ApplicationRecord
   delegate :code, :name, to: :activity, prefix: true
   delegate :energy_step_required, to: :jurisdiction, allow_nil: true
   delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
+  delegate :form_json, to: :template_version
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
+  before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
 
   def search_data
@@ -50,14 +53,15 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  def form_json
-    # TODO: add versioning for requirement templates, etc.  for now just stub the return of the requirement template to use and its form data
-    # need to look up jurisidcitional version and enablement as well
-    jurisdiction.template_form_json(activity, permit_type)
+  def set_template_version
+    return unless template_version.blank?
+
+    self.template_version = current_template_version
   end
 
-  def published_template_version #this will eventually be different, if there is a new version it should notify the user
-    jurisdiction.published_reqirement_template_version(activity, permit_type)
+  def current_template_version
+    # this will eventually be different, if there is a new version it should notify the user
+    jurisdiction.published_requirement_template_version(activity, permit_type)
   end
 
   def number_prefix

@@ -147,3 +147,15 @@ RequirementsFromXlsxSeeder.seed
 # Energy Step Code Reference Tables
 StepCode::MEUIReferencesSeeder.seed!
 StepCode::TEDIReferencesSeeder.seed!
+
+puts "Seeding jurisdiction customizations..."
+TemplateVersion
+  .limit(3)
+  .each do |template_version|
+    JurisdictionTemplateVersionCustomization.find_or_create_by(
+      jurisdiction: north_van,
+      template_version: template_version,
+    ) do |customization|
+      # any other data to add
+    end
+  end
