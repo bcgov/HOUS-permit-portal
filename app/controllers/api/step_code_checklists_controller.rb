@@ -46,6 +46,27 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
       :epc_calculation_airtightness,
       :epc_calculation_testing_target_type,
       :epc_calculation_compliance,
+      :building_type,
+      :dwh_heating_consumption,
+      :ref_dwh_heating_consumption,
+      :ref_hvac_consumption,
+      :hvac_consumption,
+      building_characteristics_summary_attributes: [
+        roof_ceilings_lines: %i[details rsi],
+        above_grade_walls_lines: %i[details rsi],
+        framings_lines: %i[details rsi],
+        unheated_floors_lines: %i[details rsi],
+        below_grade_walls_lines: %i[details rsi],
+        slabs_lines: %i[details rsi],
+        windows_glazed_doors: [:performance_type, lines: %i[details performance_value shgc]],
+        doors_lines: %i[details performance_type performance_value],
+        airtightness: [:details],
+        space_heating_cooling_lines: %i[details variant performance_value performance_type],
+        hot_water_lines: %i[details performance_type performance_value],
+        ventilation_lines: %i[details percent_eff liters_per_sec],
+        other_lines: [:details],
+        fossil_fuels: %i[details presence],
+      ],
     )
   end
 

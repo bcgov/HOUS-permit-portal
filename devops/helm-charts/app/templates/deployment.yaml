@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s-%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s\\\")].image\"}]" $.Values.appName $.Values.STAGE $.Values.appName .process }}'
+    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s-%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s\\\")].image\"}]" $.Values.STAGE $.Values.appName $.Values.appName .process }}'
   labels:
     app: "{{ $.Values.appName }}-{{ .process }}"
   name: "{{ $.Values.appName }}-{{ .process }}"

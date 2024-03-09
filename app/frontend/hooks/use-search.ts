@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { ISearch } from "../lib/create-search-model"
+import { ISearch, TFilterableStatus } from "../lib/create-search-model"
 import { ESortDirection } from "../types/enums"
 import { parseBoolean } from "../utils/utility-functions"
 
@@ -14,6 +14,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     const currentPage = queryParams.get("currentPage")
     const countPerPage = queryParams.get("countPerPage")
     const showArchived = queryParams.get("showArchived")
+    const statusFilter = queryParams.get("statusFilter") as TFilterableStatus
     const sortDirection = queryParams.get("sortDirection") as ESortDirection
     const sortField = queryParams.get("sortField")
 
@@ -21,6 +22,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     if (currentPage) searchModel.setCurrentPage(parseInt(decodeURIComponent(currentPage)))
     if (countPerPage) searchModel.setCountPerPage(parseInt(decodeURIComponent(countPerPage)))
     if (showArchived) searchModel.setShowArchived(parseBoolean(showArchived))
+    if (statusFilter) searchModel.setStatusFilter(statusFilter)
     if (sortDirection && sortField) {
       searchModel.applySort({ direction: sortDirection, field: sortField })
     } else {

@@ -1,13 +1,18 @@
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
+  EDoorsPerformanceType,
+  EFossilFuelsPresence,
+  EHotWaterPerformanceType,
   ENumberUnit,
   ERequirementType,
   ESortDirection,
+  ESpaceHeatingCoolingPerformanceType,
   EStepCodeAirtightnessValue,
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EWindowsGlazedDoorsPerformanceType,
 } from "./enums"
 
 export type TLatLngTuple = [number, number]
@@ -40,6 +45,7 @@ export type TSearchParams<IModelSortFields> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  statusFilter?: string
 }
 
 export interface IRequirementOptions {
@@ -132,12 +138,23 @@ export interface IErrorsBoxData {
   class: string
 }
 
+interface IStepCodeBuildingCharacteristicSummarySelectOptions {
+  performanceTypes: {
+    windowsGlazedDoors: EWindowsGlazedDoorsPerformanceType[]
+    doors: EDoorsPerformanceType[]
+    spaceHeatingCooling: ESpaceHeatingCoolingPerformanceType[]
+    hotWater: EHotWaterPerformanceType[]
+  }
+  fossilFuelsPresence: EFossilFuelsPresence[]
+}
+
 export interface IStepCodeSelectOptions {
   compliancePaths: EStepCodeCompliancePath[]
   airtightnessValues: EStepCodeAirtightnessValue[]
   epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
   permitApplications: Partial<IPermitApplication>[]
   buildingTypes: EStepCodeBuildingType[]
+  buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
 }
 
 export interface IRequirementBlockCustomization {

@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { ENumberUnit } from "./types/enums"
+import { ENumberUnit, ERequirementType } from "./types/enums"
 
 export const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -41,3 +41,15 @@ export const unitGroups: { [key: string]: ENumberUnit[] } = {
 }
 
 export const datefnsAppDateFormat = "yyyy/MM/dd"
+
+export function getRequirementTypeLabel(requirementType: ERequirementType) {
+  let derivedTranslationKey: keyof typeof ERequirementType
+
+  Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
+    if (value === requirementType) {
+      derivedTranslationKey = key
+    }
+  })
+
+  return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
+}

@@ -1,7 +1,8 @@
 {
   "all": {
     "sourceCodeDir": "app/frontend",
-    "watchAdditionalPaths": []
+    "watchAdditionalPaths": [],
+    "devServerConnectTimeout": 1
   },
   "development": {
     "autoBuild": true,

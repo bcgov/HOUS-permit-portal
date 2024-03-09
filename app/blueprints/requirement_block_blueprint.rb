@@ -12,8 +12,8 @@ class RequirementBlockBlueprint < Blueprinter::Base
 
   field :association_list, name: :associations
 
-  field :form_json do |requirement_block|
-    requirement_block.to_form_json
+  field :form_json do |requirement_block, options|
+    requirement_block.to_form_json(options[:parent_key])
   end
 
   association :requirements, blueprint: RequirementBlueprint

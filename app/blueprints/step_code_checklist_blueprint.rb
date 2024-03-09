@@ -52,7 +52,7 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
   end
 
   view :building_characteristics_summary do
-    # TODO
+    association :building_characteristics_summary, blueprint: StepCodeBuildingCharacteristicsSummaryBlueprint
   end
 
   view :mid_construction_testing_results do

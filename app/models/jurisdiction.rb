@@ -24,17 +24,12 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
-  def published_requirement_template_version(activity, permit_type)
-    #eventually will fetch the jurisdictions pecific version
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type).published_template_version
-  end
-
   def review_managers
-    users.review_managers
+    users&.kept&.review_managers
   end
 
   def reviewers
-    users.reviewers
+    users&.kept&.reviewers
   end
 
   def assign_unique_prefix
@@ -99,15 +94,19 @@ class Jurisdiction < ApplicationRecord
   end
 
   def review_managers_size
-    review_managers.size
+    review_managers&.size || 0
   end
 
   def reviewers_size
-    reviewers.size
+    reviewers&.size || 0
   end
 
   def permit_applications_size
-    permit_applications.size
+    permit_applications&.size || 0
+  end
+
+  def templates_used_size
+    jurisdiction_template_version_customizations&.size || 0
   end
 
   private

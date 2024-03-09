@@ -157,7 +157,7 @@ class RequirementsFromXlsxSeeder
               ), # if parse fails it will raise error
             # required_for_in_person_hint - text
             # reusable - boolean
-            required_for_multiple_owners: row["required_for_multiple_owners"].present?,
+            elective: row["elective"].present?,
             position: req_position_incrementer,
           )
           req_position_incrementer += 1

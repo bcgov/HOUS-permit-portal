@@ -2,9 +2,9 @@ import { Grid } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
-import { GridColumnHeader } from "../shared/compliance-grid/column-header"
-import { GridData } from "../shared/compliance-grid/data"
-import { GridRowHeader } from "../shared/compliance-grid/row-header"
+import { GridColumnHeader } from "../shared/grid/column-header"
+import { GridData } from "../shared/grid/data"
+import { GridRowHeader } from "../shared/grid/row-header"
 import { translationPrefix } from "./translation-prefix"
 
 interface IProps {

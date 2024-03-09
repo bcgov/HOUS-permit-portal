@@ -261,3 +261,6 @@ en:
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Submit"
       energy_step_code: "Use Energy Step Code Tool"
+  step_code_building_characteristics_summary:
+    performance_type:
+      error: "%{field_name} performance type must be one of %{accepted_values}"
