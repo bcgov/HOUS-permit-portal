@@ -21,6 +21,10 @@ FROM base as build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python
 
+# Use jemalloc to improve memory - https://medium.com/code-wild/how-jemalloc-improved-memory-usage-of-our-rails-application-7038d5926d4
+RUN apt-get update && apt-get install libjemalloc2 && rm -rf /var/lib/apt/lists/*
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
 # Install JavaScript dependencies
 ARG NODE_VERSION=20.10.0
 ENV PATH=/usr/local/node/bin:$PATH
