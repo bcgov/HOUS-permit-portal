@@ -1,0 +1,52 @@
+STAGE: prod
+
+route:
+  spec:
+    host: "buildingpermit.gov.bc.ca"
+
+vaultNamespace: "bb18ab-prod"
+
+# unfortunately since we are looping through these in an array redefining the object in the array overwrites the original one values.yaml so we have to specify all the keys rather than just the differences...
+deployments:
+  - process: web
+    replicaCount: 2
+    spec:
+      containers:
+        includeCommand: false
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+  - process: worker
+    replicaCount: 2
+    spec:
+      containers:
+        includeCommand: true
+        args:
+          - >-
+            set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec sidekiq
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+  - process: anycable-rpc
+    replicaCount: 2
+    spec:
+      containers:
+        includeCommand: true
+        args:
+          - >-
+            set -a; . /vault/secrets/secrets.env; set +a; exec bundle exec anycable --rpc-host=0.0.0.0:50051
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi

@@ -1,0 +1,61 @@
+route:
+  spec:
+    host: "hous-permit-portal.apps.silver.devops.gov.bc.ca"
+
+nginx:
+  fullnameOverride: "nginx"
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: bitnami/nginx
+    tag: 1.25.4-debian-12-r3
+  podSecurityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "20m"
+    limits:
+      memory: "128Mi"
+      cpu: "50m"
+  networkPolicy:
+    enabled: false
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+  serverBlock: |-
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
+    server {
+      listen 8080;
+
+      location / { # Route http connections to the web service
+          proxy_pass http://hous-permit-portal-web:3000;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Forwarded-Host $server_name;
+      }
+
+      location /cable { # Route websocket connections to /cable (anycable service)
+          proxy_pass http://anycable-go:8080;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection $connection_upgrade;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Forwarded-Host $server_name;
+      }
+    }

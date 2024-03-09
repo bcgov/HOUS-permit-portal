@@ -64,6 +64,10 @@ module BaseControllerMethods
     { flash: msg }
   end
 
+  def store_currents
+    Current.user = current_user
+  end
+
   private
 
   def default_meta(message)

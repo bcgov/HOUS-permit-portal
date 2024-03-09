@@ -1,0 +1,18 @@
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: dev
+imageName: "consigno-server-automation"
+appName: "consigno-verifio-notarius-server"
+
+vaultNamespace: "bb18ab-nonprod"
+
+deployment:
+  replicaCount: 1
+  spec:
+    containers:
+      resources:
+        requests:
+          cpu: 150m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 384Mi

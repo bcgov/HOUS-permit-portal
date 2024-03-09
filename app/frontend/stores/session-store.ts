@@ -24,6 +24,8 @@ export const SessionStoreModel = types
         const user = response.data.data
         self.loggedIn = true
         self.rootStore.userStore.setCurrentUser(user)
+        // connect websocket
+        self.rootStore.subscribeToUserChannel()
         if (opts.redirectToRoot) window.location.replace("/")
         return true
       }
@@ -51,6 +53,7 @@ export const SessionStoreModel = types
       self.isLoggingOut = true
       const response: any = yield self.environment.api.logout()
       if (response.ok) {
+        self.rootStore.disconnectUserChannel()
         self.resetAuth()
       }
       self.isLoggingOut = false

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s\\\")].image\"}]" $.Values.imageName $.Values.appName}}'
+  labels:
+    app: "{{ $.Values.appName }}"
+  name: "{{ $.Values.appName }}"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: "{{ $.Values.appName }}"
+      deployment: "{{ $.Values.appName }}"
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-secrets.env: '{{ printf "%s/%s/%s" $.Values.vaultNamespace $.Values.STAGE $.Values.appName}}'
+        vault.hashicorp.com/agent-inject-template-secrets.env: |
+          {{`{{- with secret "`}}{{ printf "%s/%s/%s" $.Values.vaultNamespace $.Values.STAGE $.Values.appName }}{{ `" -}}`}}
+          {{`{{- range $k, $v := .Data.data }}`}}
+          {{ `{{ $k }}={{ $v }}{{ end -}}` }}
+          {{`{{- end }}`}}
+        vault.hashicorp.com/agent-limits-cpu: "50m"
+        vault.hashicorp.com/agent-limits-mem: "100Mi"
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/agent-requests-cpu: "10m"
+        vault.hashicorp.com/agent-requests-mem: "25Mi"
+        vault.hashicorp.com/auth-path: "auth/k8s-silver"
+        vault.hashicorp.com/namespace: "platform-services"
+        vault.hashicorp.com/role: '{{ $.Values.vaultNamespace }}'
+      labels:
+        app: "{{ $.Values.appName }}"
+        deployment: "{{ $.Values.appName }}"
+    spec:
+      containers:
+        - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.imageName }}:latest"
+          imagePullPolicy: Always
+          name: "{{ $.Values.appName }}"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - set -a; . /vault/secrets/secrets.env; set +a; exec ./entrypoint.sh
+          resources:
+            limits:
+              cpu: {{ $.Values.deployment.spec.containers.resources.limits.cpu }}
+              memory: {{ $.Values.deployment.spec.containers.resources.limits.memory }}
+            requests:
+              cpu: {{ $.Values.deployment.spec.containers.resources.requests.cpu }}
+              memory: {{ $.Values.deployment.spec.containers.resources.requests.memory }}
+          terminationMessagePath: "/termination-log"
+          terminationMessagePolicy: File
+
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
+      serviceAccountName: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
+      terminationGracePeriodSeconds: 30

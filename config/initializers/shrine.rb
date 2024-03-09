@@ -8,7 +8,7 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
-if Rails.env.test? || ENV["DOCKER_BUILDING"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
+if Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
   Shrine.storages = {
     cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
     store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent

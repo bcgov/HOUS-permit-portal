@@ -1,0 +1,6 @@
+dependencies:
+- name: crunchy-postgres
+  repository: https://bcgov.github.io/crunchy-postgres/
+  version: 0.6.1
+digest: sha256:31f7c9fa7c59b8c39a8b32f343a2f25677e2ff3af8deea4d1c6e596c51fbb712
+generated: "2024-03-04T11:42:19.177107-08:00"
