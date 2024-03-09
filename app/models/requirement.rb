@@ -143,6 +143,8 @@ class Requirement < ApplicationRecord
     json.merge!({ description: hint }) if hint
 
     json.merge!({ validate: { required: true } }) if required
+    
+    json.merge!({ elective: elective }) if elective
 
     json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
 

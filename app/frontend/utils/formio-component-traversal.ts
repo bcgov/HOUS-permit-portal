@@ -48,6 +48,21 @@ export const combineComplianceHints = (
   const blocksList = findPanelComponents(updatedJson.components)
   blocksList.forEach((panelComponent) => {
     if (blocksLookups[panelComponent.id]) {
+      if (blocksLookups[panelComponent.id]?.tip) {
+        panelComponent["tip"] = blocksLookups[panelComponent.id].tip
+      }
+      if (blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]) {
+        panelComponent.components.forEach((subComp) => {
+          if (subComp.elective) {
+            subComp["conditional"] = {
+              show: blocksLookups[panelComponent.id]?.enabledElectiveFieldIds?.includes(subComp.id),
+              when: null,
+              eq: "",
+            }
+          }
+        })
+      }
+
       for (const [key, value] of Object.entries(blocksLookups[panelComponent.id])) {
         panelComponent[key] = value
       }
