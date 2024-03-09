@@ -289,6 +289,8 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            defaultContactLabel: "Contact",
+            canAddMultipleContacts: "Submitter can add multiple contacts",
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",

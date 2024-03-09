@@ -64,6 +64,11 @@ export function isMultiOptionRequirement(requirementType: ERequirementType): boo
   return multiOptionRequirementFields.includes(requirementType)
 }
 
+export function isContactRequirement(requirementType: ERequirementType): boolean {
+  const contactRequirementFields = [ERequirementType.generalContact, ERequirementType.professionalContact]
+  return contactRequirementFields.includes(requirementType)
+}
+
 export function isQuillEmpty(value: string) {
   if (!value || (value.replace(/<(.|\n)*?>/g, "").trim().length === 0 && !value.includes("<img"))) {
     return true

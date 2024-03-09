@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { getRequirementTypeLabel } from "../../../../constants"
 import { IRequirementsAttribute } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
-import { isMultiOptionRequirement } from "../../../../utils/utility-functions"
+import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
@@ -49,6 +49,9 @@ export const FieldsSetup = observer(function FieldsSetup() {
   const onUseRequirement = (requirementType: ERequirementType) => {
     append({
       inputType: requirementType,
+      label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
+        ? t("requirementsLibrary.modals.defaultContactLabel")
+        : undefined,
       ...(isMultiOptionRequirement(requirementType)
         ? {
             inputOptions: {
@@ -186,7 +189,6 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         controlProps: {
                           control: control,
                           name: `requirementsAttributes.${index}.elective`,
-                          // @ts-ignore
                         },
                       }}
                       unitSelectProps={
@@ -224,6 +226,16 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             }
                           : undefined
                       }
+                      canAddMultipleContactProps={
+                        isContactRequirement(requirementType)
+                          ? {
+                              controlProps: {
+                                control: control,
+                                name: `requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`,
+                              },
+                            }
+                          : undefined
+                      }
                     />
                   </Box>
                   <Box
@@ -245,6 +257,13 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       )}
                       selectProps={{
                         maxW: "339px",
+                      }}
+                      addMultipleContactProps={{
+                        shouldRender: true,
+                        formControlProps: { isDisabled: true },
+                        switchProps: {
+                          isChecked: !!watch(`requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`),
+                        },
                       }}
                       showAddLabelIndicator
                     />
