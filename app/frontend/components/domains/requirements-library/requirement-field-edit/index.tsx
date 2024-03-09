@@ -1,14 +1,25 @@
-import { Box, Button, HStack, IconButton, Input, InputGroup, InputLeftElement, Textarea } from "@chakra-ui/react"
+import {
+  Box,
+  BoxProps,
+  Button,
+  HStack,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Textarea,
+} from "@chakra-ui/react"
 import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, FieldValues, useFieldArray } from "react-hook-form"
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
-import { ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
+import { GenericContactEdit } from "./generic-contact-edit"
 import { IControlProps } from "./types"
 
 export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
@@ -18,6 +29,7 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
     getOptionValue: (idx: number) => IOption
   }
+  canAddMultipleContactProps?: IControlProps<TFieldValues>
 }
 
 const requirementsComponentMap = {
@@ -349,6 +361,83 @@ const requirementsComponentMap = {
 
   [ERequirementType.energyStepCode]: function <TFieldValues>(props) {
     return <EditableGroup editableInput={<i className="fa fa-bolt"></i>} {...props} />
+  },
+  [ERequirementType.generalContact]: function <TFieldValues>({
+    editableLabelProps,
+    canAddMultipleContactProps,
+  }: TRequirementEditProps<TFieldValues>) {
+    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      { type: ERequirementContactFieldItemType.firstName },
+      { type: ERequirementContactFieldItemType.lastName },
+      { type: ERequirementContactFieldItemType.email },
+      { type: ERequirementContactFieldItemType.phone },
+      {
+        type: ERequirementContactFieldItemType.address,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
+      { type: ERequirementContactFieldItemType.organization },
+    ]
+
+    if (!canAddMultipleContactProps) {
+      import.meta.env.DEV && console.error("canAddMultipleContactProps is required for contact requirement edit")
+      return null
+    }
+
+    return (
+      <GenericContactEdit<TFieldValues>
+        requirementType={ERequirementType.generalContact}
+        contactFieldItems={contactFieldItemTypes}
+        editableLabelProps={editableLabelProps}
+        {...canAddMultipleContactProps}
+      />
+    )
+  },
+
+  [ERequirementType.professionalContact]: function <TFieldValues>({
+    editableLabelProps,
+    canAddMultipleContactProps,
+  }: TRequirementEditProps<TFieldValues>) {
+    if (!canAddMultipleContactProps) {
+      import.meta.env.DEV && console.error("multipleContactProps is required for contact requirement edit")
+      return null
+    }
+
+    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      { type: ERequirementContactFieldItemType.firstName },
+      { type: ERequirementContactFieldItemType.lastName },
+      { type: ERequirementContactFieldItemType.email },
+      { type: ERequirementContactFieldItemType.phone },
+      {
+        type: ERequirementContactFieldItemType.address,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
+      { type: ERequirementContactFieldItemType.professionalAssociation },
+      { type: ERequirementContactFieldItemType.professionalNumber },
+      { type: ERequirementContactFieldItemType.organization },
+    ]
+
+    return (
+      <GenericContactEdit<TFieldValues>
+        requirementType={ERequirementType.professionalContact}
+        contactFieldItems={contactFieldItemTypes}
+        editableLabelProps={editableLabelProps}
+        {...canAddMultipleContactProps}
+      />
+    )
   },
 }
 

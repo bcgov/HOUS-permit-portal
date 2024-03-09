@@ -11,6 +11,7 @@ export interface IRequirementsAttribute {
   inputOptions?: {
     valueOptions?: IOption[]
     numberUnit?: ENumberUnit
+    canAddMultipleContacts?: boolean
   }
 }
 

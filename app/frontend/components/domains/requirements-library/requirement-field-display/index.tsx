@@ -2,6 +2,7 @@ import {
   BoxProps,
   Checkbox,
   CheckboxGroup,
+  FormControlProps,
   FormLabelProps,
   HeadingProps,
   Input,
@@ -13,6 +14,7 @@ import {
   Select,
   SelectProps,
   Stack,
+  SwitchProps,
   Textarea,
 } from "@chakra-ui/react"
 import { CalendarBlank, Envelope, MapPin, Phone } from "@phosphor-icons/react"
@@ -29,6 +31,13 @@ export type TRequirementFieldDisplayProps = {
   helperText?: string
   unit?: ENumberUnit | null
   selectProps?: Partial<SelectProps>
+  addMultipleContactProps?: {
+    shouldRender?: boolean
+    isChecked?: boolean
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+    formControlProps?: FormControlProps
+    switchProps?: SwitchProps
+  }
   requirementType: ERequirementType
   showAddLabelIndicator?: boolean
 }

@@ -28,6 +28,7 @@ class Requirement < ApplicationRecord
   before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
+  validate :validate_can_add_multiple_contacts
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code, with: /\_file/, if: Proc.new { |req| req.input_type == "file" }
 
@@ -113,6 +114,7 @@ class Requirement < ApplicationRecord
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select checkbox radio]
+  CONTACT_TYPES = %w[general_contact professional_contact]
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -225,6 +227,14 @@ class Requirement < ApplicationRecord
   end
 
   def validate_value_options
+    unless TYPES_WITH_VALUE_OPTIONS.include?(input_type.to_s)
+      if input_options.present? && input_options["value_options"].present?
+        errors.add(:input_options, "value options are not allowed for #{input_type}")
+      end
+
+      return
+    end
+
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
@@ -235,7 +245,9 @@ class Requirement < ApplicationRecord
   end
 
   def validate_unit_for_number_inputs
-    return unless input_type_number? && (input_options.present? && input_options["number_unit"].present?)
+    return unless (input_options.present? && input_options["number_unit"].present?)
+
+    return(errors.add(:input_options, "number_unit is only allowed for number inputs")) if !input_type_number?
 
     if !NUMBER_UNITS.include?(input_options["number_unit"])
       errors.add(:input_options, "the number_unit must be one of #{NUMBER_UNITS.join(", ")}")
@@ -246,6 +258,21 @@ class Requirement < ApplicationRecord
     #all values MUST be converted to camelCase to be compatible with rehyration on front end
     input_options["value_options"] = input_options["value_options"].map do |option_json|
       option_json.merge("value" => option_json["value"].camelize(:lower))
+    end
+  end
+
+  def validate_can_add_multiple_contacts
+    return unless (input_options.present? && input_options["can_add_multiple_contacts"].present?)
+
+    unless CONTACT_TYPES.include?(input_type.to_s)
+      return(errors.add(:input_options, "can_add_multiple_contacts is only allowed for contact inputs"))
+    end
+
+    if !(
+         input_options["can_add_multiple_contacts"].is_a?(TrueClass) ||
+           input_options["can_add_multiple_contacts"].is_a?(FalseClass)
+       )
+      errors.add(:input_options, "can_add_multiple_contacts must be a boolean")
     end
   end
 end
