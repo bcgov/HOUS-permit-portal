@@ -1,0 +1,9 @@
+anycable-go:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 512Mi

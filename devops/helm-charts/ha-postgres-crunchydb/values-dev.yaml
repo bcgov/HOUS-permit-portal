@@ -50,8 +50,8 @@ crunchy-postgres:
     pgBouncer:
       replicas: 1
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 64Mi
       limits:
-        cpu: 100m
+        cpu: 50m
         memory: 128Mi
