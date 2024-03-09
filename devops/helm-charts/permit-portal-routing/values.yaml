@@ -19,7 +19,7 @@ nginx:
       cpu: "20m"
     limits:
       memory: "128Mi"
-      cpu: "100m"
+      cpu: "50m"
   networkPolicy:
     enabled: false
   service:
