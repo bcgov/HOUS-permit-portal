@@ -68,6 +68,8 @@ class TemplateVersioningService
 
       previous_version = previous_version(template_version)
 
+      return template_version if previous_version.blank?
+
       previous_version.jurisdiction_template_version_customizations.each do |customization|
         begin
           copy_jurisdiction_customizations_to_template_version(customization, template_version)
