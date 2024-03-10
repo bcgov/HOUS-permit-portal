@@ -23,7 +23,9 @@ RUN apt-get update -qq && \
 
 # Use jemalloc to improve memory - https://medium.com/code-wild/how-jemalloc-improved-memory-usage-of-our-rails-application-7038d5926d4
 RUN apt-get update && apt-get install libjemalloc2 && rm -rf /var/lib/apt/lists/*
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD="libjemalloc.so.2" \
+    MALLOC_CONF="dirty_decay_ms:1000,narenas:2,background_thread:true,stats_print:true" \
+    RUBY_YJIT_ENABLE="1"
 
 # Install JavaScript dependencies
 ARG NODE_VERSION=20.10.0
