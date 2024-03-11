@@ -10,7 +10,7 @@ gem "pg", "~> 1.1"
 gem "activerecord-nulldb-adapter", "1.0.1" # for Dockerfile asset build
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", ">= 5.0"
+gem "puma", ">= 6.4.2"
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
@@ -64,7 +64,6 @@ gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 1.12"
 gem "rubyzip"
 gem "anycable-rails", "~> 1.4"
-
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
