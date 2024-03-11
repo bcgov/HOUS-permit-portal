@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Stack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
 import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -17,6 +17,7 @@ import { PermitApplicationStatusTag } from "../../shared/permit-applications/per
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { SubmissionDownloadModal } from "./submission-download-modal"
 
 interface IEditPermitApplicationScreenProps {}
 
@@ -32,7 +33,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const getDefaultPermitApplicationMetadataValues = () => ({ nickname: currentPermitApplication?.nickname })
 
-  const { register, watch, setValue, handleSubmit, reset } = useForm<TPermitApplicationMetadataForm>({
+  const { register, watch, setValue, reset } = useForm<TPermitApplicationMetadataForm>({
     mode: "onChange",
     defaultValues: getDefaultPermitApplicationMetadataValues(),
   })
@@ -42,8 +43,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const [completedSections, setCompletedSections] = useState({})
 
+  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+
   const handleSave = async () => {
-    if (currentPermitApplication.isSubmitted || isStepCode) return
+    if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
     const submissionData = formio.data
@@ -72,20 +75,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     }
   }
 
-  const handleDownloadApplication = () => {}
-
-  // const onSubmitMetadata = (formValues) => {
-  //   currentPermitApplication.update(formValues)
-  // }
-
   useInterval(handleSave, 60000) // save progress every minute
 
   useEffect(() => {
     // sets the defaults subject to application load
     reset(getDefaultPermitApplicationMetadataValues())
   }, [currentPermitApplication?.nickname])
-
-  const { isOpen, onOpen, onClose } = useDisclosure()
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
@@ -156,17 +151,15 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           </Flex>
         </HStack>
         {isSubmitted ? (
-          <HStack>
-            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onOpen}>
+          <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
               {t("permitApplication.show.contactsSummary")}
             </Button>
-            <Button variant="primary" onClick={handleDownloadApplication}>
-              {t("permitApplication.show.downloadApplication")}
-            </Button>
+            <SubmissionDownloadModal permitApplication={currentPermitApplication} />
             <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
               {t("ui.backHome")}
             </Button>
-          </HStack>
+          </Stack>
         ) : (
           <HStack gap={4}>
             <Button variant="primary" onClick={handleClickFinishLater}>
@@ -191,11 +184,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           </Flex>
         )}
       </Flex>
-      {isOpen && (
+      {isContactsOpen && (
         <ContactSummaryModal
-          isOpen={isOpen}
-          onOpen={onOpen}
-          onClose={onClose}
+          isOpen={isContactsOpen}
+          onOpen={onContactsOpen}
+          onClose={onContactsClose}
           permitApplication={currentPermitApplication}
         />
       )}

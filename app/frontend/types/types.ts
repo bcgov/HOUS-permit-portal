@@ -165,3 +165,9 @@ export interface IRequirementBlockCustomization {
 export interface ITemplateCustomization {
   requirementBlockChanges?: Record<string, IRequirementBlockCustomization>
 }
+
+export interface IDownloadableFile {
+  fileUrl: string
+  fileName: string
+  fileSize: number
+}

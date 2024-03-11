@@ -2,6 +2,7 @@ class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
+  include ZipfileUploader.Attachment(:zipfile)
   searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
              word_start: %i[number nickname full_address permit_classifications submitter status]
 
@@ -38,6 +39,7 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
+  after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
   def search_data
     {
@@ -131,7 +133,29 @@ class PermitApplication < ApplicationRecord
     return new_number
   end
 
+  def zipfile_size
+    zipfile_data&.dig("metadata", "size")
+  end
+
+  def zipfile_name
+    zipfile_data&.dig("metadata", "filename")
+  end
+
+  def zipfile_url
+    zipfile&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
+    )
+  end
+
   private
+
+  def zip_and_upload_supporting_documents
+    return unless submitted? && zipfile_data.blank?
+
+    ZipfileJob.perform_async(id)
+  end
 
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.

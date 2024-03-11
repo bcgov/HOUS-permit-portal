@@ -119,6 +119,7 @@ export const PermitApplicationStoreModel = types
           statusFilter: self.statusFilter,
         }
       )
+
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
         // dual purpose method also serves the submitters

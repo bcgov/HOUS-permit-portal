@@ -18,6 +18,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
+import { SubmissionDownloadModal } from "../../permit-application/submission-download-modal"
 import { GridHeaders } from "./grid-header"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
@@ -52,7 +53,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Flex>
         </Flex>
 
-        <SearchGrid templateColumns="165px 2fr 2fr repeat(3, 1fr)">
+        <SearchGrid templateColumns="170px 2fr 2fr repeat(3, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -100,7 +101,13 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     )}
                   </SearchGridItem>
                   <SearchGridItem gap={2}>
-                    <IconButton variant="secondary" icon={<Download />} aria-label={"download"} />
+                    <SubmissionDownloadModal
+                      permitApplication={pa}
+                      renderTrigger={(onOpen) => (
+                        <IconButton variant="secondary" icon={<Download />} aria-label={"download"} onClick={onOpen} />
+                      )}
+                    />
+
                     <RouterLinkButton
                       variant="primary"
                       rightIcon={<ArrowSquareOut />}

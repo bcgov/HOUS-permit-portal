@@ -529,6 +529,7 @@ DEPENDENCIES
   redis (~> 5.0.8)
   roo (~> 2.10)
   rspec-rails (~> 6.1.0)
+  rubyzip
   searchkick (~> 5.3.1)
   shoulda-matchers (~> 5.3.0)
   shrine (~> 3.5.0)
