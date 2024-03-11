@@ -393,7 +393,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_07_004129) do
     t.datetime "updated_at", null: false
     t.jsonb "compliance_data"
     t.string "data_key"
-    t.boolean "is_zip"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"
   end
