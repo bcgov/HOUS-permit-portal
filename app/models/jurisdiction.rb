@@ -11,6 +11,8 @@ class Jurisdiction < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_template_version_customizations
+  has_many :template_versions, through: :jurisdiction_template_version_customizations
+  has_many :requirement_templates, through: :template_versions
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
@@ -22,28 +24,12 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
-  def requirement_templates
-    # TODO: THIS IS STUBBED FOR NOW
-    # big changes are coming to the jurisdiction specific form templates, so just use all for now
-    RequirementTemplate.all
-  end
-
-  def published_requirement_template_version(activity, permit_type)
-    #eventually will fetch the jurisdictions pecific version
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type).published_template_version
-  end
-
-  def template_form_json(activity, permit_type)
-    # published_requirement_template_version(activity, permit_type).form_json
-    RequirementTemplate.find_by(activity: activity, permit_type: permit_type).to_form_json
-  end
-
   def review_managers
-    users.review_managers
+    users&.kept&.review_managers
   end
 
   def reviewers
-    users.reviewers
+    users&.kept&.reviewers
   end
 
   def assign_unique_prefix
@@ -108,15 +94,19 @@ class Jurisdiction < ApplicationRecord
   end
 
   def review_managers_size
-    review_managers.size
+    review_managers&.size || 0
   end
 
   def reviewers_size
-    reviewers.size
+    reviewers&.size || 0
   end
 
   def permit_applications_size
-    permit_applications.size
+    permit_applications&.size || 0
+  end
+
+  def templates_used_size
+    jurisdiction_template_version_customizations&.size || 0
   end
 
   private

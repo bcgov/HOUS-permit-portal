@@ -1,0 +1,13 @@
+route:
+  spec:
+    host: "buildingpermit.gov.bc.ca"
+
+nginx:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "20m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"

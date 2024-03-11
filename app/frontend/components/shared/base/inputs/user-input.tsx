@@ -25,9 +25,9 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
   const taken = takenEmails?.includes(emailWatch)
 
   return (
-    <Flex bg="greys.grey03" p={2} borderRadius="sm" flexWrap="wrap">
+    <Flex bg="greys.grey03" p={2} borderRadius="md" flexWrap="wrap" minH={114}>
       <Input hidden {...register(`users.${index}.jurisdictionId`)} value={jurisdictionId} />
-      <Flex gap={4} align="flex-end">
+      <Flex gap={4} align="flex-start">
         <FormControl flex={2}>
           <FormLabel>{t("auth.role")}</FormLabel>
           <Controller
@@ -61,7 +61,12 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
           </Tag>
         )}
         {!invited && !taken && remove && (
-          <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<UserMinus size={16} />}>
+          <Button
+            onClick={() => remove(index)}
+            variant="tertiary"
+            leftIcon={<UserMinus size={16} />}
+            alignSelf="center"
+          >
             {t("ui.remove")}
           </Button>
         )}

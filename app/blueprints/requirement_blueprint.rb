@@ -11,6 +11,7 @@ class RequirementBlueprint < Blueprinter::Base
          :related_content,
          :required_for_in_person_hint,
          :required_for_multiple_owners,
+         :elective,
          :updated_at,
          :created_at
 

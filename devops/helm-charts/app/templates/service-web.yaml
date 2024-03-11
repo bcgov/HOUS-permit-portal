@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: "{{ .Values.appName }}-web"
+  name: "{{ .Values.appName }}-web"
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: 3000-tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: "{{ .Values.appName }}-web"
+    deployment: "{{ .Values.appName }}-web"
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

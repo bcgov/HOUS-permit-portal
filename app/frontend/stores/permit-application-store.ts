@@ -116,6 +116,7 @@ export const PermitApplicationStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
+          statusFilter: self.statusFilter,
         }
       )
 

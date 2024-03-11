@@ -89,17 +89,35 @@ if PermitApplication.first.blank?
       end
     end
 
+  puts "Seeding requirement templates..."
+  # Create RequirementTemplate records
+  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
+  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
+  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
+  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+  RequirementTemplate.reindex
+
+  # Requrements from seeder are idempotent
+  # Requirments block will get created from requiremetms templates
+  puts "Seeding requirements..."
+  RequirementsFromXlsxSeeder.seed
+
+  # Energy Step Code Reference Tables
+  StepCode::MEUIReferencesSeeder.seed!
+  StepCode::TEDIReferencesSeeder.seed!
+
   # Creating Permit Applications
   puts "Seeding permit applications..."
-  submitters = User.where(role: "submitter")
-  20.times do
+  submitters = User.submitter
+  rt = RequirementTemplate.with_published_version.first.published_template_version
+  20.times do |index|
     PermitApplication.create(
       submitter_id: submitters.sample.id,
       full_address: "123 Address st",
       pid: "999999999",
-      jurisdiction_id: jurisdictions.sample.id,
-      activity_id: activity1.id,
-      permit_type_id: permit_type1.id,
+      jurisdiction_id: index.even? ? jurisdictions.sample.id : north_van.id,
+      activity_id: rt.activity.id,
+      permit_type_id: rt.permit_type.id,
     )
   end
   # Seed a North Vancouver Example
@@ -131,19 +149,14 @@ if PermitApplication.first.blank?
   end
 end
 
-puts "Seeding requirement templates..."
-# Create RequirementTemplate records
-RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
-RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
-RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
-RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
-RequirementTemplate.reindex
-
-# Requrements from seeder are idempotent
-# Requirments block will get created from requiremetms templates
-puts "Seeding requirements..."
-RequirementsFromXlsxSeeder.seed
-
-# Energy Step Code Reference Tables
-StepCode::MEUIReferencesSeeder.seed!
-StepCode::TEDIReferencesSeeder.seed!
+puts "Seeding jurisdiction customizations..."
+TemplateVersion
+  .limit(3)
+  .each do |template_version|
+    JurisdictionTemplateVersionCustomization.find_or_create_by(
+      jurisdiction: north_van,
+      template_version: template_version,
+    ) do |customization|
+      # any other data to add
+    end
+  end

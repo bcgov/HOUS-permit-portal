@@ -34,6 +34,12 @@ function isTemplateEditPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isDigitalPermitEditPath(path: string): boolean {
+  const regex = /^\/digital-building-permits\/([a-f\d-]+)\/edit$/
+
+  return regex.test(path)
+}
+
 function isTemplateVersionPath(path: string): boolean {
   const regex = /^\/template-versions\/([a-f\d-]+)$/
   return regex.test(path)
@@ -56,6 +62,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isTemplateVersionPath,
     isPermitApplicationEditPath,
     isPermitApplicationPath,
+    isDigitalPermitEditPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -93,8 +100,11 @@ export const NavBar = observer(() => {
           <Flex align="center" gap={2}>
             <RouterLink to="/">
               <Image
+                fit="cover"
+                htmlHeight="64px"
+                htmlWidth="166px"
                 alt={t("site.linkHome")}
-                src={currentUser?.isAdmin ? "/images/logo-light.svg" : "/images/logo.svg"}
+                src={currentUser?.isAdmin ? "/images/logo-light.svg" : "/images/logo.png"}
               />
             </RouterLink>
             <Show above="md">
@@ -155,8 +165,6 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
 
   const handleClickLogout = async () => {
     await logout()
-    // Do a full browser refresh to slightly enhance security
-    window.location.href = "/"
   }
 
   const superAdminOnlyItems = (

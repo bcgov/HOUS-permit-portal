@@ -34,18 +34,15 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
           <PopoverTrigger>
             <InputGroup w={320}>
               <Input
-                as={Flex}
                 bg="white"
                 cursor="pointer"
-                alignItems="center"
                 borderColor="gray.200"
                 borderWidth={1}
                 rounded="base"
                 shadow="base"
+                placeholder={t(`${translationPrefix}.buildingType.placeholder`)}
               >
-                {value
-                  ? t(`${translationPrefix}.buildingType.options.${value}`)
-                  : t(`${translationPrefix}.buildingType.select`)}
+                {value && t(`${translationPrefix}.buildingType.options.${value}`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>

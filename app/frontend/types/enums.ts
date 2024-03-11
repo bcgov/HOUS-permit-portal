@@ -13,13 +13,6 @@ export enum EPermitClassificationType {
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
-  viewed = "viewed",
-}
-
-export enum ERequirementTemplateStatus {
-  published = "published",
-  scheduled = "scheduled",
-  draft = "draft",
 }
 
 export enum ETemplateVersionStatus {
@@ -74,6 +67,7 @@ export enum EContactSortFields {
   phone = "phone",
   address = "address",
 }
+
 export enum EPermitApplicationSortFields {
   number = "number",
   permitClassification = "permit_classification",
@@ -175,4 +169,41 @@ export enum EStepCodeBuildingType {
   triplex = "triplex",
   retail = "retail",
   other = "other",
+}
+
+export enum ESpaceHeatingCoolingVariant {
+  principal = "principal",
+  secondary = "secondary",
+}
+
+export enum EWindowsGlazedDoorsPerformanceType {
+  usi = "usi",
+  uimp = "u_imp",
+}
+
+export enum EDoorsPerformanceType {
+  rsi = "rsi",
+  usi = "usi",
+}
+
+export enum ESpaceHeatingCoolingPerformanceType {
+  afue = "afue",
+  hspf = "hspf",
+  sse = "sse",
+  cop = "cop",
+  seer = "seer",
+}
+
+export enum EHotWaterPerformanceType {
+  percentEff = "percent_eff",
+  afue = "afue",
+  uef = "uef",
+  ef = "ef",
+  eer = "eer",
+}
+
+export enum EFossilFuelsPresence {
+  yes = "yes",
+  no = "no",
+  unknown = "unknown",
 }

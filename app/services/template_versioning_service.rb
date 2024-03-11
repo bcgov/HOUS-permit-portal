@@ -87,7 +87,10 @@ class TemplateVersioningService
 
     requirement_template.requirement_template_sections.each do |template_section|
       template_section.requirement_blocks.each do |requirement_block|
-        requirement_blocks_json[requirement_block.id] = RequirementBlockBlueprint.render_as_hash(requirement_block)
+        requirement_blocks_json[requirement_block.id] = RequirementBlockBlueprint.render_as_hash(
+          requirement_block,
+          parent_key: template_section.key,
+        )
       end
     end
 

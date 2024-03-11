@@ -89,6 +89,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :related_content,
         :required_for_in_person_hint,
         :required_for_multiple_owners,
+        :elective,
         :_destroy,
         input_options: [:number_unit, value_options: [%i[value label]]],
       ],

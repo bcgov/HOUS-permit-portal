@@ -34,7 +34,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
             title={t("home.permitsTitle")}
             description={t("home.permitsDescription")}
             icon={<FileText size={24} />}
-            href={`jurisdictions/${jurisdiction.id}/permit-applications`}
+            href={`/digital-building-permits`}
           />
           <HomeScreenBox
             title={t("home.contentManagementTitle")}

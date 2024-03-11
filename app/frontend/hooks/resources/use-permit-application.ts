@@ -19,8 +19,10 @@ export const usePermitApplication = () => {
       try {
         setCurrentPermitApplication(null)
         if (isUUID(permitApplicationId)) {
-          await fetchPermitApplication(permitApplicationId)
-          setCurrentPermitApplication(permitApplicationId)
+          let permitApplication = await fetchPermitApplication(permitApplicationId)
+          if (permitApplication) {
+            setCurrentPermitApplication(permitApplicationId)
+          }
         }
       } catch (e) {
         console.error(e)

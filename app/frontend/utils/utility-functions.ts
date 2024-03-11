@@ -7,6 +7,12 @@ export function isUUID(str) {
   return regex.test(str)
 }
 
+export function generateUUID() {
+  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+    (parseInt(c) ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (parseInt(c) / 4)))).toString(16)
+  )
+}
+
 export function debounce<T extends (...args: any[]) => any>(func: T, delay: number): TDebouncedFunction<T> {
   let timeoutId: NodeJS.Timeout
 
@@ -98,4 +104,14 @@ export function formatBytes(bytes: number, decimals: number = 2): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+}
+
+export function renameKeys(keysMap, obj) {
+  return Object.keys(obj).reduce(
+    (acc, key) => ({
+      ...acc,
+      ...{ [keysMap[key] || key]: obj[key] },
+    }),
+    {}
+  )
 }

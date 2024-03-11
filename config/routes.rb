@@ -59,7 +59,14 @@ Rails.application.routes.draw do
       patch "restore", on: :member
     end
 
-    resources :template_versions, only: %i[show]
+    resources :template_versions, only: %i[index show]
+
+    get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
+          "template_versions#show_jurisdiction_template_version_cutomization"
+    put "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
+          "template_versions#update_jurisdiction_template_version_cutomization"
+    post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
+           "template_versions#create_jurisdiction_template_version_cutomization"
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
