@@ -37,59 +37,45 @@
                     <tr>
                     <!-- START CONTENT ROW -->
                       <td>
-                        <h1>New assignment to review a permit application.</h1>
-                        <p>Dear [Reviewer/Manager @TODO],</p>
+                        <h1>Permit application status updated.</h1>
+                        <p>Dear [Submitter/User @TODO],</p>
                         <p>
-                            You have been assigned to a building permit application:
+                            Your permit application status has changed: 
                         </p>
 
+                        <h2>Application details:</h2>
                          <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0">
                           <tr>
                             <td>
                               <dl class="table-like">
                                 
                                 <dt>Application ID</dt>
-                                <dd><a href="#TODO">123456789@TODO</a></dd>
+                                <dd><a href="#TODO">123456789 @TODO</a></dd>
 
-                                <dt>Applicant Name</dt>
-                                <dd>Name @TODO</dd>
+                                <dt>Current status</dt>
+                                <dd>Viewed @TODO</dd>
                                 
-                                <dt>Deadline</dt>
+                                <dt>Updated status date</dt>
                                 <dd>YYYY-MM-DD @TODO</dd>
+
+                                <dt>Local reference #</dt>
+                                <dd>987654321 @TODO</dd>
 
                               </dl>
                             </td>
                           </tr>
                         </table>
                         
-                        <h2>Tasks:</h2>
+                        <h2>Next steps:</h2>
 
-                        <ol>
-                          <li>Conduct an initial check to see if your assigned permit application is complete</li>
-                          <li>Send to municipal departments to verify against BC Building Code and local bylaws</li>
-                          <li>Contact users via email or phone if further documentation is required</li>
-                          <li>Send email notifications to users regarding any updates to their application status</li>
-                          <li>Ensure assigned tasks are completed on time</li>
-                        </ol>
+                        <ul>
+                          <li>Local Jurisdiction will contact you with further details.</li>
+                          <li>Please contact them if you do not hear back within a estimate of 3 weeks.</li>
+                        </ul>
 
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
-                          <tbody>
-                            <tr>
-                              <td align="left">
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                  <tbody>
-                                    <tr>
-                                      <td> <a href="https://buildingpermit.gov.bc.ca/login" target="_blank">Login to Building Permit Hub</a> </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                        
+
                         <p>
-                           If you have questions or need clarification on your assigned tasks, please contact your supervisor. 
+                           If you have any questions or difficulties during your application status, please contact the local jurisdiction you applied to.
                         </p>
 
             
