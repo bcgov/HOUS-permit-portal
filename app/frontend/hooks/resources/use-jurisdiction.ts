@@ -17,7 +17,7 @@ export const useJurisdiction = () => {
   useEffect(() => {
     ;(async () => {
       try {
-        setCurrentJurisdiction(null)
+        setCurrentJurisdiction(jurisdictionId)
         if (isUUID(jurisdictionId)) {
           await fetchJurisdiction(jurisdictionId)
           setCurrentJurisdiction(jurisdictionId)
