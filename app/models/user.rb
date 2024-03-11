@@ -42,6 +42,7 @@ class User < ApplicationRecord
   validates :email, presence: true
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :reindex_jurisdiction_user_size
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -90,6 +91,12 @@ class User < ApplicationRecord
   end
 
   private
+
+  def reindex_jurisdiction_user_size
+    return unless jurisdiction.present?
+
+    jurisdiction.reindex if saved_change_to_jurisdiction_id? || saved_change_to_role? || destroyed? || new_record?
+  end
 
   def refresh_search_index
     User.search_index.refresh

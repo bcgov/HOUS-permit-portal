@@ -38,6 +38,7 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
+  after_commit :reindex_jurisdiction_permit_application_size
 
   def search_data
     {
@@ -132,6 +133,13 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  def reindex_jurisdiction_permit_application_size
+    return unless jurisdiction.present?
+    return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
+
+    jurisdiction.reindex
+  end
 
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
