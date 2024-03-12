@@ -136,6 +136,14 @@ RSpec.describe Requirement, type: :model do
       expect(select_requirement.value_options).to eq(select_options)
     end
 
+    it "camelizes values on input types" do
+      select_options = [{ "label" => "test", "value" => "needs_camel" }]
+      select_requirement =
+        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+      camel_select_options = [{ "label" => "test", "value" => "needsCamel" }]
+      expect(select_requirement.value_options).to eq(camel_select_options)
+    end
+
     it "returns the number unit for number input with a unit" do
       number_unit = "m"
       number_requirement_with_unit =
