@@ -23,7 +23,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
+import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { CustomToast } from "../base/flash-message"
@@ -31,13 +31,13 @@ import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
-  onCompletedSectionsChange?: (sections: any) => void
+  onCompletedBlocksChange?: (sections: any) => void
   formRef: any
   triggerSave?: () => void
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedSectionsChange, formRef, triggerSave }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
@@ -122,6 +122,11 @@ export const RequirementForm = observer(
       setAllCollapsed((cur) => !cur)
     }
 
+    const mapErrorBoxData = (errors) =>
+      errors.map((error) => {
+        return { label: error.component.label, id: error.component.id, class: error.component.class }
+      })
+
     function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
@@ -149,20 +154,26 @@ export const RequirementForm = observer(
     }
 
     const onBlur = (containerComponent) => {
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
-      setErrorBoxData(
-        containerComponent.root.errors.map((error) => {
-          return { label: error.component.label, id: error.component.id, class: error.component.class }
-        })
-      )
+      setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
+    }
+
+    const onChange = () => {
+      if (!formRef.current) return
+
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
+      }
+      setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
+
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(rootComponent))
       }
     }
     const scrollToTop = () => {
@@ -204,6 +215,7 @@ export const RequirementForm = observer(
             onSubmit={onFormSubmit}
             options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
+            onChange={onChange}
           />
         </Flex>
         <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">

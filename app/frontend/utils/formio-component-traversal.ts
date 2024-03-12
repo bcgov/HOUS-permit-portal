@@ -22,18 +22,19 @@ const findPanelComponents = (components) => {
   return panelComponents
 }
 
-export const getCompletedSectionsFromForm = (rootComponent) => {
+export const getCompletedBlocksFromForm = (rootComponent) => {
   const blocksList = findPanelComponents(rootComponent.components)
-  let completedSections = {}
+  let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
-    const complete =
-      panelComponent.components.filter(
-        (comp) => comp.error || (comp.component.validate?.required && R.isEmpty(comp.dataValue))
-      ).length == 0 //if there are any components with errors OR required fields with no value
+    const incompleteComponents = panelComponent.components.filter(
+      (comp) => comp.error || (comp.component.validate?.required && (R.isEmpty(comp.dataValue) || !comp.dataValue))
+    )
 
-    return (completedSections[panelComponent?.component?.key] = complete)
+    const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
+
+    return (completedBlocks[panelComponent?.component?.key] = complete)
   })
-  return completedSections
+  return completedBlocks
 }
 
 export const combineComplianceHints = (

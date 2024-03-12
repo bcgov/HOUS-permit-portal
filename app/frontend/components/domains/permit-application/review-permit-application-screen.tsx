@@ -20,7 +20,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const formRef = useRef(null)
   const navigate = useNavigate()
 
-  const [completedSections, setCompletedSections] = useState({})
+  const [completedBlocks, setCompletedBlocks] = useState({})
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
@@ -66,13 +66,13 @@ export const ReviewPermitApplicationScreen = observer(() => {
         </Stack>
       </Flex>
       <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
-        <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
+        <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
           <Flex flex={1} direction="column" p={24}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
-              onCompletedSectionsChange={setCompletedSections}
+              onCompletedBlocksChange={setCompletedBlocks}
             />
           </Flex>
         )}

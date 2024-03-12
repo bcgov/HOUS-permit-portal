@@ -41,7 +41,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const [completedSections, setCompletedSections] = useState({})
+  const [completedBlocks, setCompletedBlocks] = useState({})
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
@@ -172,13 +172,13 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         )}
       </Flex>
       <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
-        <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
+        <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
           <Flex flex={1} direction="column" p={24}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
-              onCompletedSectionsChange={setCompletedSections}
+              onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
             />
           </Flex>
