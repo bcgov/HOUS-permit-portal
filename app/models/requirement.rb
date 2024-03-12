@@ -32,86 +32,6 @@ class Requirement < ApplicationRecord
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code, with: /\_file/, if: Proc.new { |req| req.input_type == "file" }
 
-  DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
-    text: {
-      type: "simpletextfield",
-    },
-    phone: {
-      type: "simplephonenumber",
-    },
-    email: {
-      type: "simpleemail",
-    },
-    # TODO: figure out why these address fields don't work
-    # address: {
-    #   type: "simpleaddressadvanced",
-    # },
-    address: {
-      type: "simpletextfield",
-    },
-    bcaddress: {
-      type: "bcaddress",
-    },
-    signature: {
-      type: "simplesignatureadvanced",
-    },
-    number: {
-      applyMaskOn: "change",
-      mask: false,
-      inputFormat: "plain",
-    },
-    date: {
-      enableTime: false,
-      datePicker: {
-        disableWeekends: false,
-        disableWeekdays: false,
-      },
-      enableMinDateInput: false,
-      enableMaxDateInput: false,
-      widget: {
-        type: "calendar",
-        displayInTimezone: "viewer",
-        locale: "en",
-        useLocaleSettings: false,
-        allowInput: true,
-        mode: "single",
-        enableTime: true,
-        noCalendar: false,
-        format: "yyyy-MM-dd",
-        hourIncrement: 1,
-        minuteIncrement: 1,
-        time_24hr: false,
-        minDate: nil,
-        disableWeekends: false,
-        disableWeekdays: false,
-        maxDate: nil,
-      },
-    },
-    select: {
-      widget: {
-        type: "choicesjs",
-      },
-    },
-    multi_option_select: {
-      type: "selectboxes",
-      inputType: "checkbox",
-      optionsLabelPosition: "right",
-      tableView: false,
-      # type: "select",
-      # multiple: true,
-      # widget: {
-      #   type: "choicesjs",
-      # },
-    },
-    energy_step_code: {
-      type: "button",
-      action: "custom",
-      title: I18n.t("formio.requirement_template.energy_step_code"),
-      label: I18n.t("formio.requirement_template.energy_step_code"),
-      custom: "document.dispatchEvent(new Event('openStepCode'));",
-    },
-  }
-
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select checkbox radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
@@ -133,49 +53,9 @@ class Requirement < ApplicationRecord
   end
 
   def to_form_json(requirement_block_key = requirement_block&.key)
-    json = {
-      id: id,
-      key: key(requirement_block_key),
-      type: input_type,
-      input: true,
-      label: label,
-      widget: {
-        type: "input",
-      },
-    }.merge!(formio_type_options)
+    form_json_service = RequirementFormJsonService.new(self)
 
-    json.merge!({ description: hint }) if hint
-
-    json.merge!({ validate: { required: true } }) if required
-
-    #assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
-    json.merge!({ elective: elective }) if elective
-
-    json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
-
-    json.merge!({ values: input_options["value_options"] }) if input_type_checkbox? || input_type_multi_option_select?
-
-    json.merge!({ computedCompliance: input_options["computed_compliance"] }) if computed_compliance?
-
-    json.merge!({ energyStepCode: input_options["energy_step_code"] }) if input_type.to_sym == :energy_step_code
-
-    if input_options["conditional"].present?
-      # assumption that conditional is only within the same requirement block for now
-      conditional = input_options["conditional"]
-      section = PermitApplication.section_from_key(requirement_block_key)
-      if conditional["when"].present?
-        conditional.merge!("when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}")
-      end
-      json.merge!({ conditional: conditional })
-    end
-
-    #indicates code-based conditionals.  Always merge elective show = false to end.
-    if input_options["customConditional"].present?
-      json.merge!({ customConditional: input_options["customConditional"] })
-    end
-    json.merge!({ customConditional: "#{json[:customConditional]};show = false" }) if elective
-
-    json
+    form_json_service.to_form_json(requirement_block_key)
   end
 
   def lookup_props(requirement_block_key = requirement_block&.key)
@@ -201,29 +81,9 @@ class Requirement < ApplicationRecord
   end
 
   def formio_type_options
-    return unless input_type.present?
+    form_json_service = RequirementFormJsonService.new(self)
 
-    if (input_type.to_sym == :file)
-      return(
-        {
-          type: "file",
-          storage:
-            (
-              if (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?)
-                "s3custom"
-              else
-                nil
-              end
-            ),
-        }.tap do |file_hash|
-          file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
-            "computed_compliance"
-          ].present?
-          file_hash["multiple"] = true if input_options["multiple"].present?
-        end
-      )
-    end
-    DEFAULT_FORMIO_TYPE_TO_OPTIONS[input_type.to_sym] || {}
+    form_json_service.formio_type_options
   end
 
   def validate_value_options
