@@ -39,6 +39,7 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
+  after_commit :reindex_jurisdiction_permit_application_size
   after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
   def force_update_published_template_version
@@ -158,6 +159,13 @@ class PermitApplication < ApplicationRecord
 
   private
 
+  def reindex_jurisdiction_permit_application_size
+    return unless jurisdiction.present?
+    return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
+
+    jurisdiction.reindex
+  end
+  
   def zip_and_upload_supporting_documents
     return unless submitted? && zipfile_data.blank?
 

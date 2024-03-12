@@ -73,7 +73,7 @@ class Jurisdiction < ApplicationRecord
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
-      # templates_used: "TODO",
+      templates_used: templates_used_size,
     }
   end
 
