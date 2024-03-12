@@ -35,7 +35,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   if (!currentJurisdiction) return <LoadingScreen />
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
+    <Container maxW="container.lg" p={8} as={"main"} flexGrow={1}>
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Flex direction="column">
@@ -48,7 +48,9 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   email: currentJurisdiction?.submissionEmail || t("ui.notAvailable"),
                 })}
               </Text>
-              <RouterLink to={`/jurisdictions/${currentJurisdiction.id}/configuration`}>{t("ui.change")}</RouterLink>
+              <RouterLink to={`/jurisdictions/${currentJurisdiction.id}/configuration-management`}>
+                {t("ui.change")}
+              </RouterLink>
             </Flex>
           </Flex>
         </Flex>
