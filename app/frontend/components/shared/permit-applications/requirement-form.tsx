@@ -18,7 +18,8 @@ import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
-import React, { useEffect, useRef, useState } from "react"
+import * as R from "ramda"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
@@ -52,6 +53,8 @@ export const RequirementForm = observer(
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
     const [imminentSubmission, setImminentSubmission] = useState(null)
+
+    const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -214,7 +217,9 @@ export const RequirementForm = observer(
           <Form
             form={formattedFormJson}
             formReady={formReady}
-            submission={submissionData}
+            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be
+                                     mutated*/
+            submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
             options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}

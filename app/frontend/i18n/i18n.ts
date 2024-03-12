@@ -361,7 +361,7 @@ const options = {
             organization: "Organization (optional)",
             businessName: "Business Name",
             businessLicense: "Business License",
-            professionalAssociation: "Professional Association",
+            professionalAssociation: "Professional Association/Organization",
             professionalNumber: "Professional Number",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
