@@ -25,13 +25,18 @@ module Api::Concerns::Search::PermitApplications
     # Only add the jurisdiction_id condition if @jurisdiction is present
     if current_user.submitter?
       search_conditions[:where] = search_conditions[:where].merge({ submitter_id: current_user.id })
-    elsif @jurisdiction.present?
+    elsif current_user.review_staff?
+      raise StandardError unless @jurisdiction.present?
+
       search_conditions[:where] = {
         jurisdiction_id: @jurisdiction.id,
         # Overrides status filter, reorder the code if necessary
         status: %i[submitted],
       }
+    elsif current_user.super_admin?
+      return
     end
+
     @permit_application_search = PermitApplication.search(query, **search_conditions)
   end
 
