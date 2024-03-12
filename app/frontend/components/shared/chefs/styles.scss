@@ -427,7 +427,7 @@ $blue-light: #f6f9fc;
   .help-block {
     display: block;
     margin-top: 16px;
-    color: #d9292f;
+    color: var(--chakra-colors-error);
     font-weight: 700;
   }
 }
