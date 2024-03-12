@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>@TODO</title>
+        <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
+      <tr>
+        <td>&nbsp;</td>
+        <td class="container">
+          <div class="header"> 
+            <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td width="170" style="vertical-align: middle; padding: 0 16px; border-right: 1px solid #fcba19">
+                  <img src="https://dev.buildingpermit.gov.bc.ca/images/logo-light.svg" style="display: block; height: auto; border: 0; width: 100%;" width="170" alt="BC Gov Logo" title="BC Gov Logo @TODO"/>
+                </td>
+                <td style="vertical-align: middle; padding: 0 16px">
+                  <span style="color: #ffffff; font-weight: bold; font-size: 18px">Building Permit Hub</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="content">
+
+            <!-- START CENTERED WHITE CONTAINER -->
+
+            <table role="presentation" class="main" cellspacing="0" cellpadding="0">
+
+              <!-- START MAIN CONTENT AREA -->
+              <tr>
+                <td class="wrapper">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                    <!-- START CONTENT ROW -->
+                      <td>
+                        <h1>Heading 1</h1>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                       
+												<ul>
+													<li>This is an unordered list</li>
+													<li>Another item</li>
+													<li>Another item <a href="https://buildingpermit.gov.bc.ca/" target="_blank">with link</a></li>
+												</ul>
+                        
+												<ol>
+													<li>This is an numbered list</li>
+													<li>Another item</li>
+													<li>Another item <a href="https://buildingpermit.gov.bc.ca/" target="_blank">with link</a></li>
+												</ol>
+                        
+                        <h2>Heading 2</h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+												<h3>Heading 3</h3>
+                        <p>
+                          <strong>Email:</strong> <a href="mailto:digital.codes.permits@gov.bc.ca">digital.codes.permits@gov.bc.ca</a><br>
+                          <strong>Tel:</strong> <a href="tel:18446874644" target="_blank" title="tel:18446874644" rel="noopener">1-844-687-4644</a>
+                        </p>
+                        
+                        <hr>
+                        
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+                          <tbody>
+                            <tr>
+                              <td align="left">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                  <tbody>
+                                    <tr>
+                                      <td> <a href="https://buildingpermit.gov.bc.ca/login" target="_blank">Login to Building Permit Hub</a></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-secondary">
+                          <tbody>
+                            <tr>
+                              <td align="left">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                  <tbody>
+                                    <tr>
+                                      <td> <a href="https://buildingpermit.gov.bc.ca/" target="_blank">Button Secondary</a></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        
+                        <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td>
+                              <dl class="table-like">
+                                
+                                <dt>Application ID</dt>
+                                <dd><a href="#TODO">123456789@TODO</a></dd>
+                                
+                                <dt>Submission date</dt>
+                                <dd>YYYY-MM-DD @TODO</dd>
+
+                                <dt>Applicant</dt>
+                                <dd>Name @TODO</dd>
+
+																<dt>Permit type</dt>
+                                <dd>@TODO consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore</dd>
+                                
+                              </dl>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="basic-table-content border-top">
+                                
+                                Application update description TODO text here Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.  and a <a href="https://buildingpermit.gov.bc.ca/">@TODO link</a>.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+
+                      </td>
+                    </tr>
+                    <tr>
+                        <td class="basic-table">
+                            <table 
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            class="table-like"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Application ID 
+                                        </th>
+                                        <th>
+                                            Submission date
+                                        </th>
+                                        <th>
+                                            &nbsp;
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- LOOP TO SHOW EACH APPLICATION -->
+                                    <tr>
+                                        <td>
+                                            <a href="#TODO">123456789 @TODO</a>
+                                        </td>
+                                        <td>
+                                            YYYY-MM-DD @TODO
+                                        </td>
+                                        <td align="right">
+                                            <em><small>
+                                                @TODO X days ago
+                                            </small></em>
+                                        </td>
+                                    </tr>
+                                    <!-- LOOP END -->
+                                </tbody>
+                            </table>
+                        </td>
+                    <!-- END OF CONTENT ROW -->
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+            <!-- END MAIN CONTENT AREA -->
+            </table>
+
+            <!-- START FOOTER -->
+            <div class="footer">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td><div class="yellow-border">&nbsp;</div></td>
+                </tr>
+                <tr>
+                  <td class="wrapper">
+                    <p>You are receiving this email because you are registered on <a href="https://buildingpermit.gov.bc.ca/" title="Building Permit Hub">Building Permit Hub</a>.</p>
+                    <p>The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.</p>
+                    <h3>BC Building Permit Hub</h3>
+                    <p>
+                      <a href="https://buildingpermit.gov.bc.ca" target="_blank" style="margin-right: 20px">Home</a> 
+                      <a href="https://buildingpermit.gov.bc.ca/contact" target="_blank" style="margin-right: 20px">Contact us</a>
+                      <a href="https://buildingpermit.gov.bc.ca/help" target="_blank" style="margin-right: 20px">Help</a>
+                      <a href="https://buildingpermit.gov.bc.ca/login" target="_blank" style="margin-right: 20px">Login</a>
+                    </p>
+                    <hr>
+                    <p>© Government of British Columbia.</p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <!-- END FOOTER -->
+
+          <!-- END CENTERED WHITE CONTAINER -->
+          </div>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </body>
+</html>
