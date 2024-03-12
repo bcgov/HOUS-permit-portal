@@ -14,9 +14,9 @@
 
 // override formio form designer
 .form-designer,
-// override form viewer
+  // override form viewer
 .form-wrapper,
-// override preview panel in form builder component editor modal
+  // override preview panel in form builder component editor modal
 .component-preview {
   /*
   		moved from the main application
@@ -32,12 +32,15 @@
   h1 {
     font-size: 1.9em;
   }
+
   h2 {
     font-size: 1.7em;
   }
+
   h3 {
     font-size: 1.3em;
   }
+
   h4 {
     font-size: 1.05em;
   }
@@ -60,6 +63,7 @@
   // links
   a {
     color: $bcgov-link;
+
     &:hover {
       color: $bcgov-link-hover;
     }
@@ -68,6 +72,7 @@
   // Horizontal Rule
   hr {
     margin-bottom: 1em;
+
     .orange {
       border-top: 2px solid $bcgov-orange;
     }
@@ -78,6 +83,7 @@
   .component-fade-leave-active {
     transition: opacity 0.3s ease;
   }
+
   .component-fade-enter,
   .component-fade-leave-to {
     opacity: 0;
@@ -97,14 +103,17 @@
     font-weight: bold;
     color: $bcgov-font;
     opacity: 1;
+
     .fa-minus-square-o::before,
     .fa-plus-square-o::before {
       font-size: 130%;
       color: black;
     }
+
     .fa-minus-square-o::before {
       content: "\f106";
     }
+
     .fa-plus-square-o::before {
       content: "\f107";
     }
@@ -127,6 +136,7 @@
         border-radius: 0;
       }
     }
+
     & > .card > .card-header {
       background: none;
 
@@ -180,6 +190,7 @@
       border-top-left-radius: 0.25rem;
       border-bottom-left-radius: 0.25rem;
     }
+
     // if validation error make borders red;
     &.is-invalid + .form-control.input {
       border: 1px solid #dc3545;
@@ -242,9 +253,11 @@
   .form-text {
     font-size: 0.85em;
   }
+
   .invalid-feedback {
     font-size: 100%; // reset this wrapper
   }
+
   .form-text.error {
     background: none !important;
     color: $bcgov-error;
@@ -263,6 +276,7 @@
       &:not(.is-selected) {
         color: $bcgov-font;
       }
+
       &:hover {
         background-color: $bcgov-link-hover;
         color: white;
@@ -275,11 +289,13 @@
       margin-bottom: 0;
       font-size: 90%;
     }
+
     .choices__item,
     .choices__button {
       background-color: white;
       color: $bcgov-link;
       border-color: $bcgov-link;
+
       &:hover {
         background-color: $bcgov-link-hover;
         border-color: $bcgov-link-hover;
@@ -297,12 +313,14 @@
   .form-radio {
     .form-check {
       margin-bottom: 5px;
+
       .form-check-label {
         font-size: 1em;
 
         .form-check-input {
           transform: scale(1.3);
         }
+
         span {
           margin-left: 5px;
         }
@@ -430,6 +448,60 @@
     margin-top: 16px;
     color: var(--chakra-colors-error);
     font-weight: 700;
+  }
+  .contact-data-grid {
+    border: none;
+    max-width: 650px;
+
+    .contact-field-set {
+      margin-top: 0;
+    }
+
+    table,
+    td,
+    tr {
+      border: none !important;
+    }
+
+    .formio-button-remove-row {
+      width: max-content;
+      background: inherit;
+      color: var(--chakra-colors-error);
+      border: none;
+      display: flex;
+      align-items: center;
+
+      i:before {
+        content: "\2715";
+        font-size: var(--chakra-fontSizes-xs);
+        margin-right: var(--chakra-space-2);
+      }
+
+      &:after {
+        content: "Remove";
+      }
+    }
+  }
+
+  .contact-field-set {
+    border: 1px solid var(--chakra-colors-border-light);
+    padding-inline: var(--chakra-space-4);
+    padding-block: var(--chakra-space-3);
+    border-radius: var(--chakra-radii-sm);
+    margin-top: var(--chakra-space-4);
+    max-width: 562px;
+
+    .formio-component-simpletextfield {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    legend {
+      font-weight: 700;
+      font-size: var(--chakra-fontSizes-md);
+    }
   }
 }
 
