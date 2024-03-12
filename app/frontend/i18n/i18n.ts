@@ -192,6 +192,10 @@ const options = {
             templatesUsed: "Templates Used",
             mapPosition: "Map position",
           },
+          submissionEmailConfirmed: {
+            heading: "Email confirmed!",
+            description: "You will start to receive permit applications shortly",
+          },
           lat: "Latitude",
           lng: "Longitude",
           title: "Local Housing Permits",
@@ -725,6 +729,23 @@ const options = {
               title: "My Jurisdiction's About Page",
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
+            },
+            submissionsInboxSetup: {
+              title: "Submissions Inbox Setup",
+              description: "Specify email addresses that should receive applications.",
+              permitTypes: {
+                label: "Send permit applications for",
+                low_residential: "Low Density - Residential",
+                medium_residential: "Medium Density - Residential",
+                high_residential: "High Density - Residential",
+                new_construction: "New Construction",
+                addition_alteration_renovation: "Addition, Alteration, or Renovation",
+                site_alteration: "Site Alteration",
+                demolition: "Demolition",
+              },
+              emailLabel: "to recipient email(s)",
+              addEmail: "Add another email",
+              confirmationRequired: "Action Required: please click link in verification email",
             },
             stepCodeRequirements: {
               title: "Energy Step Code Requirements",

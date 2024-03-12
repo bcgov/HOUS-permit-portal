@@ -18,16 +18,16 @@ RSpec.describe Activity, type: :model do
     end
 
     it "is not valid with a duplicate code" do
-      create(:activity, code: "ABC")
-      activity = build(:activity, code: "ABC")
+      create(:activity)
+      activity = build(:activity)
       expect(activity).not_to be_valid
     end
   end
 
   describe "#image_url" do
     it "returns the correct image URL" do
-      activity = create(:activity, code: "XYZ")
-      expected_url = ActionController::Base.helpers.asset_path("images/permit_classifications/XYZ.png")
+      activity = create(:activity)
+      expected_url = ActionController::Base.helpers.asset_path("images/permit_classifications/#{activity.code}.png")
       expect(activity.image_url).to eq(expected_url)
     end
   end

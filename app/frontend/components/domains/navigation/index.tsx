@@ -8,6 +8,7 @@ import { Footer } from "../../shared/base/footer"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { EULAModal } from "../../shared/eula-modal"
+import { EmailConfirmedScreen } from "../authentication/email-confirmed-screen"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
@@ -15,6 +16,7 @@ import { ResetPasswordScreen } from "../authentication/reset-password-screen"
 import { HomeScreen } from "../home"
 import { ConfigurationManagementScreen } from "../home/review-manager/configuration-management-screen"
 import { EnergyStepRequirementsScreen } from "../home/review-manager/configuration-management-screen/energy-step-requirements-screen"
+import { SubmissionsInboxSetupScreen } from "../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen"
 import { JurisdictionIndexScreen } from "../jurisdictions/index"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
@@ -107,8 +109,8 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<JurisdictionSubmissionInboxScreen />} />
       <Route
-        path="/jurisdictions/:jurisdictionId/configuration-management"
-        element={<ConfigurationManagementScreen />}
+        path="/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup"
+        element={<SubmissionsInboxSetupScreen />}
       />
       <Route
         path="/jurisdictions/:jurisdictionId/configuration-management/energy-step"
@@ -135,6 +137,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/digital-building-permits/:templateVersionId/edit"
         element={<JurisdictionEditDigitalPermitScreen />}
+      />
+      <Route
+        path="/jurisdictions/:jurisdictionId/configuration-management"
+        element={<ConfigurationManagementScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
     </>
@@ -169,6 +175,7 @@ const AppRoutes = observer(() => {
           </>
         )}
         <Route path="/contact" element={<ContactScreen />} />
+        <Route path="/confirmed" element={<EmailConfirmedScreen />} />
 
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>

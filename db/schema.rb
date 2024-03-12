@@ -140,6 +140,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
     t.datetime "signed_off_at"
     t.string "nickname"
     t.datetime "viewed_at"
+    t.jsonb "zipfile_data"
     t.uuid "template_version_id", null: false
     t.jsonb "form_customizations_snapshot"
     t.string "reference_number"

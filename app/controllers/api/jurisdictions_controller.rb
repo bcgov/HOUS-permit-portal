@@ -120,6 +120,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[id name department title phone_number email],
+      permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
     )
   end
 

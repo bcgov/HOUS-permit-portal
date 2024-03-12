@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { FileText, Info } from "@phosphor-icons/react"
+import { FileText, Info, Tray } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
@@ -51,6 +51,16 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             </SectionBox>
 
             <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+              <GridItem>
+                <HomeScreenBox
+                  title={t(`${i18nPrefix}.submissionsInboxSetup.title`)}
+                  description={t(`${i18nPrefix}.submissionsInboxSetup.description`)}
+                  linkText={t("ui.edit")}
+                  icon={<Tray size="24px" color="--var(chakra-colors-text-primary)" />}
+                  href="submissions-inbox-setup"
+                  h="full"
+                />
+              </GridItem>
               <GridItem>
                 <HomeScreenBox
                   title={t(`${i18nPrefix}.stepCodeRequirements.title`)}

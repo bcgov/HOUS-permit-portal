@@ -8,16 +8,14 @@ class ApplicationMailer < ActionMailer::Base
 
   protected
 
-  def send_mail(user, action, subject_i18n_values = {})
-    @user = user
+  def send_mail(email:, template:, i18n_key:, i18n_params: {}, locals: {})
     @root_url = FrontendUrlHelper.root_url
-
     CHESApiWrapper.new.send_email(
-      to: user.email,
+      to: email,
       from: ENV["FROM_EMAIL"],
       subject:
-        "#{I18n.t("application_mailer.subject_start")} - #{I18n.t("application_mailer.subjects.#{action}", **subject_i18n_values)}",
-      body: render(template: "#{self.class.name.underscore}/#{action}"),
+        "#{I18n.t("application_mailer.subject_start")} - #{I18n.t("application_mailer.subjects.#{i18n_key}", i18n_params)}",
+      body: render(template: template, locals:)
     )
   end
 end

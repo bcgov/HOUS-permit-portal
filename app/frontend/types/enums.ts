@@ -10,6 +10,16 @@ export enum EPermitClassificationType {
   Activity = "Activity",
 }
 
+export enum EPermitClassificationCode {
+  lowResidential = "low_residential",
+  mediumResidential = "medium_residential",
+  highResidential = "high_residential",
+  newConstruction = "new_construction",
+  additionAlterationRenovation = "addition_alteration_renovation",
+  siteAlteration = "site_alteration",
+  demolition = "demolition",
+}
+
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",

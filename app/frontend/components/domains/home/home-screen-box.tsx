@@ -26,7 +26,9 @@ export const HomeScreenBox = ({ icon, title, description, href, linkText, ...res
               {title}
             </Heading>
           </Flex>
-          <Text ml={8}>{description}</Text>
+          <Text ml={8} fontSize="sm">
+            {description}
+          </Text>
         </Flex>
         <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />}>
           <Heading as="h3" fontSize="lg" color="text.link">
