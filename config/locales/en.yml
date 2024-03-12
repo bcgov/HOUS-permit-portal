@@ -287,7 +287,7 @@ en:
         business_license: "Business license"
         professional_association: "Professional association/organization"
         professional_number: "Professional number"
-        organization: "Organization (optional)"
+        organization: "Organization"
         add_person_button: "Add another person"
   step_code_building_characteristics_summary:
     performance_type:
