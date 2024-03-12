@@ -191,6 +191,15 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                 )
               }}
               requirementBlockCustomizations={watchedCustomizations?.requirementBlockChanges}
+              hideElectiveField={(requirementBlockId, requirement) => {
+                const customization = watchedCustomizations.requirementBlockChanges[requirementBlockId]
+
+                if (!customization || !customization.enabledElectiveFieldIds) {
+                  return true
+                }
+
+                return !customization?.enabledElectiveFieldIds?.includes(requirement.id)
+              }}
             />
           </Flex>
         </Flex>

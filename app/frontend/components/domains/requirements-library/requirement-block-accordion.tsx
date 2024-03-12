@@ -33,6 +33,7 @@ type TProps = {
   triggerForceCollapse?: boolean
   renderEdit?: () => JSX.Element
   requirementBlockCustomization?: IRequirementBlockCustomization
+  hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
 } & Partial<AccordionProps> &
   (
     | { isEditable?: never; showEditWarning?: never }
@@ -51,6 +52,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   triggerForceCollapse,
   renderEdit,
   requirementBlockCustomization,
+  hideElectiveField,
   ...accordionProps
 }: TProps) {
   const { t } = useTranslation()
@@ -142,43 +144,57 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 : 0
             }
           >
-            {requirementBlock.requirements.map((requirement: IDenormalizedRequirement, index) => {
-              const requirementType = requirement.inputType
-              return (
-                <Box
-                  key={requirement.id}
-                  w={"full"}
-                  borderRadius={"sm"}
-                  pt={index !== 0 ? 1 : 0}
-                  pb={5}
-                  pos={"relative"}
-                >
+            {requirementBlock.requirements
+              .filter((requirement) => {
+                if (!requirement.elective) {
+                  return true
+                }
+
+                if (!hideElectiveField) {
+                  return true
+                }
+
+                if (hideElectiveField) {
+                  return !hideElectiveField(requirementBlock.id, requirement)
+                }
+              })
+              .map((requirement: IDenormalizedRequirement, index) => {
+                const requirementType = requirement.inputType
+                return (
                   <Box
+                    key={requirement.id}
                     w={"full"}
-                    sx={{
-                      "& input": {
-                        maxW: "339px",
-                      },
-                    }}
+                    borderRadius={"sm"}
+                    pt={index !== 0 ? 1 : 0}
+                    pb={5}
+                    pos={"relative"}
                   >
-                    <RequirementFieldDisplay
-                      requirementType={requirementType}
-                      label={requirement.label}
-                      helperText={requirement?.hint}
-                      unit={
-                        requirementType === ERequirementType.number
-                          ? requirement?.inputOptions?.numberUnit ?? null
-                          : undefined
-                      }
-                      options={requirement?.inputOptions?.valueOptions?.map((option) => option.label)}
-                      selectProps={{
-                        maxW: "339px",
+                    <Box
+                      w={"full"}
+                      sx={{
+                        "& input": {
+                          maxW: "339px",
+                        },
                       }}
-                    />
+                    >
+                      <RequirementFieldDisplay
+                        requirementType={requirementType}
+                        label={requirement.label}
+                        helperText={requirement?.hint}
+                        unit={
+                          requirementType === ERequirementType.number
+                            ? requirement?.inputOptions?.numberUnit ?? null
+                            : undefined
+                        }
+                        options={requirement?.inputOptions?.valueOptions?.map((option) => option.label)}
+                        selectProps={{
+                          maxW: "339px",
+                        }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              )
-            })}
+                )
+              })}
           </VStack>
         </AccordionPanel>
       </AccordionItem>
