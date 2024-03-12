@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<target>System.err</target>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %level [%thread] %logger{30} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="cliAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<target>System.out</target>
+		<encoder>
+			<pattern>%msg %n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${CSA_HOME}/log/csa.log</file>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${CSA_HOME}/log/log-history/csa.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<!-- keep 10 days' worth of history -->
+			<maxHistory>10</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %level [%thread] %logger{30} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="com.notarius.consigno.api" level="INFO" />
+	<logger name="com.notarius.consigno.callas" level="WARN" />
+	<logger name="com.notarius.consigno.sdk" level="INFO" />
+	<logger name="com.notarius.consigno.sdk.webservices" level="INFO" />
+	<logger name="org.springframework" level="ERROR" />
+	<logger name="org.apache.camel" level="ERROR" />
+	<logger name="org.hibernate" level="ERROR" />
+	<logger name="io.netty" level="ERROR" />
+	<logger name="com.jayway" level="ERROR" />
+	<logger name="org.apache.http" level="ERROR" />
+	<logger name="org.springframework.web" level="ERROR" />
+	<logger name="SDKCLI" level="INFO" additivity="false">
+		<appender-ref ref="cliAppender" />
+	</logger>
+
+	<root>
+		<appender-ref ref="consoleAppender" />
+	</root>
+
+	<include resource="logback-extension.xml" optional="true" />
+</configuration>
