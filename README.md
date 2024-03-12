@@ -26,7 +26,7 @@ Ensure you have the following:
 
 ### Workers (Sidekiq)
 
-The app uses the Sidekiq [https://github.com/sidekiq/sidekiq] library for background job processing. To run this locally:
+The app uses the [Sidekiq](https://github.com/sidekiq/sidekiq) library for background job processing. To run this locally:
 
 - Ensure you have `Redis` installed locally
 - Set ENV var `REDIS_URL=localhost:6379/0`
@@ -36,7 +36,7 @@ The app uses the Sidekiq [https://github.com/sidekiq/sidekiq] library for backgr
 
 ### Websockets (Anycable)
 
-The app uses Anycable [https://anycable.io/] to serve websockets in a scalable way. To run the websocket server locally:
+The app uses [Anycable](https://anycable.io/) to serve websockets in a scalable way. To run the websocket server locally:
 
 - Ensure to `bundle install`
 - Donwload the `anycable-go` websocket server (on OSX: `brew install anycable-go`) [https://docs.anycable.io/anycable-go/getting_started]
