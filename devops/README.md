@@ -6,8 +6,12 @@ The application relies on various deployments and services in order to run. Thes
 
 There are helm charts available for each major service / application. Right now they are:
 
-- App (includes web, workers, etc.)
-- Crunchy Postgres (used for production HA PG - uses: https://github.com/bcgov/crunchy-postgres v0.6.0)
+- permit-portal-routing (includes base network policies and nginx for reverse proxying to websocket / http servers)
+- app (includes web, workers, RPC service for hous-permit-portal)
+- anycable-go (websocket service)
+- ha-postgres-crunchydb (HA Postgres, makes use of https://github.com/bcgov/crunchy-postgres)
+- ha-elasticsearch (HA Elasticsearch based off bitnami/elasticsearch)
+- ha-redis (HA Redis with Sentinels based off bitnami/redis)
 
 Run each helm chart by going into the respective folder and issuing helm commands, here are some examples:
 
