@@ -26,10 +26,12 @@ export const getCompletedSectionsFromForm = (rootComponent) => {
   const blocksList = findPanelComponents(rootComponent.components)
   let completedSections = {}
   blocksList.forEach((panelComponent) => {
-    const complete =
-      panelComponent.components.filter(
-        (comp) => comp.error || (comp.component.validate?.required && R.isEmpty(comp.dataValue))
-      ).length == 0 //if there are any components with errors OR required fields with no value
+    const incompleteComponents = panelComponent.components.filter(
+      (comp) =>
+        comp.error || (comp.component.validate?.required && (R.isEmpty(comp.dataValue) || R.isNil(comp.dataValue)))
+    )
+
+    const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
 
     return (completedSections[panelComponent?.component?.key] = complete)
   })

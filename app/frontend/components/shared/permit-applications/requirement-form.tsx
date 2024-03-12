@@ -122,6 +122,11 @@ export const RequirementForm = observer(
       setAllCollapsed((cur) => !cur)
     }
 
+    const mapErrorBoxData = (errors) =>
+      errors.map((error) => {
+        return { label: error.component.label, id: error.component.id, class: error.component.class }
+      })
+
     function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
@@ -152,15 +157,21 @@ export const RequirementForm = observer(
       if (onCompletedSectionsChange) {
         onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
       }
-      setErrorBoxData(
-        containerComponent.root.errors.map((error) => {
-          return { label: error.component.label, id: error.component.id, class: error.component.class }
-        })
-      )
+      setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
+    }
+
+    const onChange = () => {
+      if (!formRef.current) return
+
+      if (onCompletedSectionsChange) {
+        onCompletedSectionsChange(getCompletedSectionsFromForm(formRef.current))
+      }
+      setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
+
       if (onCompletedSectionsChange) {
         onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
       }
@@ -204,6 +215,7 @@ export const RequirementForm = observer(
             onSubmit={onFormSubmit}
             options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
+            onChange={onChange}
           />
         </Flex>
         <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
