@@ -130,8 +130,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_11_164616) do
     t.datetime "signed_off_at"
     t.string "nickname"
     t.datetime "viewed_at"
-    t.uuid "template_version_id", null: false
     t.jsonb "zipfile_data"
+    t.uuid "template_version_id", null: false
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"

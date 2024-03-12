@@ -29,6 +29,13 @@ export interface IContact {
   createdAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
+export interface IPermitTypeSubmissionContact {
+  id: string
+  email: string
+  permitTypeId: string
+  confirmedAt: string
+}
+
 export interface ISort<TField = string> {
   field: TField
   direction: ESortDirection

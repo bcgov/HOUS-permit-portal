@@ -20,4 +20,5 @@ class JurisdictionBlueprint < Blueprinter::Base
          :updated_at
 
   association :contacts, blueprint: ContactBlueprint
+  association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
 end

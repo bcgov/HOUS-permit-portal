@@ -49,6 +49,10 @@ Rails.application.routes.draw do
       get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
 
+    get "/permit_type_submission_contacts/confirm",
+        to: "permit_type_submission_contacts#confirm",
+        as: :permit_type_submission_contact_confirmation
+
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
@@ -109,6 +113,7 @@ Rails.application.routes.draw do
 
   get "/reset-password" => "home#index", :as => :reset_password
   get "/login" => "home#index", :as => :login
+  get "/confirmed" => "home#index", :as => :confirmed
   get "/accept-invitation" => "home#index", :as => :accept_invitation
   get "/*path",
       to: "home#index",

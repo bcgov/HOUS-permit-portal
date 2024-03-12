@@ -46,6 +46,7 @@ en:
     subject_start: "BC Building Permit Hub"
     subjects:
       update_password_success: "You have successfully updated your password"
+      confirm_inbox_email: "Confirm submission inbox email"
   arbitrary_message_construct:
     devise:
       failure:
