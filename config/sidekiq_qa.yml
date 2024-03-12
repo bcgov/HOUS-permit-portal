@@ -1,5 +1,0 @@
----
-:concurrency: 10
-:queues:
-  - file_processing
-  - default
