@@ -152,7 +152,7 @@ class RequirementFormJsonService
     get_multi_contact_datagrid_form_json(requirement_block_key)
   end
 
-  def get_contact_field_form_json(field_key)
+  def get_contact_field_form_json(field_key, required = true)
     shared_form_json = {
       applyMaskOn: "change",
       tableView: true,
@@ -161,6 +161,9 @@ class RequirementFormJsonService
       key: snake_to_camel(field_key.to_s),
       label: I18n.t("formio.requirement.contact.#{field_key.to_s}"),
       type: "textfield",
+      validate: {
+        required: required,
+      },
       **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text],
     }
 
@@ -235,7 +238,7 @@ class RequirementFormJsonService
         [get_contact_field_form_json(:email), get_contact_field_form_json(:phone)],
       ),
       get_contact_field_form_json(:address),
-      get_columns_form_json("organization_columns", [get_contact_field_form_json(:organization)]),
+      get_columns_form_json("organization_columns", [get_contact_field_form_json(:organization, false)]),
     ]
   end
 
@@ -256,7 +259,10 @@ class RequirementFormJsonService
       ),
       get_columns_form_json(
         "professional_columns",
-        [get_contact_field_form_json(:professional_association), get_contact_field_form_json(:professional_number)],
+        [
+          get_contact_field_form_json(:professional_association, false),
+          get_contact_field_form_json(:professional_number),
+        ],
       ),
     ]
   end
