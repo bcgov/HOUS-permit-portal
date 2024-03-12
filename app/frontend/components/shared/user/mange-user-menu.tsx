@@ -30,7 +30,10 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
 
   const {
     jurisdictionStore: { currentJurisdiction },
+    userStore: { currentUser },
   } = useMst()
+
+  const isCurrentUser = user.id === currentUser.id
 
   return (
     <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
@@ -45,7 +48,12 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
               {t("ui.restore")}
             </ManageMenuItem>
           ) : (
-            <ManageMenuItem color="semantic.error" onClick={handleRemove} icon={<Archive />}>
+            <ManageMenuItem
+              color={isCurrentUser ? "greys.grey01" : "semantic.error"}
+              onClick={handleRemove}
+              icon={<Archive />}
+              isDisabled={isCurrentUser}
+            >
               {t("ui.archive")}
             </ManageMenuItem>
           )}
