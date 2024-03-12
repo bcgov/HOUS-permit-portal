@@ -23,7 +23,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
+import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { CustomToast } from "../base/flash-message"
@@ -31,13 +31,13 @@ import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
-  onCompletedSectionsChange?: (sections: any) => void
+  onCompletedBlocksChange?: (sections: any) => void
   formRef: any
   triggerSave?: () => void
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedSectionsChange, formRef, triggerSave }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
@@ -154,8 +154,8 @@ export const RequirementForm = observer(
     }
 
     const onBlur = (containerComponent) => {
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
       setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
     }
@@ -163,8 +163,8 @@ export const RequirementForm = observer(
     const onChange = () => {
       if (!formRef.current) return
 
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(formRef.current))
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
       setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
@@ -172,8 +172,8 @@ export const RequirementForm = observer(
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
 
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(rootComponent))
       }
     }
     const scrollToTop = () => {
