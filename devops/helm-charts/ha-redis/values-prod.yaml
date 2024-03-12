@@ -8,14 +8,14 @@ redis:
         memory: "256Mi"
         cpu: "50m"
   replica:
-    replicaCount: 3
+    replicaCount: 2
     persistence:
       enabled: true
       size: 1Gi
     resources:
       requests:
         memory: "256Mi"
-        cpu: "20m"
+        cpu: "50m"
       limits:
         memory: "512Mi"
         cpu: "100m"

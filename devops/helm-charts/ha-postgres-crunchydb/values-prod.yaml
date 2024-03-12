@@ -4,7 +4,7 @@ crunchy-postgres:
     dataVolumeClaimSpec:
       storage: 2Gi
     requests:
-      cpu: 10m
+      cpu: 50m
       memory: 256Mi
     limits:
       cpu: 100m

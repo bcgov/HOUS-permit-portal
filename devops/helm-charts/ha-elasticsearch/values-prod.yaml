@@ -5,7 +5,7 @@ elasticsearch:
     heapSize: "512m"
     resources:
       requests:
-        cpu: "20m"
+        cpu: "50m"
         memory: "256Mi"
       limits:
         cpu: "150m"
@@ -20,11 +20,11 @@ elasticsearch:
     heapSize: "1024m"
     resources:
       requests:
-        cpu: "20m"
+        cpu: "50m"
         memory: "1024Mi"
       limits:
         cpu: "200m"
-        memory: "1512Mi"
+        memory: "2048Mi"
     persistence:
       enabled: true
       accessModes:

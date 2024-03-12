@@ -54,7 +54,6 @@
 
 		<root >
 			<appender-ref ref="consoleAppender" />
-			<appender-ref ref="FILE" />
 		</root>
 	</Loggers>
 

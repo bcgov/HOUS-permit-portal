@@ -24,6 +24,29 @@ Ensure you have the following:
 - Start the server: `rails s`
 - Start the front-end dev server for hot-reloading: `npm run dev`
 
+### Workers (Sidekiq)
+
+The app uses the Sidekiq [https://github.com/sidekiq/sidekiq] library for background job processing. To run this locally:
+
+- Ensure you have `Redis` installed locally
+- Set ENV var `REDIS_URL=localhost:6379/0`
+- Run `bundle exec sidekiq` (add a `-q queue_name`) to start that particular queue, you can see which queues are currently in the app in `config/initializers/sidekiq.rb` under `config.queues`
+
+* Note that the Openshift deployed versions make use of HA-Redis via Sentinels so the environment variables required for that are different
+
+### Websockets (Anycable)
+
+The app uses Anycable [https://anycable.io/] to serve websockets in a scalable way. To run the websocket server locally:
+
+- Ensure to `bundle install`
+- Donwload the `anycable-go` websocket server (on OSX: `brew install anycable-go`) [https://docs.anycable.io/anycable-go/getting_started]
+- Add an ENV var `ANYCABLE_REDIS_URL=redis://localhost:6379/2`. It is recommended to set this value to a different Redis db than Sidekiq.
+
+After installation run both the `anycable-go` websocket server as well as the RPC server
+
+- RPC Server: `bundle exec anycable`
+- Anycable-Go Sockets: `anycable-go --port=8080`
+
 ### Local - File storage setup
 
 - For the local environment, if you want to test the full file upload process, you would want to run a local version of minio to simulate the object storage environment.
