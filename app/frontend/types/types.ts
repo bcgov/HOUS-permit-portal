@@ -2,10 +2,12 @@ import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
   EDoorsPerformanceType,
+  EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
   ENumberUnit,
   ERequirementType,
+  ESZeroCarbonStep,
   ESortDirection,
   ESpaceHeatingCoolingPerformanceType,
   EStepCodeAirtightnessValue,
@@ -155,6 +157,8 @@ export interface IStepCodeSelectOptions {
   permitApplications: Partial<IPermitApplication>[]
   buildingTypes: EStepCodeBuildingType[]
   buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
+  energySteps: EEnergyStep[]
+  zeroCarbonSteps: ESZeroCarbonStep[]
 }
 
 export interface IRequirementBlockCustomization {

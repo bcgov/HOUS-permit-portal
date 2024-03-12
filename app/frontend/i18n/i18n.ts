@@ -710,6 +710,30 @@ const options = {
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
             },
+            stepCodeRequirements: {
+              title: "Energy Step Code Requirements",
+              description: "Define step code requirements.",
+              part9Building: "Part 9 Building",
+              stepRequired: {
+                energy: {
+                  title: "Energy Step Required",
+                  options: {
+                    "3": "3",
+                    "4": "4",
+                    "5": "5",
+                  },
+                },
+                zeroCarbon: {
+                  title: "Zero Carbon Step Code Level Required",
+                  options: {
+                    "1": "EL 1 - Measure Only",
+                    "2": "EL 2 - Moderate",
+                    "3": "EL 3 - Strong",
+                    "4": "EL 4 - Zero Carbon",
+                  },
+                },
+              },
+            },
           },
           superAdminTitle: "Admin Home",
           submissionsInboxTitle: "Submissions Inbox",
@@ -924,6 +948,7 @@ const options = {
             digitalBuildingPermits: "Digital Building Permits",
             contact: "Contact Us",
             configurationManagement: "Configuration Management",
+            energyStep: "Energy Step Code Requirements",
           },
           questionSupport: "Question Support",
         },
