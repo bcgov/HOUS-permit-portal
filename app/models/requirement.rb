@@ -23,7 +23,8 @@ class Requirement < ApplicationRecord
        _prefix: true
 
   before_create :set_requirement_code
-  validate :validate_value_options
+  before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
+  validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code, with: /\_file/, if: Proc.new { |req| req.input_type == "file" }
@@ -211,8 +212,6 @@ class Requirement < ApplicationRecord
   end
 
   def validate_value_options
-    return unless TYPES_WITH_VALUE_OPTIONS.include?(input_type.to_s)
-
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
@@ -227,6 +226,13 @@ class Requirement < ApplicationRecord
 
     if !NUMBER_UNITS.include?(input_options["number_unit"])
       errors.add(:input_options, "the number_unit must be one of #{NUMBER_UNITS.join(", ")}")
+    end
+  end
+
+  def convert_value_options
+    #all values MUST be converted to camelCase to be compatible with rehyration on front end
+    input_options["value_options"] = input_options["value_options"].map do |option_json|
+      option_json.merge("value" => option_json["value"].camelize(:lower))
     end
   end
 end
