@@ -41,6 +41,13 @@ class PermitApplication < ApplicationRecord
   before_save :set_submitted_at, if: :status_changed?
   after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
+  def force_update_published_template_version
+    return unless Rails.env.development?
+    # for development purposes only
+
+    current_template_version.update(form_json: current_template_version.requirement_template.to_form_json)
+  end
+
   def search_data
     {
       number: number,

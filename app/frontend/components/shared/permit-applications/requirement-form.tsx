@@ -19,7 +19,7 @@ import { observer } from "mobx-react-lite"
 import { format } from "date-fns"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
@@ -191,6 +191,12 @@ export const RequirementForm = observer(
               status="info"
             />
           )}
+          <Box bg="greys.grey03" p={3} borderRadius="sm">
+            <Text fontStyle="italic">
+              {t("site.foippaWarning")}
+              <Link to={"mailto:digital.codes.permits@gov.bc.ca"}>digital.codes.permits@gov.bc.ca</Link>
+            </Text>
+          </Box>
           <Form
             form={formattedFormJson}
             formReady={formReady}
@@ -200,7 +206,7 @@ export const RequirementForm = observer(
             onBlur={onBlur}
           />
         </Flex>
-        <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
+        <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
           <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
             {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
           </Button>
