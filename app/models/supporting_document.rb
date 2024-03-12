@@ -9,7 +9,14 @@ class SupportingDocument < ApplicationRecord
     signer = compliance_data["result"].sort_by { |signer| signer.dig("signatureTimestamp", "date") }&.first
 
     if signer
-      { name: signer["signatureFieldName"], date: signer.dig("signatureTimestamp", "date") }
+      {
+        name: signer["signatureFieldName"],
+        date:
+          Time
+            .parse(signer.dig("signatureTimestamp", "date"))
+            .in_time_zone(Rails.application.config.time_zone)
+            .strftime("%Y-%m-%d %H:%M:%S %Z"),
+      }
     else
       { name: nil, date: nil }
     end
@@ -20,9 +27,29 @@ class SupportingDocument < ApplicationRecord
       "data_key" => data_key,
       "message" =>
         compliance_data["error"] ||
-          compliance_data["result"].map do |signer|
-            "#{signer["signatureFieldName"]} signed at #{signer.dig("signatureTimestamp", "date")}"
-          end,
+          "Signers validated: #{
+            compliance_data["result"]
+              .map do |signer|
+                "#{signer["signatureFieldName"]} signed at #{Time.parse(signer.dig("signatureTimestamp", "date")).in_time_zone(Rails.application.config.time_zone).strftime("%Y-%m-%d %H:%M:%S %Z")}"
+              end
+              .join(", ")
+          }",
     }
+  end
+
+  def file_size
+    file_data.dig("metadata", "size")
+  end
+
+  def file_name
+    file_data.dig("metadata", "filename")
+  end
+
+  def file_url
+    file&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{file.original_filename}\"",
+    )
   end
 end

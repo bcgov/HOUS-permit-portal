@@ -1,6 +1,6 @@
 class DerivativesJob
   include Sidekiq::Worker
-  sidekiq_options queue: :promote_asset_and_make_derivatives
+  sidekiq_options queue: :file_processing
 
   def perform(attacher_class, record_class, record_id, name, file_data)
     attacher_class = Object.const_get(attacher_class)

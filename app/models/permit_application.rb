@@ -2,6 +2,7 @@ class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
+  include ZipfileUploader.Attachment(:zipfile)
   searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
              word_start: %i[number nickname full_address permit_classifications submitter status]
 
@@ -25,7 +26,7 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
 
-  enum status: { draft: 0, submitted: 1, viewed: 2 }, _default: 0
+  enum status: { draft: 0, submitted: 1 }, _default: 0
 
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
@@ -38,6 +39,14 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
+  after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+
+  def force_update_published_template_version
+    return unless Rails.env.development?
+    # for development purposes only
+
+    current_template_version.update(form_json: current_template_version.requirement_template.to_form_json)
+  end
 
   def search_data
     {
@@ -61,7 +70,14 @@ class PermitApplication < ApplicationRecord
 
   def current_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    jurisdiction.published_requirement_template_version(activity, permit_type)
+    RequirementTemplate.published_requirement_template_version(activity, permit_type)
+  end
+
+  def form_customizations
+    jurisdiction
+      .jurisdiction_template_version_customizations
+      .find_by(template_version: current_template_version)
+      &.customizations
   end
 
   def number_prefix
@@ -124,7 +140,29 @@ class PermitApplication < ApplicationRecord
     return new_number
   end
 
+  def zipfile_size
+    zipfile_data&.dig("metadata", "size")
+  end
+
+  def zipfile_name
+    zipfile_data&.dig("metadata", "filename")
+  end
+
+  def zipfile_url
+    zipfile&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
+    )
+  end
+
   private
+
+  def zip_and_upload_supporting_documents
+    return unless submitted? && zipfile_data.blank?
+
+    ZipfileJob.perform_async(id)
+  end
 
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.

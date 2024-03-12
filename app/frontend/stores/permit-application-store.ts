@@ -116,8 +116,10 @@ export const PermitApplicationStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
+          statusFilter: self.statusFilter,
         }
       )
+
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
         // dual purpose method also serves the submitters

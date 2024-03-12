@@ -8,7 +8,10 @@ import { RouterLink } from "../navigation/router-link"
 
 export const Footer = observer(() => {
   const location = useLocation()
-  const { userStore, sessionStore } = useMst()
+  const {
+    userStore,
+    sessionStore: { loggedIn },
+  } = useMst()
   const { currentUser } = userStore
   const { t } = useTranslation()
   const excludeFooterRoutes = [
@@ -20,8 +23,7 @@ export const Footer = observer(() => {
     "/permit-applications",
   ]
 
-  const shouldShowFooter =
-    !sessionStore.loggedIn || !excludeFooterRoutes.some((route) => location.pathname.startsWith(route))
+  const shouldShowFooter = !loggedIn || !excludeFooterRoutes.some((route) => location.pathname.startsWith(route))
 
   return (
     <>
@@ -74,7 +76,7 @@ export const Footer = observer(() => {
                           {t("site.contact")}
                         </RouterLink>
                         <Link
-                          href="https://www2.gov.bc.ca/gov/content/home/accessible-government"
+                          href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services"
                           target="_blank"
                           rel="noopener noreferrer"
                           color="text.primary"
@@ -82,13 +84,20 @@ export const Footer = observer(() => {
                           {t("site.help")}
                         </Link>
                       </Flex>
+
                       <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
-                        <RouterLink to="/login" color="text.primary">
-                          {t("auth.login")}
-                        </RouterLink>
-                        <RouterLink to="/register" color="text.primary">
-                          {t("auth.register")}
-                        </RouterLink>
+                        {!loggedIn ? (
+                          <>
+                            <RouterLink to="/login" color="text.primary">
+                              {t("auth.login")}
+                            </RouterLink>
+                            <RouterLink to="/register" color="text.primary">
+                              {t("auth.register")}
+                            </RouterLink>
+                          </>
+                        ) : (
+                          <></>
+                        )}
                       </Flex>
                       <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
                         <Link
@@ -107,13 +116,29 @@ export const Footer = observer(() => {
                         >
                           {t("site.disclaimerTitle")}
                         </Link>
+                        <Link
+                          href="https://www2.gov.bc.ca/gov/content/home/accessible-government"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="text.primary"
+                        >
+                          {t("site.accessibility")}
+                        </Link>
+                        <Link
+                          href="https://www2.gov.bc.ca/gov/content/home/copyright"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="text.primary"
+                        >
+                          {t("site.copyright")}
+                        </Link>
                       </Flex>
                     </Flex>
                   </Flex>
                 </Flex>
                 <Divider border="1px solid" borderColor="theme.blue" />
                 <Link
-                  href="https://www2.gov.bc.ca/gov/content/home/disclaimer"
+                  href="https://www2.gov.bc.ca/gov/content/home/copyright"
                   color="text.secondary"
                   target="_blank"
                   rel="noopener noreferrer"

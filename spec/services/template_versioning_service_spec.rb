@@ -84,7 +84,10 @@ RSpec.describe TemplateVersioningService, type: :service do
         requirement_template.requirement_template_sections.each do |section|
           section.template_section_blocks.each do |section_block|
             requirement_blocks_json[section_block.requirement_block.id].should eq(
-                       RequirementBlockBlueprint.render_as_json(section_block.requirement_block),
+                       RequirementBlockBlueprint.render_as_json(
+                         section_block.requirement_block,
+                         parent_key: section.key,
+                       ),
                      )
           end
         end

@@ -19,11 +19,11 @@ import { observer } from "mobx-react-lite"
 import { format } from "date-fns"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
+import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { CustomToast } from "../base/flash-message"
@@ -31,13 +31,13 @@ import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
-  onCompletedSectionsChange?: (sections: any) => void
+  onCompletedBlocksChange?: (sections: any) => void
   formRef: any
   triggerSave?: () => void
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedSectionsChange, formRef, triggerSave }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
@@ -122,6 +122,11 @@ export const RequirementForm = observer(
       setAllCollapsed((cur) => !cur)
     }
 
+    const mapErrorBoxData = (errors) =>
+      errors.map((error) => {
+        return { label: error.component.label, id: error.component.id, class: error.component.class }
+      })
+
     function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
@@ -149,20 +154,26 @@ export const RequirementForm = observer(
     }
 
     const onBlur = (containerComponent) => {
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
-      setErrorBoxData(
-        containerComponent.root.errors.map((error) => {
-          return { label: error.component.label, id: error.component.id, class: error.component.class }
-        })
-      )
+      setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
+    }
+
+    const onChange = () => {
+      if (!formRef.current) return
+
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
+      }
+      setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
+
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(rootComponent))
       }
     }
     const scrollToTop = () => {
@@ -183,7 +194,7 @@ export const RequirementForm = observer(
           ref={boxRef}
         >
           <ErrorsBox errorBox={errorBoxData} />
-          {permitApplication?.submittedAt && (
+          {permitApplication?.isSubmitted && (
             <CustomToast
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
@@ -191,6 +202,12 @@ export const RequirementForm = observer(
               status="info"
             />
           )}
+          <Box bg="greys.grey03" p={3} borderRadius="sm">
+            <Text fontStyle="italic">
+              {t("site.foippaWarning")}
+              <Link to={"mailto:digital.codes.permits@gov.bc.ca"}>digital.codes.permits@gov.bc.ca</Link>
+            </Text>
+          </Box>
           <Form
             form={formattedFormJson}
             formReady={formReady}
@@ -198,9 +215,10 @@ export const RequirementForm = observer(
             onSubmit={onFormSubmit}
             options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
+            onChange={onChange}
           />
         </Flex>
-        <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
+        <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
           <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
             {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
           </Button>

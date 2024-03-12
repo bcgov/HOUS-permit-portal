@@ -27,6 +27,9 @@ class User < ApplicationRecord
 
   enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
 
+  # https://github.com/waiting-for-dev/devise-jwt
+  self.skip_session_storage = %i[http_auth params_auth]
+
   # Associations
   belongs_to :jurisdiction, optional: true
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy

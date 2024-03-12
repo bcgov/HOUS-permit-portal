@@ -1,0 +1,57 @@
+crunchy-postgres:
+  instances:
+    replicas: 3
+    dataVolumeClaimSpec:
+      storage: 2Gi
+    requests:
+      cpu: 10m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 512Mi
+    replicaCertCopy:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 50m
+        memory: 64Mi
+
+  pgBackRest:
+    retention: "3"
+    repos:
+      volume:
+        storage: 1Gi
+    repoHost:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi
+    sidecars:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi
+
+  patroni:
+    postgresql:
+      parameters:
+        shared_buffers: 16MB # default is 128MB; a good tuned default for shared_buffers is 25% of the memory allocated to the pod
+        wal_buffers: "64kB" # this can be set to -1 to automatically set as 1/32 of shared_buffers or 64kB, whichever is larger
+        min_wal_size: 32MB
+        max_wal_size: 64MB # default is 1GB
+        max_slot_wal_keep_size: 128MB # default is -1, allowing unlimited wal growth when replicas fall behind
+
+  proxy:
+    pgBouncer:
+      replicas: 2
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 50m
+        memory: 128Mi

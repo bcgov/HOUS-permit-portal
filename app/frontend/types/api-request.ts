@@ -7,6 +7,7 @@ export interface IRequirementsAttribute {
   inputType?: ERequirementType
   hint?: string
   required?: boolean
+  elective?: boolean
   inputOptions?: {
     valueOptions?: IOption[]
     numberUnit?: ENumberUnit

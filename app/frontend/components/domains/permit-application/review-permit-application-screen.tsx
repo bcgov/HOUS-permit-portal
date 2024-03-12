@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Heading, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Heading, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef, useState } from "react"
@@ -12,6 +12,7 @@ import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/p
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { SubmissionDownloadModal } from "./submission-download-modal"
 
 export const ReviewPermitApplicationScreen = observer(() => {
   const { currentPermitApplication, error } = usePermitApplication()
@@ -19,11 +20,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const formRef = useRef(null)
   const navigate = useNavigate()
 
-  const [completedSections, setCompletedSections] = useState({})
+  const [completedBlocks, setCompletedBlocks] = useState({})
 
-  const handleDownloadApplication = () => {}
-
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
@@ -56,35 +55,33 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
-        <HStack>
-          <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onOpen}>
+        <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+          <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
             {t("permitApplication.show.contactsSummary")}
           </Button>
-          <Button variant="primary" onClick={handleDownloadApplication}>
-            {t("permitApplication.show.downloadApplication")}
-          </Button>
+          <SubmissionDownloadModal permitApplication={currentPermitApplication} />
           <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
             {t("ui.backHome")}
           </Button>
-        </HStack>
+        </Stack>
       </Flex>
       <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
-        <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
+        <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
           <Flex flex={1} direction="column" p={24}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
-              onCompletedSectionsChange={setCompletedSections}
+              onCompletedBlocksChange={setCompletedBlocks}
             />
           </Flex>
         )}
       </Flex>
-      {isOpen && (
+      {isContactsOpen && (
         <ContactSummaryModal
-          isOpen={isOpen}
-          onOpen={onOpen}
-          onClose={onClose}
+          isOpen={isContactsOpen}
+          onOpen={onContactsOpen}
+          onClose={onContactsClose}
           permitApplication={currentPermitApplication}
         />
       )}

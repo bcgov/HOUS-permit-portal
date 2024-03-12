@@ -1,0 +1,65 @@
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: dev
+
+redis:
+  fullnameOverride: redis-ha
+  architecture: replication
+  # Redis only exposed internally to the Openshift cluster
+  auth:
+    enabled: false
+    sentinel: false
+    usePasswordFiles: false # if this is enabeld it will use /opt/bitnami/redis/secrets/redis-password ---> we will instead use /vault/secrets/secrets.env which we have configured to have the password
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 7.2.4-debian-12-r9
+  sentinel:
+    enabled: true
+    masterSet: "redisMasterSet"
+    persistence:
+      enabled: false
+    containerPorts:
+      sentinel: 26379
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "50m"
+  replica:
+    replicaCount: 1
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+    persistence:
+      enabled: true
+      size: 500Mi
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "100m"
+  # don't need this since we are using sentinel, it will only look at replicas
+  # master:
+  #   persistence:
+  #     enabled: true
+  #     size: 1Gi
+  #   resources:
+  #     requests:
+  #       memory: "128Mi"
+  #       cpu: "20m"
+  #     limits:
+  #       memory: "256Mi"
+  #       cpu: "100m"
+  #   podSecurityContext:
+  #     enabled: false
+  #   containerSecurityContext:
+  #     enabled: false

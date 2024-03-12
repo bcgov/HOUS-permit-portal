@@ -1,0 +1,73 @@
+{{- range .Values.deployments }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '{{ printf "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"%s-%s:latest\"},\"fieldPath\":\"spec.template.spec.containers[?(@.name==\\\"%s-%s\\\")].image\"}]" $.Values.STAGE $.Values.appName $.Values.appName .process }}'
+  labels:
+    app: "{{ $.Values.appName }}-{{ .process }}"
+  name: "{{ $.Values.appName }}-{{ .process }}"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: "{{ $.Values.appName }}-{{ .process }}"
+      deployment: "{{ $.Values.appName }}-{{ .process }}"
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-secrets.env: '{{ printf "%s/%s/%s" $.Values.vaultNamespace $.Values.STAGE $.Values.appName}}'
+        vault.hashicorp.com/agent-inject-template-secrets.env: |
+          {{`{{- with secret "`}}{{ printf "%s/%s/%s" $.Values.vaultNamespace $.Values.STAGE $.Values.appName }}{{ `" -}}`}}
+          {{`{{- range $k, $v := .Data.data }}`}}
+          {{ `{{ $k }}={{ $v }}{{ end -}}` }}
+          {{`{{- end }}`}}
+        vault.hashicorp.com/agent-limits-cpu: "50m"
+        vault.hashicorp.com/agent-limits-mem: "100Mi"
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/agent-requests-cpu: "10m"
+        vault.hashicorp.com/agent-requests-mem: "25Mi"
+        vault.hashicorp.com/auth-path: "auth/k8s-silver"
+        vault.hashicorp.com/namespace: "platform-services"
+        vault.hashicorp.com/role: '{{ $.Values.vaultNamespace }}'
+      labels:
+        app: "{{ $.Values.appName }}-{{ .process }}"
+        deployment: "{{ $.Values.appName }}-{{ .process }}"
+    spec:
+      containers:
+        - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
+          imagePullPolicy: Always
+          name: "{{ $.Values.appName }}-{{ .process }}"
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          resources:
+            limits:
+              cpu: {{ .spec.containers.resources.limits.cpu }}
+              memory: {{ .spec.containers.resources.limits.memory }}
+            requests:
+              cpu: {{ .spec.containers.resources.requests.cpu }}
+              memory: {{ .spec.containers.resources.requests.memory }}
+          {{- if .spec.containers.includeCommand }}
+          command:
+          - /bin/sh
+          - '-c'
+          args: {{ .spec.containers.args }}
+          {{- end }}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
+      serviceAccountName: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
+      terminationGracePeriodSeconds: 30
+---
+ {{- end }}

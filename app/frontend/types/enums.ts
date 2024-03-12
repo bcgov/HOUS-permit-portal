@@ -13,7 +13,6 @@ export enum EPermitClassificationType {
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
-  viewed = "viewed",
 }
 
 export enum ETemplateVersionStatus {

@@ -170,7 +170,7 @@ const options = {
             nextStep: "The next step is to invite users",
           },
           index: {
-            title: "Manage Jurisdictions",
+            title: "Jurisdictions",
             description: "Below is a list of all jurisdictions in the system",
             createButton: "Create New Jurisdiction",
             tableHeading: "Local Governments",
@@ -213,11 +213,18 @@ const options = {
           ask: "Ask a question",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
+          viewed: "Viewed",
+          notViewed: "New",
+          status: {
+            draft: "Draft Permits",
+            submitted: "Submitted Permits",
+          },
           columns: {
             number: "Application #",
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted At",
+            viewed_at: "Viewed At",
             status: "Status",
           },
           submissionInbox: {
@@ -259,9 +266,13 @@ const options = {
             contactsSummary: "Contacts Summary",
             downloadApplication: "Download application",
             contactSummaryHeading: "List of all contacts on this application",
+            downloadHeading: "Download application",
+            downloadPrompt: "Choose specific files or entire package:",
+            downloadZip: "Download all as .zip",
           },
         },
         requirementsLibrary: {
+          elective: "Elective",
           associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
@@ -275,6 +286,7 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
             create: {
@@ -293,6 +305,7 @@ const options = {
             addHelpText: "Add help text",
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
+            isAnElectiveField: "This is an elective field for Local Gov",
             optionsMenu: {
               triggerButton: "Options",
               remove: "Remove",
@@ -316,17 +329,20 @@ const options = {
             requirementSku: "Generated unique identifier",
           },
           requirementTypeLabels: {
-            shortText: "Short Text",
+            text: "Short Text",
+            checkbox: "Checkbox",
             address: "Address",
+            bcaddress: "BC Address",
             date: "Date",
             number: "Number",
             textArea: "Text Area",
-            radio: "Select Radio Options",
+            radio: "Radio Options",
             multiOptionSelect: "Multi-Select Checkboxes",
             select: "Single Select Dropdown",
             signature: "Signature",
             generalContact: "General Contact",
-            fileUpload: "File Upload",
+            professionalContact: "Professional Contact",
+            file: "File Upload",
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
@@ -874,6 +890,10 @@ const options = {
           somethingWrong: "Something went wrong",
           pageNotFound: "404 - The page you are looking for could not be found",
           seeConsoleForDetails: "See the browser console for details",
+          accessibility: "Accessibility",
+          copyright: "Copyright",
+          foippaWarning:
+            "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
           breadcrumb: {
             profile: "Profile",
             jurisdictions: "Manage Jurisdictions",
@@ -892,6 +912,7 @@ const options = {
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital Building Permits",
+            contact: "Contact Us",
           },
           questionSupport: "Question Support",
         },

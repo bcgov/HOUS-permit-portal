@@ -1,0 +1,21 @@
+redis:
+  sentinel:
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "20m"
+      limits:
+        memory: "256Mi"
+        cpu: "50m"
+  replica:
+    replicaCount: 3
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "20m"
+      limits:
+        memory: "512Mi"
+        cpu: "100m"

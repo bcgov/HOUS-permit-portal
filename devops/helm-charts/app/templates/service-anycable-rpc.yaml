@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: "{{ .Values.appName }}-anycable-rpc"
+  name: "{{ .Values.appName }}-anycable-rpc"
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: 50051-tcp
+      port: 50051
+      protocol: TCP
+      targetPort: 50051
+  selector:
+    app: "{{ .Values.appName }}-anycable-rpc"
+    deployment: "{{ .Values.appName }}-anycable-rpc"
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

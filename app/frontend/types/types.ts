@@ -45,6 +45,7 @@ export type TSearchParams<IModelSortFields> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  statusFilter?: string
 }
 
 export interface IRequirementOptions {
@@ -163,4 +164,10 @@ export interface IRequirementBlockCustomization {
 
 export interface ITemplateCustomization {
   requirementBlockChanges?: Record<string, IRequirementBlockCustomization>
+}
+
+export interface IDownloadableFile {
+  fileUrl: string
+  fileName: string
+  fileSize: number
 }

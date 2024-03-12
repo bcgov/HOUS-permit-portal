@@ -1,0 +1,6 @@
+dependencies:
+- name: anycable-go
+  repository: https://helm.anycable.io/
+  version: 0.5.11
+digest: sha256:1e8b72160270e4715eff26d3bdb105091be1eeb845acf620ddae8093873b9f0c
+generated: "2024-03-06T15:56:22.001197-08:00"

@@ -1,0 +1,31 @@
+elasticsearch:
+  master:
+    replicaCount: 1
+    heapSize: "512m"
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "512Mi"
+      limits:
+        cpu: "150m"
+        memory: "1024Mi"
+    persistence:
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      size: "500Mi"
+  data:
+    replicaCount: 1
+    heapSize: "1024m"
+    resources:
+      requests:
+        cpu: "20m"
+        memory: "1024Mi"
+      limits:
+        cpu: "200m"
+        memory: "1.5Gi"
+    persistence:
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      size: "1Gi"

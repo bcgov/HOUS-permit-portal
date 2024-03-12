@@ -5,6 +5,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { IUser } from "../../../models/user"
+import { useMst } from "../../../setup/root"
 import { ManageMenuItem } from "../base/manage-menu-item"
 import { Can } from "./can"
 
@@ -26,8 +27,13 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
   }
 
   const { t } = useTranslation()
+
+  const {
+    jurisdictionStore: { currentJurisdiction },
+  } = useMst()
+
   return (
-    <Can action="user:manage" data={{ user }}>
+    <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
       <Menu>
         <MenuButton as={Button} variant="link">
           {t("ui.manage")}
