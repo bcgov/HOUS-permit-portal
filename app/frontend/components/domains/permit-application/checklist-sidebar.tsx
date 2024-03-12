@@ -50,7 +50,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                         pl={6}
                         gap={2}
                         w="full"
-                        _selected={{ color: "theme.blue", bg: "theme.blueLight" }}
+                        _selected={{ color: "theme.blue", bg: "theme.blueLight", fontWeight: "bold" }}
                         justifyContent="flex-start"
                         textAlign="left"
                         onClick={() => handleTabsChange(indexOfBlockId(block.id), section.id, block.id)}

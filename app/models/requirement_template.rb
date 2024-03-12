@@ -66,6 +66,9 @@ class RequirementTemplate < ApplicationRecord
                       title: I18n.t("formio.requirement_template.signoff_checkbox_title"),
                       label: I18n.t("formio.requirement_template.signoff_checkbox_label"),
                       inputType: "checkbox",
+                      validate: {
+                        required: true,
+                      },
                       input: true,
                       defaultValue: false,
                     },

@@ -417,4 +417,17 @@ $blue-light: #f6f9fc;
       left: 0;
     }
   }
+
+  .submit-fail {
+    &:after {
+      display: none;
+    }
+  }
+
+  .help-block {
+    display: block;
+    margin-top: 16px;
+    color: #d9292f;
+    font-weight: 700;
+  }
 }
