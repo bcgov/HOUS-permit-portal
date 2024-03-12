@@ -27,8 +27,7 @@ export const getCompletedBlocksFromForm = (rootComponent) => {
   let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
     const incompleteComponents = panelComponent.components.filter(
-      (comp) =>
-        comp.error || (comp.component.validate?.required && (R.isEmpty(comp.dataValue) || R.isNil(comp.dataValue)))
+      (comp) => comp.error || (comp.component.validate?.required && (R.isEmpty(comp.dataValue) || !comp.dataValue))
     )
 
     const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
