@@ -44,7 +44,6 @@ class RequirementBlock < ApplicationRecord
   end
 
   def components_form_json(section_key)
-    # binding.pry
     optional_block = requirements.all? { |req| !req.required }
     requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
 
