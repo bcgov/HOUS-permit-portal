@@ -213,6 +213,7 @@ class RequirementFormJsonService
       legend: requirement.label,
       key: key,
       type: "fieldset",
+      custom_class: "contact-field-set",
       label: requirement.label,
       hideLabel: true,
       input: false,
@@ -271,6 +272,7 @@ class RequirementFormJsonService
       initEmpty: false,
       hideLabel: true,
       tableView: false,
+      custom_class: "contact-data-grid",
       defaultValue: [
         {
           firstName: "",
