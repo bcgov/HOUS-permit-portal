@@ -14,10 +14,14 @@ class PermitApplicationBlueprint < Blueprinter::Base
          :submitted_at,
          :formatted_compliance_data,
          :front_end_form_update,
-         :form_customizations
+         :zipfile_size,
+         :zipfile_name,
+         :zipfile_url
+  :form_customizations
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint
   association :submitter, blueprint: UserBlueprint
   association :step_code, blueprint: StepCodeBlueprint
+  association :supporting_documents, blueprint: SupportingDocumentBlueprint
 end

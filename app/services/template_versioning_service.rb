@@ -65,12 +65,107 @@ class TemplateVersioningService
       deprecate_versions_before_template(template_version)
 
       raise StandardError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
+
+      previous_version = previous_version(template_version)
+
+      return template_version if previous_version.blank?
+
+      previous_version.jurisdiction_template_version_customizations.each do |customization|
+        begin
+          copy_jurisdiction_customizations_to_template_version(customization, template_version)
+        rescue => e
+          # we want to know if an error is happening
+          # but don't want to fail the whole publish process because of it
+          Rails.logger.error("Error copying customizations to new template version: #{e.message}")
+        end
+      end
     end
 
     return template_version
   end
 
   private
+
+  def self.previous_version(template_version)
+    template_version
+      .requirement_template
+      .template_versions
+      .where("version_date <=?", template_version.version_date)
+      .where.not(id: template_version.id)
+      .order(version_date: :desc)
+      .first
+  end
+
+  def self.copy_jurisdiction_customizations_to_template_version(
+    jurisdiction_template_version_customization,
+    new_template_version
+  )
+    return if jurisdiction_template_version_customization.blank? || new_template_version.blank?
+
+    modified_copied_customizations = jurisdiction_template_version_customization.customizations.deep_dup
+    existing_customization_for_template =
+      new_template_version.jurisdiction_template_version_customizations.find_by(
+        jurisdiction_id: jurisdiction_template_version_customization.jurisdiction_id,
+      )
+    does_new_template_already_have_customization = existing_customization_for_template.present?
+
+    return if modified_copied_customizations["requirement_block_changes"].blank?
+
+    # Remove any requirement_block_changes if the requirement_block is not present in the new template version
+    modified_copied_customizations["requirement_block_changes"].delete_if do |key, _value|
+      !new_template_version.requirement_blocks_json.key?(key)
+    end
+
+    # Remove any enabled_elective_field_ids that are not present in the new template version's requirement_blocks
+    modified_copied_customizations["requirement_block_changes"].each do |key, current_requirement_block_change|
+      next if current_requirement_block_change["enabled_elective_field_ids"].blank?
+
+      available_elective_field_ids =
+        new_template_version.requirement_blocks_json[key]["requirements"]
+          .select { |r| r["elective"] }
+          .map { |r| r["id"] }
+
+      modified_copied_customizations["requirement_block_changes"][key]["enabled_elective_field_ids"].delete_if do |id|
+        !available_elective_field_ids.include?(id)
+      end
+
+      if !does_new_template_already_have_customization ||
+           existing_customization_for_template
+             .customizations
+             .dig("requirement_block_changes", key, "enabled_elective_field_ids")
+             .blank?
+        next
+      end
+
+      # Combine the enabled_elective_field_ids from the old and new template versions and remove any duplicates
+      modified_copied_customizations["requirement_block_changes"][key][
+        "enabled_elective_field_ids"
+      ] = existing_customization_for_template.customizations.dig(
+        "requirement_block_changes",
+        key,
+        "enabled_elective_field_ids",
+      ) | modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_ids")
+    end
+
+    copied_jurisdiction_template_version_customization = nil
+
+    if does_new_template_already_have_customization
+      copied_jurisdiction_template_version_customization = existing_customization_for_template
+      copied_jurisdiction_template_version_customization.customizations = modified_copied_customizations
+    else
+      copied_jurisdiction_template_version_customization =
+        new_template_version.jurisdiction_template_version_customizations.build(
+          jurisdiction_id: jurisdiction_template_version_customization.jurisdiction_id,
+          customizations: modified_copied_customizations,
+        )
+    end
+
+    if !copied_jurisdiction_template_version_customization.save
+      raise StandardError.new(
+              "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:#{jurisdiction_template_version_customization.jurisdiction_id}",
+            )
+    end
+  end
 
   def self.deprecate_versions_before_template(template_version)
     template_version

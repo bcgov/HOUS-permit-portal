@@ -332,7 +332,7 @@ GEM
     psych (5.1.1.1)
       stringio
     public_suffix (5.0.4)
-    puma (6.4.0)
+    puma (6.4.2)
       nio4r (~> 2.0)
     pundit (2.3.1)
       activesupport (>= 3.0.0)
@@ -523,12 +523,13 @@ DEPENDENCIES
   phonelib (~> 0.8.5)
   prettier_print (~> 1.2)
   pry-byebug (~> 3.10.1)
-  puma (>= 5.0)
+  puma (>= 6.4.2)
   pundit (~> 2.3.1)
   rails (~> 7.1.2)
   redis (~> 5.0.8)
   roo (~> 2.10)
   rspec-rails (~> 6.1.0)
+  rubyzip
   searchkick (~> 5.3.1)
   shoulda-matchers (~> 5.3.0)
   shrine (~> 3.5.0)

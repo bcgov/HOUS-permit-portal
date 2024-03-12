@@ -1,9 +1,9 @@
 import {
   Box,
-  Button,
   Flex,
   GridItem,
   Heading,
+  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -13,7 +13,6 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Download } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -36,13 +35,10 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          <Flex w="full" justify="space-between" my={6}>
+          <Flex w="full" justify="space-between" my={3}>
             <Heading as="h1" textTransform={"capitalize"}>
               {t("permitApplication.show.contactsSummary")}
             </Heading>
-            <Button variant="link" leftIcon={<Download />}>
-              {t("permitApplication.show.downloadApplication")}
-            </Button>
           </Flex>
           <ModalCloseButton fontSize="11px" />
         </ModalHeader>
@@ -82,14 +78,21 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
                 ))}
               </Box>
             </Box>
-
             {contacts.map((contact) => (
               <Box key={contact.id} className={"contact-index-grid-row"} role={"row"} display={"contents"}>
-                <SearchGridItem key={`title-${contact.id}`}>{contact.title}</SearchGridItem>
-                <SearchGridItem key={`name-${contact.id}`}>{contact.name}</SearchGridItem>
-                <SearchGridItem key={`email-${contact.id}`}>{contact.email}</SearchGridItem>
-                <SearchGridItem key={`phone-${contact.id}`}>{contact.phone}</SearchGridItem>
-                <SearchGridItem key={`address-${contact.id}`}>{contact.address}</SearchGridItem>
+                <SearchGridItem>{contact.title}</SearchGridItem>
+                <SearchGridItem>{contact.name}</SearchGridItem>
+                <SearchGridItem>
+                  <Link href={`mailto:${contact.email}`} isExternal>
+                    {contact.email}
+                  </Link>
+                </SearchGridItem>
+                <SearchGridItem>
+                  <Link href={`tel:${contact.phone}`} isExternal>
+                    {contact.phone}
+                  </Link>
+                </SearchGridItem>
+                <SearchGridItem>{contact.address}</SearchGridItem>
               </Box>
             ))}
           </SearchGrid>

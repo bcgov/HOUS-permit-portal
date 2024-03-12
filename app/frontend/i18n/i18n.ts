@@ -170,7 +170,7 @@ const options = {
             nextStep: "The next step is to invite users",
           },
           index: {
-            title: "Manage Jurisdictions",
+            title: "Jurisdictions",
             description: "Below is a list of all jurisdictions in the system",
             createButton: "Create New Jurisdiction",
             tableHeading: "Local Governments",
@@ -266,6 +266,9 @@ const options = {
             contactsSummary: "Contacts Summary",
             downloadApplication: "Download application",
             contactSummaryHeading: "List of all contacts on this application",
+            downloadHeading: "Download application",
+            downloadPrompt: "Choose specific files or entire package:",
+            downloadZip: "Download all as .zip",
           },
         },
         requirementsLibrary: {
@@ -889,6 +892,8 @@ const options = {
           seeConsoleForDetails: "See the browser console for details",
           accessibility: "Accessibility",
           copyright: "Copyright",
+          foippaWarning:
+            "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
           breadcrumb: {
             profile: "Profile",
             jurisdictions: "Manage Jurisdictions",

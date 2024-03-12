@@ -52,13 +52,14 @@ export const SitesSelect = observer(function ({
   }
 
   const handleChange = (option: IOption) => {
+    setPidOptions([])
     onChange(option)
+    setValue(pidName, null)
     if (option) {
       fetchPids(option.value).then((pids: string[]) => {
         setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
       })
     }
-    setValue(pidName, null)
     const selectControl = pidSelectRef.current.controlRef
     if (selectControl) {
       selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
@@ -124,7 +125,7 @@ export const SitesSelect = observer(function ({
                   <Select
                     options={pidOptions}
                     ref={pidSelectRef}
-                    value={pidOptions.find((option) => option.value === value?.value)}
+                    value={pidOptions.find((option) => option.value === value) ?? { label: null, value: null }}
                     onChange={(option) => {
                       onChange(option.value)
                     }}

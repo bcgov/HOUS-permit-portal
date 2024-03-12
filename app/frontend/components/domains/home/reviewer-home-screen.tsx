@@ -1,13 +1,30 @@
-import { Container } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
-import { useTranslation } from "react-i18next"
+import React, { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { IHomeScreenProps } from "."
 import { useMst } from "../../../setup/root"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 
 export const ReviewerHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
-  const { t } = useTranslation()
-  const {} = useMst()
+  // Currently this home screen redirects the user to the submission inbox
+  // This approach is necessary as the page already exists at the jurisdictions/${jurisdiction.id}/submission-inbox
+  // route for review_managers, and it wouldn't make sense to have a page exist at two routes at once.
+  // (base url for links, dependence on jurisdiction ID param, etc.)
+  // Plus this leaves a starting point in case we want to add more screens for reviewers later.
 
-  return <Container>reviewer home</Container>
+  const {
+    userStore: {
+      currentUser: { jurisdiction },
+    },
+  } = useMst()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!jurisdiction?.id) return
+
+    navigate(`jurisdictions/${jurisdiction.id}/submission-inbox`)
+  }, [jurisdiction])
+
+  if (!jurisdiction) return <LoadingScreen />
+  return <></>
 })

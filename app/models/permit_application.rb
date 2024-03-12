@@ -2,6 +2,7 @@ class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
+  include ZipfileUploader.Attachment(:zipfile)
   searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
              word_start: %i[number nickname full_address permit_classifications submitter status]
 
@@ -39,6 +40,14 @@ class PermitApplication < ApplicationRecord
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
   after_commit :reindex_jurisdiction_permit_application_size
+  after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+
+  def force_update_published_template_version
+    return unless Rails.env.development?
+    # for development purposes only
+
+    current_template_version.update(form_json: current_template_version.requirement_template.to_form_json)
+  end
 
   def search_data
     {
@@ -132,6 +141,22 @@ class PermitApplication < ApplicationRecord
     return new_number
   end
 
+  def zipfile_size
+    zipfile_data&.dig("metadata", "size")
+  end
+
+  def zipfile_name
+    zipfile_data&.dig("metadata", "filename")
+  end
+
+  def zipfile_url
+    zipfile&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
+    )
+  end
+
   private
 
   def reindex_jurisdiction_permit_application_size
@@ -139,6 +164,12 @@ class PermitApplication < ApplicationRecord
     return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
 
     jurisdiction.reindex
+  end
+  
+  def zip_and_upload_supporting_documents
+    return unless submitted? && zipfile_data.blank?
+
+    ZipfileJob.perform_async(id)
   end
 
   def set_submitted_at

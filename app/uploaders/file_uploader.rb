@@ -17,7 +17,6 @@ class FileUploader < Shrine
       # Construct the path with support for derivatives
       path = [parent_model, parent_id, identifier]
       path << derivative.to_s if derivative # Append derivative name if present
-
       if record[:file_data]["storage"] == "cache"
         path << record[:file_data]["id"] #get the same name as it did in the cache
       else

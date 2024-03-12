@@ -36,4 +36,20 @@ class SupportingDocument < ApplicationRecord
           }",
     }
   end
+
+  def file_size
+    file_data.dig("metadata", "size")
+  end
+
+  def file_name
+    file_data.dig("metadata", "filename")
+  end
+
+  def file_url
+    file&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{file.original_filename}\"",
+    )
+  end
 end
