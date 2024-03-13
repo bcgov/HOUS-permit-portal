@@ -383,6 +383,25 @@
     }
   }
 
+  .energy-step-code-warning {
+    border: 1px solid;
+    border-color: $error;
+    background: $error-light;
+    border-radius: 0.25rem;
+    padding-left: var(--chakra-space-6);
+    padding-top: var(--chakra-space-3);
+    padding-bottom: var(--chakra-space-3);
+    padding-right: var(--chakra-space-6);
+    margin-top: 4px;
+    margin-bottom: 4px;
+    .i {
+      background-color: $error;
+      height: 24px;
+      width: 24px;
+      margin-right: 6px;
+    }
+  }
+
   .optional-block-confirmation-checkbox {
     font-weight: 700;
 

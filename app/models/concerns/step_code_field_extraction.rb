@@ -41,7 +41,7 @@ module StepCodeFieldExtraction
     @doc ||= supporting_documents.find_by(data_key: step_code_plan_field)
   end
 
-  def requirement_energy_step_code
+  def requirement_energy_step_code_key_value
     #energy stepcode is a unique field, look at the published form_json to find item with lookup_type: "energy_step_code"
     requirements_lookups.find { |k, v| v.input_type == "energy_step_code" }
   end
