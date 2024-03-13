@@ -60,6 +60,7 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
+      created_at: created_at,
     }
   end
 
@@ -165,7 +166,7 @@ class PermitApplication < ApplicationRecord
 
     jurisdiction.reindex
   end
-  
+
   def zip_and_upload_supporting_documents
     return unless submitted? && zipfile_data.blank?
 

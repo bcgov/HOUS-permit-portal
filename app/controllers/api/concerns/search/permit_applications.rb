@@ -16,7 +16,7 @@ module Api::Concerns::Search::PermitApplications
         ),
     }
 
-    search_conditions = { where: {} }
+    search_conditions.merge!({ where: {} })
     if permit_application_search_params[:status_filter].present?
       search_conditions[:where][:status] = permit_application_search_params[:status_filter]
     end
