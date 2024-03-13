@@ -52,6 +52,7 @@
     "apisauce": "^3.0.1",
     "date-fns": "^2.30.0",
     "formiojs": "^4.17.4",
+    "formio-export": "github:bcgov/formio-export#main",
     "framer-motion": "^10.16.5",
     "humps": "^2.0.1",
     "i18next": "^23.7.6",
