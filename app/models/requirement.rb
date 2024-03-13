@@ -109,7 +109,7 @@ class Requirement < ApplicationRecord
     },
   }
 
-  NUMBER_UNITS = %w[no_unit mm cm m in ft mi $ sqm sqft]
+  NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select checkbox radio]
 
   def value_options

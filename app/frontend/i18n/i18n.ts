@@ -352,13 +352,14 @@ const options = {
             option: {
               noUnit: "(no unit)",
               mm: "mm - millimeters",
-              cm: "cm- centimeters",
+              cm: "cm - centimeters",
               m: "m - meters",
               in: "in - inches",
               ft: "ft - feet",
               mi: "mi - miles",
               sqm: "sqm - sq meters",
               sqft: "sqft - sq feet",
+              cad: "$ - CAD",
             },
             display: {
               noUnit: "(no unit)",
@@ -370,6 +371,7 @@ const options = {
               mi: "miles (mi)",
               sqm: "sq meters (sqm)",
               sqft: "sq feet (sqft)",
+              cad: "$ (CAD)",
             },
           },
         },

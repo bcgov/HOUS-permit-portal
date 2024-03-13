@@ -131,6 +131,7 @@ export enum ENumberUnit {
   mi = "mi",
   sqm = "sqm",
   sqft = "sqft",
+  cad = "cad",
 }
 
 export enum EStepCodeChecklistStage {
