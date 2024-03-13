@@ -1,4 +1,5 @@
-import { Box, BoxProps, FormControl, FormLabel, Heading, HeadingProps, Switch } from "@chakra-ui/react"
+import { Box, BoxProps, Button, FormControl, FormLabel, Heading, HeadingProps, Switch } from "@chakra-ui/react"
+import { Plus } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { getRequirementTypeLabel } from "../../../../constants"
@@ -24,6 +25,7 @@ export function GenericContactDisplay({
   containerProps,
   renderHeading,
   addMultipleContactProps,
+  showAddPersonButton,
 }: TGenericContactDisplayProps) {
   const { t } = useTranslation()
   return (
@@ -102,6 +104,27 @@ export function GenericContactDisplay({
             {...addMultipleContactProps?.switchProps}
           />
         </FormControl>
+      )}
+
+      {showAddPersonButton && (
+        <Button
+          variant={"secondary"}
+          leftIcon={<Plus />}
+          size={"sm"}
+          my={6}
+          isDisabled
+          // As it is a display component it should have the styles of
+          // a normal button but should be disabled to screen readers and not clickable
+          _disabled={{
+            bg: "transparent",
+            color: "text.primary",
+            borderWidth: 1,
+            borderColor: "border.dark",
+            cursor: "not-allowed",
+          }}
+        >
+          {t("requirementsLibrary.addAnotherPerson")}
+        </Button>
       )}
     </>
   )
