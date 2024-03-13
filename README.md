@@ -39,7 +39,7 @@ The app uses the [Sidekiq](https://github.com/sidekiq/sidekiq) library for backg
 The app uses [Anycable](https://anycable.io/) to serve websockets in a scalable way. To run the websocket server locally:
 
 - Ensure to `bundle install`
-- Donwload the `anycable-go` websocket server (on OSX: `brew install anycable-go`) [https://docs.anycable.io/anycable-go/getting_started]
+- [Download the `anycable-go` websocket server on OSX: `brew install anycable-go`](https://docs.anycable.io/anycable-go/getting_started)
 - Add an ENV var `ANYCABLE_REDIS_URL=redis://localhost:6379/2`. It is recommended to set this value to a different Redis db than Sidekiq.
 
 After installation run both the `anycable-go` websocket server as well as the RPC server
@@ -133,9 +133,9 @@ The overall process of a file upload is as follow:
 - The files are directly uploaded into the /cache/ folder
 - Upon saving the file, it persists gainst the application as a 'supporting_document'
 
-## Deployment (DevOps)
+## DevOps
 
-TBD
+See the `/devops` folder for Dockerfiles and Helm-Charts
 
 ## Testing
 
