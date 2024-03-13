@@ -275,6 +275,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          addAnotherPerson: "Add another person",
           elective: "Elective",
           associationsInfo: "Sections, tags, etc...",
           index: {
@@ -358,7 +359,7 @@ const options = {
             email: "Email",
             phone: "Phone",
             address: "Address",
-            organization: "Organization (optional)",
+            organization: "Organization",
             businessName: "Business Name",
             businessLicense: "Business License",
             professionalAssociation: "Professional Association/Organization",
