@@ -17,10 +17,12 @@ import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
+
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
+import { usePermitApplicationPdfUpload } from "../../../hooks/use-permit-application-pdf-upload"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
@@ -51,6 +53,8 @@ export const RequirementForm = observer(
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
     const [imminentSubmission, setImminentSubmission] = useState(null)
+
+    const { uploadFormPdf } = usePermitApplicationPdfUpload()
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -148,6 +152,10 @@ export const RequirementForm = observer(
     }
 
     const onModalSubmit = async () => {
+      // await uploadFormPdf(permitApplication, formRef.current.component, imminentSubmission)
+
+      toPDF()
+
       if (await permitApplication.submit({ submissionData: imminentSubmission })) {
         navigate(`/permit-applications/${permitApplication.id}/sucessful-submission`)
       }

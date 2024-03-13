@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
@@ -58,6 +59,9 @@ export const PermitApplicationModel = types
     get formattedFormJson() {
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
       return combineComplianceHints(self.formJson, self.formCustomizations, self.formattedComplianceData)
+    },
+    generateFileName(purpose: string, fileExt: string) {
+      return `${purpose}_${self.number}_${self.submitter.firstInitialLastName}_${format(new Date(), "yyyy-MM-dd")}.${fileExt}`
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
