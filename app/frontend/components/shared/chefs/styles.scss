@@ -461,6 +461,13 @@ $blue-light: #f6f9fc;
   }
 }
 
+.text-xxsmall-uppercase {
+  font-size: var(--chakra-fontSizes-xxs);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 .chakra-menu__menu-list {
   .chakra-menu__group__title {
     max-width: 200px;

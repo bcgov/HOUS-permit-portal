@@ -883,6 +883,7 @@ const options = {
           description: "Lorem ipsum here is the site description",
           keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
+          myPermits: "My Permits",
           activePermits: "Active Permits",
           approvedPermits: "Approved Permits",
           myAccount: "My Account",

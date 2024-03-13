@@ -18,7 +18,7 @@ import {
   Spacer,
   Text,
 } from "@chakra-ui/react"
-import { Envelope, List, MagnifyingGlass } from "@phosphor-icons/react"
+import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -27,6 +27,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeNavLinks } from "../step-code/nav-links"
 import { SubNavBar } from "./sub-nav-bar"
 
@@ -126,17 +127,15 @@ export const NavBar = observer(() => {
             <Spacer />
             <HStack gap={3}>
               {(!isStepCode && currentUser?.isSubmitter) || (!loggedIn && <NavBarSearch />)}
+              {currentUser?.isSubmitter ? (
+                <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
+                  {t("site.myPermits")}
+                </RouterLinkButton>
+              ) : null}
               {currentUser?.jurisdiction && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
-                  <Text
-                    color="whiteAlpha.700"
-                    textAlign="right"
-                    fontSize="xxs"
-                    fontWeight="bold"
-                    letterSpacing="1px"
-                    textTransform="uppercase"
-                  >
+                  <Text color="whiteAlpha.700" textAlign="right" className="text-xxsmall-uppercase">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 </Flex>
@@ -163,7 +162,7 @@ const NavBarSearch = () => {
   const { t } = useTranslation()
 
   return (
-    <Button variant="tertiary" rightIcon={<MagnifyingGlass size={16} />}>
+    <Button variant="tertiary" leftIcon={<MagnifyingGlass size={16} />}>
       {t("ui.search")}
     </Button>
   )
@@ -189,6 +188,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <NavMenuItem label={t("home.auditLogTitle")} to={"/audit-log"} />
+      <MenuDivider />
     </>
   )
 
@@ -220,11 +220,9 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
                 </Text>
                 <MenuGroup title={currentUser.firstName + " " + currentUser.lastName} noOfLines={1}>
                   <MenuDivider />
-                  <NavMenuItem label={t("site.home")} to={"/"} />
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
                   {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
-                  <MenuDivider />
                   <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
                   <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
                 </MenuGroup>
