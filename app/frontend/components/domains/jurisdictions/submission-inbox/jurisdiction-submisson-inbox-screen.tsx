@@ -1,4 +1,4 @@
-import { Box, Center, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Center, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -18,6 +18,7 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
+import { Can } from "../../../shared/user/can"
 import { SubmissionDownloadModal } from "../../permit-application/submission-download-modal"
 import { GridHeaders } from "./grid-header"
 
@@ -36,23 +37,25 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} flexGrow={1}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
-          <Flex direction="column">
+      <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
+        <Flex justify={"space-between"} w={"full"}>
+          <Box>
             <Heading as="h1" fontSize={"4xl"} color={"text.primary"}>
               {t("permitApplication.submissionInbox.title")}
             </Heading>
-            <Flex>
-              <Text mr={2}>
-                {t("permitApplication.submissionInbox.submissionsSentTo", {
-                  email: currentJurisdiction?.submissionEmail || t("ui.notAvailable"),
-                })}
-              </Text>
-              <RouterLink to={`/jurisdictions/${currentJurisdiction.id}/configuration-management`}>
-                {t("ui.change")}
-              </RouterLink>
-            </Flex>
-          </Flex>
+            <Text fontSize="sm" color="text.secondary">
+              {t("permitApplication.submissionInbox.submissionsSentTo")}
+            </Text>
+          </Box>
+          <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
+            <Button
+              as={RouterLink}
+              to={`/jurisdictions/${currentJurisdiction.id}/configuration-management/submissions-inbox-setup`}
+              variant="secondary"
+            >
+              {t("ui.setup")}
+            </Button>
+          </Can>
         </Flex>
 
         <SearchGrid templateColumns="170px 2fr 2fr repeat(3, 1fr)">

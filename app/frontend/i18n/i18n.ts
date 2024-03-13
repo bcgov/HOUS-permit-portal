@@ -92,7 +92,7 @@ const options = {
           no: "No",
           show: "Show",
           hide: "Hide",
-          change: "Change",
+          setup: "Setup",
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
@@ -241,7 +241,8 @@ const options = {
           submissionInbox: {
             title: "Submissions Inbox",
             tableHeading: "Permit Applications",
-            submissionsSentTo: "All submissions are sent to: {{email}}",
+            submissionsSentTo:
+              "A copy of all submitted applications are also sent to one or more email addresses configured by the review manager.",
           },
           fields: {
             number: "Application #",
