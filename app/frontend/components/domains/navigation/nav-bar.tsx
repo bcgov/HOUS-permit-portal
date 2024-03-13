@@ -2,13 +2,15 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   Flex,
   HStack,
   Heading,
   Image,
+  Link,
   Menu,
   MenuButton,
+  MenuDivider,
+  MenuGroup,
   MenuItem,
   MenuList,
   Portal,
@@ -16,7 +18,7 @@ import {
   Spacer,
   Text,
 } from "@chakra-ui/react"
-import { List, MagnifyingGlass } from "@phosphor-icons/react"
+import { Envelope, List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
@@ -89,8 +91,8 @@ export const NavBar = observer(() => {
         position="sticky"
         top={0}
         w="full"
-        bg={currentUser?.isAdmin ? "theme.blue" : "greys.white"}
-        color={currentUser?.isAdmin ? "greys.white" : "theme.blue"}
+        bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
+        color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
         zIndex={10}
         borderBottomWidth={2}
         borderColor="border.light"
@@ -104,7 +106,7 @@ export const NavBar = observer(() => {
                 htmlHeight="64px"
                 htmlWidth="166px"
                 alt={t("site.linkHome")}
-                src={currentUser?.isAdmin ? "/images/logo-light.svg" : "/images/logo.png"}
+                src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
               />
             </RouterLink>
             <Show above="md">
@@ -113,7 +115,7 @@ export const NavBar = observer(() => {
                   {t("stepCode.title")}
                 </Heading>
               ) : (
-                <Heading as="h3" fontSize="2xl" fontWeight="normal">
+                <Heading as="h3" fontSize="2xl" fontWeight="normal" mb="0">
                   {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
                 </Heading>
               )}
@@ -123,8 +125,22 @@ export const NavBar = observer(() => {
             </Show>
             <Spacer />
             <HStack gap={3}>
-              {!isStepCode && currentUser?.isSubmitter && <NavBarSearch />}
-              {currentUser?.jurisdiction && <Text color="greys.white">{currentUser.jurisdiction.name}</Text>}
+              {(!isStepCode && currentUser?.isSubmitter) || (!loggedIn && <NavBarSearch />)}
+              {currentUser?.jurisdiction && (
+                <Flex direction="column">
+                  <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
+                  <Text
+                    color="whiteAlpha.700"
+                    textAlign="right"
+                    fontSize="xxs"
+                    fontWeight="bold"
+                    letterSpacing="1px"
+                    textTransform="uppercase"
+                  >
+                    {t(`user.roles.${currentUser.role as EUserRoles}`)}
+                  </Text>
+                </Flex>
+              )}
               {currentUser?.isReviewer ||
                 currentUser?.isReviewManager ||
                 (currentUser?.isSuperAdmin && (
@@ -185,31 +201,49 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       <MenuButton
         as={Button}
         borderRadius="lg"
-        border={isAdmin ? "solid white" : "solid black"}
+        border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
         borderWidth="1px"
         p={3}
-        variant={isAdmin ? "primary" : "primaryInverse"}
+        variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
         aria-label="menu dropdown button"
-        leftIcon={<List size={16} weight="bold" color={isAdmin ? "white" : "black"} />}
+        leftIcon={<List size={16} weight="bold" />}
       >
         {t("site.menu")}
       </MenuButton>
       <Portal>
-        <MenuList zIndex={10}>
-          {loggedIn ? (
-            <>
-              <NavMenuItem label={t("site.home")} to={"/"} />
-              {currentUser?.isSuperAdmin && superAdminOnlyItems}
-              {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
-              {currentUser?.isSubmitter && submitterOnlyItems}
-              <Divider borderWidth="1px" />
-              <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-              <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
-            </>
-          ) : (
-            <NavMenuItem label={t("auth.login")} to="/login" />
-          )}
-        </MenuList>
+        <div className="nav-menu-dropdown-background">
+          <MenuList zIndex={10} boxShadow="2xl">
+            {loggedIn ? (
+              <>
+                <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
+                  {t("site.loggedInWelcome")}
+                </Text>
+                <MenuGroup title={currentUser.firstName + " " + currentUser.lastName} noOfLines={1}>
+                  <MenuDivider />
+                  <NavMenuItem label={t("site.home")} to={"/"} />
+                  {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                  {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                  {currentUser?.isSubmitter && submitterOnlyItems}
+                  <MenuDivider />
+                  <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
+                  <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
+                </MenuGroup>
+              </>
+            ) : (
+              <>
+                <NavMenuItem label={t("site.home")} to="/" />
+                <NavMenuItem label={t("auth.login")} to="/login" />
+                <NavMenuItem label={t("auth.register")} to="/register" />
+              </>
+            )}
+            <MenuDivider />
+            <MenuItem>
+              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")}>
+                {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
+              </Link>
+            </MenuItem>
+          </MenuList>
+        </div>
       </Portal>
     </Menu>
   )

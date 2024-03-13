@@ -40,7 +40,7 @@ import { NavBar } from "./nav-bar"
 
 export const Navigation = observer(() => {
   const { sessionStore } = useMst()
-
+  const { loggedIn } = sessionStore
   const { validateToken, isValidating } = sessionStore
 
   useEffect(() => {
@@ -63,7 +63,8 @@ export const Navigation = observer(() => {
         ) : (
           <>
             <AppRoutes />
-            <Footer />
+
+            {!loggedIn ? <Footer /> : null}
           </>
         )}
       </Flex>

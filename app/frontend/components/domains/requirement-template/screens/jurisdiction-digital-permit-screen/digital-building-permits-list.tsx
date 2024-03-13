@@ -40,6 +40,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
             w="full"
             as="section"
             p={6}
+            className="jumbo-buttons"
           >
             <Stack spacing={3} flex={1}>
               <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">

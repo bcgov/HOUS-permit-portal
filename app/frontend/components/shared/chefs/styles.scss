@@ -26,9 +26,11 @@ $bcgov-alert-success: #dff0d8;
 //blueAlt is bcgov-blue-secondary
 $blue-light: #f6f9fc;
 
-/////////////////////////////////
-///  override formio styles:
-/////////////////////////////////
+/* ======================================
+
+  		Override formio styles (Start)
+
+====================================== */
 
 // override formio form designer
 .form-designer,
@@ -36,9 +38,9 @@ $blue-light: #f6f9fc;
 .form-wrapper,
 // override preview panel in form builder component editor modal
 .component-preview {
-  ///////
-  /////moved from the main application
-  ///////
+  /*
+  		moved from the main application
+  */
 
   // Typography
   .v-application {
@@ -429,5 +431,64 @@ $blue-light: #f6f9fc;
     margin-top: 16px;
     color: var(--chakra-colors-error);
     font-weight: 700;
+  }
+}
+
+/* ======================================
+
+			Override formio styles (end)
+
+====================================== */
+
+/* ======================================
+
+  Styles for rest of app:
+
+====================================== */
+
+/* Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind */
+.nav-menu-dropdown-background > div {
+  &::after {
+    content: "";
+    display: block;
+    background: rgba(0, 0, 0, 0.25);
+    position: absolute;
+    top: -100px;
+    bottom: -100vh;
+    left: -100vw;
+    right: -100vw;
+    z-index: -1;
+  }
+}
+
+.chakra-menu__menu-list {
+  .chakra-menu__group__title {
+    max-width: 200px;
+    margin-left: var(--chakra-space-3);
+  }
+  .chakra-menu__menuitem {
+    border-radius: 0;
+  }
+}
+
+/* Admin Panel's  have large cards that should behave like a button (eg. have whole box clickable without changing markup) */
+.jumbo-buttons {
+  transition: border-color 200ms ease-out;
+  position: relative;
+  .chakra-button {
+    position: static;
+    &::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      display: block;
+    }
+  }
+  &:hover {
+    border-color: $bcgov-blue-secondary;
+    background-color: $blue-light;
   }
 }
