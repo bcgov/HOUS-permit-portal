@@ -152,14 +152,17 @@ class RequirementFormJsonService
     get_multi_contact_datagrid_form_json(requirement_block_key)
   end
 
-  def get_contact_field_form_json(field_key, required = true)
+  def get_contact_field_form_json(field_type, parent_key = nil, required = true)
+    # The key needs to be camel case, otherwise there are issues in the front-end with data-grid
+    key = snake_to_camel(field_type.to_s)
+    key = "#{parent_key}|#{key}" if parent_key.present?
+
     shared_form_json = {
       applyMaskOn: "change",
       tableView: true,
       input: true,
-      # THe key needs to be camel case, otherwise there are issues in the front-end with data-grid
-      key: snake_to_camel(field_key.to_s),
-      label: I18n.t("formio.requirement.contact.#{field_key.to_s}"),
+      key: key,
+      label: I18n.t("formio.requirement.contact.#{field_type.to_s}"),
       type: "textfield",
       validate: {
         required: required,
@@ -179,8 +182,8 @@ class RequirementFormJsonService
 
     form_json =
       (
-        if field_to_form_json[field_key].present?
-          shared_form_json.merge!(field_to_form_json[field_key])
+        if field_to_form_json[field_type].present?
+          shared_form_json.merge!(field_to_form_json[field_type])
         else
           shared_form_json
         end
@@ -200,17 +203,18 @@ class RequirementFormJsonService
     }
   end
 
-  def get_contact_field_set_form_json(key = nil)
+  def get_contact_field_set_form_json(key = nil, parent_key = nil)
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
-    key = requirement.input_type if key.nil?
+    key = "#{requirement.input_type}" if key.nil?
+    key = "#{parent_key}|#{key}" if parent_key.present?
 
     contact_components =
       (
         if requirement.input_type_general_contact?
-          get_general_contact_field_components
+          get_general_contact_field_components(key)
         else
-          get_professional_contact_field_components
+          get_professional_contact_field_components(key)
         end
       )
 
@@ -227,41 +231,44 @@ class RequirementFormJsonService
     }
   end
 
-  def get_general_contact_field_components()
+  def get_general_contact_field_components(parent_key = nil)
     [
       get_columns_form_json(
         "name_columns",
-        [get_contact_field_form_json(:first_name), get_contact_field_form_json(:last_name)],
+        [get_contact_field_form_json(:first_name, parent_key), get_contact_field_form_json(:last_name, parent_key)],
       ),
       get_columns_form_json(
         "reach_columns",
-        [get_contact_field_form_json(:email), get_contact_field_form_json(:phone)],
+        [get_contact_field_form_json(:email, parent_key), get_contact_field_form_json(:phone, parent_key)],
       ),
-      get_contact_field_form_json(:address),
-      get_columns_form_json("organization_columns", [get_contact_field_form_json(:organization, false)]),
+      get_contact_field_form_json(:address, parent_key),
+      get_columns_form_json("organization_columns", [get_contact_field_form_json(:organization, parent_key, false)]),
     ]
   end
 
-  def get_professional_contact_field_components
+  def get_professional_contact_field_components(parent_key = nil)
     [
       get_columns_form_json(
         "name_columns",
-        [get_contact_field_form_json(:first_name), get_contact_field_form_json(:last_name)],
+        [get_contact_field_form_json(:first_name, parent_key), get_contact_field_form_json(:last_name, parent_key)],
       ),
       get_columns_form_json(
         "reach_columns",
-        [get_contact_field_form_json(:email), get_contact_field_form_json(:phone)],
+        [get_contact_field_form_json(:email, parent_key), get_contact_field_form_json(:phone, parent_key)],
       ),
-      get_contact_field_form_json(:address),
+      get_contact_field_form_json(:address, parent_key),
       get_columns_form_json(
         "business_columns",
-        [get_contact_field_form_json(:business_name), get_contact_field_form_json(:business_license)],
+        [
+          get_contact_field_form_json(:business_name, parent_key),
+          get_contact_field_form_json(:business_license, parent_key),
+        ],
       ),
       get_columns_form_json(
         "professional_columns",
         [
-          get_contact_field_form_json(:professional_association, false),
-          get_contact_field_form_json(:professional_number),
+          get_contact_field_form_json(:professional_association, parent_key, false),
+          get_contact_field_form_json(:professional_number, parent_key),
         ],
       ),
     ]
@@ -298,7 +305,7 @@ class RequirementFormJsonService
       key: requirement.key(requirement_block_key),
       type: "datagrid",
       input: true,
-      components: [get_contact_field_set_form_json],
+      components: [get_contact_field_set_form_json(nil, requirement_block_key)],
     }
   end
 
