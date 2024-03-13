@@ -23,6 +23,8 @@ class StepCode < ApplicationRecord
     elsif permit_application.step_code_plan_document.compliance_data.blank? ||
           permit_application.step_code_plan_document.compliance_data.empty?
       errors.add(:plan_version, "file is being verified for author and date.")
+    elsif permit_application.step_code_plan_document.compliance_data.dig("error")
+      errors.add(:plan_version, "file uploaded failed to verify author and data due to an error with the serivce.")
     end
   end
 
