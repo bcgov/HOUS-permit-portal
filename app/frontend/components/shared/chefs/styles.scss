@@ -382,6 +382,7 @@
 
     .tips-header {
       color: $bcgov-blue-secondary;
+
       .i {
         background-color: $bcgov-blue-secondary;
         height: 24px;
@@ -393,6 +394,7 @@
 
   .compliance {
     background-color: $blue-light !important;
+
     .i {
       background-color: $bcgov-blue-secondary;
       height: 24px;
@@ -449,18 +451,52 @@
     color: var(--chakra-colors-error);
     font-weight: 700;
   }
+
   .contact-data-grid {
     border: none;
-    max-width: 650px;
+    max-width: 700px;
 
     .contact-field-set {
       margin-top: 0;
+    }
+
+    td {
+      padding-left: 0;
     }
 
     table,
     td,
     tr {
       border: none !important;
+    }
+
+    .formio-button-add-row {
+      margin-top: 14px;
+      background: transparent;
+      color: var(--chakra-colors-text-primary);
+      border: 1px solid var(--chakra-colors-border-dark);
+
+      &:hover {
+        background: var(--chakra-colors-lighten-100);
+      }
+
+      &:disabled {
+        background: var(--chakra-colors-greys-grey03);
+        color: var(--chakra-colors-greys-grey01);
+        border-color: var(--chakra-colors-border-light);
+      }
+
+      &:active {
+        border-width: 2px;
+        border-color: var(--chakra-colors-focus);
+      }
+
+      i:before {
+        content: "+";
+        font-size: var(--chakra-fontSizes-xl);
+        margin-right: var(--chakra-space-1);
+      }
+
     }
 
     .formio-button-remove-row {
