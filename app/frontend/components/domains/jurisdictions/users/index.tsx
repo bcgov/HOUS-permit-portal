@@ -16,7 +16,7 @@ import { ToggleArchivedButton } from "../../../shared/buttons/show-archived-butt
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
-import { ManageUserMenu } from "../../../shared/user/mange-user-menu"
+import { ManageUserMenu } from "../../../shared/user/manage-user-menu"
 import { RoleTag } from "../../../shared/user/role-tag"
 import { GridHeaders } from "./grid-header"
 
