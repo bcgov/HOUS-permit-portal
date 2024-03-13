@@ -140,20 +140,20 @@ const VersionCard = observer(function VersionCard({
   const renderTemplateButton = () => {
     if (status === ETemplateVersionStatus.published || status === ETemplateVersionStatus.deprecated) {
       return (
-        <Button as={RouterLink} textDecor={"none"} to={viewRoute} variant={"primary"} size="sm">
+        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
           {t("requirementTemplate.versionSidebar.viewTemplateButton")}
         </Button>
       )
     } else if (status === ETemplateVersionStatus.draft) {
       return (
-        <Button as={RouterLink} to={viewRoute} textDecor={"none"} variant={"primary"} size="sm" leftIcon={<Pencil />}>
+        <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm" leftIcon={<Pencil />}>
           {t("translation:requirementTemplate.versionSidebar.resumeDraftButton")}
         </Button>
       )
     } else {
       return (
         <ButtonGroup spacing={4}>
-          <Button as={RouterLink} to={viewRoute} textDecor={"none"} variant={"primary"} size="sm">
+          <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
             {t("ui.preview")}
           </Button>
           <Button variant={"secondary"} size="sm" onClick={onUnschedule} isDisabled>

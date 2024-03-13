@@ -62,7 +62,6 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
               as={RouterLink}
               variant={"primary"}
               ml={4}
-              textDecor={"none"}
               alignSelf={"center"}
             >
               {t("ui.manage")}
