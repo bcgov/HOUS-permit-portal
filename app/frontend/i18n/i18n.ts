@@ -138,6 +138,10 @@ const options = {
           desc: "Descending",
           returnHome: "Return to home",
         },
+        eula: {
+          title: "End-User License Agreement",
+          accept: "Accept Agreement",
+        },
         contact: {
           fields: {
             name: "Name",

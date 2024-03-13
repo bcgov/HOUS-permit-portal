@@ -1,5 +1,5 @@
 class Api::UsersController < Api::ApplicationController
-  before_action :find_user, only: %i[destroy restore]
+  before_action :find_user, only: %i[destroy restore accept_eula]
 
   def index
     perform_search
@@ -58,6 +58,12 @@ class Api::UsersController < Api::ApplicationController
     else
       render_error "user.restore_error", {}
     end
+  end
+
+  def accept_eula
+    authorize @user
+    @user.license_agreements.create!(accepted_at: Time.current, agreement: EndUserLicenseAgreement.active_agreement)
+    render_success @user, "user.eula_accepted", { blueprint_opts: { view: :current_user } }
   end
 
   private

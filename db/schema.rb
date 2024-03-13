@@ -55,10 +55,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
-  create_table "jurisdiction_template_version_customizations",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "end_user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "content"
+    t.boolean "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "jurisdiction_template_version_customizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "customizations", default: {}
     t.uuid "jurisdiction_id", null: false
     t.uuid "template_version_id", null: false
@@ -494,6 +498,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
     t.index %w[hdd step], name: "tedi_composite_index", unique: true
   end
 
+  create_table "user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "agreement_id", null: false
+    t.date "accepted_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agreement_id"], name: "index_user_license_agreements_on_agreement_id"
+    t.index ["user_id"], name: "index_user_license_agreements_on_user_id"
+  end
+
   create_table "users",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -586,5 +600,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
   add_foreign_key "template_versions", "requirement_templates"
+  add_foreign_key "user_license_agreements", "end_user_license_agreements", column: "agreement_id"
+  add_foreign_key "user_license_agreements", "users"
   add_foreign_key "users", "jurisdictions"
 end
