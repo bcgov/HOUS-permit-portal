@@ -53,12 +53,9 @@ export const combineComplianceHints = (
       }
       if (blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]) {
         panelComponent.components.forEach((subComp) => {
-          if (subComp.elective) {
-            subComp["conditional"] = {
-              show: blocksLookups[panelComponent.id]?.enabledElectiveFieldIds?.includes(subComp.id),
-              when: null,
-              eq: "",
-            }
+          if (subComp.elective && subComp.customConditional.endsWith(";show = false")) {
+            //remove the ;show = false at the end of the conditional
+            subComp.customConditional = subComp.customConditional.slice(0, -13)
           }
         })
       }

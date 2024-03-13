@@ -143,7 +143,8 @@ class Requirement < ApplicationRecord
     json.merge!({ description: hint }) if hint
 
     json.merge!({ validate: { required: true } }) if required
-    
+
+    #assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
     json.merge!({ elective: elective }) if elective
 
     json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
@@ -161,6 +162,12 @@ class Requirement < ApplicationRecord
       end
       json.merge!({ conditional: conditional })
     end
+
+    #indicates code-based conditionals.  Always merge elective show = false to end.
+    if input_options["customConditional"].present?
+      json.merge!({ customConditional: input_options["customConditional"] })
+    end
+    json.merge!({ customConditional: "#{json[:customConditional]};show = false" }) if elective
 
     json
   end
