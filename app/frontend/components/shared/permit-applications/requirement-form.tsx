@@ -152,13 +152,12 @@ export const RequirementForm = observer(
     }
 
     const onModalSubmit = async () => {
-      // await uploadFormPdf(permitApplication, formRef.current.component, imminentSubmission)
+      await uploadFormPdf(permitApplication, formRef.current.component, imminentSubmission)
 
-      toPDF()
-
-      if (await permitApplication.submit({ submissionData: imminentSubmission })) {
-        navigate(`/permit-applications/${permitApplication.id}/sucessful-submission`)
-      }
+      // UNCOMMENT BEFORE PR
+      // if (await permitApplication.submit({ submissionData: imminentSubmission })) {
+      //   navigate(`/permit-applications/${permitApplication.id}/sucessful-submission`)
+      // }
     }
 
     const onBlur = (containerComponent) => {

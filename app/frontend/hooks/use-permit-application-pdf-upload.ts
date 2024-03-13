@@ -1,5 +1,5 @@
-import FormioExport from "formio-export"
 import {} from "react"
+import FormioExport from "../lib/formio-export-interop"
 import { IPermitApplication } from "../models/permit-application"
 
 export function usePermitApplicationPdfUpload() {

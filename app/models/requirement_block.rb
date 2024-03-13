@@ -59,7 +59,9 @@ class RequirementBlock < ApplicationRecord
       type: "checkbox",
       custom_class: "optional-block-confirmation-checkbox",
       validate: {
-        required: true,
+        # required: true,
+        # DO NOT COMMIT THIS
+        required: false,
       },
       input: true,
       label: I18n.t("formio.requirement_block.optional_block_confirmation_requirement_label"),
