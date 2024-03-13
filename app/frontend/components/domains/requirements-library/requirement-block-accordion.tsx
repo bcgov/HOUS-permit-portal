@@ -190,6 +190,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         selectProps={{
                           maxW: "339px",
                         }}
+                        showAddPersonButton={!!requirement?.inputOptions?.canAddMultipleContacts}
                       />
                     </Box>
                   </Box>

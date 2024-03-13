@@ -38,6 +38,7 @@ export type TRequirementFieldDisplayProps = {
     formControlProps?: FormControlProps
     switchProps?: SwitchProps
   }
+  showAddPersonButton?: boolean
   requirementType: ERequirementType
   showAddLabelIndicator?: boolean
 }
