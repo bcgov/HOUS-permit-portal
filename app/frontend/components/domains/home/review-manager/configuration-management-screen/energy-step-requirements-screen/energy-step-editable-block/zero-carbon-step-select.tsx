@@ -2,7 +2,6 @@ import {
   Flex,
   Input,
   InputGroup,
-  InputProps,
   InputRightElement,
   Popover,
   PopoverContent,
@@ -22,10 +21,10 @@ import { i18nPrefix } from "../i18n-prefix"
 interface IProps {
   onChange: (event: any) => void
   value: ESZeroCarbonStep
-  inputProps?: InputProps
+  isDisabled?: boolean
 }
 
-export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onChange, value, inputProps }: IProps) {
+export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onChange, value, isDisabled }: IProps) {
   const {
     stepCodeStore: { selectOptions },
   } = useMst()
@@ -35,7 +34,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onC
       {({ onClose }) => (
         <>
           <PopoverTrigger>
-            <InputGroup>
+            <InputGroup pointerEvents={isDisabled ? "none" : "auto"}>
               <Input
                 as={Flex}
                 bg="white"
@@ -45,7 +44,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onC
                 borderWidth={1}
                 rounded="base"
                 shadow="base"
-                {...inputProps}
+                isDisabled={isDisabled}
               >
                 {value ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`) : t(`ui.selectPlaceholder`)}
               </Input>

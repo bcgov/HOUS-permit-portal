@@ -50,7 +50,7 @@ const Form = function JursidictionEnergyStepRequirementsForm({ jurisdiction }) {
               control={control}
               name="energyStepRequired"
               render={({ field: { onChange, value } }) => {
-                return <EnergyStepSelect onChange={onChange} value={value} inputProps={{ isDisabled: !isEditing }} />
+                return <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing} />
               }}
             />
           </FormControl>
@@ -60,9 +60,7 @@ const Form = function JursidictionEnergyStepRequirementsForm({ jurisdiction }) {
               control={control}
               name="zeroCarbonStepRequired"
               render={({ field: { onChange, value } }) => {
-                return (
-                  <ZeroCarbonStepSelect onChange={onChange} value={value} inputProps={{ isDisabled: !isEditing }} />
-                )
+                return <ZeroCarbonStepSelect onChange={onChange} value={value} isDisabled={!isEditing} />
               }}
             />
           </FormControl>
