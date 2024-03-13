@@ -37,6 +37,7 @@ export const colors = {
     900: "rgba(255, 255, 255, 0.9);",
   },
   darken: {
+    60: "rgba(0, 0, 0, 0.06)",
     100: "rgba(0, 0, 0, 0.1)",
   },
   hover: {
