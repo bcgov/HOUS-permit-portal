@@ -20,6 +20,7 @@ RSpec.describe AutomatedCompliance::AutopopulateJob, type: :job do
 
   it "rejects invalid components" do
     allow(invalid_permit_application).to receive(:automated_compliance_unique_unfilled_modules) { ["Invalid"] }
-    expect { AutomatedCompliance::AutopopulateJob.new.perform(permit_application) }.to raise_error { ArgumentError }
+    expect(Rails.logger).to receive(:error).with("unsafe compliance module called Invalid")
+    AutomatedCompliance::AutopopulateJob.new.perform(invalid_permit_application)
   end
 end

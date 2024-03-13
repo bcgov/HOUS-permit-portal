@@ -17,6 +17,7 @@ class StepCode < ApplicationRecord
   validate :requires_plan_document
 
   def requires_plan_document
+    return if permit_application.blank? #do not enforce if there is no permit application
     if permit_application.step_code_plan_document.blank?
       errors.add(:plan_version, "file is missing.  Please upload on the permit application first.")
     elsif permit_application.step_code_plan_document.compliance_data.blank? ||
@@ -26,6 +27,7 @@ class StepCode < ApplicationRecord
   end
 
   def set_plan_fields
+    return if permit_application.blank?
     assign_attributes(
       plan_author: permit_application.step_code_plan_author,
       plan_version: permit_application.step_code_plan_version,
