@@ -1,6 +1,6 @@
 class StepCode::Compliance::ProposeStep::ZeroCarbon < StepCode::Compliance::ProposeStep::Base
   def min_required_step
-    @min_required_step ||= checklist.step_code.energy_step_required || min_step
+    @min_required_step ||= checklist.step_code.zero_carbon_step_required || min_step
   end
 
   def max_step

@@ -5,7 +5,7 @@ class StepCode::ZeroCarbon::ComplianceBlueprint < Blueprinter::Base
   transform RoundDecimalsTransformer
 
   field :proposed_zero_carbon_step do |compliance, _options|
-    "EL#{compliance.step}"
+    compliance.step && "EL#{compliance.step}"
   end
 
   field :required_zero_carbon_step do |compliance, _options|
