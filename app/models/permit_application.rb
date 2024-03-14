@@ -40,10 +40,10 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
-  before_save :notify_user_application_updated, if: :status_changed?
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
+  after_commit :notify_user_application_updated
   after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
@@ -221,14 +221,9 @@ class PermitApplication < ApplicationRecord
   def notify_user_application_updated
     return if new_record?
 
-    # TODO
-    # update(changed_status_at: Time.zone.now)
+    return unless saved_change_to_viewed_at? || saved_change_to_reference_number?
 
-    # PermitHubMailerJob.perform_async(
-    #   "notify_application_updated",
-    #   submitter.id,
-    #   id
-    # )
+    PermitHubMailerJob.perform_async("notify_application_updated", submitter.id, id)
   end
 
   def reindex_jurisdiction_permit_application_size
