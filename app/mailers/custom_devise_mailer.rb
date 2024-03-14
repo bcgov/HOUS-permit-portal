@@ -15,7 +15,7 @@ class CustomDeviseMailer < Devise::Mailer
     CHESApiWrapper.new.send_email(
       to: mail_headers[:to],
       from: mail_headers[:from],
-      subject: "#{I18n.t("arbitrary_message_construct.mailers.subject_start")} - #{mail_headers[:subject]}",
+      subject: "#{I18n.t("application_mailer.subject_start")} - #{mail_headers[:subject]}",
       body: render(template: "devise/mailer/#{mail_headers[:template_name]}"),
     )
   end

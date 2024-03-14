@@ -3,6 +3,10 @@ class PermitHubMailer < ApplicationMailer
     send_mail(user, "welcome")
   end
 
+  def send_onboarding_email(user)
+    send_mail(user, "onboarding")
+  end
+
   def send_notify_submitter_application_submitted_email(user, permit_application)
     @permit_application = permit_application
     send_mail(user, "notify_submitter_application_submitted")

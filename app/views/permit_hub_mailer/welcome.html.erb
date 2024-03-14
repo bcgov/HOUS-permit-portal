@@ -30,7 +30,7 @@
             <tr>
               <td class="basic-table-content border-top" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding: 8px 16px; border-top: 1px solid #d9d9d9;" valign="top">
                 <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin-bottom: 24px; margin: 4px 0;">
-                  To update your information or login preferences please login into the <a href="https://buildingpermit.gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">Building Permit Hub</a>.
+                  To update your information or login preferences please login into the <a href="<%= @root_url %>" style="color: #1a5a96; text-decoration: underline;">Building Permit Hub</a>.
                 </p>
               </td>
             </tr>
@@ -50,7 +50,7 @@
                     <tbody>
                       <tr>
                         <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent">
-                          <a href="https://buildingpermit.gov.bc.ca/login" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">Login to Building Permit Hub</a>
+                          <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">Login to Building Permit Hub</a>
                         </td>
                       </tr>
                     </tbody>

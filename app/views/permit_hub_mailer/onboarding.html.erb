@@ -1,0 +1,75 @@
+  <!-- START MAIN CONTENT AREA -->
+  <tr>
+    <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+        <tr>
+        <!-- START CONTENT ROW -->
+          <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Welcome!</h1>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+                Welcome to the Building Permit Hub! We are thrilled to have you as part of this pilot project and look forward to working with you. As you begin, we want to be sure that you have all the information you need to get started. Below are some key features, tips, and resources to help you navigate the system:
+            </p>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+                <strong>Introduction:</strong> The Building Permit Hub is designed to streamline the permit application process. Our user-friendly interface is created to guide you through the process step by step.
+            </p>
+
+            <hr style="border: 0; border-bottom: 1px solid #dddddd; margin: 24px 0;">
+            <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Key features:</h2>
+            
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+                Explore the various features of the system, including:
+            </p>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+                <li style="list-style-position: initial; margin-left: 5px;"><strong>Permit submission review:</strong> Easily review submitted permits applications online.</li>
+                <li style="list-style-position: initial; margin-left: 5px;"><strong>Document management:</strong> Download and manage all necessary documents securely.</li>
+                <li style="list-style-position: initial; margin-left: 5px;"><strong>Status tracking:</strong> Monitor the status of your applications in real-time.</li>
+            </ul>
+            
+
+            <hr style="border: 0; border-bottom: 1px solid #dddddd; margin: 24px 0;">
+
+            <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Tips for getting started:</h2>
+
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+                <li style="list-style-position: initial; margin-left: 5px;">Familiarize yourself with the system interface by exploring sections and functionalities</li>
+                <li style="list-style-position: initial; margin-left: 5px;">Use our help resources, including the attached onboarding guide</li>
+            </ul>
+            
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+                <strong>Next steps:</strong> Begin by logging into the system using the credentials provided to you. Once logged in, you can start exploring the system and reviewing your permit applications.
+            </p>
+
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+              <tbody>
+                <tr>
+                  <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: auto; width: auto;">
+                      <tbody>
+                        <tr>
+                          <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent"> <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">Login to Building Permit Hub</a> </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <hr style="border: 0; border-bottom: 1px solid #dddddd; margin: 24px 0;">
+
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+                If you have any questions or need assistance, please reach out to us at <a href="mailto:digital.codes.permits@gov.bc.ca" style="color: #1a5a96; text-decoration: underline;">digital.codes.permits@gov.bc.ca</a>.
+            </p>
+
+            <br>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">The Building Permit Hub Team</p>
+
+          </td>
+          <!-- END OF CONTENT ROW -->
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- END MAIN CONTENT AREA -->

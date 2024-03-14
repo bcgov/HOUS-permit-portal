@@ -154,10 +154,10 @@ table[class="body"] .article {
                     </p>
                     <h3 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left;">Building Permit Hub</h3>
                     <p style="font-family: 'Open Sans', sans-serif; font-weight: normal; margin: 0; margin-bottom: 24px; color: #464341; font-size: 14px; text-align: left; line-height: 20px;">
-                      <a href="https://buildingpermit.gov.bc.ca" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Home</a>
-                      <a href="https://buildingpermit.gov.bc.ca/contact" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Contact us</a>
-                      <a href="https://buildingpermit.gov.bc.ca/help" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Help</a>
-                      <a href="https://buildingpermit.gov.bc.ca/login" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Login</a>
+                      <a href="<%= @root_url %>" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Home</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/contact") %>" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Contact us</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/help") %>" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Help</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="text-decoration: underline; color: #464341; font-size: 14px; text-align: left; line-height: 20px; margin-right: 20px;">Login</a>
                     </p>
                     <hr style="border: 0; border-bottom: 1px solid #dddddd; margin: 24px 0; border-color: #464341;">
                     <p style="font-family: 'Open Sans', sans-serif; font-weight: normal; margin: 0; margin-bottom: 24px; color: #464341; font-size: 14px; text-align: left; line-height: 20px;">© <%= Time.now.year.to_s %> Government of British Columbia.</p>

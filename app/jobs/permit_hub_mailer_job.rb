@@ -9,6 +9,8 @@ class PermitHubMailerJob
     case email_type
     when "welcome"
       PermitHubMailer.new.send_welcome_email(user)
+    when "onboarding"
+      PermitHubMailer.new.send_onboarding_email(user)
     when "notify_submitter_application_submitted"
       PermitHubMailer.new.send_notify_submitter_application_submitted_email(user, permit_application)
     when "notify_reviewer_application_received"
