@@ -93,17 +93,16 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
                 </RouterLinkButton>
               </Flex>
             </Flex>
-            <Flex as="section" direction="column" flex={1} gap={4}>
-              <Flex direction="column" gap={2}>
-                <Heading>{t("landing.whoForTitle")}</Heading>
-              </Flex>
+            <VStack as="section" align="flex-start" spacing={4}>
+              <Heading>{t("landing.whoForTitle")}</Heading>
+
               <UnorderedList spacing={1} pl={4}>
                 {whoFor.map((str) => (
                   <ListItem key={str}>{str}</ListItem>
                 ))}
               </UnorderedList>
               <RouterLink to="#">{t("landing.iNeed")}</RouterLink>
-            </Flex>
+            </VStack>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
             <Image src="https://placehold.co/230x150" alt="dont-forget-me" />

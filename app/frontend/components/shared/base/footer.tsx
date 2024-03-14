@@ -61,9 +61,9 @@ export const Footer = observer(() => {
               <Flex direction="column" gap={8}>
                 <Flex direction={{ base: "column", md: "row" }} gap={12}>
                   <Box flex={1}>
-                    <Image alt="site logo" src={"/images/logo.svg"} />
+                    <Image alt="site logo" src={"/images/logo.svg"} width="200px" />
                   </Box>
-                  <Flex direction="column" gap={4} flex={3}>
+                  <Flex direction="column" gap={4} flex={3} pt={4}>
                     <Heading as="h3" size="md">
                       {t("site.titleLong")}
                     </Heading>
@@ -136,16 +136,16 @@ export const Footer = observer(() => {
                     </Flex>
                   </Flex>
                 </Flex>
-                <Divider border="1px solid" borderColor="theme.blue" />
+                <Divider borderColor="theme.blue" />
                 <Link
                   href="https://www2.gov.bc.ca/gov/content/home/copyright"
                   color="text.secondary"
                   target="_blank"
                   rel="noopener noreferrer"
+                  textDecoration="none"
+                  fontSize="sm"
                 >
-                  <Text fontSize="sm">
-                    © ${new Date().getFullYear()} {t("site.copyrightHolder")}
-                  </Text>
+                  © {new Date().getFullYear()} {t("site.copyrightHolder")}
                 </Link>
               </Flex>
             </Container>

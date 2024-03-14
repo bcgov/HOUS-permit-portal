@@ -16,7 +16,15 @@ export const HomeScreenBox = ({ icon, title, description, href, useViewText }: I
   const { t } = useTranslation()
 
   return (
-    <Box as="section" borderRadius="lg" border="1px solid" borderColor="border.light" p={6} w="full">
+    <Box
+      as="section"
+      borderRadius="lg"
+      border="1px solid"
+      borderColor="border.light"
+      p={6}
+      w="full"
+      className="jumbo-buttons"
+    >
       <Flex direction={{ base: "column", md: "row" }} gap={8} align="center">
         <Flex direction="column" gap={3} flex={1}>
           <Flex color="text.link">

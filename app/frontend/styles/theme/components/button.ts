@@ -1,10 +1,11 @@
 const disabledStyles = { bg: "greys.grey03", color: "greys.grey01", borderColor: "border.light" }
-const activeStyles = { borderWidth: 2, borderColor: "focus" }
+const activeStyles = { borderWidth: 1, borderColor: "focus" }
+const focusStyles = { boxShadow: "0 0 0 3px rgba(46,93,215,0.4)" }
+const focusInverseStyles = { boxShadow: "0 0 0 3px rgba(255,255,255,0.4)" }
 
 export const Button = {
   baseStyle: {
     borderRadius: "sm",
-    letterSpacing: "1px",
     lineHeight: "27px",
     fontWeight: 400,
     width: "fit-content",
@@ -31,6 +32,7 @@ export const Button = {
         _disabled: { ...disabledStyles },
         _active: { ...activeStyles },
       },
+      _focus: { ...focusStyles },
     },
     primaryInverse: {
       color: "theme.blue",
@@ -38,7 +40,13 @@ export const Button = {
       borderColor: "theme.blue",
       bg: "greys.white",
       textDecor: "none",
-      _hover: { textDecor: "none", bg: "darken.100", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
+      _hover: {
+        textDecor: "none",
+        bg: "whiteAlpha.900",
+        _disabled: { ...disabledStyles },
+        _active: { ...activeStyles },
+      },
+      _focus: { ...focusInverseStyles },
     },
     secondary: {
       bg: "transparent",
@@ -47,6 +55,7 @@ export const Button = {
       borderColor: "border.dark",
       textDecor: "none",
       _hover: { textDecor: "none", bg: "darken.60", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
+      _focus: { ...focusStyles },
     },
     secondaryInverse: {
       bg: "transparent",
@@ -55,6 +64,7 @@ export const Button = {
       borderColor: "greys.white",
       textDecor: "none",
       _hover: { textDecor: "none", bg: "lighten.100", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
+      _focus: { ...focusInverseStyles },
     },
     tertiary: {
       color: "text.primary",
@@ -95,7 +105,7 @@ export const Button = {
       color: "text.link",
       fontWeight: "normal",
       textDecoration: "underline",
-      _hover: {},
+      _hover: { color: "focus" },
       _disabled: { ...disabledStyles, bg: "inherit" },
     },
   },
