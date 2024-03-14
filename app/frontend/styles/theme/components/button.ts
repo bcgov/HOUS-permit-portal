@@ -38,7 +38,12 @@ export const Button = {
       borderColor: "theme.blue",
       bg: "greys.white",
       textDecor: "none",
-      _hover: { textDecor: "none", bg: "darken.100", _disabled: { ...disabledStyles }, _active: { ...activeStyles } },
+      _hover: {
+        textDecor: "none",
+        bg: "lighten.900",
+        _disabled: { ...disabledStyles },
+        _active: { ...activeStyles },
+      },
     },
     secondary: {
       bg: "transparent",

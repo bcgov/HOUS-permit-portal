@@ -33,15 +33,18 @@ class Api::PermitApplicationsController < Api::ApplicationController
     submission_section = permit_application_params.dig("submission_data", "data", "section-completion-key")
     submission_section&.each { |key, value| submission_section[key] = nil }
 
-    if @permit_application.update_and_respond_with_backend_changes(
-         extract_s3_uploads_from_params(permit_application_params),
-       )
+    if @permit_application.draft? &&
+         @permit_application.update_and_respond_with_backend_changes(
+           extract_s3_uploads_from_params(permit_application_params),
+         )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       end
       render_success @permit_application,
                      ("permit_application.save_draft_success"),
                      { blueprint: PermitApplicationBlueprint }
+    elsif @permit_application.submitted? && @permit_application.update(submitted_permit_application_params)
+      render_success @permit_application, ("permit_application.save_success"), { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.update_error",
                    message_opts: {
@@ -54,7 +57,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     authorize @permit_application
     signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
 
-    #for submissions, we do not run the automated compliance as that should have already been complete
+    # for submissions, we do not run the automated compliance as that should have already been complete
     if signed &&
          @permit_application.update_and_respond_with_backend_changes(
            extract_s3_uploads_from_params(
@@ -96,7 +99,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     @permit_application = PermitApplication.find(params[:id])
   end
 
-  def permit_application_params #params for submitters
+  def permit_application_params # params for submitters
     params.require(:permit_application).permit(
       :activity_id,
       :permit_type_id,
@@ -108,5 +111,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
       submission_data: {
       },
     )
+  end
+
+  def submitted_permit_application_params # params for submitters
+    params.require(:permit_application).permit(:reference_number)
   end
 end

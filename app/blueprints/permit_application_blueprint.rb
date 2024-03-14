@@ -17,7 +17,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
          :zipfile_size,
          :zipfile_name,
          :zipfile_url,
-         :form_customizations
+         :form_customizations,
+         :reference_number
+
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
   association :jurisdiction, blueprint: JurisdictionBlueprint

@@ -20,8 +20,8 @@ import { useTranslation } from "react-i18next"
 
 interface IControlsProps {
   CustomEditableControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
-  saveButtonProps?: Partial<ButtonProps>
-  cancelButtonProps?: Partial<ButtonProps>
+  saveButtonProps?: Partial<ButtonProps> & { textContent?: string }
+  cancelButtonProps?: Partial<ButtonProps> & { textContent?: string }
   iconButtonProps?: Partial<IconButtonProps>
 }
 
@@ -35,13 +35,15 @@ export interface IEditableInputWithControlsProps extends EditableProps {
 
 function EditableControls({
   CustomEditableControls,
-  saveButtonProps,
-  cancelButtonProps,
+  saveButtonProps = {},
+  cancelButtonProps = {},
   iconButtonProps,
 }: IControlsProps) {
   const editableControls = useEditableControls()
   const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
   const { t } = useTranslation()
+  const { textContent: saveTextContent = t("ui.done"), ...restSaveButtonProps } = saveButtonProps
+  const { textContent: cancelTextContent = t("ui.cancel"), ...restCancelButtonProps } = cancelButtonProps
 
   if (CustomEditableControls) {
     return <CustomEditableControls {...editableControls} />
@@ -50,10 +52,10 @@ function EditableControls({
   return isEditing ? (
     <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
       <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
-        {t("ui.done")}
+        {saveTextContent}
       </Button>
       <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
-        {t("ui.cancel")}
+        {cancelTextContent}
       </Button>
     </ButtonGroup>
   ) : (

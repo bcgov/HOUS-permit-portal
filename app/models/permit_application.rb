@@ -25,6 +25,7 @@ class PermitApplication < ApplicationRecord
   validate :submitter_must_have_role
   validates :nickname, presence: true
   validates :number, presence: true
+  validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
   enum status: { draft: 0, submitted: 1 }, _default: 0
 

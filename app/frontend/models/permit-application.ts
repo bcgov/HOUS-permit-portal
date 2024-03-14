@@ -37,6 +37,7 @@ export const PermitApplicationModel = types
     zipfileSize: types.maybeNull(types.number),
     zipfileName: types.maybeNull(types.string),
     zipfileUrl: types.maybeNull(types.string),
+    referenceNumber: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
