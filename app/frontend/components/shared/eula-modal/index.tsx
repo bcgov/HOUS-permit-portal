@@ -42,7 +42,14 @@ export const EULAModal = observer(function EULAModel() {
   }, [isOpen, eula])
 
   return (
-    <Modal closeOnOverlayClick={false} closeOnEsc={false} scrollBehavior={"inside"} isOpen={isOpen} onClose={onClose}>
+    <Modal
+      size={"2xl"}
+      closeOnOverlayClick={false}
+      closeOnEsc={false}
+      scrollBehavior={"inside"}
+      isOpen={isOpen}
+      onClose={onClose}
+    >
       <ModalOverlay />
       <ModalContent>
         <Suspense fallback={<LoadingScreen />}>
