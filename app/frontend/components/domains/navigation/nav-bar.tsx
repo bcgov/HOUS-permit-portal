@@ -239,7 +239,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
             )}
             <MenuDivider />
             <MenuItem>
-              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")}>
+              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
               </Link>
             </MenuItem>
