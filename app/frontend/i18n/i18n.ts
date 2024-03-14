@@ -972,6 +972,7 @@ const options = {
             configurationManagement: "Configuration Management",
             energyStep: "Energy Step Code Requirements",
             submissionsInboxSetup: "Submissions Inbox Setup",
+            confirmed: "Submission E-mail Confirmed",
           },
           questionSupport: "Question Support",
         },
