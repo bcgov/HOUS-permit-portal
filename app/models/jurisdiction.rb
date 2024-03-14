@@ -109,6 +109,10 @@ class Jurisdiction < ApplicationRecord
     jurisdiction_template_version_customizations&.size || 0
   end
 
+  def unviewed_permit_applications
+    permit_applications.unviewed
+  end
+
   private
 
   def sanitize_html_fields

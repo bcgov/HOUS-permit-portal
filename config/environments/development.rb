@@ -67,5 +67,9 @@ Rails.application.configure do
   # See CHESApiWrapper
   config.action_mailer.delivery_method = :letter_opener
 
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "http" }
+
+  config.after_initialize do
+    Rails.application.routes.default_url_options = Rails.application.config.action_mailer.default_url_options
+  end
 end

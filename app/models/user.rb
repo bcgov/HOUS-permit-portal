@@ -90,6 +90,10 @@ class User < ApplicationRecord
     reviewer? || review_manager?
   end
 
+  def role_name
+    role.gsub("_", " ")
+  end
+
   private
 
   def reindex_jurisdiction_user_size

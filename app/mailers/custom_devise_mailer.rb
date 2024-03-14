@@ -1,4 +1,7 @@
 class CustomDeviseMailer < Devise::Mailer
+  default from: ENV["FROM_EMAIL"]
+  layout "mailer"
+
   # If you wanted to override devise confirmation instructions do it here
   def confirmation_instructions(record, token, opts = {})
     super
@@ -13,7 +16,7 @@ class CustomDeviseMailer < Devise::Mailer
       to: mail_headers[:to],
       from: mail_headers[:from],
       subject: "#{I18n.t("arbitrary_message_construct.mailers.subject_start")} - #{mail_headers[:subject]}",
-      body: render(template: "devise/mailer/#{mail_headers[:template_name]}", layout: false),
+      body: render(template: "devise/mailer/#{mail_headers[:template_name]}"),
     )
   end
 end

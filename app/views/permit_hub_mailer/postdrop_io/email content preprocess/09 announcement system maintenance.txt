@@ -131,7 +131,7 @@
                     <p>
                       You are receiving this email because you are registered on
                       <a
-                        href="https://buildingpermit.gov.bc.ca/"
+                        href="<%= root_url %>"
                         title="Building Permit Hub"
                         >Building Permit Hub</a
                       >.
@@ -148,25 +148,25 @@
                     <h3>Building Permit Hub</h3>
                     <p>
                       <a
-                        href="https://buildingpermit.gov.bc.ca"
+                        href="<%= root_url %>"
                         target="_blank"
                         style="margin-right: 20px"
                         >Home</a
                       >
                       <a
-                        href="https://buildingpermit.gov.bc.ca/contact"
+                        href="<%= FrontendUrlHelper.frontend_url("/contact") %>"
                         target="_blank"
                         style="margin-right: 20px"
                         >Contact us</a
                       >
                       <a
-                        href="https://buildingpermit.gov.bc.ca/help"
+                        href="<%= FrontendUrlHelper.frontend_url("/help") %>"
                         target="_blank"
                         style="margin-right: 20px"
                         >Help</a
                       >
                       <a
-                        href="https://buildingpermit.gov.bc.ca/login"
+                        href="<%= FrontendUrlHelper.frontend_url("/login") %>"
                         target="_blank"
                         style="margin-right: 20px"
                         >Login</a
