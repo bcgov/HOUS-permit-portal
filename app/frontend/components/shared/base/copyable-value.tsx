@@ -1,16 +1,16 @@
-import { HStack, IconButton, Text } from "@chakra-ui/react"
+import { HStack, IconButton, StackProps, Text } from "@chakra-ui/react"
 import { Copy } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 
-interface ICopyableNumberProps {
+interface ICopyableNumberProps extends StackProps {
   value: string
   label: string
 }
 
-export const CopyableValue = ({ value, label }: ICopyableNumberProps) => {
+export const CopyableValue = ({ value, label, ...containerProps }: ICopyableNumberProps) => {
   const { t } = useTranslation()
   const { uiStore } = useMst()
 
@@ -24,7 +24,7 @@ export const CopyableValue = ({ value, label }: ICopyableNumberProps) => {
   }
 
   return (
-    <HStack gap={1}>
+    <HStack gap={1} {...containerProps}>
       <Text mt={1}>
         {label}:{" "}
         <Text as="span" fontWeight={700}>

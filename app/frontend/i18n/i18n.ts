@@ -137,6 +137,8 @@ const options = {
           asc: "Ascending",
           desc: "Descending",
           returnHome: "Return to home",
+          copied: "Copied!",
+          failedToCopy: "Something went wrong while trying to copy",
         },
         contact: {
           fields: {
@@ -204,6 +206,7 @@ const options = {
           templatesUsed: "Templates Used",
         },
         permitApplication: {
+          referenceNumber: "Reference #",
           indexTitle: "My Active Permits",
           start: "Start a Permit Application",
           drafts: "Draft Permits",

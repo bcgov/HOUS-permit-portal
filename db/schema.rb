@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_13_233909) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -134,6 +134,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
     t.jsonb "zipfile_data"
     t.uuid "template_version_id", null: false
     t.jsonb "form_customizations_snapshot"
+    t.string "reference_number"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -259,22 +260,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
     t.jsonb "ventilation_lines", default: [{}]
     t.jsonb "other_lines", default: [{}]
     t.jsonb "fossil_fuels", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["step_code_checklist_id"],
-            name: "idx_on_step_code_checklist_id_f0fc711627"
-  end
-
-  create_table "step_code_building_characteristics_summaries",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "step_code_checklist_id", null: false
-    t.jsonb "roof_ceilings_lines", default: [{ "rsi" => nil, "details" => nil }]
-    t.jsonb "windows_glazed_doors_lines",
-            default: [
-              { "shgc" => nil, "details" => nil, "insulation_type" => "usi" }
-            ]
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["step_code_checklist_id"],

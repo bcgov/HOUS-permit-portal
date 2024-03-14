@@ -42,7 +42,7 @@ export const Button = {
       textDecor: "none",
       _hover: {
         textDecor: "none",
-        bg: "whiteAlpha.900",
+        bg: "lighten.900",
         _disabled: { ...disabledStyles },
         _active: { ...activeStyles },
       },
