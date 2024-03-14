@@ -4,31 +4,13 @@
 @import url("https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css");
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "formiojs/dist/formio.form.css";
+@import "../../../styles/global-theme-variables.scss";
 
-// Variables
-$bcgov-blue: #003366;
-$bcgov-blue-secondary: #38598a;
-$bcgov-orange: #fcba19;
-$bcgov-grey: #efefef;
-$bcgov-font: #313132;
-$bcgov-error: #d8292f;
-$bcgov-link: #1a5a96;
-$bcgov-link-hover: #3b99fc;
-$bcgov-input-placeholder: #606060;
-$bcgov-font-error: #a12622;
-$bcgov-font-warning: #6c4a00;
-$bcgov-font-success: #2d4821;
-$bcgov-alert-error: #f2dede;
-$bcgov-alert-warning: #f9f1c6;
-$bcgov-alert-info: #d9eaf7;
-$bcgov-alert-success: #dff0d8;
+/* ======================================
 
-//blueAlt is bcgov-blue-secondary
-$blue-light: #f6f9fc;
+  		Override formio styles (Start)
 
-/////////////////////////////////
-///  override formio styles:
-/////////////////////////////////
+====================================== */
 
 // override formio form designer
 .form-designer,
@@ -36,13 +18,13 @@ $blue-light: #f6f9fc;
 .form-wrapper,
 // override preview panel in form builder component editor modal
 .component-preview {
-  ///////
-  /////moved from the main application
-  ///////
+  /*
+  		moved from the main application
+  */
 
   // Typography
   .v-application {
-    font-family: -apple-system, BlinkMacSystemFont, BCSans, Roboto, Verdana, Arial, sans-serif !important;
+    font-family: -apple-system, "BlinkMacSystemFont", "BCSans", "Roboto", "Verdana", "Arial", sans-serif !important;
     line-height: 1.4;
     font-size: 0.875rem;
   }
@@ -431,3 +413,9 @@ $blue-light: #f6f9fc;
     font-weight: 700;
   }
 }
+
+/* ======================================
+
+			Override formio styles (end)
+
+====================================== */

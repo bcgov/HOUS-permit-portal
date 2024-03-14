@@ -3,6 +3,7 @@ import {
   Button,
   Flex,
   Heading,
+  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -19,7 +20,7 @@ import { observer } from "mobx-react-lite"
 import { format } from "date-fns"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
@@ -205,7 +206,9 @@ export const RequirementForm = observer(
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
-              <Link to={"mailto:digital.codes.permits@gov.bc.ca"}>digital.codes.permits@gov.bc.ca</Link>
+              <Link href={"mailto:" + t("site.contactEmail")} isExternal>
+                {t("site.contactEmail")}
+              </Link>
             </Text>
           </Box>
           <Form

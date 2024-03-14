@@ -73,7 +73,7 @@
 
                         <ol>
                           <li>Log into the <a href="https://buildingpermit.gov.bc.ca">Building Permit Hub</a></li>
-                          <li>Review and download the pending application</li>
+                          <li>Review and action on the pending application</li>
                         </ol>
 
                         

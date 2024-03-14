@@ -1,0 +1,60 @@
+@import "global-theme-variables.scss";
+
+/* ======================================
+
+  Styling that cannot be handled by Chakra Theme/Props :
+
+====================================== */
+
+/* Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind */
+.nav-menu-dropdown-background > div {
+  &::after {
+    content: "";
+    display: block;
+    background: rgba(0, 0, 0, 0.25);
+    position: absolute;
+    top: -100px;
+    bottom: -100vh;
+    left: -100vw;
+    right: -100vw;
+    z-index: -1;
+  }
+}
+.chakra-menu__menu-list {
+  .chakra-menu__group__title {
+    max-width: 250px;
+    margin-left: var(--chakra-space-3);
+  }
+  .chakra-menu__menuitem {
+    border-radius: 0;
+  }
+}
+
+.text-xxsmall-uppercase {
+  font-size: var(--chakra-fontSizes-xxs);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Admin Panel's  have large cards that should behave like a button (eg. have whole box clickable without changing markup) */
+.jumbo-buttons {
+  transition: border-color 200ms ease-out;
+  position: relative;
+  .chakra-button {
+    position: static;
+    &::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      display: block;
+    }
+  }
+  &:hover {
+    border-color: $bcgov-blue-secondary;
+    background-color: $blue-light;
+  }
+}
