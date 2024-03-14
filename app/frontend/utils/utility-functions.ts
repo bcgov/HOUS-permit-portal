@@ -1,4 +1,6 @@
 import { format } from "date-fns"
+import { utcToZonedTime } from "date-fns-tz"
+import { vancouverTimeZone } from "../constants"
 import { ERequirementType } from "../types/enums"
 import { TDebouncedFunction } from "../types/types"
 
@@ -91,7 +93,8 @@ export function handleScrollToBottom(elementId: string) {
 }
 
 export function formatTemplateVersion(versionDate: Date) {
-  return `v.${format(versionDate, "yyyy.MM.dd")}`
+  const timeZonedDate = utcToZonedTime(versionDate, vancouverTimeZone)
+  return `v.${format(timeZonedDate, "yyyy.MM.dd")}`
 }
 
 export function formatBytes(bytes: number, decimals: number = 2): string {
