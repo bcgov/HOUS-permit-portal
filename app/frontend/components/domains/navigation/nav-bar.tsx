@@ -229,9 +229,12 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
               </>
             ) : (
               <>
+                <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
+                  <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                  <NavMenuItemCTA label={t("auth.register")} to="/register" />
+                </MenuList>
+                <MenuDivider />
                 <NavMenuItem label={t("site.home")} to="/" />
-                <NavMenuItem label={t("auth.login")} to="/login" />
-                <NavMenuItem label={t("auth.register")} to="/register" />
               </>
             )}
             <MenuDivider />
@@ -251,10 +254,11 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
 interface INavMenuItemProps {
   label: string
   to?: string
+  variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItem = ({ label, to, onClick }: INavMenuItemProps) => {
+const NavMenuItem = ({ label, to, variant, onClick }: INavMenuItemProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -263,7 +267,47 @@ const NavMenuItem = ({ label, to, onClick }: INavMenuItemProps) => {
   }
 
   return (
-    <MenuItem as={Button} color="text.primary" variant="tertiary" onClick={handleClick}>
+    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick}>
+      <Text textAlign="left" w="full">
+        {label}
+      </Text>
+    </MenuItem>
+  )
+}
+
+// THIS IS CTA BUTTON VERSION FOR THE NAV MENU
+interface INavMenuItemCTAProps {
+  label: string
+  to?: string
+  variant?: string
+  onClick?: (any) => void
+}
+
+const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) => {
+  const navigate = useNavigate()
+
+  const handleClick = (e) => {
+    navigate(to)
+    onClick && onClick(e)
+  }
+
+  return (
+    <MenuItem
+      as={Button}
+      variant={variant || "primary"}
+      size="sm"
+      onClick={handleClick}
+      style={{
+        color: "var(--chakra-colors-greys-white)",
+        background: "var(--chakra-colors-theme-blue)",
+        borderRadius: "var(--chakra-radii-sm)",
+        width: "auto",
+      }}
+      _hover={{
+        bg: "var(--chakra-colors-theme-blueAlt) !important",
+        boxShadow: "none",
+      }}
+    >
       <Text textAlign="left" w="full">
         {label}
       </Text>
