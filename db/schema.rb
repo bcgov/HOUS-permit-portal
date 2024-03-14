@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_08_210431) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_13_212234) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -133,6 +133,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_08_210431) do
     t.datetime "viewed_at"
     t.jsonb "zipfile_data"
     t.uuid "template_version_id", null: false
+    t.jsonb "form_customizations_snapshot"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"

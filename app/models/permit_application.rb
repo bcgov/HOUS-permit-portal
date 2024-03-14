@@ -39,6 +39,8 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_save :set_submitted_at, if: :status_changed?
+  before_save :take_form_customizations_snapshot_if_submitted
+
   after_commit :reindex_jurisdiction_permit_application_size
   after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
@@ -46,7 +48,9 @@ class PermitApplication < ApplicationRecord
     return unless Rails.env.development?
     # for development purposes only
 
-    current_template_version.update(form_json: current_template_version.requirement_template.to_form_json)
+    current_published_template_version.update(
+      form_json: current_published_template_version.requirement_template.to_form_json,
+    )
   end
 
   def search_data
@@ -60,25 +64,30 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
+      created_at: created_at,
     }
   end
 
   def set_template_version
     return unless template_version.blank?
 
-    self.template_version = current_template_version
+    self.template_version = current_published_template_version
   end
 
-  def current_template_version
+  def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
     RequirementTemplate.published_requirement_template_version(activity, permit_type)
   end
 
   def form_customizations
-    jurisdiction
-      .jurisdiction_template_version_customizations
-      .find_by(template_version: current_template_version)
-      &.customizations
+    if submitted?
+      form_customizations_snapshot
+    else
+      jurisdiction
+        .jurisdiction_template_version_customizations
+        .find_by(template_version: template_version)
+        &.customizations
+    end
   end
 
   def number_prefix
@@ -159,13 +168,27 @@ class PermitApplication < ApplicationRecord
 
   private
 
+  def take_form_customizations_snapshot_if_submitted
+    return unless status_changed? && submitted?
+
+    current_customizations =
+      jurisdiction
+        .jurisdiction_template_version_customizations
+        .find_by(template_version: template_version)
+        &.customizations
+
+    return unless current_customizations.present?
+
+    self.form_customizations_snapshot = current_customizations
+  end
+
   def reindex_jurisdiction_permit_application_size
     return unless jurisdiction.present?
     return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
 
     jurisdiction.reindex
   end
-  
+
   def zip_and_upload_supporting_documents
     return unless submitted? && zipfile_data.blank?
 
