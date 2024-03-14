@@ -78,11 +78,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
 
   useEffect(() => {
     isEditing && trigger()
-  }, [isEditing])
-
-  useEffect(() => {
-    isEditing && trigger()
-  }, [fields.length])
+  }, [isEditing, fields.length])
 
   return (
     <EditableBlockContainer>
