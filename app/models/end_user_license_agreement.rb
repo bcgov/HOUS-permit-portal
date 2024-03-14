@@ -3,8 +3,6 @@ class EndUserLicenseAgreement < ApplicationRecord
 
   before_create :replace_active_agreement, if: :active
 
-  validates_uniqueness_of :active, if: :active
-
   def self.active_agreement
     find_by(active: true)
   end
@@ -12,6 +10,6 @@ class EndUserLicenseAgreement < ApplicationRecord
   private
 
   def replace_active_agreement
-    EndUserLicenseAgreement.active_agreement&.update(active: false)
+    EndUserLicenseAgreement.where(active: true).update_all(active: false)
   end
 end
