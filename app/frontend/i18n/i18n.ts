@@ -990,6 +990,7 @@ const options = {
             contact: "Contact Us",
             configurationManagement: "Configuration Management",
             energyStep: "Energy Step Code Requirements",
+            submissionsInboxSetup: "Submissions Inbox Setup",
           },
           questionSupport: "Question Support",
         },
