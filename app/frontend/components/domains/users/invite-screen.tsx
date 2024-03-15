@@ -1,6 +1,7 @@
 import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
 import { PaperPlane, UserPlus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -9,6 +10,7 @@ import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { CustomToast } from "../../shared/base/flash-message"
 import { UserInput } from "../../shared/base/inputs/user-input"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -23,7 +25,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
   const {
-    userStore: { invite },
+    userStore: { invite, takenEmails },
   } = useMst()
 
   const defaultUserValues = {
@@ -94,6 +96,13 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   {t("user.addUser")}
                 </Button>
               </Flex>
+              {!R.isEmpty(takenEmails) && (
+                <CustomToast
+                  status="error"
+                  title={t("user.takenErrorTitle")}
+                  description={t("user.takenErrorDescription")}
+                />
+              )}
               <Flex gap={4}>
                 <Button
                   variant="primary"
