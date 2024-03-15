@@ -43,7 +43,10 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
+  after_commit :notify_user_application_updated
   after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+
+  scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
   def force_update_published_template_version
     return unless Rails.env.development?
@@ -167,6 +170,38 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def submitter_frontend_url
+    FrontendUrlHelper.frontend_url("/permit-applications/#{id}/edit")
+  end
+
+  def reviewer_frontend_url
+    FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
+  end
+
+  def days_ago_submitted
+    # Calculate the difference in days between the current date and the submitted_at date
+    (Date.current - submitted_at.to_date).to_i
+  end
+
+  def formatted_submitted_at
+    submitted_at&.strftime("%Y-%m-%d")
+  end
+
+  def formatted_viewed_at
+    viewed_at&.strftime("%Y-%m-%d")
+  end
+
+  def permit_type_and_activity
+    "#{activity.name} - #{permit_type.name}".strip
+  end
+
+  def send_submit_notifications
+    PermitHubMailerJob.perform_async("notify_submitter_application_submitted", submitter.id, id)
+    jurisdiction.users.each do |user|
+      PermitHubMailerJob.perform_async("notify_reviewer_application_received", user.id, id)
+    end
+  end
+
   private
 
   def take_form_customizations_snapshot_if_submitted
@@ -181,6 +216,14 @@ class PermitApplication < ApplicationRecord
     return unless current_customizations.present?
 
     self.form_customizations_snapshot = current_customizations
+  end
+
+  def notify_user_application_updated
+    return if new_record?
+
+    return unless saved_change_to_viewed_at? || saved_change_to_reference_number?
+
+    PermitHubMailerJob.perform_async("notify_application_updated", submitter.id, id)
   end
 
   def reindex_jurisdiction_permit_application_size

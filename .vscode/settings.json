@@ -5,5 +5,8 @@
   "workbench.editor.labelFormat": "short",
   "[ruby]": {
     "editor.defaultFormatter": "Shopify.ruby-lsp"
+  },
+  "[erb]": {
+    "editor.defaultFormatter": "elia.erb-formatter"
   }
 }

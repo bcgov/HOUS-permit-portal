@@ -46,6 +46,12 @@ en:
     subject_start: "BC Building Permit Hub"
     subjects:
       update_password_success: "You have successfully updated your password"
+      welcome: "Welcome to the Building Permit Hub"
+      onboarding: "Welcome to the Building Permit Hub"
+      notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
+      notify_reviewer_application_received: "New application received: %{permit_application_number}"
+      notify_application_updated: "Updated application status: %{permit_application_number}"
+      remind_reviewers: "Your report on outstanding permit applications"
   arbitrary_message_construct:
     devise:
       failure:

@@ -495,6 +495,7 @@ DEPENDENCIES
   activerecord-nulldb-adapter (= 1.0.1)
   acts-as-taggable-on (~> 10.0.0)
   acts_as_list (~> 1.1.0)
+  addressable (~> 2.8)
   anycable-rails (~> 1.4)
   awesome_print (~> 1.9)
   aws-sdk-s3 (~> 1.141.0)

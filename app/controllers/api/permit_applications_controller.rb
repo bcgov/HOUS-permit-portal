@@ -64,6 +64,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
              permit_application_params.merge(status: :submitted, signed_off_at: Time.current),
            ),
          )
+      @permit_application.send_submit_notifications
+
       render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
     else
       render_error "permit_application.submit_error",

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_13_233909) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -248,28 +248,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_13_233909) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "step_code_checklist_id", null: false
-    t.jsonb "roof_ceilings_lines", default: [{}]
-    t.jsonb "above_grade_walls_lines", default: [{}]
-    t.jsonb "framings_lines", default: [{}]
-    t.jsonb "unheated_floors_lines", default: [{}]
-    t.jsonb "below_grade_walls_lines", default: [{}]
-    t.jsonb "slabs_lines", default: [{}]
-    t.jsonb "windows_glazed_doors",
-            default: {
-              "lines" => [{}],
-              "performance_type" => "usi"
-            }
-    t.jsonb "doors_lines", default: [{ "performance_type" => "rsi" }]
-    t.jsonb "airtightness", default: {}
-    t.jsonb "space_heating_cooling_lines",
+    t.jsonb "roof_ceilings_lines", default: [{ "rsi" => nil, "details" => nil }]
+    t.jsonb "windows_glazed_doors_lines",
             default: [
-              { "variant" => "principal" },
-              { "variant" => "secondary" }
+              { "shgc" => nil, "details" => nil, "insulation_type" => "usi" }
             ]
-    t.jsonb "hot_water_lines", default: [{ "performance_type" => "ef" }]
-    t.jsonb "ventilation_lines", default: [{}]
-    t.jsonb "other_lines", default: [{}]
-    t.jsonb "fossil_fuels", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["step_code_checklist_id"],

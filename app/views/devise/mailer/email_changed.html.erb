@@ -5,19 +5,16 @@
       <tr>
         <!-- START CONTENT ROW -->
         <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
-          <h1>Reset your password</h1>
+          <p>Hello <%= @email %>!</p>
 
-          <p>Hello <%= @resource.email %>!</p>
-
-          <p>Someone has requested a link to change your password. Click the button below to proceed.</p>
-          <p><%= link_to 'Change my password', reset_password_url(reset_password_token: @token), class: "btn btn-primary" %></p>
-
-          <p>If you didn't request this, please ignore this email.</p>
-          <p>Your password won't change until you access the link above and create a new one.</p>
+          <% if @resource.try(:unconfirmed_email?) %>
+            <p>We're contacting you to notify you that your email is being changed to <%= @resource.unconfirmed_email %>.</p>
+          <% else %>
+            <p>We're contacting you to notify you that your email has been changed to <%= @resource.email %>.</p>
+          <% end %>
 
           <p>–––</p>
-          <p><a href="<%= root_url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: bold;">The BC Building Permit Hub Team</a></p>
-
+          <p><a href="<%= root_url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: bold;">The Building Permit Hub Team</a></p>
         </td>
         <!-- END OF CONTENT ROW -->
       </tr>
@@ -25,4 +22,3 @@
   </td>
 </tr>
 <!-- END MAIN CONTENT AREA -->
-
