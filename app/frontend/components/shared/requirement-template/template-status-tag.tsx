@@ -1,8 +1,10 @@
 import { Flex, HStack, Tag, Text } from "@chakra-ui/react"
 import { CheckSquareOffset, Clock, Pencil } from "@phosphor-icons/react"
 import { format } from "date-fns"
+import { utcToZonedTime } from "date-fns-tz"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { vancouverTimeZone } from "../../../constants"
 import { ETemplateVersionStatus } from "../../../types/enums"
 
 interface ITemplateStatusTagProps {
@@ -53,7 +55,7 @@ export const TemplateStatusTag = ({ status, scheduledFor }: ITemplateStatusTagPr
       </Tag>
       {scheduledFor && (
         <Text fontSize="sm" fontWeight="bold">
-          {format(scheduledFor, "yyyy-MM-dd")}
+          {format(utcToZonedTime(scheduledFor, vancouverTimeZone), "yyyy-MM-dd")}
         </Text>
       )}
     </Flex>

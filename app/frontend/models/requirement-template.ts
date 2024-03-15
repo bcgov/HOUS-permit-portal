@@ -1,5 +1,7 @@
-import { addDays, isAfter, isSameDay, max } from "date-fns"
+import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
+import { utcToZonedTime } from "date-fns-tz"
 import { Instance, flow, types } from "mobx-state-tree"
+import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { ETemplateVersionStatus } from "../types/enums"
@@ -55,16 +57,27 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         return self.discardedAt !== null
       },
       get nextAvailableScheduleDate() {
-        const tomorrow = addDays(new Date(), 1)
+        // Get tomorrow's date in Vancouver time zone, starting from midnight
+        const tomorrow = addDays(startOfDay(utcToZonedTime(new Date(), vancouverTimeZone)), 1)
 
+        // If no scheduled versions are available, return tomorrow's date
         if (self.scheduledTemplateVersions.length === 0) {
           return tomorrow
         }
-        const latestDate = max(self.scheduledTemplateVersions.map((version) => version.versionDate))
 
+        // Get the latest scheduled date in Vancouver time zone
+        const latestDate = max(
+          self.scheduledTemplateVersions.map((version) =>
+            startOfDay(utcToZonedTime(new Date(version.versionDate), vancouverTimeZone))
+          )
+        )
+
+        // Compare the latest date with tomorrow
         if (isAfter(latestDate, tomorrow) || isSameDay(latestDate, tomorrow)) {
+          // If the latest date is after or the same day as tomorrow, return the date after the latest date
           return addDays(latestDate, 1)
         } else {
+          // Otherwise, return tomorrow's date
           return tomorrow
         }
       },

@@ -44,6 +44,8 @@ export const unitGroups: { [key: string]: ENumberUnit[] } = {
 
 export const datefnsAppDateFormat = "yyyy/MM/dd"
 
+export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
+
 export function getRequirementTypeLabel(requirementType: ERequirementType) {
   let derivedTranslationKey: keyof typeof ERequirementType
 
