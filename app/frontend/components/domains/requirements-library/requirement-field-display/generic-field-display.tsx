@@ -1,8 +1,10 @@
-import { FormControl, FormHelperText, FormLabel, FormLabelProps } from "@chakra-ui/react"
+import { FormControl, FormLabel, FormLabelProps } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { getRequirementTypeLabel } from "../../../../constants"
+import { isQuillEmpty } from "../../../../utils/utility-functions"
+import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { TRequirementFieldDisplayProps } from "./index"
 
 interface IGroupedFieldProps extends Omit<TRequirementFieldDisplayProps, "options"> {
@@ -39,7 +41,14 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
             : getRequirementTypeLabel(requirementType))}
       </FormLabel>
       {inputDisplay}
-      {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+      {!isQuillEmpty(helperText) && (
+        <EditorWithPreview
+          label={t("requirementsLibrary.modals.addHelpTextLabel")}
+          htmlValue={helperText}
+          containerProps={{ p: 0, ...helperTextStyles }}
+          isReadOnly
+        />
+      )}
     </FormControl>
   )
 })
