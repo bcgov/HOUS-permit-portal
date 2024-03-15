@@ -153,6 +153,8 @@ class Requirement < ApplicationRecord
 
     json.merge!({ computedCompliance: input_options["computed_compliance"] }) if computed_compliance?
 
+    json.merge!({ energyStepCode: input_options["energy_step_code"] }) if input_type.to_sym == :energy_step_code
+
     if input_options["conditional"].present?
       # assumption that conditional is only within the same requirement block for now
       conditional = input_options["conditional"]

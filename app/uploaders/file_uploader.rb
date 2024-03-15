@@ -3,7 +3,7 @@ class FileUploader < Shrine
 
   Attacher.validate do
     validate_max_size 100 * 1024 * 1024 #100 MB to start
-    validate_mime_type %w[application/pdf image/jpeg image/png]
+    #could be images, excel files, bims, we do not have an exhaustive list right now.
   end
 
   def generate_location(io, derivative: nil, **options)

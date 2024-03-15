@@ -1,4 +1,6 @@
+import { t } from "i18next"
 import * as R from "ramda"
+
 const findPanelComponents = (components) => {
   let panelComponents = []
 
@@ -80,6 +82,14 @@ export const combineComplianceHints = (
     if (item && item.computedCompliance) {
       item.computedComplianceResult = value
     }
+    if (item && item.energyStepCode) {
+      item.label = t("formComponents.energyStepCode.edit")
+      item.title = t("formComponents.energyStepCode.edit")
+      if (value == "warningFileOutOfDate") {
+        item.energyStepCodeWarning = t("formComponents.energyStepCode.warningFileOutOfDate")
+      }
+    }
   }
+
   return updatedJson
 }

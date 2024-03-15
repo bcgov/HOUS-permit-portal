@@ -382,6 +382,13 @@ const options = {
             },
           },
         },
+        formComponents: {
+          energyStepCode: {
+            edit: "View and edit compliance report",
+            warningFileOutOfDate:
+              "Plan file updated may be out of date as it differs from when the step code was created.",
+          },
+        },
         stepCode: {
           title: "Step Code Auto-Compliance Tool",
           subTitle: "Automatically generate your BC Energy Step Code Compliance Report",

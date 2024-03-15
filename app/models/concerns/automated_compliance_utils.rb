@@ -7,7 +7,7 @@ module AutomatedComplianceUtils
   end
 
   def requirements_lookups
-    published_requirement_template&.lookup_props
+    published_requirement_template&.lookup_props || {}
   end
 
   def automated_compliance_requirements

@@ -6,6 +6,7 @@ import ChefsFormioComponents from "./additional-formio"
 
 const defaultLabelTemplate = Templates.current.label.form
 const defaultComponentsTemplate = Templates.current.components.form
+const defaultButtonsTemplate = Templates.current.button.form
 
 //container - we can add for main headers like Contact Info
 //panels - are for section blocks, to put things inside panels, we need to target the components section under the body
@@ -22,6 +23,19 @@ Templates.current = {
         }
       }
       template = template.concat(defaultComponentsTemplate(ctx))
+      return template
+    },
+  },
+  button: {
+    form: (ctx) => {
+      let template = ""
+      if (ctx?.component?.energyStepCodeWarning) {
+        template = template.concat(
+          `<div class="energy-step-code-warning"><i class="ph-fill ph-info"></i>${ctx?.component?.energyStepCodeWarning}</div>`
+        )
+      }
+
+      template = template.concat(defaultButtonsTemplate(ctx))
       return template
     },
   },

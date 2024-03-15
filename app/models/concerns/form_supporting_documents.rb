@@ -6,6 +6,16 @@ module FormSupportingDocuments
     joined = {}
     #compliance data on the permit_applicaiton itself
 
+    #compliance data for energy step code
+    #fetch the energy step_code from json
+    if requirement_energy_step_code_key_value && step_code
+      if step_code.plan_out_of_date
+        joined[requirement_energy_step_code_key_value[0]] = "warningFileOutOfDate"
+      else
+        joined[requirement_energy_step_code_key_value[0]] = "infoInProgress"
+      end
+    end
+
     #data from individual documents
     grouped_compliance_data =
       supporting_documents.where.not(compliance_data: {}).map { |sd| sd.compliance_message_view }

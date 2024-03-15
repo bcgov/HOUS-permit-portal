@@ -161,9 +161,8 @@ export const RequirementForm = observer(
       setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
     }
 
-    const onChange = () => {
+    const onInitialized = (event) => {
       if (!formRef.current) return
-
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
@@ -172,11 +171,8 @@ export const RequirementForm = observer(
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
-
-      if (onCompletedBlocksChange) {
-        onCompletedBlocksChange(getCompletedBlocksFromForm(rootComponent))
-      }
     }
+
     const scrollToTop = () => {
       handleScrollToTop("outerScrollContainer")
       handleScrollToTop("permitApplicationFieldsContainer")
@@ -218,7 +214,7 @@ export const RequirementForm = observer(
             onSubmit={onFormSubmit}
             options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
-            onChange={onChange}
+            onInitialized={onInitialized}
           />
         </Flex>
         <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
