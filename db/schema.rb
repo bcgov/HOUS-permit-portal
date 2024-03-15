@@ -145,6 +145,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.uuid "template_version_id", null: false
     t.jsonb "zipfile_data"
     t.jsonb "form_customizations_snapshot"
+    t.datetime "changed_status_at"
     t.string "reference_number"
     t.datetime "changed_status_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"

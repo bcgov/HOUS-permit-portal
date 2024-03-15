@@ -23,6 +23,7 @@ class PermitApplication < ApplicationRecord
   # Custom validation
 
   validate :submitter_must_have_role
+  validate :jurisdiction_must_have_submission_email
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
@@ -243,6 +244,14 @@ class PermitApplication < ApplicationRecord
   end
 
   def submitter_must_have_role
-    errors.add(:submitter, "must have the submitter role") unless submitter&.submitter?
+    unless submitter&.submitter?
+      errors.add(:submitter, I18N.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+    end
+  end
+
+  def jurisdiction_must_have_submission_email
+    unless (jurisdiction&.submission_email).present?
+      errors.add(:jurisdiction, I18N.t("errors.models.permit_application.attributes.jurisdiction.not_onboarded"))
+    end
   end
 end
