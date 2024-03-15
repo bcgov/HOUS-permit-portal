@@ -8,8 +8,8 @@ class AutomatedCompliance::AutopopulateJob < ApplicationJob
   end
 
   def match(compliance_module_name, permit_application)
-    unless (%w[DigitalSealValidator ParcelInfoExtractor]).include? compliance_module_name
-      #AlrValidator, HistoricSite
+    unless (%w[DigitalSealValidator ParcelInfoExtractor HistoricSite]).include? compliance_module_name
+      #AlrValidator
       Rails.logger.error "unsafe compliance module called #{compliance_module_name}"
       return
     end

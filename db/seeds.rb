@@ -148,6 +148,7 @@ if PermitApplication.first.blank?
     )
   end
 end
+PermitApplication.reindex
 
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
