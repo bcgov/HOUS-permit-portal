@@ -5,12 +5,13 @@ import { useTranslation } from "react-i18next"
 import { isQuillEmpty } from "../../../../utils/utility-functions"
 import { Editor } from "../editor"
 
-type TProps = {
+export type TEditorWithPreviewProps = {
   label?: string
   htmlValue: string
   onChange?: (htmlValue: string) => void
   containerProps?: BoxProps
   editText?: string
+  editTextButtonProps?: ButtonProps
   onRemove?: (setEditMode: (editMode: boolean) => void) => void
   isReadOnly?: boolean
 } & (
@@ -30,9 +31,10 @@ export const EditorWithPreview = observer(function EditorWithPreview({
   renderInitialTrigger,
   initialTriggerText,
   editText,
+  editTextButtonProps,
   onRemove,
   isReadOnly,
-}: TProps) {
+}: TEditorWithPreviewProps) {
   const isEditorEmpty = isQuillEmpty(htmlValue)
   const [isEditMode, setIsEditMode] = useState(false)
   const { t } = useTranslation()
@@ -119,7 +121,7 @@ export const EditorWithPreview = observer(function EditorWithPreview({
       ) : (
         <>
           {editText && (
-            <Button variant={"link"} textDecoration={"underline"}>
+            <Button variant={"link"} textDecoration={"underline"} {...editTextButtonProps}>
               {editText}
             </Button>
           )}
