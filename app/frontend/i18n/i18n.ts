@@ -177,8 +177,20 @@ const options = {
             addContactSummary: "Click to add a Contact Summary section",
             clickToEditContacts: "Click to edit contacts",
             clickToShowContacts: "Click to show contacts as they will be seen",
-            clickToEditMap: "Click to edit map coordinates",
+            clickToEditMap: "Click to edit map",
+            clickToSeeMap: "Click to see map",
             clickToShowMap: "Click to show map as it will be seen",
+            editMapStart: "To display a map of your jurisdiction on the 'About' page, please follow these steps:",
+            editMapSteps: [
+              "Identify the central point of your jurisdiction on Google Maps.",
+              "Right-click on the desired central location to open a context menu.",
+              "Select the option that displays the coordinates to copy them.",
+              "Individually paste these coordinates into the fields below",
+              "Adjust the zoom level below to your preference.",
+              "Remember to click 'Save' at the bottom of the page to apply your changes.",
+            ],
+            editMapEnd:
+              "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
           },
           new: {
             title: "Create New Jurisdiction",
