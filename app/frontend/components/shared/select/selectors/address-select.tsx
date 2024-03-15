@@ -2,42 +2,33 @@ import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import React, { useCallback } from "react"
+import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
+import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
-  setSiteSelected: (boolean) => void
   onChange: (option: IOption) => void
-  selectedOption: IOption
-  pidName?: string
-  siteName?: string
+  value: IOption
+  addressName?: string
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
 
-export const SitesSelect = observer(function ({
+export const AddressSelect = observer(function ({
   onChange,
-  selectedOption,
+  value,
   stylesToMerge,
-  setSiteSelected,
-  pidName = "pid",
-  siteName = "site",
+  addressName = "address",
   ...rest
 }: TSitesSelectProps) {
   const { geocoderStore } = useMst()
-  const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids } = geocoderStore
-  const pidSelectRef = useRef(null)
+  const { fetchSiteOptions: fetchOptions } = geocoderStore
 
-  const { setValue, control, watch, reset } = useFormContext()
-  const pidWatch = watch(pidName)
-  const siteWatch = watch(siteName)
+  const { reset } = useFormContext()
   const { t } = useTranslation()
 
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
@@ -49,26 +40,7 @@ export const SitesSelect = observer(function ({
     } else callback([])
   }
 
-  const handleChange = (option: IOption) => {
-    setPidOptions([])
-    onChange(option)
-    setValue(pidName, null)
-    if (option) {
-      fetchPids(option.value).then((pids: string[]) => {
-        setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
-      })
-    }
-    const selectControl = pidSelectRef.current.controlRef
-    if (selectControl) {
-      selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
-    }
-  }
-
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
-
-  useEffect(() => {
-    setSiteSelected(!!pidWatch || !!(!fetchingPids && siteWatch && R.isEmpty(pidOptions)))
-  }, [pidWatch, siteWatch, pidOptions, fetchingPids])
 
   return (
     <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
@@ -77,10 +49,10 @@ export const SitesSelect = observer(function ({
         <InputGroup>
           <AsyncSelect<IOption, boolean>
             isClearable={true}
-            onChange={handleChange}
+            onChange={onChange}
             placeholder="Search Addresses"
-            value={selectedOption}
-            defaultValue={selectedOption}
+            value={value}
+            defaultValue={value}
             components={{
               Control,
               Option,
@@ -104,34 +76,6 @@ export const SitesSelect = observer(function ({
             isCreatable={false}
             {...rest}
           />
-        </InputGroup>
-      </FormControl>
-
-      <FormControl>
-        <FormLabel>{t("permitApplication.pidLabel")}</FormLabel>
-        <InputGroup>
-          <Flex w="full" direction="column">
-            <Controller
-              name={pidName}
-              control={control}
-              rules={{
-                required:
-                  pidOptions.length > 0 ? t("ui.isRequired", { field: t("permitApplication.pidLabel") }) : false,
-              }}
-              render={({ field: { onChange, value } }) => {
-                return (
-                  <Select
-                    options={pidOptions}
-                    ref={pidSelectRef}
-                    value={pidOptions.find((option) => option.value === value) ?? { label: null, value: null }}
-                    onChange={(option) => {
-                      onChange(option.value)
-                    }}
-                  />
-                )
-              }}
-            />
-          </Flex>
         </InputGroup>
       </FormControl>
     </Flex>

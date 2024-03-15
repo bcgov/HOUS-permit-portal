@@ -1,28 +1,15 @@
-import {
-  Box,
-  BoxProps,
-  Center,
-  Checkbox,
-  Container,
-  Flex,
-  FormControl,
-  FormLabel,
-  Grid,
-  Heading,
-  Image,
-  ListItem,
-  Select,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, BoxProps, Container, Flex, Heading, Image, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
 import { CaretRight, CheckCircle, ClipboardText, FileArrowUp } from "@phosphor-icons/react"
 import i18next from "i18next"
-import React, { ReactNode } from "react"
+import React, { ReactNode, useEffect, useState } from "react"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IJurisdiction } from "../../../models/jurisdiction"
+import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { AddressSelect } from "../../shared/select/selectors/address-select"
 
 interface ILandingScreenProps {}
 
@@ -127,7 +114,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Flex w="full" bg="greys.grey03">
         <Container maxW="container.lg" py={10} px={8}>
           <Flex as="section" direction="column" gap={6}>
-            <HousingTypeSearch />
+            <JurisdictionSearch />
             <VStack w="full" gap={2} textAlign="center" py={4} px={8}>
               <Heading as="h3" fontSize="md">
                 {t("landing.whenNotNecessaryQ")}
@@ -146,9 +133,6 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               </Heading>
               <Text>{t("landing.expectA")}</Text>
             </VStack>
-            <Center w="full" h="217px" bg="greys.grey03">
-              suggestion: Lottie?
-            </Center>
           </Flex>
         </Container>
       </Flex>
@@ -167,69 +151,42 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
   )
 }
 
-interface IHousingTypeSearchProps {}
-const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
+interface IJurisdictionSearchProps {}
+const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
   const { t } = useTranslation()
-  const housingtypes = [
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-  ]
+  const { geocoderStore } = useMst()
+  const { fetchGeocodedJurisdiction } = geocoderStore
+  const formMethods = useForm()
+  const { control, watch } = formMethods
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
+
+  const addressWatch = watch("address")
+
+  useEffect(() => {
+    if (!addressWatch?.value) return
+    ;(async () => {
+      const jurisdiction = await fetchGeocodedJurisdiction(addressWatch.value)
+      setJurisdiction(jurisdiction)
+    })()
+  }, [addressWatch?.value])
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
-      <Flex direction="column" bg="white" flex={1} p={6} gap={4}>
-        <Flex as="section" direction="column" gap={2}>
-          <Heading fontSize="2xl">{t("landing.whereTitle")}</Heading>
-          <Text>{t("landing.findAuthority")}</Text>
-        </Flex>
-
-        <FormControl>
-          <FormLabel>{t("landing.locationOr")}</FormLabel>
-          {/* TODO: Implement using react-select */}
-          <Select placeholder={t("ui.selectPlaceholder")}>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
-          </Select>
-        </FormControl>
-
-        <FormControl>
-          <Flex direction="column" gap={4}>
-            <FormLabel>{t("ui.selectApplicable")}</FormLabel>
-            <Checkbox>{t("landing.withinXRiver")}</Checkbox>
-            <Checkbox>{t("landing.withinXForest")}</Checkbox>
-            <Checkbox>{t("landing.withinXProtected")}</Checkbox>
-          </Flex>
-        </FormControl>
-        <Box bg="greys.grey03" w="full" h="171px"></Box>
-      </Flex>
-
-      <Flex direction="column" bg="white" flex={3} p={6} gap={4}>
-        <Flex as="section" direction="column" gap={2}>
-          <Heading fontSize="2xl">{t("landing.whatType")}</Heading>
-          <Text>
-            {t("landing.dontSee")} <RouterLink to="#">{t("ui.clickHere")}</RouterLink>
-          </Text>
-        </Flex>
-        <Grid
-          templateColumns={{ base: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }}
-          gap={4}
-        >
-          {housingtypes.map((type) => (
-            <Flex direction="column" key={type.url} textAlign="center" gap={2} p={2}>
-              <Image src={type.imageUrl} alt={type.label} objectFit="cover" />
-              <RouterLinkButton variant="link" fontWeight="bold" fontSize="sm" color="text.link" to={type.url}>
-                {type.label}
-              </RouterLinkButton>
-            </Flex>
-          ))}
-        </Grid>
+      <Flex bg="white" flex={3} p={6} gap={4}>
+        <FormProvider {...formMethods}>
+          <form>
+            <Controller
+              name="address"
+              control={control}
+              render={({ field: { onChange, value } }) => {
+                return <AddressSelect onChange={onChange} value={value} />
+              }}
+            />
+          </form>
+        </FormProvider>
+        {addressWatch?.value}
+        <br />
+        {jurisdiction?.name}
       </Flex>
     </Flex>
   )
