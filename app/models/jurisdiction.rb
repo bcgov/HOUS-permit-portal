@@ -1,4 +1,7 @@
 class Jurisdiction < ApplicationRecord
+  extend FriendlyId
+  friendly_id :qualified_name, use: :slugged
+
   include ActionView::Helpers::SanitizeHelper
   searchkick searchable: %i[reverse_qualified_name qualified_name],
              word_start: %i[reverse_qualified_name qualified_name],

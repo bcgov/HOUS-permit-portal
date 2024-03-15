@@ -65,6 +65,7 @@ gem "sidekiq-cron", "~> 1.12"
 gem "rubyzip"
 gem "anycable-rails", "~> 1.4"
 gem "addressable", "~> 2.8"
+gem "friendly_id", "~> 5.5.1"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

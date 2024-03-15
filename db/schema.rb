@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -100,9 +100,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_14_201710) do
     t.string "submission_email"
     t.integer "energy_step_required"
     t.integer "zero_carbon_step_required"
+    t.string "slug"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
+    t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
   end
 
   create_table "mechanical_energy_use_intensity_references",
