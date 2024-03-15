@@ -39,6 +39,8 @@ module HousPermitPortal
     # we will be using dotenv locally and Hashicorp Vault in production so disable default rails master.key
     config.read_encrypted_secrets = false
 
+    config.active_job.queue_adapter = :sidekiq
+
     # Don't generate system test files.
     config.generators.system_tests = nil
 
