@@ -34,6 +34,7 @@ class User < ApplicationRecord
   belongs_to :jurisdiction, optional: true
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
+  has_many :license_agreements, class_name: "UserLicenseAgreement"
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles

@@ -7,6 +7,7 @@ import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
+import { EULAModal } from "../../shared/eula-modal"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
 import { RegisterScreen } from "../authentication/register-screen"
@@ -56,6 +57,7 @@ export const Navigation = observer(() => {
       </Box>
 
       <NavBar />
+      <EULAModal />
 
       <Flex direction="column" overflow="auto" h="full" id="outerScrollContainer">
         {isValidating ? (

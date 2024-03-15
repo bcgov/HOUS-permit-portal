@@ -8,6 +8,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
 import { EUserSortFields } from "../types/enums"
+import { IEULA } from "../types/types"
 
 export const UserStoreModel = types
   .compose(
@@ -15,6 +16,7 @@ export const UserStoreModel = types
       usersMap: types.map(UserModel),
       currentUser: types.maybeNull(types.safeReference(UserModel)),
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
+      eula: types.maybeNull(types.frozen<IEULA>()),
     }),
     createSearchModel<EUserSortFields>("searchUsers", Object.values(EUserSortFields))
   )
@@ -70,6 +72,13 @@ export const UserStoreModel = types
       const { ok, data: response } = yield self.environment.api.updateProfile(formData)
       self.mergeUpdate(response.data, "usersMap")
       return response.ok
+    }),
+    fetchEULA: flow(function* () {
+      const response = yield self.environment.api.getEULA()
+      if (response.ok) {
+        self.eula = response.data.data
+        return true
+      }
     }),
   }))
   .actions((self) => ({

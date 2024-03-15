@@ -171,3 +171,7 @@ export interface IDownloadableFile {
   fileName: string
   fileSize: number
 }
+
+export interface IEULA {
+  content: string
+}

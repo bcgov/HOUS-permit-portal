@@ -183,6 +183,14 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}/restore`)
   }
 
+  async acceptEULA(userId: string) {
+    return this.client.patch<ApiResponse<IUser>>(`/users/${userId}/accept_eula`)
+  }
+
+  async getEULA() {
+    return this.client.get("/end_user_license_agreement")
+  }
+
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
   }

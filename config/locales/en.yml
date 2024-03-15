@@ -152,6 +152,9 @@ en:
       restore_error:
         title: "Oops"
         message: "There was an error restoring the user"
+      eula_accepted:
+        title: ""
+        message: "End-User License Agreement accepted"
     requirement_block:
       create_error:
         title: Oops

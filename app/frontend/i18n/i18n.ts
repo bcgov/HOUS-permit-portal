@@ -140,6 +140,10 @@ const options = {
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
         },
+        eula: {
+          title: "End-User License Agreement",
+          accept: "Accept Agreement",
+        },
         contact: {
           fields: {
             name: "Name",

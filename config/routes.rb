@@ -92,7 +92,10 @@ Rails.application.routes.draw do
     resource :profile, only: [:update], controller: "users"
     resources :users, only: [:destroy] do
       patch "restore", on: :member
+      patch "accept_eula", on: :member
     end
+
+    resources :end_user_license_agreement, only: %i[index]
 
     resources :step_codes, only: %i[index create destroy], shallow: true do
       resources :step_code_checklists, only: %i[index show update]
