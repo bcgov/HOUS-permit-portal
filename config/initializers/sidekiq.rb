@@ -14,7 +14,7 @@ if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip th
 
   Sidekiq.configure_server do |config|
     config.redis = redis_cfg
-    config.queues = %w[promote_asset_and_make_derivatives default]
+    config.queues = %w[file_processing default]
     config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
   end
 

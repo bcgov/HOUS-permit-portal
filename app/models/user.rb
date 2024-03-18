@@ -41,6 +41,7 @@ class User < ApplicationRecord
   validate :confirmed_user_has_fields
   validate :unique_bceid
   validates :email, presence: true
+  validates :username, uniqueness: true
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
