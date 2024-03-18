@@ -62,7 +62,7 @@ export const Footer = observer(() => {
                           {t("site.contact")}
                         </RouterLink>
                         <Link
-                          href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services"
+                          href={import.meta.env.VITE_BCGOV_HELP_IFRAME_URL}
                           target="_blank"
                           rel="noopener noreferrer"
                           color="text.primary"
