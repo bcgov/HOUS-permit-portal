@@ -92,7 +92,7 @@ const options = {
           no: "No",
           show: "Show",
           hide: "Hide",
-          change: "Change",
+          setup: "Setup",
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
@@ -192,6 +192,10 @@ const options = {
             templatesUsed: "Templates Used",
             mapPosition: "Map position",
           },
+          submissionEmailConfirmed: {
+            heading: "Email confirmed!",
+            description: "You will start to receive permit applications shortly",
+          },
           lat: "Latitude",
           lng: "Longitude",
           title: "Local Housing Permits",
@@ -237,7 +241,8 @@ const options = {
           submissionInbox: {
             title: "Submissions Inbox",
             tableHeading: "Permit Applications",
-            submissionsSentTo: "All submissions are sent to: {{email}}",
+            submissionsSentTo:
+              "A copy of all submitted applications are also sent to one or more email addresses configured by the review manager.",
           },
           fields: {
             number: "Application #",
@@ -715,8 +720,59 @@ const options = {
           requirementsLibraryTitle: "Requirements Library",
           requirementsLibraryDescription:
             "Create and manage requirement blocks that can be used inside of permit templates.",
-          contentManagementTitle: "Content Management",
-          contentManagementDescription: "Customize content in one centralized place.",
+          configurationManagement: {
+            title: "Configuration Management",
+            description: "Customize content in one centralized place.",
+            editPermission: "Only managers are able to edit.",
+            jurisdictionNameLabel: "Name of local jurisdiction",
+            jurisdictionLocationLabel: "Location",
+            jurisdictionAbout: {
+              title: "My Jurisdiction's About Page",
+              description:
+                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
+            },
+            submissionsInboxSetup: {
+              title: "Submissions Inbox Setup",
+              description: "Specify email addresses that should receive applications.",
+              permitTypes: {
+                label: "Send permit applications for",
+                low_residential: "Low Density - Residential",
+                medium_residential: "Medium Density - Residential",
+                high_residential: "High Density - Residential",
+                new_construction: "New Construction",
+                addition_alteration_renovation: "Addition, Alteration, or Renovation",
+                site_alteration: "Site Alteration",
+                demolition: "Demolition",
+              },
+              emailLabel: "to recipient email(s)",
+              addEmail: "Add another email",
+              confirmationRequired: "Action Required: please click link in verification email",
+            },
+            stepCodeRequirements: {
+              title: "Energy Step Code Requirements",
+              description: "Define step code requirements.",
+              part9Building: "Part 9 Building",
+              stepRequired: {
+                energy: {
+                  title: "Energy Step Required",
+                  options: {
+                    "3": "3",
+                    "4": "4",
+                    "5": "5",
+                  },
+                },
+                zeroCarbon: {
+                  title: "Zero Carbon Step Code Level Required",
+                  options: {
+                    "1": "EL 1 - Measure Only",
+                    "2": "EL 2 - Moderate",
+                    "3": "EL 3 - Strong",
+                    "4": "EL 4 - Zero Carbon",
+                  },
+                },
+              },
+            },
+          },
           superAdminTitle: "Admin Home",
           submissionsInboxTitle: "Submissions Inbox",
           submissionsInboxDescription: "View all submitted building permit applications.",
@@ -915,7 +971,7 @@ const options = {
             "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
           breadcrumb: {
             profile: "Profile",
-            jurisdictions: "Manage Jurisdictions",
+            jurisdictions: "Jurisdictions",
             new: "Create New",
             invite: "Invite",
             templateVersions: "Template Versions",
@@ -932,6 +988,10 @@ const options = {
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital Building Permits",
             contact: "Contact Us",
+            configurationManagement: "Configuration Management",
+            energyStep: "Energy Step Code Requirements",
+            submissionsInboxSetup: "Submissions Inbox Setup",
+            confirmed: "Submission E-mail Confirmed",
           },
           questionSupport: "Question Support",
         },
