@@ -56,7 +56,6 @@ export const SessionStoreModel = types
         self.rootStore.disconnectUserChannel()
         self.resetAuth()
       }
-      self.isLoggingOut = false
       // Do a full browser refresh to enhance security
       window.location.href = "/"
     }),
