@@ -17,7 +17,8 @@ import {
 } from "../../../../../types/api-request"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
-import { BuilderFloatingButtons } from "../../builder-floating-buttons"
+import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
+import { BuilderTopFloatingButtons } from "../../builder-top-floating-buttons"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
 import { ControlsHeader } from "./controls-header"
@@ -132,6 +133,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               bg={hasNoSections ? "greys.grey03" : undefined}
               overflow={"auto"}
               ref={rightContainerRef}
+              position={"relative"}
             >
               <ControlsHeader
                 onSaveDraft={onSaveDraft}
@@ -139,6 +141,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
                 onAddSection={onAddSection}
                 requirementTemplate={requirementTemplate}
               />
+              <BuilderTopFloatingButtons />
               {hasNoSections ? (
                 <Flex
                   justifyContent={hasNoSections ? "center" : undefined}
@@ -156,7 +159,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             </Flex>
           </Flex>
         </FormProvider>
-        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
+        <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
       </Flex>
     </RemoveScroll>
   )

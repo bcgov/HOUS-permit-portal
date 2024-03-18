@@ -8,9 +8,9 @@ interface IProps {
   onCollapseAll: () => void
 }
 
-export function BuilderFloatingButtons({ onScrollToTop, onCollapseAll }: IProps) {
+export function BuilderBottomFloatingButtons({ onScrollToTop, onCollapseAll }: IProps) {
   return (
-    <Stack spacing={4} position={"fixed"} bottom={6} right={6} alignItems={"flex-end"}>
+    <Stack spacing={4} position={"absolute"} bottom={6} right={6} alignItems={"flex-end"}>
       <Button variant={"greyButton"} leftIcon={<ArrowUp />} pl={"0.6125rem"} onClick={onScrollToTop}>
         {t("requirementTemplate.edit.goToTop")}
       </Button>

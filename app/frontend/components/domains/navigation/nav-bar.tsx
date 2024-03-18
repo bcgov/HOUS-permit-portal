@@ -223,10 +223,10 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
                   {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
-                  <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
                   <HelpDrawer
                     renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
                   />
+                  <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
                   <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
                 </MenuGroup>
               </>
