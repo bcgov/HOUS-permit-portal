@@ -30,7 +30,7 @@ class PermitTypeSubmissionContact < ApplicationRecord
 
   def send_confirmation_instructions
     return if confirmed?
-    PermitTypeSubmissionContactMailer.new.send_confirm_email(self)
+    PermitHubMailer.permit_type_submission_contact_confirm(self).deliver_later
   end
 
   def reset_confirmation

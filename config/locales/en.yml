@@ -52,7 +52,7 @@ en:
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_application_updated: "Updated application status: %{permit_application_number}"
       remind_reviewers: "Your report on outstanding permit applications"
-      confirm_inbox_email: "Confirm submission inbox email"
+      permit_type_submission_contact_confirm: "Confirm submission inbox email"
   arbitrary_message_construct:
     devise:
       failure:

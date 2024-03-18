@@ -30,7 +30,7 @@ class Api::InvitationsController < Devise::InvitationsController
     if invitation_accepted
       resource.after_database_authentication
 
-      PermitHubMailerJob.perform_async("onboarding", user.id)
+      PermitHubMailer.onboarding(user).deliver_later
       sign_in(resource_name, resource)
 
       render_success(

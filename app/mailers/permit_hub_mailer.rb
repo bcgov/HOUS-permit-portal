@@ -1,80 +1,54 @@
 class PermitHubMailer < ApplicationMailer
-  def send_welcome_email(user)
-    send_mail(
-      email: user.email,
-      template: "user_mailer/welcome",
-      i18n_key: "welcome",
-      locals: {
-        user:
-      }
-    )
+  # define instance variables that will be used in the view template
+  def welcome(user)
+    @user = user
+    send_mail(email: user.email, template_key: "welcome")
   end
 
-  def send_onboarding_email(user)
-    send_mail(
-      email: user.email,
-      template: "user_mailer/onboarding",
-      i18n_key: "onboarding",
-      locals: {
-        user:
-      }
-    )
+  def onboarding(user)
+    @user = user
+    send_mail(email: user.email, template_key: "onboarding")
   end
 
-  def send_notify_submitter_application_submitted_email(
-    user,
-    permit_application
-  )
-    send_mail(
-      email: user.email,
-      template: "user_mailer/notify_submitter_application_submitted",
-      i18n_key: "notify_submitter_application_submitted",
-      locals: {
-        user:,
-        permit_application:
-      }
-    )
+  def notify_submitter_application_submitted(user, permit_application)
+    @user = user
+    @permit_application = permit_application
+    send_mail(email: user.email, template_key: "notify_submitter_application_submitted")
   end
 
-  def send_notify_reviewer_application_received_email(user, permit_application)
+  def notify_reviewer_application_received(user, permit_application)
+    @user = user
+    @permit_application = permit_application
     send_mail(
       email: user.email,
-      template: "user_mailer/notify_reviewer_application_received",
-      i18n_key: "notify_reviewer_application_received",
-      i18n_params: {
-        permit_application_number: permit_application.number
+      template_key: "notify_reviewer_application_received",
+      subject_i18n_params: {
+        permit_application_number: permit_application.number,
       },
-      locals: {
-        user:,
-        permit_application:
-      }
     )
   end
 
-  def send_notify_application_updated_email(user, permit_application)
+  def notify_application_updated(user, permit_application)
+    @user = user
+    @permit_application = permit_application
     send_mail(
       email: user.email,
-      template: "user_mailer/notify_application_updated",
-      i18n_key: "notify_application_updated",
-      i18n_params: {
-        permit_application_number: permit_application.number
+      template_key: "notify_application_updated",
+      subject_i18n_params: {
+        permit_application_number: permit_application.number,
       },
-      locals: {
-        user:,
-        permit_application:
-      }
     )
   end
 
-  def send_remind_reviewer_email(user, permit_applications)
-    send_mail(
-      email: user.email,
-      template: "user_mailer/remind_reviewer",
-      i18n_key: "remind_reviewer",
-      locals: {
-        user:,
-        permit_applications:
-      }
-    )
+  def remind_reviewer(user, permit_applications)
+    @user = user
+    @permit_applications = permit_applications
+    send_mail(email: user.email, template_key: "remind_reviewer")
+  end
+
+  #### PermitTypeSubmission Contact Mailer
+  def permit_type_submission_contact_confirm(permit_type_submission_contact)
+    @permit_type_submission_contact = permit_type_submission_contact
+    send_mail(email: permit_type_submission_contact.email, template_key: "permit_type_submission_contact_confirm")
   end
 end
