@@ -49,6 +49,8 @@ Devise.setup do |config|
   # with default "from" parameter.
   config.mailer_sender = ENV["FROM_EMAIL"]
 
+  config.mailer = "CustomDeviseMailer"
+
   # Configure the class responsible to send e-mails.
 
   # Configure the parent class responsible to send e-mails.
