@@ -40,7 +40,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" flex={1}>
       <PermitApplicationStatusTabs searchModel={permitApplicationStore} />
-      <BlueTitleBar title={t("permitApplication.indexTitle")} imageSrc={"/images/jurisdiction-bus.svg"} />
+      <BlueTitleBar title={t("permitApplication.indexTitle")} />
       <Container maxW="container.lg" pb={4}>
         <Flex as="section" direction="column" p={6} gap={6} flex={1}>
           <RouterLinkButton
