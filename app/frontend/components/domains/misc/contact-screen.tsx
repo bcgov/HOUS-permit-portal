@@ -7,7 +7,7 @@ export const ContactScreen = () => {
   const mailto = "mailto:" + t("site.contactEmail")
 
   return (
-    <Container maxW="container.lg" py="16" px="8">
+    <Container maxW="container.lg" pt="16" pb="36" px="8">
       <Heading as="h1">{t("site.contact")}</Heading>
       <Text>
         <strong>{t("site.contactInstructions_1")}</strong>
@@ -18,9 +18,11 @@ export const ContactScreen = () => {
       </Heading>
       <Text>
         {t("site.contactInstructions_3")}
-        <Link href="" isExternal>
-          {t("site.listJurisdictions")}.
-        </Link>
+        {/*
+					<Link ml="1" href="">
+          	{t("site.listJurisdictions")}.
+					</Link>
+				*/}
       </Text>
 
       <VStack
