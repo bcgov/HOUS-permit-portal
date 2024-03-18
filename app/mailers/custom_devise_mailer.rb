@@ -1,4 +1,7 @@
 class CustomDeviseMailer < Devise::Mailer
+  default from: ENV["FROM_EMAIL"]
+  layout "mailer"
+
   # If you wanted to override devise confirmation instructions do it here
   def confirmation_instructions(record, token, opts = {})
     super
@@ -7,7 +10,7 @@ class CustomDeviseMailer < Devise::Mailer
   def devise_mail(record, action, opts = {}, &block)
     initialize_from_record(record)
     mail_headers = headers_for(action, opts)
-    # @root_url = FrontendUrlHelper.root_url
+    @root_url = FrontendUrlHelper.root_url
 
     mail(
       to: mail_headers[:to],
