@@ -1,7 +1,6 @@
 class ChesEmailDelivery
   attr_accessor :config, :client, :bearer_token, :delivery_method
 
-  # In Production environments use CHES, otherwise locally use Letter Opener
   def initialize(config)
     @config = config
 
@@ -15,7 +14,6 @@ class ChesEmailDelivery
   end
 
   def deliver!(mail)
-    # send request to CHES in deployed prod mode
     ensure_ches_token_is_valid_and_health_check_passes
     params = {
       to: mail.to,
@@ -29,6 +27,7 @@ class ChesEmailDelivery
       body: mail.body.to_s,
       bodyType: body_type(mail),
     }
+
     response = client.post("email", params.to_json)
 
     if response.success?
@@ -39,9 +38,9 @@ class ChesEmailDelivery
 
   def body_type(mail)
     case mail.content_type
-    when "text/html"
+    when mail.content_type.include?("text/html")
       "html"
-    when "text/plain"
+    when mail.content_type.include?("text/plain")
       "text"
     else
       "html"
