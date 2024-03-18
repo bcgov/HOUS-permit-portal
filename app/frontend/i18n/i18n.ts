@@ -864,9 +864,8 @@ const options = {
             workType: "Work Type",
             manageButton: "Manage",
             lastUpdated: "Last updated",
-            requestNewLink: "request a new permit type",
-            requestNewPrompt:
-              "Your administrator has made the above permit types available for digital submissions. If there is another permit type you want please",
+            requestNewPromptWithLink:
+              "Your administrator has made the above permit types available for digital submissions. If there is another permit type you want please <1>request a new permit type</1>.",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
           },
