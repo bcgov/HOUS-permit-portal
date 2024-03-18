@@ -10,7 +10,7 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
 
   def initialize(checklist:, step:)
     @checklist = checklist
-    @step = step
+    @step = step || checklist.step_code.zero_carbon_step_required || ENV["MIN_ZERO_CARBON_STEP"].to_i
   end
 
   def total_ghg

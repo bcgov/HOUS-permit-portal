@@ -9,6 +9,7 @@ export const PermitClassificationStoreModel = types
   .model("PermitClassificationStore", {
     permitTypeMap: types.map(PermitTypeModel),
     activityMap: types.map(ActivityModel),
+    isLoaded: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
@@ -59,6 +60,7 @@ export const PermitClassificationStoreModel = types
         self.mergeUpdateAll(activityData, "activityMap")
       }
       self.isLoading = false
+      self.isLoaded = true
       return response.ok
     }),
   }))

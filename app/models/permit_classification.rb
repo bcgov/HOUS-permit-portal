@@ -4,6 +4,16 @@ class PermitClassification < ApplicationRecord
   validates :code, presence: true, uniqueness: :true
   validates :name, presence: true
 
+  enum code: %i[
+         low_residential
+         medium_residential
+         high_residential
+         new_construction
+         addition_alteration_renovation
+         site_alteration
+         demolition
+       ]
+
   def image_url
     ActionController::Base.helpers.asset_path("images/permit_classifications/#{self.code}.png")
   end
