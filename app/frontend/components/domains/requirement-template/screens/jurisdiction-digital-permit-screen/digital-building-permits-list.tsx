@@ -1,4 +1,4 @@
-import { Button, Flex, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Center, Flex, Link, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -70,6 +70,14 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
           </Flex>
         )
       })}
+      <Center>
+        <Box bg="greys.grey03" p={4} w="75%" mt={24}>
+          {t("digitalBuildingPermits.index.requestNewPrompt")}{" "}
+          <Link href={`mailto:digital.codes.permits@gov.bc.ca?subject=New%20permit%20type%20requested`}>
+            {t("digitalBuildingPermits.index.requestNewLink")}
+          </Link>
+        </Box>
+      </Center>
     </Stack>
   )
 })
