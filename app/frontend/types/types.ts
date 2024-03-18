@@ -2,10 +2,12 @@ import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
   EDoorsPerformanceType,
+  EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
   ENumberUnit,
   ERequirementType,
+  ESZeroCarbonStep,
   ESortDirection,
   ESpaceHeatingCoolingPerformanceType,
   EStepCodeAirtightnessValue,
@@ -25,6 +27,13 @@ export interface IContact {
   phoneNumber?: string
   email?: string
   createdAt?: number | string // has to allow string to stop errors with useFieldArray
+}
+
+export interface IPermitTypeSubmissionContact {
+  id: string
+  email: string
+  permitTypeId: string
+  confirmedAt: string
 }
 
 export interface ISort<TField = string> {
@@ -155,6 +164,8 @@ export interface IStepCodeSelectOptions {
   permitApplications: Partial<IPermitApplication>[]
   buildingTypes: EStepCodeBuildingType[]
   buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
+  energySteps: EEnergyStep[]
+  zeroCarbonSteps: ESZeroCarbonStep[]
 }
 
 export interface IRequirementBlockCustomization {

@@ -16,9 +16,7 @@ export const EnergyStep = function EnergyStep({ checklist }: IProps) {
     <>
       <GridRowHeader>{t(`${translationPrefix}.step`)}</GridRowHeader>
       <GridData>
-        <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.proposedEnergyStep || "-" }}
-        />
+        <TextFormControl inputProps={{ isDisabled: true, textAlign: "center", value: checklist.requiredEnergyStep }} />
       </GridData>
       <GridPlaceholder colSpan={2} />
     </>

@@ -1,30 +1,23 @@
-import { Box, Flex, Heading, Text } from "@chakra-ui/react"
+import { BoxProps, Flex, Heading, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { SectionBox } from "./section-box"
 
-interface IHomeScreenBoxProps {
+interface IHomeScreenBoxProps extends BoxProps {
   icon: ReactNode
   href: string
   title: string
   description: string
-  useViewText?: boolean
+  linkText?: string
 }
 
-export const HomeScreenBox = ({ icon, title, description, href, useViewText }: IHomeScreenBoxProps) => {
+export const HomeScreenBox = ({ icon, title, description, href, linkText, ...rest }: IHomeScreenBoxProps) => {
   const { t } = useTranslation()
 
   return (
-    <Box
-      as="section"
-      borderRadius="lg"
-      border="1px solid"
-      borderColor="border.light"
-      p={6}
-      w="full"
-      className="jumbo-buttons"
-    >
+    <SectionBox {...rest}>
       <Flex direction={{ base: "column", md: "row" }} gap={8} align="center">
         <Flex direction="column" gap={3} flex={1}>
           <Flex color="text.link">
@@ -33,14 +26,16 @@ export const HomeScreenBox = ({ icon, title, description, href, useViewText }: I
               {title}
             </Heading>
           </Flex>
-          <Text ml={8}>{description}</Text>
+          <Text ml={8} fontSize="sm">
+            {description}
+          </Text>
         </Flex>
         <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />}>
           <Heading as="h3" fontSize="lg" color="text.link">
-            {useViewText ? t("ui.view") : t("ui.manage")}
+            {linkText || t("ui.manage")}
           </Heading>
         </RouterLinkButton>
       </Flex>
-    </Box>
+    </SectionBox>
   )
 }

@@ -13,6 +13,7 @@ class Jurisdiction < ApplicationRecord
   has_many :jurisdiction_template_version_customizations
   has_many :template_versions, through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
+  has_many :permit_type_submission_contacts
 
   validates :name, uniqueness: { scope: :locality_type }
   validates :locality_type, presence: true
@@ -21,6 +22,9 @@ class Jurisdiction < ApplicationRecord
   before_save :sanitize_html_fields
 
   accepts_nested_attributes_for :contacts
+  accepts_nested_attributes_for :permit_type_submission_contacts,
+                                allow_destroy: true,
+                                reject_if: proc { |attributes| attributes["email"].blank? }
 
   before_create :assign_unique_prefix
 

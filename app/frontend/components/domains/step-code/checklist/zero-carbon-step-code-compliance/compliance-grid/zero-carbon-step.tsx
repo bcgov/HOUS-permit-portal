@@ -17,7 +17,7 @@ export const ZeroCarbonStep = function ZeroCarbonStep({ checklist }: IProps) {
       <GridRowHeader>{t(`${translationPrefix}.step`)}</GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.proposedZeroCarbonStep || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.requiredZeroCarbonStep }}
         />
       </GridData>
       <GridPlaceholder colSpan={2} />
