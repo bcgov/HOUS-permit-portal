@@ -24,21 +24,27 @@ export const HomeScreenBox = ({ icon, title, description, href, useViewText }: I
       p={6}
       w="full"
       className="jumbo-buttons"
+      position="relative"
+      transition="border-color 200ms ease-out"
+      _hover={{
+        borderColor: "theme.blueAlt",
+        bg: "theme.BlueLight",
+      }}
     >
       <Flex direction={{ base: "column", md: "row" }} gap={8} align="center">
         <Flex direction="column" gap={3} flex={1}>
           <Flex color="text.link">
             {icon}
-            <Heading as="h3" fontSize="xl" ml={2}>
+            <Heading as="h3" ml={2}>
               {title}
             </Heading>
           </Flex>
           <Text ml={8}>{description}</Text>
         </Flex>
-        <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />}>
-          <Heading as="h3" fontSize="lg" color="text.link">
+        <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />} position="static">
+          <Text as="span" fontWeight="bold" fontSize="lg" color="text.link">
             {useViewText ? t("ui.view") : t("ui.manage")}
-          </Heading>
+          </Text>
         </RouterLinkButton>
       </Flex>
     </Box>

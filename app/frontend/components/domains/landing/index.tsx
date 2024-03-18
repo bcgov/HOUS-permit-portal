@@ -79,9 +79,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               color="greys.white"
               flex={1}
             >
-              <Heading as="h3" fontSize="xl">
-                {t("landing.accessMyPermits")}
-              </Heading>
+              <Heading as="h2">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
@@ -94,7 +92,9 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               </Flex>
             </Flex>
             <VStack as="section" align="flex-start" spacing={4}>
-              <Heading>{t("landing.whoForTitle")}</Heading>
+              <Heading as="h2" variant="yellowline">
+                {t("landing.whoForTitle")}
+              </Heading>
 
               <UnorderedList spacing={1} pl={4}>
                 {whoFor.map((str) => (
@@ -107,9 +107,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
             <Image src="https://placehold.co/230x150" alt="dont-forget-me" />
             <Flex as="section" direction="column" gap={4}>
-              <Heading as="h3" fontSize="xl">
-                {t("landing.whyUseTitle")}
-              </Heading>
+              <Heading as="h3">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
             </Flex>
           </Flex>

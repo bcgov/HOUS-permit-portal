@@ -35,12 +35,8 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
-            <Heading as="h3" fontSize={"4xl"} color={"text.primary"}>
-              {t("jurisdiction.index.title")}
-            </Heading>
-            <Text color={"text.secondary"} mt={1}>
-              {t("jurisdiction.index.description")}
-            </Text>
+            <Heading as="h1">{t("jurisdiction.index.title")}</Heading>
+            <Text color={"text.secondary"}>{t("jurisdiction.index.description")}</Text>
           </Box>
           <RouterLinkButton variant={"primary"} to={"/jurisdictions/new"}>
             {t("jurisdiction.index.createButton")}
@@ -86,6 +82,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
             totalPages={totalPages}
             pageSize={countPerPage}
             handlePageChange={handlePageChange}
+            showLessItems={true}
           />
         </Flex>
       </VStack>

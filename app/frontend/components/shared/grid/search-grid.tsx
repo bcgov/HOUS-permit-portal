@@ -21,6 +21,10 @@ export const SearchGrid = ({ children, templateColumns, ...containerProps }: ISe
           borderBottom: "1px solid",
           borderColor: "border.light",
         },
+        "[role='row']:not(:last-child) > [role='cell']": {
+          borderBottom: "1px solid",
+          borderColor: "border.light",
+        },
       }}
       border={"1px solid"}
       borderColor={"border.light"}

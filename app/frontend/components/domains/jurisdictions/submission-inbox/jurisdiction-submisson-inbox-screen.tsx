@@ -39,9 +39,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Flex direction="column">
-            <Heading as="h1" fontSize={"4xl"} color={"text.primary"}>
-              {t("permitApplication.submissionInbox.title")}
-            </Heading>
+            <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
             <Flex>
               <Text mr={2}>
                 {t("permitApplication.submissionInbox.submissionsSentTo", {
@@ -133,6 +131,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             totalPages={totalPages}
             pageSize={countPerPage}
             handlePageChange={handlePageChange}
+            showLessItems={true}
           />
         </Flex>
       </VStack>

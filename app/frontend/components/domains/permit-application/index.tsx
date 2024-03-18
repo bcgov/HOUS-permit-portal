@@ -56,9 +56,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             justify="space-between"
             direction={{ base: "column", md: "row" }}
           >
-            <Heading as="h3" fontSize="2xl">
-              {t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.draft}`)}
-            </Heading>
+            <Heading as="h2">{t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.draft}`)}</Heading>
             <Flex align="flex-end" gap={4}>
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
@@ -94,6 +92,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             totalPages={totalPages}
             pageSize={countPerPage}
             handlePageChange={handlePageChange}
+            showLessItems={true}
           />
         </Flex>
       </Container>

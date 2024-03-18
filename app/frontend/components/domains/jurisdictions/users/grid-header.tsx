@@ -30,9 +30,7 @@ export const GridHeaders = observer(function GridHeaders() {
           justifyContent={"space-between"}
           align="center"
         >
-          <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
-            {t("user.index.tableHeading")}
-          </Text>
+          <Text role={"heading"}>{t("user.index.tableHeading")}</Text>
           <SearchInput searchModel={userStore} />
         </GridItem>
       </Box>
