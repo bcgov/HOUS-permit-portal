@@ -19,7 +19,7 @@ class EulaUpdater
         eula = EndUserLicenseAgreement.find_or_initialize_by(active: true, variant: variant)
 
         # Update the content
-        eula.content = html_content
+        eula.content = html_content.gsub("\u0000", "")
 
         # Save the record
         if eula.save
