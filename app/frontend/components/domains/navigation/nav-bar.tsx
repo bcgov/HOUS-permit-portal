@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { StepCodeNavLinks } from "../step-code/nav-links"
@@ -125,6 +126,7 @@ export const NavBar = observer(() => {
             </Show>
             <Spacer />
             <HStack gap={3}>
+              {!isStepCode && !loggedIn && <HelpDrawer />}
               {(!isStepCode && currentUser?.isSubmitter) || (!loggedIn && <NavBarSearch />)}
               {currentUser?.isSubmitter ? (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
@@ -222,6 +224,9 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
                   {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
+                  <HelpDrawer
+                    renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
+                  />
                   <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
                 </MenuGroup>
               </>
