@@ -9,7 +9,8 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
-import { EPermitApplicationSortFields } from "../types/enums"
+import { EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
+import { IUserPushPayload } from "../types/types"
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -151,6 +152,17 @@ export const PermitApplicationStoreModel = types
       self.currentPermitApplication?.stepCode &&
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
+    processWebsocketChange: flow(function* (payload: IUserPushPayload) {
+      //based on the eventType do stuff
+      switch (payload.eventType) {
+        case ESocketEventTypes.update:
+          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payload.data })
+          document.dispatchEvent(event)
+          break
+        default:
+          import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
+      }
+    }),
   }))
 
 export interface IPermitApplicationStore extends Instance<typeof PermitApplicationStoreModel> {}

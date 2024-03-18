@@ -10,9 +10,7 @@ module FormSupportingDocuments
     #fetch the energy step_code from json
     if requirement_energy_step_code_key_value && step_code
       if step_code.plan_out_of_date
-        joined[
-          requirement_energy_step_code_key_value[0]
-        ] = "warningFileOutOfDate"
+        joined[requirement_energy_step_code_key_value[0]] = "warningFileOutOfDate"
       else
         joined[requirement_energy_step_code_key_value[0]] = "infoInProgress"
       end
@@ -20,14 +18,10 @@ module FormSupportingDocuments
 
     #data from individual documents
     grouped_compliance_data =
-      supporting_documents
-        .where.not(compliance_data: {})
-        .map { |sd| sd.compliance_message_view }
+      supporting_documents.where.not(compliance_data: {}).map { |sd| sd.compliance_message_view }
     grouped_compliance_data
       .group_by { |sd| sd["data_key"] }
-      .each do |key, value|
-        joined[key] = value.map { |v| v["message"] }.uniq.join(",")
-      end
+      .each { |key, value| joined[key] = value.map { |v| v["message"] }.uniq.join(",") }
 
     joined
   end
@@ -44,26 +38,17 @@ module FormSupportingDocuments
   def file_fields_to_merge! #NOTE THIS MODIFIES THE UNDERLYING FIELDS TO BE MERGED ON THE SUBMISSION_DATA HASH
     #find supporting docs that are created that have data key and match based on storage id
     docs_in_storage = supporting_documents.select(:id, :data_key, :file_data)
-    find_file_fields_and_transform_hash!(
-      submission_data,
-      {}
-    ) do |file_field_key, file_array|
-      file_array
-        .map do |file|
-          remap_cache_to_storage_ids(file_field_key, file, docs_in_storage)
-        end
-        .compact
+    find_file_fields_and_transform_hash!(submission_data, {}) do |file_field_key, file_array|
+      file_array.map { |file| remap_cache_to_storage_ids(file_field_key, file, docs_in_storage) }.compact
     end
   end
 
   def remap_cache_to_storage_ids(file_field_key, file_hash, docs_in_storage)
-    if file_hash["storage"] != "s3custom" ||
-         !file_hash["id"].start_with?("cache/")
+    if file_hash["storage"] != "s3custom" || !file_hash["id"].start_with?("cache/")
       file_hash
     else
       file_hash.tap do |h|
-        support_doc =
-          docs_in_storage.find { |d| d.id && d.data_key == file_field_key }
+        support_doc = docs_in_storage.find { |d| d.id && d.data_key == file_field_key }
         file_data_id = support_doc&.file_data&.dig("id")
         if file_data_id.present?
           h["id"] = file_data_id
@@ -75,18 +60,10 @@ module FormSupportingDocuments
   end
 
   #for automated compliance fields
-  def fetch_file_ids_from_submission_data_matching_requirements(
-    fields_and_requirements_array
-  )
+  def fetch_file_ids_from_submission_data_matching_requirements(fields_and_requirements_array)
     fields_and_requirements_array
       .map do |field_id, req|
-        self.submission_data.dig(
-          "data",
-          PermitApplication.section_from_key(field_id),
-          field_id,
-          0,
-          "id"
-        )
+        self.submission_data.dig("data", PermitApplication.section_from_key(field_id), field_id, 0, "id")
       end
       .compact
       .map { |id| id.start_with?("cache/") ? id.slice(6..-1) : id }
@@ -94,6 +71,30 @@ module FormSupportingDocuments
 
   def supporting_documents_without_compliance_matching(regex_pattern)
     supporting_documents.file_ids_with_regex(regex_pattern).without_compliance
+  end
+
+  def zipfile_size
+    zipfile_data&.dig("metadata", "size")
+  end
+
+  def zipfile_name
+    zipfile_data&.dig("metadata", "filename")
+  end
+
+  def zipfile_url
+    zipfile&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
+    )
+  end
+
+  private
+
+  def zip_and_upload_supporting_documents
+    return unless submitted? && zipfile_data.blank?
+
+    ZipfileJob.perform_async(id)
   end
 
   module ClassMethods

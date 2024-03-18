@@ -73,12 +73,6 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  def set_template_version
-    return unless template_version.blank?
-
-    self.template_version = current_published_template_version
-  end
-
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
     RequirementTemplate.published_requirement_template_version(activity, permit_type)
@@ -95,16 +89,29 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def update_viewed_at
+    update(viewed_at: Time.current)
+  end
+
   def number_prefix
     jurisdiction.prefix
   end
 
-  def assign_default_nickname
-    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+  def collaborators
+    #eventually will add editors.  For compliance related items (it is before submit, it should target collaborators)
+    [submitter]
   end
 
-  def update_viewed_at
-    update(viewed_at: Time.current)
+  private
+
+  def set_template_version
+    return unless template_version.blank?
+
+    self.template_version = current_published_template_version
+  end
+
+  def assign_default_nickname
+    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number
@@ -153,22 +160,6 @@ class PermitApplication < ApplicationRecord
     # Assign the new number to the permit application
     self.number = new_number if self.number.blank?
     return new_number
-  end
-
-  def zipfile_size
-    zipfile_data&.dig("metadata", "size")
-  end
-
-  def zipfile_name
-    zipfile_data&.dig("metadata", "filename")
-  end
-
-  def zipfile_url
-    zipfile&.url(
-      public: false,
-      expires_in: 3600,
-      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
-    )
   end
 
   def submitter_frontend_url
@@ -230,12 +221,6 @@ class PermitApplication < ApplicationRecord
     return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
 
     jurisdiction.reindex
-  end
-
-  def zip_and_upload_supporting_documents
-    return unless submitted? && zipfile_data.blank?
-
-    ZipfileJob.perform_async(id)
   end
 
   def set_submitted_at

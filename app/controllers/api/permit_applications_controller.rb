@@ -16,13 +16,18 @@ class Api::PermitApplicationsController < Api::ApplicationController
                        current_page: @permit_application_search.current_page,
                      },
                      blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :extended,
+                     },
                    }
   end
 
   def show
     authorize @permit_application
 
-    render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
+    render_success @permit_application,
+                   nil,
+                   { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
 
     @permit_application.update_viewed_at if current_user.review_staff?
   end
@@ -42,9 +47,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
       end
       render_success @permit_application,
                      ("permit_application.save_draft_success"),
-                     { blueprint: PermitApplicationBlueprint }
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     elsif @permit_application.submitted? && @permit_application.update(submitted_permit_application_params)
-      render_success @permit_application, ("permit_application.save_success"), { blueprint: PermitApplicationBlueprint }
+      render_success @permit_application,
+                     ("permit_application.save_success"),
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     else
       render_error "permit_application.update_error",
                    message_opts: {
@@ -66,7 +73,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
          )
       @permit_application.send_submit_notifications
 
-      render_success @permit_application, nil, { blueprint: PermitApplicationBlueprint }
+      render_success @permit_application,
+                     nil,
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     else
       render_error "permit_application.submit_error",
                    message_opts: {
@@ -86,7 +95,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
       end
-      render_success @permit_application, "permit_application.create_success", { blueprint: PermitApplicationBlueprint }
+      render_success @permit_application,
+                     "permit_application.create_success",
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     else
       render_error "permit_application.create_error",
                    message_opts: {
