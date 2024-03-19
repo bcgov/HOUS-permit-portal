@@ -36,6 +36,9 @@ const styles = {
       fontSize: "var(--chakra-fontSizes-lg)",
       color: "inherit",
     },
+    [".chakra-breadcrumb__list"]: {
+      paddingLeft: "0",
+    },
   },
 }
 const components = { Button, FormLabel, Heading, Input, Link, Text, Table }

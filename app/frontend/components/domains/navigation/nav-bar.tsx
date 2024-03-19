@@ -186,7 +186,6 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
-      <NavMenuItem label={t("home.auditLogTitle")} to={"/audit-log"} />
       <MenuDivider />
     </>
   )

@@ -36,29 +36,32 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Flex
         align="center"
         h="364px"
-        bgImage="https://placehold.co/1080x364"
-        bgPosition="center"
+        bgImage="images/header-background.jpeg"
+        bgPosition="center 60%"
         bgRepeat="no-repeat"
         bgSize="cover"
+        bgColor="theme.blue"
       >
-        <Container maxW="container.lg" py={16} px={8}>
-          <Flex
-            direction="column"
-            p={8}
-            maxW="468px"
-            bg="theme.blue"
-            color="greys.white"
-            borderRadius="sm"
-            borderLeft="8px solid"
-            borderColor="theme.yellow"
-            gap={2}
-          >
-            <Heading as="h1" fontSize="2xl">
-              {t("landing.title")}
-            </Heading>
-            <Text fontSize="lg">{t("landing.intro")}</Text>
-          </Flex>
-        </Container>
+        <Box bgColor="theme.blueShadedLight" w="full" height="full">
+          <Container maxW="container.lg" py={16} px={8}>
+            <Flex
+              direction="column"
+              p={8}
+              maxW="468px"
+              bg="theme.blueShadedDark"
+              color="greys.white"
+              borderRadius="sm"
+              borderLeft="8px solid"
+              borderColor="theme.yellow"
+              gap={2}
+            >
+              <Heading as="h1" fontSize="2xl">
+                {t("landing.title")}
+              </Heading>
+              <Text fontSize="lg">{t("landing.intro")}</Text>
+            </Flex>
+          </Container>
+        </Box>
       </Flex>
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
