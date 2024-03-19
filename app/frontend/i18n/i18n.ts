@@ -81,6 +81,11 @@ const options = {
           createdQ: "Why was this tool created?",
           createdA:
             "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
+          addressSelectLabel: "Location or civic address",
+          where: "Where",
+          findYourAuth: "Find your local building permit authority.",
+          localJurisdiction: "Local jurisdiction",
+          learnRequirements: "Learn about local requirements",
         },
         ui: {
           tip: "Tip",
@@ -133,6 +138,7 @@ const options = {
           collapseAll: "Collapse all",
           toTop: "Go to top",
           confirm: "Confirm",
+          searchAddresses: "Search addresses",
           close: "Close",
           asc: "Ascending",
           desc: "Descending",
@@ -309,6 +315,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          addAnotherPerson: "Add another person",
           elective: "Elective",
           associationsInfo: "Sections, tags, etc...",
           index: {
@@ -323,6 +330,8 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            defaultContactLabel: "Contact",
+            canAddMultipleContacts: "Submitter can add multiple contacts",
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
@@ -383,6 +392,18 @@ const options = {
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
+          },
+          contactFieldItemLabels: {
+            firstName: "First Name",
+            lastName: "Last Name",
+            email: "Email",
+            phone: "Phone",
+            address: "Address",
+            organization: "Organization",
+            businessName: "Business Name",
+            businessLicense: "Business License",
+            professionalAssociation: "Professional Association/Organization",
+            professionalNumber: "Professional Number",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
           unitLabels: {
@@ -850,6 +871,9 @@ const options = {
           inviteTitle: "Invite Users",
           inviteSuccess: "Invite sent!",
           inviteError: "Email taken",
+          takenErrorTitle: "Some of these emails already belong to existing users",
+          takenErrorDescription:
+            "One or more of the requested users have an existing submitter, reviewer, or review manager account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
           sendInvites: "Send Invites",
           acceptInvitation: "Accept Invitation to",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",

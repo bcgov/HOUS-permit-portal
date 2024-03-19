@@ -60,6 +60,7 @@ export type TSearchParams<IModelSortFields> = {
 export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
+  canAddMultipleContacts?: boolean
 }
 
 export interface IFormJson {

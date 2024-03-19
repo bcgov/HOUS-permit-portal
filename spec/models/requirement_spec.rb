@@ -192,16 +192,7 @@ RSpec.describe Requirement, type: :model do
       end
 
       it "returns correct form json for checkbox requirement" do
-        options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
-        requirement =
-          create(
-            :requirement,
-            label: "Checkbox Requirement",
-            input_type: "checkbox",
-            input_options: {
-              "value_options" => options,
-            },
-          )
+        requirement = create(:requirement, label: "Checkbox Requirement", input_type: "checkbox")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|checkboxRequirement",
@@ -211,7 +202,6 @@ RSpec.describe Requirement, type: :model do
           widget: {
             type: "input",
           },
-          values: options,
         }
 
         expect(form_json).to eq(expected_form_json)

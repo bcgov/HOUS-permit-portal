@@ -1,10 +1,10 @@
 import {
+  BoxProps,
   Checkbox,
   CheckboxGroup,
-  FormControl,
-  FormHelperText,
-  FormLabel,
+  FormControlProps,
   FormLabelProps,
+  HeadingProps,
   Input,
   InputGroup,
   InputLeftElement,
@@ -14,36 +14,33 @@ import {
   Select,
   SelectProps,
   Stack,
+  SwitchProps,
   Textarea,
 } from "@chakra-ui/react"
-import { CalendarBlank, MapPin } from "@phosphor-icons/react"
+import { CalendarBlank, Envelope, MapPin, Phone } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useTranslation } from "react-i18next"
-import { getRequirementTypeLabel } from "../../../constants"
-import { ENumberUnit, ERequirementType } from "../../../types/enums"
+import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
+import { GenericContactDisplay } from "./generic-contact-display"
+import { GenericFieldDisplay } from "./generic-field-display"
 
-const defaultLabelProps: Partial<FormLabelProps> = {
-  color: "text.primary",
-}
-
-type TRequirementFieldDisplayProps = {
-  labelProps?: Partial<FormLabelProps>
+export type TRequirementFieldDisplayProps = {
+  labelProps?: Partial<FormLabelProps | HeadingProps>
   label?: string
   options?: string[]
   helperText?: string
   unit?: ENumberUnit | null
   selectProps?: Partial<SelectProps>
+  addMultipleContactProps?: {
+    shouldRender?: boolean
+    isChecked?: boolean
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+    formControlProps?: FormControlProps
+    switchProps?: SwitchProps
+  }
+  showAddPersonButton?: boolean
   requirementType: ERequirementType
   showAddLabelIndicator?: boolean
-}
-
-interface IGroupedFieldProps extends Omit<TRequirementFieldDisplayProps, "options"> {
-  inputDisplay: JSX.Element
-}
-
-const helperTextStyles = {
-  color: "text.secondary",
 }
 
 const defaultOptions = ["Option", "Option"]
@@ -59,7 +56,7 @@ const requirementsComponentMap = {
         inputDisplay={
           <InputGroup>
             <InputLeftElement pointerEvents="none">
-              <i className="fa fa-phone"></i>
+              <Phone />
             </InputLeftElement>
             <Input bg={"white"} />
           </InputGroup>
@@ -70,14 +67,12 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.email](props: TRequirementFieldDisplayProps) {
-    const { t } = useTranslation()
-
     return (
       <GenericFieldDisplay
         inputDisplay={
           <InputGroup>
             <InputLeftElement pointerEvents="none">
-              <i className="fa fa-envelope"></i>
+              <Envelope />
             </InputLeftElement>
             <Input bg={"white"} />
           </InputGroup>
@@ -164,17 +159,16 @@ const requirementsComponentMap = {
   [ERequirementType.checkbox]({ options = defaultOptions, ...genericDisplayProps }: TRequirementFieldDisplayProps) {
     return (
       <GenericFieldDisplay
-        inputDisplay={
-          <CheckboxGroup>
-            <Stack>
-              {options.map((option, index) => (
-                <Checkbox key={index} value={option}>
-                  {option}
-                </Checkbox>
-              ))}
-            </Stack>
-          </CheckboxGroup>
-        }
+        containerProps={{
+          display: "flex",
+          flexDir: "row-reverse",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          sx: {
+            label: { mb: 0 },
+          },
+        }}
+        inputDisplay={<Checkbox mr={2} />}
         {...genericDisplayProps}
       />
     )
@@ -230,35 +224,61 @@ const requirementsComponentMap = {
   [ERequirementType.energyStepCode](props: TRequirementFieldDisplayProps) {
     return <GenericFieldDisplay inputDisplay={<i className="fa fa-bolt"></i>} {...props} />
   },
-}
 
-export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
-  return !!requirementsComponentMap[requirementType]
+  [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {
+    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      { type: ERequirementContactFieldItemType.firstName },
+      { type: ERequirementContactFieldItemType.lastName },
+      { type: ERequirementContactFieldItemType.email },
+      { type: ERequirementContactFieldItemType.phone },
+      {
+        type: ERequirementContactFieldItemType.address,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
+      { type: ERequirementContactFieldItemType.organization },
+    ]
+
+    return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
+  },
+
+  [ERequirementType.professionalContact](props: TRequirementFieldDisplayProps) {
+    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
+      { type: ERequirementContactFieldItemType.firstName },
+      { type: ERequirementContactFieldItemType.lastName },
+      { type: ERequirementContactFieldItemType.email },
+      { type: ERequirementContactFieldItemType.phone },
+      {
+        type: ERequirementContactFieldItemType.address,
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
+      { type: ERequirementContactFieldItemType.businessName },
+      { type: ERequirementContactFieldItemType.businessLicense },
+      { type: ERequirementContactFieldItemType.professionalAssociation },
+      { type: ERequirementContactFieldItemType.professionalNumber },
+    ]
+
+    return <GenericContactDisplay contactFieldItems={contactFieldItemTypes} {...props} />
+  },
 }
 
 export const RequirementFieldDisplay = observer(function RequirementFieldDisplay(props: TRequirementFieldDisplayProps) {
   return requirementsComponentMap[props.requirementType]?.(props) ?? null
 })
 
-export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
-  inputDisplay,
-  label,
-  labelProps,
-  helperText,
-  showAddLabelIndicator,
-  requirementType,
-}: IGroupedFieldProps) {
-  const { t } = useTranslation()
-  return (
-    <FormControl w={"100%"} isReadOnly>
-      <FormLabel {...defaultLabelProps} {...labelProps} color={!label && showAddLabelIndicator ? "error" : undefined}>
-        {label ??
-          (showAddLabelIndicator
-            ? `${t("requirementsLibrary.modals.addLabel")} *`
-            : getRequirementTypeLabel(requirementType))}
-      </FormLabel>
-      {inputDisplay}
-      {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-    </FormControl>
-  )
-})
+export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
+  return !!requirementsComponentMap[requirementType]
+}

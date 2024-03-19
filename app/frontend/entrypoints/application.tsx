@@ -46,6 +46,8 @@ const renderApp = (rootStore) => {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.documentElement.style.overflow = "hidden"
+  document.body.style.overflow = "hidden"
   const rootStore = setupRootStore()
   if (import.meta.env.PROD) {
     renderApp(rootStore)
