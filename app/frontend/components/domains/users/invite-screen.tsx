@@ -1,5 +1,5 @@
 import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
-import { PaperPlane, UserPlus } from "@phosphor-icons/react"
+import { PaperPlaneTilt, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -77,9 +77,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
             {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
           </Text>
         </Flex>
-        <Heading as="h3" fontSize="2xl">
-          {currentJurisdiction.name}
-        </Heading>
+        <Heading as="h2">{currentJurisdiction.name}</Heading>
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap={6}>
@@ -91,7 +89,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   type="button"
                   variant="tertiary"
                   onClick={() => append(defaultUserValues)}
-                  leftIcon={<UserPlus size={16} />}
+                  leftIcon={<Plus size={16} />}
                 >
                   {t("user.addUser")}
                 </Button>
@@ -109,7 +107,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   type="submit"
                   isLoading={isSubmitting}
                   loadingText={t("ui.loading")}
-                  rightIcon={<PaperPlane size={16} />}
+                  rightIcon={<PaperPlaneTilt size={16} />}
                 >
                   {t("user.sendInvites")}
                 </Button>

@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :requirement_template do
-    association :activity, factory: :activity
-    association :permit_type, factory: :permit_type
+    permit_type { PermitType.first || association(:permit_type, code: :low_residential) }
+    activity { Activity.first || association(:activity, code: :new_construction) }
 
     factory :requirement_template_with_sections do
       transient { sections_count { 5 } }

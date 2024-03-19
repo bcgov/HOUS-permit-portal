@@ -1,5 +1,5 @@
 import { Button, Flex, FormControl, FormLabel, HStack, Input, InputGroup, Select, Tag, Text } from "@chakra-ui/react"
-import { CheckCircle, UserMinus, WarningCircle } from "@phosphor-icons/react"
+import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -61,12 +61,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
           </Tag>
         )}
         {!invited && !taken && remove && (
-          <Button
-            onClick={() => remove(index)}
-            variant="tertiary"
-            leftIcon={<UserMinus size={16} />}
-            alignSelf="center"
-          >
+          <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />} alignSelf="center">
             {t("ui.remove")}
           </Button>
         )}

@@ -72,7 +72,7 @@ export const JurisdictionScreen = observer(() => {
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
-      <BlueTitleBar title={qualifiedName} imageSrc={"/images/jurisdiction-bus.svg"} />
+      <BlueTitleBar title={qualifiedName} />
       <Show below="md">
         <JurisdictionMap mapPosition={mapPositionWatch} />
       </Show>

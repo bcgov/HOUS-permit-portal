@@ -30,31 +30,62 @@
   }
 }
 
-.text-xxsmall-uppercase {
-  font-size: var(--chakra-fontSizes-xxs);
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+/* Admin Panel's  */
+//  large cards that should behave like a button (eg. have whole box clickable without changing markup)
+.jumbo-buttons .chakra-button {
+  position: static;
+  &::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: "";
+    display: block;
+  }
 }
 
-/* Admin Panel's  have large cards that should behave like a button (eg. have whole box clickable without changing markup) */
-.jumbo-buttons {
-  transition: border-color 200ms ease-out;
-  position: relative;
-  .chakra-button {
-    position: static;
-    &::after {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      content: "";
-      display: block;
+/* Typography Issues */
+
+// Workaround for <Heading> variant to be able to show a yellow line
+h1,
+h2,
+h3,
+h4,
+h5 {
+  &::before {
+    content: "";
+  }
+}
+
+// Reset Chakra's default to so we don't have to set "fontSize prop, only need to use the "as" prop. (This  only affects headings that are inside a <Container>.)
+.chakra-container {
+  h1 {
+    font-size: var(--chakra-fontSizes-4xl);
+    &:only-child {
+      margin-bottom: 0;
     }
   }
-  &:hover {
-    border-color: $bcgov-blue-secondary;
-    background-color: $blue-light;
+  h2 {
+    font-size: var(--chakra-fontSizes-2xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
   }
+  h3 {
+    font-size: var(--chakra-fontSizes-xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h4 {
+    font-size: var(--chakra-fontSizes-lg);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.chakra-toast h3 {
+  margin-bottom: 0;
 }

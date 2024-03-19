@@ -3,7 +3,7 @@ import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tr
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { EUserSortFields } from "../types/enums"
-import { IContact, TLatLngTuple } from "../types/types"
+import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 import { PermitApplicationModel } from "./permit-application"
 import { UserModel } from "./user"
@@ -11,6 +11,7 @@ import { UserModel } from "./user"
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
     id: types.identifier,
+    slug: types.string,
     name: types.string,
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
@@ -26,12 +27,15 @@ export const JurisdictionModel = types
     lookOutHtml: types.maybeNull(types.string),
     contactSummaryHtml: types.maybeNull(types.string),
     contacts: types.array(types.frozen<IContact>()),
+    permitTypeSubmissionContacts: types.array(types.frozen<IPermitTypeSubmissionContact>()),
     createdAt: types.Date,
     updatedAt: types.Date,
     tableUsers: types.array(types.reference(UserModel)),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
+    energyStepRequired: types.maybeNull(types.number),
+    zeroCarbonStepRequired: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
   .views((self) => ({
@@ -46,6 +50,9 @@ export const JurisdictionModel = types
       const sortByCreatedAt = R.sort<IContact>((a, b) => (a.createdAt as number) - (b.createdAt as number))
 
       return sortByCreatedAt(self.contacts)[0]
+    },
+    getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
+      return self.permitTypeSubmissionContacts.find((c) => c.id == id)
     },
   }))
   .actions((self) => ({

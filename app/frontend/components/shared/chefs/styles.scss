@@ -69,7 +69,7 @@
   hr {
     margin-bottom: 1em;
     .orange {
-      border-top: 2px solid $bcgov-orange;
+      border-top: 2px solid $bcgov-yellow;
     }
   }
 
@@ -349,6 +349,12 @@
 
   .card-body {
     padding: 24px !important;
+  }
+
+  .card-tips {
+    padding-top: 24px;
+    padding-right: 24px;
+    padding-left: 24px;
   }
 
   .tips {

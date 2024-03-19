@@ -18,13 +18,29 @@ class RequirementsFromXlsxSeeder
         errors,
       )
 
-      # medium density new contruction
-      # setup_requirement_template(
-      #   "new_construction",
-      #   "medium_residential",
-      #   xlsx.sheet("Dev-RequirementBlocks-Townhouse"),
-      #   errors,
-      # )
+      puts errors
+    end
+    RequirementTemplate.reindex
+  end
+
+  def self.seed_medium
+    file_name = "#{Rails.root}/db/templates/Core Permit Requirements List.xlsx"
+    if File.exist?(file_name)
+      xlsx = Roo::Spreadsheet.open(file_name)
+
+      req_sheet = xlsx.sheet("Dev-Requirements")
+      parsed_req_sheet = req_sheet.parse(headers: true)
+      valid_rows =
+        parsed_req_sheet.select { |row| row["requirement_code"] && row["requirement_code"] != "requirement_code" }
+      errors = ["Requirements Loading"]
+
+      setup_requirement_template(
+        "new_construction",
+        "medium_residential",
+        xlsx.sheet("TEST-ReqBlocks-Mid.densityHouse"),
+        valid_rows,
+        errors,
+      )
 
       puts errors
     end

@@ -92,7 +92,7 @@ const options = {
           no: "No",
           show: "Show",
           hide: "Hide",
-          change: "Change",
+          setup: "Setup",
           search: "Search",
           loading: "Loading...",
           invalidInput: "Invalid input",
@@ -192,6 +192,10 @@ const options = {
             templatesUsed: "Templates Used",
             mapPosition: "Map position",
           },
+          submissionEmailConfirmed: {
+            heading: "Email confirmed!",
+            description: "You will start to receive permit applications shortly",
+          },
           lat: "Latitude",
           lng: "Longitude",
           title: "Local Housing Permits",
@@ -237,7 +241,8 @@ const options = {
           submissionInbox: {
             title: "Submissions Inbox",
             tableHeading: "Permit Applications",
-            submissionsSentTo: "All submissions are sent to: {{email}}",
+            submissionsSentTo:
+              "A copy of all submitted applications are also sent to one or more email addresses configured by the review manager.",
           },
           fields: {
             number: "Application #",
@@ -246,6 +251,27 @@ const options = {
             locationHeading: "Location for permit",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work Type",
+            applicationDisclaimerInstruction:
+              "Before you submit a building permit application, please ensure your proposed building siting and design complies with:",
+            applicationDisclaimer_1: "provincial building code",
+            applicationDisclaimer_1_link: "https://www.bccodes.ca/building-code.html",
+            applicationDisclaimer_2: "local zoning bylaw",
+            applicationDisclaimer_2_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws",
+            applicationDisclaimer_3: "official community plan regulations",
+            applicationDisclaimer_3_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/local-government-planning/official-community-plans",
+            applicationDisclaimer_4: "applicable development permit areas",
+            applicationDisclaimer_4_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/development-permit-areas",
+            applicationDisclaimer_5: "variances outlined in a local bylaw",
+            applicationDisclaimer_5_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws/board-of-variance",
+            applicationDisclaimerMoreInfo:
+              "For more information and specific building drawing requirements and checklists, contact your local jurisdiction.",
+            applicationDisclaimerMoreInfo_CTA: "Find your local jurisdiction",
+            applicationDisclaimerMoreInfo_Link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/facts-framework/local-government-maps",
             submitted: "Your application has been submitted",
             hearBack: "If you don't hear back by Lorem days,",
             contactInstruction:
@@ -715,8 +741,59 @@ const options = {
           requirementsLibraryTitle: "Requirements Library",
           requirementsLibraryDescription:
             "Create and manage requirement blocks that can be used inside of permit templates.",
-          contentManagementTitle: "Content Management",
-          contentManagementDescription: "Customize content in one centralized place.",
+          configurationManagement: {
+            title: "Configuration Management",
+            description: "Customize content in one centralized place.",
+            editPermission: "Only managers are able to edit.",
+            jurisdictionNameLabel: "Name of local jurisdiction",
+            jurisdictionLocationLabel: "Location",
+            jurisdictionAbout: {
+              title: "My Jurisdiction's About Page",
+              description:
+                "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
+            },
+            submissionsInboxSetup: {
+              title: "Submissions Inbox Setup",
+              description: "Specify email addresses that should receive applications.",
+              permitTypes: {
+                label: "Send permit applications for",
+                low_residential: "Low Density - Residential",
+                medium_residential: "Medium Density - Residential",
+                high_residential: "High Density - Residential",
+                new_construction: "New Construction",
+                addition_alteration_renovation: "Addition, Alteration, or Renovation",
+                site_alteration: "Site Alteration",
+                demolition: "Demolition",
+              },
+              emailLabel: "to recipient email(s)",
+              addEmail: "Add another email",
+              confirmationRequired: "Action Required: please click link in verification email",
+            },
+            stepCodeRequirements: {
+              title: "Energy Step Code Requirements",
+              description: "Define step code requirements.",
+              part9Building: "Part 9 Building",
+              stepRequired: {
+                energy: {
+                  title: "Energy Step Required",
+                  options: {
+                    "3": "3",
+                    "4": "4",
+                    "5": "5",
+                  },
+                },
+                zeroCarbon: {
+                  title: "Zero Carbon Step Code Level Required",
+                  options: {
+                    "1": "EL 1 - Measure Only",
+                    "2": "EL 2 - Moderate",
+                    "3": "EL 3 - Strong",
+                    "4": "EL 4 - Zero Carbon",
+                  },
+                },
+              },
+            },
+          },
           superAdminTitle: "Admin Home",
           submissionsInboxTitle: "Submissions Inbox",
           submissionsInboxDescription: "View all submitted building permit applications.",
@@ -867,6 +944,8 @@ const options = {
             workType: "Work Type",
             manageButton: "Manage",
             lastUpdated: "Last updated",
+            requestNewPromptWithLink:
+              "Your administrator has made the above permit types available for digital submissions. If there is another permit type you want please <1>request a new permit type</1>.",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
           },
@@ -895,6 +974,20 @@ const options = {
           home: "Home",
           contact: "Contact us",
           contactEmail: "digital.codes.permits@gov.bc.ca",
+          contactInstructions_1: "If you have any questions or need assistance, see the contact options below:",
+          contactInstructions_2: "Have a question about your digital permit application?",
+          contactInstructions_3:
+            "Please contact your local government for questions related to your permit application.",
+          contactTeamInstructionsTitle: "Contact the Building Permit Hub Team",
+          contactTeamInstructions_1: "Do you have some feedback for the Building Permit Hub Team?",
+          contactTeamInstructions_2:
+            "Do you have any questions or need assistance regarding your experience using the Building Permit Hub?",
+          contactTeamCTA: "Please contact us at",
+          contactNeedHelp: "Need general help?",
+          contactNeedHelpInstructions:
+            "Services are available in a variety of different languages and channels through Service BC.",
+          contactNeedHelpCTA: "Get help with government services",
+          listJurisdictions: "See list of jurisdictions",
           help: "Help",
           aboutTitle: "About",
           disclaimerTitle: "Disclaimer",
@@ -910,7 +1003,10 @@ const options = {
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
           somethingWrong: "Something went wrong",
-          pageNotFound: "404 - The page you are looking for could not be found",
+          pageNotFound: "Oops, we can’t find that page",
+          pageNotFoundInstructions: "Please check that the web URL has been entered correctly.",
+          pageNotFoundCTA: "Go back to home",
+          pageNotFoundContactInstructions: "Do you believe this to be in error or are you stuck?",
           seeConsoleForDetails: "See the browser console for details",
           accessibility: "Accessibility",
           copyright: "Copyright",
@@ -918,7 +1014,7 @@ const options = {
             "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
           breadcrumb: {
             profile: "Profile",
-            jurisdictions: "Manage Jurisdictions",
+            jurisdictions: "Jurisdictions",
             new: "Create New",
             invite: "Invite",
             templateVersions: "Template Versions",
@@ -935,6 +1031,10 @@ const options = {
             stepCodes: "Step Codes",
             digitalBuildingPermits: "Digital Building Permits",
             contact: "Contact Us",
+            configurationManagement: "Configuration Management",
+            energyStep: "Energy Step Code Requirements",
+            submissionsInboxSetup: "Submissions Inbox Setup",
+            confirmed: "Submission E-mail Confirmed",
           },
           questionSupport: "Question Support",
         },

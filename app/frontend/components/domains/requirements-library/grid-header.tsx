@@ -26,9 +26,7 @@ export const GridHeaders = observer(function GridHeaders() {
           justifyContent={"space-between"}
           align="center"
         >
-          <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
-            {t("requirementsLibrary.index.tableHeading")}
-          </Text>
+          <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
           <SearchInput searchModel={requirementBlockStore as ISearch} />
         </GridItem>
       </Box>

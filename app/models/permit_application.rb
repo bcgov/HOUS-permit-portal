@@ -196,10 +196,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submit_notifications
-    PermitHubMailerJob.perform_async("notify_submitter_application_submitted", submitter.id, id)
-    jurisdiction.users.each do |user|
-      PermitHubMailerJob.perform_async("notify_reviewer_application_received", user.id, id)
-    end
+    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
   end
 
   private
@@ -223,7 +221,7 @@ class PermitApplication < ApplicationRecord
 
     return unless saved_change_to_viewed_at? || saved_change_to_reference_number?
 
-    PermitHubMailerJob.perform_async("notify_application_updated", submitter.id, id)
+    PermitHubMailer.notify_application_updated(submitter, self).deliver_later
   end
 
   def reindex_jurisdiction_permit_application_size

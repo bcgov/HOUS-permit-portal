@@ -24,7 +24,7 @@ class Api::UsersController < Api::ApplicationController
     ActiveRecord::Base.transaction do
       if password_params[:password].present?
         if @user.update_with_password(password_params)
-          CustomDeviseMailer.new.password_change(@user)
+          Devise::Mailer.new.password_change(@user).deliver
         else
           raise ActiveRecord::RecordInvalid
         end

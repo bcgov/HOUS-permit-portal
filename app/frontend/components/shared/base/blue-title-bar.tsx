@@ -10,21 +10,21 @@ export const BlueTitleBar = ({ title, imageSrc, ...rest }: IBlueTitleBarProps) =
   return (
     <Box h="fit-content" bg="theme.blueGradient" {...rest}>
       <Container as={Flex} direction="column" justify="center" maxW="container.lg" h="full">
-        <Box position="relative" h="180px" w="full">
-          <Heading as="h1" color="greys.white" position="absolute" left={0} top="68px" fontSize="4xl">
+        <Box position="relative" minHeight="180px" display="flex" alignItems="center">
+          <Heading as="h1" color="greys.white" my="12">
             {title}
           </Heading>
-          {imageSrc && (
-            <Image
-              position="absolute"
-              right={0}
-              src={imageSrc}
-              alt="title decoration"
-              h="full"
-              objectFit="cover"
-              mr={{ base: -4, md: 0 }}
-            />
-          )}
+
+          <Image
+            position="absolute"
+            right="0"
+            zIndex="0"
+            src={imageSrc || "images/banner-housing.svg"}
+            opacity="10%"
+            alt="title decoration"
+            h="full"
+            objectFit="cover"
+          />
         </Box>
       </Container>
     </Box>

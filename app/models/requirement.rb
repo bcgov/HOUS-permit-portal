@@ -110,7 +110,7 @@ class Requirement < ApplicationRecord
   }
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
-  TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select checkbox radio]
+  TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -149,7 +149,7 @@ class Requirement < ApplicationRecord
 
     json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
 
-    json.merge!({ values: input_options["value_options"] }) if input_type_checkbox? || input_type_multi_option_select?
+    json.merge!({ values: input_options["value_options"] }) if input_type_multi_option_select?
 
     json.merge!({ computedCompliance: input_options["computed_compliance"] }) if computed_compliance?
 

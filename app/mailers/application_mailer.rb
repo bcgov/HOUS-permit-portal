@@ -2,22 +2,17 @@ class ApplicationMailer < ActionMailer::Base
   default from: ENV["FROM_EMAIL"]
   layout "mailer"
 
-  def directory_name
-    raise NotImplementedError
-  end
-
   protected
 
-  def send_mail(user, action, subject_i18n_values = {})
-    @user = user
+  # template_key should match i18n as well as the name of the file in the views
+  def send_mail(email:, template_key:, subject_i18n_params: {})
     @root_url = FrontendUrlHelper.root_url
 
-    CHESApiWrapper.new.send_email(
-      to: user.email,
-      from: ENV["FROM_EMAIL"],
+    mail(
+      to: email,
       subject:
-        "#{I18n.t("application_mailer.subject_start")} - #{I18n.t("application_mailer.subjects.#{action}", **subject_i18n_values)}",
-      body: render(template: "#{self.class.name.underscore}/#{action}"),
+        "#{I18n.t("application_mailer.subject_start")} - #{I18n.t("application_mailer.subjects.#{template_key}", **subject_i18n_params)}",
+      template_name: template_key, # this isn't fully necessary since rails introspects it anyway, but here for clarity (template_path is also auto introspected by rails)
     )
   end
 end

@@ -1,6 +1,6 @@
 class DestroyAssetJob
   include Sidekiq::Worker
-  sidekiq_options queue: :destroy_asset
+  sidekiq_options queue: :file_processing
 
   def perform(attacher_class, data)
     attacher_class = Object.const_get(attacher_class)

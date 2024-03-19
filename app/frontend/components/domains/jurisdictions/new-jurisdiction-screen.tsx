@@ -61,7 +61,7 @@ export const NewJurisdictionScreen = observer(() => {
                   {t("jurisdiction.new.nextStep")}
                 </Text>
                 <HStack>
-                  <RouterLinkButton to={`/jurisdictions/${jurisdiction?.id}/users/invite`} variant="primary">
+                  <RouterLinkButton to={`/jurisdictions/${jurisdiction?.slug}/users/invite`} variant="primary">
                     {t("user.index.inviteButton")}
                   </RouterLinkButton>
                   <RouterLinkButton to={`/jurisdictions`} variant="secondary">

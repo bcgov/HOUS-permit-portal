@@ -43,7 +43,7 @@ export const ResetPasswordScreen = ({}: IResetPasswordScreenProps) => {
             bg="greys.white"
           >
             <Flex gap={2} direction="column">
-              <Heading as="h3">{t("auth.resetPassword")}</Heading>
+              <Heading as="h1">{t("auth.resetPassword")}</Heading>
               <Text>{t("auth.passwordRequirements")}</Text>
             </Flex>
 

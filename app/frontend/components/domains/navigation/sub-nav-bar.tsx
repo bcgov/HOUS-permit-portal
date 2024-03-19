@@ -52,16 +52,17 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
 
   const [breadcrumbs, setBreadcrumbs] = useState<TBreadcrumbSegment[]>([])
 
+  const FRIENDLY_SLUG_RESOURCES = ["jurisdictions"]
+
   useEffect(() => {
     // Get the current path and split into segments
     // Filter out empty segments
     const pathSegments = path.split("/").filter(Boolean)
-
     // Create breadcrumb segments
     const breadcrumbSegments = pathSegments.map((segment, index) => {
       const href = "/" + pathSegments.slice(0, index + 1).join("/")
-      const resourceNeeded = isUUID(segment)
       const previousSegment = pathSegments[index - 1]
+      const resourceNeeded = isUUID(segment) || FRIENDLY_SLUG_RESOURCES.includes(previousSegment)
 
       const currentResourceMap = {
         jurisdictions: rootStore.jurisdictionStore.currentJurisdiction?.name,
