@@ -1,11 +1,11 @@
-import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import { debounce } from "lodash"
 import { observer } from "mobx-react-lite"
 import React, { useCallback } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ControlProps, InputProps, OptionProps, components } from "react-select"
+import { ControlProps, InputProps, OptionProps, StylesConfig, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
@@ -42,43 +42,51 @@ export const AddressSelect = observer(function ({
 
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
+  const customStyles: StylesConfig<IOption, boolean> = {
+    container: (provided) => ({
+      ...provided,
+      padding: 0,
+      width: "100%", // This will make the container have a width of 100%
+    }),
+    control: (provided) => ({
+      ...provided,
+      borderRadius: "4px",
+      paddingInline: "0.75rem",
+      height: "40px",
+      width: "100%", // Ensure the control also takes up 100% width
+    }),
+    menu: (provided) => ({
+      ...provided,
+      width: "100%", // Ensure the menu matches the width of the control/container
+      background: "var(--chakra-colors-greys-grey10)",
+    }),
+    // Add other custom styles as needed
+  }
+
   return (
-    <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
-      <FormControl>
-        <FormLabel>{t("permitApplication.addressLabel")}</FormLabel>
-        <InputGroup>
-          <AsyncSelect<IOption, boolean>
-            isClearable={true}
-            onChange={onChange}
-            placeholder="Search Addresses"
-            value={value}
-            defaultValue={value}
-            components={{
-              Control,
-              Option,
-              Input,
-            }}
-            stylesToMerge={{
-              control: {
-                borderRadius: "4px",
-                paddingInline: "0.75rem",
-                height: "40px",
-              },
-              menu: {
-                width: "100%",
-                background: "var(--chakra-colors-greys-grey10)",
-              },
-              ...stylesToMerge,
-            }}
-            defaultOptions
-            loadOptions={debouncedFetchOptions}
-            closeMenuOnSelect={true}
-            isCreatable={false}
-            {...rest}
-          />
-        </InputGroup>
-      </FormControl>
-    </Flex>
+    <FormControl w="full">
+      <FormLabel>{t("landing.addressSelectLabel")}</FormLabel>
+      <InputGroup w="full">
+        <AsyncSelect<IOption, boolean>
+          isClearable={true}
+          onChange={onChange}
+          placeholder={t("ui.searchAddresses")}
+          value={value}
+          defaultValue={value}
+          components={{
+            Control,
+            Option,
+            Input,
+          }}
+          styles={customStyles}
+          defaultOptions
+          loadOptions={debouncedFetchOptions}
+          closeMenuOnSelect={true}
+          isCreatable={false}
+          {...rest}
+        />
+      </InputGroup>
+    </FormControl>
   )
 })
 

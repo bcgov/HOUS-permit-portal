@@ -1,13 +1,26 @@
-import { Box, BoxProps, Container, Flex, Heading, Image, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
-import { CaretRight, CheckCircle, ClipboardText, FileArrowUp } from "@phosphor-icons/react"
+import {
+  Box,
+  BoxProps,
+  Button,
+  Center,
+  Container,
+  Flex,
+  HStack,
+  Heading,
+  Image,
+  ListItem,
+  Text,
+  UnorderedList,
+  VStack,
+} from "@chakra-ui/react"
+import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
-import React, { ReactNode, useEffect, useState } from "react"
+import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
-import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddressSelect } from "../../shared/select/selectors/address-select"
 
@@ -15,6 +28,11 @@ interface ILandingScreenProps {}
 
 export const LandingScreen = ({}: ILandingScreenProps) => {
   const { t } = useTranslation()
+  const iNeedRef = useRef<HTMLDivElement>(null)
+
+  const scrollToJurisdictionSearch = () => {
+    iNeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   const whoFor = i18next.t("landing.whoFor", { returnObjects: true }) as string[]
 
@@ -73,10 +91,10 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                <RouterLinkButton to="/login" variant="primaryInverse" rightIcon={<CaretRight size={16} />}>
+                <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
                   {t("auth.login")}
                 </RouterLinkButton>
-                <RouterLinkButton to="/register" variant="primaryInverse" rightIcon={<CaretRight size={16} />}>
+                <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
                   {t("auth.register")}
                 </RouterLinkButton>
               </Flex>
@@ -91,7 +109,9 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
                   <ListItem key={str}>{str}</ListItem>
                 ))}
               </UnorderedList>
-              <RouterLink to="#">{t("landing.iNeed")}</RouterLink>
+              <Button variant="link" onClick={scrollToJurisdictionSearch}>
+                {t("landing.iNeed")}
+              </Button>
             </VStack>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
@@ -103,7 +123,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           </Flex>
         </Flex>
       </Container>
-      <Container maxW="container.lg" px={8}>
+      <Container maxW="container.lg" px={8} ref={iNeedRef}>
         <VStack as="section" w="full" gap={2} mb={4} textAlign="center">
           <Heading as="h3" fontSize="4xl">
             {t("landing.iNeedLong")}
@@ -172,21 +192,67 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
-      <Flex bg="white" flex={3} p={6} gap={4}>
+      <Flex bg="white" w="50%" p={6} gap={4}>
         <FormProvider {...formMethods}>
-          <form>
-            <Controller
-              name="address"
-              control={control}
-              render={({ field: { onChange, value } }) => {
-                return <AddressSelect onChange={onChange} value={value} />
-              }}
-            />
+          <form style={{ width: "100%" }}>
+            <Flex direction="column" gap={6}>
+              <Flex direction="column">
+                <Heading as="h2" variant="yellowline" mb={2}>
+                  {t("landing.where")}
+                </Heading>
+                <Text>{t("landing.findYourAuth")}</Text>
+              </Flex>
+
+              <Controller
+                name="address"
+                control={control}
+                render={({ field: { onChange, value } }) => {
+                  return <AddressSelect onChange={onChange} value={value} />
+                }}
+              />
+            </Flex>
           </form>
         </FormProvider>
-        {addressWatch?.value}
-        <br />
-        {jurisdiction?.name}
+      </Flex>
+      <Flex
+        bg={addressWatch?.value ? "theme.blueAlt" : "greys.white"}
+        w="50%"
+        p={6}
+        gap={4}
+        color={addressWatch?.value ? "greys.white" : "theme.blueAlt"}
+      >
+        <Center h="full" w="full">
+          {addressWatch?.value ? (
+            <VStack gap={8}>
+              <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
+                {t("landing.localJurisdiction")}
+              </Text>
+              <HStack gap={4}>
+                <Text fontSize="2xl" fontWeight="bold">
+                  {jurisdiction?.name}
+                </Text>
+                <Box color="theme.yellow">
+                  <CheckCircle size={32} />
+                </Box>
+              </HStack>
+              <RouterLinkButton
+                variant="ghost"
+                color="greys.white"
+                to={`/jurisdictions/${jurisdiction?.id}`}
+                icon={<CaretRight size={16} />}
+              >
+                {t("landing.learnRequirements")}
+              </RouterLinkButton>
+            </VStack>
+          ) : (
+            <VStack gap={6}>
+              <MapPin size={40} />
+              <Text fontStyle="italic" textAlign="center">
+                {t("landing.reqsVary")}
+              </Text>
+            </VStack>
+          )}
+        </Center>
       </Flex>
     </Flex>
   )
