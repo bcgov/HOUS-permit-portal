@@ -39,6 +39,9 @@ const styles = {
     [".chakra-breadcrumb__list"]: {
       paddingLeft: "0",
     },
+    ["ul li"]: {
+      marginBottom: "var(--chakra-sizes-2)",
+    },
   },
 }
 const components = { Button, FormLabel, Heading, Input, Link, Text, Table }
