@@ -11,15 +11,102 @@ class RequirementFormJsonService
     email: {
       type: "simpleemail"
     },
-    # TODO: figure out why these address fields don't work
-    # address: {
-    #   type: "simpleaddressadvanced",
-    # },
     address: {
-      type: "simpletextfield"
+      type: "simpleaddressadvanced",
+      provider: "nominatim",
+      validate: {
+        isUseForCopy: false
+      },
+      tableView: false,
+      components: [
+        {
+          key: "address1",
+          type: "textfield",
+          input: true,
+          label: "Address 1",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "address2",
+          type: "textfield",
+          input: true,
+          label: "Address 2",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "city",
+          type: "textfield",
+          input: true,
+          label: "City",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "state",
+          type: "textfield",
+          input: true,
+          label: "Province / State",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "country",
+          type: "textfield",
+          input: true,
+          label: "Country",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        },
+        {
+          key: "zip",
+          type: "textfield",
+          input: true,
+          label: "Postal / Zip Code",
+          tableView: false,
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        }
+      ]
     },
     bcaddress: {
-      type: "bcaddress"
+      type: "simplebcaddress",
+      provider: "custom",
+      tableView: false,
+      providerOptions: {
+        url: "/api/geocoder/form_bc_addresses",
+        params: {
+          # echo: true,
+          brief: true,
+          # minScore: 55,
+          # onlyCivic: true,
+          maxResults: 10,
+          autoComplete: true
+          # matchAccuracy: 100,
+          # matchPrecision: "unit, civic_number, intersection, block, street, locality, province"
+          # precisionPoints: 100
+        },
+        queryProperty: "addressString",
+        responseProperty: "features",
+        displayValueProperty: "properties.fullAddress"
+      },
+      queryParameters: {
+        # echo: true,
+        brief: true,
+        # minScore: 55,
+        # onlyCivic: true,
+        maxResults: 10,
+        autoComplete: true
+        # matchAccuracy: 100,
+        # matchPrecision:  "unit, civic_number, intersection, block, street, locality, province"
+        # precisionPoints: 100
+      }
     },
     signature: {
       type: "simplesignatureadvanced"

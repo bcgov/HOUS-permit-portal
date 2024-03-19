@@ -84,7 +84,6 @@ const FormComponent = function ApplicationPDFFormComponent({
         return { value, label, isVisible: !R.isNil(value) && !R.isNil(label) }
     }
   }
-
   switch (component.type) {
     case EComponentType.container: {
       dataPath = [component.key]
@@ -345,11 +344,10 @@ const InputField = function ApplicationPDFInputField({ value, label, type }) {
 
 const FileField = function ApplicationPDFFileField({ value, label }: { value: Record<string, any>[]; label: string }) {
   const fileExists = value && !R.isEmpty(value)
-
   return (
     <RequirementField
       label={label}
-      value={fileExists ? R.pluck("originalName", value).join(", ") : t("permitApplication.pdf.fileNotAdded")}
+      value={fileExists ? R.pluck("original_name", value).join(", ") : t("permitApplication.pdf.fileNotAdded")}
     />
   )
 }

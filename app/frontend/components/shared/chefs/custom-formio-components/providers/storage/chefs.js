@@ -85,6 +85,7 @@ const chefs = function Provider(formio) {
     name: "chefs",
     uploadFile(file, name, dir, progressCallback, url, options, fileKey) {
       const uploadRequest = function (form) {
+        debugger
         return xhrRequest(
           url,
           name,

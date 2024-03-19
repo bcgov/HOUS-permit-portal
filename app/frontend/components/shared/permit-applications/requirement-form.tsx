@@ -339,6 +339,8 @@ export const RequirementForm = observer(
       }
     }
     const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
+    console.log(JSON.stringify(unsavedSubmissionData, null, 2))
+    // console.log(JSON.stringify(formattedFormJson, null, 2))
     return (
       <>
         <Flex
