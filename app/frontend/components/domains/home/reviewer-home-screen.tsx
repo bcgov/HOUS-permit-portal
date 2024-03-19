@@ -22,7 +22,7 @@ export const ReviewerHomeScreen = observer(({ ...rest }: IHomeScreenProps) => {
   useEffect(() => {
     if (!jurisdiction?.id) return
 
-    navigate(`jurisdictions/${jurisdiction.id}/submission-inbox`)
+    navigate(`jurisdictions/${jurisdiction.slug}/submission-inbox`)
   }, [jurisdiction])
 
   if (!jurisdiction) return <LoadingScreen />
