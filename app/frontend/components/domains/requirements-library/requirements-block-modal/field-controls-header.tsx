@@ -1,9 +1,10 @@
-import { Button, HStack, Tag } from "@chakra-ui/react"
-import { SlidersHorizontal } from "@phosphor-icons/react"
+import { Button, HStack } from "@chakra-ui/react"
 import React from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { getRequirementTypeLabel } from "../../../../constants"
+import { ElectiveTag } from "../../../shared/elective-tag"
+import { HasConditionalTag } from "../../../shared/has-conditional-tag"
+import { RequirementTypeTag } from "../../../shared/requirement-type-tag"
 import { OptionsMenu } from "../requirement-field-edit/options-menu"
 import { IRequirementBlockForm } from "./index"
 
@@ -37,39 +38,13 @@ export function FieldControlsHeader({ requirementIndex, isRequirementInEditMode,
       )}
       <HStack className={"requirement-edit-controls-container"}>
         {watchedElective && !isRequirementInEditMode && (
-          <Tag
-            bg={"theme.yellowLight"}
-            color={"text.secondary"}
-            fontWeight={700}
-            fontSize={"xs"}
-            display={isRequirementInEditMode ? "none" : "flex"}
-          >
-            {t("requirementsLibrary.elective")}
-          </Tag>
+          <ElectiveTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
         {watchedConditional && !isRequirementInEditMode && (
-          <Tag
-            bg={"semantic.infoLight"}
-            color={"text.secondary"}
-            fontWeight={700}
-            fontSize={"xs"}
-            display={isRequirementInEditMode ? "none" : "flex"}
-          >
-            <SlidersHorizontal style={{ marginRight: "var(--chakra-space-1)" }} />
-            {t("requirementsLibrary.hasConditionalLogic")}
-          </Tag>
+          <HasConditionalTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
         {!isRequirementInEditMode && (
-          <Tag
-            bg={"greys.grey03"}
-            color={"text.secondary"}
-            fontWeight={700}
-            fontSize={"xs"}
-            className={"requirement-edit-controls"}
-            display={"none"}
-          >
-            {getRequirementTypeLabel(watchedRequirementType)}
-          </Tag>
+          <RequirementTypeTag type={watchedRequirementType} className={"requirement-edit-controls"} display={"none"} />
         )}
         <Button
           variant={"primary"}
