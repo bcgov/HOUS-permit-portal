@@ -72,15 +72,14 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
         <Box
-          maxWidth="container.sm"
+          width="full"
           mx="auto"
           mt="10"
-          mb="20"
+          mb="10"
           border="1px solid"
           borderColor="border.light"
-          bg="greys.grey03"
           borderRadius="md"
-          p="8"
+          p="6"
         >
           <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
           <UnorderedList ml="0" mt="4">
@@ -115,13 +114,11 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Link>
             </ListItem>
           </UnorderedList>
-          <Text>
-            {t("permitApplication.new.applicationDisclaimerMoreInfo")}
-            <Link ml="1" href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
-              {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
-              <ArrowSquareOut></ArrowSquareOut>
-            </Link>
-          </Text>
+          <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
+          <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
+            {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
+            <ArrowSquareOut></ArrowSquareOut>
+          </Link>
         </Box>
 
         {/* Todo - need to check the address, compute the jurisdiction, input permit type and work type After this is

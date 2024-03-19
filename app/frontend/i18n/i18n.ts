@@ -222,12 +222,16 @@ const options = {
         permitApplication: {
           referenceNumber: "Reference #",
           indexTitle: "My Active Permits",
-          start: "Start a Permit Application",
+          start: "Start a permit application",
           drafts: "Draft Permits",
           startedOn: "Started on",
           lastUpdated: "Last updated",
-          seeBestPracticesLink: "See best practices for",
-          ask: "Ask a question",
+          seeBestPractices_CTA: "See best practices",
+          seeBestPractices_link:
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
+          searchKnowledge_CTA: "Ask a question",
+          searchKnowledge_link:
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
           viewed: "Viewed",
@@ -240,8 +244,8 @@ const options = {
             number: "Application #",
             permit_classification: "Types",
             submitter: "Submitter",
-            submitted_at: "Submitted At",
-            viewed_at: "Viewed At",
+            submitted_at: "Submitted at",
+            viewed_at: "Viewed at",
             status: "Status",
           },
           submissionInbox: {
