@@ -1,10 +1,11 @@
 import { Box, Container, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
@@ -39,10 +40,12 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   })
   const { handleSubmit, formState, control, watch } = formMethods
   const { isSubmitting } = formState
-  const { permitClassificationStore, permitApplicationStore } = useMst()
+  const { permitClassificationStore, permitApplicationStore, geocoderStore } = useMst()
+  const { fetchGeocodedJurisdiction } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions, isLoading } = permitClassificationStore
   const navigate = useNavigate()
   const [siteSelected, setSiteSelected] = useState(false)
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
 
   const onSubmit = async (formValues) => {
     const params = { ...formValues, fullAddress: formValues.site.label }
@@ -54,6 +57,15 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
   const permitTypeIdWatch = watch("permitTypeId")
   const pidWatch = watch("pid")
+  const siteWatch = watch("site")
+
+  useEffect(() => {
+    if (!siteWatch?.value) return
+    ;(async () => {
+      const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value)
+      setJurisdiction(jurisdiction)
+    })()
+  }, [siteWatch?.value])
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white">
@@ -145,7 +157,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   }}
                 />
               </Flex>
-              {siteSelected && (
+              {siteSelected && jurisdiction && (
                 <Flex as="section" direction="column" gap={2}>
                   <Heading as="h2" variant="yellowline">
                     {t("permitApplication.new.permitTypeHeading")}
@@ -157,10 +169,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                       return (
                         <PermitTypeRadioSelect
                           w="full"
-                          fetchOptions={() => fetchPermitTypeOptions(true, pidWatch)}
+                          fetchOptions={() => fetchPermitTypeOptions(true, pidWatch, jurisdiction.id)}
                           onChange={onChange}
                           value={value}
-                          isLoading={isLoading}
                         />
                       )
                     }}
@@ -175,7 +186,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   <ActivityList
                     fetchOptions={() => fetchActivityOptions(true, permitTypeIdWatch)}
                     permitTypeId={permitTypeIdWatch}
-                    isLoading={isLoading}
                   />
                 </Flex>
               )}

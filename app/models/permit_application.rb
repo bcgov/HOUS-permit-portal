@@ -23,6 +23,7 @@ class PermitApplication < ApplicationRecord
   # Custom validation
 
   validate :submitter_must_have_role
+  validate :jurisdiction_has_matching_submission_contact
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
@@ -243,6 +244,18 @@ class PermitApplication < ApplicationRecord
   end
 
   def submitter_must_have_role
-    errors.add(:submitter, "must have the submitter role") unless submitter&.submitter?
+    unless submitter&.submitter?
+      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+    end
+  end
+
+  def jurisdiction_has_matching_submission_contact
+    matching_contacts = PermitTypeSubmissionContact.where(jurisdiction: jurisdiction, permit_type: permit_type)
+    if matching_contacts.empty?
+      errors.add(
+        :jurisdiction,
+        I18n.t("activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"),
+      )
+    end
   end
 end

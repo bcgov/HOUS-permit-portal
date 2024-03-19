@@ -34,6 +34,12 @@ en:
         uid: BCeID
     errors:
       models:
+        permit_application:
+          attributes:
+            submitter:
+              incorrect_role: "must have the submitter role"
+            jurisdiction:
+              no_contact: "must have at least one PermitTypeSubmissionContact that matches the permit type of this application."
         supporting_document:
           attributes:
             file:
