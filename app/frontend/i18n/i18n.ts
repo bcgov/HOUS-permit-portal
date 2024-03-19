@@ -145,6 +145,7 @@ const options = {
           returnHome: "Return to home",
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
+          reset: "Reset",
         },
         eula: {
           title: "End-User License Agreement",
@@ -313,6 +314,7 @@ const options = {
         requirementsLibrary: {
           addAnotherPerson: "Add another person",
           elective: "Elective",
+          hasConditionalLogic: "Has Conditional Logic",
           associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",

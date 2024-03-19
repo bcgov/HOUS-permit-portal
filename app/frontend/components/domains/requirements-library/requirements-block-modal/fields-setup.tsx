@@ -1,11 +1,10 @@
-import { Box, Button, Flex, HStack, Tag, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { getRequirementTypeLabel } from "../../../../constants"
-import { IRequirementsAttribute } from "../../../../types/api-request"
+import { IRequirementAttributes } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
@@ -13,7 +12,7 @@ import { EditorWithPreview } from "../../../shared/editor/custom-extensions/edit
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { RequirementFieldDisplay } from "../requirement-field-display"
 import { RequirementFieldEdit } from "../requirement-field-edit"
-import { OptionsMenu } from "../requirement-field-edit/options-menu"
+import { FieldControlsHeader } from "./field-controls-header"
 import { IRequirementBlockForm } from "./index"
 
 const fieldContainerSharedProps = {
@@ -122,7 +121,8 @@ export const FieldsSetup = observer(function FieldsSetup() {
             {fields.map((field, index) => {
               const watchedHint = watch(`requirementsAttributes.${index}.hint`)
               const watchedElective = watch(`requirementsAttributes.${index}.elective`)
-              const requirementType = (field as IRequirementsAttribute).inputType
+              const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
+              const requirementType = (field as IRequirementAttributes).inputType
               return (
                 <Box
                   key={field.id}
@@ -131,9 +131,8 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   _hover={{
                     bg: "theme.blueLight",
                     "& .requirement-edit-controls-container": {
-                      flexFlow: "row",
                       ".requirement-edit-controls": {
-                        visibility: "visible",
+                        display: "flex",
                       },
                     },
                   }}
@@ -268,52 +267,11 @@ export const FieldsSetup = observer(function FieldsSetup() {
                       showAddLabelIndicator
                     />
                   </Box>
-                  <HStack pos={"absolute"} right={0} top={0} spacing={4}>
-                    {isRequirementInEditMode(field.id) && (
-                      <OptionsMenu
-                        menuButtonProps={{
-                          size: "sm",
-                        }}
-                        onRemove={() => remove(index)}
-                      />
-                    )}
-                    <HStack className={"requirement-edit-controls-container"} flexFlow={"row-reverse"}>
-                      {watchedElective && !isRequirementInEditMode(field.id) && (
-                        <Tag
-                          bg={"theme.yellowLight"}
-                          color={"text.secondary"}
-                          fontWeight={700}
-                          fontSize={"xs"}
-                          visibility={isRequirementInEditMode(field.id) ? "hidden" : "visible"}
-                        >
-                          {t("requirementsLibrary.elective")}
-                        </Tag>
-                      )}
-                      {!isRequirementInEditMode(field.id) && (
-                        <Tag
-                          bg={"greys.grey03"}
-                          color={"text.secondary"}
-                          fontWeight={700}
-                          fontSize={"xs"}
-                          className={"requirement-edit-controls"}
-                          visibility={"hidden"}
-                        >
-                          {getRequirementTypeLabel(requirementType)}
-                        </Tag>
-                      )}
-                      <Button
-                        variant={"primary"}
-                        size={"sm"}
-                        onClick={() => {
-                          toggleRequirementToEdit(field.id)
-                        }}
-                        className={"requirement-edit-controls"}
-                        visibility={isRequirementInEditMode(field.id) ? "visible" : "hidden"}
-                      >
-                        {t(isRequirementInEditMode(field.id) ? "ui.done" : "ui.edit")}
-                      </Button>
-                    </HStack>
-                  </HStack>
+                  <FieldControlsHeader
+                    requirementIndex={index}
+                    isRequirementInEditMode={isRequirementInEditMode(field.id)}
+                    toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
+                  />
                 </Box>
               )
             })}
