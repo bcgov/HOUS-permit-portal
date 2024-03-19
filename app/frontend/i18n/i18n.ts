@@ -81,6 +81,11 @@ const options = {
           createdQ: "Why was this tool created?",
           createdA:
             "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
+          addressSelectLabel: "Location or civic address",
+          where: "Where",
+          findYourAuth: "Find your local building permit authority.",
+          localJurisdiction: "Local jurisdiction",
+          learnRequirements: "Learn about local requirements",
         },
         ui: {
           tip: "Tip",
@@ -133,6 +138,7 @@ const options = {
           collapseAll: "Collapse all",
           toTop: "Go to top",
           confirm: "Confirm",
+          searchAddresses: "Search addresses",
           close: "Close",
           asc: "Ascending",
           desc: "Descending",

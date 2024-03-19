@@ -19,7 +19,7 @@ export const BlueTitleBar = ({ title, imageSrc, ...rest }: IBlueTitleBarProps) =
             position="absolute"
             right="0"
             zIndex="0"
-            src={imageSrc || "images/banner-housing.svg"}
+            src={imageSrc || "/images/banner-housing.svg"}
             opacity="10%"
             alt="title decoration"
             h="full"
