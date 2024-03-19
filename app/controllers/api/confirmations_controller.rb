@@ -18,7 +18,7 @@ class Api::ConfirmationsController < Devise::ConfirmationsController
     yield resource if block_given?
 
     if resource.errors.empty?
-      PermitHubMailer.welcome_email(@user).deliver_later
+      PermitHubMailer.welcome(@user).deliver_later
       redirect_to login_url(frontend_flash_message("user.confirmation_success", "success"))
     else
       redirect_to login_url(

@@ -65,6 +65,7 @@ gem "sidekiq-cron", "~> 1.12"
 gem "rubyzip", "~> 2.3.2"
 gem "anycable-rails", "~> 1.4"
 gem "addressable", "~> 2.8"
+gem "friendly_id", "~> 5.5.1"
 gem 'exception_notification', '~> 4.5.0'
 
 group :development, :test do

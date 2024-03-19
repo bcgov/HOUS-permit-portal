@@ -1,4 +1,16 @@
-import { Flex, FormControl, FormControlProps, FormErrorMessage, FormLabel, Input, InputGroup } from "@chakra-ui/react"
+import {
+  Flex,
+  FormControl,
+  FormControlProps,
+  FormErrorMessage,
+  FormLabel,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputProps,
+} from "@chakra-ui/react"
+import { Envelope, X } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -7,20 +19,42 @@ import { fieldArrayCompatibleErrorMessage } from "./form-helpers"
 
 interface IEmailFormControlProps extends FormControlProps {
   validate?: boolean
+  label?: string
   required?: boolean
+  showIcon?: boolean
+  hideLabel?: boolean
   fieldName?: string
+  isRemovable?: boolean
+  handleRemove?: () => void
+  inputProps?: InputProps
 }
 
-export const EmailFormControl = ({ validate, fieldName = "email", required, ...rest }: IEmailFormControlProps) => {
+export const EmailFormControl = ({
+  validate,
+  label,
+  fieldName = "email",
+  required,
+  showIcon,
+  hideLabel,
+  isRemovable,
+  handleRemove,
+  inputProps,
+  ...rest
+}: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
   const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)
 
   return (
-    <FormControl isInvalid={errorMessage} {...rest}>
-      <FormLabel>{t("auth.emailLabel")}</FormLabel>
-      <InputGroup>
-        <Flex w="full" direction="column">
+    <FormControl isInvalid={errorMessage && !inputProps?.isDisabled} {...rest}>
+      {!hideLabel && <FormLabel>{label || t("auth.emailLabel")}</FormLabel>}
+      <Flex>
+        <InputGroup pos="relative">
+          {showIcon && (
+            <InputLeftElement pointerEvents="none">
+              <Envelope />
+            </InputLeftElement>
+          )}
           <Input
             {...register(fieldName, {
               required: required && t("ui.isRequired", { field: t("auth.emailLabel") }),
@@ -30,10 +64,27 @@ export const EmailFormControl = ({ validate, fieldName = "email", required, ...r
             })}
             bg="greys.white"
             type={"text"}
+            {...inputProps}
           />
-          {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
-        </Flex>
-      </InputGroup>
+        </InputGroup>
+        {isRemovable && (
+          <IconButton
+            onClick={handleRemove}
+            isRound
+            ml={2}
+            size="xs"
+            alignSelf="center"
+            bg="transparent"
+            aria-label="Remove"
+            icon={<X size={"10px"} color="text.primary" />}
+          />
+        )}
+      </Flex>
+      {errorMessage && !inputProps?.isDisabled && (
+        <FormErrorMessage pos="absolute" bottom={-5}>
+          {errorMessage}
+        </FormErrorMessage>
+      )}
     </FormControl>
   )
 }

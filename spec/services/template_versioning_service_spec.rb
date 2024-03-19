@@ -159,7 +159,8 @@ RSpec.describe TemplateVersioningService, type: :service do
         expected_publishable_version_1 = TemplateVersioningService.schedule!(requirement_template, Date.current + 5)
         TemplateVersioningService.schedule!(requirement_template, Date.current + 15)
 
-        requirement_template_2 = create(:full_requirement_template, sections_count: 1)
+        permit_type = create(:permit_type, code: :medium_residential)
+        requirement_template_2 = create(:full_requirement_template, permit_type: permit_type, sections_count: 1)
 
         TemplateVersioningService.schedule!(requirement_template_2, Date.current + 3)
         TemplateVersioningService.schedule!(requirement_template_2, Date.current + 5)
@@ -187,7 +188,8 @@ RSpec.describe TemplateVersioningService, type: :service do
         expected_published_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 5)
         expected_scheduled_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 15)
 
-        requirement_template_2 = create(:full_requirement_template, sections_count: 1)
+        permit_type = create(:permit_type, code: :medium_residential)
+        requirement_template_2 = create(:full_requirement_template, permit_type: permit_type, sections_count: 1)
 
         expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 3)
         expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 5)

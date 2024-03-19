@@ -1,8 +1,8 @@
-import { Button, Flex, Stack, Text } from "@chakra-ui/react"
+import { Box, Button, Center, Flex, Link, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useTemplateVersions } from "../../../../../hooks/resources/use-template-versions"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
@@ -70,6 +70,18 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
           </Flex>
         )
       })}
+      <Center>
+        <Box bg="greys.grey03" p={4} w="75%" mt={24}>
+          <Trans
+            i18nKey="digitalBuildingPermits.index.requestNewPromptWithLink"
+            components={{
+              // This is the component that replaces the <1></1> in your i18n string.
+              // It's an array where each index corresponds to the placeholder number.
+              1: <Link href={`mailto:digital.codes.permits@gov.bc.ca?subject=New%20permit%20type%20requested`}></Link>,
+            }}
+          />
+        </Box>
+      </Center>
     </Stack>
   )
 })

@@ -31,7 +31,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
   useSearch(jurisdictionStore)
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
+    <Container maxW="container.lg" p={8} as={"main"} flexGrow={1}>
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
