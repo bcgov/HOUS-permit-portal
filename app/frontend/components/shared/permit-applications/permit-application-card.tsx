@@ -1,12 +1,11 @@
-import { Box, Flex, Image, Show, Spacer, Text } from "@chakra-ui/react"
-import { CaretRight } from "@phosphor-icons/react"
+import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
+import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { RouterLink } from "../navigation/router-link"
 import { PermitApplicationStatusTag } from "./permit-application-status-tag"
 
 interface IPermitApplicationCardProps {
@@ -113,11 +112,16 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         </Flex>
       </Flex>
       <Flex direction={{ base: "column", md: "row" }} gap={4}>
-        <RouterLink to={"#"}>{`${t("permitApplication.seeBestPracticesLink")} ${permitTypeAndActivity}`}</RouterLink>
+        <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
+          {t("permitApplication.seeBestPractices_CTA")}
+          <ArrowSquareOut></ArrowSquareOut>
+        </Link>
         <Show above="md">
           <Text>{"  |  "}</Text>
         </Show>
-        <RouterLink to={"#"}>{t("permitApplication.ask")}</RouterLink>
+        <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
+          {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut></ArrowSquareOut>
+        </Link>
       </Flex>
     </Flex>
   )
