@@ -114,6 +114,7 @@ export interface IDenormalizedRequirement {
   inputOptions: IRequirementOptions
   hint?: string | null
   elective?: boolean
+  required?: boolean
 }
 
 export interface IDenormalizedRequirementBlock {

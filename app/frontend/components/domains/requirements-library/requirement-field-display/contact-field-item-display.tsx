@@ -11,7 +11,15 @@ export function ContactFieldItemDisplay({ contactFieldItemType }: IContactFieldI
   const defaultProps: Partial<TRequirementFieldDisplayProps> = {
     label: getRequirementContactFieldItemLabel(contactFieldItemType),
     requirementType: ERequirementType.text,
+    required: true,
   }
+  const required = [
+    ERequirementContactFieldItemType.firstName,
+    ERequirementContactFieldItemType.lastName,
+    ERequirementContactFieldItemType.email,
+    ERequirementContactFieldItemType.phone,
+    ERequirementContactFieldItemType.address,
+  ].includes(contactFieldItemType)
 
   const propsByType = {
     [ERequirementContactFieldItemType.email]: {
@@ -27,5 +35,5 @@ export function ContactFieldItemDisplay({ contactFieldItemType }: IContactFieldI
       labelProps: { maxW: "full" },
     },
   }
-  return <RequirementFieldDisplay {...defaultProps} {...propsByType[contactFieldItemType]} />
+  return <RequirementFieldDisplay {...defaultProps} {...propsByType[contactFieldItemType]} required={required} />
 }

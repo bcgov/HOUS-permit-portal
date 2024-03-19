@@ -120,8 +120,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
             {fields.map((field, index) => {
               const watchedHint = watch(`requirementsAttributes.${index}.hint`)
-              const watchedElective = watch(`requirementsAttributes.${index}.elective`)
-              const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
+              const watchedRequired = watch(`requirementsAttributes.${index}.required`)
               const requirementType = (field as IRequirementAttributes).inputType
               return (
                 <Box
@@ -264,6 +263,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                           isChecked: !!watch(`requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`),
                         },
                       }}
+                      required={watchedRequired}
                       showAddLabelIndicator
                     />
                   </Box>

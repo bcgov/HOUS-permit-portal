@@ -7,6 +7,7 @@ import { TRequirementFieldDisplayProps } from "./index"
 
 interface IGroupedFieldProps extends Omit<TRequirementFieldDisplayProps, "options"> {
   inputDisplay: JSX.Element
+  required?: boolean
   containerProps?: Partial<FormControlProps>
 }
 
@@ -26,10 +27,11 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   showAddLabelIndicator,
   requirementType,
   containerProps,
+  required,
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
   return (
-    <FormControl w={"100%"} isReadOnly {...containerProps}>
+    <FormControl w={"100%"} isReadOnly isRequired={required} {...containerProps}>
       <FormLabel
         {...defaultLabelProps}
         {...(labelProps as FormLabelProps)}

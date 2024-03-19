@@ -41,6 +41,7 @@ export type TRequirementFieldDisplayProps = {
   showAddPersonButton?: boolean
   requirementType: ERequirementType
   showAddLabelIndicator?: boolean
+  required?: boolean
 }
 
 const defaultOptions = ["Option", "Option"]
