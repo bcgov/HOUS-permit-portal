@@ -6,7 +6,7 @@ class Api::InvitationsController < Devise::InvitationsController
 
   def create
     inviter = Jurisdiction::UserInviter.new(inviter: current_user, users_params: users_params).call
-    if inviter.results[:invited].any?
+    if (inviter.results[:invited] + inviter.results[:email_taken]).any?
       render_success(inviter.results, nil, { blueprint: InvitationBlueprint })
     else
       render_error "user.create_invite_error" and return

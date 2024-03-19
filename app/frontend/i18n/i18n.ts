@@ -846,6 +846,9 @@ const options = {
           inviteTitle: "Invite Users",
           inviteSuccess: "Invite sent!",
           inviteError: "Email taken",
+          takenErrorTitle: "Some of these emails already belong to existing users",
+          takenErrorDescription:
+            "One or more of the requested users have an existing submitter, reviewer, or review manager account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
           sendInvites: "Send Invites",
           acceptInvitation: "Accept Invitation to",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",

@@ -45,7 +45,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
         <NameFormControl label="First Name (optional)" index={index} subFieldName="firstName" />
         <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
         {invited && (
-          <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2} alignSelf="center">
+          <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" alignSelf="center">
             <HStack color="semantic.success">
               <CheckCircle size={20} />
               <Text>{t("user.inviteSuccess")}</Text>
@@ -53,7 +53,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
           </Tag>
         )}
         {taken && (
-          <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" mb={2}>
+          <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" alignSelf="center">
             <HStack color="semantic.error">
               <WarningCircle size={20} />
               <Text>{t("user.inviteError")}</Text>
