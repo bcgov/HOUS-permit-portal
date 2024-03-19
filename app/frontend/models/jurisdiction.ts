@@ -11,6 +11,7 @@ import { UserModel } from "./user"
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
     id: types.identifier,
+    slug: types.string,
     name: types.string,
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
@@ -33,8 +34,8 @@ export const JurisdictionModel = types
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
-    energyStepRequired: types.number,
-    zeroCarbonStepRequired: types.number,
+    energyStepRequired: types.maybeNull(types.number),
+    zeroCarbonStepRequired: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
   .views((self) => ({

@@ -28,7 +28,7 @@ export const JurisdictionStoreModel = types
       //@ts-ignore
       return t(`jurisdiction.fields.${toCamelCase(field)}`)
     },
-    // View to get a Jurisdiction by id
+    // View to get a Jurisdiction by id or slug
     getJurisdictionById(id: string) {
       return self.jurisdictionMap.get(id)
     },
@@ -97,6 +97,11 @@ export const JurisdictionStoreModel = types
     }),
     setCurrentJurisdiction(jurisdictionId) {
       self.currentJurisdiction = jurisdictionId
+    },
+    setCurrentJurisdictionBySlug(slug) {
+      const j = self.jurisdictions.find((j) => j.slug == slug)
+      self.currentJurisdiction = j?.id
+      return j?.id
     },
   }))
 

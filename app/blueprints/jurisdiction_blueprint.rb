@@ -1,6 +1,7 @@
 class JurisdictionBlueprint < Blueprinter::Base
-  field :slug, name: :id
-  fields :name,
+  identifier :id
+  fields :slug,
+         :name,
          :locality_type,
          :qualifier,
          :qualified_name,
