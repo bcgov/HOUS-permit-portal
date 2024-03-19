@@ -31,8 +31,15 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Flex direction="column">
-                <Image src="https://placehold.co/107x79" alt={`thumbnail for ${nickname}`} w={107} h={79} />
-                <Text color="text.link" textTransform="capitalize" fontWeight="bold">
+                <Image
+                  src="images/permit_classifications/low_residential.png"
+                  alt={`thumbnail for ${nickname}`}
+                  w="full"
+                  h="106"
+                  bg="semantic.infoLight"
+                  objectFit="contain"
+                />
+                <Text as="span" mt="1" color="text.secondary" fontSize="sm" fontWeight="bold">
                   {permitTypeAndActivity}
                 </Text>
               </Flex>

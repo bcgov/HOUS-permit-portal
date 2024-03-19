@@ -97,9 +97,9 @@ export const PermitTypeRadioCard = (props: IPermitTypeRadioCardProps) => {
             {permitType.description}
           </Text>
         </Flex>
-        <Box flex={1}>
-          <Image w="334px" src={permitType.imageUrl} alt={permitType.name} objectFit="cover" />
-        </Box>
+        <Flex justifyContent="center" width="full" bg="semantic.infoLight">
+          <Image width="40" src={permitType.imageUrl} alt={permitType.name} objectFit="contain" />
+        </Flex>
       </Flex>
     </Box>
   )

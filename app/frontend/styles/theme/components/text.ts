@@ -7,7 +7,7 @@ export const Text = {
     tiny_uppercase: {
       fontSize: "xxs",
       fontWeight: "bold",
-      letterSpacing: "1px",
+      letterSpacing: "0.05em",
       textTransform: "uppercase",
     },
   },
