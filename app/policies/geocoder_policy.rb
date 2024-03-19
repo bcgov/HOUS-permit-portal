@@ -10,4 +10,8 @@ class GeocoderPolicy < ApplicationPolicy
   def pid?
     site_options?
   end
+
+  def formio?
+    true
+  end
 end

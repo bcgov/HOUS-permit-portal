@@ -11,6 +11,13 @@ class Wrappers::Geocoder < Wrappers::Base
 
   OUTPUT_FORMAT = "json"
 
+  def site_options_raw(address_string)
+    site_params = { autoComplete: true, brief: true, maxResults: 10 }
+    site_params[:addressString] = address_string if address_string.present?
+
+    r = get("/addresses.#{OUTPUT_FORMAT}", site_params)
+  end
+
   def site_options(address_string = nil, coordinates = nil)
     site_params = { locationDescriptor: "parcelPoint", autoComplete: true, brief: true, maxResults: 10 }
 
