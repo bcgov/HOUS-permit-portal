@@ -10,30 +10,31 @@ import {
   useRadio,
   useRadioGroup,
 } from "@chakra-ui/react"
+import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { IPermitType } from "../../../models/permit-classification"
+import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
+import { CustomToast } from "../base/flash-message"
 import { SharedSpinner } from "../base/shared-spinner"
 
 interface IPermitTypeRadioSelect extends FlexProps {
   fetchOptions: () => Promise<IOption<IPermitType>[]>
   onChange: (value) => void
   value: string
-  isLoading: boolean
 }
 
-export const PermitTypeRadioSelect = ({
-  onChange,
-  value,
-  fetchOptions,
-  isLoading,
-  ...rest
-}: IPermitTypeRadioSelect) => {
+export const PermitTypeRadioSelect = observer(({ onChange, value, fetchOptions, ...rest }: IPermitTypeRadioSelect) => {
   const { getRadioProps } = useRadioGroup({
     name: "permitType",
     defaultValue: null,
     onChange: onChange,
   })
+
+  const { permitClassificationStore } = useMst()
+  const { isPermitTypeLoading } = permitClassificationStore
 
   const [permitTypeOptions, setPermitTypeOptions] = useState<IOption<IPermitType>[]>([])
 
@@ -43,7 +44,13 @@ export const PermitTypeRadioSelect = ({
     })()
   }, [])
 
-  if (isLoading) return <SharedSpinner />
+  const { t } = useTranslation()
+
+  if (isPermitTypeLoading) return <SharedSpinner />
+
+  if (R.isEmpty(permitTypeOptions)) {
+    return <CustomToast status="error" description={t("translation:permitApplication.new.noContactsAvailable")} />
+  }
 
   return (
     <Flex gap={4} flexWrap="wrap" role="radiogroup" {...rest}>
@@ -53,7 +60,7 @@ export const PermitTypeRadioSelect = ({
       })}
     </Flex>
   )
-}
+})
 
 interface IPermitTypeRadioCardProps extends UseRadioProps {
   permitType: IPermitType

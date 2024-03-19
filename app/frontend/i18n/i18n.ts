@@ -50,7 +50,7 @@ const options = {
           easyToFollow: "Easy to follow instructions of what is required for your building permit application",
           accessMyPermits: "Access My Housing Building Permits",
           accessExplanation:
-            "Digital Building Permit Account uses the same or different login as BCeID. Need to explain this to users clearly what they’re logging in with.",
+            "Digital Building Permit Account uses the same or different login as BCeID. Need to explain this to users clearly what they're logging in with.",
           whoForTitle: "Who is this for?",
           whoFor: [
             "I want to build a houseplex",
@@ -287,6 +287,7 @@ const options = {
             bySubmitting: "By submitting this application",
             confirmation: "Lorem ipsum submitting blah de blah filler lorem",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
+            noContactsAvailable: "Sorry, the Building Permit Hub doesn't support this jurisdiction yet.",
             whatsNext:
               "Lorem ipsum what to expext next. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
             emailed:
@@ -931,7 +932,7 @@ const options = {
             tableHeading: "Templates",
             title: "Permit Templates Catalogue",
             description:
-              "List of all permit templates in the system that’s been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
+              "List of all permit templates in the system that's been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
             createButton: "Create new template",
             seeArchivedButton: "See Archived",
           },
@@ -1024,7 +1025,7 @@ const options = {
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
           somethingWrong: "Something went wrong",
-          pageNotFound: "Oops, we can’t find that page",
+          pageNotFound: "Oops, we can't find that page",
           pageNotFoundInstructions: "Please check that the web URL has been entered correctly.",
           pageNotFoundCTA: "Go back to home",
           pageNotFoundContactInstructions: "Do you believe this to be in error or are you stuck?",

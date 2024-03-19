@@ -18,7 +18,6 @@ JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
 north_van = Jurisdiction.find_by(name: "North Vancouver")
-north_van.update(submission_email: "test@example.com") if Rails.env.development?
 
 puts "Seeding users..."
 5.times do |n|
@@ -203,4 +202,10 @@ EndUserLicenseAgreement.find_or_create_by(
 
     <p>Atque his de rebus et splendida est eorum et illustris oratio. Cupiditates non Epicuri divisione finiebat, sed sua satietate. Expectoque quid ad id, quod quaerebam, respondeas. In eo autem voluptas omnium Latine loquentium more ponitur, cum percipitur ea, quae sensum aliquem moveat, iucunditas. Istam voluptatem perpetuam quis potest praestare sapienti? Similiter sensus, cum accessit ad naturam, tuetur illam quidem, sed etiam se tuetur; Ipse Epicurus fortasse redderet, ut Sextus Peducaeus, Sex. Habent enim et bene longam et satis litigiosam disputationem. Rationis enim perfectio est virtus; </p>
   ",
+)
+
+PermitTypeSubmissionContact.create!(
+  jurisdiction_id: north_van.id,
+  permit_type_id: rt.permit_type.id,
+  email: "example@example.com", # Add a valid email address
 )
