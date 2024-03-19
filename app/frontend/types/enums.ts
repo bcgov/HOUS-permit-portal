@@ -231,3 +231,16 @@ export enum ESZeroCarbonStep {
   three = "3",
   four = "4",
 }
+
+export enum ERequirementContactFieldItemType {
+  firstName = "firstName",
+  lastName = "lastName",
+  email = "email",
+  phone = "phone",
+  address = "address",
+  organization = "organization",
+  businessName = "businessName",
+  businessLicense = "businessLicense",
+  professionalAssociation = "professionalAssociation",
+  professionalNumber = "professionalNumber",
+}

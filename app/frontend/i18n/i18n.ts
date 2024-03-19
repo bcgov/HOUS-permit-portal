@@ -311,6 +311,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          addAnotherPerson: "Add another person",
           elective: "Elective",
           associationsInfo: "Sections, tags, etc...",
           index: {
@@ -325,6 +326,8 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            defaultContactLabel: "Contact",
+            canAddMultipleContacts: "Submitter can add multiple contacts",
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
@@ -385,6 +388,18 @@ const options = {
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
+          },
+          contactFieldItemLabels: {
+            firstName: "First Name",
+            lastName: "Last Name",
+            email: "Email",
+            phone: "Phone",
+            address: "Address",
+            organization: "Organization",
+            businessName: "Business Name",
+            businessLicense: "Business License",
+            professionalAssociation: "Professional Association/Organization",
+            professionalNumber: "Professional Number",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
           unitLabels: {

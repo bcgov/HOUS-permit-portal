@@ -27,7 +27,7 @@ interface IProps {
 }
 
 // TODO: remove when backend for these types is implemented
-const DISABLED_TYPES = [ERequirementType.address, ERequirementType.generalContact]
+const DISABLED_TYPES = [ERequirementType.address]
 
 export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   defaultButtonProps,
@@ -53,7 +53,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
       )}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW={"500px"}>
+        <DrawerContent maxW={"550px"}>
           <DrawerCloseButton fontSize={"xs"} />
           <DrawerHeader color={"greys.white"} backgroundColor={"theme.blueAlt"} p={6} pt={10} fontSize={"2xl"}>
             {t("ui.add")}...
