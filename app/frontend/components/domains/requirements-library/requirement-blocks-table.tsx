@@ -110,6 +110,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
           totalPages={totalPages}
           pageSize={countPerPage}
           handlePageChange={handlePageChange}
+          showLessItems={true}
         />
       </Flex>
     </VStack>

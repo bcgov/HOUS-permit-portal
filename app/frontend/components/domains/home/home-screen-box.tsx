@@ -22,7 +22,7 @@ export const HomeScreenBox = ({ icon, title, description, href, linkText, ...res
         <Flex direction="column" gap={3} flex={1}>
           <Flex color="text.link">
             {icon}
-            <Heading as="h3" fontSize="xl" ml={2}>
+            <Heading as="h3" ml={2}>
               {title}
             </Heading>
           </Flex>
@@ -30,10 +30,10 @@ export const HomeScreenBox = ({ icon, title, description, href, linkText, ...res
             {description}
           </Text>
         </Flex>
-        <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />}>
-          <Heading as="h3" fontSize="lg" color="text.link">
+        <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />} position="static">
+          <Text as="span" fontWeight="bold" fontSize="lg" color="text.link">
             {linkText || t("ui.manage")}
-          </Heading>
+          </Text>
         </RouterLinkButton>
       </Flex>
     </SectionBox>

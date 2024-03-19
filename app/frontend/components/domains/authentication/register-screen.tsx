@@ -53,7 +53,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               bg="greys.white"
             >
               <Flex gap={2} direction="column">
-                <Heading as="h3">{t("auth.register")}</Heading>
+                <Heading as="h1">{t("auth.register")}</Heading>
                 <Text>{t("auth.registerInstructions")}</Text>
               </Flex>
               <Box border="1px solid" borderColor="border.light" padding={6}>
@@ -78,7 +78,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
               </Box>
               <Box border="1px solid" borderColor="border.light" padding={6}>
                 <Flex gap={4} direction="column">
-                  <Heading as="h3">{t("auth.passwordTitle")}</Heading>
+                  <Heading as="h2">{t("auth.passwordTitle")}</Heading>
                   <Text>{t("auth.passwordRequirements")}</Text>
                   <PasswordFormControl validate mb={0} />
                 </Flex>

@@ -36,7 +36,7 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
   return (
     <CenterContainer>
       <Flex direction="column" gap={6} w="full" p={10} border="solid 1px" borderColor="border.light" bg="greys.white">
-        <Heading as="h3">{t("auth.login")}</Heading>
+        <Heading as="h1">{t("auth.login")}</Heading>
         <form action="/api/auth/keycloak" method="post">
           {/* @ts-ignore */}
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />

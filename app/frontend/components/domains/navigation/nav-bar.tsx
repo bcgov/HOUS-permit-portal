@@ -4,7 +4,6 @@ import {
   Container,
   Flex,
   HStack,
-  Heading,
   Image,
   Link,
   Menu,
@@ -112,13 +111,13 @@ export const NavBar = observer(() => {
             </RouterLink>
             <Show above="md">
               {isStepCode ? (
-                <Heading as="h3" fontSize="md" color="text.primary" fontWeight="bold">
+                <Text fontSize="md" color="text.primary" fontWeight="bold">
                   {t("stepCode.title")}
-                </Heading>
+                </Text>
               ) : (
-                <Heading as="h3" fontSize="2xl" fontWeight="normal" mb="0">
+                <Text fontSize="2xl" fontWeight="normal" mb="0">
                   {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
-                </Heading>
+                </Text>
               )}
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}
@@ -135,7 +134,7 @@ export const NavBar = observer(() => {
               {currentUser?.jurisdiction && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
-                  <Text color="whiteAlpha.700" textAlign="right" className="text-xxsmall-uppercase">
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 </Flex>
@@ -187,7 +186,6 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
-      <NavMenuItem label={t("home.auditLogTitle")} to={"/audit-log"} />
       <MenuDivider />
     </>
   )
@@ -211,7 +209,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
         {t("site.menu")}
       </MenuButton>
       <Portal>
-        <div className="nav-menu-dropdown-background">
+        <Box className="nav-menu-dropdown-background">
           <MenuList zIndex={10} boxShadow="2xl">
             {loggedIn ? (
               <>
@@ -244,7 +242,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
               </Link>
             </MenuItem>
           </MenuList>
-        </div>
+        </Box>
       </Portal>
     </Menu>
   )

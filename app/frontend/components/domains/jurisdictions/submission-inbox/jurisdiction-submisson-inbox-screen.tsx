@@ -36,11 +36,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   if (!currentJurisdiction) return <LoadingScreen />
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"} flexGrow={1}>
+    <Container maxW="container.lg" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
         <Flex justify={"space-between"} w={"full"}>
           <Box>
-            <Heading as="h1" fontSize={"4xl"} color={"text.primary"}>
+            <Heading as="h1">
               {t("permitApplication.submissionInbox.title")}
             </Heading>
             <Text fontSize="sm" color="text.secondary">
@@ -138,6 +138,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             totalPages={totalPages}
             pageSize={countPerPage}
             handlePageChange={handlePageChange}
+            showLessItems={true}
           />
         </Flex>
       </VStack>

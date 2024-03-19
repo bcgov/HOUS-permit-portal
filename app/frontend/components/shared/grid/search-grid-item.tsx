@@ -14,6 +14,7 @@ export const SearchGridItem = ({ children, ...rest }: ISearchGridItemProps) => {
       alignItems="center"
       role="cell"
       color="text.primary"
+      fontSize="sm"
       {...rest}
     >
       {children}
