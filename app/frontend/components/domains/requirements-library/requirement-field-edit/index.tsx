@@ -199,53 +199,23 @@ const requirementsComponentMap = {
     multiOptionProps,
     ...editableGroupProps
   }: TRequirementEditProps<TFieldValues>) {
-    const { t } = useTranslation()
-
-    if (!multiOptionProps) {
-      import.meta.env.DEV && console.error("multiOptionProps is required for checkbox requirement edit")
-      return null
-    }
-
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
-
-    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
-
     return (
       <EditableGroup
-        multiOptionEditableInput={
-          <>
-            {fields.map((field, idx) => (
-              <HStack key={field.id}>
-                <Box
-                  border={"1px solid"}
-                  borderColor={"border.light"}
-                  bg={"white"}
-                  w={"16px"}
-                  h={"16px"}
-                  borderRadius={"sm"}
-                />
-                <Input
-                  bg={"white"}
-                  size={"sm"}
-                  value={getOptionValue(idx).label}
-                  onChange={(e) => onOptionValueChange(idx, e.target.value)}
-                  w={"150px"}
-                />
-                <IconButton
-                  aria-label={"remove option"}
-                  variant={"unstyled"}
-                  icon={<X />}
-                  onClick={() => remove(idx)}
-                />
-              </HStack>
-            ))}
-
-            {/*  @ts-ignore*/}
-            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
-              {t("requirementsLibrary.modals.addOptionButton")}
-            </Button>
-          </>
-        }
+        sx={{
+          "& > div:first-child": {
+            alignItems: "center",
+            "&:before": {
+              content: "''",
+              border: "1px solid",
+              borderColor: "border.light",
+              bg: "white",
+              w: "16px",
+              h: "16px",
+              borderRadius: "sm",
+              mr: 2,
+            },
+          },
+        }}
         {...editableGroupProps}
       />
     )

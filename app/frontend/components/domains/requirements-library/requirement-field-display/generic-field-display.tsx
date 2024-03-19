@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel, FormLabelProps } from "@chakra-ui/react"
+import { FormControl, FormControlProps, FormHelperText, FormLabel, FormLabelProps } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -7,6 +7,7 @@ import { TRequirementFieldDisplayProps } from "./index"
 
 interface IGroupedFieldProps extends Omit<TRequirementFieldDisplayProps, "options"> {
   inputDisplay: JSX.Element
+  containerProps?: Partial<FormControlProps>
 }
 
 const defaultLabelProps: Partial<FormLabelProps> = {
@@ -24,10 +25,11 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   helperText,
   showAddLabelIndicator,
   requirementType,
+  containerProps,
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
   return (
-    <FormControl w={"100%"} isReadOnly>
+    <FormControl w={"100%"} isReadOnly {...containerProps}>
       <FormLabel
         {...defaultLabelProps}
         {...(labelProps as FormLabelProps)}

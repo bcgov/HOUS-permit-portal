@@ -159,17 +159,16 @@ const requirementsComponentMap = {
   [ERequirementType.checkbox]({ options = defaultOptions, ...genericDisplayProps }: TRequirementFieldDisplayProps) {
     return (
       <GenericFieldDisplay
-        inputDisplay={
-          <CheckboxGroup>
-            <Stack>
-              {options.map((option, index) => (
-                <Checkbox key={index} value={option}>
-                  {option}
-                </Checkbox>
-              ))}
-            </Stack>
-          </CheckboxGroup>
-        }
+        containerProps={{
+          display: "flex",
+          flexDir: "row-reverse",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          sx: {
+            label: { mb: 0 },
+          },
+        }}
+        inputDisplay={<Checkbox mr={2} />}
         {...genericDisplayProps}
       />
     )

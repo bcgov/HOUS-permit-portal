@@ -87,14 +87,6 @@ class Requirement < ApplicationRecord
   end
 
   def validate_value_options
-    unless TYPES_WITH_VALUE_OPTIONS.include?(input_type.to_s)
-      if input_options.present? && input_options["value_options"].present?
-        errors.add(:input_options, "value options are not allowed for #{input_type}")
-      end
-
-      return
-    end
-
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
@@ -115,7 +107,7 @@ class Requirement < ApplicationRecord
   end
 
   def convert_value_options
-    #all values MUST be converted to camelCase to be compatible with rehyration on front end
+    # all values MUST be converted to camelCase to be compatible with rehyration on front end
     input_options["value_options"] = input_options["value_options"].map do |option_json|
       option_json.merge("value" => option_json["value"].camelize(:lower))
     end

@@ -1,4 +1,4 @@
-import { Stack } from "@chakra-ui/react"
+import { Stack, StackProps } from "@chakra-ui/react"
 import React from "react"
 import { FieldValues } from "react-hook-form"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
@@ -13,7 +13,7 @@ export type TEditableGroupProps<TFieldValues extends FieldValues> = {
   isElectiveCheckboxProps: TIsElectiveCheckboxProps<TFieldValues>
   editableInput?: JSX.Element
   multiOptionEditableInput?: JSX.Element
-}
+} & Partial<StackProps>
 
 export function EditableGroup<TFieldValues>({
   editableLabelProps,
@@ -22,9 +22,10 @@ export function EditableGroup<TFieldValues>({
   multiOptionEditableInput,
   isOptionalCheckboxProps,
   isElectiveCheckboxProps,
+  ...containerProps
 }: TEditableGroupProps<TFieldValues>) {
   return (
-    <Stack spacing={4}>
+    <Stack spacing={4} {...containerProps}>
       <EditableLabel {...editableLabelProps} />
       {editableInput}
       {editableInput && <EditableHelperText {...editableHelperTextProps} />}
