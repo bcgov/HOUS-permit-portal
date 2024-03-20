@@ -1,4 +1,4 @@
-import { Box, Button, Container, Divider, Flex, HStack, Heading, Image, Link, Text } from "@chakra-ui/react"
+import { Box, Container, Divider, Flex, Heading, Image, Link, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -37,20 +37,6 @@ export const Footer = observer(() => {
           borderColor="border.light"
           zIndex={10}
         >
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            justify="center"
-            gap={4}
-            p={4}
-            align="center"
-            bg="greys.grey04"
-          >
-            <Text>{t("site.didYouFind")}</Text>
-            <HStack gap={3}>
-              <Button variant="secondary">{t("ui.yes")}</Button>
-              <Button variant="secondary">{t("ui.no")}</Button>
-            </HStack>
-          </Flex>
           <Flex py={8} borderY="4px solid" borderColor="theme.yellow" bg="text.primary" color="greys.white">
             <Container maxW="container.lg">
               <Text>{t("site.territorialAcknowledgement")}</Text>

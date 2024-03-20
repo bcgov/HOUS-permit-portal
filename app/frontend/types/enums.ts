@@ -245,6 +245,13 @@ export enum ERequirementContactFieldItemType {
   professionalNumber = "professionalNumber",
 }
 
+export enum EGovFeedbackResponseNoReason {
+  unclear = "This information is unclear",
+  missingInfo = "This page is missing the information I need",
+  notRelated = "This page is not related to what I searched for",
+  other = "Other",
+}
+
 export enum ESocketDomainTypes {
   notification = "notification",
   permitApplication = "permit_application",

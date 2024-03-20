@@ -995,6 +995,13 @@ const options = {
           beta: "Beta",
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",
+          thankYouForResponse: "Thank you for your response!",
+          govFeedbackResponseNoReasons: {
+            unclear: "This information is unclear",
+            missingInfo: "This page is missing the information I need",
+            notRelated: "This page is not related to what I searched for",
+            other: "Other",
+          },
           territorialAcknowledgement:
             "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
           home: "Home",
