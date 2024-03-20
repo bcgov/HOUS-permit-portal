@@ -13,19 +13,15 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :zipfile_size,
            :zipfile_name,
            :zipfile_url,
-           :reference_number
-           :submitted_at,
+           :reference_number,
+           :submitted_at
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
   end
 
   view :extended do
     include_view :base
-    fields :form_json,
-           :submission_data,
-           :formatted_compliance_data,
-           :front_end_form_update,
-           :form_customizations
+    fields :form_json, :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
 
     association :jurisdiction, blueprint: JurisdictionBlueprint
     association :submitter, blueprint: UserBlueprint
