@@ -40,9 +40,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
         <Flex justify={"space-between"} w={"full"}>
           <Box>
-            <Heading as="h1">
-              {t("permitApplication.submissionInbox.title")}
-            </Heading>
+            <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
             <Text fontSize="sm" color="text.secondary">
               {t("permitApplication.submissionInbox.submissionsSentTo")}
             </Text>
@@ -50,7 +48,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
             <Button
               as={RouterLink}
-              to={`/jurisdictions/${currentJurisdiction.id}/configuration-management/submissions-inbox-setup`}
+              to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/submissions-inbox-setup`}
               variant="secondary"
             >
               {t("ui.setup")}

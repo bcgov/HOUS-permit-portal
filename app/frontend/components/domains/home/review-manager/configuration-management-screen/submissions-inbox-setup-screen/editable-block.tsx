@@ -42,7 +42,8 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
     jurisdictionStore: { getJurisdictionById },
   } = useMst()
   const jurisdiction = getJurisdictionById(jurisdictionId)
-  const { getPermitTypeSubmissionContact } = jurisdiction
+
+  const getPermitTypeSubmissionContact = jurisdiction?.getPermitTypeSubmissionContact
 
   const { formState, trigger, getValues } = useFormContext()
   const { errors, isSubmitting, isSubmitted } = formState
@@ -90,7 +91,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
         {fields.map((f, index) => {
           const trueIndex = getIndex(f)
           const contactId = getValues(`${fieldArrayName}.${trueIndex}.id`)
-          const contact = contactId && getPermitTypeSubmissionContact(contactId)
+          const contact = contactId && getPermitTypeSubmissionContact && getPermitTypeSubmissionContact(contactId)
 
           return (
             <React.Fragment key={f.id || generateUUID()}>

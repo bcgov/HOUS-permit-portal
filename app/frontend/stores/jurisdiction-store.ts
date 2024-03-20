@@ -8,7 +8,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
 import { ISort } from "../types/types"
-import { toCamelCase } from "../utils/utility-functions"
+import { isUUID, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
   .compose(
@@ -30,6 +30,9 @@ export const JurisdictionStoreModel = types
     },
     // View to get a Jurisdiction by id or slug
     getJurisdictionById(id: string) {
+      if (!isUUID(id)) {
+        Array.from(self.jurisdictionMap.values()).find((j) => j.slug == id)
+      }
       return self.jurisdictionMap.get(id)
     },
     // View to get all jurisdictions as an array
