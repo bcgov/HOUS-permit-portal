@@ -137,7 +137,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   }, [currentPermitApplication?.nickname])
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitApplication) return <LoadingScreen />
+  if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const scrollToBottom = () => {
     handleScrollToBottom("permitApplicationFieldsContainer")

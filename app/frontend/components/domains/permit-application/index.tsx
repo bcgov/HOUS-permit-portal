@@ -4,7 +4,6 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 
-import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { EPermitApplicationStatus, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
@@ -22,10 +21,6 @@ interface IPermitApplicationIndexScreenProps {}
 
 export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationIndexScreenProps) => {
   const { t } = useTranslation()
-
-  // This needs to be here to keep the pathname param updating within this hook
-  // to prevent missed useEffect re-runs on back, and then re-resume.
-  usePermitApplication()
 
   const { permitApplicationStore } = useMst()
   const {
