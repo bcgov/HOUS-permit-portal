@@ -244,3 +244,10 @@ export enum ERequirementContactFieldItemType {
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
 }
+
+export enum EGovFeedbackResponseNoReason {
+  unclear = "This information is unclear",
+  missingInfo = "This page is missing the information I need",
+  notRelated = "This page is not related to what I searched for",
+  other = "Other",
+}
