@@ -1,5 +1,6 @@
 import { t } from "i18next"
 import {
+  EEnabledElectiveFieldReason,
   EGovFeedbackResponseNoReason,
   ENumberUnit,
   ERequirementContactFieldItemType,
@@ -75,4 +76,13 @@ export function getGovFeedbackResponseNoReasonOptions(): IOption<EGovFeedbackRes
       label: t(`site.govFeedbackResponseNoReasons.${key}`),
     })
   )
+}
+
+export function getEnabledElectiveReasonOptions(): IOption<EEnabledElectiveFieldReason>[] {
+  return Object.values(EEnabledElectiveFieldReason).map((reason) => {
+    return {
+      label: t(`digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.${reason}`),
+      value: reason,
+    }
+  })
 }

@@ -2,6 +2,7 @@ import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
   EDoorsPerformanceType,
+  EEnabledElectiveFieldReason,
   EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
@@ -177,6 +178,7 @@ export interface IStepCodeSelectOptions {
 export interface IRequirementBlockCustomization {
   tip?: string
   enabledElectiveFieldIds?: Array<string>
+  enabledElectiveFieldReasons?: Record<string, EEnabledElectiveFieldReason>
 }
 
 export interface ITemplateCustomization {

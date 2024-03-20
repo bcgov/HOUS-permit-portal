@@ -10,6 +10,9 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  FormControl,
+  FormLabel,
+  Select,
   Stack,
   Text,
   useDisclosure,
@@ -18,6 +21,8 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { getEnabledElectiveReasonOptions } from "../../../../../constants"
+import { EEnabledElectiveFieldReason } from "../../../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -44,6 +49,7 @@ function formFormDefaults(
     enabledElectiveFieldIds: customization?.enabledElectiveFieldIds?.filter(
       (id) => !!availableElectiveFields.find((f) => f.id === id)
     ),
+    enabledElectiveFieldReasons: customization?.enabledElectiveFieldReasons,
   }
 }
 
@@ -65,6 +71,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
   const [showManageFieldsView, setShowManageFieldsView] = useState(false)
 
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
+  const watchedEnabledElectiveFieldReasons = watch("enabledElectiveFieldReasons") ?? {}
 
   useEffect(() => {
     if (isOpen) {
@@ -120,10 +127,12 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
                   existingEnabledElectiveFieldIds={watchedEnabledElectiveFieldIds}
                   electiveFields={electiveFields}
                   onCancel={() => setShowManageFieldsView(false)}
-                  onAddFields={(fieldIds) => {
+                  onAddFields={(fieldIds, fieldReasons) => {
                     setValue("enabledElectiveFieldIds", fieldIds)
+                    setValue("enabledElectiveFieldReasons", fieldReasons)
                     setShowManageFieldsView(false)
                   }}
+                  existingEnabledElectiveFieldReasons={watchedEnabledElectiveFieldReasons}
                 />
               ) : (
                 <MainView
@@ -220,25 +229,45 @@ const MainView = ({
 
 const ManageElectiveFieldsView = ({
   existingEnabledElectiveFieldIds,
+  existingEnabledElectiveFieldReasons = {},
   onCancel,
   electiveFields,
   onAddFields,
 }: {
   existingEnabledElectiveFieldIds: string[]
+  existingEnabledElectiveFieldReasons: Record<string, EEnabledElectiveFieldReason>
   electiveFields: IDenormalizedRequirement[]
-  onAddFields: (fieldIds: string[]) => void
+  onAddFields: (fieldIds: string[], enabledElectiveFieldReasons: Record<string, EEnabledElectiveFieldReason>) => void
   onCancel: () => void
 }) => {
   const { t } = useTranslation()
   const [enabledFieldIds, setEnabledFieldIds] = useState<string[]>([...existingEnabledElectiveFieldIds])
+  const [enabledFieldReasons, setEnabledFieldReasons] = useState<Record<string, EEnabledElectiveFieldReason>>(
+    existingEnabledElectiveFieldReasons ?? {}
+  )
+
+  const removeReason = (fieldId: string) => {
+    setEnabledFieldReasons((prev) => {
+      const newReasons = { ...prev }
+      delete newReasons[fieldId]
+      return newReasons
+    })
+  }
 
   const onFieldEnableChange = (fieldId: string, isEnabled: boolean) => {
     if (isEnabled) {
       setEnabledFieldIds((prev) => [...prev, fieldId])
     } else {
       setEnabledFieldIds((prev) => prev.filter((id) => id !== fieldId))
+      removeReason(fieldId)
     }
   }
+
+  const onReasonChange = (fieldId: string, reason: EEnabledElectiveFieldReason) => {
+    setEnabledFieldReasons((prev) => ({ ...prev, [fieldId]: reason }))
+  }
+
+  const isAddValid = enabledFieldIds.every((id) => !!enabledFieldReasons[id])
   return (
     <Stack as={"section"} w={"full"} spacing={6} mt={7}>
       <Text color={"text.secondary"} fontWeight={700}>
@@ -246,31 +275,51 @@ const ManageElectiveFieldsView = ({
       </Text>
       <Stack w={"full"} spacing={4}>
         {electiveFields.map((requirementField) => {
+          const enabled = enabledFieldIds.includes(requirementField.id)
           return (
-            <Stack
-              key={requirementField.id}
-              flexDir={"row"}
-              spacing={2}
-              borderRadius={"md"}
-              border={"1px solid"}
-              borderColor={"border.light"}
-              bg={"theme.blueLight"}
-              px={4}
-              py={2}
-            >
-              <Checkbox
-                borderColor={"border.input"}
-                isChecked={enabledFieldIds.includes(requirementField.id)}
-                onChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
-              />
-              <Text fontWeight={700}>{requirementField.label}</Text>
+            <Stack key={requirementField.id}>
+              <Stack
+                flexDir={"row"}
+                spacing={2}
+                borderRadius={"md"}
+                border={"1px solid"}
+                borderColor={"border.light"}
+                bg={"theme.blueLight"}
+                px={4}
+                py={2}
+              >
+                <Checkbox
+                  borderColor={"border.input"}
+                  isChecked={enabled}
+                  onChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
+                />
+                <Text fontWeight={700}>{requirementField.label}</Text>
+              </Stack>
+              <FormControl alignSelf={"flex-end"} maxW={"200px"} isRequired={enabled}>
+                <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</FormLabel>
+                <Select
+                  value={enabledFieldReasons[requirementField.id]}
+                  placeholder={t("digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder")}
+                  onChange={(e) => onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)}
+                >
+                  {getEnabledElectiveReasonOptions().map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
             </Stack>
           )
         })}
       </Stack>
 
       <ButtonGroup size={"md"} justifyContent={"flex-start"} gap={6}>
-        <Button variant={"primary"} onClick={() => onAddFields([...new Set(enabledFieldIds)])}>
+        <Button
+          variant={"primary"}
+          onClick={() => onAddFields([...new Set(enabledFieldIds)], enabledFieldReasons)}
+          isDisabled={!isAddValid}
+        >
           {t("digitalBuildingPermits.edit.requirementBlockSidebar.addSelectedButton")}
         </Button>
         <Button variant={"secondary"} onClick={onCancel}>
