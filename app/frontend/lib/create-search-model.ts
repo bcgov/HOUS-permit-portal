@@ -86,7 +86,6 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         if (self.sort && self.sort.field == sortField && self.sort.direction == ESortDirection.ascending) {
           // return to unsorted state
           self.clearSort()
-          yield self.fetchData(opts)
         } else {
           // apply the next sort state
           const direction =
@@ -94,8 +93,8 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
               ? ESortDirection.ascending
               : ESortDirection.descending
           self.applySort({ field: sortField, direction, ...opts })
-          yield self.fetchData(opts)
         }
+        yield self.fetchData(opts)
       }),
       toggleShowArchived: flow(function* () {
         self.setShowArchived(!self.showArchived)

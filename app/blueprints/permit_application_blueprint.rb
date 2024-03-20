@@ -1,35 +1,36 @@
 class PermitApplicationBlueprint < Blueprinter::Base
-  identifier :id
-
-  view :compliance_update do
-    fields :formatted_compliance_data, :front_end_form_update
-  end
-
-  view :extended do
+  view :base do
+    identifier :id
     fields :nickname,
            :status,
            :number,
            :created_at,
            :updated_at,
            :viewed_at,
-           :form_json,
            :full_address,
            :pid,
            :pin,
-           :submission_data,
-           :submitted_at,
-           :formatted_compliance_data,
-           :front_end_form_update,
            :zipfile_size,
            :zipfile_name,
            :zipfile_url,
-           :form_customizations,
-           :reference_number
+           :reference_number,
+           :submitted_at
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
+  end
+
+  view :extended do
+    include_view :base
+    fields :form_json, :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
+
     association :jurisdiction, blueprint: JurisdictionBlueprint
     association :submitter, blueprint: UserBlueprint
     association :step_code, blueprint: StepCodeBlueprint
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
+  end
+
+  view :compliance_update do
+    identifier :id
+    fields :formatted_compliance_data, :front_end_form_update
   end
 end
