@@ -77,7 +77,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   description={t(`${i18nPrefix}.jurisdictionAbout.description`)}
                   linkText={t("ui.edit")}
                   icon={<Info size="24px" color="--var(chakra-colors-text-primary)" />}
-                  href={`/jurisdictions/${currentJurisdiction.id}`}
+                  href={`/jurisdictions/${currentJurisdiction.slug}`}
                   h="full"
                 />
               </GridItem>

@@ -146,7 +146,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.jsonb "zipfile_data"
     t.jsonb "form_customizations_snapshot"
     t.string "reference_number"
-    t.datetime "changed_status_at"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
