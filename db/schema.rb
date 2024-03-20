@@ -146,6 +146,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_18_190718) do
     t.jsonb "zipfile_data"
     t.uuid "template_version_id", null: false
     t.jsonb "form_customizations_snapshot"
+    t.jsonb "compliance_data", default: {}, null: false
     t.string "reference_number"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
@@ -407,7 +408,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_18_190718) do
     t.jsonb "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.jsonb "compliance_data"
+    t.jsonb "compliance_data", default: {}, null: false
     t.string "data_key"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"

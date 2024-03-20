@@ -244,3 +244,12 @@ export enum ERequirementContactFieldItemType {
   professionalAssociation = "professionalAssociation",
   professionalNumber = "professionalNumber",
 }
+
+export enum ESocketDomainTypes {
+  notification = "notification",
+  permitApplication = "permit_application",
+}
+
+export enum ESocketEventTypes {
+  update = "update",
+}

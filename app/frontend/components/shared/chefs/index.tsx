@@ -2,6 +2,7 @@
 import { Form, Formio, Templates } from "@formio/react"
 import "./styles.scss"
 
+import { t } from "i18next"
 import ChefsFormioComponents from "./additional-formio"
 import { overridePanelTemplate } from "./additional-formio/templates/panel"
 
@@ -35,8 +36,17 @@ Templates.current = {
     form: (ctx) => {
       let template = ""
       if (ctx?.component?.computedCompliance) {
-        const computedComplianceText =
-          ctx?.component?.computedComplianceResult || `This field has compliance capability.`
+        let result = ctx?.component?.computedComplianceResult
+        let computedComplianceText: string = t(`automatedCompliance.baseMessage`)
+        if (result) {
+          if (ctx?.component?.computedCompliance == "DigitalSealValidator") {
+            computedComplianceText = result
+          } else {
+            //assume all complianes are default values except for seal validators
+            computedComplianceText = t("automatedCompliance.defaultValueMesage", { defaultValue: result })
+          }
+        }
+
         template = template.concat(
           `<div class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><i class="ph-fill ph-lightning-a"></i>
           ${computedComplianceText}</div>`

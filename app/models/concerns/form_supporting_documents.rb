@@ -3,8 +3,8 @@ module FormSupportingDocuments
   include TraverseDataJson
 
   def formatted_compliance_data
-    joined = {}
     #compliance data on the permit_applicaiton itself
+    joined = compliance_data
 
     #compliance data for energy step code
     #fetch the energy step_code from json
@@ -71,6 +71,30 @@ module FormSupportingDocuments
 
   def supporting_documents_without_compliance_matching(regex_pattern)
     supporting_documents.file_ids_with_regex(regex_pattern).without_compliance
+  end
+
+  def zipfile_size
+    zipfile_data&.dig("metadata", "size")
+  end
+
+  def zipfile_name
+    zipfile_data&.dig("metadata", "filename")
+  end
+
+  def zipfile_url
+    zipfile&.url(
+      public: false,
+      expires_in: 3600,
+      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
+    )
+  end
+
+  private
+
+  def zip_and_upload_supporting_documents
+    return unless submitted? && zipfile_data.blank?
+
+    ZipfileJob.perform_async(id)
   end
 
   module ClassMethods

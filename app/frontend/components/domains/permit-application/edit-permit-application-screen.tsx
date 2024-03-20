@@ -38,12 +38,40 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     defaultValues: getDefaultPermitApplicationMetadataValues(),
   })
 
-  const nicknameWatch = watch("nickname")
-  const isStepCode = R.test(/step-code/, window.location.pathname)
-
   const [completedBlocks, setCompletedBlocks] = useState({})
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+
+  const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
+
+  const handlePermitApplicationUpdate = (_event: CustomEvent) => {
+    if (formRef.current) {
+      if (_event.detail && _event.detail.id == currentPermitApplication?.id) {
+        import.meta.env.DEV && console.log("[DEV] setting formio data", _event.detail)
+        handleAutomatedComplianceUpdate(_event.detail.frontEndFormUpdate)
+      }
+    } else {
+      import.meta.env.DEV && console.log("[DEV] re-enqueue to process later", _event)
+      setProcessEventOnLoad(_event)
+    }
+  }
+
+  useEffect(() => {
+    if (formRef.current && processEventOnLoad) {
+      handlePermitApplicationUpdate(processEventOnLoad)
+      setProcessEventOnLoad(null)
+    }
+  }, [formRef.current, processEventOnLoad])
+
+  useEffect(() => {
+    document.addEventListener("handlePermitApplicationUpdate", handlePermitApplicationUpdate)
+    return () => {
+      document.removeEventListener("handlePermitApplicationUpdate", handlePermitApplicationUpdate)
+    }
+  })
+
+  const nicknameWatch = watch("nickname")
+  const isStepCode = R.test(/step-code/, window.location.pathname)
 
   const handleSave = async () => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
@@ -56,15 +84,41 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         nickname: nicknameWatch,
       })
       if (response.ok && response.data.data.frontEndFormUpdate) {
-        for (const [key, value] of Object.entries(response.data.data.frontEndFormUpdate)) {
-          let componentToSet = formio.getComponent(key)
-          componentToSet.setValue(value)
-        }
+        updateFormIoValues(formio, response.data.data.frontEndFormUpdate)
         //update file hashes that have been changed
       }
       return response.ok
     } catch (e) {
       return false
+    }
+  }
+
+  const handleAutomatedComplianceUpdate = (frontEndFormUpdate) => {
+    if (R.isNil(frontEndFormUpdate)) {
+      return
+    }
+    const formio = formRef.current
+    updateFormIoValues(formio, frontEndFormUpdate)
+  }
+
+  const updateFormIoValues = (formio, frontEndFormUpdate) => {
+    for (const [key, value] of Object.entries(frontEndFormUpdate)) {
+      let componentToSet = formio.getComponent(key)
+      componentSetValue(componentToSet, value)
+    }
+  }
+
+  const componentSetValue = (componentToSet, newValue) => {
+    if (componentToSet?.component?.type == "file") {
+      //all file types use S3, always set to what is returned
+      componentToSet.setValue(newValue)
+      import.meta.env.DEV && console.log("[DEV] setting file value", componentToSet, newValue)
+    } else {
+      //if it is a computed compliance
+      if (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue())) {
+        import.meta.env.DEV && console.log("[DEV] setting file value", componentToSet, newValue)
+        componentToSet.setValue(newValue)
+      }
     }
   }
 

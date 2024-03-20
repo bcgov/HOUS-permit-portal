@@ -1,58 +1,55 @@
 ---
 http_interactions:
-  - request:
-      method: get
-      uri: "<GEO_LTSA_PARCELMAP_REST_URL>/whse/bcgw_pub_whse_cadastre/MapServer/0/query?f=json&outFields=PID%2CPARCEL_STATUS%2CPARCEL_NAME%2CPARCEL_CLASS%2COWNER_TYPE%2CMUNICIPALITY%2CREGIONAL_DISTRICT%2CWHEN_UPDATED%2CFEATURE_AREA_SQM&returnCountOnly=false&returnGeometry=true&returnIdsOnly=false&spatialRel=esriSpatialRelIntersects&where=PID%3D%27031562868%27"
-      body:
-        encoding: US-ASCII
-        string: ""
-      headers:
-        User-Agent:
-          - Faraday v2.9.0
-    response:
-      status:
-        code: 200
-        message: ""
-      headers:
-        date:
-          - Wed, 07 Feb 2024 08:01:32 GMT
-        server:
-          - ""
-        x-content-type-options:
-          - nosniff
-        x-xss-protection:
-          - 1; mode=block
-        vary:
-          - Origin
-        cache-control:
-          - max-age=0,must-revalidate
-        etag:
-          - d3d4b939
-        x-esri-ftiles-cache-compress:
-          - "true"
-        content-encoding:
-          - gzip
-        content-type:
-          - application/json;charset=UTF-8
-        content-length:
-          - "651"
-        access-control-allow-origin:
-          - "(null)"
-        access-control-allow-credentials:
-          - "true"
-        access-control-allow-methods:
-          - POST, GET, OPTIONS, HEAD
-        access-control-allow-headers:
-          - X-Requested-With, Referer, Origin, Content-Type, SOAPAction, Authorization,
-            Accept
-        access-control-max-age:
-          - "1000"
-        x-frame-options:
-          - allow-from (null)
-      body:
-        encoding: UTF-8
-        string:
-          '{"displayFieldName":"PARCEL_NAME","fieldAliases":{"PID":"PID","PARCEL_STATUS":"PARCEL_STATUS","PARCEL_NAME":"PARCEL_NAME","PARCEL_CLASS":"PARCEL_CLASS","OWNER_TYPE":"OWNER_TYPE","MUNICIPALITY":"MUNICIPALITY","REGIONAL_DISTRICT":"REGIONAL_DISTRICT","WHEN_UPDATED":"WHEN_UPDATED","FEATURE_AREA_SQM":"FEATURE_AREA_SQM"},"geometryType":"esriGeometryPolygon","spatialReference":{"wkid":102190,"latestWkid":3005},"fields":[{"name":"PID","type":"esriFieldTypeString","alias":"PID","length":9},{"name":"PARCEL_STATUS","type":"esriFieldTypeString","alias":"PARCEL_STATUS","length":20},{"name":"PARCEL_NAME","type":"esriFieldTypeString","alias":"PARCEL_NAME","length":50},{"name":"PARCEL_CLASS","type":"esriFieldTypeString","alias":"PARCEL_CLASS","length":50},{"name":"OWNER_TYPE","type":"esriFieldTypeString","alias":"OWNER_TYPE","length":50},{"name":"MUNICIPALITY","type":"esriFieldTypeString","alias":"MUNICIPALITY","length":254},{"name":"REGIONAL_DISTRICT","type":"esriFieldTypeString","alias":"REGIONAL_DISTRICT","length":50},{"name":"WHEN_UPDATED","type":"esriFieldTypeDate","alias":"WHEN_UPDATED","length":8},{"name":"FEATURE_AREA_SQM","type":"esriFieldTypeDouble","alias":"FEATURE_AREA_SQM"}],"features":[{"attributes":{"PID":"031562868","PARCEL_STATUS":"Active","PARCEL_NAME":"031562868","PARCEL_CLASS":"Subdivision","OWNER_TYPE":"Federal","MUNICIPALITY":"Vancouver,
-          City of","REGIONAL_DISTRICT":"Metro Vancouver Regional District","WHEN_UPDATED":1657211120000,"FEATURE_AREA_SQM":6244.2759},"geometry":{"rings":[[[1210045.2017000001,478683.38869999908],[1210096.3984999992,478739.42960000038],[1210113.8822000008,478727.88189999945],[1210114.4697999991,478727.49349999987],[1210157.1992000006,478688.5569000002],[1210103.7675000001,478629.99100000039],[1210045.2017000001,478683.38869999908]]]}}]}'
-    recorded_at: Wed, 07 Feb 2024 08:01:32 GMT
+- request:
+    method: get
+    uri: "<GEO_LTSA_PARCELMAP_REST_URL>/whse/bcgw_pub_whse_cadastre/MapServer/0/query?f=json&outFields=%2A&returnCountOnly=false&returnGeometry=true&returnIdsOnly=false&spatialRel=esriSpatialRelIntersects&where=PID%3D%27031562868%27"
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: ''
+    headers:
+      date:
+      - Fri, 15 Mar 2024 20:21:57 GMT
+      server:
+      - ''
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - 1; mode=block
+      vary:
+      - Origin
+      cache-control:
+      - max-age=0,must-revalidate
+      etag:
+      - '"3757f79e"'
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json;charset=UTF-8
+      content-length:
+      - '940'
+      access-control-allow-origin:
+      - "(null)"
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-methods:
+      - POST, GET, OPTIONS, HEAD
+      access-control-allow-headers:
+      - X-Requested-With, Referer, Origin, Content-Type, SOAPAction, Authorization,
+        Accept
+      access-control-max-age:
+      - '1000'
+      x-frame-options:
+      - allow-from (null)
+    body:
+      encoding: UTF-8
+      string: '{"displayFieldName":"PARCEL_NAME","fieldAliases":{"PARCEL_FABRIC_POLY_ID":"PARCEL_FABRIC_POLY_ID","PARCEL_NAME":"PARCEL_NAME","PLAN_NUMBER":"PLAN_NUMBER","PIN":"PIN","PID":"PID","PID_NUMBER":"PID_NUMBER","PARCEL_STATUS":"PARCEL_STATUS","PARCEL_CLASS":"PARCEL_CLASS","OWNER_TYPE":"OWNER_TYPE","PARCEL_START_DATE":"PARCEL_START_DATE","MUNICIPALITY":"MUNICIPALITY","REGIONAL_DISTRICT":"REGIONAL_DISTRICT","WHEN_UPDATED":"WHEN_UPDATED","FEATURE_AREA_SQM":"FEATURE_AREA_SQM","FEATURE_LENGTH_M":"FEATURE_LENGTH_M","OBJECTID":"OBJECTID","SHAPE.AREA":"SHAPE.AREA","SHAPE.LEN":"SHAPE.LEN","PID_FORMATTED":"PID_FORMATTED"},"geometryType":"esriGeometryPolygon","spatialReference":{"wkid":102190,"latestWkid":3005},"fields":[{"name":"PARCEL_FABRIC_POLY_ID","type":"esriFieldTypeInteger","alias":"PARCEL_FABRIC_POLY_ID"},{"name":"PARCEL_NAME","type":"esriFieldTypeString","alias":"PARCEL_NAME","length":50},{"name":"PLAN_NUMBER","type":"esriFieldTypeString","alias":"PLAN_NUMBER","length":128},{"name":"PIN","type":"esriFieldTypeInteger","alias":"PIN"},{"name":"PID","type":"esriFieldTypeString","alias":"PID","length":9},{"name":"PID_NUMBER","type":"esriFieldTypeInteger","alias":"PID_NUMBER"},{"name":"PARCEL_STATUS","type":"esriFieldTypeString","alias":"PARCEL_STATUS","length":20},{"name":"PARCEL_CLASS","type":"esriFieldTypeString","alias":"PARCEL_CLASS","length":50},{"name":"OWNER_TYPE","type":"esriFieldTypeString","alias":"OWNER_TYPE","length":50},{"name":"PARCEL_START_DATE","type":"esriFieldTypeDate","alias":"PARCEL_START_DATE","length":8},{"name":"MUNICIPALITY","type":"esriFieldTypeString","alias":"MUNICIPALITY","length":254},{"name":"REGIONAL_DISTRICT","type":"esriFieldTypeString","alias":"REGIONAL_DISTRICT","length":50},{"name":"WHEN_UPDATED","type":"esriFieldTypeDate","alias":"WHEN_UPDATED","length":8},{"name":"FEATURE_AREA_SQM","type":"esriFieldTypeDouble","alias":"FEATURE_AREA_SQM"},{"name":"FEATURE_LENGTH_M","type":"esriFieldTypeDouble","alias":"FEATURE_LENGTH_M"},{"name":"OBJECTID","type":"esriFieldTypeOID","alias":"OBJECTID"},{"name":"SHAPE.AREA","type":"esriFieldTypeDouble","alias":"SHAPE.AREA"},{"name":"SHAPE.LEN","type":"esriFieldTypeDouble","alias":"SHAPE.LEN"},{"name":"PID_FORMATTED","type":"esriFieldTypeString","alias":"PID_FORMATTED","length":4000}],"features":[{"attributes":{"PARCEL_FABRIC_POLY_ID":7867609,"PARCEL_NAME":"031562868","PLAN_NUMBER":"EPP115443","PIN":null,"PID":"031562868","PID_NUMBER":31562868,"PARCEL_STATUS":"Active","PARCEL_CLASS":"Subdivision","OWNER_TYPE":"Federal","PARCEL_START_DATE":1635897600000,"MUNICIPALITY":"Vancouver,
+        City of","REGIONAL_DISTRICT":"Metro Vancouver Regional District","WHEN_UPDATED":1657211120000,"FEATURE_AREA_SQM":6244.2759,"FEATURE_LENGTH_M":313.9039,"OBJECTID":858750715,"SHAPE.AREA":0,"SHAPE.LEN":0,"PID_FORMATTED":"031-562-868"},"geometry":{"rings":[[[1210045.2017000001,478683.38869999908],[1210096.3984999992,478739.42960000038],[1210113.8822000008,478727.88189999945],[1210114.4697999991,478727.49349999987],[1210157.1992000006,478688.5569000002],[1210103.7675000001,478629.99100000039],[1210045.2017000001,478683.38869999908]]]}}]}'
+  recorded_at: Fri, 15 Mar 2024 20:21:58 GMT
 recorded_with: VCR 6.2.0
