@@ -145,6 +145,7 @@ const options = {
           returnHome: "Return to home",
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
+          reset: "Reset",
         },
         eula: {
           title: "End-User License Agreement",
@@ -318,6 +319,7 @@ const options = {
         requirementsLibrary: {
           addAnotherPerson: "Add another person",
           elective: "Elective",
+          hasConditionalLogic: "Has Conditional Logic",
           associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
@@ -370,6 +372,7 @@ const options = {
             updatedAt: "Updated At",
             requirementSku: "Requirement SKU",
           },
+          configurationsColumn: "Configurations",
           fieldDescriptions: {
             description: "Provide some context for admins and managers for this fieldset.",
             associations: "Assign a tag to help organize and find this requirement block easier.",

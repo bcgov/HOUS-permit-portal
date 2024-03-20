@@ -66,6 +66,16 @@ class Requirement < ApplicationRecord
     input_options["computed_compliance"].present?
   end
 
+  def has_conditional?
+    input_options["conditional"].present?
+  end
+
+  def has_data_validation?
+    # TODO: false for now, but will be implemented in the future when
+    # custom data validation is added
+    false
+  end
+
   private
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided

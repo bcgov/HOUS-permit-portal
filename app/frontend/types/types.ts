@@ -63,6 +63,8 @@ export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
   canAddMultipleContacts?: boolean
+  conditional?: Object
+  dataValidation?: Object
 }
 
 export interface IFormJson {
@@ -114,6 +116,7 @@ export interface IDenormalizedRequirement {
   inputOptions: IRequirementOptions
   hint?: string | null
   elective?: boolean
+  required?: boolean
 }
 
 export interface IDenormalizedRequirementBlock {
