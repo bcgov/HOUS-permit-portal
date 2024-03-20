@@ -194,7 +194,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
         // from another section, then we set the id to null so that it gets created
         // on the new section by rails.
         if (!existingMSTSection || !existingMSTSection.hasTemplateSectionBlock(sectionBlockAttributes.id)) {
-          sectionBlockAttributes.id = null
+          // this is to handle case if the same requirementBlock was removed then re-added during edit
+          const existingSectionAndRequirementBlockCombo =
+            existingMSTSection?.getTemplateSectionBlockByRequirementBlockId(sectionBlockAttributes.requirementBlockId)
+
+          sectionBlockAttributes.id = existingSectionAndRequirementBlockCombo
+            ? existingSectionAndRequirementBlockCombo.id
+            : null
         }
         sectionBlockAttributes.position = blockIndex
       })
