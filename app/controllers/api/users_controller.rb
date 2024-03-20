@@ -62,7 +62,10 @@ class Api::UsersController < Api::ApplicationController
 
   def accept_eula
     authorize @user
-    @user.license_agreements.create!(accepted_at: Time.current, agreement: EndUserLicenseAgreement.active_agreement)
+    @user.license_agreements.create!(
+      accepted_at: Time.current,
+      agreement: EndUserLicenseAgreement.active_agreement(@user.eula_variant),
+    )
     render_success @user, "user.eula_accepted", { blueprint_opts: { view: :current_user } }
   end
 

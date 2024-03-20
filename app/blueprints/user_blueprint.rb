@@ -14,7 +14,7 @@ class UserBlueprint < Blueprinter::Base
 
   view :current_user do
     field :eula_accepted do |user, _options|
-      user.license_agreements.active_agreement.present?
+      user.eula_variant.present? && user.license_agreements.active_agreement(user.eula_variant).present?
     end
   end
 

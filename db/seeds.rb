@@ -163,50 +163,12 @@ TemplateVersion
   end
 
 puts "Seeding EULA..."
-EndUserLicenseAgreement.find_or_create_by(
-  active: true,
-  content:
-    "<h1>Non est ista, inquam, Piso, magna dissensio.</h1>
+EulaUpdater.run
 
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. An eum discere ea mavis, quae cum plane perdidiceriti nihil sciat? Nulla profecto est, quin suam vim retineat a primo ad extremum. </p>
-
-    <ol>
-      <li>Cur igitur, cum de re conveniat, non malumus usitate loqui?</li>
-      <li>Polemoni et iam ante Aristoteli ea prima visa sunt, quae paulo ante dixi.</li>
-      <li>Nam illud quidem adduci vix possum, ut ea, quae senserit ille, tibi non vera videantur.</li>
-    </ol>
-
-    <h2>Quis istud possit, inquit, negare?</h2>
-
-    <p>Duo Reges: constructio interrete. Ea possunt paria non esse. Ergo opifex plus sibi proponet ad formarum quam civis excellens ad factorum pulchritudinem? <b>Aliter enim nosmet ipsos nosse non possumus.</b> Quorum sine causa fieri nihil putandum est. Cum id fugiunt, re eadem defendunt, quae Peripatetici, verba. Quod quidem nobis non saepe contingit. Illo enim addito iuste fit recte factum, per se autem hoc ipsum reddere in officio ponitur. Ita enim se Athenis collocavit, ut sit paene unus ex Atticis, ut id etiam cognomen videatur habiturus. Re mihi non aeque satisfacit, et quidem locis pluribus. </p>
-
-    <ul>
-      <li>Sullae consulatum?</li>
-      <li>Stulti autem malorum memoria torquentur, sapientes bona praeterita grata recordatione renovata delectant.</li>
-      <li>Quem Tiberina descensio festo illo die tanto gaudio affecit, quanto L.</li>
-    </ul>
-
-    <dl>
-      <dt><dfn>Bork</dfn></dt>
-      <dd>Sextilio Rufo, cum is rem ad amicos ita deferret, se esse heredem Q.</dd>
-      <dt><dfn>Vide, quaeso, rectumne sit.</dfn></dt>
-      <dd>Quae qui non vident, nihil umquam magnum ac cognitione dignum amaverunt.</dd>
-      <dt><dfn>Sed videbimus.</dfn></dt>
-      <dd>Vadem te ad mortem tyranno dabis pro amico, ut Pythagoreus ille Siculo fecit tyranno?</dd>
-      <dt><dfn>Bork</dfn></dt>
-      <dd>Mihi, inquam, qui te id ipsum rogavi?</dd>
-      <dt><dfn>Immo videri fortasse.</dfn></dt>
-      <dd>Honesta oratio, Socratica, Platonis etiam.</dd>
-      <dt><dfn>Si longus, levis.</dfn></dt>
-      <dd>Idne consensisse de Calatino plurimas gentis arbitramur, primarium populi fuisse, quod praestantissimus fuisset in conficiendis voluptatibus?</dd>
-    </dl>
-
-    <p>Atque his de rebus et splendida est eorum et illustris oratio. Cupiditates non Epicuri divisione finiebat, sed sua satietate. Expectoque quid ad id, quod quaerebam, respondeas. In eo autem voluptas omnium Latine loquentium more ponitur, cum percipitur ea, quae sensum aliquem moveat, iucunditas. Istam voluptatem perpetuam quis potest praestare sapienti? Similiter sensus, cum accessit ad naturam, tuetur illam quidem, sed etiam se tuetur; Ipse Epicurus fortasse redderet, ut Sextus Peducaeus, Sex. Habent enim et bene longam et satis litigiosam disputationem. Rationis enim perfectio est virtus; </p>
-  ",
-)
-
+puts "Seeding permit type contact..."
 PermitTypeSubmissionContact.create!(
   jurisdiction_id: north_van.id,
   permit_type_id: rt.permit_type.id,
   email: "example@example.com", # Add a valid email address
 )
+
