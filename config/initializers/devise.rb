@@ -11,7 +11,7 @@
 Devise.setup do |config|
   config.jwt do |jwt|
     jwt.secret = ENV["DEVISE_JWT_SECRET_KEY"]
-
+    jwt.expiration_time = ENV["SESSION_TIMEOUT_MINUTES"].to_i.minutes
     jwt.dispatch_requests = [
       ["POST", %r{^/api/login$}],
       ["PUT", %r{^/api/invitation$}],
@@ -257,11 +257,6 @@ Devise.setup do |config|
   # one (and only one) @ exists in the given string. This is mainly
   # to give user feedback and not to assert the e-mail validity.
   config.email_regexp = /\A[^@\s]+@[^@\s]+\z/
-
-  # ==> Configuration for :timeoutable
-  # The time you want to timeout the user session without activity. After this
-  # time the user will be asked for credentials again. Default is 30 minutes.
-  config.timeout_in = (ENV["SESSION_TIMEOUT_MINUTES"].to_i).minutes
 
   # ==> Configuration for :lockable
   # Defines which strategy will be used to lock an account.
