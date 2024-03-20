@@ -11,7 +11,7 @@ RSpec.describe PermitApplication, type: :model do
   describe "enums" do
     subject { build_stubbed(:permit_application) }
 
-    it { should define_enum_for(:status).with_values(draft: 0, submitted: 1, viewed: 2) }
+    it { should define_enum_for(:status).with_values(draft: 0, submitted: 1) }
   end
 
   # describe "validations" do

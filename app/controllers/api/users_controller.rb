@@ -1,5 +1,5 @@
 class Api::UsersController < Api::ApplicationController
-  before_action :find_user, only: %i[destroy restore]
+  before_action :find_user, only: %i[destroy restore accept_eula]
 
   def index
     perform_search
@@ -23,19 +23,23 @@ class Api::UsersController < Api::ApplicationController
 
     ActiveRecord::Base.transaction do
       if password_params[:password].present?
-        raise ActiveRecord::RecordInvalid unless @user.update_with_password(password_params)
+        if @user.update_with_password(password_params)
+          Devise::Mailer.new.password_change(@user).deliver
+        else
+          raise ActiveRecord::RecordInvalid
+        end
       end
 
       raise ActiveRecord::RecordInvalid unless @user.update(user_params)
     end
 
-    render_success(@user, "user.update_success")
-  rescue ActiveRecord::RecordInvalid
+    render_success(@user, email_changed? ? "user.confirmation_sent" : "user.update_success")
+  rescue ActiveRecord::RecordInvalid => e
     # Handle any ActiveRecord exceptions here
     if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
-      render_error "user.update_password_error" and return
+      render_error "user.update_password_error", {}, e and return
     end
-    render_error "user.update_error"
+    render_error "user.update_error", {}, e
   end
 
   def destroy
@@ -56,7 +60,17 @@ class Api::UsersController < Api::ApplicationController
     end
   end
 
+  def accept_eula
+    authorize @user
+    @user.license_agreements.create!(accepted_at: Time.current, agreement: EndUserLicenseAgreement.active_agreement)
+    render_success @user, "user.eula_accepted", { blueprint_opts: { view: :current_user } }
+  end
+
   private
+
+  def email_changed?
+    user_params[:email] && user_params[:email] != @user.email
+  end
 
   def password_params
     params.require(:user).permit(:current_password, :password)

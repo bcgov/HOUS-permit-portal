@@ -1,33 +1,38 @@
 import {
   Box,
   BoxProps,
+  Button,
   Center,
-  Checkbox,
   Container,
   Flex,
-  FormControl,
-  FormLabel,
-  Grid,
+  HStack,
   Heading,
   Image,
   ListItem,
-  Select,
   Text,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, CheckCircle, ClipboardText, FileArrowUp } from "@phosphor-icons/react"
+import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
-import React, { ReactNode } from "react"
+import React, { ReactNode, useEffect, useRef, useState } from "react"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IJurisdiction } from "../../../models/jurisdiction"
+import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
-import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { AddressSelect } from "../../shared/select/selectors/address-select"
 
 interface ILandingScreenProps {}
 
 export const LandingScreen = ({}: ILandingScreenProps) => {
   const { t } = useTranslation()
+  const iNeedRef = useRef<HTMLDivElement>(null)
+
+  const scrollToJurisdictionSearch = () => {
+    iNeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   const whoFor = i18next.t("landing.whoFor", { returnObjects: true }) as string[]
 
@@ -36,29 +41,32 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Flex
         align="center"
         h="364px"
-        bgImage="https://placehold.co/1080x364"
-        bgPosition="center"
+        bgImage="images/header-background.jpeg"
+        bgPosition="center 60%"
         bgRepeat="no-repeat"
         bgSize="cover"
+        bgColor="theme.blue"
       >
-        <Container maxW="container.lg" py={16} px={8}>
-          <Flex
-            direction="column"
-            p={8}
-            maxW="468px"
-            bg="theme.blue"
-            color="greys.white"
-            borderRadius="sm"
-            borderLeft="8px solid"
-            borderColor="theme.yellow"
-            gap={2}
-          >
-            <Heading as="h1" fontSize="2xl">
-              {t("landing.title")}
-            </Heading>
-            <Text fontSize="lg">{t("landing.intro")}</Text>
-          </Flex>
-        </Container>
+        <Box bgColor="theme.blueShadedLight" w="full" height="full">
+          <Container maxW="container.lg" py={16} px={8}>
+            <Flex
+              direction="column"
+              p={8}
+              maxW="468px"
+              bg="theme.blueShadedDark"
+              color="greys.white"
+              borderRadius="sm"
+              borderLeft="8px solid"
+              borderColor="theme.yellow"
+              gap={2}
+            >
+              <Heading as="h1" fontSize="2xl">
+                {t("landing.title")}
+              </Heading>
+              <Text fontSize="lg">{t("landing.intro")}</Text>
+            </Flex>
+          </Container>
+        </Box>
       </Flex>
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
@@ -79,44 +87,43 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               color="greys.white"
               flex={1}
             >
-              <Heading as="h3" fontSize="xl">
-                {t("landing.accessMyPermits")}
-              </Heading>
+              <Heading as="h2">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                <RouterLinkButton to="/login" variant="primaryInverse" rightIcon={<CaretRight size={16} />}>
+                <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
                   {t("auth.login")}
                 </RouterLinkButton>
-                <RouterLinkButton to="/register" variant="primaryInverse" rightIcon={<CaretRight size={16} />}>
+                <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
                   {t("auth.register")}
                 </RouterLinkButton>
               </Flex>
             </Flex>
-            <Flex as="section" direction="column" flex={1} gap={4}>
-              <Flex direction="column" gap={2}>
-                <Heading>{t("landing.whoForTitle")}</Heading>
-              </Flex>
+            <VStack as="section" align="flex-start" spacing={4}>
+              <Heading as="h2" variant="yellowline">
+                {t("landing.whoForTitle")}
+              </Heading>
+
               <UnorderedList spacing={1} pl={4}>
                 {whoFor.map((str) => (
                   <ListItem key={str}>{str}</ListItem>
                 ))}
               </UnorderedList>
-              <RouterLink to="#">{t("landing.iNeed")}</RouterLink>
-            </Flex>
+              <Button variant="link" onClick={scrollToJurisdictionSearch}>
+                {t("landing.iNeed")}
+              </Button>
+            </VStack>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
             <Image src="https://placehold.co/230x150" alt="dont-forget-me" />
             <Flex as="section" direction="column" gap={4}>
-              <Heading as="h3" fontSize="xl">
-                {t("landing.whyUseTitle")}
-              </Heading>
+              <Heading as="h3">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
             </Flex>
           </Flex>
         </Flex>
       </Container>
-      <Container maxW="container.lg" px={8}>
+      <Container maxW="container.lg" px={8} ref={iNeedRef}>
         <VStack as="section" w="full" gap={2} mb={4} textAlign="center">
           <Heading as="h3" fontSize="4xl">
             {t("landing.iNeedLong")}
@@ -127,7 +134,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       <Flex w="full" bg="greys.grey03">
         <Container maxW="container.lg" py={10} px={8}>
           <Flex as="section" direction="column" gap={6}>
-            <HousingTypeSearch />
+            <JurisdictionSearch />
             <VStack w="full" gap={2} textAlign="center" py={4} px={8}>
               <Heading as="h3" fontSize="md">
                 {t("landing.whenNotNecessaryQ")}
@@ -146,9 +153,6 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               </Heading>
               <Text>{t("landing.expectA")}</Text>
             </VStack>
-            <Center w="full" h="217px" bg="greys.grey03">
-              suggestion: Lottie?
-            </Center>
           </Flex>
         </Container>
       </Flex>
@@ -167,69 +171,88 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
   )
 }
 
-interface IHousingTypeSearchProps {}
-const HousingTypeSearch = ({}: IHousingTypeSearchProps) => {
+interface IJurisdictionSearchProps {}
+const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
   const { t } = useTranslation()
-  const housingtypes = [
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-    { imageUrl: "https://placehold.co/152x143", label: "TYPE", url: "#" },
-  ]
+  const { geocoderStore } = useMst()
+  const { fetchGeocodedJurisdiction } = geocoderStore
+  const formMethods = useForm()
+  const { control, watch } = formMethods
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
+
+  const addressWatch = watch("address")
+
+  useEffect(() => {
+    if (!addressWatch?.value) return
+    ;(async () => {
+      const jurisdiction = await fetchGeocodedJurisdiction(addressWatch.value)
+      setJurisdiction(jurisdiction)
+    })()
+  }, [addressWatch?.value])
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
-      <Flex direction="column" bg="white" flex={1} p={6} gap={4}>
-        <Flex as="section" direction="column" gap={2}>
-          <Heading fontSize="2xl">{t("landing.whereTitle")}</Heading>
-          <Text>{t("landing.findAuthority")}</Text>
-        </Flex>
+      <Flex bg="white" w="50%" p={6} gap={4}>
+        <FormProvider {...formMethods}>
+          <form style={{ width: "100%" }}>
+            <Flex direction="column" gap={6}>
+              <Flex direction="column">
+                <Heading as="h2" variant="yellowline" mb={2}>
+                  {t("landing.where")}
+                </Heading>
+                <Text>{t("landing.findYourAuth")}</Text>
+              </Flex>
 
-        <FormControl>
-          <FormLabel>{t("landing.locationOr")}</FormLabel>
-          {/* TODO: Implement using react-select */}
-          <Select placeholder={t("ui.selectPlaceholder")}>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
-          </Select>
-        </FormControl>
-
-        <FormControl>
-          <Flex direction="column" gap={4}>
-            <FormLabel>{t("ui.selectApplicable")}</FormLabel>
-            <Checkbox>{t("landing.withinXRiver")}</Checkbox>
-            <Checkbox>{t("landing.withinXForest")}</Checkbox>
-            <Checkbox>{t("landing.withinXProtected")}</Checkbox>
-          </Flex>
-        </FormControl>
-        <Box bg="greys.grey03" w="full" h="171px"></Box>
-      </Flex>
-
-      <Flex direction="column" bg="white" flex={3} p={6} gap={4}>
-        <Flex as="section" direction="column" gap={2}>
-          <Heading fontSize="2xl">{t("landing.whatType")}</Heading>
-          <Text>
-            {t("landing.dontSee")} <RouterLink to="#">{t("ui.clickHere")}</RouterLink>
-          </Text>
-        </Flex>
-        <Grid
-          templateColumns={{ base: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }}
-          gap={4}
-        >
-          {housingtypes.map((type) => (
-            <Flex direction="column" key={type.url} textAlign="center" gap={2} p={2}>
-              <Image src={type.imageUrl} alt={type.label} objectFit="cover" />
-              <RouterLinkButton variant="link" fontWeight="bold" fontSize="sm" color="text.link" to={type.url}>
-                {type.label}
-              </RouterLinkButton>
+              <Controller
+                name="address"
+                control={control}
+                render={({ field: { onChange, value } }) => {
+                  return <AddressSelect onChange={onChange} value={value} />
+                }}
+              />
             </Flex>
-          ))}
-        </Grid>
+          </form>
+        </FormProvider>
+      </Flex>
+      <Flex
+        bg={addressWatch?.value ? "theme.blueAlt" : "greys.white"}
+        w="50%"
+        p={6}
+        gap={4}
+        color={addressWatch?.value ? "greys.white" : "theme.blueAlt"}
+      >
+        <Center h="full" w="full">
+          {addressWatch?.value ? (
+            <VStack gap={8}>
+              <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
+                {t("landing.localJurisdiction")}
+              </Text>
+              <HStack gap={4}>
+                <Text fontSize="2xl" fontWeight="bold">
+                  {jurisdiction?.name}
+                </Text>
+                <Box color="theme.yellow">
+                  <CheckCircle size={32} />
+                </Box>
+              </HStack>
+              <RouterLinkButton
+                variant="ghost"
+                color="greys.white"
+                to={`/jurisdictions/${jurisdiction?.id}`}
+                icon={<CaretRight size={16} />}
+              >
+                {t("landing.learnRequirements")}
+              </RouterLinkButton>
+            </VStack>
+          ) : (
+            <VStack gap={6}>
+              <MapPin size={40} />
+              <Text fontStyle="italic" textAlign="center">
+                {t("landing.reqsVary")}
+              </Text>
+            </VStack>
+          )}
+        </Center>
       </Flex>
     </Flex>
   )

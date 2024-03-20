@@ -1,6 +1,7 @@
 class JurisdictionBlueprint < Blueprinter::Base
   identifier :id
-  fields :name,
+  fields :slug,
+         :name,
          :locality_type,
          :qualifier,
          :qualified_name,
@@ -12,9 +13,13 @@ class JurisdictionBlueprint < Blueprinter::Base
          :review_managers_size,
          :reviewers_size,
          :permit_applications_size,
+         :templates_used_size,
          :map_position,
+         :energy_step_required,
+         :zero_carbon_step_required,
          :created_at,
          :updated_at
 
   association :contacts, blueprint: ContactBlueprint
+  association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
 end

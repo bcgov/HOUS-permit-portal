@@ -1,12 +1,22 @@
+import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
+import { utcToZonedTime } from "date-fns-tz"
 import { Instance, flow, types } from "mobx-state-tree"
+import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ERequirementTemplateStatus } from "../types/enums"
+import { ETemplateVersionStatus } from "../types/enums"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
+import { TemplateVersionModel } from "./template-version"
 
 function preProcessor(snapshot) {
-  const processedSnapShot = { ...snapshot }
+  const processedSnapShot = {
+    ...snapshot,
+    scheduledTemplateVersions: snapshot.templateVersions
+      ?.filter((version) => version.status === ETemplateVersionStatus.scheduled)
+      .map((version) => version.id),
+    publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
+  }
 
   if (snapshot.requirementTemplateSections) {
     processedSnapShot.requirementTemplateSectionMap = snapshot.requirementTemplateSections.reduce((acc, section) => {
@@ -18,6 +28,7 @@ function preProcessor(snapshot) {
     )
     processedSnapShot.isFullyLoaded = true
   }
+
   return processedSnapShot
 }
 
@@ -25,14 +36,13 @@ export const RequirementTemplateModel = types.snapshotProcessor(
   types
     .model("RequirementTemplateModel", {
       id: types.identifier,
-      status: types.enumeration(Object.values(ERequirementTemplateStatus)),
       description: types.maybeNull(types.string),
-      version: types.maybeNull(types.string),
       jurisdictionsSize: types.optional(types.number, 0),
+      publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
+      scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
-      scheduledFor: types.maybeNull(types.Date),
       discardedAt: types.maybeNull(types.Date),
       requirementTemplateSectionMap: types.map(RequirementTemplateSectionModel),
       sortedRequirementTemplateSections: types.array(types.safeReference(RequirementTemplateSectionModel)),
@@ -46,11 +56,30 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       get isDiscarded() {
         return self.discardedAt !== null
       },
-      get isDraft() {
-        return self.status === ERequirementTemplateStatus.draft
-      },
-      get isPublished() {
-        return self.status === ERequirementTemplateStatus.published
+      get nextAvailableScheduleDate() {
+        // Get tomorrow's date in Vancouver time zone, starting from midnight
+        const tomorrow = addDays(startOfDay(utcToZonedTime(new Date(), vancouverTimeZone)), 1)
+
+        // If no scheduled versions are available, return tomorrow's date
+        if (self.scheduledTemplateVersions.length === 0) {
+          return tomorrow
+        }
+
+        // Get the latest scheduled date in Vancouver time zone
+        const latestDate = max(
+          self.scheduledTemplateVersions.map((version) =>
+            startOfDay(utcToZonedTime(new Date(version.versionDate), vancouverTimeZone))
+          )
+        )
+
+        // Compare the latest date with tomorrow
+        if (isAfter(latestDate, tomorrow) || isSameDay(latestDate, tomorrow)) {
+          // If the latest date is after or the same day as tomorrow, return the date after the latest date
+          return addDays(latestDate, 1)
+        } else {
+          // Otherwise, return tomorrow's date
+          return tomorrow
+        }
       },
       hasRequirementSection(id: string) {
         return self.requirementTemplateSectionMap.has(id)

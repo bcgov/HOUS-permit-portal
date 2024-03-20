@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<Appenders>
+		<RollingFile name="FILE"
+			fileName="${CSA_HOME}/log/csa.log"
+			filePattern="${CSA_HOME}/log/log-history/csa.%d{yyyy-MM-dd}.log">
+			<PatternLayout>
+				<pattern>
+					%d{HH:mm:ss.SSS} %level [%thread] %logger{30} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+		<Console name="consoleAppender" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>
+					%d{HH:mm:ss.SSS} %level [%thread] %logger{30} - %msg%n
+				</pattern>
+			</PatternLayout>
+		</Console>
+		<Console name="cliAppender" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>
+					%msg %n
+				</pattern>
+			</PatternLayout>
+		</Console>
+		<Async name="async">
+			<AppenderRef ref="consoleAppender" />
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="cliAppender" />
+		</Async>
+	</Appenders>
+
+	<Loggers>
+		<logger name="com.notarius.consigno.api" level="INFO" />
+		<logger name="com.notarius.consigno.callas" level="WARN" />
+		<logger name="com.notarius.consigno.sdk" level="INFO" />
+		<logger name="com.notarius.consigno.sdk.webservices"
+			level="INFO" />
+		<logger name="org.springframework" level="ERROR" />
+		<logger name="org.apache.camel" level="ERROR" />
+		<logger name="org.hibernate" level="ERROR" />
+		<logger name="io.netty" level="ERROR" />
+		<logger name="com.jayway" level="ERROR" />
+		<logger name="org.apache.http" level="ERROR" />
+		<logger name="org.springframework.web" level="ERROR" />
+		<logger name="SDKCLI" level="INFO" additivity="false">
+			<appender-ref ref="cliAppender" />
+		</logger>
+
+		<root >
+			<appender-ref ref="consoleAppender" />
+		</root>
+	</Loggers>
+
+</configuration>

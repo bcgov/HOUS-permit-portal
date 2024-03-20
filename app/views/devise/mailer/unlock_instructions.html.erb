@@ -1,0 +1,24 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+        <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <p>Hello <%= @resource.email %>!</p>
+
+          <p>Your account has been locked due to an excessive number of unsuccessful sign in attempts.</p>
+
+          <p>Click the link below to unlock your account:</p>
+
+          <p><%= link_to 'Unlock my account', unlock_url(@resource, unlock_token: @token) %></p>
+          
+          <p>–––</p>
+          <p><a href="<%= @root_url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: bold;">The Building Permit Hub Team</a></p>
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+<!-- END MAIN CONTENT AREA -->

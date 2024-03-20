@@ -18,13 +18,29 @@ class RequirementsFromXlsxSeeder
         errors,
       )
 
-      # medium density new contruction
-      # setup_requirement_template(
-      #   "new_construction",
-      #   "medium_residential",
-      #   xlsx.sheet("Dev-RequirementBlocks-Townhouse"),
-      #   errors,
-      # )
+      puts errors
+    end
+    RequirementTemplate.reindex
+  end
+
+  def self.seed_medium
+    file_name = "#{Rails.root}/db/templates/Core Permit Requirements List.xlsx"
+    if File.exist?(file_name)
+      xlsx = Roo::Spreadsheet.open(file_name)
+
+      req_sheet = xlsx.sheet("Dev-Requirements")
+      parsed_req_sheet = req_sheet.parse(headers: true)
+      valid_rows =
+        parsed_req_sheet.select { |row| row["requirement_code"] && row["requirement_code"] != "requirement_code" }
+      errors = ["Requirements Loading"]
+
+      setup_requirement_template(
+        "new_construction",
+        "medium_residential",
+        xlsx.sheet("TEST-ReqBlocks-Mid.densityHouse"),
+        valid_rows,
+        errors,
+      )
 
       puts errors
     end
@@ -46,12 +62,30 @@ class RequirementsFromXlsxSeeder
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
-      RequirementTemplate.where(activity: activity, permit_type: permit_type, status: "published").first_or_create(
+      RequirementTemplate.where(activity: activity, permit_type: permit_type).first_or_create(
         activity: activity,
         permit_type: permit_type,
-        status: "published",
       )
     setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
+
+    requirement_template.reload
+
+    force_a_published_template_version(requirement_template)
+  end
+
+  def self.force_a_published_template_version(requirement_template)
+    return if requirement_template.published_template_version.present?
+
+    version_date = Date.yesterday
+    template_version = nil
+
+    Timecop.freeze(version_date - 1) do
+      template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+    end
+
+    return if template_version.blank?
+
+    Timecop.freeze(version_date) { template_version = TemplateVersioningService.publish_version!(template_version) }
   end
 
   def self.setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
@@ -139,7 +173,7 @@ class RequirementsFromXlsxSeeder
               ), # if parse fails it will raise error
             # required_for_in_person_hint - text
             # reusable - boolean
-            required_for_multiple_owners: row["required_for_multiple_owners"].present?,
+            elective: row["elective"].present?,
             position: req_position_incrementer,
           )
           req_position_incrementer += 1

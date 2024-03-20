@@ -1,0 +1,14 @@
+STAGE: prod
+vaultNamespace: "bb18ab-prod"
+
+deployment:
+  replicaCount: 1
+  spec:
+    containers:
+      resources:
+        requests:
+          cpu: 150m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi

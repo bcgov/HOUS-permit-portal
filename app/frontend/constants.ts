@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { ENumberUnit } from "./types/enums"
+import { ENumberUnit, ERequirementType } from "./types/enums"
 
 export const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -15,6 +15,7 @@ export const getUnitOptionLabel = (unit?: ENumberUnit) => {
     mi: t("requirementsLibrary.unitLabels.option.mi"),
     sqm: t("requirementsLibrary.unitLabels.option.sqm"),
     sqft: t("requirementsLibrary.unitLabels.option.sqft"),
+    cad: t("requirementsLibrary.unitLabels.option.cad"),
   }
 
   return unit === undefined ? t("requirementsLibrary.unitLabels.option.noUnit") : unitToLabel[unit]
@@ -30,12 +31,29 @@ export const getUnitDisplayLabel = (unit?: ENumberUnit) => {
     mi: t("requirementsLibrary.unitLabels.display.mi"),
     sqm: t("requirementsLibrary.unitLabels.display.sqm"),
     sqft: t("requirementsLibrary.unitLabels.display.sqft"),
+    cad: t("requirementsLibrary.unitLabels.display.cad"),
   }
 
   return unit === undefined ? t("requirementsLibrary.unitLabels.display.noUnit") : unitToLabel[unit]
 }
 
 export const unitGroups: { [key: string]: ENumberUnit[] } = {
-  metric: [ENumberUnit.mm, ENumberUnit.cm, ENumberUnit.m, ENumberUnit.sqm],
+  metric: [ENumberUnit.mm, ENumberUnit.cm, ENumberUnit.m, ENumberUnit.sqm, ENumberUnit.cad],
   imperial: [ENumberUnit.in, ENumberUnit.ft, ENumberUnit.mi, ENumberUnit.sqft],
+}
+
+export const datefnsAppDateFormat = "yyyy/MM/dd"
+
+export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
+
+export function getRequirementTypeLabel(requirementType: ERequirementType) {
+  let derivedTranslationKey: keyof typeof ERequirementType
+
+  Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
+    if (value === requirementType) {
+      derivedTranslationKey = key
+    }
+  })
+
+  return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
 }

@@ -3,10 +3,6 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
 
   fields :stage
 
-  field :name do |checklist, _options|
-    "#{checklist.stage.titleize} Checklist"
-  end
-
   view :extended do
     include_view :project_info
     include_view :compliance_summary
@@ -31,17 +27,7 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
   view :compliance_summary do
     fields :compliance_path
 
-    # TODO: may not need these fields once step code is integrated with permit application flow
-    # TODO: get values from permit application
-    # field plan_author do |checklist, _options|
-    #   checklist.step_code.permit_application.drawings_author
-    # end
-    # field plan_version do |checklist, _options|
-    #   checklist.step_code.permit_application.drawings_version
-    # end
-    # field plan_date do |checklist, _options|
-    #   checklist.step_code.permit_application.drawings_date
-    # end
+    fields :plan_author, :plan_version, :plan_date
 
     # TODO: add required steps to jurisdiction
     # field :required_energy_step do |checklist, _options|
@@ -57,11 +43,16 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
            :completed_by_email,
            :completed_by_phone,
            :completed_by_address,
-           :energy_advisor_id
+           :energy_advisor_id,
+           :codeco
+
+    field :p_file_no do |checklist, _options|
+      checklist.data_entries.pluck(:p_file_no).join(", ")
+    end
   end
 
   view :building_characteristics_summary do
-    # TODO
+    association :building_characteristics_summary, blueprint: StepCodeBuildingCharacteristicsSummaryBlueprint
   end
 
   view :mid_construction_testing_results do

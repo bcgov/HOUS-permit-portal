@@ -27,18 +27,24 @@ class User < ApplicationRecord
 
   enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
 
+  # https://github.com/waiting-for-dev/devise-jwt
+  self.skip_session_storage = %i[http_auth params_auth]
+
   # Associations
   belongs_to :jurisdiction, optional: true
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
+  has_many :license_agreements, class_name: "UserLicenseAgreement"
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
   validate :unique_bceid
   validates :email, presence: true
+  validates :username, uniqueness: true
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :reindex_jurisdiction_user_size
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -82,7 +88,21 @@ class User < ApplicationRecord
     reviewer? || review_manager? || super_admin?
   end
 
+  def review_staff?
+    reviewer? || review_manager?
+  end
+
+  def role_name
+    role.gsub("_", " ")
+  end
+
   private
+
+  def reindex_jurisdiction_user_size
+    return unless jurisdiction.present?
+
+    jurisdiction.reindex if saved_change_to_jurisdiction_id? || saved_change_to_role? || destroyed? || new_record?
+  end
 
   def refresh_search_index
     User.search_index.refresh

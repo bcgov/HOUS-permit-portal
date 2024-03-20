@@ -9,6 +9,7 @@
   "devDependencies": {
     "@chakra-ui/cli": "^2.4.1",
     "@prettier/plugin-ruby": "^4.0.2",
+    "@rails/actioncable": "^7.1.2",
     "@types/leaflet": "^1.9.8",
     "@types/quill": "^2.0.14",
     "@types/ramda": "^0.29.9",
@@ -28,7 +29,7 @@
     "reactotron-react-js": "^3.3.8",
     "sass": "^1.70.0",
     "typescript": "^5.3.2",
-    "vite": "^5.0.11",
+    "vite": "^5.0.12",
     "vite-plugin-ruby": "^5.0.0"
   },
   "dependencies": {
@@ -46,9 +47,11 @@
     "@types/jest": "^29.5.10",
     "@types/node": "^20.9.4",
     "@types/react": "^18.2.38",
+    "@types/react-datepicker": "^6.0.1",
     "@types/react-dom": "^18.2.17",
     "apisauce": "^3.0.1",
     "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.1",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",
     "humps": "^2.0.1",
@@ -62,6 +65,7 @@
     "quill-delta": "^5.1.0",
     "ramda": "^0.29.1",
     "rc-pagination": "^4.0.4",
+    "react-datepicker": "^6.1.0",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.50.1",
     "react-i18next": "^13.5.0",

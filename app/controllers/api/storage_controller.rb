@@ -19,8 +19,8 @@ class Api::StorageController < Api::ApplicationController
     else
       render_error("misc.not_found_error", status: :not_found)
     end
-  rescue ActiveRecord::RecordNotFound
-    render_error("misc.not_found_error", status: :not_found)
+  rescue ActiveRecord::RecordNotFound => e
+    render_error("misc.not_found_error", { status: :not_found }, e)
   end
 
   def delete
@@ -42,10 +42,10 @@ class Api::StorageController < Api::ApplicationController
       raise "Need to implement"
       # render json: { url: record.file_url}, status: :ok
     else
-      render_error("misc.not_found_error", status: :not_found)
+      render_error("misc.not_found_error", { status: :not_found }, e)
     end
-  rescue ActiveRecord::RecordNotFound
-    render_error("misc.not_found_error", status: :not_found)
+  rescue ActiveRecord::RecordNotFound => e
+    render_error("misc.not_found_error", { status: :not_found }, e)
   end
 
   private

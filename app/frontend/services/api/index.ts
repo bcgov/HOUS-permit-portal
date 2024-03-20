@@ -1,12 +1,15 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-tempate-screen"
+import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
-import { IPermitType } from "../../models/permit-classification"
+import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
+import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
 import {
@@ -122,13 +125,16 @@ export class Api {
     activity_id: string = null,
     pid: string = null
   ) {
-    return this.client.post<IOptionResponse<IPermitType>>(`/permit_classifications/permit_classification_options`, {
-      type,
-      published,
-      permit_type_id,
-      activity_id,
-      pid,
-    })
+    return this.client.post<IOptionResponse<IPermitType | IActivity>>(
+      `/permit_classifications/permit_classification_options`,
+      {
+        type,
+        published,
+        permit_type_id,
+        activity_id,
+        pid,
+      }
+    )
   }
 
   async createJurisdiction(params) {
@@ -180,6 +186,14 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}/restore`)
   }
 
+  async acceptEULA(userId: string) {
+    return this.client.patch<ApiResponse<IUser>>(`/users/${userId}/accept_eula`)
+  }
+
+  async getEULA() {
+    return this.client.get("/end_user_license_agreement")
+  }
+
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
   }
@@ -216,8 +230,29 @@ export class Api {
     })
   }
 
+  // we send the versionDate as string instead of date as we want to strip off timezone info
+  async scheduleRequirementTemplate(
+    templateId: string,
+    {
+      requirementTemplate,
+      versionDate,
+    }: {
+      requirementTemplate?: IRequirementTemplateUpdateParams
+      versionDate: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
+      requirementTemplate,
+      versionDate,
+    })
+  }
+
   async fetchSiteOptions(address: string, pid: string = null) {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
+  }
+
+  async fetchGeocodedJurisdiction(siteId: string) {
+    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId })
   }
 
   async fetchPids(siteId: string) {
@@ -230,6 +265,42 @@ export class Api {
 
   async restoreRequirementTemplate(id) {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
+  }
+
+  async fetchTemplateVersions(activityId?: string) {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId })
+  }
+
+  async fetchTemplateVersion(id: string) {
+    return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
+  }
+
+  async fetchJurisdictionTemplateVersionCustomization(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`
+    )
+  }
+
+  async createJurisdictionTemplateVersionCustomization(
+    templateId: string,
+    jurisdictionId: string,
+    jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
+  ) {
+    return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
+      { jurisdictionTemplateVersionCustomization }
+    )
+  }
+
+  async updateJurisdictionTemplateVersionCustomization(
+    templateId: string,
+    jurisdictionId: string,
+    jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
+  ) {
+    return this.client.put<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
+      { jurisdictionTemplateVersionCustomization }
+    )
   }
 
   async fetchStepCodes() {

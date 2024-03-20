@@ -1,6 +1,8 @@
+import { format } from "date-fns"
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
 import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-tempate-screen"
+import { datefnsAppDateFormat } from "../constants"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
@@ -41,6 +43,12 @@ export const RequirementTemplateStoreModel = types
               self.rootStore.requirementBlockStore.mergeUpdate(sectionBlock.requirementBlock, "requirementBlockMap")
           })
         })
+      }
+
+      if (requirementTemplate.templateVersions?.length > 0) {
+        requirementTemplate.templateVersions.forEach((templateVersion) =>
+          self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
+        )
       }
 
       return requirementTemplate
@@ -97,6 +105,28 @@ export const RequirementTemplateStoreModel = types
     }),
     updateRequirementTemplate: flow(function* (templateId: string, params: IRequirementTemplateUpdateParams) {
       const response = yield* toGenerator(self.environment.api.updateRequirementTemplate(templateId, params))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+
+        return self.requirementTemplateMap.get(templateData.id)
+      }
+
+      return response.ok
+    }),
+    scheduleRequirementTemplate: flow(function* (
+      templateId: string,
+      requirementParams: IRequirementTemplateUpdateParams,
+      scheduleDate: Date
+    ) {
+      const response = yield* toGenerator(
+        self.environment.api.scheduleRequirementTemplate(templateId, {
+          requirementTemplate: requirementParams,
+          versionDate: format(scheduleDate, datefnsAppDateFormat),
+        })
+      )
 
       if (response.ok) {
         const templateData = response.data.data

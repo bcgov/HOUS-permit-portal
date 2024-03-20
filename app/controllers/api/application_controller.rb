@@ -3,6 +3,7 @@ class Api::ApplicationController < ActionController::API
   include Pundit::Authorization
 
   before_action :authenticate_user!
+  before_action :store_currents
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
@@ -26,6 +27,10 @@ class Api::ApplicationController < ActionController::API
   end
 
   def user_not_authorized(exception)
-    render_error "misc.user_not_authorized_error", message_opts: { error_message: exception.message } and return
+    render_error(
+      "misc.user_not_authorized_error",
+      { message_opts: { error_message: exception.message } },
+      exception,
+    ) and return
   end
 end

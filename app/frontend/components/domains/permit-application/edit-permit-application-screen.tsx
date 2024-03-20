@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Stack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
 import { CaretRight, Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
@@ -16,6 +17,7 @@ import { PermitApplicationStatusTag } from "../../shared/permit-applications/per
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { SubmissionDownloadModal } from "./submission-download-modal"
 
 interface IEditPermitApplicationScreenProps {}
 
@@ -31,7 +33,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const getDefaultPermitApplicationMetadataValues = () => ({ nickname: currentPermitApplication?.nickname })
 
-  const { register, watch, setValue, handleSubmit, reset } = useForm<TPermitApplicationMetadataForm>({
+  const { register, watch, setValue, reset } = useForm<TPermitApplicationMetadataForm>({
     mode: "onChange",
     defaultValues: getDefaultPermitApplicationMetadataValues(),
   })
@@ -39,10 +41,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const [completedSections, setCompletedSections] = useState({})
+  const [completedBlocks, setCompletedBlocks] = useState({})
+
+  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const handleSave = async () => {
-    if (currentPermitApplication.isSubmitted || isStepCode) return
+    if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
     const submissionData = formio.data
@@ -58,21 +62,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         }
         //update file hashes that have been changed
       }
-    } catch (e) {}
+      return response.ok
+    } catch (e) {
+      return false
+    }
   }
 
   const handleClickFinishLater = async () => {
-    await handleSave()
-    navigate("/")
+    const success = await handleSave()
+    if (success) {
+      navigate("/")
+    }
   }
-
-  const handleDownloadApplication = () => {
-    // TODO: APPLICATION DOWNLOAD
-  }
-
-  // const onSubmitMetadata = (formValues) => {
-  //   currentPermitApplication.update(formValues)
-  // }
 
   useInterval(handleSave, 60000) // save progress every minute
 
@@ -80,8 +81,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     // sets the defaults subject to application load
     reset(getDefaultPermitApplicationMetadataValues())
   }, [currentPermitApplication?.nickname])
-
-  const { isOpen, onOpen, onClose } = useDisclosure()
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication) return <LoadingScreen />
@@ -93,7 +92,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
-    <Box as="main" overflow="auto" h="full">
+    <Box as="main" overflow="hidden" h="full">
       <Flex
         id="permitHeader"
         position="sticky"
@@ -148,26 +147,19 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </form>
 
             <Text>{permitTypeAndActivity}</Text>
-            <Text mt={1}>
-              {t("permitApplication.fields.number")}:{" "}
-              <Text as="span" fontWeight={700}>
-                {number}
-              </Text>
-            </Text>
+            <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
         {isSubmitted ? (
-          <HStack>
-            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onOpen}>
+          <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
               {t("permitApplication.show.contactsSummary")}
             </Button>
-            <Button variant="primary" onClick={handleDownloadApplication}>
-              {t("permitApplication.show.downloadApplication")}
-            </Button>
+            <SubmissionDownloadModal permitApplication={currentPermitApplication} />
             <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
               {t("ui.backHome")}
             </Button>
-          </HStack>
+          </Stack>
         ) : (
           <HStack gap={4}>
             <Button variant="primary" onClick={handleClickFinishLater}>
@@ -180,23 +172,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         )}
       </Flex>
       <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
-        <ChecklistSideBar permitApplication={currentPermitApplication} completedSections={completedSections} />
+        <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
           <Flex flex={1} direction="column" p={24}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
-              onCompletedSectionsChange={setCompletedSections}
+              onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
             />
           </Flex>
         )}
       </Flex>
-      {isOpen && (
+      {isContactsOpen && (
         <ContactSummaryModal
-          isOpen={isOpen}
-          onOpen={onOpen}
-          onClose={onClose}
+          isOpen={isContactsOpen}
+          onOpen={onContactsOpen}
+          onClose={onContactsClose}
           permitApplication={currentPermitApplication}
         />
       )}

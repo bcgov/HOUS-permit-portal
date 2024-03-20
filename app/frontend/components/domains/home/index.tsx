@@ -3,7 +3,7 @@ import React from "react"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { PermitApplicationIndexScreen } from "../permit-application"
-import { ReviewManagerHomeScreen } from "./review-manager-home-screen"
+import { ReviewManagerHomeScreen } from "./review-manager"
 import { ReviewerHomeScreen } from "./reviewer-home-screen"
 import { SuperAdminHomeScreen } from "./super-admin-home-screen"
 

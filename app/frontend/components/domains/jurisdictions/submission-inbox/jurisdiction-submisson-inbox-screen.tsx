@@ -1,5 +1,5 @@
-import { Box, Button, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { Download } from "@phosphor-icons/react"
+import { Box, Button, Center, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { ArrowSquareOut, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -16,7 +16,10 @@ import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
-import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
+import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
+import { Can } from "../../../shared/user/can"
+import { SubmissionDownloadModal } from "../../permit-application/submission-download-modal"
 import { GridHeaders } from "./grid-header"
 
 export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionSubmissionInbox() {
@@ -34,24 +37,26 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
-      <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
-        <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
-          <Flex direction="column">
-            <Heading as="h1" fontSize={"4xl"} color={"text.primary"}>
-              {t("permitApplication.submissionInbox.title")}
-            </Heading>
-            <Flex>
-              <Text mr={2}>
-                {t("permitApplication.submissionInbox.submissionsSentTo", {
-                  email: currentJurisdiction?.submissionEmail || t("ui.notAvailable"),
-                })}
-              </Text>
-              <RouterLink to={`/jurisdictions/${currentJurisdiction.id}/configuration`}>{t("ui.change")}</RouterLink>
-            </Flex>
-          </Flex>
+      <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
+        <Flex justify={"space-between"} w={"full"}>
+          <Box>
+            <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
+            <Text fontSize="sm" color="text.secondary">
+              {t("permitApplication.submissionInbox.submissionsSentTo")}
+            </Text>
+          </Box>
+          <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
+            <Button
+              as={RouterLink}
+              to={`/jurisdictions/${currentJurisdiction.slug}/configuration-management/submissions-inbox-setup`}
+              variant="secondary"
+            >
+              {t("ui.setup")}
+            </Button>
+          </Can>
         </Flex>
 
-        <SearchGrid templateColumns="165px 2fr 2fr repeat(3, 1fr)">
+        <SearchGrid templateColumns="170px 2fr 2fr repeat(3, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -81,20 +86,38 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     </Flex>
                   </SearchGridItem>
                   <SearchGridItem>
-                    {pa.submittedAt && (
+                    {pa.isViewed ? (
+                      <Flex direction="column">
+                        <Text>{format(pa.viewedAt, "yyyy-MM-dd")}</Text>
+                        <Text>{format(pa.viewedAt, "hh:mm")}</Text>
+                      </Flex>
+                    ) : (
+                      <PermitApplicationViewedAtTag permitApplication={pa} />
+                    )}
+                  </SearchGridItem>
+                  <SearchGridItem>
+                    {pa.isSubmitted && (
                       <Flex direction="column">
                         <Text>{format(pa.submittedAt, "yyyy-MM-dd")}</Text>
                         <Text>{format(pa.submittedAt, "hh:mm")}</Text>
                       </Flex>
                     )}
                   </SearchGridItem>
-                  <SearchGridItem>
-                    <PermitApplicationStatusTag permitApplication={pa} />
-                  </SearchGridItem>
-                  <SearchGridItem>
-                    <Button variant="primary" leftIcon={<Download />}>
-                      {t("ui.download")}
-                    </Button>
+                  <SearchGridItem gap={2}>
+                    <SubmissionDownloadModal
+                      permitApplication={pa}
+                      renderTrigger={(onOpen) => (
+                        <IconButton variant="secondary" icon={<Download />} aria-label={"download"} onClick={onOpen} />
+                      )}
+                    />
+
+                    <RouterLinkButton
+                      variant="primary"
+                      rightIcon={<ArrowSquareOut />}
+                      to={`/permit-applications/${pa.id}`}
+                    >
+                      {t("ui.view")}
+                    </RouterLinkButton>
                   </SearchGridItem>
                 </Box>
               )
@@ -113,6 +136,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             totalPages={totalPages}
             pageSize={countPerPage}
             handlePageChange={handlePageChange}
+            showLessItems={true}
           />
         </Flex>
       </VStack>

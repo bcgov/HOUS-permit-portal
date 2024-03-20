@@ -1,4 +1,5 @@
 import { Instance, applySnapshot, flow, getSnapshot, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import {
   EStepCodeAirtightnessValue,
@@ -7,12 +8,13 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
 } from "../types/enums"
+import { renameKeys } from "../utils/utility-functions"
+import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
 
 export const StepCodeChecklistModel = types
   .model("StepCodeChecklistModel", {
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
-    name: types.string,
     stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
     // permit application info
     buildingPermitNumber: types.maybeNull(types.string),
@@ -20,9 +22,12 @@ export const StepCodeChecklistModel = types
     address: types.maybeNull(types.string),
     jurisdictionName: types.maybeNull(types.string),
     pid: types.maybeNull(types.string),
-    // model fields
+    // plan, assumed to be based on drawing upload on the permit application
+    planAuthor: types.maybeNull(types.string),
+    planVersion: types.maybeNull(types.string),
+    planDate: types.maybeNull(types.string),
+    // user input fields
     buildingType: types.maybeNull(types.enumeration<EStepCodeBuildingType[]>(Object.values(EStepCodeBuildingType))),
-    dwellingUnitsCount: types.maybeNull(types.number),
     compliancePath: types.maybeNull(
       types.enumeration<EStepCodeCompliancePath[]>(Object.values(EStepCodeCompliancePath))
     ),
@@ -34,19 +39,9 @@ export const StepCodeChecklistModel = types
     completedByEmail: types.maybeNull(types.string),
     completedByServiceOrganization: types.maybeNull(types.string),
     energyAdvisorId: types.maybeNull(types.string),
-    siteVisitCompleted: types.maybeNull(types.boolean),
-    siteVisitDate: types.maybeNull(types.Date),
-    testingPressure: types.maybeNull(types.number),
-    testingPressureDirection: types.maybeNull(types.string),
-    testingResultType: types.maybeNull(types.string),
-    testingResult: types.maybeNull(types.number),
-    testerName: types.maybeNull(types.string),
-    testerCompanyName: types.maybeNull(types.string),
-    testerEmail: types.maybeNull(types.string),
-    testerPhone: types.maybeNull(types.string),
-    homeState: types.maybeNull(types.string),
-    complianceStatus: types.maybeNull(types.string),
-    notes: types.maybeNull(types.string),
+    codeco: types.maybeNull(types.boolean),
+    pFileNo: types.maybeNull(types.string),
+    buildingCharacteristicsSummary: types.maybeNull(StepCodeBuildingCharacteristicsSummaryModel),
     hvacConsumption: types.maybeNull(types.string),
     dhwHeatingConsumption: types.maybeNull(types.string),
     refHvacConsumption: types.maybeNull(types.string),
@@ -58,9 +53,12 @@ export const StepCodeChecklistModel = types
       types.enumeration<EStepCodeEPCTestingTargetType[]>(Object.values(EStepCodeEPCTestingTargetType))
     ),
     epcCalculationCompliance: types.maybeNull(types.boolean),
-    // calculated fields
+    // calculated / pre-populated fields
+    dwellingUnitsCount: types.maybeNull(types.number),
     proposedEnergyStep: types.maybeNull(types.string),
     requiredEnergyStep: types.maybeNull(types.string),
+    minEnergyStep: types.maybeNull(types.string),
+    maxEnergyStep: types.maybeNull(types.string),
     meuiPassed: types.maybeNull(types.boolean),
     meui: types.maybeNull(types.string),
     meuiRequirement: types.maybeNull(types.string),
@@ -91,6 +89,8 @@ export const StepCodeChecklistModel = types
     softwareVersion: types.maybeNull(types.string),
     proposedZeroCarbonStep: types.maybeNull(types.string),
     requiredZeroCarbonStep: types.maybeNull(types.string),
+    minZeroCarbonStep: types.maybeNull(types.string),
+    maxZeroCarbonStep: types.maybeNull(types.string),
     co2Passed: types.maybeNull(types.boolean),
     co2: types.maybeNull(types.string),
     co2Requirement: types.maybeNull(types.string),
@@ -115,7 +115,39 @@ export const StepCodeChecklistModel = types
       return self.co2Passed && self.ghgPassed && self.prescriptivePassed
     },
     get defaultFormValues() {
-      return getSnapshot(self)
+      const snapshot = getSnapshot(self)
+      return renameKeys(
+        { buildingCharacteristicsSummary: "buildingCharacteristicsSummaryAttributes" },
+        R.pick(
+          [
+            "buildingType",
+            "compliancePath",
+            "completedBy",
+            "completedAt",
+            "completedByCompany",
+            "completedByEmail",
+            "completedByAddress",
+            "completedByPhone",
+            "completedByServiceOrganization",
+            "energyAdvisorId",
+            "buildingCharacteristicsSummary",
+            "hvacConsumption",
+            "dhwHeatingConsumption",
+            "refHvacConsumption",
+            "refDwhHeatingConsumption",
+            "epcCalculationAirtightness",
+            "epcCalculationTestingTargetType",
+            "epcCalculationCompliance",
+          ],
+          snapshot
+        )
+      )
+    },
+    get numberOfEnergySteps() {
+      return parseInt(self.maxEnergyStep) - parseInt(self.minEnergyStep) + 1
+    },
+    get numberOfZeroCarbonSteps() {
+      return parseInt(self.maxZeroCarbonStep) - parseInt(self.minZeroCarbonStep) + 1
     },
   }))
   .actions((self) => ({

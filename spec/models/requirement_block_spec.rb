@@ -23,7 +23,6 @@ RSpec.describe RequirementBlock, type: :model do
   end
 
   describe "enums" do
-    # TODO: remove xit tests when roles will be defined
     it { should define_enum_for(:sign_off_role).with_prefix(true).with_values(any: 0) }
     it { should define_enum_for(:reviewer_role).with_prefix(true).with_values(any: 0) }
   end
@@ -42,8 +41,8 @@ RSpec.describe RequirementBlock, type: :model do
              collapsed: false,
            }
          )
-
-      expect(form_json[:components].count).to eq 6
+      # expect 7 because a block that is all optional requirements gets one extra required component
+      expect(form_json[:components].count).to eq 7
     end
   end
 

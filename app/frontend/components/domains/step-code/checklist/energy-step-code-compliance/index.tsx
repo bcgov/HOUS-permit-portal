@@ -16,7 +16,7 @@ export const EnergyStepCodeCompliance = observer(function EnergyStepCodeComplian
   const translationPrefix = "stepCodeChecklist.edit.energyStepCodeCompliance"
 
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
+    <ChecklistSection heading={t(`${translationPrefix}.heading`)} isAutoFilled>
       <HStack>
         <VStack>
           <TextFormControl

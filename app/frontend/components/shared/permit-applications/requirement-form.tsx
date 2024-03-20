@@ -3,6 +3,7 @@ import {
   Button,
   Flex,
   Heading,
+  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -23,7 +24,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedSectionsFromForm } from "../../../utils/formio-component-traversal"
+import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { CustomToast } from "../base/flash-message"
@@ -31,34 +32,26 @@ import { Form } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
-  onCompletedSectionsChange?: (sections: any) => void
+  onCompletedBlocksChange?: (sections: any) => void
   formRef: any
-  triggerSave: () => void
+  triggerSave?: () => void
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedSectionsChange, formRef, triggerSave }: IRequirementFormProps) => {
-    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson } =
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave }: IRequirementFormProps) => {
+    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
     const location = useLocation()
-
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
-
-    const togglePanelCollapse = () => {
-      if (!allCollapsed) {
-        document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
-      } else {
-        document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
-      }
-      setAllCollapsed((cur) => !cur)
-    }
+    const [imminentSubmission, setImminentSubmission] = useState(null)
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -110,6 +103,31 @@ export const RequirementForm = observer(
       }
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
+    useEffect(() => {
+      const handleOpenStepCode = (_event) => {
+        triggerSave?.()
+        navigate("step-code", { state: { background: location } })
+      }
+      document.addEventListener("openStepCode", handleOpenStepCode)
+      return () => {
+        document.removeEventListener("openStepCode", handleOpenStepCode)
+      }
+    }, [])
+
+    const togglePanelCollapse = () => {
+      if (!allCollapsed) {
+        document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
+      } else {
+        document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
+      }
+      setAllCollapsed((cur) => !cur)
+    }
+
+    const mapErrorBoxData = (errors) =>
+      errors.map((error) => {
+        return { label: error.component.label, id: error.component.id, class: error.component.class }
+      })
+
     function handleBlockIntersection(entries: IntersectionObserverEntry[]) {
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
@@ -125,8 +143,6 @@ export const RequirementForm = observer(
       }
     }
 
-    const [imminentSubmission, setImminentSubmission] = useState(null)
-
     const onFormSubmit = async (submission: any) => {
       setImminentSubmission(submission)
       onOpen()
@@ -138,42 +154,24 @@ export const RequirementForm = observer(
       }
     }
 
-    useEffect(() => {
-      const handleOpenStepCode = (event) => {
-        triggerSave()
-        navigate("step-code", { state: { background: location } })
+    const onBlur = (containerComponent) => {
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
-      document.addEventListener("openStepCode", handleOpenStepCode)
-      return () => {
-        document.removeEventListener("openStepCode", handleOpenStepCode)
-      }
-    }, [])
-
-    const onSubmit = async (submission: any) => {
-      if (await permitApplication.submit({ submissionData: submission })) {
-        navigate("/permit-applications/sucessful-submission")
-      }
+      setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
     }
 
-    const onBlur = (containerComponent) => {
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(containerComponent.root))
+    const onInitialized = (event) => {
+      if (!formRef.current) return
+      if (onCompletedBlocksChange) {
+        onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
-      setErrorBoxData(
-        containerComponent.root.errors.map((error) => {
-          return { label: error.component.label, id: error.component.id, class: error.component.class }
-        })
-      )
+      setErrorBoxData(mapErrorBoxData(formRef.current.errors))
     }
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
-      if (onCompletedSectionsChange) {
-        onCompletedSectionsChange(getCompletedSectionsFromForm(rootComponent))
-      }
     }
-
-    const { isOpen, onOpen, onClose } = useDisclosure()
 
     const scrollToTop = () => {
       handleScrollToTop("outerScrollContainer")
@@ -182,9 +180,18 @@ export const RequirementForm = observer(
 
     return (
       <>
-        <Box as={"section"} flex={1} className={"form-wrapper"} scrollMargin={96} mb={20} ref={boxRef}>
+        <Flex
+          direction="column"
+          as={"section"}
+          flex={1}
+          className={"form-wrapper"}
+          scrollMargin={96}
+          mb={20}
+          gap={8}
+          ref={boxRef}
+        >
           <ErrorsBox errorBox={errorBoxData} />
-          {permitApplication?.submittedAt && (
+          {permitApplication?.isSubmitted && (
             <CustomToast
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
@@ -192,16 +199,25 @@ export const RequirementForm = observer(
               status="info"
             />
           )}
+          <Box bg="greys.grey03" p={3} borderRadius="sm">
+            <Text fontStyle="italic">
+              {t("site.foippaWarning")}
+              <Link href={"mailto:" + t("site.contactEmail")} isExternal>
+                {t("site.contactEmail")}
+              </Link>
+            </Text>
+          </Box>
           <Form
             form={formattedFormJson}
             formReady={formReady}
             submission={submissionData}
             onSubmit={onFormSubmit}
-            options={permitApplication ? {} : { readOnly: true }}
+            options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
+            onInitialized={onInitialized}
           />
-        </Box>
-        <VStack align="end" position="sticky" bottom={24} right={0} zIndex={11} gap={4}>
+        </Flex>
+        <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
           <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
             {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
           </Button>

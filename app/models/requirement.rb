@@ -23,7 +23,8 @@ class Requirement < ApplicationRecord
        _prefix: true
 
   before_create :set_requirement_code
-  validate :validate_value_options
+  before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
+  validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code, with: /\_file/, if: Proc.new { |req| req.input_type == "file" }
@@ -108,8 +109,8 @@ class Requirement < ApplicationRecord
     },
   }
 
-  NUMBER_UNITS = %w[no_unit mm cm m in ft mi $ sqm sqft]
-  TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select checkbox radio]
+  NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
+  TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -139,24 +140,20 @@ class Requirement < ApplicationRecord
       },
     }.merge!(formio_type_options)
 
-    if hint || computed_compliance?
-      description =
-        if computed_compliance?
-          "<div><div data-compliance='#{input_options.dig("computed_compliance", "module")}'>Compliance Check: #{input_options.dig("computed_compliance", "module")}</div><div>#{hint}</div></div>"
-        else
-          "<div>#{hint}</div>"
-        end
-
-      json.merge!({ description: description })
-    end
+    json.merge!({ description: hint }) if hint
 
     json.merge!({ validate: { required: true } }) if required
 
+    #assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
+    json.merge!({ elective: elective }) if elective
+
     json.merge!({ data: { values: input_options["value_options"] } }) if input_type_select?
 
-    json.merge!({ values: input_options["value_options"] }) if input_type_checkbox? || input_type_multi_option_select?
+    json.merge!({ values: input_options["value_options"] }) if input_type_multi_option_select?
 
     json.merge!({ computedCompliance: input_options["computed_compliance"] }) if computed_compliance?
+
+    json.merge!({ energyStepCode: input_options["energy_step_code"] }) if input_type.to_sym == :energy_step_code
 
     if input_options["conditional"].present?
       # assumption that conditional is only within the same requirement block for now
@@ -167,6 +164,12 @@ class Requirement < ApplicationRecord
       end
       json.merge!({ conditional: conditional })
     end
+
+    #indicates code-based conditionals.  Always merge elective show = false to end.
+    if input_options["customConditional"].present?
+      json.merge!({ customConditional: input_options["customConditional"] })
+    end
+    json.merge!({ customConditional: "#{json[:customConditional]};show = false" }) if elective
 
     json
   end
@@ -194,6 +197,8 @@ class Requirement < ApplicationRecord
   end
 
   def formio_type_options
+    return unless input_type.present?
+
     if (input_type.to_sym == :file)
       return(
         {
@@ -218,8 +223,6 @@ class Requirement < ApplicationRecord
   end
 
   def validate_value_options
-    return unless TYPES_WITH_VALUE_OPTIONS.include?(input_type.to_s)
-
     if input_options.blank? || input_options["value_options"].blank? || !input_options["value_options"].is_a?(Array) ||
          !input_options["value_options"].all? { |option|
            option.is_a?(Hash) && (option.key?("label") && option["label"].is_a?(String)) &&
@@ -234,6 +237,13 @@ class Requirement < ApplicationRecord
 
     if !NUMBER_UNITS.include?(input_options["number_unit"])
       errors.add(:input_options, "the number_unit must be one of #{NUMBER_UNITS.join(", ")}")
+    end
+  end
+
+  def convert_value_options
+    #all values MUST be converted to camelCase to be compatible with rehyration on front end
+    input_options["value_options"] = input_options["value_options"].map do |option_json|
+      option_json.merge("value" => option_json["value"].camelize(:lower))
     end
   end
 end

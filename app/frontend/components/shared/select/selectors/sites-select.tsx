@@ -13,7 +13,6 @@ import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
   setSiteSelected: (boolean) => void
-  fetchOptions: (address?: string, pid?: string) => Promise<IOption[]>
   onChange: (option: IOption) => void
   selectedOption: IOption
   pidName?: string
@@ -23,7 +22,6 @@ type TSitesSelectProps = {
 // Please be advised that this is expected to be used within a form context!
 
 export const SitesSelect = observer(function ({
-  fetchOptions,
   onChange,
   selectedOption,
   stylesToMerge,
@@ -34,7 +32,7 @@ export const SitesSelect = observer(function ({
 }: TSitesSelectProps) {
   const { geocoderStore } = useMst()
   const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const { fetchPids, fetchingPids } = geocoderStore
+  const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids } = geocoderStore
   const pidSelectRef = useRef(null)
 
   const { setValue, control, watch, reset } = useFormContext()
@@ -52,13 +50,14 @@ export const SitesSelect = observer(function ({
   }
 
   const handleChange = (option: IOption) => {
+    setPidOptions([])
     onChange(option)
+    setValue(pidName, null)
     if (option) {
       fetchPids(option.value).then((pids: string[]) => {
         setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
       })
     }
-    setValue(pidName, null)
     const selectControl = pidSelectRef.current.controlRef
     if (selectControl) {
       selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
@@ -124,7 +123,7 @@ export const SitesSelect = observer(function ({
                   <Select
                     options={pidOptions}
                     ref={pidSelectRef}
-                    value={pidOptions.find((option) => option.value === value?.value)}
+                    value={pidOptions.find((option) => option.value === value) ?? { label: null, value: null }}
                     onChange={(option) => {
                       onChange(option.value)
                     }}

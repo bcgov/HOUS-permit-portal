@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Welcome to the Building Permit Hub!</title>
+        <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
+      <tr>
+        <td>&nbsp;</td>
+        <td class="container">
+          <div class="header"> 
+            <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td width="170" style="vertical-align: middle; padding: 0 16px; border-right: 1px solid #fcba19">
+                  <img src="https://dev.buildingpermit.gov.bc.ca/images/logo-light.svg" style="display: block; height: auto; border: 0; width: 100%;" width="170" alt="BC Gov Logo" title="BC Gov Logo @TODO"/>
+                </td>
+                <td style="vertical-align: middle; padding: 0 16px">
+                  <span style="color: #ffffff; font-weight: bold; font-size: 18px">Building Permit Hub</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="content">
+
+            <!-- START CENTERED WHITE CONTAINER -->
+
+            <table role="presentation" class="main" cellspacing="0" cellpadding="0">
+
+              <!-- START MAIN CONTENT AREA -->
+              <tr>
+                <td class="wrapper">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                    <!-- START CONTENT ROW -->
+                      <td>
+                        <h1>Welcome!</h1>
+                        <p>Dear [Reviewer/Manager @TODO],</p>
+                        <p>
+                            Welcome to the Building Permit Hub! We are thrilled to have you as part of this pilot project and look forward to working with you. As you begin, we want to be sure that you have all the information you need to get started. Below are some key features, tips, and resources to help you navigate the system:
+                        </p>
+                        <p>
+                            <strong>Introduction:</strong> The Building Permit Hub is designed to streamline the permit application process. Our user-friendly interface is created to guide you through the process step by step.
+                        </p>
+
+                        <hr>
+                        <h2>Key features:</h2>
+                        
+                        <p>
+                            Explore the various features of the system, including:
+												</p>
+												<ul>
+														<li><strong>Permit submission review:</strong> Easily review submitted permits applications online.</li>
+														<li><strong>Document management:</strong> Download and manage all necessary documents securely.</li>
+														<li><strong>Status tracking:</strong> Monitor the status of your applications in real-time.</li>
+												</ul>
+                        
+
+                        <hr>
+
+                        <h2>Tips for getting started:</h2>
+
+												<ul>
+														<li>Familiarize yourself with the system interface by exploring sections and functionalities</li>
+														<li>Use our help resources, including the attached onboarding guide</li>
+												</ul>
+                        
+                        <p>
+                            <strong>Next steps:</strong> Begin by logging into the system using the credentials provided to you. Once logged in, you can start exploring the system and reviewing your permit applications.
+                        </p>
+
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+                          <tbody>
+                            <tr>
+                              <td align="left">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                  <tbody>
+                                    <tr>
+                                      <td> <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank">Login to Building Permit Hub</a> </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <hr>
+
+                        <p>
+                            If you have any questions or need assistance, please reach out to us at <a href="mailto:digital.codes.permits@gov.bc.ca">digital.codes.permits@gov.bc.ca</a>.
+                        </p>
+
+                        <br>
+                        <p>The Building Permit Hub Team</p>
+
+                      </td>
+                      <!-- END OF CONTENT ROW -->
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+            <!-- END MAIN CONTENT AREA -->
+            </table>
+
+            <!-- START FOOTER -->
+            <div class="footer">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td><div class="yellow-border">&nbsp;</div></td>
+                </tr>
+                <tr>
+                  <td class="wrapper">
+                    <p>You are receiving this email because you are registered on <a href="<%= root_url %>" title="Building Permit Hub">Building Permit Hub</a>.</p>
+                    <p>The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.</p>
+                    <h3>Building Permit Hub</h3>
+                    <p>
+                      <a href="<%= root_url %>" target="_blank" style="margin-right: 20px">Home</a> 
+                      <a href="<%= FrontendUrlHelper.frontend_url("/contact") %>" target="_blank" style="margin-right: 20px">Contact us</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/help") %>" target="_blank" style="margin-right: 20px">Help</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="margin-right: 20px">Login</a>
+                    </p>
+                    <hr>
+                    <p>© Government of British Columbia.</p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <!-- END FOOTER -->
+
+          <!-- END CENTERED WHITE CONTAINER -->
+          </div>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </body>
+</html>

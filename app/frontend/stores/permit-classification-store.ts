@@ -1,14 +1,16 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { ActivityModel, PermitTypeModel } from "../models/permit-classification"
+import { ActivityModel, IPermitType, PermitTypeModel } from "../models/permit-classification"
 import { EPermitClassificationType } from "../types/enums"
+import { IOption } from "../types/types"
 
 export const PermitClassificationStoreModel = types
   .model("PermitClassificationStore", {
     permitTypeMap: types.map(PermitTypeModel),
     activityMap: types.map(ActivityModel),
+    isLoaded: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
@@ -53,33 +55,39 @@ export const PermitClassificationStoreModel = types
       self.isLoading = true
       const response: any = yield self.environment.api.fetchPermitClassifications()
       if (response.ok) {
-        let permitTypeData = response.data.data.filter((pc) => pc.type == EPermitClassificationType.PermitType)
-        let activityData = response.data.data.filter((pc) => pc.type == EPermitClassificationType.Activity)
+        const permitTypeData = response.data.data.filter((pc) => pc.type == EPermitClassificationType.PermitType)
+        const activityData = response.data.data.filter((pc) => pc.type == EPermitClassificationType.Activity)
         self.mergeUpdateAll(permitTypeData, "permitTypeMap")
         self.mergeUpdateAll(activityData, "activityMap")
       }
       self.isLoading = false
+      self.isLoaded = true
       return response.ok
     }),
   }))
   .actions((self) => ({
     fetchPermitTypeOptions: flow(function* (publishedOnly = false, pid = null) {
-      const response = yield self.environment.api.fetchPermitClassificationOptions(
-        EPermitClassificationType.PermitType,
-        publishedOnly,
-        null,
-        null,
-        pid
+      const response = yield* toGenerator(
+        self.environment.api.fetchPermitClassificationOptions(
+          EPermitClassificationType.PermitType,
+          publishedOnly,
+          null,
+          null,
+          pid
+        )
       )
-      return response.data.data
+
+      return response?.data?.data ?? ([] as IOption<IPermitType>[])
     }),
     fetchActivityOptions: flow(function* (publishedOnly = false, activityId = null) {
-      const response = yield self.environment.api.fetchPermitClassificationOptions(
-        EPermitClassificationType.Activity,
-        publishedOnly,
-        activityId
+      const response = yield* toGenerator(
+        self.environment.api.fetchPermitClassificationOptions(
+          EPermitClassificationType.Activity,
+          publishedOnly,
+          activityId
+        )
       )
-      return response.data.data
+      return response?.data?.data ?? []
     }),
   }))
 

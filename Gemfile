@@ -10,7 +10,7 @@ gem "pg", "~> 1.1"
 gem "activerecord-nulldb-adapter", "1.0.1" # for Dockerfile asset build
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", ">= 5.0"
+gem "puma", ">= 6.4.2"
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
@@ -56,9 +56,17 @@ gem "aws-sdk-s3", "~> 1.141.0"
 gem "pundit", "~> 2.3.1"
 gem "phonelib", "~> 0.8.5"
 gem "roo", "~> 2.10"
-gem 'discard', '~> 1.2'
+gem "discard", "~> 1.2"
 gem "faraday", "~> 2.9.0"
 gem "factory_bot", "~> 6.4"
+# The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
+gem "timecop", "~> 0.9.8"
+gem "sidekiq-cron", "~> 1.12"
+gem "rubyzip", "~> 2.3.2"
+gem "anycable-rails", "~> 1.4"
+gem "addressable", "~> 2.8"
+gem "friendly_id", "~> 5.5.1"
+gem 'exception_notification', '~> 4.5.0'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

@@ -6,13 +6,12 @@ import { IPermitApplication } from "../../../models/permit-application"
 
 interface IChecklistSideBarProps {
   permitApplication: IPermitApplication
-  completedSections: object
+  completedBlocks: object
 }
 
-export const ChecklistSideBar = observer(({ permitApplication, completedSections }: IChecklistSideBarProps) => {
+export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }: IChecklistSideBarProps) => {
   const { formJson } = permitApplication
-  const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass, getIsBlockPopulated } =
-    permitApplication
+  const { selectedTabIndex, setSelectedTabIndex, indexOfBlockId, getBlockClass } = permitApplication
 
   const navHeight = document.getElementById("mainNav")?.offsetHeight
   const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
@@ -51,14 +50,14 @@ export const ChecklistSideBar = observer(({ permitApplication, completedSections
                         pl={6}
                         gap={2}
                         w="full"
-                        _selected={{ color: "theme.blue", bg: "theme.blueLight" }}
+                        _selected={{ color: "theme.blue", bg: "theme.blueLight", fontWeight: "bold" }}
                         justifyContent="flex-start"
                         textAlign="left"
                         onClick={() => handleTabsChange(indexOfBlockId(block.id), section.id, block.id)}
                       >
                         <Flex align="center">
                           <Box w={5} mr={2}>
-                            {completedSections[block.key] ? (
+                            {completedBlocks[block.key] ? (
                               <CheckCircle color="#2E8540" size={18} />
                             ) : (
                               <CircleDashed color="#A19F9D" size={18} />

@@ -1,0 +1,11 @@
+template_publish:
+  cron: "1 0 * * * America/Vancouver"
+  class: "TemplatePublishJob"
+  queue: default
+  active_job: false
+
+remind_reviewers:
+  cron: "30 8 * * 1 America/Vancouver" # Runs every Monday at 8:30 AM
+  class: "RemindReviewerJob"
+  queue: default
+  active_job: false

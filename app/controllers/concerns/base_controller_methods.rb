@@ -44,7 +44,8 @@ module BaseControllerMethods
   end
 
   # error_key maps to a translation key in en.yml
-  def render_error(error_key = nil, opts = {})
+  def render_error(error_key = nil, opts = {}, exception = nil)
+    Rails.logger.error "#{exception.message}\n#{exception.backtrace}" if exception.present?
     opts.reverse_merge!({ status: 400, meta: {} })
     message =
       (
@@ -61,6 +62,10 @@ module BaseControllerMethods
   def render_flash_message(message_key, message_type, opts = {})
     msg = ArbitraryMessageConstruct.message(key: message_key, type: message_type, options: opts[:message_opts]).to_json
     { flash: msg }
+  end
+
+  def store_currents
+    Current.user = current_user
   end
 
   private

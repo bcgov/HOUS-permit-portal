@@ -136,6 +136,14 @@ RSpec.describe Requirement, type: :model do
       expect(select_requirement.value_options).to eq(select_options)
     end
 
+    it "camelizes values on input types" do
+      select_options = [{ "label" => "test", "value" => "needs_camel" }]
+      select_requirement =
+        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+      camel_select_options = [{ "label" => "test", "value" => "needsCamel" }]
+      expect(select_requirement.value_options).to eq(camel_select_options)
+    end
+
     it "returns the number unit for number input with a unit" do
       number_unit = "m"
       number_requirement_with_unit =
@@ -184,16 +192,7 @@ RSpec.describe Requirement, type: :model do
       end
 
       it "returns correct form json for checkbox requirement" do
-        options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
-        requirement =
-          create(
-            :requirement,
-            label: "Checkbox Requirement",
-            input_type: "checkbox",
-            input_options: {
-              "value_options" => options,
-            },
-          )
+        requirement = create(:requirement, label: "Checkbox Requirement", input_type: "checkbox")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|checkboxRequirement",
@@ -203,7 +202,6 @@ RSpec.describe Requirement, type: :model do
           widget: {
             type: "input",
           },
-          values: options,
         }
 
         expect(form_json).to eq(expected_form_json)
@@ -303,6 +301,98 @@ RSpec.describe Requirement, type: :model do
         }
 
         expect(form_json).to eq(expected_form_json)
+      end
+
+      context "electives" do
+        it "returns a hidden field for an elective requirement" do
+          requirement =
+            create(
+              :requirement,
+              requirement_code: "text_requirement",
+              label: "Text Requirement",
+              input_type: "text",
+              elective: true,
+            )
+          form_json = requirement.to_form_json.reject { |key| key == :id }
+          expected_form_json = {
+            key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            type: "simpletextfield",
+            elective: true,
+            input: true,
+            label: "Text Requirement",
+            widget: {
+              type: "input",
+            },
+            customConditional: ";show = false",
+          }
+          expect(form_json).to eq(expected_form_json)
+        end
+
+        it "merges the show condition for an elective with other conditional logic" do
+          requirement =
+            create(
+              :requirement,
+              requirement_code: "text_requirement",
+              label: "Text Requirement",
+              input_type: "text",
+              elective: true,
+              input_options: {
+                "conditional" => {
+                  show: true,
+                  when: "test",
+                  eq: "customValue",
+                },
+              },
+            )
+          form_json = requirement.to_form_json.reject { |key| key == :id }
+          expected_form_json = {
+            key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            type: "simpletextfield",
+            elective: true,
+            input: true,
+            label: "Text Requirement",
+            widget: {
+              type: "input",
+            },
+            conditional: {
+              show: true,
+              when: "test",
+              eq: "customValue",
+            },
+            customConditional: ";show = false",
+          }
+        end
+
+        it "merges the show condition for an elective with customConditional" do
+          requirement =
+            create(
+              :requirement,
+              requirement_code: "text_requirement",
+              label: "Text Requirement",
+              input_type: "text",
+              elective: true,
+              input_options: {
+                "customConditional" => "show = true",
+              },
+            )
+          form_json = requirement.to_form_json.reject { |key| key == :id }
+          expected_form_json = {
+            key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            type: "simpletextfield",
+            elective: true,
+            input: true,
+            label: "Text Requirement",
+            widget: {
+              type: "input",
+            },
+            customConditional: "show = true;show = false",
+          }
+        end
+      end
+
+      context "validations" do
+        it "returns a validation for required if it is a required field" do
+        end
       end
     end
   end

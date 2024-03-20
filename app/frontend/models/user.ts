@@ -19,6 +19,7 @@ export const UserModel = types
     createdAt: types.Date,
     discardedAt: types.maybeNull(types.Date),
     lastSignInAt: types.maybeNull(types.Date),
+    eulaAccepted: types.maybeNull(types.boolean),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -34,6 +35,9 @@ export const UserModel = types
     },
     get isReviewer() {
       return self.role == EUserRoles.reviewer
+    },
+    get isReviewStaff() {
+      return self.role == EUserRoles.reviewer || self.role == EUserRoles.reviewManager
     },
     get isSubmitter() {
       return self.role == EUserRoles.submitter
@@ -52,6 +56,10 @@ export const UserModel = types
     }),
     restore: flow(function* () {
       const response = yield self.environment.api.restoreUser(self.id)
+      return response.ok
+    }),
+    acceptEULA: flow(function* () {
+      const response = yield self.environment.api.acceptEULA(self.id)
       return response.ok
     }),
   }))

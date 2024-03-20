@@ -20,19 +20,26 @@ import { CalendarBlank, MapPin } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { getRequirementTypeLabel } from "../../../constants"
 import { ENumberUnit, ERequirementType } from "../../../types/enums"
 
 const defaultLabelProps: Partial<FormLabelProps> = {
   color: "text.primary",
 }
 
-type TRequirementProps = {
+type TRequirementFieldDisplayProps = {
   labelProps?: Partial<FormLabelProps>
   label?: string
   options?: string[]
   helperText?: string
   unit?: ENumberUnit | null
   selectProps?: Partial<SelectProps>
+  requirementType: ERequirementType
+  showAddLabelIndicator?: boolean
+}
+
+interface IGroupedFieldProps extends Omit<TRequirementFieldDisplayProps, "options"> {
+  inputDisplay: JSX.Element
 }
 
 const helperTextStyles = {
@@ -42,241 +49,216 @@ const helperTextStyles = {
 const defaultOptions = ["Option", "Option"]
 
 const requirementsComponentMap = {
-  [ERequirementType.text]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.text](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<Input bg={"white"} />} {...props} />
+  },
+
+  [ERequirementType.phone](props: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.shortText")}
-        </FormLabel>
-        <Input bg={"white"} />
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <i className="fa fa-phone"></i>
+            </InputLeftElement>
+            <Input bg={"white"} />
+          </InputGroup>
+        }
+        {...props}
+      />
     )
   },
 
-  [ERequirementType.phone]({ label, helperText, labelProps }: TRequirementProps) {
+  [ERequirementType.email](props: TRequirementFieldDisplayProps) {
     const { t } = useTranslation()
+
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.phone")}
-        </FormLabel>
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <i className="fa fa-phone"></i>
-          </InputLeftElement>
-          <Input bg={"white"} />
-        </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <i className="fa fa-envelope"></i>
+            </InputLeftElement>
+            <Input bg={"white"} />
+          </InputGroup>
+        }
+        {...props}
+      />
     )
   },
 
-  [ERequirementType.email]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.address](props: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.email")}
-        </FormLabel>
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <i className="fa fa-envelope"></i>
-          </InputLeftElement>
-          <Input bg={"white"} />
-        </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <InputGroup>
+            <InputLeftElement>
+              <MapPin />
+            </InputLeftElement>
+            <Input bg={"white"} />
+          </InputGroup>
+        }
+        {...props}
+      />
     )
   },
 
-  [ERequirementType.address]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.date](props: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.address")}
-        </FormLabel>
-        <InputGroup>
-          <InputLeftElement>
-            <MapPin />
-          </InputLeftElement>
-          <Input bg={"white"} />
-        </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <InputGroup w={"166px"}>
+            <InputLeftElement>
+              <CalendarBlank />
+            </InputLeftElement>
+            <Input bg={"white"} />
+          </InputGroup>
+        }
+        {...props}
+      />
     )
   },
 
-  [ERequirementType.date]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.number]({ unit, ...genericieldDisplayProps }: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.date")}
-        </FormLabel>
-        <InputGroup w={"166px"}>
-          <InputLeftElement>
-            <CalendarBlank />
-          </InputLeftElement>
-          <Input bg={"white"} />
-        </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <InputGroup w={"130px"}>
+            <InputRightElement mr={2}>{unit === undefined ? "unit" : unit}</InputRightElement>
+            <Input bg={"white"} />
+          </InputGroup>
+        }
+        {...genericieldDisplayProps}
+      />
     )
   },
 
-  [ERequirementType.number]({ label, helperText, unit, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.textArea](props: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.number")}
-        </FormLabel>
-        <InputGroup w={"130px"}>
-          <InputRightElement mr={2}>{unit === undefined ? "unit" : unit}</InputRightElement>
-          <Input bg={"white"} />
-        </InputGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={<Textarea bg={"white"} _hover={{ borderColor: "border.base" }} />}
+        {...props}
+      />
     )
   },
 
-  [ERequirementType.textArea]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.radio]({ options = defaultOptions, ...genericDisplayProps }: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.textArea")}
-        </FormLabel>
-        <Textarea bg={"white"} _hover={{ borderColor: "border.base" }} />
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <RadioGroup defaultValue="1">
+            <Stack>
+              {options.map((option, index) => (
+                <Radio key={index} value={option}>
+                  {option}
+                </Radio>
+              ))}
+            </Stack>
+          </RadioGroup>
+        }
+        {...genericDisplayProps}
+      />
     )
   },
 
-  [ERequirementType.radio]({ label, options = defaultOptions, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.checkbox]({ options = defaultOptions, ...genericDisplayProps }: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.radio")}
-        </FormLabel>
-        <RadioGroup defaultValue="1">
-          <Stack>
-            {options.map((option, index) => (
-              <Radio key={index} value={option}>
-                {option}
-              </Radio>
-            ))}
-          </Stack>
-        </RadioGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <CheckboxGroup>
+            <Stack>
+              {options.map((option, index) => (
+                <Checkbox key={index} value={option}>
+                  {option}
+                </Checkbox>
+              ))}
+            </Stack>
+          </CheckboxGroup>
+        }
+        {...genericDisplayProps}
+      />
     )
   },
 
-  [ERequirementType.checkbox]({ label, helperText, options = defaultOptions, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
+  [ERequirementType.multiOptionSelect]({
+    options = defaultOptions,
+    ...genericDisplayProps
+  }: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.multiSelectCheckbox")}
-        </FormLabel>
-        <CheckboxGroup>
-          <Stack>
-            {options.map((option, index) => (
-              <Checkbox key={index} value={option}>
-                {option}
-              </Checkbox>
-            ))}
-          </Stack>
-        </CheckboxGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
-    )
-  },
-
-  [ERequirementType.multiOptionSelect]({ label, helperText, options = defaultOptions, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
-    return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.multiOptionSelect")}
-        </FormLabel>
-        <CheckboxGroup>
-          <Stack>
-            {options.map((option, index) => (
-              <Checkbox key={index} value={option}>
-                {option}
-              </Checkbox>
-            ))}
-          </Stack>
-        </CheckboxGroup>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <CheckboxGroup>
+            <Stack>
+              {options.map((option, index) => (
+                <Checkbox key={index} value={option}>
+                  {option}
+                </Checkbox>
+              ))}
+            </Stack>
+          </CheckboxGroup>
+        }
+        {...genericDisplayProps}
+      />
     )
   },
 
   [ERequirementType.select]({
-    label,
-    helperText,
-    options = defaultOptions,
-    labelProps,
     selectProps,
-  }: TRequirementProps) {
-    const { t } = useTranslation()
+    options = defaultOptions,
+    ...genericDisplayProps
+  }: TRequirementFieldDisplayProps) {
     return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.select")}
-        </FormLabel>
-        <Select placeholder={"Select"} color={"greys.grey01"} value={""} isReadOnly {...selectProps}>
-          {options.map((option, index) => (
-            <option key={index} value={option} style={{ width: "100%" }}>
-              {option}
-            </option>
-          ))}
-        </Select>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
+      <GenericFieldDisplay
+        inputDisplay={
+          <Select placeholder={"Select"} color={"greys.grey01"} value={""} isReadOnly {...selectProps}>
+            {options.map((option, index) => (
+              <option key={index} value={option} style={{ width: "100%" }}>
+                {option}
+              </option>
+            ))}
+          </Select>
+        }
+        {...genericDisplayProps}
+      />
     )
   },
 
-  [ERequirementType.file]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
-    return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.fileUpload")}
-        </FormLabel>
-        <i className="fa fa-cloud-upload"></i>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
-    )
+  [ERequirementType.file](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<i className="fa fa-cloud-upload"></i>} {...props} />
   },
 
-  [ERequirementType.energyStepCode]({ label, helperText, labelProps }: TRequirementProps) {
-    const { t } = useTranslation()
-    return (
-      <FormControl isReadOnly>
-        <FormLabel {...defaultLabelProps} {...labelProps}>
-          {label ?? t("requirementsLibrary.requirementTypeLabels.energyStepCode")}
-        </FormLabel>
-        <i className="fa fa-bolt"></i>
-        {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
-      </FormControl>
-    )
+  [ERequirementType.energyStepCode](props: TRequirementFieldDisplayProps) {
+    return <GenericFieldDisplay inputDisplay={<i className="fa fa-bolt"></i>} {...props} />
   },
 }
-
-type TProps = { requirementType: ERequirementType } & TRequirementProps
 
 export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
 }
 
-export const RequirementFieldDisplay = observer(function RequirementFieldDisplay({ requirementType, ...rest }: TProps) {
-  return requirementsComponentMap[requirementType]?.(rest) ?? null
+export const RequirementFieldDisplay = observer(function RequirementFieldDisplay(props: TRequirementFieldDisplayProps) {
+  return requirementsComponentMap[props.requirementType]?.(props) ?? null
+})
+
+export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
+  inputDisplay,
+  label,
+  labelProps,
+  helperText,
+  showAddLabelIndicator,
+  requirementType,
+}: IGroupedFieldProps) {
+  const { t } = useTranslation()
+  return (
+    <FormControl w={"100%"} isReadOnly>
+      <FormLabel {...defaultLabelProps} {...labelProps} color={!label && showAddLabelIndicator ? "error" : undefined}>
+        {label ??
+          (showAddLabelIndicator
+            ? `${t("requirementsLibrary.modals.addLabel")} *`
+            : getRequirementTypeLabel(requirementType))}
+      </FormLabel>
+      {inputDisplay}
+      {helperText && <FormHelperText {...helperTextStyles}>{helperText}</FormHelperText>}
+    </FormControl>
+  )
 })

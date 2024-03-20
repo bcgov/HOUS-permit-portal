@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Updated documentation requirements for Building Permit Hub</title>
+        <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
+      <tr>
+        <td>&nbsp;</td>
+        <td class="container">
+          <div class="header"> 
+            <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td width="170" style="vertical-align: middle; padding: 0 16px; border-right: 1px solid #fcba19">
+                  <img src="https://dev.buildingpermit.gov.bc.ca/images/logo-light.svg" style="display: block; height: auto; border: 0; width: 100%;" width="170" alt="BC Gov Logo" title="BC Gov Logo @TODO"/>
+                </td>
+                <td style="vertical-align: middle; padding: 0 16px">
+                  <span style="color: #ffffff; font-weight: bold; font-size: 18px">Building Permit Hub</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="content">
+
+            <!-- START CENTERED WHITE CONTAINER -->
+
+            <table role="presentation" class="main" cellspacing="0" cellpadding="0">
+
+              <!-- START MAIN CONTENT AREA -->
+              <tr>
+                <td class="wrapper">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                    <!-- START CONTENT ROW -->
+                      <td>
+                        <h1>Notice of new updates for documentation requirements.</h1>
+                        <p>Dear [Submitter/User @TODO],</p>
+                        <p>
+                            Documentation requirements for your building permit applications have been updated, starting <strong>[effective date @TODO]</strong>. These changes have been implemented to [purpose @TODO].
+                        </p>
+
+                        <p>
+                          <h2>Updated requirements:</h2>
+                        </p>
+
+												<ol>
+													<li>[List item of updated documentation requirements @TODO]</li>
+													<li>[List item of updated documentation requirements @TODO]</li>
+													<li>[List item of updated documentation requirements @TODO]</li>
+												</ol>
+                        
+
+                        <hr>
+
+                        <p>
+                          <strong>Please review the new requirements and submit your documentation to ensure your application is processed on time.</strong>
+                        </p>
+                            
+
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+                          <tbody>
+                            <tr>
+                              <td align="left">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                  <tbody>
+                                    <tr>
+                                      <td><a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank">Login to Building Permit Hub</a></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <hr>
+                        
+                        <p>
+                          If you have questions or difficulties during your application, please email <a href="mailto:digital.codes.permits@gov.bc.ca">digital.codes.permits@gov.bc.ca</a>.
+                        </p>
+
+                        <br>
+
+            
+                        <p>
+                            Thank you,<br><br>
+                            The Building Permit Hub Team
+                        </p>
+                        
+
+                        
+                      </td>
+                      <!-- END OF CONTENT ROW -->
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+            <!-- END MAIN CONTENT AREA -->
+            </table>
+
+            <!-- START FOOTER -->
+            <div class="footer">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td><div class="yellow-border">&nbsp;</div></td>
+                </tr>
+                <tr>
+                  <td class="wrapper">
+                    <p>You are receiving this email because you are registered on <a href="<%= root_url %>" title="Building Permit Hub">Building Permit Hub</a>.</p>
+                    <p>The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.</p>
+                    <h3>Building Permit Hub</h3>
+                    <p>
+                      <a href="<%= root_url %>" target="_blank" style="margin-right: 20px">Home</a> 
+                      <a href="<%= FrontendUrlHelper.frontend_url("/contact") %>" target="_blank" style="margin-right: 20px">Contact us</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/help") %>" target="_blank" style="margin-right: 20px">Help</a>
+                      <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="margin-right: 20px">Login</a>
+                    </p>
+                    <hr>
+                    <p>© Government of British Columbia.</p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <!-- END FOOTER -->
+
+          <!-- END CENTERED WHITE CONTAINER -->
+          </div>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </body>
+</html>

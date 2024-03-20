@@ -1,11 +1,20 @@
 import { IPermitApplication } from "../models/permit-application"
+import { IActivity, IPermitType } from "../models/permit-classification"
 import {
+  EDoorsPerformanceType,
+  EEnergyStep,
+  EFossilFuelsPresence,
+  EHotWaterPerformanceType,
   ENumberUnit,
+  ERequirementType,
+  ESZeroCarbonStep,
   ESortDirection,
+  ESpaceHeatingCoolingPerformanceType,
   EStepCodeAirtightnessValue,
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EWindowsGlazedDoorsPerformanceType,
 } from "./enums"
 
 export type TLatLngTuple = [number, number]
@@ -18,6 +27,13 @@ export interface IContact {
   phoneNumber?: string
   email?: string
   createdAt?: number | string // has to allow string to stop errors with useFieldArray
+}
+
+export interface IPermitTypeSubmissionContact {
+  id: string
+  email: string
+  permitTypeId: string
+  confirmedAt: string
 }
 
 export interface ISort<TField = string> {
@@ -38,6 +54,7 @@ export type TSearchParams<IModelSortFields> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  statusFilter?: string
 }
 
 export interface IRequirementOptions {
@@ -62,6 +79,7 @@ export interface IFormIOSection {
   initiallyCollapsed: false
   components: IFormIOBlock[]
 }
+
 export interface IFormIOBlock {
   id: string
   legend: string
@@ -86,10 +104,57 @@ export interface ISubmissionData {
   data: any[]
 }
 
+export interface IDenormalizedRequirement {
+  id: string
+  label: string
+  inputType: ERequirementType
+  inputOptions: IRequirementOptions
+  hint?: string | null
+  elective?: boolean
+}
+
+export interface IDenormalizedRequirementBlock {
+  id: string
+  name: string
+  description?: string
+  displayName: string
+  displayDescription?: string
+  requirements: IDenormalizedRequirement[]
+}
+
+export interface IDenormalizedTemplateSectionBlock {
+  id: string
+  requirementBlock: IDenormalizedRequirementBlock
+}
+
+export interface IDenormalizedRequirementTemplateSection {
+  id: string
+  name: string
+  templateSectionBlocks: IDenormalizedTemplateSectionBlock[]
+}
+
+export interface IDenormalizedTemplate {
+  id: string
+  description?: string
+  permitType: IPermitType
+  activity: IActivity
+  requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
+}
+
 export interface IErrorsBoxData {
   id: string
   label: string
   class: string
+}
+
+interface IStepCodeBuildingCharacteristicSummarySelectOptions {
+  performanceTypes: {
+    windowsGlazedDoors: EWindowsGlazedDoorsPerformanceType[]
+    doors: EDoorsPerformanceType[]
+    spaceHeatingCooling: ESpaceHeatingCoolingPerformanceType[]
+    hotWater: EHotWaterPerformanceType[]
+  }
+  fossilFuelsPresence: EFossilFuelsPresence[]
 }
 
 export interface IStepCodeSelectOptions {
@@ -98,4 +163,26 @@ export interface IStepCodeSelectOptions {
   epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
   permitApplications: Partial<IPermitApplication>[]
   buildingTypes: EStepCodeBuildingType[]
+  buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
+  energySteps: EEnergyStep[]
+  zeroCarbonSteps: ESZeroCarbonStep[]
+}
+
+export interface IRequirementBlockCustomization {
+  tip?: string
+  enabledElectiveFieldIds?: Array<string>
+}
+
+export interface ITemplateCustomization {
+  requirementBlockChanges?: Record<string, IRequirementBlockCustomization>
+}
+
+export interface IDownloadableFile {
+  fileUrl: string
+  fileName: string
+  fileSize: number
+}
+
+export interface IEULA {
+  content: string
 }

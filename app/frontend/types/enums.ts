@@ -10,15 +10,25 @@ export enum EPermitClassificationType {
   Activity = "Activity",
 }
 
+export enum EPermitClassificationCode {
+  lowResidential = "low_residential",
+  mediumResidential = "medium_residential",
+  highResidential = "high_residential",
+  newConstruction = "new_construction",
+  additionAlterationRenovation = "addition_alteration_renovation",
+  siteAlteration = "site_alteration",
+  demolition = "demolition",
+}
+
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
-  viewed = "viewed",
 }
 
-export enum ERequirementTemplateStatus {
+export enum ETemplateVersionStatus {
   published = "published",
   scheduled = "scheduled",
+  deprecated = "deprecated",
   draft = "draft",
 }
 
@@ -53,11 +63,10 @@ export enum EUserSortFields {
 }
 
 export enum ERequirementTemplateSortFields {
-  status = "status",
   permitType = "permit_type",
   activity = "activity",
   description = "description",
-  version = "version",
+  currentVersion = "current_version",
   jurisdictionsSize = "jurisdictions_size",
 }
 
@@ -68,12 +77,30 @@ export enum EContactSortFields {
   phone = "phone",
   address = "address",
 }
+
 export enum EPermitApplicationSortFields {
   number = "number",
   permitClassification = "permit_classification",
   submitter = "submitter",
-  submitted_at = "submitted_at",
+  submittedAt = "submitted_at",
+  viewedAt = "viewed_at",
   status = "status",
+}
+
+export enum EPermitApplicationSubmitterSortFields {
+  number = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  submittedAt = "submitted_at",
+  status = "status",
+}
+
+export enum EPermitApplicationReviewerSortFields {
+  number = "number",
+  permitClassification = "permit_classification",
+  submitter = "submitter",
+  viewedAt = "viewed_at",
+  submittedAt = "submitted_at",
 }
 
 export enum ESortDirection {
@@ -114,6 +141,7 @@ export enum ENumberUnit {
   mi = "mi",
   sqm = "sqm",
   sqft = "sqft",
+  cad = "cad",
 }
 
 export enum EStepCodeChecklistStage {
@@ -152,4 +180,54 @@ export enum EStepCodeBuildingType {
   triplex = "triplex",
   retail = "retail",
   other = "other",
+}
+
+export enum ESpaceHeatingCoolingVariant {
+  principal = "principal",
+  secondary = "secondary",
+}
+
+export enum EWindowsGlazedDoorsPerformanceType {
+  usi = "usi",
+  uimp = "u_imp",
+}
+
+export enum EDoorsPerformanceType {
+  rsi = "rsi",
+  usi = "usi",
+}
+
+export enum ESpaceHeatingCoolingPerformanceType {
+  afue = "afue",
+  hspf = "hspf",
+  sse = "sse",
+  cop = "cop",
+  seer = "seer",
+}
+
+export enum EHotWaterPerformanceType {
+  percentEff = "percent_eff",
+  afue = "afue",
+  uef = "uef",
+  ef = "ef",
+  eer = "eer",
+}
+
+export enum EFossilFuelsPresence {
+  yes = "yes",
+  no = "no",
+  unknown = "unknown",
+}
+
+export enum EEnergyStep {
+  three = "3",
+  four = "4",
+  five = "5",
+}
+
+export enum ESZeroCarbonStep {
+  one = "1",
+  two = "2",
+  three = "3",
+  four = "4",
 }

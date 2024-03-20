@@ -116,8 +116,10 @@ export const PermitApplicationStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
+          statusFilter: self.statusFilter,
         }
       )
+
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
         // dual purpose method also serves the submitters
@@ -134,8 +136,8 @@ export const PermitApplicationStoreModel = types
     }),
     fetchPermitApplication: flow(function* (id: string) {
       let permitApplication = self.getPermitApplicationById(id)
-      if (!permitApplication) {
-        // PermitApplication not found in the map, fetch from API
+      // If the user is review staff, we still need to hit the show endpoint to update viewedAt
+      if (!permitApplication || self.rootStore.userStore.currentUser.isReviewStaff) {
         const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
         if (ok && response.data) {
           permitApplication = response.data

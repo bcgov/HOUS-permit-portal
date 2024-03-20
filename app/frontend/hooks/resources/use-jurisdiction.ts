@@ -9,7 +9,8 @@ export const useJurisdiction = () => {
   const { pathname } = useLocation()
   const { jurisdictionStore } = useMst()
 
-  const { currentJurisdiction, setCurrentJurisdiction, fetchJurisdiction } = jurisdictionStore
+  const { currentJurisdiction, setCurrentJurisdiction, fetchJurisdiction, setCurrentJurisdictionBySlug } =
+    jurisdictionStore
 
   const [error, setError] = useState<Error | undefined>(undefined)
   const { t } = useTranslation()
@@ -17,10 +18,15 @@ export const useJurisdiction = () => {
   useEffect(() => {
     ;(async () => {
       try {
-        setCurrentJurisdiction(null)
         if (isUUID(jurisdictionId)) {
+          setCurrentJurisdiction(jurisdictionId)
           await fetchJurisdiction(jurisdictionId)
           setCurrentJurisdiction(jurisdictionId)
+        } else {
+          //assume slug
+          setCurrentJurisdictionBySlug(jurisdictionId)
+          await fetchJurisdiction(jurisdictionId)
+          setCurrentJurisdictionBySlug(jurisdictionId)
         }
       } catch (e) {
         console.error(e.message)

@@ -18,15 +18,13 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 7"}
+          gridColumn={"span 6"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
         >
-          <Text role={"heading"} as={"h3"} color={"black"} fontSize={"sm"} height="fit-content">
-            {t("requirementTemplate.index.tableHeading")}
-          </Text>
+          <Text role={"heading"}>{t("requirementTemplate.index.tableHeading")}</Text>
           <SearchInput searchModel={requirementTemplateStore} />
         </GridItem>
       </Box>

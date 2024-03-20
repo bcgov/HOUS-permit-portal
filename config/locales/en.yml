@@ -38,11 +38,21 @@ en:
           attributes:
             file:
               max_size: "must not be larger than %{max_size} bytes"
-              not_valid_file_type: "must be a pdf, jpg, or png"
         user:
           attributes:
             uid:
               taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+  application_mailer:
+    subject_start: "BC Building Permit Hub"
+    subjects:
+      update_password_success: "You have successfully updated your password"
+      welcome: "Welcome to the Building Permit Hub"
+      onboarding: "Welcome to the Building Permit Hub"
+      notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
+      notify_reviewer_application_received: "New application received: %{permit_application_number}"
+      notify_application_updated: "Updated application status: %{permit_application_number}"
+      remind_reviewers: "Your report on outstanding permit applications"
+      permit_type_submission_contact_confirm: "Confirm submission inbox email"
   arbitrary_message_construct:
     devise:
       failure:
@@ -78,6 +88,9 @@ en:
       pid_error:
         title: Oops
         message: Error encountered fetching pid for address
+      jurisdiction_error:
+        title: Oops
+        message: Error encountered fetching jurisdiction for address
     permit_classification:
       options_error:
         title: Oops
@@ -110,6 +123,9 @@ en:
       invitation_accepted_success:
         title: Welcome
         message: You have successfully been onboarded onto BC Permit Hub and are now logged in.
+      confirmation_sent:
+        title: Success
+        message: You need to confirm your new email address. Please check your new email inbox.
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed
@@ -146,6 +162,9 @@ en:
       restore_error:
         title: "Oops"
         message: "There was an error restoring the user"
+      eula_accepted:
+        title: ""
+        message: "End-User License Agreement accepted"
     requirement_block:
       create_error:
         title: Oops
@@ -162,7 +181,10 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "Template updated successfully!"
+        message: "This version has been saved as a draft."
+      schedule_success:
+        title: ""
+        message: "Permit has been scheduled to published."
       create_error:
         title: Oops
         message: "%{error_message}"
@@ -173,6 +195,9 @@ en:
         title: Oops
         message: "Something went wrong archiving the template"
       update_error:
+        title: Oops
+        message: "%{error_message}"
+      schedule_error:
         title: Oops
         message: "%{error_message}"
       delete_error:
@@ -207,6 +232,9 @@ en:
       update_error:
         title: Oops
         message: "%{error_message}"
+      save_success:
+        title: ""
+        message: "Permit application successfully updated!"
       save_draft_success:
         title: ""
         message: "Permit application successfully saved as draft!"
@@ -214,9 +242,9 @@ en:
         title: Oops
         message: "%{error_message}"
     step_code:
-      create_success:
+      h2k_imported:
         title: ""
-        message: "New step code created!"
+        message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
       create_error:
         title: Oops
         message: "%{error_message}"
@@ -234,6 +262,19 @@ en:
       not_found_error:
         title: "Oops"
         message: 404 - The requested resource could not be found
+    jurisdiction_template_version_customization:
+      create_success:
+        title: ""
+        message: "Jurisdiction Template Customization created!"
+      update_success:
+        title: ""
+        message: "Jurisdiction Template Customization updated!"
+      create_error:
+        title: Oops
+        message: "Something went wrong creating Jurisdiction Template Customization"
+      update_error:
+        title: Oops
+        message: "Something went wrong updating Jurisdiction Template Customization"
 
   formio:
     requirement_template:
@@ -241,5 +282,10 @@ en:
       signoff_panel_title: "Sign and Submit"
       signoff_checkbox_title: "Sign Off"
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
-      signoff_submit_title: "Submit"
-      energy_step_code: "Use Energy Step Code Tool"
+      signoff_submit_title: "Review and Submit"
+      energy_step_code: "Start"
+    requirement_block:
+      optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
+  step_code_building_characteristics_summary:
+    performance_type:
+      error: "%{field_name} performance type must be one of %{accepted_values}"

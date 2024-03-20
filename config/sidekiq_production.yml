@@ -1,5 +1,0 @@
----
-:concurrency: 20
-:queues:
-  - promote_asset_and_make_derivatives
-  - default

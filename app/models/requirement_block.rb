@@ -39,7 +39,33 @@ class RequirementBlock < ApplicationRecord
       title: name,
       collapsible: true,
       collapsed: false,
-      components: requirements.map { |r| r.to_form_json(key(section_key)) },
+      components: components_form_json(section_key),
+    }
+  end
+
+  def components_form_json(section_key)
+    optional_block = requirements.all? { |req| !req.required }
+    requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
+
+    requirement_map.push(optional_block_confirmation_requirement(section_key)) if optional_block
+
+    requirement_map
+  end
+
+  def optional_block_confirmation_requirement(section_key)
+    {
+      id: "#{id}-confirmation",
+      key: "#{key(section_key)}|confirmation",
+      type: "checkbox",
+      custom_class: "optional-block-confirmation-checkbox",
+      validate: {
+        required: true,
+      },
+      input: true,
+      label: I18n.t("formio.requirement_block.optional_block_confirmation_requirement_label"),
+      widget: {
+        type: "input",
+      },
     }
   end
 

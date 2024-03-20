@@ -9,13 +9,11 @@ interface IPermitApplicationStatusTagProps extends TagProps {
 
 export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPermitApplicationStatusTagProps) => {
   const bgMap = {
-    [EPermitApplicationStatus.viewed]: "theme.blueAlt",
     [EPermitApplicationStatus.submitted]: "theme.yellow",
     [EPermitApplicationStatus.draft]: "theme.blueLight",
   }
 
   const colorMap = {
-    [EPermitApplicationStatus.viewed]: "greys.white",
     [EPermitApplicationStatus.submitted]: "text.link",
     [EPermitApplicationStatus.draft]: "text.link",
   }

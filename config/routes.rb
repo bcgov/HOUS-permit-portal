@@ -1,4 +1,5 @@
 require "sidekiq/web"
+require "sidekiq/cron/web"
 
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -48,14 +49,28 @@ Rails.application.routes.draw do
       get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
 
+    get "/permit_type_submission_contacts/confirm",
+        to: "permit_type_submission_contacts#confirm",
+        as: :permit_type_submission_contact_confirmation
+
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
     end
 
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
+      post "schedule", to: "requirement_templates#schedule", on: :member
       patch "restore", on: :member
     end
+
+    resources :template_versions, only: %i[index show]
+
+    get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
+          "template_versions#show_jurisdiction_template_version_cutomization"
+    put "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
+          "template_versions#update_jurisdiction_template_version_cutomization"
+    post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
+           "template_versions#create_jurisdiction_template_version_cutomization"
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
@@ -71,6 +86,7 @@ Rails.application.routes.draw do
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection
       get "pids", on: :collection
+      get "jurisdiction", on: :collection
     end
 
     resources :permit_applications, only: %i[create update show] do
@@ -81,7 +97,10 @@ Rails.application.routes.draw do
     resource :profile, only: [:update], controller: "users"
     resources :users, only: [:destroy] do
       patch "restore", on: :member
+      patch "accept_eula", on: :member
     end
+
+    resources :end_user_license_agreement, only: %i[index]
 
     resources :step_codes, only: %i[index create destroy], shallow: true do
       resources :step_code_checklists, only: %i[index show update]
@@ -98,6 +117,7 @@ Rails.application.routes.draw do
 
   get "/reset-password" => "home#index", :as => :reset_password
   get "/login" => "home#index", :as => :login
+  get "/confirmed" => "home#index", :as => :confirmed
   get "/accept-invitation" => "home#index", :as => :accept_invitation
   get "/*path",
       to: "home#index",

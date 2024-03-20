@@ -1,7 +1,12 @@
 class StepCodeChecklist < ApplicationRecord
   belongs_to :step_code, optional: Rails.env.test?
 
+  has_one :building_characteristics_summary, class_name: "StepCodeBuildingCharacteristicsSummary", dependent: :destroy
+  accepts_nested_attributes_for :building_characteristics_summary
+  after_create :create_building_characteristics_summary
+
   delegate :data_entries, :building_permit_number, :jurisdiction_name, :full_address, :pid, to: :step_code
+  delegate :plan_author, :plan_version, :plan_date, :builder, to: :step_code
 
   enum stage: %i[pre_construction mid_construction as_built]
   enum compliance_path: %i[step_code_ers step_code_necb passive_house step_code]
@@ -27,6 +32,17 @@ class StepCodeChecklist < ApplicationRecord
       airtightness_values: epc_calculation_airtightnesses.keys,
       epc_testing_target_types: epc_calculation_testing_target_types.keys,
       building_types: building_types.keys,
+      energy_steps: (ENV["MIN_ENERGY_STEP"].to_i..ENV["MAX_ENERGY_STEP"].to_i).to_a,
+      zero_carbon_steps: (ENV["MIN_ZERO_CARBON_STEP"].to_i..ENV["MAX_ZERO_CARBON_STEP"].to_i).to_a,
+      building_characteristics_summary: {
+        performance_types: {
+          windows_glazed_doors: StepCode::BuildingCharacteristics::WindowsGlazedDoors::PERFORMANCE_TYPES.keys,
+          doors: StepCode::BuildingCharacteristics::Line::Doors::PERFORMANCE_TYPES.keys,
+          space_heating_cooling: StepCode::BuildingCharacteristics::Line::SpaceHeatingCooling::PERFORMANCE_TYPES.keys,
+          hot_water: StepCode::BuildingCharacteristics::Line::HotWater::PERFORMANCE_TYPES.keys,
+        },
+        fossil_fuels_presence: StepCode::BuildingCharacteristics::FossilFuels::PRESENCE.keys,
+      },
     }
   end
 

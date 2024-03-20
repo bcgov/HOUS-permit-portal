@@ -1,11 +1,11 @@
-import { Button, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
 import { Info, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { IJurisdiction } from "../../../models/jurisdiction"
-import { RouterLinkButton } from "../navigation/router-link-button"
+import { ManageMenuItem } from "../base/manage-menu-item"
 import { Can } from "../user/can"
 
 interface IManageJurisdictionMenuProps<TSearchModel extends ISearch> {
@@ -24,25 +24,13 @@ export const ManageJurisdictionMenu = observer(function ManageJurisdictionMenu<T
         <MenuButton as={Button} variant="link">
           {t("ui.manage")}
         </MenuButton>
-        <MenuList>
-          <MenuItem
-            as={RouterLinkButton}
-            leftIcon={<Info />}
-            w="full"
-            justifyContent="flex-start"
-            to={`${jurisdiction.id}`}
-          >
+        <MenuList boxShadow="elevations.elevation04">
+          <ManageMenuItem icon={<Info />} to={`${jurisdiction.slug}`}>
             {t("jurisdiction.index.about")}
-          </MenuItem>
-          <MenuItem
-            as={RouterLinkButton}
-            leftIcon={<Users />}
-            w="full"
-            justifyContent="flex-start"
-            to={`${jurisdiction.id}/users`}
-          >
+          </ManageMenuItem>
+          <ManageMenuItem icon={<Users />} to={`${jurisdiction.slug}/users`}>
             {t("jurisdiction.index.users")}
-          </MenuItem>
+          </ManageMenuItem>
         </MenuList>
       </Menu>
     </Can>

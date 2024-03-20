@@ -1,0 +1,91 @@
+@import "global-theme-variables.scss";
+
+/* ======================================
+
+  Styling that cannot be handled by Chakra Theme/Props :
+
+====================================== */
+
+/* Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind */
+.nav-menu-dropdown-background > div {
+  &::after {
+    content: "";
+    display: block;
+    background: rgba(0, 0, 0, 0.25);
+    position: absolute;
+    top: -100px;
+    bottom: -100vh;
+    left: -100vw;
+    right: -100vw;
+    z-index: -1;
+  }
+}
+.chakra-menu__menu-list {
+  .chakra-menu__group__title {
+    max-width: 250px;
+    margin-left: var(--chakra-space-3);
+  }
+  .chakra-menu__menuitem {
+    border-radius: 0;
+  }
+}
+
+/* Admin Panel's  */
+//  large cards that should behave like a button (eg. have whole box clickable without changing markup)
+.jumbo-buttons .chakra-button {
+  position: static;
+  &::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: "";
+    display: block;
+  }
+}
+
+/* Typography Issues */
+
+// Workaround for <Heading> variant to be able to show a yellow line
+h1,
+h2,
+h3,
+h4,
+h5 {
+  &::before {
+    content: "";
+  }
+}
+
+// Reset Chakra's default to so we don't have to set "fontSize prop, only need to use the "as" prop. (This  only affects headings that are inside a <Container>.)
+.chakra-container {
+  h1 {
+    font-size: var(--chakra-fontSizes-4xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h2 {
+    font-size: var(--chakra-fontSizes-2xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h3 {
+    font-size: var(--chakra-fontSizes-xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h4 {
+    font-size: var(--chakra-fontSizes-lg);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.chakra-toast h3 {
+  margin-bottom: 0;
+}

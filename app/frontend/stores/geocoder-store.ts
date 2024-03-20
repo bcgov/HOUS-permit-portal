@@ -30,6 +30,15 @@ export const GeocoderStoreModel = types
       self.fetchingPids = false
       return response.ok
     }),
+    fetchGeocodedJurisdiction: flow(function* (siteId: string) {
+      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId)
+      if (response.ok) {
+        let responseData = response.data.data
+        self.rootStore.jurisdictionStore.addJurisdiction(responseData)
+        return responseData
+      }
+      return response.ok
+    }),
   }))
 
 export interface IGeocoderStore extends Instance<typeof GeocoderStoreModel> {}
