@@ -1,5 +1,6 @@
 class RequirementBlock < ApplicationRecord
-  searchkick searchable: %i[name requirement_labels associations], word_start: %i[name requirement_labels associations]
+  searchkick searchable: %i[name requirement_labels associations configurations],
+             word_start: %i[name requirement_labels associations configurations]
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
 
@@ -24,6 +25,7 @@ class RequirementBlock < ApplicationRecord
       name: name,
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
+      configurations: configurations_search_list,
     }
   end
 
@@ -74,6 +76,19 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def configurations_search_list
+    configurations = []
+    has_any_elective = requirements.any?(&:elective?)
+    has_any_conditional = requirements.any?(&:has_conditional?)
+    has_any_data_validation = requirements.any?(&:has_data_validation?)
+
+    configurations << "elective" if has_any_elective
+    configurations << "conditional" if has_any_conditional
+    configurations << "data_validation" if has_any_data_validation
+
+    configurations
+  end
 
   # sku should be auto generated. Use uuid if not provided
   def set_sku

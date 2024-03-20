@@ -9,7 +9,8 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
-import { EPermitApplicationSortFields } from "../types/enums"
+import { EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
+import { IUserPushPayload } from "../types/types"
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -42,7 +43,6 @@ export const PermitApplicationStoreModel = types
   .actions((self) => ({
     __beforeMergeUpdate(permitApplicationData) {
       const pad = permitApplicationData
-      if (!pad?.jurisdiction?.id) return pad
 
       pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
       self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
@@ -51,6 +51,7 @@ export const PermitApplicationStoreModel = types
         jurisdiction: pad.jurisdiction.id,
         submitter: pad.submitter.id,
         stepCode: pad.stepCode?.id,
+        isFullyLoaded: true,
       })
     },
     __beforeMergeUpdateAll(permitApplicationsData) {
@@ -60,6 +61,7 @@ export const PermitApplicationStoreModel = types
         permitApplicationsData.map((pa) => pa.jurisdiction)
       )
       self.rootStore.jurisdictionStore.mergeUpdateAll(jurisdictionsUniq, "jurisdictionMap")
+
       //find all unique submitters
       const submittersUniq = R.uniqBy(
         (u: IUser) => u.id,
@@ -86,6 +88,10 @@ export const PermitApplicationStoreModel = types
     setTablePermitApplications: (permitApplications) => {
       self.tablePermitApplications = permitApplications.map((pa) => pa.id)
     },
+    // Action to add a new PermitApplication
+    addPermitApplication(permitapplication: IPermitApplication) {
+      self.permitApplicationMap.put(permitapplication)
+    },
   }))
   .actions((self) => ({
     createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
@@ -96,10 +102,6 @@ export const PermitApplicationStoreModel = types
       }
       return false
     }),
-    // Action to add a new PermitApplication
-    addPermitApplication(permitapplication: IPermitApplication) {
-      self.permitApplicationMap.put(permitapplication)
-    },
     // Action to remove a PermitApplication
     removePermitApplication(id: string) {
       self.permitApplicationMap.delete(id)
@@ -121,8 +123,7 @@ export const PermitApplicationStoreModel = types
       )
 
       if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
-        // dual purpose method also serves the submitters
+        response.data.data.forEach((pa) => self.addPermitApplication(pa))
         ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
           response.data.data
         )
@@ -135,22 +136,30 @@ export const PermitApplicationStoreModel = types
       return response.ok
     }),
     fetchPermitApplication: flow(function* (id: string) {
-      let permitApplication = self.getPermitApplicationById(id)
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
-      if (!permitApplication || self.rootStore.userStore.currentUser.isReviewStaff) {
-        const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
-        if (ok && response.data) {
-          permitApplication = response.data
-          self.mergeUpdate(response.data, "permitApplicationMap")
-        }
+      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
+      if (ok && response.data) {
+        const permitApplication = response.data
+        self.mergeUpdate(response.data, "permitApplicationMap")
+        return permitApplication
       }
-      return permitApplication
     }),
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
       self.currentPermitApplication?.stepCode &&
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
+    processWebsocketChange: flow(function* (payload: IUserPushPayload) {
+      //based on the eventType do stuff
+      switch (payload.eventType) {
+        case ESocketEventTypes.update:
+          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payload.data })
+          document.dispatchEvent(event)
+          break
+        default:
+          import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
+      }
+    }),
   }))
 
 export interface IPermitApplicationStore extends Instance<typeof PermitApplicationStoreModel> {}

@@ -2,27 +2,20 @@
 import { Form, Formio, Templates } from "@formio/react"
 import "./styles.scss"
 
+import { t } from "i18next"
 import ChefsFormioComponents from "./additional-formio"
+import { overridePanelTemplate } from "./additional-formio/templates/panel"
 
 const defaultLabelTemplate = Templates.current.label.form
-const defaultComponentsTemplate = Templates.current.components.form
 const defaultButtonsTemplate = Templates.current.button.form
 
 //container - we can add for main headers like Contact Info
 //panels - are for section blocks, to put things inside panels, we need to target the components section under the body
 
 Templates.current = {
-  components: {
+  panel: {
     form: (ctx) => {
-      let template = ""
-      if (ctx?.component?.type == "panel") {
-        if (ctx?.component?.tip) {
-          template = template.concat(
-            `<div class="tips"><h3 class="tips-header"><i class="ph-fill ph-seal-check"></i>Tip</h3>${ctx?.component?.tip}</div>`
-          )
-        }
-      }
-      template = template.concat(defaultComponentsTemplate(ctx))
+      let template = overridePanelTemplate(ctx)
       return template
     },
   },
@@ -43,14 +36,22 @@ Templates.current = {
     form: (ctx) => {
       let template = ""
       if (ctx?.component?.computedCompliance) {
-        const computedComplianceText =
-          ctx?.component?.computedComplianceResult || `This field has compliance capability.`
+        let result = ctx?.component?.computedComplianceResult
+        let computedComplianceText: string = t(`automatedCompliance.baseMessage`)
+        if (result) {
+          if (ctx?.component?.computedCompliance == "DigitalSealValidator") {
+            computedComplianceText = result
+          } else {
+            //assume all complianes are default values except for seal validators
+            computedComplianceText = t("automatedCompliance.defaultValueMesage", { defaultValue: result })
+          }
+        }
+
         template = template.concat(
           `<div class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><i class="ph-fill ph-lightning-a"></i>
           ${computedComplianceText}</div>`
         )
       }
-
       template = template.concat(defaultLabelTemplate(ctx))
       return template
     },

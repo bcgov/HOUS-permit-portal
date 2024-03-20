@@ -27,7 +27,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
             title={t("home.submissionsInboxTitle")}
             description={t("home.submissionsInboxDescription")}
             icon={<Tray size={24} />}
-            href={`jurisdictions/${jurisdiction.id}/submission-inbox`}
+            href={`jurisdictions/${jurisdiction.slug}/submission-inbox`}
             linkText={t("ui.view")}
           />
           <HomeScreenBox
@@ -40,13 +40,13 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
             title={t("home.configurationManagement.title")}
             description={t("home.configurationManagement.description")}
             icon={<Pencil size={24} />}
-            href={`jurisdictions/${jurisdiction.id}/configuration-management`}
+            href={`jurisdictions/${jurisdiction.slug}/configuration-management`}
           />
           <HomeScreenBox
             title={t("home.userManagementTitle")}
             description={t("home.userManagementDescription")}
             icon={<Users size={24} />}
-            href={`jurisdictions/${jurisdiction.id}/users`}
+            href={`jurisdictions/${jurisdiction.slug}/users`}
           />
         </Flex>
       </Flex>

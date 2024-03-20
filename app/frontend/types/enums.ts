@@ -44,6 +44,7 @@ export enum ERequirementLibrarySortFields {
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
+  configurations = "configurations",
 }
 
 export enum EJurisdictionSortFields {
@@ -230,4 +231,39 @@ export enum ESZeroCarbonStep {
   two = "2",
   three = "3",
   four = "4",
+}
+
+export enum ERequirementContactFieldItemType {
+  firstName = "firstName",
+  lastName = "lastName",
+  email = "email",
+  phone = "phone",
+  address = "address",
+  organization = "organization",
+  businessName = "businessName",
+  businessLicense = "businessLicense",
+  professionalAssociation = "professionalAssociation",
+  professionalNumber = "professionalNumber",
+}
+
+export enum EGovFeedbackResponseNoReason {
+  unclear = "This information is unclear",
+  missingInfo = "This page is missing the information I need",
+  notRelated = "This page is not related to what I searched for",
+  other = "Other",
+}
+
+export enum ESocketDomainTypes {
+  notification = "notification",
+  permitApplication = "permit_application",
+}
+
+export enum ESocketEventTypes {
+  update = "update",
+}
+
+export enum EEnabledElectiveFieldReason {
+  bylaw = "bylaw",
+  zoning = "zoning",
+  policy = "policy",
 }

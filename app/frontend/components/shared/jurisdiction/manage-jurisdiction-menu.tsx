@@ -24,11 +24,11 @@ export const ManageJurisdictionMenu = observer(function ManageJurisdictionMenu<T
         <MenuButton as={Button} variant="link">
           {t("ui.manage")}
         </MenuButton>
-        <MenuList>
-          <ManageMenuItem icon={<Info />} to={`${jurisdiction.id}`}>
+        <MenuList boxShadow="elevations.elevation04">
+          <ManageMenuItem icon={<Info />} to={`${jurisdiction.slug}`}>
             {t("jurisdiction.index.about")}
           </ManageMenuItem>
-          <ManageMenuItem icon={<Users />} to={`${jurisdiction.id}/users`}>
+          <ManageMenuItem icon={<Users />} to={`${jurisdiction.slug}/users`}>
             {t("jurisdiction.index.users")}
           </ManageMenuItem>
         </MenuList>

@@ -78,9 +78,12 @@ export const combineComplianceHints = (
       ?.components?.find((c) => c.key === rb)
       ?.components?.find((c) => c.key === key)
 
-    // Update the description if the item is found
+    // Note the result is either a string or a object, to be handled by the renderer
     if (item && item.computedCompliance) {
       item.computedComplianceResult = value
+      if (item.computedCompliance != "DigitalSealValidator") {
+        item.defaultValue = value
+      }
     }
     if (item && item.energyStepCode) {
       item.label = t("formComponents.energyStepCode.edit")

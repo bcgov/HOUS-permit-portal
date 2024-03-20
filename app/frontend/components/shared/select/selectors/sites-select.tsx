@@ -13,7 +13,6 @@ import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
   setSiteSelected: (boolean) => void
-  fetchOptions: (address?: string, pid?: string) => Promise<IOption[]>
   onChange: (option: IOption) => void
   selectedOption: IOption
   pidName?: string
@@ -23,7 +22,6 @@ type TSitesSelectProps = {
 // Please be advised that this is expected to be used within a form context!
 
 export const SitesSelect = observer(function ({
-  fetchOptions,
   onChange,
   selectedOption,
   stylesToMerge,
@@ -34,7 +32,7 @@ export const SitesSelect = observer(function ({
 }: TSitesSelectProps) {
   const { geocoderStore } = useMst()
   const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const { fetchPids, fetchingPids } = geocoderStore
+  const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids } = geocoderStore
   const pidSelectRef = useRef(null)
 
   const { setValue, control, watch, reset } = useFormContext()

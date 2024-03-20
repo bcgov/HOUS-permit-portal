@@ -44,27 +44,28 @@ const options = {
         landing: {
           title: "Building Permit Hub",
           intro:
-            "Co-created with a variety of pilot local jurisdictions for the people of B.C. to help create more homes faster.",
-          easilyUpload: "Easily upload all your required building permitting information such as pdf files",
-          bestPractices: "Get best-practices from  provincial and local jurisdictions",
-          easyToFollow: "Easy to follow instructions of what is required for your building permit application",
-          accessMyPermits: "Access My Housing Building Permits",
+            "The B.C. government is working with partners at all levels across government and First Nations to standardize and streamline the building permit process, unlocking the construction of more homes, faster.",
+          easilyUpload: "Easily upload required building permit information",
+          bestPractices: "Best-practices from local jurisdictions",
+          easyToFollow: "Easy to follow instructions to help you submit a building permit application",
+          accessMyPermits: "Access my building permits",
           accessExplanation:
-            "Digital Building Permit Account uses the same or different login as BCeID. Need to explain this to users clearly what they’re logging in with.",
+            "You can use either your BCeID account or the Building Permit Hub login to log in to the Building Permit Hub. You can also link your BCeID account to your Building Permit Hub account later on.",
           whoForTitle: "Who is this for?",
           whoFor: [
-            "I want to build a houseplex",
-            "I want to build a small building on my property",
-            "Industry professionals",
+            "I want to build housing",
+            "I am an industry professional",
+            "I am a homeowner and need a building permit for housing",
             "Building Permits in BC for Housing",
+            "I am a local government or First Nation and want to accept digital building permit applications",
           ],
           iNeed: "What do I need?",
           whyUseTitle: "Why use this tool?",
           whyUse:
-            "This is a housing building permitting tool pilot to help all communities in BC receive and process building permit applications faster and more efficiently.  This tool links into the single application portal for Provincial natural resource permits that may also be required for some housing building permit applications.",
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
           iNeedLong: "What do I need for a housing building permit?",
           reqsVary:
-            "Permit requirements vary by local jurisdiction and depend on the geography of the surrounding location.",
+            "Building permits are important to ensure your housing is safe, legal and compliant. Building permit requirements vary by local jurisdiction and depend on local servicing, zoning and bylaw requirements (e.g. rural services vs. urban, tree bylaws, etc.).",
           whereTitle: "Where",
           findAuthority: "Find your local building permitting authority.",
           locationOr: "Location or Civic Address",
@@ -73,14 +74,21 @@ const options = {
           withinXProtected: "Within x km of a protected land",
           whatType: "What type of housing are you building?",
           dontSee: "Don't see the type that you're looking for?",
-          whenNotNecessaryQ: "When is a permit not necessary?",
+          whenNotNecessaryQ: "When is a permit needed?",
           whenNotNecessaryA:
-            "Projects that are for the interior of your home, minor repairs. Things like fence, sheds may depend on local jurisdiction and geography.",
+            "Permits help ensure that construction and major renovations follow local bylaws, the building code and health and safety standards. You will need the required permits before any stage of a project can start. Projects for the interior of your home or minor repairs may not require a permit depending on your local jurisdiction and geography.",
           expectQ: "What can I expect?",
-          expectA: "After submitting your permit application through this tool, lorem ipsum dolor sit amet.",
+          expectA:
+            "Once you have provided all the information needed for the permits, your local jurisdiction will be notified and will contact you to discuss if more details are needed. This could be because of how the land is used, the rules for building in that area, how much the area can support, the quality of the soil, or any environmental concerns.",
           createdQ: "Why was this tool created?",
           createdA:
-            "Becoming a North American leader of digital permitting and construction by digitally integrating permit systems and tools across the housing development sector across B.C. is a commitment of the 2023 Ministry of Housing Homes for People Plan.",
+            "The Building Permit Hub will make it simpler for home builders to send in building permits for new housing online. Local jurisdictions can receive the applications and process them faster too. This tool automatically checks if the application follows the rules in the B.C. Building Code, including the Energy Step Code, to help prevent any delays in the application process.",
+          tellUsYourExperience: "Tell us about your experience with the Building Permit Hub",
+          addressSelectLabel: "Location or civic address",
+          where: "Where",
+          findYourAuth: "Find your local building permit authority.",
+          localJurisdiction: "Local jurisdiction",
+          learnRequirements: "Learn about local requirements",
         },
         ui: {
           tip: "Tip",
@@ -133,12 +141,14 @@ const options = {
           collapseAll: "Collapse all",
           toTop: "Go to top",
           confirm: "Confirm",
+          searchAddresses: "Search addresses",
           close: "Close",
           asc: "Ascending",
           desc: "Descending",
           returnHome: "Return to home",
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
+          reset: "Reset",
         },
         eula: {
           title: "End-User License Agreement",
@@ -216,12 +226,16 @@ const options = {
         permitApplication: {
           referenceNumber: "Reference #",
           indexTitle: "My Active Permits",
-          start: "Start a Permit Application",
+          start: "Start a permit application",
           drafts: "Draft Permits",
           startedOn: "Started on",
           lastUpdated: "Last updated",
-          seeBestPracticesLink: "See best practices for",
-          ask: "Ask a question",
+          seeBestPractices_CTA: "See best practices",
+          seeBestPractices_link:
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
+          searchKnowledge_CTA: "Ask a question",
+          searchKnowledge_link:
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
           viewed: "Viewed",
@@ -234,8 +248,8 @@ const options = {
             number: "Application #",
             permit_classification: "Types",
             submitter: "Submitter",
-            submitted_at: "Submitted At",
-            viewed_at: "Viewed At",
+            submitted_at: "Submitted at",
+            viewed_at: "Viewed at",
             status: "Status",
           },
           submissionInbox: {
@@ -251,6 +265,27 @@ const options = {
             locationHeading: "Location for permit",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work Type",
+            applicationDisclaimerInstruction:
+              "Before you submit a building permit application, please ensure your proposed building siting and design complies with:",
+            applicationDisclaimer_1: "provincial building code",
+            applicationDisclaimer_1_link: "https://www.bccodes.ca/building-code.html",
+            applicationDisclaimer_2: "local zoning bylaw",
+            applicationDisclaimer_2_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws",
+            applicationDisclaimer_3: "official community plan regulations",
+            applicationDisclaimer_3_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/local-government-planning/official-community-plans",
+            applicationDisclaimer_4: "applicable development permit areas",
+            applicationDisclaimer_4_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/development-permit-areas",
+            applicationDisclaimer_5: "variances outlined in a local bylaw",
+            applicationDisclaimer_5_link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws/board-of-variance",
+            applicationDisclaimerMoreInfo:
+              "For more information and specific building drawing requirements and checklists, contact your local jurisdiction.",
+            applicationDisclaimerMoreInfo_CTA: "Find your local jurisdiction",
+            applicationDisclaimerMoreInfo_Link:
+              "https://www2.gov.bc.ca/gov/content/governments/local-governments/facts-framework/local-government-maps",
             submitted: "Your application has been submitted",
             hearBack: "If you don't hear back by Lorem days,",
             contactInstruction:
@@ -260,6 +295,7 @@ const options = {
             bySubmitting: "By submitting this application",
             confirmation: "Lorem ipsum submitting blah de blah filler lorem",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
+            noContactsAvailable: "Sorry, the Building Permit Hub doesn't support this jurisdiction yet.",
             whatsNext:
               "Lorem ipsum what to expext next. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
             emailed:
@@ -284,7 +320,9 @@ const options = {
           },
         },
         requirementsLibrary: {
+          addAnotherPerson: "Add another person",
           elective: "Elective",
+          hasConditionalLogic: "Has Conditional Logic",
           associationsInfo: "Sections, tags, etc...",
           index: {
             title: "Requirements Library",
@@ -298,6 +336,8 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            defaultContactLabel: "Contact",
+            canAddMultipleContacts: "Submitter can add multiple contacts",
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
@@ -335,6 +375,7 @@ const options = {
             updatedAt: "Updated At",
             requirementSku: "Requirement SKU",
           },
+          configurationsColumn: "Configurations",
           fieldDescriptions: {
             description: "Provide some context for admins and managers for this fieldset.",
             associations: "Assign a tag to help organize and find this requirement block easier.",
@@ -358,6 +399,18 @@ const options = {
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
+          },
+          contactFieldItemLabels: {
+            firstName: "First Name",
+            lastName: "Last Name",
+            email: "Email",
+            phone: "Phone",
+            address: "Address",
+            organization: "Organization",
+            businessName: "Business Name",
+            businessLicense: "Business License",
+            professionalAssociation: "Professional Association/Organization",
+            professionalNumber: "Professional Number",
           },
           descriptionMaxLength: "(Max length: 250 characters)",
           unitLabels: {
@@ -825,6 +878,9 @@ const options = {
           inviteTitle: "Invite Users",
           inviteSuccess: "Invite sent!",
           inviteError: "Email taken",
+          takenErrorTitle: "Some of these emails already belong to existing users",
+          takenErrorDescription:
+            "One or more of the requested users have an existing submitter, reviewer, or review manager account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
           sendInvites: "Send Invites",
           acceptInvitation: "Accept Invitation to",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
@@ -886,7 +942,7 @@ const options = {
             tableHeading: "Templates",
             title: "Permit Templates Catalogue",
             description:
-              "List of all permit templates in the system that’s been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
+              "List of all permit templates in the system that's been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
             createButton: "Create new template",
             seeArchivedButton: "See Archived",
           },
@@ -920,6 +976,8 @@ const options = {
             workType: "Work Type",
             manageButton: "Manage",
             lastUpdated: "Last updated",
+            requestNewPromptWithLink:
+              "Your administrator has made the above permit types available for digital submissions. If there is another permit type you want please <1>request a new permit type</1>.",
             emptyPermitsText:
               "No available building permits of the selected work type. Please wait for updates from the Ministry of Housing.",
           },
@@ -933,6 +991,13 @@ const options = {
               selectFieldsTitle: "Select elective fields",
               electiveFormFields: "Elective Form Fields",
               addSelectedButton: "Add selected",
+              reason: "Reason",
+              reasonLabels: {
+                placeholder: "Select a reason",
+                bylaw: "Bylaw",
+                zoning: "Zoning",
+                policy: "Policy",
+              },
             },
           },
         },
@@ -943,11 +1008,32 @@ const options = {
           beta: "Beta",
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",
+          thankYouForResponse: "Thank you for your response!",
+          govFeedbackResponseNoReasons: {
+            unclear: "This information is unclear",
+            missingInfo: "This page is missing the information I need",
+            notRelated: "This page is not related to what I searched for",
+            other: "Other",
+          },
           territorialAcknowledgement:
             "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples - First Nations, Métis, and Inuit - respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
           home: "Home",
           contact: "Contact us",
           contactEmail: "digital.codes.permits@gov.bc.ca",
+          contactInstructions_1: "If you have any questions or need assistance, see the contact options below:",
+          contactInstructions_2: "Have a question about your digital permit application?",
+          contactInstructions_3:
+            "Please contact your local government for questions related to your permit application.",
+          contactTeamInstructionsTitle: "Contact the Building Permit Hub Team",
+          contactTeamInstructions_1: "Do you have some feedback for the Building Permit Hub Team?",
+          contactTeamInstructions_2:
+            "Do you have any questions or need assistance regarding your experience using the Building Permit Hub?",
+          contactTeamCTA: "Please contact us at",
+          contactNeedHelp: "Need general help?",
+          contactNeedHelpInstructions:
+            "Services are available in a variety of different languages and channels through Service BC.",
+          contactNeedHelpCTA: "Get help with government services",
+          listJurisdictions: "See list of jurisdictions",
           help: "Help",
           aboutTitle: "About",
           disclaimerTitle: "Disclaimer",
@@ -963,7 +1049,10 @@ const options = {
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
           somethingWrong: "Something went wrong",
-          pageNotFound: "404 - The page you are looking for could not be found",
+          pageNotFound: "Oops, we can't find that page",
+          pageNotFoundInstructions: "Please check that the web URL has been entered correctly.",
+          pageNotFoundCTA: "Go back to home",
+          pageNotFoundContactInstructions: "Do you believe this to be in error or are you stuck?",
           seeConsoleForDetails: "See the browser console for details",
           accessibility: "Accessibility",
           copyright: "Copyright",
@@ -994,6 +1083,10 @@ const options = {
             confirmed: "Submission E-mail Confirmed",
           },
           questionSupport: "Question Support",
+        },
+        automatedCompliance: {
+          baseMessage: `This field has Auto-Compliance capability.`,
+          defaultValueMesage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
         },
       },
     },

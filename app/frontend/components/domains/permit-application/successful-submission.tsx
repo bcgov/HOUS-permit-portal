@@ -14,7 +14,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
   const { currentPermitApplication, error } = usePermitApplication()
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitApplication) return <LoadingScreen />
+  if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const { jurisdiction, number } = currentPermitApplication
   const { name, primaryContact } = jurisdiction

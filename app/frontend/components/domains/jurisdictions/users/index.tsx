@@ -46,9 +46,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
-            <Heading as="h1" fontSize={"4xl"} color={"text.primary"}>
-              {currentJurisdiction?.qualifiedName}
-            </Heading>
+            <Heading as="h1">{currentJurisdiction?.qualifiedName}</Heading>
           </Box>
           <RouterLinkButton alignSelf="flex-end" to={"invite"}>
             {t("user.index.inviteButton")}
@@ -67,10 +65,12 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
               return (
                 <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight={700}>{<RoleTag role={u.role} />}</SearchGridItem>
-                  <SearchGridItem>{u.email}</SearchGridItem>
-                  <SearchGridItem>{u.name}</SearchGridItem>
-                  <SearchGridItem>{format(u.createdAt, "yyyy-MM-dd")}</SearchGridItem>
-                  <SearchGridItem>
+                  <SearchGridItem fontSize="sm">{u.email}</SearchGridItem>
+                  <SearchGridItem fontSize="sm" maxWidth="300px" sx={{ wordBreak: "break-word" }}>
+                    {u.name}
+                  </SearchGridItem>
+                  <SearchGridItem fontSize="sm">{format(u.createdAt, "yyyy-MM-dd")}</SearchGridItem>
+                  <SearchGridItem fontSize="sm">
                     {u.lastSignInAt ? format(u.lastSignInAt, "yyyy-MM-dd") : t("ui.never")}
                   </SearchGridItem>
                   <SearchGridItem>
@@ -95,6 +95,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
             totalPages={totalPages}
             pageSize={countPerPage}
             handlePageChange={handlePageChange}
+            showLessItems={true}
           />
         </Flex>
 

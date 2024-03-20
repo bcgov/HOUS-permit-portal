@@ -5,7 +5,7 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
-import { IPermitType } from "../../models/permit-classification"
+import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
@@ -123,15 +123,20 @@ export class Api {
     published = false,
     permit_type_id: string = null,
     activity_id: string = null,
-    pid: string = null
+    pid: string = null,
+    jurisdictionId: string = null
   ) {
-    return this.client.post<IOptionResponse<IPermitType>>(`/permit_classifications/permit_classification_options`, {
-      type,
-      published,
-      permit_type_id,
-      activity_id,
-      pid,
-    })
+    return this.client.post<IOptionResponse<IPermitType | IActivity>>(
+      `/permit_classifications/permit_classification_options`,
+      {
+        type,
+        published,
+        permit_type_id,
+        activity_id,
+        pid,
+        jurisdictionId,
+      }
+    )
   }
 
   async createJurisdiction(params) {
@@ -246,6 +251,10 @@ export class Api {
 
   async fetchSiteOptions(address: string, pid: string = null) {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
+  }
+
+  async fetchGeocodedJurisdiction(siteId: string) {
+    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId })
   }
 
   async fetchPids(siteId: string) {

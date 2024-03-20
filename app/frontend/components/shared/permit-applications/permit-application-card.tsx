@@ -1,12 +1,11 @@
-import { Box, Flex, Image, Show, Spacer, Text } from "@chakra-ui/react"
-import { CaretRight } from "@phosphor-icons/react"
+import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
+import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { RouterLink } from "../navigation/router-link"
 import { PermitApplicationStatusTag } from "./permit-application-status-tag"
 
 interface IPermitApplicationCardProps {
@@ -32,8 +31,15 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Flex direction="column">
-                <Image src="https://placehold.co/107x79" alt={`thumbnail for ${nickname}`} w={107} h={79} />
-                <Text color="text.link" textTransform="capitalize" fontWeight="bold">
+                <Image
+                  src="images/permit_classifications/low_residential.png"
+                  alt={`thumbnail for ${nickname}`}
+                  w="full"
+                  h="106"
+                  bg="semantic.infoLight"
+                  objectFit="contain"
+                />
+                <Text as="span" mt="1" color="text.secondary" fontSize="sm" fontWeight="bold">
                   {permitTypeAndActivity}
                 </Text>
               </Flex>
@@ -113,11 +119,16 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         </Flex>
       </Flex>
       <Flex direction={{ base: "column", md: "row" }} gap={4}>
-        <RouterLink to={"#"}>{`${t("permitApplication.seeBestPracticesLink")} ${permitTypeAndActivity}`}</RouterLink>
+        <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
+          {t("permitApplication.seeBestPractices_CTA")}
+          <ArrowSquareOut></ArrowSquareOut>
+        </Link>
         <Show above="md">
           <Text>{"  |  "}</Text>
         </Show>
-        <RouterLink to={"#"}>{t("permitApplication.ask")}</RouterLink>
+        <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
+          {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut></ArrowSquareOut>
+        </Link>
       </Flex>
     </Flex>
   )

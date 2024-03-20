@@ -27,6 +27,7 @@ export const Button = {
       bg: "theme.blue",
       textDecor: "none",
       _hover: {
+        color: "greys.white",
         textDecor: "none",
         bg: "theme.blueAlt",
         _disabled: { ...disabledStyles },
@@ -41,6 +42,7 @@ export const Button = {
       bg: "greys.white",
       textDecor: "none",
       _hover: {
+        color: "theme.blue",
         textDecor: "none",
         bg: "lighten.900",
         _disabled: { ...disabledStyles },
@@ -105,6 +107,7 @@ export const Button = {
       color: "text.link",
       fontWeight: "normal",
       textDecoration: "underline",
+      fontSize: "inherit",
       _hover: { color: "focus" },
       _disabled: { ...disabledStyles, bg: "inherit" },
     },

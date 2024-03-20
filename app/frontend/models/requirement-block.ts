@@ -23,6 +23,15 @@ export const RequirementBlockModel = types
     hasRequirement(id: string) {
       return self.requirements.findIndex((requirement) => requirement.id === id) !== -1
     },
+    get hasAnyElective() {
+      return self.requirements.some((requirement) => requirement.elective)
+    },
+    get hasAnyConditional() {
+      return self.requirements.some((requirement) => !!requirement.conditional)
+    },
+    get hasAnyDataValidation() {
+      return self.requirements.some((requirement) => !!requirement.dataValidation)
+    },
   }))
   .actions((self) => ({
     update: flow(function* (requirementParams: IRequirementBlockParams) {

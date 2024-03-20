@@ -9,7 +9,9 @@ export const colors = {
     blueAlt: "#38598A",
     blueLight: "#F6F9FC",
     blueGradient:
-      "var(--Gradient-Blue-Background, linear-gradient(125deg, #142B43 -52.7%, #142B43 -52.68%, #054277 47.38%, #142B43 137.55%));",
+      "var(--Gradient-Blue-Background, linear-gradient(125deg, #142B43 -52.7%, #142B43 -52.68%, #054277 47.38%, #142B43 137.55%))",
+    blueShadedDark: "rgba(1, 51, 102, 0.90)",
+    blueShadedLight: "rgba(1, 51, 102, 0.40)",
     yellow: "#FCBA19",
     yellowLight: "#FEF2D6",
   },

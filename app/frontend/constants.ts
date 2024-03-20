@@ -1,5 +1,12 @@
 import { t } from "i18next"
-import { ENumberUnit, ERequirementType } from "./types/enums"
+import {
+  EEnabledElectiveFieldReason,
+  EGovFeedbackResponseNoReason,
+  ENumberUnit,
+  ERequirementContactFieldItemType,
+  ERequirementType,
+} from "./types/enums"
+import { IOption } from "./types/types"
 
 export const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -56,4 +63,26 @@ export function getRequirementTypeLabel(requirementType: ERequirementType) {
   })
 
   return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
+}
+
+export function getRequirementContactFieldItemLabel(contactFieldItemType: ERequirementContactFieldItemType) {
+  return t(`requirementsLibrary.contactFieldItemLabels.${contactFieldItemType}`)
+}
+
+export function getGovFeedbackResponseNoReasonOptions(): IOption<EGovFeedbackResponseNoReason>[] {
+  return Object.entries(EGovFeedbackResponseNoReason).map(
+    ([key, value]: [keyof typeof EGovFeedbackResponseNoReason, EGovFeedbackResponseNoReason]) => ({
+      value: value,
+      label: t(`site.govFeedbackResponseNoReasons.${key}`),
+    })
+  )
+}
+
+export function getEnabledElectiveReasonOptions(): IOption<EEnabledElectiveFieldReason>[] {
+  return Object.values(EEnabledElectiveFieldReason).map((reason) => {
+    return {
+      label: t(`digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.${reason}`),
+      value: reason,
+    }
+  })
 }

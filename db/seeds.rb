@@ -148,6 +148,7 @@ if PermitApplication.first.blank?
     )
   end
 end
+PermitApplication.reindex
 
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
@@ -163,3 +164,11 @@ TemplateVersion
 
 puts "Seeding EULA..."
 EulaUpdater.run
+
+puts "Seeding permit type contact..."
+PermitTypeSubmissionContact.create!(
+  jurisdiction_id: north_van.id,
+  permit_type_id: rt.permit_type.id,
+  email: "example@example.com", # Add a valid email address
+)
+

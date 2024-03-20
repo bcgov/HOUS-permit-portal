@@ -34,6 +34,12 @@ en:
         uid: BCeID
     errors:
       models:
+        permit_application:
+          attributes:
+            submitter:
+              incorrect_role: "must have the submitter role"
+            jurisdiction:
+              no_contact: "must have at least one PermitTypeSubmissionContact that matches the permit type of this application."
         supporting_document:
           attributes:
             file:
@@ -88,6 +94,9 @@ en:
       pid_error:
         title: Oops
         message: Error encountered fetching pid for address
+      jurisdiction_error:
+        title: Oops
+        message: Error encountered fetching jurisdiction for address
     permit_classification:
       options_error:
         title: Oops
@@ -272,7 +281,6 @@ en:
       update_error:
         title: Oops
         message: "Something went wrong updating Jurisdiction Template Customization"
-
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -283,6 +291,23 @@ en:
       energy_step_code: "Start"
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
+    requirement:
+      contact:
+        first_name: "First name"
+        last_name: "Last name"
+        email: "Email"
+        phone: "Phone"
+        address: "Address"
+        business_name: "Business name"
+        business_license: "Business license"
+        professional_association: "Professional association/organization"
+        professional_number: "Professional number"
+        organization: "Organization"
+        add_person_button: "Add another person"
   step_code_building_characteristics_summary:
     performance_type:
       error: "%{field_name} performance type must be one of %{accepted_values}"
+  model_validation:
+    jurisdiction_template_version_customization:
+      enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of 
+      {accepted_reasons}"

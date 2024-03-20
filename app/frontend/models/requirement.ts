@@ -21,6 +21,12 @@ export const RequirementModel = types
     get numberUnit(): ENumberUnit | undefined {
       return self.inputOptions?.numberUnit
     },
+    get conditional(): Object | undefined {
+      return self.inputOptions?.conditional
+    },
+    get dataValidation(): Object | undefined {
+      return self.inputOptions?.dataValidation
+    },
   }))
 
 export interface IRequirement extends Instance<typeof RequirementModel> {}

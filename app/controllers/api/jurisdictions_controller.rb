@@ -102,6 +102,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @permit_application_search.current_page,
                      },
                      blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 

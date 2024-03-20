@@ -12,4 +12,10 @@ class WebsocketBroadcaster
     return unless broadcast_ready?
     ActionCable.server.broadcast(user_channel(Current.user.id), hash)
   end
+
+  def self.push_update_to_relevant_users(users, domain, eventType, data)
+    users.each do |user|
+      ActionCable.server.broadcast(user_channel(user.id), { domain: domain, eventType: eventType, data: data })
+    end
+  end
 end

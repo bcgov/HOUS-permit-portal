@@ -10,6 +10,11 @@ class Api::PermitClassificationsController < Api::ApplicationController
       permit_classifications =
         if classification_option_params[:published].present?
           query = RequirementTemplate.with_published_version.includes(:permit_type).includes(:activity)
+          if classification_option_params[:jurisdiction_id].present?
+            jurisdiction = Jurisdiction.find(classification_option_params[:jurisdiction_id])
+            permit_type_ids = jurisdiction.permit_type_submission_contacts.pluck(:permit_type_id)
+            query = query.where(permit_type_id: permit_type_ids)
+          end
 
           query =
             query.where(permit_type_id: classification_option_params[:permit_type_id]) if classification_option_params[
@@ -37,6 +42,6 @@ class Api::PermitClassificationsController < Api::ApplicationController
   private
 
   def classification_option_params
-    params.permit(%i[type pid published permit_type_id activity_id])
+    params.permit(%i[type pid published permit_type_id activity_id jurisdiction_id])
   end
 end

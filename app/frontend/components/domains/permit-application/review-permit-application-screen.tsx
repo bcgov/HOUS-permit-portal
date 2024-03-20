@@ -45,7 +45,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   }, [currentPermitApplication?.referenceNumber])
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitApplication) return <LoadingScreen />
+  if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const { permitTypeAndActivity, formJson, number } = currentPermitApplication
 

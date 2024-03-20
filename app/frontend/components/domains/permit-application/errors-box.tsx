@@ -24,15 +24,17 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
       borderRadius="lg"
       maxH="360px"
       position="fixed"
-      right="20px"
-      top="160px"
+      right="30px"
+      top="50%"
       zIndex={9}
       p={4}
       maxW={"300px"}
       overflowY={"auto"}
     >
-      <Flex>
-        <WarningCircle size={24} color={"semantic.error"} aria-label={"Warning icon"} />
+      <Flex align="center" gap={4}>
+        <Box color="semantic.error">
+          <WarningCircle size={24} aria-label={"Warning icon"} />
+        </Box>
         <Heading as="h3" fontSize="md" overflowWrap={"break-word"}>
           {t("requirementTemplate.edit.errorsBox.title", { count: errorBox.length })}
         </Heading>
