@@ -281,7 +281,6 @@ en:
       update_error:
         title: Oops
         message: "Something went wrong updating Jurisdiction Template Customization"
-
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -308,3 +307,7 @@ en:
   step_code_building_characteristics_summary:
     performance_type:
       error: "%{field_name} performance type must be one of %{accepted_values}"
+  model_validation:
+    jurisdiction_template_version_customization:
+      enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of 
+      {accepted_reasons}"

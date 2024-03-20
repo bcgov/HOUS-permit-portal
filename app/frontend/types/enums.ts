@@ -261,3 +261,9 @@ export enum ESocketDomainTypes {
 export enum ESocketEventTypes {
   update = "update",
 }
+
+export enum EEnabledElectiveFieldReason {
+  bylaw = "bylaw",
+  zoning = "zoning",
+  policy = "policy",
+}

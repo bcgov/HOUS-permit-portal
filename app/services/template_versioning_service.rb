@@ -116,7 +116,8 @@ class TemplateVersioningService
       !new_template_version.requirement_blocks_json.key?(key)
     end
 
-    # Remove any enabled_elective_field_ids that are not present in the new template version's requirement_blocks
+    # Remove any enabled_elective_field_ids and reasons that are not present in the new template version's
+    # requirement_blocks
     modified_copied_customizations["requirement_block_changes"].each do |key, current_requirement_block_change|
       next if current_requirement_block_change["enabled_elective_field_ids"].blank?
 
@@ -127,6 +128,14 @@ class TemplateVersioningService
 
       modified_copied_customizations["requirement_block_changes"][key]["enabled_elective_field_ids"].delete_if do |id|
         !available_elective_field_ids.include?(id)
+      end
+
+      if modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_reasons").present?
+        modified_copied_customizations
+          .dig("requirement_block_changes", key, "enabled_elective_field_reasons")
+          .delete_if { |id| !available_elective_field_ids.include?(id) }
+      else
+        modified_copied_customizations["requirement_block_changes"][key]["enabled_elective_field_reasons"] = {}
       end
 
       if !does_new_template_already_have_customization ||
@@ -145,6 +154,15 @@ class TemplateVersioningService
         key,
         "enabled_elective_field_ids",
       ) | modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_ids")
+
+      # Combine the enabled_elective_field_reasons from the old and new template versions and remove any duplicates
+      modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_reasons").merge!(
+        existing_customization_for_template.customizations.dig(
+          "requirement_block_changes",
+          key,
+          "enabled_elective_field_reasons",
+        ),
+      )
     end
 
     copied_jurisdiction_template_version_customization = nil

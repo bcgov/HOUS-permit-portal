@@ -988,6 +988,13 @@ const options = {
               selectFieldsTitle: "Select elective fields",
               electiveFormFields: "Elective Form Fields",
               addSelectedButton: "Add selected",
+              reason: "Reason",
+              reasonLabels: {
+                placeholder: "Select a reason",
+                bylaw: "Bylaw",
+                zoning: "Zoning",
+                policy: "Policy",
+              },
             },
           },
         },
