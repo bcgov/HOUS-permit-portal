@@ -14,7 +14,8 @@ import { useMst } from "../../../../../setup/root"
 import { IRequirementBlockCustomization, ITemplateCustomization } from "../../../../../types/types"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
-import { BuilderFloatingButtons } from "../../builder-floating-buttons"
+import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
+import { BuilderTopFloatingButtons } from "../../builder-top-floating-buttons"
 import { SectionsDisplay } from "../../sections-display"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
@@ -144,6 +145,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             bg={hasNoSections ? "greys.grey03" : undefined}
             overflow={"auto"}
             ref={rightContainerRef}
+            position={"relative"}
           >
             <Flex
               px={6}
@@ -168,6 +170,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                 </Button>
               </ButtonGroup>
             </Flex>
+            <BuilderTopFloatingButtons />
             <SectionsDisplay
               sections={templateSections}
               shouldCollapseAll={shouldCollapseAll}
@@ -203,7 +206,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             />
           </Flex>
         </Flex>
-        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
+        <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
       </Flex>
     </RemoveScroll>
   )

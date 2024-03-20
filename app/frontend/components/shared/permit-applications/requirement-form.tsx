@@ -28,6 +28,7 @@ import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
+import { BuilderTopFloatingButtons } from "../../domains/requirement-template/builder-top-floating-buttons"
 import { CustomToast } from "../base/flash-message"
 import { Form } from "../chefs"
 
@@ -36,10 +37,11 @@ interface IRequirementFormProps {
   onCompletedBlocksChange?: (sections: any) => void
   formRef: any
   triggerSave?: () => void
+  showHelpButton?: boolean
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave, showHelpButton }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
@@ -210,6 +212,8 @@ export const RequirementForm = observer(
               </Link>
             </Text>
           </Box>
+          {showHelpButton && <BuilderTopFloatingButtons mr={0} mt={0} />}
+
           <Form
             form={formattedFormJson}
             formReady={formReady}

@@ -129,6 +129,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
+              showHelpButton
             />
           </Flex>
         )}

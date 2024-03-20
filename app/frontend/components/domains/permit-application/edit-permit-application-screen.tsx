@@ -228,12 +228,13 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={24}>
+          <Flex flex={1} direction="column" p={24} position={"relative"}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
+              showHelpButton
             />
           </Flex>
         )}

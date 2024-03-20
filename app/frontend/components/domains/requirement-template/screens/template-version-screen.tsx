@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { BuilderFloatingButtons } from "../builder-floating-buttons"
+import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
+import { BuilderTopFloatingButtons } from "../builder-top-floating-buttons"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { useSectionHighlight } from "../use-section-highlight"
@@ -67,6 +68,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             bg={hasNoSections ? "greys.grey03" : undefined}
             overflow={"auto"}
             ref={rightContainerRef}
+            position={"relative"}
           >
             <Flex
               px={6}
@@ -80,6 +82,8 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
                 {t("ui.close")}
               </Button>
             </Flex>
+            <BuilderTopFloatingButtons />
+
             <SectionsDisplay
               sections={templateSections}
               shouldCollapseAll={shouldCollapseAll}
@@ -88,7 +92,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             />
           </Flex>
         </Flex>
-        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
+        <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
       </Flex>
     </RemoveScroll>
   )

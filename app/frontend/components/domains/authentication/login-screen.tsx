@@ -8,6 +8,7 @@ import { BackButton } from "../../shared/buttons/back-button"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { PasswordFormControl } from "../../shared/form/password-form-control"
 import { UsernameFormControl } from "../../shared/form/username-form-control"
+import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 
 interface ILoginScreenProps {}
@@ -80,6 +81,8 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
           </RouterLink>
           {" | "}
           <RouterLink to="/register">{t("auth.register")}</RouterLink>
+          {" | "}
+          <HelpDrawer defaultButtonProps={{ variant: "link" }} />
         </Flex>
       </Flex>
     </CenterContainer>
