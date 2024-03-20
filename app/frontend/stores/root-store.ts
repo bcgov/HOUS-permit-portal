@@ -40,7 +40,7 @@ export const RootStoreModel = types
       }
     },
     disconnectUserChannel() {
-      self.userChannelConsumer?.consumer.disconnect()
+      self.userChannelConsumer?.consumer?.disconnect()
     },
   }))
 

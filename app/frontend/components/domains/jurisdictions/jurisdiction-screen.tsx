@@ -1,4 +1,19 @@
-import { Box, Button, Container, Flex, FormControl, FormLabel, HStack, Heading, Input, Show } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  FormControl,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+  ListItem,
+  OrderedList,
+  Show,
+  Text,
+} from "@chakra-ui/react"
+import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Control, Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
@@ -13,7 +28,6 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { Editor } from "../../shared/editor/editor"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
-import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { Can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
@@ -173,8 +187,6 @@ export const JurisdictionScreen = observer(() => {
                   </Button>
                 </Flex>
               </Can>
-
-              <RouterLink to="#">{t("jurisdiction.didNotFind")}</RouterLink>
             </Flex>
           </form>
         </FormProvider>
@@ -236,6 +248,12 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
   const { control, watch, setValue } = useFormContext()
   const mapPositionWatch = watch("mapPosition")
 
+  const editMapSteps = i18next.t("jurisdiction.edit.editMapSteps", { returnObjects: true }) as string[]
+
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    event.target.select()
+  }
+
   return (
     <Flex flex={1}>
       <Flex direction="column" w="full">
@@ -246,40 +264,58 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
             onClick={() => {
               setIsEditingMap((current) => !current)
             }}
+            mb={1}
           >
             {!isEditingMap && t("jurisdiction.edit.clickToEditMap")}
+            {isEditingMap && t("jurisdiction.edit.clickToSeeMap")}
           </Button>
         </Can>
         {isEditingMap && (
-          <FormControl flex={1}>
-            <FormLabel>{t("jurisdiction.fields.mapPosition")}</FormLabel>
-            <Controller
-              name="mapPosition"
-              control={control}
-              render={({ field }) => (
-                <HStack mb={2}>
-                  <Input
-                    type="number"
-                    aria-label="jurisdiction latitude"
-                    placeholder="Latitude"
-                    value={field.value[0]}
-                    onChange={(e) => field.onChange([parseFloat(e.target.value), field.value[1]])}
-                  />
-                  <Input
-                    type="number"
-                    aria-label="jurisdiction longitude"
-                    placeholder="Longitude"
-                    value={field.value[1]}
-                    onChange={(e) => field.onChange([field.value[0], parseFloat(e.target.value)])}
-                  />
-                </HStack>
-              )}
-            />
-          </FormControl>
+          <>
+            <Box p={4} border="1px solid" borderRadius="md" borderColor="border.light" mb={4}>
+              <Text fontWeight="bold" mb={4}>
+                {t("jurisdiction.edit.editMapStart")}
+              </Text>
+              <OrderedList>
+                {editMapSteps.map((str) => (
+                  <ListItem key={str}>{str}</ListItem>
+                ))}
+              </OrderedList>
+              <Text>{t("jurisdiction.edit.editMapEnd")}</Text>
+            </Box>
+            <FormControl flex={1}>
+              <FormLabel>{t("jurisdiction.fields.mapPosition")}</FormLabel>
+              <Controller
+                name="mapPosition"
+                control={control}
+                render={({ field }) => (
+                  <HStack mb={2}>
+                    <Input
+                      type="number"
+                      onFocus={handleFocus}
+                      aria-label="jurisdiction latitude"
+                      placeholder="Latitude"
+                      value={field.value[0]}
+                      onChange={(e) => field.onChange([parseFloat(e.target.value), field.value[1]])}
+                    />
+                    <Input
+                      type="number"
+                      onFocus={handleFocus}
+                      aria-label="jurisdiction longitude"
+                      placeholder="Longitude"
+                      value={field.value[1]}
+                      onChange={(e) => field.onChange([field.value[0], parseFloat(e.target.value)])}
+                    />
+                  </HStack>
+                )}
+              />
+            </FormControl>
+          </>
         )}
         <JurisdictionMap
           mapPosition={mapPositionWatch}
           onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
+          isEditingMap={isEditingMap}
         />
       </Flex>
     </Flex>
