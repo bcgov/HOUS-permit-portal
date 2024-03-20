@@ -2,7 +2,7 @@ import { Button, ButtonProps } from "@chakra-ui/react"
 import React, { ReactElement, forwardRef } from "react"
 import { Link as ReactRouterLink } from "react-router-dom"
 
-interface IRouterLinkButtonProps extends ButtonProps {
+export interface IRouterLinkButtonProps extends ButtonProps {
   to: string
   icon?: ReactElement
 }

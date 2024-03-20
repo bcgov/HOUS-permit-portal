@@ -28,7 +28,6 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
 import { Editor } from "../../shared/editor/editor"
 import { JurisdictionMap } from "../../shared/module-wrappers/jurisdiction-map"
-import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { Can } from "../../shared/user/can"
 import { ContactGrid } from "./contacts/contact-grid"
@@ -188,8 +187,6 @@ export const JurisdictionScreen = observer(() => {
                   </Button>
                 </Flex>
               </Can>
-
-              <RouterLink to="#">{t("jurisdiction.didNotFind")}</RouterLink>
             </Flex>
           </form>
         </FormProvider>

@@ -37,6 +37,7 @@ const MapDragListener: React.FC<{ onDrag: (newCenter: [number, number]) => void 
 
 const SetMapBehaviour = ({ isEditingMap }: { isEditingMap: boolean }) => {
   const map = useMap()
+  map.attributionControl.remove()
 
   useEffect(() => {
     if (isEditingMap) {
