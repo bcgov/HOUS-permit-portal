@@ -18,10 +18,11 @@ export const setupRootStore = () => {
   const rootStore = RootStoreModel.create(initialState, environment)
 
   const { api } = environment
-  const { uiStore } = rootStore
+  const { uiStore, sessionStore } = rootStore
 
   Monitors.addFlashMessageMonitor(api, uiStore)
   Monitors.addApiErrorMonitor(api, uiStore)
+  Monitors.addApiUnauthorizedError(api, sessionStore)
 
   return rootStore
 }

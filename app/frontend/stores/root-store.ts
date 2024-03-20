@@ -56,4 +56,6 @@ export interface IRootStore extends IStateTreeNode {
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   stepCodeStore: IStepCodeStore
+  subscribeToUserChannel: () => void
+  disconnectUserChannel: () => void
 }

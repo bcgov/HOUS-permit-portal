@@ -1,8 +1,10 @@
 import { Box, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -78,13 +80,24 @@ export const Navigation = observer(() => {
 })
 
 const AppRoutes = observer(() => {
-  const { sessionStore } = useMst()
-  const { loggedIn } = sessionStore
+  const { sessionStore, uiStore } = useMst()
+  const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
 
   const { userStore } = useMst()
   const { currentUser } = userStore
+
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    if (tokenExpired) {
+      sessionStore.resetAuth()
+      navigate("/login")
+      uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
+    }
+  }, [tokenExpired])
 
   const superAdminOnlyRoutes = (
     <>

@@ -6,6 +6,7 @@ export const SessionStoreModel = types
   .model("SessionStoreModel")
   .props({
     loggedIn: types.optional(types.boolean, false),
+    tokenExpired: types.optional(types.boolean, false),
     isValidating: types.optional(types.boolean, true),
     isLoggingOut: types.optional(types.boolean, false),
   })
@@ -15,7 +16,9 @@ export const SessionStoreModel = types
   .actions((self) => ({
     resetAuth: flow(function* () {
       self.loggedIn = false
+      self.tokenExpired = false
       self.rootStore.userStore.unsetCurrentUser()
+      self.rootStore.disconnectUserChannel()
     }),
   }))
   .actions((self) => ({
@@ -53,7 +56,6 @@ export const SessionStoreModel = types
       self.isLoggingOut = true
       const response: any = yield self.environment.api.logout()
       if (response.ok) {
-        self.rootStore.disconnectUserChannel()
         self.resetAuth()
       }
       // Do a full browser refresh to enhance security
@@ -69,6 +71,9 @@ export const SessionStoreModel = types
         window.location.replace(response.meta.redirectUrl)
       }
     }),
+    setTokenExpired(isExpired: boolean) {
+      self.tokenExpired = isExpired
+    },
   }))
 
 export interface ISessionStore extends Instance<typeof SessionStoreModel> {}

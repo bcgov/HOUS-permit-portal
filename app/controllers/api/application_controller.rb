@@ -29,7 +29,7 @@ class Api::ApplicationController < ActionController::API
   def user_not_authorized(exception)
     render_error(
       "misc.user_not_authorized_error",
-      { message_opts: { error_message: exception.message } },
+      { message_opts: { error_message: exception.message }, status: 403 },
       exception,
     ) and return
   end
