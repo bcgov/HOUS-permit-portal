@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
+import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useSearch } from "../../../../hooks/use-search"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
@@ -29,6 +30,10 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
 
   const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
     permitApplicationStore
+
+  // This needs to be here to keep the pathname param updating within this hook
+  // to prevent missed useEffect re-runs on back, and then re-resume.
+  usePermitApplication()
 
   useSearch(permitApplicationStore, [currentJurisdiction?.id])
 

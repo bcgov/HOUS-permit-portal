@@ -103,7 +103,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                      },
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :extended,
+                       view: :base,
                      },
                    }
   end

@@ -87,6 +87,10 @@ export const PermitApplicationStoreModel = types
     setTablePermitApplications: (permitApplications) => {
       self.tablePermitApplications = permitApplications.map((pa) => pa.id)
     },
+    // Action to add a new PermitApplication
+    addPermitApplication(permitapplication: IPermitApplication) {
+      self.permitApplicationMap.put(permitapplication)
+    },
   }))
   .actions((self) => ({
     createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
@@ -97,10 +101,6 @@ export const PermitApplicationStoreModel = types
       }
       return false
     }),
-    // Action to add a new PermitApplication
-    addPermitApplication(permitapplication: IPermitApplication) {
-      self.permitApplicationMap.put(permitapplication)
-    },
     // Action to remove a PermitApplication
     removePermitApplication(id: string) {
       self.permitApplicationMap.delete(id)
@@ -122,7 +122,8 @@ export const PermitApplicationStoreModel = types
       )
 
       if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
+        // self.mergeUpdateAll(response.data.data, "permitApplicationMap")
+        response.data.data.forEach((pa) => self.addPermitApplication(pa))
         // dual purpose method also serves the submitters
         ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
           response.data.data
@@ -136,16 +137,16 @@ export const PermitApplicationStoreModel = types
       return response.ok
     }),
     fetchPermitApplication: flow(function* (id: string) {
-      let permitApplication = self.getPermitApplicationById(id)
+      // let permitApplication = self.getPermitApplicationById(id)
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
-      if (!permitApplication || self.rootStore.userStore.currentUser.isReviewStaff) {
-        const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
-        if (ok && response.data) {
-          permitApplication = response.data
-          self.mergeUpdate(response.data, "permitApplicationMap")
-        }
+      // if (!permitApplication || !permitApplication.formJson || self.rootStore.userStore.currentUser.isReviewStaff) {
+      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
+      if (ok && response.data) {
+        const permitApplication = response.data
+        self.mergeUpdate(response.data, "permitApplicationMap")
+        return permitApplication
       }
-      return permitApplication
+      // }
     }),
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
