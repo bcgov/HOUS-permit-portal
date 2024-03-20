@@ -57,8 +57,22 @@ FactoryBot.define do
                 },
               },
             )
+            create(:requirement, requirement_code: "no_compliance", requirement_block: block, input_type: :text)
+            create(
+              :requirement,
+              requirement_code: "seal_test",
+              requirement_block: block,
+              input_type: :text,
+              input_options: {
+                computed_compliance: {
+                  module: "DigitalSealValidator",
+                },
+              },
+            )
           end
         end
+        #publish a template_version
+        create(:template_version, requirement_template: template, form_json: template.to_form_json, status: "published")
       end
     end
 
@@ -82,6 +96,8 @@ FactoryBot.define do
             )
           end
         end
+        #publish a template version
+        create(:template_version, requirement_template: template, form_json: template.to_form_json, status: "published")
       end
     end
   end

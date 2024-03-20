@@ -1,29 +1,35 @@
 class PermitApplicationBlueprint < Blueprinter::Base
   identifier :id
-  fields :nickname,
-         :status,
-         :number,
-         :created_at,
-         :updated_at,
-         :viewed_at,
-         :form_json,
-         :full_address,
-         :pid,
-         :pin,
-         :submission_data,
-         :submitted_at,
-         :formatted_compliance_data,
-         :front_end_form_update,
-         :zipfile_size,
-         :zipfile_name,
-         :zipfile_url,
-         :form_customizations,
-         :reference_number
 
-  association :permit_type, blueprint: PermitClassificationBlueprint
-  association :activity, blueprint: PermitClassificationBlueprint
-  association :jurisdiction, blueprint: JurisdictionBlueprint
-  association :submitter, blueprint: UserBlueprint
-  association :step_code, blueprint: StepCodeBlueprint
-  association :supporting_documents, blueprint: SupportingDocumentBlueprint
+  view :compliance_update do
+    fields :formatted_compliance_data, :front_end_form_update
+  end
+
+  view :extended do
+    fields :nickname,
+           :status,
+           :number,
+           :created_at,
+           :updated_at,
+           :viewed_at,
+           :form_json,
+           :full_address,
+           :pid,
+           :pin,
+           :submission_data,
+           :submitted_at,
+           :formatted_compliance_data,
+           :front_end_form_update,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
+           :form_customizations,
+           :reference_number
+    association :permit_type, blueprint: PermitClassificationBlueprint
+    association :activity, blueprint: PermitClassificationBlueprint
+    association :jurisdiction, blueprint: JurisdictionBlueprint
+    association :submitter, blueprint: UserBlueprint
+    association :step_code, blueprint: StepCodeBlueprint
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+  end
 end

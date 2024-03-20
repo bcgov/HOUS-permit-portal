@@ -251,3 +251,12 @@ export enum EGovFeedbackResponseNoReason {
   notRelated = "This page is not related to what I searched for",
   other = "Other",
 }
+
+export enum ESocketDomainTypes {
+  notification = "notification",
+  permitApplication = "permit_application",
+}
+
+export enum ESocketEventTypes {
+  update = "update",
+}

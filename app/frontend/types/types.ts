@@ -8,6 +8,8 @@ import {
   ENumberUnit,
   ERequirementType,
   ESZeroCarbonStep,
+  ESocketDomainTypes,
+  ESocketEventTypes,
   ESortDirection,
   ESpaceHeatingCoolingPerformanceType,
   EStepCodeAirtightnessValue,
@@ -186,4 +188,21 @@ export interface IDownloadableFile {
 
 export interface IEULA {
   content: string
+}
+
+export interface INotification {
+  title: string
+  description: string
+  at: string
+}
+
+export interface IPermitApplicationUpdate {
+  id
+  frontEndFromUpdate: Object
+}
+
+export interface IUserPushPayload {
+  domain: ESocketDomainTypes
+  eventType: ESocketEventTypes
+  data: INotification | IPermitApplicationUpdate
 }

@@ -1071,6 +1071,10 @@ const options = {
           },
           questionSupport: "Question Support",
         },
+        automatedCompliance: {
+          baseMessage: `This field has Auto-Compliance capability.`,
+          defaultValueMesage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
+        },
       },
     },
     // ... other languages
