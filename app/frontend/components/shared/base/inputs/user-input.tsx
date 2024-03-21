@@ -1,11 +1,25 @@
-import { Button, Flex, FormControl, FormLabel, HStack, Input, InputGroup, Select, Tag, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  HStack,
+  Input,
+  InputGroup,
+  Select,
+  Tag,
+  Text,
+} from "@chakra-ui/react"
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { EUserRoles } from "../../../../types/enums"
 import { EmailFormControl } from "../../form/email-form-control"
+import { SharedSpinner } from "../shared-spinner"
 
 interface IUserInputProps {
   index: number
@@ -15,6 +29,7 @@ interface IUserInputProps {
 
 export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInputProps) => {
   const { register, formState, control, watch } = useFormContext()
+  const { isSubmitting } = formState
   const { t } = useTranslation()
 
   const emailWatch = watch(`users.${index}.email`)
@@ -33,38 +48,44 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
           <Controller
             name={`users.${index}.role`}
             control={control}
+            rules={{ required: true }} // Inline validation rule
             render={({ field }) => (
-              <Select bg="greys.white" {...field}>
-                <option value="review_manager">Review Manager</option>
-                <option value="reviewer">Reviewer</option>
-              </Select>
+              <>
+                <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
+                  <option value="review_manager">{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
+                  <option value="reviewer">{t(`user.roles.${EUserRoles.reviewer}`)}</option>
+                </Select>
+              </>
             )}
           />
         </FormControl>
         <EmailFormControl fieldName={`users.${index}.email`} flex={3} validate required />
         <NameFormControl label="First Name (optional)" index={index} subFieldName="firstName" />
         <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
-        {invited && (
-          <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" alignSelf="center">
-            <HStack color="semantic.success">
-              <CheckCircle size={20} />
-              <Text>{t("user.inviteSuccess")}</Text>
-            </HStack>
-          </Tag>
-        )}
-        {taken && (
-          <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" alignSelf="center">
-            <HStack color="semantic.error">
-              <WarningCircle size={20} />
-              <Text>{t("user.inviteError")}</Text>
-            </HStack>
-          </Tag>
-        )}
-        {!invited && !taken && remove && (
-          <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />} alignSelf="center">
-            {t("ui.remove")}
-          </Button>
-        )}
+        <Box alignSelf="center">
+          {isSubmitting && <SharedSpinner />}
+          {invited && (
+            <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" alignSelf="center">
+              <HStack color="semantic.success">
+                <CheckCircle size={20} />
+                <Text>{t("user.inviteSuccess")}</Text>
+              </HStack>
+            </Tag>
+          )}
+          {taken && (
+            <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" alignSelf="center">
+              <HStack color="semantic.error">
+                <WarningCircle size={20} />
+                <Text>{t("user.inviteError")}</Text>
+              </HStack>
+            </Tag>
+          )}
+          {!invited && !taken && remove && !isSubmitting && (
+            <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />} alignSelf="center">
+              {t("ui.remove")}
+            </Button>
+          )}
+        </Box>
       </Flex>
     </Flex>
   )

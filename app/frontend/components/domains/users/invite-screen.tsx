@@ -29,7 +29,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   } = useMst()
 
   const defaultUserValues = {
-    role: EUserRoles.reviewManager,
+    role: null,
     jurisdictionId: currentJurisdiction?.id,
     firstName: "",
     lastName: "",
@@ -60,7 +60,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { isSubmitting } = formState
 
   const onSubmit = async (formData) => {
-    invite(formData)
+    await invite(formData)
   }
 
   const navigate = useNavigate()
