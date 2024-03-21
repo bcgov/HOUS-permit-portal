@@ -15,6 +15,7 @@ class JurisdictionBlueprint < Blueprinter::Base
          :permit_applications_size,
          :templates_used_size,
          :map_position,
+         :map_zoom,
          :energy_step_required,
          :zero_carbon_step_required,
          :created_at,

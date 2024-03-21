@@ -5,8 +5,10 @@ import { TLatLngTuple } from "../../../types/types"
 
 interface IJurisdictionMapProps {
   mapPosition: TLatLngTuple
+  mapZoom: number
   linePositions?: TLatLngTuple[]
   onMapDrag?: (newCenter: TLatLngTuple) => void
+  onZoomChange?: (newZoom: number) => void
   isEditingMap?: boolean
 }
 
@@ -25,11 +27,18 @@ const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
 }
 
 // Component to listen for map drag events
-const MapDragListener: React.FC<{ onDrag: (newCenter: [number, number]) => void }> = ({ onDrag }) => {
+const MapChangeListener: React.FC<{
+  onDrag: (newCenter: [number, number]) => void
+  onZoomChange?: (newZoom: number) => void
+}> = ({ onDrag, onZoomChange }) => {
   useMapEvents({
     moveend: (e) => {
       const newCenter = e.target.getCenter()
       onDrag && onDrag([newCenter.lat, newCenter.lng])
+    },
+    zoomend: (e) => {
+      const newZoom = e.target.getZoom()
+      onZoomChange && onZoomChange(newZoom)
     },
   })
   return null
@@ -43,9 +52,11 @@ const SetMapBehaviour = ({ isEditingMap }: { isEditingMap: boolean }) => {
     if (isEditingMap) {
       map.dragging.enable()
       map.scrollWheelZoom.enable()
+      map.zoomControl.addTo(map)
     } else {
       map.dragging.disable()
       map.scrollWheelZoom.disable()
+      map.zoomControl.remove()
     }
   }, [isEditingMap, map])
 
@@ -54,8 +65,10 @@ const SetMapBehaviour = ({ isEditingMap }: { isEditingMap: boolean }) => {
 
 export const JurisdictionMap = ({
   mapPosition,
+  mapZoom,
   linePositions,
   onMapDrag,
+  onZoomChange,
   isEditingMap = false,
 }: IJurisdictionMapProps) => {
   return (
@@ -63,7 +76,7 @@ export const JurisdictionMap = ({
       <MapContainer
         dragging={isEditingMap}
         center={mapPosition}
-        zoom={13}
+        zoom={mapZoom}
         style={{ height: "250px", width: "100%", zIndex: 0 }}
       >
         <TileLayer
@@ -73,7 +86,7 @@ export const JurisdictionMap = ({
         <SetMapBehaviour isEditingMap={isEditingMap} />
         <Polyline pathOptions={{ color: "blue" }} positions={linePositions || []} />
         <MapUpdater center={mapPosition} />
-        <MapDragListener onDrag={onMapDrag} />
+        <MapChangeListener onDrag={onMapDrag} onZoomChange={onZoomChange} />
       </MapContainer>
     </>
   )

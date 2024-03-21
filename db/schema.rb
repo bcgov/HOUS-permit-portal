@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_18_190718) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_21_224402) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -101,6 +101,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_18_190718) do
     t.integer "energy_step_required"
     t.integer "zero_carbon_step_required"
     t.string "slug"
+    t.integer "map_zoom"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
