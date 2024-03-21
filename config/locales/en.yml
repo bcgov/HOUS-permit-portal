@@ -39,7 +39,7 @@ en:
             submitter:
               incorrect_role: "must have the submitter role"
             jurisdiction:
-              no_contact: "must have at least one PermitTypeSubmissionContact that matches the permit type of this application."
+              no_contact: "must have at least one submission contact email for this permit type."
         supporting_document:
           attributes:
             file:
@@ -49,7 +49,7 @@ en:
             uid:
               taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
   application_mailer:
-    subject_start: "BC Building Permit Hub"
+    subject_start: "Building Permit Hub"
     subjects:
       update_password_success: "You have successfully updated your password"
       welcome: "Welcome to the Building Permit Hub"
@@ -277,10 +277,10 @@ en:
         message: "Jurisdiction Template Customization updated!"
       create_error:
         title: Oops
-        message: "Something went wrong creating Jurisdiction Template Customization"
+        message: "Something went wrong creating Jurisdiction Customization"
       update_error:
         title: Oops
-        message: "Something went wrong updating Jurisdiction Template Customization"
+        message: "Something went wrong updating Jurisdiction Customization"
   formio:
     requirement_template:
       completion_title: "Completion"

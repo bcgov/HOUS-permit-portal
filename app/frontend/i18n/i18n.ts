@@ -23,7 +23,7 @@ const options = {
           userFirstNameLabel: "First Name",
           userLastNameLabel: "Last Name",
           organizationLabel: "Organization (optional)",
-          organizationHelpText: "Lorem Ipsum Organiation help text",
+          organizationHelpText: "Company or professional association that you belong to if applicable.",
           passwordLabel: "Password",
           forgotPassword: "Forgot password?",
           passwordTooWeak: "Password too weak",
@@ -300,20 +300,19 @@ const options = {
             applicationDisclaimerMoreInfo_CTA: "Find your local jurisdiction",
             applicationDisclaimerMoreInfo_Link:
               "https://www2.gov.bc.ca/gov/content/governments/local-governments/facts-framework/local-government-maps",
-            submitted: "Your application has been submitted",
-            hearBack: "If you don't hear back by Lorem days,",
+            submitted: "Your application has been submitted!",
+            hearBack: "Need Help?",
             contactInstruction:
-              "here are instructions of what to do and the local government building permit to contact. Instruction text here lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+              "You can log into the Building Permit Hub at any time to view a history of the applications you have submitted. Please contact the {{ jurisdictionName }} for questions related to your application.",
             whatsNextTitle: "What's next?",
             ready: "Ready to submit this application?",
             bySubmitting: "By submitting this application",
             confirmation: "Lorem ipsum submitting blah de blah filler lorem",
-            yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
+            yourReference: "Your Building Permit Hub application ID is {{ number }}",
             noContactsAvailable: "Sorry, the Building Permit Hub doesn't support this jurisdiction yet.",
             whatsNext:
-              "Lorem ipsum what to expext next. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-            emailed:
-              "A confirmation email has also been sent to the applicant and {{ jurisdictionName }}'s building permit office",
+              "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
+            emailed: "Confirmation notifications have been sent to all individuals involved.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -1052,7 +1051,8 @@ const options = {
           aboutTitle: "About",
           disclaimerTitle: "Disclaimer",
           copyrightHolder: "Government of British Columbia.",
-          description: "Lorem ipsum here is the site description",
+          description:
+            "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
           keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My Permits",
@@ -1099,7 +1099,7 @@ const options = {
           questionSupport: "Question Support",
         },
         automatedCompliance: {
-          baseMessage: `This field has Auto-Compliance capability.`,
+          baseMessage: `This field has Auto-Compliance capability:`,
           defaultValueMesage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
         },
       },
