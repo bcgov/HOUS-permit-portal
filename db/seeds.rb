@@ -77,7 +77,7 @@ if PermitApplication.first.blank?
     .each do |jurisdiction|
       if jurisdiction.contacts.blank?
         rand(3..5).times do |n|
-          Contact.create(
+          Contact.create!(
             name: "Contact #{n}",
             title: "Title #{n}",
             department: "Department #{n}",
@@ -111,7 +111,7 @@ if PermitApplication.first.blank?
   submitters = User.submitter
   rt = RequirementTemplate.with_published_version.first.published_template_version
   20.times do |index|
-    PermitApplication.create(
+    PermitApplication.create!(
       submitter_id: submitters.sample.id,
       full_address: "123 Address st",
       pid: "999999999",
@@ -138,7 +138,7 @@ if PermitApplication.first.blank?
           "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
         end
       )
-    PermitApplication.create(
+    PermitApplication.create!(
       submitter: submitters.sample,
       jurisdiction: north_van,
       activity: activity1,
@@ -154,7 +154,7 @@ puts "Seeding jurisdiction customizations..."
 TemplateVersion
   .limit(3)
   .each do |template_version|
-    JurisdictionTemplateVersionCustomization.find_or_create_by(
+    JurisdictionTemplateVersionCustomization.find_or_create_by!(
       jurisdiction: north_van,
       template_version: template_version,
     ) do |customization|
@@ -171,4 +171,3 @@ PermitTypeSubmissionContact.create!(
   permit_type_id: rt.permit_type.id,
   email: "example@example.com", # Add a valid email address
 )
-
