@@ -1,7 +1,7 @@
 class Contact < ApplicationRecord
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :phone_number, phone: true
-  validates :cell_number, phone: true
+  validates :phone_number, phone: true, allow_blank: true
+  validates :cell_number, phone: true, allow_blank: true
   before_validation :normalize_phone_number
 
   belongs_to :jurisdiction
