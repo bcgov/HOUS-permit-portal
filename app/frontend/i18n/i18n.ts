@@ -798,6 +798,7 @@ const options = {
             title: "Configuration Management",
             description: "Customize content in one centralized place.",
             editPermission: "Only managers are able to edit.",
+            jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
             jurisdictionAbout: {
