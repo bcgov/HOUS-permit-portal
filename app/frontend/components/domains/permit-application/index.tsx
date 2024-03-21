@@ -71,7 +71,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
           </Flex>
 
           {isSearching ? (
-            <Flex w="full" flex={1}>
+            <Flex py="50" w="full">
               <SharedSpinner h={50} w={50} />
             </Flex>
           ) : (

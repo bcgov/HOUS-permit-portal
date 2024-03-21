@@ -1,15 +1,4 @@
-import {
-  Box,
-  ButtonProps,
-  Center,
-  Flex,
-  HStack,
-  ListItem,
-  StackProps,
-  Tag,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, ButtonProps, Flex, HStack, ListItem, StackProps, Tag, UnorderedList, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -54,9 +43,9 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
         <GridHeaders />
 
         {isSearching ? (
-          <Center p={50} gridColumn={"span 4"}>
+          <Flex py={50} gridColumn={"span 6"}>
             <SharedSpinner />
-          </Center>
+          </Flex>
         ) : (
           tableRequirementBlocks.map((requirementBlock) => {
             return (
