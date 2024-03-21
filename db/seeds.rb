@@ -72,6 +72,10 @@ permit_type2 = PermitType.find_by_code("medium_residential")
 
 puts "Seeding contacts..."
 if PermitApplication.first.blank?
+  north_van
+    .permit_type_submission_contacts
+    .where(email: "north-van@laterolabs.com", permit_type: permit_type1)
+    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
   jurisdictions
     .first(10)
     .each do |jurisdiction|
@@ -84,6 +88,14 @@ if PermitApplication.first.blank?
             email: "contact_#{n}_#{jurisdiction.id}@example.com",
             phone_number: "604-456-7802",
             jurisdiction_id: jurisdiction.id,
+          )
+        end
+        jurisdiction.reload
+        if jurisdiction.permit_type_submission_contacts.blank?
+          jurisdiction.permit_type_submission_contacts.create!(
+            email: jurisdiction.contacts.first.email,
+            confirmed_at: Time.now,
+            permit_type: permit_type1,
           )
         end
       end
@@ -115,7 +127,7 @@ if PermitApplication.first.blank?
       submitter_id: submitters.sample.id,
       full_address: "123 Address st",
       pid: "999999999",
-      jurisdiction_id: index.even? ? jurisdictions.sample.id : north_van.id,
+      jurisdiction_id: index.even? ? jurisdictions.first(10).sample.id : north_van.id,
       activity_id: rt.activity.id,
       permit_type_id: rt.permit_type.id,
     )
