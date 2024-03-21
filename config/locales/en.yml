@@ -105,6 +105,9 @@ en:
       login_error:
         title: Failed to login.
         message: Invalid username or password.
+      not_confirmed_error:
+        title: Failed to login.
+        message: Please confirm your registration by activating the link in the email you received. If you have not received the email please check your spam folder.
       logout_success:
         title: Successfully logged out.
         message: ""

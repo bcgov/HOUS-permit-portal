@@ -128,7 +128,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
           <Heading as="h3" fontSize="4xl">
             {t("landing.iNeedLong")}
           </Heading>
-          <Text>{t("landing.reqsVary")}</Text>
+          <Text>{t("landing.permitImportance")}</Text>
         </VStack>
       </Container>
       <Flex w="full" bg="greys.grey03">
@@ -192,7 +192,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
-      <Flex bg="white" w="50%" p={6} gap={4}>
+      <Flex bg="white" w={{ base: "full", md: "50%" }} p={6} gap={4}>
         <FormProvider {...formMethods}>
           <form style={{ width: "100%" }}>
             <Flex direction="column" gap={6}>
@@ -214,46 +214,45 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
           </form>
         </FormProvider>
       </Flex>
-      <Flex
+      <Center
         bg={addressWatch?.value ? "theme.blueAlt" : "greys.white"}
-        w="50%"
+        minH={243}
+        w={{ base: "full", md: "50%" }}
         p={6}
         gap={4}
         color={addressWatch?.value ? "greys.white" : "theme.blueAlt"}
       >
-        <Center h="full" w="full">
-          {addressWatch?.value ? (
-            <VStack gap={8}>
-              <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
-                {t("landing.localJurisdiction")}
+        {addressWatch?.value ? (
+          <VStack gap={8}>
+            <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
+              {t("landing.localJurisdiction")}
+            </Text>
+            <HStack gap={4}>
+              <Text fontSize="2xl" fontWeight="bold">
+                {jurisdiction?.name}
               </Text>
-              <HStack gap={4}>
-                <Text fontSize="2xl" fontWeight="bold">
-                  {jurisdiction?.name}
-                </Text>
-                <Box color="theme.yellow">
-                  <CheckCircle size={32} />
-                </Box>
-              </HStack>
-              <RouterLinkButton
-                variant="ghost"
-                color="greys.white"
-                to={`/jurisdictions/${jurisdiction?.id}`}
-                icon={<CaretRight size={16} />}
-              >
-                {t("landing.learnRequirements")}
-              </RouterLinkButton>
-            </VStack>
-          ) : (
-            <VStack gap={6}>
-              <MapPin size={40} />
-              <Text fontStyle="italic" textAlign="center">
-                {t("landing.reqsVary")}
-              </Text>
-            </VStack>
-          )}
-        </Center>
-      </Flex>
+              <Box color="theme.yellow">
+                <CheckCircle size={32} />
+              </Box>
+            </HStack>
+            <RouterLinkButton
+              variant="ghost"
+              color="greys.white"
+              to={`/jurisdictions/${jurisdiction?.id}`}
+              icon={<CaretRight size={16} />}
+            >
+              {t("landing.learnRequirements")}
+            </RouterLinkButton>
+          </VStack>
+        ) : (
+          <VStack gap={6}>
+            <MapPin size={40} />
+            <Text fontStyle="italic" textAlign="center">
+              {t("landing.reqsVary")}
+            </Text>
+          </VStack>
+        )}
+      </Center>
     </Flex>
   )
 }
