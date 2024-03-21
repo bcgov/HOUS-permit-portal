@@ -177,7 +177,7 @@ en:
         message: "Something went wrong creating the requirement block"
       update_error:
         title: Oops
-        message: "Something went wrong updating the requirement block"
+        message: "%{error_message}"
       delete_error:
         title: Oops
         message: "Something went wrong deleting the requirement block"
