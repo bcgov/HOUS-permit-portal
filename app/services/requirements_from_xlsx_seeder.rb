@@ -147,7 +147,14 @@ class RequirementsFromXlsxSeeder
   end
 
   def self.setup_requirements(requirement_block, valid_rows, requirement_block_requirement_codes, errors)
-    req_position_incrementer = 0
+    req_position_incrementer =
+      (
+        if requirement_block.requirements.present?
+          requirement_block.requirements.pluck(:position).max + 1
+        else
+          0
+        end
+      )
     requirement_block_requirement_codes.each do |val|
       row = valid_rows.find { |v| v["requirement_code"] == val }
       if row.present?
