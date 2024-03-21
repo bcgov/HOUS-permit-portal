@@ -62,7 +62,9 @@ export const Footer = observer(() => {
                           {t("site.contact")}
                         </RouterLink>
                         <Link
-                          href={import.meta.env.VITE_BCGOV_HELP_IFRAME_URL}
+                          href={
+                            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub"
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           color="text.primary"
