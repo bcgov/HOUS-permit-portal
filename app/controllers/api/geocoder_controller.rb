@@ -49,10 +49,25 @@ class Api::GeocoderController < Api::ApplicationController
       render_error "geocoder.jurisdiction_error", {}, e and return
     end
   end
+  
+  def form_bc_addresses
+    authorize :geocoder, :formio?
+    begin
+      wrapper = Wrappers::Geocoder.new
+      addresses = wrapper.site_options_raw(form_bc_address_params[:addressString])
+      render json: addresses, status: :ok
+    rescue StandardError => e
+      render_error "geocoder.general_error", {}, e and return
+    end
+  end
 
   private
 
   def geocoder_params
     params.permit(:address, :site_id, :pid)
+  end
+
+  def form_bc_address_params
+    params.permit(:addressString)
   end
 end
