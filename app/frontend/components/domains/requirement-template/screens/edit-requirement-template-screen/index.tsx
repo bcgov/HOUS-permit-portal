@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
+import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { useRequirementTemplate } from "../../../../../hooks/resources/use-requirement-template"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
@@ -32,6 +33,7 @@ const scrollToIdPrefix = "template-builder-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 
 export const EditRequirementTemplateScreen = observer(function EditRequirementTemplateScreen() {
+  const navigate = useNavigate()
   const { isOpen: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
   const { requirementTemplateStore, requirementBlockStore } = useMst()
   const { requirementTemplate, error } = useRequirementTemplate()
@@ -98,11 +100,22 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     await handleSubmit(async (templateFormData) => {
       const formattedSubmitData = formatSubmitData(templateFormData)
 
-      return await requirementTemplateStore.scheduleRequirementTemplate(
+      const updatedRequirementTemplate = await requirementTemplateStore.scheduleRequirementTemplate(
         requirementTemplate.id,
         formattedSubmitData,
         date
       )
+
+      if (updatedRequirementTemplate) {
+        // the template versions are ordered by latest first, so this should return the newly scheduled template
+        // version
+        const scheduledTemplateVersion = (updatedRequirementTemplate as IRequirementTemplate)
+          .scheduledTemplateVersions?.[0]
+
+        scheduledTemplateVersion
+          ? navigate(`/template-versions/${scheduledTemplateVersion.id}`)
+          : navigate("/requirement-templates")
+      }
     })()
   }
 
