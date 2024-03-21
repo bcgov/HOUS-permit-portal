@@ -39,7 +39,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
               <Text as="span" fontWeight="700">
                 {t("permitApplication.new.hearBack")}
               </Text>{" "}
-              {t("permitApplication.new.contactInstruction", { jurisdictionName })}
+              {t("permitApplication.new.contactInstruction", { jurisdictionName: name })}
             </Text>
             {primaryContact && <ContactCard w="fit-content" contact={primaryContact} />}
           </Flex>
