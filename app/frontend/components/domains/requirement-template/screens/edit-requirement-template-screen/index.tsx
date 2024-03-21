@@ -109,9 +109,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
-    <RemoveScroll style={{ width: "100%", height: "100%" }}>
+    <RemoveScroll style={{ width: "100%", height: "calc(100% - 66px)", marginTop: "66px" }}>
       <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
         <FormProvider {...formMethods}>
           <EditableBuilderHeader requirementTemplate={requirementTemplate} />
@@ -176,7 +174,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     const element = document.getElementById(formScrollToId(id))
 
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" })
+      element.scrollIntoView({ behavior: "smooth", block: "nearest" })
     }
   }
 
