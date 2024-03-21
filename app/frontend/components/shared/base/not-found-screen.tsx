@@ -29,10 +29,7 @@ export const NotFoundScreen = observer(({ ...rest }: INotFoundScreenProps) => {
         </Box>
         <RouterLinkButton to="/">{t("site.pageNotFoundCTA")}</RouterLinkButton>
         <Text>
-          {t("site.pageNotFoundContactInstructions")}
-          <RouterLink to="/contact" ml="1">
-            {t("site.contact")}
-          </RouterLink>
+          {t("site.pageNotFoundContactInstructions")} <RouterLink to="/contact">{t("site.contact")}</RouterLink>
         </Text>
       </VStack>
     </Container>

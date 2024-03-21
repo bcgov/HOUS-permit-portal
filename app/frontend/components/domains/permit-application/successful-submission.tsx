@@ -22,11 +22,11 @@ export const SuccessfulSubmissionScreen = observer(() => {
   return (
     <Container maxW="container.lg">
       <Flex direction="column" align="center" my={24} gap={8}>
-        <Icon as={CheckCircle} boxSize="14" color="success" />
+        <Icon as={CheckCircle} boxSize="14" color="semantic.success" />
         <VStack>
           <Heading as="h1">{t("permitApplication.new.submitted")}</Heading>
           <Text>{t("permitApplication.new.emailed")}</Text>
-          <Tag mt="4" color="semantic.info" border="1px solid" borderColor="semantic.blue" p={2}>
+          <Tag mt="4" color="semantic.info" border="1px solid" borderColor="semantic.info" p={2}>
             {t("permitApplication.new.yourReference", { number })}
           </Tag>
         </VStack>
