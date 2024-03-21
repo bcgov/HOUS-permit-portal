@@ -102,13 +102,43 @@ class PermitApplication < ApplicationRecord
     [submitter]
   end
 
-  private
-
   def set_template_version
     return unless template_version.blank?
 
     self.template_version = current_published_template_version
   end
+
+  def submitter_frontend_url
+    FrontendUrlHelper.frontend_url("/permit-applications/#{id}/edit")
+  end
+
+  def reviewer_frontend_url
+    FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
+  end
+
+  def days_ago_submitted
+    # Calculate the difference in days between the current date and the submitted_at date
+    (Date.current - submitted_at.to_date).to_i
+  end
+
+  def formatted_submitted_at
+    submitted_at&.strftime("%Y-%m-%d")
+  end
+
+  def formatted_viewed_at
+    viewed_at&.strftime("%Y-%m-%d")
+  end
+
+  def permit_type_and_activity
+    "#{activity.name} - #{permit_type.name}".strip
+  end
+
+  def send_submit_notifications
+    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
+  end
+
+  private
 
   def assign_default_nickname
     self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
@@ -161,38 +191,6 @@ class PermitApplication < ApplicationRecord
     self.number = new_number if self.number.blank?
     return new_number
   end
-
-  def submitter_frontend_url
-    FrontendUrlHelper.frontend_url("/permit-applications/#{id}/edit")
-  end
-
-  def reviewer_frontend_url
-    FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
-  end
-
-  def days_ago_submitted
-    # Calculate the difference in days between the current date and the submitted_at date
-    (Date.current - submitted_at.to_date).to_i
-  end
-
-  def formatted_submitted_at
-    submitted_at&.strftime("%Y-%m-%d")
-  end
-
-  def formatted_viewed_at
-    viewed_at&.strftime("%Y-%m-%d")
-  end
-
-  def permit_type_and_activity
-    "#{activity.name} - #{permit_type.name}".strip
-  end
-
-  def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
-    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
-  end
-
-  private
 
   def take_form_customizations_snapshot_if_submitted
     return unless status_changed? && submitted?
