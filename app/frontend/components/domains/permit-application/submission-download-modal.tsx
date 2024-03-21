@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Flex,
   HStack,
@@ -16,11 +15,13 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Download } from "@phosphor-icons/react"
+import { Download, FilePdf, FileZip } from "@phosphor-icons/react"
+import { PDFDownloadLink } from "@react-pdf/renderer"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { formatBytes } from "../../../utils/utility-functions"
+import { PDFContent } from "../../shared/permit-applications/pdf-content"
 
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
@@ -43,52 +44,63 @@ export const SubmissionDownloadModal = ({ permitApplication, renderTrigger }: IS
         </Button>
       )}
 
-      <Modal onClose={onClose} isOpen={isOpen} size="lg">
+      <Modal onClose={onClose} isOpen={isOpen} size="xl" scrollBehavior="inside">
         <ModalOverlay />
         <ModalContent p={6}>
           <ModalHeader>
-            <Flex w="full" justify="space-between">
+            <VStack w="full" align="start">
               <Heading as="h1" textTransform={"capitalize"}>
                 {t("permitApplication.show.downloadHeading")} {permitApplication.number}
               </Heading>
-            </Flex>
+              <Text fontSize="md" fontWeight="normal">
+                {t("permitApplication.show.downloadPrompt")}
+              </Text>
+            </VStack>
             <ModalCloseButton fontSize="11px" />
           </ModalHeader>
-          <ModalBody>
+          <ModalBody borderRadius="lg" borderWidth={1} borderColor="border.light" p={4}>
             <Flex direction="column" gap={6}>
-              <Text>{t("permitApplication.show.downloadPrompt")}</Text>
-              <Box border="1px solid" borderRadius="lg" borderColor="border.light" p={4}>
-                <VStack align="flex-start" w="full">
-                  {supportingDocuments.map((doc) => (
-                    <Flex w="full" justify="space-between" key={doc.fileUrl}>
-                      <HStack color="text.link" w="75%">
-                        <Download />
-                        <Link href={doc.fileUrl} download={doc.fileName}>
-                          {doc.fileName}
-                        </Link>
-                      </HStack>
-                      <Text color="greys.grey01" w="25%" textAlign="right">
-                        {formatBytes(doc.fileSize)}
-                      </Text>
-                    </Flex>
-                  ))}
-                </VStack>
-              </Box>
+              <VStack align="flex-start" w="full">
+                {supportingDocuments.map((doc) => (
+                  <FileDownloadLink key={doc.fileUrl} url={doc.fileUrl} name={doc.fileName} size={doc.fileSize} />
+                ))}
+              </VStack>
             </Flex>
           </ModalBody>
           <ModalFooter>
-            <Flex w="full" gap={4}>
+            <Flex gap={2} w="full" wrap="wrap">
               <Button
                 variant="primary"
                 as={Link}
+                w="full"
                 href={zipfileUrl}
                 download={zipfileName}
                 textDecoration="none"
+                leftIcon={<FileZip />}
                 _hover={{ textDecoration: "none" }}
               >
                 {t("permitApplication.show.downloadZip")}
               </Button>
-              <Button variant="secondary" onClick={onClose}>
+              <PDFDownloadLink
+                document={permitApplication && <PDFContent permitApplication={permitApplication} />}
+                fileName="application.pdf"
+                style={{ width: "100%" }}
+              >
+                {({ blob, url, loading, error }) => {
+                  return (
+                    <Button
+                      isLoading={loading}
+                      isDisabled={loading || !!error}
+                      variant="primary"
+                      w="full"
+                      leftIcon={<FilePdf />}
+                    >
+                      {t("permitApplication.show.downloadForm")}
+                    </Button>
+                  )
+                }}
+              </PDFDownloadLink>
+              <Button variant="secondary" w="full" onClick={onClose}>
                 {t("ui.neverMind")}
               </Button>
             </Flex>
@@ -96,5 +108,21 @@ export const SubmissionDownloadModal = ({ permitApplication, renderTrigger }: IS
         </ModalContent>
       </Modal>
     </>
+  )
+}
+
+const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size }) {
+  return (
+    <Flex w="full" justify="space-between">
+      <HStack color="text.link" w="75%">
+        <Download />
+        <Link href={url} download={name}>
+          {name}
+        </Link>
+      </HStack>
+      <Text color="greys.grey01" w="25%" textAlign="right">
+        {formatBytes(size)}
+      </Text>
+    </Flex>
   )
 }
