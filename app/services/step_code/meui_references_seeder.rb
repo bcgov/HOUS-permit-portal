@@ -10,7 +10,7 @@ class StepCode::MEUIReferencesSeeder
 
         data_rows.each do |row|
           data_hash = Hash[header_row.zip(row)]
-          MechanicalEnergyUseIntensityReference.create!(data_hash)
+          MechanicalEnergyUseIntensityReference.find_or_create_by!(data_hash)
         end
       end
     end
