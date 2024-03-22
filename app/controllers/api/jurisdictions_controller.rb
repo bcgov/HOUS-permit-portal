@@ -103,7 +103,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                      },
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :base,
+                       view: :jurisdiction_review_inbox,
                      },
                    }
   end

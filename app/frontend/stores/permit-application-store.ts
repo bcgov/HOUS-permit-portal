@@ -44,28 +44,30 @@ export const PermitApplicationStoreModel = types
     __beforeMergeUpdate(permitApplicationData) {
       const pad = permitApplicationData
 
-      pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
-      self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
-      self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
+      if (!pad.skipAssociationMerges) {
+        pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
+        pad.jurisdiction && self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
+        pad.submitter && self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
+      }
+
       return R.mergeRight(pad, {
-        jurisdiction: pad.jurisdiction.id,
-        submitter: pad.submitter.id,
+        jurisdiction: pad.jurisdiction?.id,
+        submitter: pad.submitter?.id,
         stepCode: pad.stepCode?.id,
-        isFullyLoaded: true,
       })
     },
     __beforeMergeUpdateAll(permitApplicationsData) {
       //find all unique jurisdictions
       const jurisdictionsUniq = R.uniqBy(
         (j: IJurisdiction) => j.id,
-        permitApplicationsData.map((pa) => pa.jurisdiction)
+        permitApplicationsData.filter((pa) => pa.jurisdiction).map((pa) => pa.jurisdiction)
       )
       self.rootStore.jurisdictionStore.mergeUpdateAll(jurisdictionsUniq, "jurisdictionMap")
 
       //find all unique submitters
       const submittersUniq = R.uniqBy(
         (u: IUser) => u.id,
-        permitApplicationsData.map((pa) => pa.submitter)
+        permitApplicationsData.filter((pa) => pa.submitter).map((pa) => pa.submitter)
       )
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
 
@@ -76,12 +78,14 @@ export const PermitApplicationStoreModel = types
         ),
         "stepCodesMap"
       )
-      //return the remapped Data
-      return R.map(
-        (pa) =>
-          R.mergeRight(pa, { jurisdiction: pa.jurisdiction.id, submitter: pa.submitter.id, stepCode: pa.stepCode?.id }),
-        permitApplicationsData
-      )
+
+      // Already merged associations here.
+      // Since beforeMergeUpdateAll internally uses beforeMergeUpdate, we need to skip the association merges
+      // to reduce duplication of work
+
+      permitApplicationsData.skipAssociationMerges = true
+
+      return permitApplicationsData
     },
   }))
   .actions((self) => ({
@@ -123,7 +127,7 @@ export const PermitApplicationStoreModel = types
       )
 
       if (response.ok) {
-        response.data.data.forEach((pa) => self.addPermitApplication(pa))
+        self.mergeUpdateAll(response.data.data, "permitApplicationMap")
         ;(self?.rootStore?.jurisdictionStore?.currentJurisdiction ?? self).setTablePermitApplications(
           response.data.data
         )
@@ -140,7 +144,10 @@ export const PermitApplicationStoreModel = types
       const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
       if (ok && response.data) {
         const permitApplication = response.data
-        self.mergeUpdate(response.data, "permitApplicationMap")
+
+        permitApplication.isFullyLoaded = true
+
+        self.mergeUpdate(permitApplication, "permitApplicationMap")
         return permitApplication
       }
     }),
