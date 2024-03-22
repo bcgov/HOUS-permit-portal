@@ -36,8 +36,10 @@ RSpec.describe AutomatedComplianceUtils do
 
   describe "automated_compliance_unique_unfilled_modules" do
     it "returns a list of unique compliance modules to run if data is missing" do
-      expect(permit_application.automated_compliance_unique_unfilled_modules.count).to eq 2
+      expect(permit_application.automated_compliance_unique_unfilled_modules.count).to eq 1
     end
+
+    #in the case of files, if there is a supporting document with the right data key it will count
   end
 
   describe "automated_compliance_requirements_for_module" do

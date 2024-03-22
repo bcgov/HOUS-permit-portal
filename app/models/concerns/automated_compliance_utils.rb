@@ -12,18 +12,21 @@ module AutomatedComplianceUtils
   end
 
   def automated_compliance_unfilled_requirements
-    automated_compliance_requirements.select do |field_id, req|
-      submission_field_is_empty?(field_id, req)
-    end
+    automated_compliance_requirements.select { |field_id, req| submission_field_is_empty?(field_id, req) }
   end
 
   def submission_field_is_empty?(field_id, requirement)
-    return true if submission_data.blank?
-    if requirement.input_options.dig("computed_compliance", "value_on")
-      supporting_documents
-        .find_by_id(submission_data.dig("data", field_id, "id"))
-        &.compliance_data
-        .blank?
+    if requirement.input_options.dig("computed_compliance", "module") == "DigitalSealValidator"
+      #if there is no related supporting document, consider this okay and not run the autopopulate again
+      #if there is a supporting document, check if the compliance has a result, if not, let it know as unfilled
+      doc = supporting_documents.find_by(data_key: field_id)
+      doc.present? ? doc.compliance_data.empty? : false
+
+      #ALTERNATIVELY search submssion data itself, identify fields with values and loop through
+      # supporting_documents
+      #   .find_by_id(submission_data.dig("data", field_id, "id"))
+      #   &.compliance_data
+      #   .blank?
     else
       compliance_data.dig(field_id).blank?
     end
@@ -38,8 +41,7 @@ module AutomatedComplianceUtils
 
   def automated_compliance_requirements_for_module(compliance_module_name)
     automated_compliance_requirements.select do |field_id, req|
-      req.input_options.dig("computed_compliance", "module") ==
-        compliance_module_name
+      req.input_options.dig("computed_compliance", "module") == compliance_module_name
     end
   end
 end
