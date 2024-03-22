@@ -103,14 +103,11 @@ if PermitApplication.first.blank?
 
   puts "Seeding requirement templates..."
   # Create RequirementTemplate records
-  template1 = RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
-  template1.create_published_template_version!(version_date: Time.current) unless template1.published_template_version
-  template2 = RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
-  template2.create_published_template_version!(version_date: Time.current) unless template2.published_template_version
-  template3 = RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
-  template3.create_published_template_version!(version_date: Time.current) unless template3.published_template_version
-  template4 = RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
-  template4.create_published_template_version!(version_date: Time.current) unless template4.published_template_version
+  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
+  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
+  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
+  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+
   RequirementTemplate.reindex
 
   # Requrements from seeder are idempotent
@@ -125,7 +122,7 @@ if PermitApplication.first.blank?
   # Creating Permit Applications
   puts "Seeding permit applications..."
   submitters = User.submitter
-  template_version = template1.published_template_version
+  template_version = TemplateVersion.published.first
   20.times do |index|
     PermitApplication.create!(
       submitter_id: submitters.sample.id,
