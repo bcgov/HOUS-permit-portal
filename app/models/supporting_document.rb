@@ -6,9 +6,8 @@ class SupportingDocument < ApplicationRecord
   scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data is NULL") }
 
   def last_signer
-    signer = compliance_data["result"].sort_by { |signer| signer.dig("signatureTimestamp", "date") }&.first
-
-    if signer
+    if compliance_data["result"] &&
+         signer = compliance_data["result"].sort_by { |signer| signer.dig("signatureTimestamp", "date") }&.first
       {
         name: signer["signatureFieldName"],
         date:
