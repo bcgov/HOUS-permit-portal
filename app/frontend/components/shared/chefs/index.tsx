@@ -43,8 +43,10 @@ Templates.current = {
             computedComplianceText = result
           } else {
             //assume all complianes are default values except for seal validators
-            computedComplianceText = t("automatedCompliance.defaultValueMesage", { defaultValue: result })
+            computedComplianceText = t("automatedCompliance.defaultValueMessage", { defaultValue: result })
           }
+        } else if ("computedComplianceResult" in ctx.component) {
+          computedComplianceText = t("automatedCompliance.failedValueMessage")
         }
 
         template = template.concat(
