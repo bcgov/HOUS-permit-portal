@@ -39,7 +39,7 @@ export const uploadFileInChunks = async (
   headers,
   file,
   progressCallback = undefined,
-  chunkSize = 1 * 1024 * 1024
+  chunkSize = 10 * 1024 * 1024
 ) => {
   //TODO: expect an array of signedUrls in the future
 

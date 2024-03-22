@@ -39,7 +39,7 @@ Shrine.plugin :add_metadata
 # Shrine.plugin :url_options, cache: url_options, store: url_options
 Shrine.plugin :form_assign
 Shrine.plugin :data_uri
-Shrine.plugin :remote_url, max_size: 20 * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
+Shrine.plugin :remote_url, max_size: 100 * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
 
 Shrine.plugin :presign_endpoint,
               presign_options:

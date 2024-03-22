@@ -32,7 +32,7 @@ const s3custom = function Provider(formio) {
           presignedData.headers,
           file,
           progressCallback,
-          1 * 1024 * 1024
+          10 * 1024 * 1024
         )
         //if there is an error along the way, it will throw and an error
 
