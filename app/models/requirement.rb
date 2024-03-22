@@ -24,13 +24,17 @@ class Requirement < ApplicationRecord
        },
        _prefix: true
 
-  before_create :set_requirement_code
+  # This needs to run before validation because we have validations related to the requirement_code
+  before_validation :set_requirement_code
   before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
-  validates_format_of :requirement_code, with: /\_file/, if: Proc.new { |req| req.input_type == "file" }
+  validates_format_of :requirement_code,
+                      with: /_file\z/,
+                      if: Proc.new { |req| req.input_type == "file" },
+                      message: "must contain _file for file type"
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
@@ -88,6 +92,10 @@ class Requirement < ApplicationRecord
           SecureRandom.uuid
         end
       )
+
+    return unless input_type == "file" && !requirement_code.end_with?("_file")
+
+    self.requirement_code += "_file"
   end
 
   def formio_type_options

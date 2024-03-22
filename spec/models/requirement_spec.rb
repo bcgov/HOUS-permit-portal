@@ -101,14 +101,33 @@ RSpec.describe Requirement, type: :model do
     end
 
     context "files" do
-      it "enforces file valid when code ending in _file" do
-        file_requirement = build(:requirement, requirement_code: "test_file", input_type: "file")
+      it "enforces file valid and no additional _file is added to requirement_code if it's already ending in _file for
+ file types" do
+        code = "test_file"
+        file_requirement = build(:requirement, requirement_code: code, input_type: "file")
         expect(file_requirement.valid?).to eq(true)
+        expect(file_requirement.requirement_code).to eq(code)
       end
 
-      it "enforces file invalid when code not ending in _file" do
-        file_requirement = build(:requirement, requirement_code: "test_fail", input_type: "file")
-        expect(file_requirement.valid?).to eq(false)
+      it "enforces file valid and ensures _file is appended to requirement code if it doesn't end with it for file
+types" do
+        code = "test_incorrect_format"
+
+        file_requirement = build(:requirement, requirement_code: code, input_type: "file")
+
+        expect(file_requirement.valid?).to eq(true)
+        expect(file_requirement.requirement_code).to eq("#{code}_file")
+      end
+
+      it "enforces file valid and ensures _file is appended to requirement code if it includes _file but doesn't end
+with it for file
+types" do
+        code = "test_file_incorrect_format"
+
+        file_requirement = build(:requirement, requirement_code: code, input_type: "file")
+
+        expect(file_requirement.valid?).to eq(true)
+        expect(file_requirement.requirement_code).to eq("#{code}_file")
       end
     end
   end
