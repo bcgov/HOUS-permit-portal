@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
+import { observer } from "mobx-react-lite"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -26,9 +27,11 @@ import { AddressSelect } from "../../shared/select/selectors/address-select"
 
 interface ILandingScreenProps {}
 
-export const LandingScreen = ({}: ILandingScreenProps) => {
+export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
   const iNeedRef = useRef<HTMLDivElement>(null)
+  const { sessionStore } = useMst()
+  const { loggedIn } = sessionStore
 
   const scrollToJurisdictionSearch = () => {
     iNeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -91,12 +94,20 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                  {t("auth.login")}
-                </RouterLinkButton>
-                <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                  {t("auth.register")}
-                </RouterLinkButton>
+                {loggedIn ? (
+                  <RouterLinkButton to="/" variant="primaryInverse" icon={<CaretRight size={16} />}>
+                    {t("site.home")}
+                  </RouterLinkButton>
+                ) : (
+                  <>
+                    <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
+                      {t("auth.login")}
+                    </RouterLinkButton>
+                    <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
+                      {t("auth.register")}
+                    </RouterLinkButton>
+                  </>
+                )}
               </Flex>
             </Flex>
             <VStack as="section" align="flex-start" spacing={4}>
@@ -169,7 +180,7 @@ export const LandingScreen = ({}: ILandingScreenProps) => {
       </Flex>
     </Flex>
   )
-}
+})
 
 interface IJurisdictionSearchProps {}
 const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
