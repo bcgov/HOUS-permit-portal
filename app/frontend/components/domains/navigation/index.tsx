@@ -167,7 +167,7 @@ const AppRoutes = observer(() => {
         {loggedIn ? (
           <>
             <Route path="/" element={<HomeScreen />} />
-            <Route path="/jurisdictions" element={<RedirectScreen />} />
+            {currentUser?.isSuperAdmin ? null : <Route path="/jurisdictions" element={<RedirectScreen />} />}
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
