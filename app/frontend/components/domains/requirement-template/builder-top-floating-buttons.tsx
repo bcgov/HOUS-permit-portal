@@ -7,17 +7,15 @@ interface IProps extends Partial<StackProps> {}
 
 export function BuilderTopFloatingButtons({ ...containerProps }: IProps) {
   return (
-    <Box zIndex="10" position="absolute" top="90px" right="6" {...containerProps}>
-      <Stack spacing="4" align="right" width="fit-content">
-        <HelpDrawer
-          defaultButtonProps={{
-            size: "sm",
-            variant: "primary",
-            p: undefined,
-            leftIcon: <Info size={"0.875rem"} />,
-          }}
-        />
-      </Stack>
-    </Box>
+    <Stack zIndex="2" spacing="4" position="absolute" top="6" right="6" {...containerProps}>
+      <HelpDrawer
+        defaultButtonProps={{
+          size: "sm",
+          variant: "primary",
+          p: undefined,
+          leftIcon: <Info size={"0.875rem"} />,
+        }}
+      />
+    </Stack>
   )
 }

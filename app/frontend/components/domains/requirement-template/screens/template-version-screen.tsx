@@ -42,7 +42,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   return (
     // the height 1px is needed other wise scroll does not work
     // as it seems like the browser has issues calculating height for flex=1 containers
-    //<RemoveScroll style={{ width: "100%", height: "100%" }}>
     <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
       <BuilderHeader
         breadCrumbs={[
@@ -94,7 +93,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
       </Flex>
       <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
     </Flex>
-    //</RemoveScroll>
   )
 
   function scrollToTop() {
