@@ -559,7 +559,7 @@ const options = {
                   laneway: "Laneway House",
                   single_detached: "Single Detached",
                   double_detached: "Double/Semi-detached (non-MURB)",
-                  row: "Row House (non-MURB)`",
+                  row: "Row House (non-MURB)",
                   multi_plex: "Multi-plex (non-MURB)",
                   single_detached_with_suite: "Single Detatched w/Secondary Suite",
                   low_rise_murb: "Low-Rise MURB",
