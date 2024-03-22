@@ -66,7 +66,7 @@ const options = {
             "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
           iNeedLong: "What do I need for a housing building permit?",
           reqsVary:
-            "Permit requirements vary by local jurisdiction and depend on the geography of the surrounding locaiton.",
+            "Permit requirements vary by local jurisdiction and depend on the geography of the surrounding location.",
           permitImportance:
             "Building permits are important to ensure your housing is safe, legal and compliant. Building permit requirements vary by local jurisdiction and depend on local servicing, zoning and bylaw requirements (e.g. rural services vs. urban, tree bylaws, etc.).",
           whereTitle: "Where",
