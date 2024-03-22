@@ -28,21 +28,24 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
   } = useMst()
 
   return (
-    <Popover placement="bottom-end">
+    <Popover placement="top-end">
       {({ onClose }) => (
         <>
           <PopoverTrigger>
             <InputGroup w={320}>
               <Input
+                as={Flex}
+                align="center"
                 bg="white"
                 cursor="pointer"
                 borderColor="gray.200"
                 borderWidth={1}
                 rounded="base"
                 shadow="base"
-                placeholder={t(`${translationPrefix}.buildingType.placeholder`)}
               >
-                {value && t(`${translationPrefix}.buildingType.options.${value}`)}
+                {value
+                  ? t(`${translationPrefix}.buildingType.options.${value}`)
+                  : t(`${translationPrefix}.buildingType.placeholder`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
