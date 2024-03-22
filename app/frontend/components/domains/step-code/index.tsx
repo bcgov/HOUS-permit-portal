@@ -1,6 +1,7 @@
 import { Center, Container, Flex, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
+import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../setup/root"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { StepCodeChecklistForm } from "./checklist"
@@ -13,6 +14,8 @@ export const StepCodeForm = observer(function NewStepCodeForm() {
   const {
     stepCodeStore: { isLoaded, fetchStepCodes, currentStepCode },
   } = useMst()
+
+  const { currentPermitApplication } = usePermitApplication()
 
   const navHeight = document.getElementById("mainNav").offsetHeight
 
@@ -40,7 +43,7 @@ export const StepCodeForm = observer(function NewStepCodeForm() {
           </Center>
         }
       >
-        {isLoaded && (
+        {isLoaded && currentPermitApplication && (
           <Container my={10} maxW="780px" px={0}>
             {!currentStepCode ? (
               <VStack spacing={8} align="start" w="full" pb={20}>
