@@ -72,7 +72,7 @@ export const Navigation = observer(() => {
           <>
             <AppRoutes />
 
-            {!loggedIn ? <Footer /> : null}
+            <Footer />
           </>
         )}
       </Flex>

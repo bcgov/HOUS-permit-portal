@@ -1030,6 +1030,8 @@ const options = {
           title: "Building Permit Hub",
           titleLong: "BC Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
+          adminPanel: "Admin Panel",
+          goTo: "Go to",
           beta: "Beta",
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",

@@ -14,16 +14,17 @@ export const Footer = observer(() => {
   } = useMst()
   const { currentUser } = userStore
   const { t } = useTranslation()
-  const excludeFooterRoutes = [
+  const onlyShowFooterOnRoutes = [
     "/reset-password",
     "/accept-invitation",
     "/login",
     "/forgot-password",
     "/register",
     "/permit-applications",
+    "/welcome",
   ]
 
-  const shouldShowFooter = !loggedIn || !excludeFooterRoutes.some((route) => location.pathname.startsWith(route))
+  const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => location.pathname.startsWith(route))
 
   return (
     <>
