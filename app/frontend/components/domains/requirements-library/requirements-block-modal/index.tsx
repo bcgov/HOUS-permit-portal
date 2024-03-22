@@ -12,7 +12,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { resetForm } from "@formio/react"
-import { Warning } from "@phosphor-icons/react"
 import { autorun } from "mobx"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -21,6 +20,7 @@ import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IRequirementBlockParams } from "../../../../types/api-request"
+import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
 import { FieldsSetup } from "./fields-setup"
 
@@ -145,19 +145,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
                 {showEditWarning && (
-                  <HStack
-                    spacing={2}
-                    w={"full"}
-                    my={8}
-                    p={4}
-                    border={"1px solid"}
-                    borderColor={"semantic.warning"}
-                    bg={"semantic.warningLight"}
-                    borderRadius={"lg"}
-                  >
-                    <Warning aria-label={"Warning icon"} />
-                    <Text>{t("requirementsLibrary.modals.editWarning")}</Text>
-                  </HStack>
+                  <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.editWarning")} />
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup />

@@ -8,6 +8,7 @@ import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { useSearch } from "../../../../hooks/use-search"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
+import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -38,6 +39,9 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
+        {!currentJurisdiction.isSubmissionContactSetupComplete && (
+          <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
+        )}
         <Flex justify={"space-between"} w={"full"}>
           <Box>
             <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>

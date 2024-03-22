@@ -2,6 +2,7 @@ import { t } from "i18next"
 import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
+import { withRootStore } from "../lib/with-root-store"
 import { EUserSortFields } from "../types/enums"
 import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
@@ -38,6 +39,7 @@ export const JurisdictionModel = types
     zeroCarbonStepRequired: types.maybeNull(types.number),
   })
   .extend(withEnvironment())
+  .extend(withRootStore())
   .views((self) => ({
     getUserSortColumnHeader(field: EUserSortFields) {
       //@ts-ignore
@@ -53,6 +55,20 @@ export const JurisdictionModel = types
     },
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
+    },
+    get isSubmissionContactSetupComplete() {
+      const permitTypes = self.rootStore.permitClassificationStore.permitTypes
+
+      const hasContactForAllPermitTypes = permitTypes.every((permitType) => {
+        return self.permitTypeSubmissionContacts.some((c) => c.permitTypeId == permitType.id)
+      })
+
+      if (!hasContactForAllPermitTypes) {
+        return false
+      }
+
+      // if there is a contact for all permit types, then check if all contacts have confirmed emails
+      return self.permitTypeSubmissionContacts.every((c) => c.email && c.confirmedAt)
     },
   }))
   .actions((self) => ({

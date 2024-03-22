@@ -267,6 +267,7 @@ const options = {
             status: "Status",
           },
           submissionInbox: {
+            contactInviteWarning: "Please have a Review Manager setup the Submission Inbox for all permit types.",
             title: "Submissions Inbox",
             tableHeading: "Permit Applications",
             submissionsSentTo:
