@@ -87,6 +87,9 @@ en:
       failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
+      unavailable:
+        title: Sorry! BCeID login is not supported for new accounts
+        message: Please create an account and login with username and password
     geocoder:
       site_options_error:
         title: Oops
