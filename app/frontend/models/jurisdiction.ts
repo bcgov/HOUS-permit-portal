@@ -60,16 +60,14 @@ export const JurisdictionModel = types
     get isSubmissionContactSetupComplete() {
       const permitTypes = self.rootStore.permitClassificationStore.permitTypes
 
-      const hasContactForAllPermitTypes = permitTypes.every((permitType) => {
-        return self.permitTypeSubmissionContacts.some((c) => c.permitTypeId == permitType.id)
+      const hasValidContactForAllPermitTypes = permitTypes.every((permitType) => {
+        //   checks if there is at least one confirmed email for each permit type
+        return self.permitTypeSubmissionContacts.some(
+          (c) => c.permitTypeId == permitType.id && c.email && c.confirmedAt
+        )
       })
 
-      if (!hasContactForAllPermitTypes) {
-        return false
-      }
-
-      // if there is a contact for all permit types, then check if all contacts have confirmed emails
-      return self.permitTypeSubmissionContacts.every((c) => c.email && c.confirmedAt)
+      return hasValidContactForAllPermitTypes
     },
   }))
   .actions((self) => ({
