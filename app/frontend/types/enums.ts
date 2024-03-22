@@ -52,7 +52,6 @@ export enum EJurisdictionSortFields {
   reviewManagersSize = "review_managers_size",
   reviewersSize = "reviewers_size",
   permitApplicationsSize = "permit_applications_size",
-  templatesUsed = "templates_used",
 }
 
 export enum EUserSortFields {

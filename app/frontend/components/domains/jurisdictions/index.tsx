@@ -43,7 +43,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="3fr repeat(4, 1fr) 1fr">
+        <SearchGrid templateColumns="3fr repeat(3, 1fr) 1fr">
           <GridHeaders />
 
           {isSearching ? (
@@ -58,7 +58,6 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
                   <SearchGridItem>{j.reviewManagersSize}</SearchGridItem>
                   <SearchGridItem>{j.reviewersSize}</SearchGridItem>
                   <SearchGridItem>{j.permitApplicationsSize}</SearchGridItem>
-                  <SearchGridItem>{j.templatesUsedSize}</SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="center" w="full" gap={3}>
                       <RouterLink to={`${j.slug}/users/invite`}>{t("user.invite")}</RouterLink>
