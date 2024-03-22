@@ -30,8 +30,9 @@ interface ILandingScreenProps {}
 export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
   const iNeedRef = useRef<HTMLDivElement>(null)
-  const { sessionStore } = useMst()
+  const { sessionStore, userStore } = useMst()
   const { loggedIn } = sessionStore
+  const { currentUser } = userStore
 
   const scrollToJurisdictionSearch = () => {
     iNeedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -79,7 +80,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             <IconBox icon={<ClipboardText size={24} />}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
 
-          <Flex gap={10} direction={{ base: "column", md: "row" }}>
+          <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
             <Flex
               as="section"
               direction="column"
@@ -89,6 +90,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               gap={6}
               color="greys.white"
               flex={1}
+              minW="lg"
             >
               <Heading as="h2">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>
@@ -96,7 +98,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
                 {loggedIn ? (
                   <RouterLinkButton to="/" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                    {t("site.home")}
+                    {t("site.goTo")} {currentUser?.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
                   </RouterLinkButton>
                 ) : (
                   <>
@@ -126,7 +128,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             </VStack>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
-            <Image src="https://placehold.co/230x150" alt="dont-forget-me" />
+            <Image src="images/digital-permit-tools.png" borderRadius="md" w="2xs" alt="Digital permit tools" />
             <Flex as="section" direction="column" gap={4}>
               <Heading as="h3">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
@@ -167,7 +169,6 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
           </Flex>
         </Container>
       </Flex>
-
       <Flex w="full" bg="greys.grey03">
         <Container maxW="container.lg" py={10}>
           <VStack as="section" w="full" gap={2} textAlign="center">
