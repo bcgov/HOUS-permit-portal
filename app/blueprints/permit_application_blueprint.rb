@@ -19,14 +19,25 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :activity, blueprint: PermitClassificationBlueprint
   end
 
+  view :jurisdiction_review_inbox do
+    include_view :base
+
+    association :submitter, blueprint: UserBlueprint
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+  end
+
   view :extended do
     include_view :base
-    fields :form_json, :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
+    fields :form_json,
+           :submission_data,
+           :formatted_compliance_data,
+           :front_end_form_update,
+           :form_customizations
 
-    association :jurisdiction, blueprint: JurisdictionBlueprint
     association :submitter, blueprint: UserBlueprint
-    association :step_code, blueprint: StepCodeBlueprint
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    association :jurisdiction, blueprint: JurisdictionBlueprint
+    association :step_code, blueprint: StepCodeBlueprint
   end
 
   view :compliance_update do
