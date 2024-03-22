@@ -35,7 +35,7 @@ export const BuilderHeader = observer(function BuilderHeader({
           h={"fit-content"}
           w={"fit-content"}
         />
-        <Text as={"h2"} fontWeight={400} fontSize={"sm"} color={"greys.grey01"}>
+        <Text as={"span"} fontSize={"sm"} color={"greys.grey01"}>
           {t("requirementTemplate.edit.title")}
         </Text>
       </HStack>

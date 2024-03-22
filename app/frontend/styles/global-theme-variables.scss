@@ -20,3 +20,15 @@ $bcgov-alert-success: #dff0d8;
 $blue-light: #f6f9fc;
 $error-light: #f7e1e3;
 $error: #d9292f;
+
+@mixin yellowBarHeader {
+  line-height: 150%;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 8px;
+    border-top: 4px solid #fcba19;
+  }
+}

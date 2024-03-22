@@ -76,7 +76,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
       {...accordionProps}
     >
       <AccordionItem>
-        <Box as={"h5"} w={"full"} background={"greys.grey04"} m={0}>
+        <Box as={"h5"} w={"full"} background={"greys.grey04"} m={0} borderTopRadius="8px">
           <AccordionButton py={3} px={6} display={"flex"} justifyContent={"space-between"} onClick={onToggle}>
             <HStack spacing={0}>
               <Box fontWeight={700} fontSize={"base"}>

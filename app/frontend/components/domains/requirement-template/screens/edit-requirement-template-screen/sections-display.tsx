@@ -24,7 +24,17 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
   const watchedSections = watch("requirementTemplateSectionsAttributes")
 
   return (
-    <Stack w={"full"} alignItems={"flex-start"} spacing={16} p={16}>
+    <Stack
+      w={"full"}
+      alignItems={"flex-start"}
+      spacing={16}
+      mt="8"
+      mb="20"
+      mx="auto"
+      pl="8"
+      pr="130px" // space for floating buttons
+      maxWidth="container.lg"
+    >
       {watchedSections.map((section, index) => (
         <SectionDisplay key={section.id} section={section} sectionIndex={index} {...props} />
       ))}
@@ -71,10 +81,8 @@ const SectionDisplay = observer(
         id={formScrollToId(section.id)}
         data-section-id={section.id}
       >
-        <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
         <HStack
           w={"full"}
-          maxW={"798px"}
           justifyContent={"space-between"}
           _hover={{ "button:nth-of-type(1)": { visibility: "visible" } }}
         >
@@ -84,6 +92,7 @@ const SectionDisplay = observer(
             w={"fit-content"}
             fontWeight={700}
             fontSize={"2xl"}
+            className="edit-template-yellowBarHeader"
             initialHint={t("ui.clickToEdit")}
             value={watchedSectionName || ""}
             editableInputProps={{
@@ -116,9 +125,10 @@ const SectionDisplay = observer(
             />
           )}
         </HStack>
-        <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
+        <Stack w={"full"}>
           {watchedSectionBlocks.map((sectionBlock, index) => (
             <RequirementBlockAccordion
+              mb="6"
               as={"section"}
               id={formScrollToId(sectionBlock.id)}
               key={sectionBlock.id}

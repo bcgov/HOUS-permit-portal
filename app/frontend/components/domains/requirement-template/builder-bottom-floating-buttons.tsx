@@ -10,11 +10,11 @@ interface IProps {
 
 export function BuilderBottomFloatingButtons({ onScrollToTop, onCollapseAll }: IProps) {
   return (
-    <Stack spacing={4} position={"absolute"} bottom={6} right={6} alignItems={"flex-end"}>
-      <Button variant={"greyButton"} leftIcon={<ArrowUp />} pl={"0.6125rem"} onClick={onScrollToTop}>
+    <Stack spacing={4} position="fixed" bottom={6} right={10} alignItems={"flex-end"}>
+      <Button variant="greyButton" leftIcon={<ArrowUp />} onClick={onScrollToTop}>
         {t("requirementTemplate.edit.goToTop")}
       </Button>
-      <Button variant={"greyButton"} onClick={onCollapseAll}>
+      <Button variant="greyButton" onClick={onCollapseAll}>
         {t("ui.collapseAll")}
       </Button>
     </Stack>

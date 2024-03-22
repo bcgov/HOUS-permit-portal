@@ -349,18 +349,6 @@
   }
 }
 
-@mixin yellowBarHeader {
-  line-height: 150%;
-
-  &::before {
-    content: "";
-    display: block;
-    width: 36px;
-    height: 8px;
-    border-top: 4px solid #fcba19;
-  }
-}
-
 .form-wrapper {
   h2 {
     @include yellowBarHeader;
@@ -411,7 +399,14 @@
   }
 
   .compliance {
-    background-color: $blue-light !important;
+    background-color: $bcgov-alert-info !important;
+    display: inline;
+    font-size: small;
+    &::after {
+      display: block;
+      content: "";
+      margin-bottom: -7px;
+    }
 
     .i {
       background-color: $bcgov-blue-secondary;

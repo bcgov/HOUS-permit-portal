@@ -28,7 +28,6 @@ import { EUserRoles } from "../../../types/enums"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { StepCodeNavLinks } from "../step-code/nav-links"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -89,8 +88,6 @@ export const NavBar = observer(() => {
       <Box
         as="nav"
         id="mainNav"
-        position="sticky"
-        top={0}
         w="full"
         bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
@@ -111,15 +108,10 @@ export const NavBar = observer(() => {
               />
             </RouterLink>
             <Show above="md">
-              {isStepCode ? (
-                <Text fontSize="md" color="text.primary" fontWeight="bold">
-                  {t("stepCode.title")}
-                </Text>
-              ) : (
-                <Text fontSize="2xl" fontWeight="normal" mb="0">
-                  {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
-                </Text>
-              )}
+              <Text fontSize="2xl" fontWeight="normal" mb="0">
+                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+              </Text>
+
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}
               </Text>
@@ -128,11 +120,11 @@ export const NavBar = observer(() => {
             <HStack gap={3}>
               {!isStepCode && !loggedIn && <HelpDrawer />}
               {(!isStepCode && currentUser?.isSubmitter) || (!loggedIn && <NavBarSearch />)}
-              {currentUser?.isSubmitter && !isStepCode ? (
+              {currentUser?.isSubmitter && !isStepCode && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
                 </RouterLinkButton>
-              ) : null}
+              )}
               {currentUser?.jurisdiction && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
@@ -148,12 +140,12 @@ export const NavBar = observer(() => {
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
-              {!isStepCode && <NavBarMenu isAdmin={currentUser?.isAdmin} />}
-              {isStepCode && <StepCodeNavLinks />}
+              <NavBarMenu isAdmin={currentUser?.isAdmin} />
             </HStack>
           </Flex>
         </Container>
       </Box>
+
       {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
     </>
   )

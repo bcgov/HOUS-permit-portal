@@ -89,3 +89,13 @@ h5 {
 .chakra-toast h3 {
   margin-bottom: 0;
 }
+
+.edit-template-yellowBarHeader {
+  margin-top: var(--chakra-space-4);
+  @include yellowBarHeader;
+  &::before {
+    position: absolute;
+    margin-top: -8px;
+    z-index: 0;
+  }
+}

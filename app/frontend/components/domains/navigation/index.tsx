@@ -1,4 +1,4 @@
-import { Box, Flex } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -65,7 +65,7 @@ export const Navigation = observer(() => {
       <NavBar />
       <EULAModal />
 
-      <Flex direction="column" overflow="auto" h="full" id="outerScrollContainer">
+      <Box id="outerScrollContainer">
         {isValidating ? (
           <LoadingScreen />
         ) : (
@@ -75,7 +75,7 @@ export const Navigation = observer(() => {
             <Footer />
           </>
         )}
-      </Flex>
+      </Box>
     </BrowserRouter>
   )
 })

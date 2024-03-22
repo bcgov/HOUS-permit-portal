@@ -16,6 +16,9 @@ export const Heading = {
         borderTop: "4px solid",
         borderColor: "theme.yellow",
       },
+      ["&:first-child"]: {
+        marginTop: "0",
+      },
     },
   },
 }

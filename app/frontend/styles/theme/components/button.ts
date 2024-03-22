@@ -16,8 +16,15 @@ export const Button = {
   },
   sizes: {
     sm: {
-      py: 0,
+      paddingTop: "0",
+      paddingBottom: "0",
+      paddingLeft: "4",
+      paddingRight: "4",
+      height: "9",
       fontSize: "md",
+      _hover: {
+        textDecoration: "none",
+      },
     },
   },
   variants: {
@@ -93,6 +100,10 @@ export const Button = {
       borderWidth: 1,
       borderColor: "border.light",
       textDecor: "none",
+      minWidth: "120px",
+      height: "9",
+      paddingTop: "0",
+      paddingBottom: "0",
       _hover: {
         textDecor: "none",
         bg: "lighten.100",

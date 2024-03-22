@@ -28,7 +28,6 @@ import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
-import { BuilderTopFloatingButtons } from "../../domains/requirement-template/builder-top-floating-buttons"
 import { CustomToast } from "../base/flash-message"
 import { Form } from "../chefs"
 
@@ -41,7 +40,13 @@ interface IRequirementFormProps {
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave, showHelpButton }: IRequirementFormProps) => {
+  ({
+    permitApplication,
+    onCompletedBlocksChange,
+    formRef,
+    triggerSave,
+    showHelpButton = true,
+  }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
@@ -92,7 +97,7 @@ export const RequirementForm = observer(
       const rootMarginValue = `${topValue}px 0px ${bottomValue}px 0px`
       const blockOptions = {
         rootMargin: rootMarginValue,
-        threshold: 0.001, // Adjust threshold based on needs
+        threshold: 0.0001, // Adjust threshold based on needs
       }
 
       const blockObserver = new IntersectionObserver(handleBlockIntersection, blockOptions)
@@ -137,8 +142,10 @@ export const RequirementForm = observer(
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
 
-      const itemWithSectionClassName = Array.from(entry.target.classList).find((className) =>
-        className.includes("formio-component-formSubmissionDataRSTsection")
+      const itemWithSectionClassName = Array.from(entry.target.classList).find(
+        (className) =>
+          className.includes("formio-component-formSubmissionDataRSTsection") ||
+          className.includes("formio-component-section-signoff-key")
       )
 
       if (itemWithSectionClassName) {
@@ -195,17 +202,20 @@ export const RequirementForm = observer(
 
     return (
       <>
+        <ErrorsBox errorBox={errorBoxData} />
         <Flex
           direction="column"
           as={"section"}
           flex={1}
           className={"form-wrapper"}
-          scrollMargin={96}
-          mb={20}
+          mb="96"
+          mx="auto"
+          pl="8"
+          pr="130px" // space for floating buttons
+          maxWidth="container.lg"
           gap={8}
           ref={boxRef}
         >
-          <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.isSubmitted && (
             <CustomToast
               description={t("permitApplication.show.wasSubmitted", {
@@ -222,7 +232,6 @@ export const RequirementForm = observer(
               </Link>
             </Text>
           </Box>
-          {showHelpButton && <BuilderTopFloatingButtons mr={0} mt={0} />}
 
           <Form
             form={formattedFormJson}
@@ -237,12 +246,12 @@ export const RequirementForm = observer(
             onInitialized={onInitialized}
           />
         </Flex>
-        <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
-          <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
-            {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
-          </Button>
-          <Button w="136px" onClick={scrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
+        <VStack align="end" position="fixed" bottom="6" right="6" zIndex={11} gap={4} w="fit-content">
+          <Button onClick={scrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
             {t("ui.toTop")}
+          </Button>
+          <Button onClick={togglePanelCollapse} variant="greyButton">
+            {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
           </Button>
         </VStack>
         {isOpen && (

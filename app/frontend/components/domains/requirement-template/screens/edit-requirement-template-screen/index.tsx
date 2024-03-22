@@ -1,10 +1,10 @@
-import { Flex, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Flex, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RemoveScroll } from "react-remove-scroll"
+//import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { useRequirementTemplate } from "../../../../../hooks/resources/use-requirement-template"
@@ -122,57 +122,52 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   return (
-    <RemoveScroll style={{ width: "100%", height: "calc(100% - 66px)", marginTop: "66px" }}>
-      <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
-        <FormProvider {...formMethods}>
-          <EditableBuilderHeader requirementTemplate={requirementTemplate} />
-          <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
-            {isReorderMode ? (
-              <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
+    // the height 1px is needed other wise scroll does not work
+    // as it seems like the browser has issues calculating height for flex=1 containers
+    //<RemoveScroll style={{ width: "100%", height: "100%" }}>
+    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
+      <FormProvider {...formMethods}>
+        <EditableBuilderHeader requirementTemplate={requirementTemplate} />
+        <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
+          {isReorderMode ? (
+            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
+          ) : (
+            <SectionsSidebar
+              onEdit={openReorderMode}
+              onItemClick={scrollIntoView}
+              sectionIdToHighlight={currentSectionId}
+              sections={denormalizedSections}
+            />
+          )}
+          <Box w="full" bg={hasNoSections ? "greys.grey03" : undefined} ref={rightContainerRef} position={"relative"}>
+            <ControlsHeader
+              onSaveDraft={onSaveDraft}
+              onScheduleDate={onSchedule}
+              onAddSection={onAddSection}
+              requirementTemplate={requirementTemplate}
+            />
+            <BuilderTopFloatingButtons top="24" />
+            {hasNoSections ? (
+              <Flex
+                justifyContent={hasNoSections ? "center" : undefined}
+                alignItems={hasNoSections ? "center" : undefined}
+                flex={1}
+                w={"full"}
+                h="80%"
+              >
+                <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
+                  {t("requirementTemplate.edit.emptyTemplateSectionText")}
+                </Text>
+              </Flex>
             ) : (
-              <SectionsSidebar
-                onEdit={openReorderMode}
-                onItemClick={scrollIntoView}
-                sectionIdToHighlight={currentSectionId}
-                sections={denormalizedSections}
-              />
+              <SectionsDisplay shouldCollapseAll={shouldCollapseAll} setSectionRef={setSectionRef} />
             )}
-            <Flex
-              flexDir={"column"}
-              flex={1}
-              h={"full"}
-              bg={hasNoSections ? "greys.grey03" : undefined}
-              overflow={"auto"}
-              ref={rightContainerRef}
-              position={"relative"}
-            >
-              <ControlsHeader
-                onSaveDraft={onSaveDraft}
-                onScheduleDate={onSchedule}
-                onAddSection={onAddSection}
-                requirementTemplate={requirementTemplate}
-              />
-              <BuilderTopFloatingButtons />
-              {hasNoSections ? (
-                <Flex
-                  justifyContent={hasNoSections ? "center" : undefined}
-                  alignItems={hasNoSections ? "center" : undefined}
-                  flex={1}
-                  w={"full"}
-                >
-                  <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
-                    {t("requirementTemplate.edit.emptyTemplateSectionText")}
-                  </Text>
-                </Flex>
-              ) : (
-                <SectionsDisplay shouldCollapseAll={shouldCollapseAll} setSectionRef={setSectionRef} />
-              )}
-            </Flex>
-          </Flex>
-        </FormProvider>
-        <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
-      </Flex>
-    </RemoveScroll>
+          </Box>
+        </Flex>
+      </FormProvider>
+      <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
+    </Flex>
+    //</RemoveScroll>
   )
 
   function onCollapseAll() {
