@@ -183,6 +183,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
 })
 
 interface IJurisdictionSearchProps {}
+
 const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
   const { t } = useTranslation()
   const { geocoderStore } = useMst()
@@ -251,6 +252,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
               color="greys.white"
               to={`/jurisdictions/${jurisdiction?.id}`}
               icon={<CaretRight size={16} />}
+              textDecoration={"underline"}
             >
               {t("landing.learnRequirements")}
             </RouterLinkButton>
