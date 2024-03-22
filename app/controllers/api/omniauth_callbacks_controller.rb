@@ -5,15 +5,16 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     auth = request.env["omniauth.auth"]
     invited_user&.accept_invitation_with_omniauth(auth)
     @user = invited_user || User.from_omniauth(auth)
-    if @user.valid? && @user.persisted?
+    if @user&.valid? && @user&.persisted?
       sign_in(resource_name, @user, store: false)
       redirect_to root_path
     else
+      error_key = @user ? "omniauth.failure_with_message" : "omniauth.unavailable"
       redirect_to login_path frontend_flash_message(
-                               "omniauth.failure_with_message",
+                               error_key,
                                "error",
                                message_opts: {
-                                 error_message: @user.errors.full_messages.join(","),
+                                 error_message: @user&.errors&.full_messages&.join(","),
                                },
                              )
     end
