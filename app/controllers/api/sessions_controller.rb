@@ -8,11 +8,10 @@ class Api::SessionsController < Devise::SessionsController
     user = User.find_by(username: params[:user][:username])
     return render_error("user.not_confirmed_error", status: :unauthorized) if user.present? && !user.confirmed?
     self.resource = warden.authenticate(auth_options)
+    return render_error("user.login_error", status: :unauthorized) unless self.resource.present?
     set_flash_message!(:notice, :signed_in)
     sign_in(resource_name, resource)
     render_success current_user, nil, { blueprint_opts: { view: :extended } }
-  rescue StandardError => e
-    return render_error("user.login_error", status: :unauthorized)
   end
 
   def destroy
