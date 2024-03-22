@@ -88,6 +88,8 @@ export const NavBar = observer(() => {
       <Box
         as="nav"
         id="mainNav"
+        position="static"
+        top={0}
         w="full"
         bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
