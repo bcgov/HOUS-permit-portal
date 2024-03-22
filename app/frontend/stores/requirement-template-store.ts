@@ -7,7 +7,7 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { RequirementTemplateModel } from "../models/requirement-template"
+import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields } from "../types/enums"
 import { toCamelCase } from "../utils/utility-functions"
@@ -133,10 +133,10 @@ export const RequirementTemplateStoreModel = types
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
 
-        return self.requirementTemplateMap.get(templateData.id)
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
       }
 
-      return response.ok
+      return false
     }),
   }))
 
