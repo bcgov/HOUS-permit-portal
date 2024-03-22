@@ -92,7 +92,7 @@ export const RequirementForm = observer(
       const rootMarginValue = `${topValue}px 0px ${bottomValue}px 0px`
       const blockOptions = {
         rootMargin: rootMarginValue,
-        threshold: 0.001, // Adjust threshold based on needs
+        threshold: 0.0001, // Adjust threshold based on needs
       }
 
       const blockObserver = new IntersectionObserver(handleBlockIntersection, blockOptions)
@@ -137,8 +137,10 @@ export const RequirementForm = observer(
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
 
-      const itemWithSectionClassName = Array.from(entry.target.classList).find((className) =>
-        className.includes("formio-component-formSubmissionDataRSTsection")
+      const itemWithSectionClassName = Array.from(entry.target.classList).find(
+        (className) =>
+          className.includes("formio-component-formSubmissionDataRSTsection") ||
+          className.includes("formio-component-section-signoff-key")
       )
 
       if (itemWithSectionClassName) {
@@ -191,7 +193,7 @@ export const RequirementForm = observer(
           flex={1}
           className={"form-wrapper"}
           scrollMargin={96}
-          mb={20}
+          mb={"100%"}
           gap={8}
           ref={boxRef}
         >

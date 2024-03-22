@@ -79,10 +79,11 @@ export const PermitApplicationModel = types
   }))
   .views((self) => ({
     indexOfBlockId: (blockId: string) => {
+      if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)
     },
     getBlockClass(sectionId, blockId) {
-      return `formio-component-${self.blockKey(sectionId, blockId)}`
+      return `formio-component-${blockId === "section-signoff-id" ? "section-signoff-key" : self.blockKey(sectionId, blockId)}`
     },
     get blockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
