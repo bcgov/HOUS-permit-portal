@@ -150,8 +150,19 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
-    <Box as="main" position="sticky" zIndex={10} height="100vh">
-      <Flex id="permitHeader" w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
+    <Box as="main" id="submitter-view-permit">
+      <Flex
+        id="permitHeader"
+        w="full"
+        px={6}
+        py={3}
+        bg="theme.blue"
+        justify="space-between"
+        color="greys.white"
+        position="sticky"
+        top="0"
+        zIndex="11"
+      >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
           <Flex direction="column" w="full">

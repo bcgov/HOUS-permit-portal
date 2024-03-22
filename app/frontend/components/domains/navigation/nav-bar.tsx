@@ -88,8 +88,6 @@ export const NavBar = observer(() => {
       <Box
         as="nav"
         id="mainNav"
-        position="static"
-        top={0}
         w="full"
         bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
@@ -120,9 +118,9 @@ export const NavBar = observer(() => {
             </Show>
             <Spacer />
             <HStack gap={3}>
-              {!isStepCode && !loggedIn && <HelpDrawer />}
-              {(!isStepCode && currentUser?.isSubmitter) || (!loggedIn && <NavBarSearch />)}
-              {currentUser?.isSubmitter && !isStepCode && (
+              {!loggedIn && <HelpDrawer />}
+              {currentUser?.isSubmitter || (!loggedIn && <NavBarSearch />)}
+              {currentUser?.isSubmitter && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
                 </RouterLinkButton>
