@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react"
 import { t } from "i18next"
 import * as R from "ramda"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { fieldArrayCompatibleErrorMessage } from "./form-helpers"
@@ -64,13 +64,19 @@ const InputFormControl = ({
   ...rest
 }: IInputFormControlProps) => {
   const { register, formState } = useFormContext()
+  const { errors } = formState
   const { t } = useTranslation()
-  const errorMessage = fieldName && fieldArrayCompatibleErrorMessage(fieldName, formState)
+  const [errorMessage, setErrorMessage] = useState<string>(null)
   const registerProps = fieldName
     ? { ...register(fieldName, { required: required && t("ui.isRequired", { field: label }), validate }) }
     : {}
+
+  useEffect(() => {
+    fieldName && setErrorMessage(fieldArrayCompatibleErrorMessage(fieldName, errors))
+  }, [errors])
+
   return (
-    <FormControl isInvalid={errorMessage} flex={1} {...rest}>
+    <FormControl isInvalid={!!errorMessage} {...rest}>
       {label && <FormLabel>{label}</FormLabel>}
       <InputGroup w="full" d="flex" flexDirection="column">
         <Input bg="greys.white" {...registerProps} {...inputProps} />

@@ -70,8 +70,8 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
               <Input hidden={true} {...register("invitationToken")} />
               <UsernameFormControl validate autoComplete="off" mb={0} />
               <Flex gap={4} w="full">
-                <TextFormControl label="First Name" fieldName="firstName" required />
-                <TextFormControl label="Last Name" fieldName="lastName" required />
+                <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
+                <TextFormControl label={t("user.lastName")} fieldName="lastName" required />
               </Flex>
               <PasswordFormControl validate mb={0} />
               <Text>{t("auth.passwordRequirements")}</Text>

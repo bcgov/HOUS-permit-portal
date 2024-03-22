@@ -31,8 +31,8 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const defaultUserValues = {
     role: null,
     jurisdictionId: currentJurisdiction?.id,
-    firstName: "",
-    lastName: "",
+    firstName: null,
+    lastName: null,
   }
 
   const formMethods = useForm<TInviteFormData>({
@@ -57,7 +57,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
     name: "users",
   })
 
-  const { isSubmitting } = formState
+  const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
     await invite(formData)
@@ -106,6 +106,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   variant="primary"
                   type="submit"
                   isLoading={isSubmitting}
+                  isDisabled={!isValid || isSubmitting}
                   loadingText={t("ui.loading")}
                   rightIcon={<PaperPlaneTilt size={16} />}
                 >
