@@ -49,9 +49,17 @@ export const overridePanelTemplate = (ctx) => {
     __p += "\n    </span>\n  </div>\n  "
   }
   __p += "\n  "
-  if ((!ctx.collapsed || ctx.builder) && ctx.component?.tip) {
-    __p += `\n <div class="card-tips"><div class="tips"><h3 class="tips-header"><i class="ph-fill ph-seal-check"></i>Tip</h3>${ctx.component?.tip}</div></div>`
+  if ((!ctx.collapsed || ctx.builder) && (ctx.component?.description || ctx.component?.tip)) {
+    __p += `\n <div class="card-panel-addition">`
+    if (ctx.component?.description) {
+      __p += `\n <div>${ctx.component?.description}</div>`
+    }
+    if (ctx.component?.tip) {
+      __p += `\n <div class="tips"><h3 class="tips-header"><i class="ph-fill ph-seal-check"></i>Tip</h3>${ctx.component?.tip}</div>`
+    }
+    __p += "\n  </div>\n  "
   }
+
   if (!ctx.collapsed || ctx.builder) {
     __p +=
       '\n  <div class="card-body" ref="' +
