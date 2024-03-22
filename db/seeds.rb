@@ -179,10 +179,3 @@ TemplateVersion
 
 puts "Seeding EULA..."
 EulaUpdater.run
-
-puts "Seeding permit type contact..."
-PermitTypeSubmissionContact.create!(
-  jurisdiction_id: north_van.id,
-  permit_type_id: template_version.permit_type.id,
-  email: "example@example.com", # Add a valid email address
-)
