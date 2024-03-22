@@ -1,6 +1,6 @@
 class AutomatedCompliance::DigitalSealValidatorJob
   include Sidekiq::Worker
-  sidekiq_options queue: :file_processing, lock: :until_and_while_executing
+  sidekiq_options queue: :default, lock: :until_and_while_executing
 
   def perform(permit_application_id)
     permit_application = PermitApplication.find(permit_application_id)
