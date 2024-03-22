@@ -96,6 +96,7 @@ class RequirementsFromXlsxSeeder
       .drop(3)
       .compact
       .uniq
+      .reject { |section_name| section_name.blank? }
       .each do |section_name|
         rs =
           requirement_template
@@ -113,7 +114,8 @@ class RequirementsFromXlsxSeeder
         # if column A(0) Section, C(2) Requirement Block Internal Name C(2) Requirement Block Display Name and L(11) value
 
         # go through each requirement block and add them to each section
-        if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
+        if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] &&
+             (sheet.row(row_index)[3].present? || sheet.row(row_index)[11].present?)
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
           internal_name = sheet.row(row_index)[1]&.strip
@@ -127,18 +129,20 @@ class RequirementsFromXlsxSeeder
               display_description: sheet.row(row_index)[3]&.strip,
             )
 
-          req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
-          self.setup_requirements(rb, valid_rows, req_vals, errors)
+          if sheet.row(row_index)[11].present?
+            req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
+            self.setup_requirements(rb, valid_rows, req_vals, errors)
 
-          rsrb =
-            req_template_section
-              .template_section_blocks
-              .where(requirement_block: rb)
-              .first_or_initialize(requirement_block: rb)
-          rsrb.update!(position: rstrb_position_incrementer[req_template_section.name] || 0)
-          rstrb_position_incrementer[req_template_section.name].present? ?
-            rstrb_position_incrementer[req_template_section.name] += 1 :
-            rstrb_position_incrementer[req_template_section.name] = 1
+            rsrb =
+              req_template_section
+                .template_section_blocks
+                .where(requirement_block: rb)
+                .first_or_initialize(requirement_block: rb)
+            rsrb.update!(position: rstrb_position_incrementer[req_template_section.name] || 0)
+            rstrb_position_incrementer[req_template_section.name].present? ?
+              rstrb_position_incrementer[req_template_section.name] += 1 :
+              rstrb_position_incrementer[req_template_section.name] = 1
+          end
         end
       rescue StandardError => e
         errors << "Error loading #{activity.name} #{permit_type.name} - row:#{row_index} - #{e.message}"

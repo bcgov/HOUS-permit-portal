@@ -39,6 +39,7 @@ class RequirementBlock < ApplicationRecord
       key: key(section_key),
       type: "panel",
       title: name,
+      description: display_description,
       collapsible: true,
       collapsed: false,
       components: components_form_json(section_key),
