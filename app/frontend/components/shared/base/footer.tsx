@@ -20,7 +20,6 @@ export const Footer = observer(() => {
     "/login",
     "/forgot-password",
     "/register",
-    "/permit-applications",
     "/welcome",
   ]
 

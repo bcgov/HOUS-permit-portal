@@ -128,7 +128,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             </VStack>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
-            <Image src="https://placehold.co/230x150" alt="dont-forget-me" />
+            <Image src="images/digital-permit-tools.png" borderRadius="md" w="2xs" alt="Digital permit tools" />
             <Flex as="section" direction="column" gap={4}>
               <Heading as="h3">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
