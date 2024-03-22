@@ -59,5 +59,3 @@ node_modules
 deleteme.*
 
 /devops/docker/**/*.tar.gz
-
-/db/templates/Core*.xlsx
