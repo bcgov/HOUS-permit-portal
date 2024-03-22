@@ -101,7 +101,7 @@ export const NavBar = observer(() => {
       >
         <Container maxW="container.lg">
           <Flex align="center" gap={2}>
-            <RouterLink to="/">
+            <RouterLink to="/welcome">
               <Image
                 fit="cover"
                 htmlHeight="64px"

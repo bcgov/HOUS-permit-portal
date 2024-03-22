@@ -42,6 +42,7 @@ type TJurisdictionFieldValues = {
   lookOutHtml: string
   contactSummaryHtml: string
   mapPosition: TLatLngTuple
+  mapZoom: number
   contactsAttributes: IContact[]
 }
 
@@ -57,6 +58,7 @@ export const JurisdictionScreen = observer(() => {
       contactSummaryHtml: currentJurisdiction?.contactSummaryHtml,
       contactsAttributes: currentJurisdiction?.contacts as IContact[],
       mapPosition: currentJurisdiction?.mapPosition || [0, 0],
+      mapZoom: currentJurisdiction?.mapZoom || 13,
     }
   }
 
@@ -70,6 +72,7 @@ export const JurisdictionScreen = observer(() => {
   const { handleSubmit, control, reset, watch, formState } = formMethods
   const { isSubmitting, isValid } = formState
   const mapPositionWatch = watch("mapPosition")
+  const mapZoomWatch = watch("mapZoom")
 
   useEffect(() => {
     reset(getDefaultJurisdictionValues())
@@ -88,7 +91,7 @@ export const JurisdictionScreen = observer(() => {
     <Flex as="main" direction="column" w="full" bg="greys.white">
       <BlueTitleBar title={qualifiedName} />
       <Show below="md">
-        <JurisdictionMap mapPosition={mapPositionWatch} />
+        <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
         <FormProvider {...formMethods}>
@@ -247,6 +250,7 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
   const [isEditingMap, setIsEditingMap] = useState(false)
   const { control, watch, setValue } = useFormContext()
   const mapPositionWatch = watch("mapPosition")
+  const mapZoomWatch = watch("mapZoom")
 
   const editMapSteps = i18next.t("jurisdiction.edit.editMapSteps", { returnObjects: true }) as string[]
 
@@ -314,7 +318,9 @@ const EditableMap = ({ currentJurisdiction }: IEditableMapProps) => {
         )}
         <JurisdictionMap
           mapPosition={mapPositionWatch}
+          mapZoom={mapZoomWatch}
           onMapDrag={isEditingMap && ((latLng) => setValue("mapPosition", latLng))}
+          onZoomChange={isEditingMap && ((zoom) => setValue("mapZoom", zoom))}
           isEditingMap={isEditingMap}
         />
       </Flex>

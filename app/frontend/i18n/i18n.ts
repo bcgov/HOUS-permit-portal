@@ -4,6 +4,13 @@ import { initReactI18next } from "react-i18next"
 export const defaultNS = "translation"
 export const fallbackNS = "translation"
 
+const fallbackTranslations = {
+  en: {
+    fallback: "Not found",
+  },
+  // You can add more fallback translations for other languages here
+}
+
 const options = {
   resources: {
     /* English translations */
@@ -153,6 +160,7 @@ const options = {
           failedToCopy: "Something went wrong while trying to copy",
           reset: "Reset",
           help: "Help",
+          pleaseSelect: "please select",
         },
         eula: {
           title: "End-User License Agreement",
@@ -793,6 +801,7 @@ const options = {
             title: "Configuration Management",
             description: "Customize content in one centralized place.",
             editPermission: "Only managers are able to edit.",
+            jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
             jurisdictionAbout: {
@@ -1098,6 +1107,7 @@ const options = {
             energyStep: "Energy Step Code Requirements",
             submissionsInboxSetup: "Submissions Inbox Setup",
             confirmed: "Submission E-mail Confirmed",
+            welcome: "Welcome",
           },
           questionSupport: "Question Support",
         },
@@ -1112,6 +1122,9 @@ const options = {
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
+  parseMissingKeyHandler: (key, defaultValue) => {
+    return fallbackTranslations.en.fallback
+  },
 }
 
 i18n.use(initReactI18next).init(options)

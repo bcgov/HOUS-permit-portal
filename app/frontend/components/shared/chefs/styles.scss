@@ -454,8 +454,10 @@
   .help-block {
     display: block;
     margin-top: 16px;
-    color: var(--chakra-colors-error);
-    font-weight: 700;
+    border: 1px solid var(--chakra-colors-error);
+    border-radius: 8px;
+    background-color: var(--chakra-colors-semantic-errorLight);
+    padding: 12px;
   }
 
   .contact-data-grid {
@@ -502,7 +504,6 @@
         font-size: var(--chakra-fontSizes-xl);
         margin-right: var(--chakra-space-1);
       }
-
     }
 
     .formio-button-remove-row {

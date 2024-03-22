@@ -9,6 +9,7 @@ import { FlashMessage } from "../../shared/base/flash-message"
 import { Footer } from "../../shared/base/footer"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
+import { RedirectScreen } from "../../shared/base/redirect-screen"
 import { EULAModal } from "../../shared/eula-modal"
 import { EmailConfirmedScreen } from "../authentication/email-confirmed-screen"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
@@ -162,9 +163,11 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
+        <Route path="/welcome" element={<LandingScreen />} />
         {loggedIn ? (
           <>
             <Route path="/" element={<HomeScreen />} />
+            <Route path="/jurisdictions" element={<RedirectScreen />} />
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
@@ -178,7 +181,7 @@ const AppRoutes = observer(() => {
           </>
         ) : (
           <>
-            <Route path="/" element={<LandingScreen />} />
+            <Route path="/" element={<RedirectScreen path="/welcome" />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
             <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />

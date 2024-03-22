@@ -50,6 +50,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
   const onSubmit = async (formData) => {
     await updateProfile(formData)
+    navigate("/")
   }
 
   return (

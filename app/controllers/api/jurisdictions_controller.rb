@@ -120,6 +120,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :contact_summary_html,
       :energy_step_required,
       :zero_carbon_step_required,
+      :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[id name department title phone_number email],
