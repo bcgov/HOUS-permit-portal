@@ -39,6 +39,7 @@ RSpec.describe RequirementBlock, type: :model do
              type: "panel",
              collapsible: true,
              collapsed: false,
+             description: nil,
            }
          )
       # expect 7 because a block that is all optional requirements gets one extra required component
