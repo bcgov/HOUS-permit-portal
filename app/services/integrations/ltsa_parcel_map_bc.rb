@@ -35,7 +35,7 @@ class Integrations::LtsaParcelMapBc
       response = @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{HISTORIC_SERVICE}/query?f=json&#{query}")
       return parse_attributes_from_response(response)
     else
-      raise ArgumentError.new("invalid geometry returned")
+      raise Errors::GeometryError
     end
   end
 

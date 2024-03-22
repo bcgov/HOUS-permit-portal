@@ -1,7 +1,11 @@
-class AutomatedCompliance::DigitalSealValidatorJob < ApplicationJob
-  queue_as :default
+class AutomatedCompliance::DigitalSealValidatorJob
+  include Sidekiq::Worker
+  sidekiq_options queue: :file_processing, lock: :until_and_while_executing
 
-  def perform(permit_application)
+  def perform(permit_application_id)
+    permit_application = PermitApplication.find(permit_application_id)
+    return if permit_application.blank?
+
     #if supporting document has compliance run validation on it
     fields_for_digital_check = permit_application.automated_compliance_requirements_for_module("DigitalSealValidator")
     supporting_doc_ids =

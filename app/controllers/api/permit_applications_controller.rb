@@ -43,7 +43,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
            extract_s3_uploads_from_params(permit_application_params),
          )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
-        AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
+        AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
       end
       render_success @permit_application,
                      ("permit_application.save_draft_success"),
@@ -93,7 +93,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     if @permit_application.save
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
-        AutomatedCompliance::AutopopulateJob.perform_later(@permit_application)
+        AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
       end
       render_success @permit_application,
                      "permit_application.create_success",

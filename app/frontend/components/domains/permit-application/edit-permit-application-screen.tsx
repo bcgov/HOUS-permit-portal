@@ -103,11 +103,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const updateFormIoValues = (formio, frontEndFormUpdate) => {
     for (const [key, value] of Object.entries(frontEndFormUpdate)) {
-      let componentToSet = formio.getComponent(key)
-      componentSetValue(componentToSet, value)
+      if (!R.isNil(value)) {
+        let componentToSet = formio.getComponent(key)
+        if (!R.isNil(componentToSet)) {
+          componentSetValue(componentToSet, value)
+        }
+      }
     }
   }
 
+  //guard happens before this call to optimize code
   const componentSetValue = (componentToSet, newValue) => {
     if (componentToSet?.component?.type == "file") {
       //all file types use S3, always set to what is returned
@@ -115,7 +120,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       import.meta.env.DEV && console.log("[DEV] setting file value", componentToSet, newValue)
     } else {
       //if it is a computed compliance
-      if (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue())) {
+      if (componentToSet?.getValue && (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue()))) {
         import.meta.env.DEV && console.log("[DEV] setting file value", componentToSet, newValue)
         componentToSet.setValue(newValue)
       }

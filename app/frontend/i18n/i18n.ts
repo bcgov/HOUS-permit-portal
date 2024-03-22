@@ -1124,7 +1124,8 @@ const options = {
         },
         automatedCompliance: {
           baseMessage: `This field has Auto-Compliance capability:`,
-          defaultValueMesage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
+          defaultValueMessage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
+          failedValueMessage: `Auto-Compliance could not find a value for this parameter.`,
         },
       },
     },

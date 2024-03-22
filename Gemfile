@@ -62,6 +62,7 @@ gem "factory_bot", "~> 6.4"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 1.12"
+gem 'sidekiq-unique-jobs', '~> 8.0'
 gem "rubyzip", "~> 2.3.2"
 gem "anycable-rails", "~> 1.4"
 gem "addressable", "~> 2.8"
@@ -73,6 +74,7 @@ group :development, :test do
   gem "debug", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
   gem "rspec-rails", "~> 6.1.0"
+  gem 'rspec-sidekiq', '~> 4.1'
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
