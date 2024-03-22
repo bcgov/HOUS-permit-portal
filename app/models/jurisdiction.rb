@@ -80,7 +80,6 @@ class Jurisdiction < ApplicationRecord
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
-      templates_used: templates_used_size,
     }
   end
 
@@ -110,10 +109,6 @@ class Jurisdiction < ApplicationRecord
 
   def permit_applications_size
     permit_applications&.size || 0
-  end
-
-  def templates_used_size
-    jurisdiction_template_version_customizations&.size || 0
   end
 
   def unviewed_permit_applications
