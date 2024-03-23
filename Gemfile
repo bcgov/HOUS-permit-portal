@@ -74,11 +74,14 @@ group :development, :test do
   gem "debug", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
   gem "rspec-rails", "~> 6.1.0"
-  gem 'rspec-sidekiq', '~> 4.1'
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "vcr", "~> 6.2"
+end
+
+group :test do
+  gem 'rspec-sidekiq', '~> 4.1'
 end
 
 group :development do
