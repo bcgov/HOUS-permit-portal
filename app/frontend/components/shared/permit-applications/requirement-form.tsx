@@ -202,7 +202,6 @@ export const RequirementForm = observer(
 
     return (
       <>
-        <ErrorsBox errorBox={errorBoxData} />
         <Flex
           direction="column"
           as={"section"}
@@ -217,6 +216,7 @@ export const RequirementForm = observer(
           gap={8}
           ref={boxRef}
         >
+          <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.isSubmitted && (
             <CustomToast
               description={t("permitApplication.show.wasSubmitted", {

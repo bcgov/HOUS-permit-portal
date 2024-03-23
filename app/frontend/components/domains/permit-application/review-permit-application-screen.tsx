@@ -69,7 +69,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
         id="permitHeader"
         position="sticky"
         top={0}
-        zIndex={10}
+        zIndex={11}
         w="full"
         px={6}
         py={3}

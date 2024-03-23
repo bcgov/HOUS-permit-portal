@@ -6,6 +6,11 @@
 
 ====================================== */
 
+.chakra-portal {
+  position: relative;
+  z-index: 99;
+}
+
 /* Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind */
 .nav-menu-dropdown-background > div {
   &::after {
@@ -16,7 +21,7 @@
     top: -100px;
     bottom: -100vh;
     left: -100vw;
-    right: -100vw;
+    right: 100vw;
     z-index: -1;
   }
 }

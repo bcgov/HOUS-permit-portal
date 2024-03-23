@@ -26,10 +26,11 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
       position="fixed"
       right="30px"
       top="50%"
-      zIndex={9}
+      zIndex={14}
       p={4}
       maxW={"300px"}
       overflowY={"auto"}
+      id="floating-error-alert-box"
     >
       <Flex align="center" gap={4}>
         <Box color="semantic.error">
