@@ -39,7 +39,8 @@ module FormSupportingDocuments
     #find supporting docs that are created that have data key and match based on storage id
     docs_in_storage = supporting_documents.select(:id, :data_key, :file_data)
     find_file_fields_and_transform_hash!(submission_data, {}) do |file_field_key, file_array|
-      file_array.map { |file| remap_cache_to_storage_ids(file_field_key, file, docs_in_storage) }.compact
+      #if file_array is blank, no file set yet
+      file_array.map { |file| remap_cache_to_storage_ids(file_field_key, file, docs_in_storage) }.compact if file_array
     end
   end
 
