@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Flex, Heading, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Collapse, Flex, Heading, ListItem, OrderedList, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, CaretUp, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -22,13 +22,14 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
       borderColor={"semantic.error"}
       borderWidth={"1px"}
       borderRadius="lg"
-      maxH="360px"
+      minH="85px"
+      maxH="calc(100vh - 360px)"
+      maxW="340px"
       position="fixed"
-      right="30px"
-      top="50%"
+      right="6"
+      top="220px"
       zIndex={14}
       p={4}
-      maxW={"300px"}
       overflowY={"auto"}
       id="floating-error-alert-box"
     >
@@ -36,7 +37,7 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
         <Box color="semantic.error">
           <WarningCircle size={24} aria-label={"Warning icon"} />
         </Box>
-        <Heading as="h3" fontSize="md" overflowWrap={"break-word"}>
+        <Heading as="h4" overflowWrap={"break-word"}>
           {t("requirementTemplate.edit.errorsBox.title", { count: errorBox.length })}
         </Heading>
         <Button
@@ -48,12 +49,26 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
         ></Button>
       </Flex>
       <Collapse in={isOpen}>
-        <Text>{t("requirementTemplate.edit.errorsBox.instructions")}</Text>
-        <VStack alignItems={"flex-start"}>
+        <Text fontSize="sm">{t("requirementTemplate.edit.errorsBox.instructions")}</Text>
+
+        <OrderedList
+          mt="2"
+          ml="0"
+          fontSize="sm"
+          sx={{
+            "li a": {
+              color: "text.primary",
+            },
+          }}
+        >
           {errorBox.map((error, index) => (
-            <ScrollLink key={error.id} to={error.id}>{`${index}. ${error.label}`}</ScrollLink>
+            <ListItem>
+              <ScrollLink key={error.id} to={error.id}>
+                {error.label}
+              </ScrollLink>
+            </ListItem>
           ))}
-        </VStack>
+        </OrderedList>
       </Collapse>
     </Box>
   )

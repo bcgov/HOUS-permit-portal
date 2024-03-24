@@ -964,7 +964,7 @@ const options = {
             scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             errorsBox: {
-              title: "There are {{count}} fields with errors on the page.",
+              title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",
             },
           },
@@ -1133,7 +1133,7 @@ const options = {
           questionSupport: "Question support",
         },
         automatedCompliance: {
-          baseMessage: `This field has Auto-Compliance capability:`,
+          baseMessage: `This field has Auto-Compliance capability`,
           defaultValueMessage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
           failedValueMessage: `Auto-Compliance could not find a value for this parameter.`,
         },

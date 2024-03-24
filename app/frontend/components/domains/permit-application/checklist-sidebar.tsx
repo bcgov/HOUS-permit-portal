@@ -16,7 +16,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
   const navHeight = document.getElementById("mainNav")?.offsetHeight
   const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
 
-  // TODO: We should probably switch to use link anchors instead so we have the ability to bring someone directly to a specific block on the page.
+  // TODO: We should probably switch to use link anchors instead so we have the ability to bring someone directly and also focus on a specific block on the page.
   const handleTabsChange = (index: number, sectionId: string, blockId: string) => {
     setSelectedTabIndex(index)
     const className = getBlockClass(sectionId, blockId)

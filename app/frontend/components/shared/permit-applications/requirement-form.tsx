@@ -215,6 +215,7 @@ export const RequirementForm = observer(
           maxWidth="container.lg"
           gap={8}
           ref={boxRef}
+          id="requirement-form-wrapper"
         >
           <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.isSubmitted && (

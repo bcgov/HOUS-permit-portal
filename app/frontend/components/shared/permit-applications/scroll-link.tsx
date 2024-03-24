@@ -7,7 +7,7 @@ export const ScrollLink = ({ to, children, ...props }) => {
     const targetElement = document.getElementById(to)
 
     if (targetElement) {
-      targetElement.scrollIntoView({ behavior: "instant", block: "center" })
+      targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
     }
   }
 

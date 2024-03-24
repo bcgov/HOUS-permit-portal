@@ -22,7 +22,11 @@ $error-light: #f7e1e3;
 $error: #d9292f;
 
 @mixin yellowBarHeader {
+  font-weight: bold;
+  font-size: var(--chakra-fontSizes-4xl);
   line-height: 150%;
+  margin-top: var(--chakra-space-6);
+  margin-bottom: var(--chakra-space-3);
 
   &::before {
     content: "";

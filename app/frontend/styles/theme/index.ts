@@ -16,6 +16,9 @@ import { space } from "./foundations/space"
 
 const styles = {
   global: {
+    html: {
+      scrollBehaviour: "smooth",
+    },
     body: {
       /*overflowX: "hidden",*/
       color: "text.primary", // Set your desired default body font color
@@ -46,7 +49,7 @@ const styles = {
     [".chakra-menu__menu-list .chakra-menu__menuitem "]: {
       borderRadius: "0",
     },
-    ["ul li"]: {
+    ["ul li, ol li"]: {
       marginBottom: "var(--chakra-sizes-2)",
     },
   },

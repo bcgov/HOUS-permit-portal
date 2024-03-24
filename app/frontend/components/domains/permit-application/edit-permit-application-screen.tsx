@@ -204,7 +204,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               </Tooltip>
             </form>
 
-            <Text>{permitTypeAndActivity}</Text>
+            <Text m="0">{permitTypeAndActivity}</Text>
             <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
