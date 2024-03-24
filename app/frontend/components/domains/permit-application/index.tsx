@@ -38,7 +38,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
   useSearch(permitApplicationStore, [])
 
   return (
-    <Flex as="main" direction="column" w="full" bg="greys.white" flex={1}>
+    <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <PermitApplicationStatusTabs searchModel={permitApplicationStore} />
       <BlueTitleBar title={t("permitApplication.indexTitle")} />
       <Container maxW="container.lg" pb={4}>

@@ -12,7 +12,6 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
-  Portal,
   Show,
   Spacer,
   Text,
@@ -20,7 +19,7 @@ import {
 import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
@@ -170,6 +169,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const { sessionStore, userStore } = useMst()
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleClickLogout = async () => {
     await logout()
@@ -189,7 +189,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
   const submitterOnlyItems = <></>
 
   return (
-    <Menu>
+    <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)}>
       <MenuButton
         as={Button}
         borderRadius="lg"
@@ -202,45 +202,44 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       >
         {t("site.menu")}
       </MenuButton>
-      <Portal>
-        <Box className="nav-menu-dropdown-background">
-          <MenuList zIndex={10} boxShadow="2xl">
-            {loggedIn ? (
-              <>
-                <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
-                  {t("site.loggedInWelcome")}
-                </Text>
-                <MenuGroup title={currentUser.firstName + " " + currentUser.lastName} noOfLines={1}>
-                  <MenuDivider />
-                  {currentUser?.isSuperAdmin && superAdminOnlyItems}
-                  {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
-                  {currentUser?.isSubmitter && submitterOnlyItems}
-                  <HelpDrawer
-                    renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
-                  />
-                  <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-                  <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
-                </MenuGroup>
-              </>
-            ) : (
-              <>
-                <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
-                  <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                  <NavMenuItemCTA label={t("auth.register")} to="/register" />
-                </MenuList>
+
+      <Box className={isMenuOpen && "show-menu-overlay-background"}>
+        <MenuList zIndex={99} boxShadow="2xl">
+          {loggedIn ? (
+            <>
+              <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
+                {t("site.loggedInWelcome")}
+              </Text>
+              <MenuGroup title={currentUser.firstName + " " + currentUser.lastName} noOfLines={1}>
                 <MenuDivider />
-                <NavMenuItem label={t("site.home")} to="/" />
-              </>
-            )}
-            <MenuDivider />
-            <MenuItem>
-              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
-                {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
-              </Link>
-            </MenuItem>
-          </MenuList>
-        </Box>
-      </Portal>
+                {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                {currentUser?.isSubmitter && submitterOnlyItems}
+                <HelpDrawer
+                  renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
+                />
+                <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
+                <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
+              </MenuGroup>
+            </>
+          ) : (
+            <>
+              <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
+                <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                <NavMenuItemCTA label={t("auth.register")} to="/register" />
+              </MenuList>
+              <MenuDivider />
+              <NavMenuItem label={t("site.home")} to="/" />
+            </>
+          )}
+          <MenuDivider />
+          <MenuItem>
+            <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
+              {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
+            </Link>
+          </MenuItem>
+        </MenuList>
+      </Box>
     </Menu>
   )
 })

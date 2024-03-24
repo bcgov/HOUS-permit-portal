@@ -6,32 +6,26 @@
 
 ====================================== */
 
+/* Make sure <Portal> stays higher than other elements eg. position: sticky/fixed  items) */
 .chakra-portal {
   position: relative;
   z-index: 99;
 }
 
 /* Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind */
-.nav-menu-dropdown-background > div {
+.show-menu-overlay-background {
+  position: relative;
+  z-index: 1000;
   &::after {
     content: "";
     display: block;
     background: rgba(0, 0, 0, 0.25);
-    position: absolute;
-    top: -100px;
-    bottom: -100vh;
-    left: -100vw;
-    right: 100vw;
-    z-index: -1;
-  }
-}
-.chakra-menu__menu-list {
-  .chakra-menu__group__title {
-    max-width: 250px;
-    margin-left: var(--chakra-space-3);
-  }
-  .chakra-menu__menuitem {
-    border-radius: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
   }
 }
 

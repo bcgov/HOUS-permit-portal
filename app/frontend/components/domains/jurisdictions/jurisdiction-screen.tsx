@@ -88,7 +88,7 @@ export const JurisdictionScreen = observer(() => {
   }
 
   return (
-    <Flex as="main" direction="column" w="full" bg="greys.white">
+    <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={qualifiedName} />
       <Show below="md">
         <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />

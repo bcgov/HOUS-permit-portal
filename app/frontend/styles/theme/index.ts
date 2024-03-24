@@ -39,6 +39,13 @@ const styles = {
     [".chakra-breadcrumb__list"]: {
       paddingLeft: "0",
     },
+    [".chakra-menu__menu-list .chakra-menu__group__title"]: {
+      maxWidth: "250px",
+      marginLeft: "var(--chakra-space-3)",
+    },
+    [".chakra-menu__menu-list .chakra-menu__menuitem "]: {
+      borderRadius: "0",
+    },
     ["ul li"]: {
       marginBottom: "var(--chakra-sizes-2)",
     },
