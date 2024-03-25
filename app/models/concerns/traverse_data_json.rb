@@ -8,8 +8,7 @@ module TraverseDataJson
 
     hash.each do |key, value|
       if key.ends_with?("_file")
-        #if files array is not present, it means it the subsequent call
-        files.concat(block.call(key, value)) if value.present? && files.present?
+        files.concat(block.call(key, value)) if value.present?
       else
         case value
         when Hash
