@@ -53,8 +53,10 @@ module Api::Concerns::Search::PermitApplications
   def order
     if (sort = permit_application_search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
-    else
+    elsif current_user.submitter?
       { created_at: { order: :desc, unmapped_type: "long" } }
+    else
+      { number: { order: :desc, unmapped_type: "long" } }
     end
   end
 end
