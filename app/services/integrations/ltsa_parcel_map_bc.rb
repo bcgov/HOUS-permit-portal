@@ -22,7 +22,7 @@ class Integrations::LtsaParcelMapBc
   def search_pin_from_coordinates(coord_array: [], field: "*")
     #assume we use SR4326 as geocoder defaults to that as its main coordinate version
     query = "returnIdsOnly=false&returnCountOnly=false"
-    query += "&where=1%3D1&geometry=#{coord_array.join("%2C")}"
+    query += "&where=PIN+IS+NOT+NULL&geometry=#{coord_array.join("%2C")}"
     query +=
       "&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=true&spatialRel=esriSpatialRelIntersects"
     query += "&outFields=#{fields}"
