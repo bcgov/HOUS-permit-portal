@@ -122,6 +122,8 @@ export const FieldsSetup = observer(function FieldsSetup() {
               const watchedHint = watch(`requirementsAttributes.${index}.hint`)
               const watchedRequired = watch(`requirementsAttributes.${index}.required`)
               const requirementType = (field as IRequirementAttributes).inputType
+              const watchedElective = watch(`requirementsAttributes.${index}.elective`)
+              const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
               return (
                 <Box
                   key={field.id}
@@ -268,9 +270,12 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     />
                   </Box>
                   <FieldControlsHeader
-                    requirementIndex={index}
                     isRequirementInEditMode={isRequirementInEditMode(field.id)}
                     toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
+                    onRemove={() => remove(index)}
+                    elective={watchedElective}
+                    conditional={watchedConditional}
+                    requirementType={requirementType}
                   />
                 </Box>
               )
