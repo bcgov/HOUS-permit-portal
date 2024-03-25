@@ -6,29 +6,6 @@
 
 ====================================== */
 
-/* Make sure <Portal> stays higher than other elements eg. position: sticky/fixed  items) */
-.chakra-portal {
-  position: relative;
-  z-index: 99;
-}
-
-/* Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind */
-.show-menu-overlay-background {
-  position: relative;
-  z-index: 1000;
-  &::after {
-    content: "";
-    display: block;
-    background: rgba(0, 0, 0, 0.25);
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 0;
-  }
-}
-
 /* Admin Panel's  */
 //  large cards that should behave like a button (eg. have whole box clickable without changing markup)
 .jumbo-buttons .chakra-button {
@@ -45,17 +22,6 @@
 }
 
 /* Typography Issues */
-
-// Workaround for <Heading> variant to be able to show a yellow line
-h1,
-h2,
-h3,
-h4,
-h5 {
-  &::before {
-    content: "";
-  }
-}
 
 // Reset Chakra's default to so we don't have to set "fontSize prop, only need to use the "as" prop. (This  only affects headings that are inside a <Container>.)
 .chakra-container {
@@ -83,10 +49,6 @@ h5 {
       margin-bottom: 0;
     }
   }
-}
-
-.chakra-toast h3 {
-  margin-bottom: 0;
 }
 
 .edit-template-yellowBarHeader {

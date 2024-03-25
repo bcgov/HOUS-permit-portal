@@ -90,11 +90,6 @@ export function handleScrollToTop(elementId: string) {
 }
 
 export function handleScrollToBottom(elementId: string) {
-  // const outerFlex = document.getElementById(elementId)
-  // outerFlex.scrollTo({
-  //   top: outerFlex.scrollHeight - outerFlex.clientHeight,
-  //   behavior: "instant",
-  // })
   window.scrollTo(0, document.body.scrollHeight)
 }
 

@@ -210,7 +210,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
               <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
                 {t("site.loggedInWelcome")}
               </Text>
-              <MenuGroup title={currentUser.firstName + " " + currentUser.lastName} noOfLines={1}>
+              <MenuGroup title={currentUser.name} noOfLines={1}>
                 <MenuDivider />
                 {currentUser?.isSuperAdmin && superAdminOnlyItems}
                 {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}

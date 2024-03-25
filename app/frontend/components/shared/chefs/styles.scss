@@ -421,8 +421,9 @@
     font-size: var(--chakra-fontSizes-xs);
     color: $bcgov-font;
     line-height: 1;
-    text-align: center;
-    margin-bottom: calc(-1 * var(--chakra-space-2));
+    text-align: left;
+    padding-left: var(--chakra-space-2);
+    margin-bottom: calc(-1 * var(--chakra-space-1));
 
     span {
       background-color: $bcgov-alert-info !important;
@@ -433,11 +434,11 @@
         content: "";
         display: inline-block;
         position: absolute;
-        left: 50%;
-        bottom: -7px;
-        border-top: 8px solid $bcgov-alert-info !important;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
+        left: var(--chakra-space-2);
+        bottom: -5px;
+        border-top: 6px solid $bcgov-alert-info !important;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
       }
     }
 
@@ -613,9 +614,8 @@
     padding-left: var(--chakra-space-6);
     padding-right: var(--chakra-space-6);
     margin-left: calc(-1 * var(--chakra-space-6) - 3px);
-    max-width: calc(
-      var(--chakra-sizes-container-sm) + var(--chakra-space-12)
-    ) !important; // to keep the input fields looking the same size
+    max-width: calc(var(--chakra-sizes-container-sm) + var(--chakra-space-12)) !important;
+    // to keep the input fields looking the same size
 
     &::before {
       content: "➤";

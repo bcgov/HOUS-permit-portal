@@ -118,12 +118,12 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "30%" }}>
           <Show above="md">
             <PermitApplicationStatusTag permitApplication={permitApplication} />
-            <Text>
-              <Text as="p" align="right" variant="tiny_uppercase">
+            <Box>
+              <Text align="right" variant="tiny_uppercase">
                 {t("permitApplication.fields.number")}
               </Text>
-              {number}
-            </Text>
+              <Text align="right">{number}</Text>
+            </Box>
           </Show>
           <RouterLinkButton
             to={`/permit-applications/${id}/edit`}

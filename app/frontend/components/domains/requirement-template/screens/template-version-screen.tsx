@@ -2,7 +2,6 @@ import { Button, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-//import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
 import { ErrorScreen } from "../../../shared/base/error-screen"
@@ -40,8 +39,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   }
 
   return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
     <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
       <BuilderHeader
         breadCrumbs={[

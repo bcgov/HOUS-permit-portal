@@ -185,19 +185,9 @@ export const RequirementForm = observer(
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
-      // setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
     }
     const onScroll = (event) => {
-      if (hasErrors) {
-        if (isFirstComponentNearTopOfView(firstComponentKey)) {
-          setFloatErrorBox(true)
-        }
-        if (!isFirstComponentNearTopOfView(firstComponentKey)) {
-          setFloatErrorBox(false)
-        }
-      } else {
-        setFloatErrorBox(false)
-      }
+      setFloatErrorBox(hasErrors && isFirstComponentNearTopOfView(firstComponentKey))
     }
 
     const onChange = (changedEvent) => {
@@ -223,7 +213,6 @@ export const RequirementForm = observer(
 
       rootComponent.on("componentError", (error) => {
         // when a form field has an error, we update the state of ErrorBox with the new error information
-        //   console.log("field err", error)
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
       })
 
@@ -249,7 +238,7 @@ export const RequirementForm = observer(
           as={"section"}
           flex={1}
           className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
-          mb={500}
+          mb="40vh"
           mx="auto"
           pl="8"
           pr="130px" // space for floating buttons
@@ -345,7 +334,11 @@ export const RequirementForm = observer(
 
 function isFirstComponentNearTopOfView(firstComponentKey) {
   const firstComponentElement = document.querySelector(`.formio-component-${firstComponentKey}`)
-  const firstComponentElTopY = firstComponentElement.getBoundingClientRect().y
-  const buffer = 400 // this buffer is to account for the transition-delay of displaying ErrorBox
-  return firstComponentElTopY < buffer
+  if (firstComponentElement) {
+    const firstComponentElTopY = firstComponentElement.getBoundingClientRect().y
+    const buffer = 400 // this buffer is to account for the transition-delay of displaying ErrorBox
+    return firstComponentElTopY < buffer
+  } else {
+    return false
+  }
 }

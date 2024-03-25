@@ -35,7 +35,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
       position="sticky"
       top={permitHeaderHeight}
       bottom="0"
-      height={"calc(100vh - " + permitHeaderHeight + "px)"}
+      height={`calc(100vh - ${permitHeaderHeight}px)`}
     >
       <Box overflowY="auto" border="1px solid" borderColor="greys.grey02">
         <Tabs orientation="vertical" index={selectedTabIndex} w="full">

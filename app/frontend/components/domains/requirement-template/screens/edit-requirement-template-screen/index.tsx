@@ -121,8 +121,6 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
     <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
       <FormProvider {...formMethods}>
         <EditableBuilderHeader requirementTemplate={requirementTemplate} />

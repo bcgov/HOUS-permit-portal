@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-//import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
 import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
@@ -113,9 +112,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   })
 
   return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
-    //<RemoveScroll style={{ width: "100%", height: "100%" }}>
     <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
       <BuilderHeader
         breadCrumbs={[
@@ -208,7 +204,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
       </Flex>
       <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
     </Flex>
-    //</RemoveScroll>
   )
 
   function scrollToTop() {

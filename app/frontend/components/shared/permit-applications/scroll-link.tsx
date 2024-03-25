@@ -9,9 +9,8 @@ export const ScrollLink = ({ to, children, ...props }) => {
       targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
       const id = targetElement.querySelector("label.col-form-label")?.getAttribute("for")
       const formControlElement = document.getElementById(id)
-      if (formControlElement?.focus && typeof formControlElement.focus === "function") {
-        formControlElement.focus()
-      }
+
+      formControlElement?.focus?.()
     }
   }
 
