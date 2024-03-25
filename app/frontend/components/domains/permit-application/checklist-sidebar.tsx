@@ -22,7 +22,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
     const className = getBlockClass(sectionId, blockId)
     const element = document.getElementsByClassName(className)[0] as HTMLElement
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "center" })
+      element.scrollIntoView({ behavior: "instant", block: "center" })
     }
   }
 
