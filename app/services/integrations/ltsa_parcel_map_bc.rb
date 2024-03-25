@@ -19,6 +19,18 @@ class Integrations::LtsaParcelMapBc
     @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
   end
 
+  def search_pin_from_coordinates(coord_array: [], field: "*")
+    #assume we use SR4326 as geocoder defaults to that as its main coordinate version
+    query = "returnIdsOnly=false&returnCountOnly=false"
+    query += "&where=1%3D1&geometry=#{coord_array.join("%2C")}"
+    query +=
+      "&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=true&spatialRel=esriSpatialRelIntersects"
+    query += "&outFields=#{fields}"
+    response = @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
+
+    parse_attributes_array_from_response(response)
+  end
+
   def historic_site_by_pid(pid:)
     query = "where=HISTORIC_SITE_IND='Y' AND PARCEL_DESCRIPTION='#{pid}'&returnGeometry=true&outFields=*"
     response = @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{HISTORIC_SERVICE}/query?f=json&#{query}")
@@ -72,6 +84,15 @@ class Integrations::LtsaParcelMapBc
     if response.success?
       #assumes there is one layer to these features at the moment
       return response.body.dig("features", 0, "attributes")
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
+  end
+
+  def parse_attributes_array_from_response(response)
+    if response.success?
+      #assumes there is one layer to these features at the moment
+      return response.body.dig("features")&.map { |f| f["attributes"] } || []
     else
       raise Errors::FeatureAttributesRetrievalError
     end
