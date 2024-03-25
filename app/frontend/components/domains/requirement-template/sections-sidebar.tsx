@@ -30,6 +30,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
       w={"368px"}
       as={"section"}
       h={"full"}
+      minH="70vh"
       borderRight={"1px solid"}
       borderColor={"border.light"}
       boxShadow={"elevations.elevation01"}

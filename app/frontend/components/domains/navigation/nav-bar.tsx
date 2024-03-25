@@ -203,7 +203,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
         {t("site.menu")}
       </MenuButton>
 
-      <Box className={isMenuOpen && "show-menu-overlay-background"}>
+      <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
         <MenuList zIndex={99} boxShadow="2xl">
           {loggedIn ? (
             <>

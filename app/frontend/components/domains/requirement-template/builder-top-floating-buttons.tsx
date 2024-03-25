@@ -14,7 +14,7 @@ export function BuilderTopFloatingButtons({ ...containerProps }: IProps) {
             size: "sm",
             variant: "primary",
             p: undefined,
-            leftIcon: <Info size={"0.875rem"} />,
+            leftIcon: <Info />,
           }}
         />
       </Stack>
