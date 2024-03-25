@@ -19,6 +19,15 @@ class Integrations::LtsaParcelMapBc
     @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
   end
 
+  def get_details_by_pin(pin:, fields: "*")
+    #cannot search PIN directly, Must use PARCEL_NAME
+    query = "returnIdsOnly=false&returnCountOnly=false"
+    query += "&where=PARCEL_NAME='#{pin}'+AND+PIN+IS+NOT+NULL"
+    query += "&returnGeometry=true&spatialRel=esriSpatialRelIntersects"
+    query += "&outFields=#{fields}"
+    @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
+  end
+
   def search_pin_from_coordinates(coord_array: [], field: "*")
     #assume we use SR4326 as geocoder defaults to that as its main coordinate version
     query = "returnIdsOnly=false&returnCountOnly=false"
@@ -66,6 +75,17 @@ class Integrations::LtsaParcelMapBc
     else
       raise Errors::FeatureAttributesRetrievalError
     end
+  end
+
+  def get_feature_attributes_by_pid_or_pin(pid:, pin:, fields: "*")
+    raise Errors::FeatureAttributesRetrievalError if (pid.present? && pin.present? || pin.blank? && pid.blank?)
+    response =
+      if pid
+        get_details_by_pid(pid: pid, fields: fields)
+      elsif pin
+        get_details_by_pin(pin: pin, fields: fields)
+      end
+    return parse_attributes_from_response(response)
   end
 
   def get_coordinates_by_pid(pid)
