@@ -115,13 +115,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   //guard happens before this call to optimize code
   const componentSetValue = (componentToSet, newValue) => {
     if (componentToSet?.component?.type == "file") {
-      //all file types use S3, always set to what is returned
-      componentToSet.setValue(newValue)
-      import.meta.env.DEV && console.log("[DEV] setting file value", componentToSet, newValue)
+      //all file types use S3, always set to what is returned.  No values would ever be set via the formUpdateChange, ignore any values
     } else {
       //if it is a computed compliance
       if (componentToSet?.getValue && (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue()))) {
-        import.meta.env.DEV && console.log("[DEV] setting file value", componentToSet, newValue)
+        import.meta.env.DEV && console.log("[DEV] setting computed compliance value", componentToSet, newValue)
         componentToSet.setValue(newValue)
       }
     }
