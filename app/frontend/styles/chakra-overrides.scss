@@ -98,18 +98,3 @@ h5 {
     z-index: 0;
   }
 }
-
-#requirement-form-wrapper {
-  [id^="error-list-"].alert.alert-danger {
-    > p::before {
-      content: "Errors";
-      display: block;
-      font-size: var(--chakra-fontSizes-2xl);
-      font-weight: bold;
-      margin-bottom: var(--chakra-space-2);
-    }
-    > ul {
-      list-style: decimal;
-    }
-  }
-}

@@ -287,6 +287,12 @@
   .choices__list {
     vertical-align: middle;
   }
+  .choices {
+    overflow: visible;
+    &:focus {
+      box-shadow: 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
+    }
+  }
   .choices__list--dropdown {
     .choices__item {
       &:not(.is-selected) {
@@ -635,6 +641,58 @@
   [ref="buttonMessageContainer"] .help-block:empty {
     padding: 0;
     border: 0;
+  }
+}
+
+#requirement-form-wrapper {
+  // style default error box that to look similar to our floating error alert box
+  [id^="error-list-"].alert.alert-danger {
+    padding-top: var(--chakra-space-7);
+    padding-left: var(--chakra-space-6);
+    padding-right: var(--chakra-space-6);
+
+    &::before {
+      content: "!";
+      font-size: 32px;
+      font-weight: bold;
+      display: inline-block;
+      height: 40px;
+      width: 40px;
+      line-height: 32px;
+      text-align: center;
+      border-radius: 100%;
+      color: $bcgov-error;
+      border: 3px solid $bcgov-error;
+      margin-bottom: var(--chakra-space-6);
+    }
+
+    > p::before {
+      //content: "Errors";
+      display: block;
+      font-size: var(--chakra-fontSizes-xl);
+      font-weight: bold;
+      margin-bottom: var(--chakra-space-2);
+    }
+
+    > ul {
+      list-style: decimal;
+    }
+  }
+
+  // the floating error alert box's show/hide
+  #floating-error-alert-box {
+    transition-property: opacity, transform;
+    transition-delay: 300ms;
+    transition-duration: 200ms;
+  }
+
+  &.float-on #floating-error-alert-box {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  &.float-off #floating-error-alert-box {
+    opacity: 0;
+    transform: translateX(200px);
   }
 }
 

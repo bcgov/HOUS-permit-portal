@@ -49,6 +49,9 @@ const styles = {
     [".chakra-menu__menu-list .chakra-menu__menuitem "]: {
       borderRadius: "0",
     },
+    ["ul, ol"]: {
+      paddingLeft: "10",
+    },
     ["ul li, ol li"]: {
       marginBottom: "var(--chakra-sizes-2)",
     },

@@ -60,6 +60,9 @@ export const RequirementForm = observer(
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
     const [imminentSubmission, setImminentSubmission] = useState(null)
+    const [floatErrorBox, setFloatErrorBox] = useState(false)
+    const [hasErrors, setHasErrors] = useState(false)
+    const [firstComponentKey, setFirstComponentKey] = useState(null)
 
     const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
 
@@ -77,6 +80,17 @@ export const RequirementForm = observer(
         box?.removeEventListener("click", handleClick)
       }
     }, [])
+
+    useEffect(() => {
+      if (hasErrors) {
+        window.addEventListener("scroll", onScroll)
+      } else {
+        window.removeEventListener("scroll", onScroll)
+      }
+      return () => {
+        window.removeEventListener("scroll", onScroll)
+      }
+    }, [hasErrors])
 
     useEffect(() => {
       // This useEffect registers the intersection observers for the panels
@@ -156,6 +170,7 @@ export const RequirementForm = observer(
     }
 
     const onFormSubmit = async (submission: any) => {
+      setHasErrors(null)
       setImminentSubmission(submission)
       onOpen()
     }
@@ -170,7 +185,19 @@ export const RequirementForm = observer(
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
-      setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
+      // setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
+    }
+    const onScroll = (event) => {
+      if (hasErrors) {
+        if (isFirstComponentNearTopOfView(firstComponentKey)) {
+          setFloatErrorBox(true)
+        }
+        if (!isFirstComponentNearTopOfView(firstComponentKey)) {
+          setFloatErrorBox(false)
+        }
+      } else {
+        setFloatErrorBox(false)
+      }
     }
 
     const onChange = (changedEvent) => {
@@ -193,6 +220,21 @@ export const RequirementForm = observer(
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
+
+      rootComponent.on("componentError", (error) => {
+        // when a form field has an error, we update the state of ErrorBox with the new error information
+        //   console.log("field err", error)
+        setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+      })
+
+      rootComponent.on("submitError", (error) => {
+        // when the form attempts to submit but has validation errors, we set a flag to show ErrorBox
+        setHasErrors(true)
+        setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+      })
+
+      const firstComponent = rootComponent.form.components[0]
+      setFirstComponentKey(firstComponent.key)
     }
 
     const scrollToTop = () => {
@@ -206,9 +248,8 @@ export const RequirementForm = observer(
           direction="column"
           as={"section"}
           flex={1}
-          className={"form-wrapper"}
-          scrollMargin={96}
-          mb="20"
+          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
+          mb="96"
           mx="auto"
           pl="8"
           pr="130px" // space for floating buttons
@@ -216,6 +257,11 @@ export const RequirementForm = observer(
           gap={8}
           ref={boxRef}
           id="requirement-form-wrapper"
+          sx={{
+            "[id^='error-list-'].alert.alert-danger > p::before": {
+              content: `"${t("requirementTemplate.edit.errorsBox.title", { count: errorBoxData.length })}"`,
+            },
+          }}
         >
           <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.isSubmitted && (
@@ -296,3 +342,10 @@ export const RequirementForm = observer(
     )
   }
 )
+
+function isFirstComponentNearTopOfView(firstComponentKey) {
+  const firstComponentElement = document.querySelector(`.formio-component-${firstComponentKey}`)
+  const firstComponentElTopY = firstComponentElement.getBoundingClientRect().y
+  const buffer = 400 // this buffer is to account for the transition-delay of displaying ErrorBox
+  return firstComponentElTopY < buffer
+}

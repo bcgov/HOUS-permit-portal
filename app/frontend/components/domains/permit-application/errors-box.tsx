@@ -62,7 +62,7 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
           }}
         >
           {errorBox.map((error, index) => (
-            <ListItem>
+            <ListItem key={index}>
               <ScrollLink key={error.id} to={error.id}>
                 {error.label}
               </ScrollLink>
