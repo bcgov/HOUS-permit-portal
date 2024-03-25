@@ -1,7 +1,7 @@
 import { format } from "date-fns"
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-tempate-screen"
+import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-template-screen"
 import { datefnsAppDateFormat } from "../constants"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"

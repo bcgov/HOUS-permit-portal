@@ -32,7 +32,7 @@ import { EditPermitApplicationScreen } from "../permit-application/edit-permit-a
 import { NewPermitApplicationScreen } from "../permit-application/new-permit-application-screen"
 import { ReviewPermitApplicationScreen } from "../permit-application/review-permit-application-screen"
 import { SuccessfulSubmissionScreen } from "../permit-application/successful-submission"
-import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-tempate-screen"
+import { NewRequirementTemplateScreen } from "../requirement-template/new-requirement-template-screen"
 import { EditRequirementTemplateScreen } from "../requirement-template/screens/edit-requirement-template-screen"
 import { JurisdictionDigitalPermitScreen } from "../requirement-template/screens/jurisdiction-digital-permit-screen"
 import { JurisdictionEditDigitalPermitScreen } from "../requirement-template/screens/jurisdiction-edit-digital-permit-screen"
