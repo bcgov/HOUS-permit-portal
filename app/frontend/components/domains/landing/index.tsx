@@ -193,15 +193,15 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
   const { control, watch } = formMethods
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
 
-  const addressWatch = watch("address")
+  const siteWatch = watch("site")
 
   useEffect(() => {
-    if (!addressWatch?.value) return
+    if (!siteWatch?.value) return
     ;(async () => {
-      const jurisdiction = await fetchGeocodedJurisdiction(addressWatch.value)
+      const jurisdiction = await fetchGeocodedJurisdiction(siteWatch.value)
       setJurisdiction(jurisdiction)
     })()
-  }, [addressWatch?.value])
+  }, [siteWatch?.value])
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
@@ -217,7 +217,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
               </Flex>
 
               <Controller
-                name="address"
+                name="site"
                 control={control}
                 render={({ field: { onChange, value } }) => {
                   return <AddressSelect onChange={onChange} value={value} />
@@ -228,14 +228,14 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
         </FormProvider>
       </Flex>
       <Center
-        bg={addressWatch?.value ? "theme.blueAlt" : "greys.white"}
+        bg={siteWatch?.value ? "theme.blueAlt" : "greys.white"}
         minH={243}
         w={{ base: "full", md: "50%" }}
         p={6}
         gap={4}
-        color={addressWatch?.value ? "greys.white" : "theme.blueAlt"}
+        color={siteWatch?.value ? "greys.white" : "theme.blueAlt"}
       >
-        {addressWatch?.value ? (
+        {siteWatch?.value ? (
           <VStack gap={8}>
             <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
               {t("landing.localJurisdiction")}

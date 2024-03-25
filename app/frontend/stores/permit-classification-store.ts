@@ -2,7 +2,7 @@ import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { ActivityModel, IPermitType, PermitTypeModel } from "../models/permit-classification"
+import { ActivityModel, IActivity, IPermitType, PermitTypeModel } from "../models/permit-classification"
 import { EPermitClassificationType } from "../types/enums"
 import { IOption } from "../types/types"
 
@@ -78,7 +78,7 @@ export const PermitClassificationStoreModel = types
         )
       )
       self.isPermitTypeLoading = false
-      return response?.data?.data ?? ([] as IOption<IPermitType>[])
+      return (response?.data?.data ?? []) as IOption<IPermitType>[]
     }),
     fetchActivityOptions: flow(function* (publishedOnly = false, activityId = null) {
       self.isActivityLoading = true
@@ -90,7 +90,7 @@ export const PermitClassificationStoreModel = types
         )
       )
       self.isActivityLoading = false
-      return response?.data?.data ?? []
+      return (response?.data?.data ?? []) as IOption<IActivity>[]
     }),
   }))
 

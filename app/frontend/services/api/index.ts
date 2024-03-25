@@ -114,6 +114,10 @@ export class Api {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
 
+  async fetchJurisdictionOptions(name: string) {
+    return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, { jurisdiction: { name } })
+  }
+
   async fetchPermitClassifications() {
     return this.client.get<IOptionResponse>(`/permit_classifications`)
   }

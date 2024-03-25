@@ -18,7 +18,6 @@ class Wrappers::Geocoder < Wrappers::Base
     site_params[:parcelPoint] = coordinates.join(",") if coordinates.present?
 
     r = get("/addresses.#{OUTPUT_FORMAT}", site_params)
-
     return(
       r["features"]
         .filter { |f| f["properties"]["siteID"].present? }

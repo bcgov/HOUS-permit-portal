@@ -98,6 +98,11 @@ export const JurisdictionStoreModel = types
       const { ok, data: response } = yield self.environment.api.fetchLocalityTypeOptions()
       return response.data
     }),
+    fetchJurisdictionOptions: flow(function* (name: string) {
+      // Jurisdiction not found in the map, fetch from API
+      const { ok, data: response } = yield self.environment.api.fetchJurisdictionOptions(name)
+      return response.data
+    }),
     setCurrentJurisdiction(jurisdictionId) {
       self.currentJurisdiction = jurisdictionId
     },

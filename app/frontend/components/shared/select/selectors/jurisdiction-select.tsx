@@ -10,37 +10,37 @@ import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
-type TSitesSelectProps = {
+type TJurisdictionSelectProps = {
   onChange: (option: IOption) => void
-  value: IOption
-  addressName?: string
+  selectedOption: IOption
+  jurisdictionName?: string
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
 
-export const AddressSelect = observer(function ({
+export const JurisdictionSelect = observer(function ({
   onChange,
-  value,
+  selectedOption,
   stylesToMerge,
-  addressName = "address",
+  jurisdictionName = "jurisdiction",
   ...rest
-}: TSitesSelectProps) {
-  const { geocoderStore } = useMst()
-  const { fetchSiteOptions: fetchOptions } = geocoderStore
+}: TJurisdictionSelectProps) {
+  const { jurisdictionStore } = useMst()
+  const { fetchJurisdictionOptions: fetchOptions } = jurisdictionStore
 
   const { setValue } = useFormContext()
   const { t } = useTranslation()
 
-  const fetchSiteOptions = (address: string, callback: (options) => void) => {
-    if (address.length > 3) {
-      fetchOptions(address).then((options: IOption[]) => {
-        setValue(addressName, null)
+  const fetchJurisdictionOptions = (name: string, callback: (options) => void) => {
+    if (name.length > 3) {
+      fetchOptions(name).then((options: IOption[]) => {
+        setValue(jurisdictionName, null)
         callback(options)
       })
     } else callback([])
   }
 
-  const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
+  const debouncedFetchOptions = useCallback(debounce(fetchJurisdictionOptions, 1000), [])
 
   const customStyles: StylesConfig<IOption, boolean> = {
     container: (provided) => ({
@@ -65,14 +65,14 @@ export const AddressSelect = observer(function ({
 
   return (
     <FormControl w="full">
-      <FormLabel>{t("landing.addressSelectLabel")}</FormLabel>
+      <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
       <InputGroup w="full">
         <AsyncSelect<IOption, boolean>
           isClearable={true}
           onChange={onChange}
-          placeholder={t("ui.searchAddresses")}
-          value={value}
-          defaultValue={value}
+          placeholder={t("ui.search")}
+          value={selectedOption}
+          defaultValue={null}
           components={{
             Control,
             Option,
@@ -112,7 +112,7 @@ const Control = ({ children, ...props }: ControlProps<IOption>) => {
 
 const Input = ({ children, ...props }: InputProps) => {
   return (
-    <components.Input {...props} aria-label="type here to search addresses">
+    <components.Input {...props} aria-label="type here to search jurisdictions">
       {children}
     </components.Input>
   )

@@ -49,7 +49,11 @@ class Integrations::LtsaParcelMapBc
 
   def get_feature_attributes_by_pid(pid:, fields: "*")
     response = get_details_by_pid(pid: pid, fields: fields)
-    return parse_attributes_from_response(response)
+    if response.success?
+      return parse_attributes_from_response(response)
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
   end
 
   def get_coordinates_by_pid(pid)

@@ -1,8 +1,8 @@
 require "rails_helper"
 
-RSpec.describe AutomatedCompliance::DigitalSealValidator do
+RSpec.describe AutomatedCompliance::SubProcess::DocDigitalSealValidator do
   it "raises an error if no document provided" do
-    expect { AutomatedCompliance::DigitalSealValidator.new.call(nil) }.to raise_error { ArgumentError }
+    expect { AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(nil) }.to raise_error { ArgumentError }
   end
 
   context "document provided" do
@@ -13,7 +13,7 @@ RSpec.describe AutomatedCompliance::DigitalSealValidator do
         allow_any_instance_of(Integrations::DigitalSealValidator).to receive(:call).and_return(
           OpenStruct.new(success: false, error: "test error", signatures: []),
         )
-        AutomatedCompliance::DigitalSealValidator.new.call(supporting_document)
+        AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(supporting_document)
         expect(supporting_document.compliance_data["status"]).to eq "failed"
       end
     end
@@ -23,7 +23,7 @@ RSpec.describe AutomatedCompliance::DigitalSealValidator do
         allow_any_instance_of(Integrations::DigitalSealValidator).to receive(:call).and_return(
           OpenStruct.new(success: true, signatures: [{ test: "payload" }]),
         )
-        AutomatedCompliance::DigitalSealValidator.new.call(supporting_document)
+        AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(supporting_document)
         expect(supporting_document.compliance_data["status"]).to eq "success"
       end
     end

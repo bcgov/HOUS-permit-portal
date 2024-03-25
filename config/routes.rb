@@ -77,6 +77,7 @@ Rails.application.routes.draw do
       post "users/search", on: :member, to: "jurisdictions#search_users"
       post "permit_applications/search", on: :member, to: "jurisdictions#search_permit_applications"
       get "locality_type_options", on: :collection
+      get "jurisdiction_options", on: :collection
     end
 
     resources :permit_classifications, only: %i[index] do
