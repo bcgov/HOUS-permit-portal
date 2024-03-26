@@ -49,7 +49,11 @@ export const overridePanelTemplate = (ctx) => {
     __p += "\n    </span>\n  </div>\n  "
   }
   __p += "\n  "
-  if ((!ctx.collapsed || ctx.builder) && (ctx.component?.description || ctx.component?.tip)) {
+  if (
+    (!ctx.collapsed || ctx.builder) &&
+    ((ctx.component?.description && ctx.component.description.length > 0) ||
+      (ctx.component?.tip && ctx.component.tip.length > 0))
+  ) {
     __p += `\n <div class="card-panel-addition">`
     if (ctx.component?.description) {
       __p += `\n <div>${ctx.component?.description}</div>`

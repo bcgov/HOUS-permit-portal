@@ -178,6 +178,18 @@
     }
   }
 
+
+  // disabled form inputs
+  .form-control, .form-check-input:not(:checked) {
+    &:disabled,
+    &[disabled="disabled"] {
+      background-color: var(--chakra-colors-greys-grey03);
+      border-color: var(--chakra-colors-greys-grey02);
+      cursor: not-allowed;
+    }
+  }
+
+
   // remove alert icons from invalid fields
   .form-control.is-invalid,
   .was-validated .form-control:invalid {
@@ -420,6 +432,7 @@
     padding-right: var(--chakra-space-6);
     margin-top: 4px;
     margin-bottom: 4px;
+
     .i {
       background-color: $error;
       height: 24px;
