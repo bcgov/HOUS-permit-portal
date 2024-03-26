@@ -52,22 +52,41 @@ const s3custom = function Provider(formio) {
           },
         }
       } catch (error) {
-        throw new Error("Failed to get pre-signed URL")
+        throw new Error("Failed to upload the file directly.  Please contact support.")
       }
     },
-    deleteFile: (fileInfo, options) => {
+    deleteFile: async (fileInfo, options) => {
       //assume we will not have public-read acl, use shrine to generate the request
-      // console.log("s3 custom delete file", fileInfo)
+      try {
+        //if there are no model / model_ids, and id starts with cache they ar part of cache
+        const params = new URLSearchParams({
+          id: fileInfo.id,
+          ...(fileInfo.model && { model: fileInfo.model }),
+          ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
+        })
+
+        const response = await fetch(`/api/storage/s3/delete?${params.toString()}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        })
+        //form.io assumes that the delete will just succeed, it always removes the link from the form
+        //TODO: ALWAYS FORCE A SAVE ON THE FILE DATA WHEN IT IS DELETED
+      } catch (error) {
+        throw new Error("The file may have failed to delete, try again.")
+      }
     },
     downloadFile: async (fileInfo, options) => {
       try {
         // Assume we will not have public-read acl, use shrine to generate the request
-        // console.log("s3 custom download files", fileInfo, options)
+        // import.meta.env.DEV && console.log("s3 custom download files", fileInfo, options)
         // Return a file value, the file value must have a url
         const params = new URLSearchParams({
           id: fileInfo.id,
-          model: fileInfo.model,
-          model_id: fileInfo.modelId,
+          ...(fileInfo.model && { model: fileInfo.model }),
+          ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
         })
 
         const response = await fetch(`/api/storage/s3/download?${params.toString()}`, {

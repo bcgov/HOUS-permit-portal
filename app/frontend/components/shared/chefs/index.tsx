@@ -34,10 +34,11 @@ Templates.current = {
   },
   label: {
     form: (ctx) => {
-      let template = ""
+      let template = defaultLabelTemplate(ctx)
       if (ctx?.component?.computedCompliance) {
         let result = ctx?.component?.computedComplianceResult
-        let computedComplianceText: string = t(`automatedCompliance.baseMessage`)
+
+        let computedComplianceText
         if (result) {
           if (ctx?.component?.computedCompliance == "DigitalSealValidator") {
             computedComplianceText = result
@@ -47,6 +48,8 @@ Templates.current = {
           }
         } else if ("computedComplianceResult" in ctx.component) {
           computedComplianceText = t("automatedCompliance.failedValueMessage")
+        } else {
+          computedComplianceText = t(`automatedCompliance.baseMessage`)
         }
 
         template = template.concat(
@@ -54,7 +57,6 @@ Templates.current = {
           ${computedComplianceText}</div>`
         )
       }
-      template = template.concat(defaultLabelTemplate(ctx))
       return template
     },
   },

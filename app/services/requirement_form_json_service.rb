@@ -318,7 +318,7 @@ class RequirementFormJsonService
     if (input_type.to_sym == :file)
       return(
         {
-          type: "file",
+          type: "simplefile",
           storage:
             (
               if (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?)
@@ -332,6 +332,7 @@ class RequirementFormJsonService
             "computed_compliance"
           ].present?
           file_hash["multiple"] = true if input_options["multiple"].present?
+          file_hash["custom_class"] = "formio-component-file" if file_hash.type != "file"
         end
       )
     end
