@@ -485,11 +485,12 @@ const options = {
           },
         },
         stepCode: {
-          title: "Step Code Auto-Compliance Tool",
-          subTitle: "Automatically generate your BC Energy Step Code Compliance Report",
-          checklistGuide: "See Checklist Guide",
+          title: "Step code auto-compliance tool",
+          subTitle: "Automatically generate your BC Energy Step Code compliance report",
+          checklistGuide: "See checklist guide",
           saveAndGoBack: "Save and go back",
           back: "Back to permit application",
+          complete: "Complete",
           restart: {
             trigger: "Restart",
             confirm: {

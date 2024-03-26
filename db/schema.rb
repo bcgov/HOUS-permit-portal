@@ -15,10 +15,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
 
-  create_table "allowlisted_jwts",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "allowlisted_jwts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "jti", null: false
     t.string "aud"
     t.datetime "exp", null: false
@@ -29,18 +26,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.index ["user_id"], name: "index_allowlisted_jwts_on_user_id"
   end
 
-  create_table "assets",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "assets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "contacts",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "title"
     t.string "email"
@@ -55,10 +46,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
   end
 
-  create_table "end_user_license_agreements",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "end_user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "content"
     t.boolean "active"
     t.datetime "created_at", null: false
@@ -66,24 +54,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.integer "variant"
   end
 
-  create_table "jurisdiction_template_version_customizations",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "jurisdiction_template_version_customizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "customizations", default: {}
     t.uuid "jurisdiction_id", null: false
     t.uuid "template_version_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
-    t.index ["template_version_id"],
-            name: "idx_on_template_version_id_8359a99333"
+    t.index ["template_version_id"], name: "idx_on_template_version_id_8359a99333"
   end
 
-  create_table "jurisdictions",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "jurisdictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.text "description_html"
     t.datetime "created_at", null: false
@@ -103,15 +84,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.string "slug"
     t.integer "map_zoom"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
-    t.index ["regional_district_id"],
-            name: "index_jurisdictions_on_regional_district_id"
+    t.index ["regional_district_id"], name: "index_jurisdictions_on_regional_district_id"
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
   end
 
-  create_table "mechanical_energy_use_intensity_references",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "mechanical_energy_use_intensity_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.int4range "hdd"
     t.numrange "conditioned_space_percent"
     t.integer "step"
@@ -119,15 +96,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.integer "meui"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[hdd conditioned_space_percent step conditioned_space_area],
-            name: "meui_composite_index",
-            unique: true
+    t.index ["hdd", "conditioned_space_percent", "step", "conditioned_space_area"], name: "meui_composite_index", unique: true
   end
 
-  create_table "permit_applications",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
     t.uuid "submitter_id", null: false
     t.uuid "jurisdiction_id", null: false
@@ -150,22 +122,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.string "reference_number"
     t.jsonb "compliance_data", default: {}, null: false
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
-    t.index ["jurisdiction_id"],
-            name: "index_permit_applications_on_jurisdiction_id"
-    t.index ["number"],
-            name: "index_permit_applications_on_number",
-            unique: true
-    t.index ["permit_type_id"],
-            name: "index_permit_applications_on_permit_type_id"
+    t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
+    t.index ["number"], name: "index_permit_applications_on_number", unique: true
+    t.index ["permit_type_id"], name: "index_permit_applications_on_permit_type_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
-    t.index ["template_version_id"],
-            name: "index_permit_applications_on_template_version_id"
+    t.index ["template_version_id"], name: "index_permit_applications_on_template_version_id"
   end
 
-  create_table "permit_classifications",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "permit_classifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "type", null: false
     t.datetime "created_at", null: false
@@ -175,26 +139,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.integer "code"
   end
 
-  create_table "permit_type_submission_contacts",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "permit_type_submission_contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "jurisdiction_id"
     t.uuid "permit_type_id"
     t.string "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string "email", null: false
-    t.index ["jurisdiction_id"],
-            name: "index_permit_type_submission_contacts_on_jurisdiction_id"
-    t.index ["permit_type_id"],
-            name: "index_permit_type_submission_contacts_on_permit_type_id"
+    t.index ["jurisdiction_id"], name: "index_permit_type_submission_contacts_on_jurisdiction_id"
+    t.index ["permit_type_id"], name: "index_permit_type_submission_contacts_on_permit_type_id"
   end
 
-  create_table "requirement_blocks",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "requirement_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.integer "sign_off_role", default: 0, null: false
     t.integer "reviewer_role", default: 0, null: false
@@ -209,24 +165,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
-  create_table "requirement_template_sections",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "requirement_template_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.uuid "requirement_template_id", null: false
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["requirement_template_id"],
-            name:
-              "index_requirement_template_sections_on_requirement_template_id"
+    t.index ["requirement_template_id"], name: "index_requirement_template_sections_on_requirement_template_id"
   end
 
-  create_table "requirement_templates",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "requirement_templates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "activity_id", null: false
     t.uuid "permit_type_id", null: false
     t.datetime "created_at", null: false
@@ -234,16 +182,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.string "description"
     t.datetime "discarded_at"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
-    t.index ["discarded_at"],
-            name: "index_requirement_templates_on_discarded_at"
-    t.index ["permit_type_id"],
-            name: "index_requirement_templates_on_permit_type_id"
+    t.index ["discarded_at"], name: "index_requirement_templates_on_discarded_at"
+    t.index ["permit_type_id"], name: "index_requirement_templates_on_permit_type_id"
   end
 
-  create_table "requirements",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "requirements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "requirement_code", null: false
     t.string "label"
     t.integer "input_type", null: false
@@ -258,14 +201,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.uuid "requirement_block_id", null: false
     t.integer "position"
     t.boolean "elective", default: false
-    t.index ["requirement_block_id"],
-            name: "index_requirements_on_requirement_block_id"
+    t.index ["requirement_block_id"], name: "index_requirements_on_requirement_block_id"
   end
 
-  create_table "step_code_building_characteristics_summaries",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "step_code_building_characteristics_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "step_code_checklist_id", null: false
     t.jsonb "roof_ceilings_lines", default: [{}]
     t.jsonb "above_grade_walls_lines", default: [{}]
@@ -273,32 +212,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.jsonb "unheated_floors_lines", default: [{}]
     t.jsonb "below_grade_walls_lines", default: [{}]
     t.jsonb "slabs_lines", default: [{}]
-    t.jsonb "windows_glazed_doors",
-            default: {
-              "lines" => [{}],
-              "performance_type" => "usi"
-            }
-    t.jsonb "doors_lines", default: [{ "performance_type" => "rsi" }]
+    t.jsonb "windows_glazed_doors", default: {"lines"=>[{}], "performance_type"=>"usi"}
+    t.jsonb "doors_lines", default: [{"performance_type"=>"rsi"}]
     t.jsonb "airtightness", default: {}
-    t.jsonb "space_heating_cooling_lines",
-            default: [
-              { "variant" => "principal" },
-              { "variant" => "secondary" }
-            ]
-    t.jsonb "hot_water_lines", default: [{ "performance_type" => "ef" }]
+    t.jsonb "space_heating_cooling_lines", default: [{"variant"=>"principal"}, {"variant"=>"secondary"}]
+    t.jsonb "hot_water_lines", default: [{"performance_type"=>"ef"}]
     t.jsonb "ventilation_lines", default: [{}]
     t.jsonb "other_lines", default: [{}]
     t.jsonb "fossil_fuels", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["step_code_checklist_id"],
-            name: "idx_on_step_code_checklist_id_f0fc711627"
+    t.index ["step_code_checklist_id"], name: "idx_on_step_code_checklist_id_f0fc711627"
   end
 
-  create_table "step_code_checklists",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "step_code_checklists", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "step_code_id"
     t.integer "stage", null: false
     t.datetime "created_at", null: false
@@ -340,10 +267,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 
-  create_table "step_code_data_entries",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "step_code_data_entries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "step_code_id"
     t.integer "stage", null: false
     t.string "model"
@@ -386,42 +310,30 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "h2k_file_data"
-    t.index ["step_code_id"],
-            name: "index_step_code_data_entries_on_step_code_id"
+    t.index ["step_code_id"], name: "index_step_code_data_entries_on_step_code_id"
   end
 
-  create_table "step_codes",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "step_codes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "permit_application_id"
     t.string "plan_author"
     t.string "plan_version"
     t.string "plan_date"
-    t.index ["permit_application_id"],
-            name: "index_step_codes_on_permit_application_id"
+    t.index ["permit_application_id"], name: "index_step_codes_on_permit_application_id"
   end
 
-  create_table "supporting_documents",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "supporting_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_application_id", null: false
     t.jsonb "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "compliance_data", default: {}, null: false
     t.string "data_key"
-    t.index ["permit_application_id"],
-            name: "index_supporting_documents_on_permit_application_id"
+    t.index ["permit_application_id"], name: "index_supporting_documents_on_permit_application_id"
   end
 
-  create_table "taggings",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "taggings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "tag_id"
     t.string "taggable_type"
     t.uuid "taggable_id"
@@ -431,30 +343,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.datetime "created_at", precision: nil
     t.string "tenant", limit: 128
     t.index ["context"], name: "index_taggings_on_context"
-    t.index %w[tag_id taggable_id taggable_type context tagger_id tagger_type],
-            name: "taggings_idx",
-            unique: true
+    t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
-    t.index %w[taggable_id taggable_type context],
-            name: "taggings_taggable_context_idx"
-    t.index %w[taggable_id taggable_type tagger_id context],
-            name: "taggings_idy"
+    t.index ["taggable_id", "taggable_type", "context"], name: "taggings_taggable_context_idx"
+    t.index ["taggable_id", "taggable_type", "tagger_id", "context"], name: "taggings_idy"
     t.index ["taggable_id"], name: "index_taggings_on_taggable_id"
-    t.index %w[taggable_type taggable_id],
-            name: "index_taggings_on_taggable_type_and_taggable_id"
+    t.index ["taggable_type", "taggable_id"], name: "index_taggings_on_taggable_type_and_taggable_id"
     t.index ["taggable_type"], name: "index_taggings_on_taggable_type"
-    t.index %w[tagger_id tagger_type],
-            name: "index_taggings_on_tagger_id_and_tagger_type"
+    t.index ["tagger_id", "tagger_type"], name: "index_taggings_on_tagger_id_and_tagger_type"
     t.index ["tagger_id"], name: "index_taggings_on_tagger_id"
-    t.index %w[tagger_type tagger_id],
-            name: "index_taggings_on_tagger_type_and_tagger_id"
+    t.index ["tagger_type", "tagger_id"], name: "index_taggings_on_tagger_type_and_tagger_id"
     t.index ["tenant"], name: "index_taggings_on_tenant"
   end
 
-  create_table "tags",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "tags", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -462,25 +364,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
-  create_table "template_section_blocks",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "template_section_blocks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "requirement_template_section_id", null: false
     t.uuid "requirement_block_id", null: false
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["requirement_block_id"],
-            name: "index_template_section_blocks_on_requirement_block_id"
-    t.index ["requirement_template_section_id"],
-            name: "idx_on_requirement_template_section_id_5469986497"
+    t.index ["requirement_block_id"], name: "index_template_section_blocks_on_requirement_block_id"
+    t.index ["requirement_template_section_id"], name: "idx_on_requirement_template_section_id_5469986497"
   end
 
-  create_table "template_versions",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "template_versions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "denormalized_template_json", default: {}
     t.jsonb "form_json", default: {}
     t.jsonb "requirement_blocks_json", default: {}
@@ -490,14 +384,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.uuid "requirement_template_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["requirement_template_id"],
-            name: "index_template_versions_on_requirement_template_id"
+    t.index ["requirement_template_id"], name: "index_template_versions_on_requirement_template_id"
   end
 
-  create_table "thermal_energy_demand_intensity_references",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "thermal_energy_demand_intensity_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.int4range "hdd"
     t.integer "step"
     t.decimal "ach"
@@ -511,27 +401,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.integer "gshl_under_300"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index %w[hdd step], name: "tedi_composite_index", unique: true
+    t.index ["hdd", "step"], name: "tedi_composite_index", unique: true
   end
 
-  create_table "user_license_agreements",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "user_license_agreements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.uuid "agreement_id", null: false
     t.date "accepted_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["agreement_id"],
-            name: "index_user_license_agreements_on_agreement_id"
+    t.index ["agreement_id"], name: "index_user_license_agreements_on_agreement_id"
     t.index ["user_id"], name: "index_user_license_agreements_on_user_id"
   end
 
-  create_table "users",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", null: false
     t.string "username"
     t.string "organization"
@@ -564,58 +447,35 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string "unconfirmed_email"
-    t.index ["confirmation_token"],
-            name: "index_users_on_confirmation_token",
-            unique: true
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["invitation_token"],
-            name: "index_users_on_invitation_token",
-            unique: true
+    t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
-    t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
+    t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
-    t.index %w[provider uid],
-            name: "index_users_on_provider_and_uid",
-            unique: true
-    t.index ["reset_password_token"],
-            name: "index_users_on_reset_password_token",
-            unique: true
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "contacts", "jurisdictions"
-  add_foreign_key "jurisdiction_template_version_customizations",
-                  "jurisdictions"
-  add_foreign_key "jurisdiction_template_version_customizations",
-                  "template_versions"
-  add_foreign_key "jurisdictions",
-                  "jurisdictions",
-                  column: "regional_district_id"
+  add_foreign_key "jurisdiction_template_version_customizations", "jurisdictions"
+  add_foreign_key "jurisdiction_template_version_customizations", "template_versions"
+  add_foreign_key "jurisdictions", "jurisdictions", column: "regional_district_id"
   add_foreign_key "permit_applications", "jurisdictions"
-  add_foreign_key "permit_applications",
-                  "permit_classifications",
-                  column: "activity_id"
-  add_foreign_key "permit_applications",
-                  "permit_classifications",
-                  column: "permit_type_id"
+  add_foreign_key "permit_applications", "permit_classifications", column: "activity_id"
+  add_foreign_key "permit_applications", "permit_classifications", column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_type_submission_contacts", "jurisdictions"
-  add_foreign_key "permit_type_submission_contacts",
-                  "permit_classifications",
-                  column: "permit_type_id"
+  add_foreign_key "permit_type_submission_contacts", "permit_classifications", column: "permit_type_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
-  add_foreign_key "requirement_templates",
-                  "permit_classifications",
-                  column: "activity_id"
-  add_foreign_key "requirement_templates",
-                  "permit_classifications",
-                  column: "permit_type_id"
+  add_foreign_key "requirement_templates", "permit_classifications", column: "activity_id"
+  add_foreign_key "requirement_templates", "permit_classifications", column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
-  add_foreign_key "step_code_building_characteristics_summaries",
-                  "step_code_checklists"
+  add_foreign_key "step_code_building_characteristics_summaries", "step_code_checklists"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"
@@ -624,9 +484,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
   add_foreign_key "template_versions", "requirement_templates"
-  add_foreign_key "user_license_agreements",
-                  "end_user_license_agreements",
-                  column: "agreement_id"
+  add_foreign_key "user_license_agreements", "end_user_license_agreements", column: "agreement_id"
   add_foreign_key "user_license_agreements", "users"
   add_foreign_key "users", "jurisdictions"
 end

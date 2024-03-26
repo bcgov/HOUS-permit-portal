@@ -52,6 +52,7 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
       :ref_dwh_heating_consumption,
       :ref_hvac_consumption,
       :hvac_consumption,
+      :status,
       building_characteristics_summary_attributes: [
         roof_ceilings_lines: %i[details rsi],
         above_grade_walls_lines: %i[details rsi],
