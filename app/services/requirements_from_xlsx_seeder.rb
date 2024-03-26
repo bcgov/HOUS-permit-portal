@@ -130,7 +130,7 @@ class RequirementsFromXlsxSeeder
             )
 
           if sheet.row(row_index)[11].present?
-            req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
+            req_vals = (11..29).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
             self.setup_requirements(rb, valid_rows, req_vals, errors)
 
             rsrb =
