@@ -11,6 +11,7 @@ interface IGroupedFieldProps extends Omit<TRequirementFieldDisplayProps, "option
   inputDisplay: JSX.Element
   required?: boolean
   containerProps?: Partial<FormControlProps>
+  editorContainerProps?: Partial<FormControlProps>
 }
 
 const defaultLabelProps: Partial<FormLabelProps> = {
@@ -30,10 +31,11 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   requirementType,
   containerProps,
   required,
+  editorContainerProps,
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
   return (
-    <FormControl w={"100%"} isReadOnly isRequired={required} {...containerProps}>
+    <FormControl w={"100%"} isReadOnly isRequired={label && required} {...containerProps}>
       <FormLabel
         {...defaultLabelProps}
         {...(labelProps as FormLabelProps)}
@@ -49,7 +51,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
         <EditorWithPreview
           label={t("requirementsLibrary.modals.addHelpTextLabel")}
           htmlValue={helperText}
-          containerProps={{ p: 0, ...helperTextStyles }}
+          containerProps={{ p: 0, ...helperTextStyles, ...editorContainerProps }}
           isReadOnly
         />
       )}
