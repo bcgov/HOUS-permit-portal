@@ -798,6 +798,8 @@ const options = {
                 heating: "Heating",
                 hotWater: "Hot water",
                 other: "All building systems, equipment, and appliances",
+                zero_carbon: "zero carbon",
+                carbon: "carbon",
               },
               requirementsMet: "Target reached:",
             },

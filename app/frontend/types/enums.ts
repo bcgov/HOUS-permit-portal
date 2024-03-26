@@ -157,6 +157,11 @@ export enum EStepCodeCompliancePath {
   stepCode = "step_code",
 }
 
+export enum EStepCodePrescriptiveValue {
+  zeroCarbon = "zero_carbon",
+  carbon = "carbon",
+}
+
 export enum EStepCodeAirtightnessValue {
   twoPointFive = "two_point_five",
   threePointTwo = "three_point_two",
