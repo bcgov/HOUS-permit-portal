@@ -332,7 +332,7 @@ class RequirementFormJsonService
             "computed_compliance"
           ].present?
           file_hash["multiple"] = true if input_options["multiple"].present?
-          file_hash["custom_class"] = "formio-component-file" if file_hash.type != "file"
+          file_hash["custom_class"] = "formio-component-file" if file_hash[:type] != "file"
         end
       )
     end
