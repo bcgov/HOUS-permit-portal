@@ -400,6 +400,8 @@ const options = {
             noFormFieldsAdded: "No form fields have been added yet, start by clicking the Add button.",
             defaultRequirementLabel: "Label",
             addHelpText: "Add help text",
+            addHelpTextLabel: "Help text",
+            editHelpTextLabel: "Edit help text",
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
             isAnElectiveField: "This is an elective field for Local Gov",
