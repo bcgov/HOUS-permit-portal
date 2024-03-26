@@ -1,4 +1,4 @@
-import { Box, HStack, Stack, Text } from "@chakra-ui/react"
+import { Box, Heading, Stack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import {
@@ -27,7 +27,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
 
 interface ISectionDisplayProps {
   section: IDenormalizedRequirementTemplateSection
-  shouldCollapseAll?: boolean
+  isCollapsedAll?: boolean
   setSectionRef: (el: HTMLElement, id: string) => void
   scrollToId?: string
   formScrollToId: (recordId: string) => string
@@ -39,7 +39,7 @@ interface ISectionDisplayProps {
 const SectionDisplay = observer(
   ({
     section,
-    shouldCollapseAll,
+    isCollapsedAll,
     setSectionRef,
     formScrollToId,
     renderEdit,
@@ -57,13 +57,20 @@ const SectionDisplay = observer(
         id={formScrollToId?.(section.id)}
         data-section-id={section.id}
       >
-        <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
-        <HStack>
-          <Text as="h4" w={"full"} maxW={"798px"} fontWeight={700} fontSize={"2xl"}>
+        <Stack
+          w="full"
+          spacing="6"
+          mt="8"
+          mb="20"
+          mx="auto"
+          pl="8"
+          pr="130px" // space for floating buttons
+          maxWidth="container.lg"
+        >
+          <Heading as="h3" variant="yellowline" fontSize="2xl">
             {sectionName}
-          </Text>
-        </HStack>
-        <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
+          </Heading>
+
           {sectionBlocks.map((sectionBlock) => (
             <RequirementBlockAccordion
               as={"section"}
@@ -71,7 +78,7 @@ const SectionDisplay = observer(
               id={formScrollToId(sectionBlock.id)}
               key={sectionBlock.id}
               requirementBlock={sectionBlock.requirementBlock}
-              triggerForceCollapse={shouldCollapseAll}
+              isCollapsedAll={isCollapsedAll}
               isEditable={!!renderEdit}
               renderEdit={
                 renderEdit

@@ -30,29 +30,34 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         <Show above="md">
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
-              <Flex direction="column">
-                <Image
-                  src="images/permit_classifications/low_residential.png"
-                  alt={`thumbnail for ${nickname}`}
-                  w="full"
-                  h="106"
-                  bg="semantic.infoLight"
-                  objectFit="contain"
-                />
-                <Text as="span" mt="1" color="text.secondary" fontSize="sm" fontWeight="bold">
-                  {permitTypeAndActivity}
-                </Text>
-              </Flex>
+              <Image
+                src="images/permit_classifications/low_residential.png"
+                alt={`thumbnail for ${nickname}`}
+                w="200px"
+                h="110px"
+                bg="semantic.infoLight"
+                objectFit="contain"
+              />
+              <Text align="center" mt="1" color="text.secondary" fontSize="sm" fontWeight="bold" lineHeight="1.2">
+                {permitTypeAndActivity}
+              </Text>
             </Box>
           </Flex>
         </Show>
         <Show below="md">
-          <Flex justify="space-between">
-            <Image src="https://placehold.co/90x36" alt={`thumbnail for ${nickname}`} />
+          <Flex justify="space-between" alignItems="center">
+            <Image
+              src="images/permit_classifications/low_residential.png"
+              alt={`thumbnail for ${nickname}`}
+              w="150px"
+              h="80px"
+              bg="semantic.infoLight"
+              objectFit="contain"
+            />
             <PermitApplicationStatusTag permitApplication={permitApplication} />
           </Flex>
         </Show>
-        <Flex direction="column" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "50%" }}>
+        <Flex direction="column" gap={2} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "50%" }}>
           <RouterLinkButton
             variant="link"
             whiteSpace="normal"
@@ -67,7 +72,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           </RouterLinkButton>
           <Show below="md">
             <Text>
-              <Text as="span" fontWeight={700}>
+              <Text as="span" fontWeight={700} mr="1">
                 {t("permitApplication.fields.number")}:
               </Text>
               {number}
@@ -97,17 +102,28 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               {format(updatedAt, "MMM d, yyyy")}
             </Text>
           </Flex>
+          <Flex direction={{ base: "column", md: "row" }} gap={4}>
+            <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
+              {t("permitApplication.seeBestPractices_CTA")}
+              <ArrowSquareOut></ArrowSquareOut>
+            </Link>
+            <Show above="md">
+              <Text>{"  |  "}</Text>
+            </Show>
+            <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
+              {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut></ArrowSquareOut>
+            </Link>
+          </Flex>
         </Flex>
         <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "30%" }}>
           <Show above="md">
             <PermitApplicationStatusTag permitApplication={permitApplication} />
-            <Text>
-              <Text as="span" fontWeight={700}>
+            <Box>
+              <Text align="right" variant="tiny_uppercase">
                 {t("permitApplication.fields.number")}
-                <Text as="span">{":  "}</Text>
               </Text>
-              {number}
-            </Text>
+              <Text align="right">{number}</Text>
+            </Box>
           </Show>
           <RouterLinkButton
             to={`/permit-applications/${id}/edit`}
@@ -117,18 +133,6 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             {permitApplication.isSubmitted ? t("ui.view") : t("ui.resume")}
           </RouterLinkButton>
         </Flex>
-      </Flex>
-      <Flex direction={{ base: "column", md: "row" }} gap={4}>
-        <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
-          {t("permitApplication.seeBestPractices_CTA")}
-          <ArrowSquareOut></ArrowSquareOut>
-        </Link>
-        <Show above="md">
-          <Text>{"  |  "}</Text>
-        </Show>
-        <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
-          {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut></ArrowSquareOut>
-        </Link>
       </Flex>
     </Flex>
   )

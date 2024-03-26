@@ -37,6 +37,7 @@ export const CopyableValue = ({ value, label, ...containerProps }: ICopyableNumb
         onClick={handleClickCopy}
         variant="ghost"
         color="theme.yellow"
+        size="sm"
       />
     </HStack>
   )

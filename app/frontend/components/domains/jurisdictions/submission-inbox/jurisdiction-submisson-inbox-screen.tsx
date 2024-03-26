@@ -1,4 +1,4 @@
-import { Box, Button, Center, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -66,9 +66,9 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           <GridHeaders />
 
           {isSearching ? (
-            <Center p={50}>
+            <Flex py={50} gridColumn={"span 6"}>
               <SharedSpinner />
-            </Center>
+            </Flex>
           ) : (
             currentJurisdiction.tablePermitApplications.map((pa: IPermitApplication) => {
               return (

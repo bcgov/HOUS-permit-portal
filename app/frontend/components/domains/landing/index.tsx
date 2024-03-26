@@ -8,6 +8,7 @@ import {
   HStack,
   Heading,
   Image,
+  Link,
   ListItem,
   Text,
   UnorderedList,
@@ -29,6 +30,7 @@ interface ILandingScreenProps {}
 
 export const LandingScreen = observer(({}: ILandingScreenProps) => {
   const { t } = useTranslation()
+  const mailto = "mailto:" + t("site.contactEmail")
   const iNeedRef = useRef<HTMLDivElement>(null)
   const { sessionStore, userStore } = useMst()
   const { loggedIn } = sessionStore
@@ -75,9 +77,9 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
           <Flex gap={6} direction={{ base: "column", md: "row" }}>
-            <IconBox icon={<FileArrowUp size={24} />}>{t("landing.easilyUpload")}</IconBox>
-            <IconBox icon={<CheckCircle size={24} />}>{t("landing.bestPractices")}</IconBox>
-            <IconBox icon={<ClipboardText size={24} />}>{t("landing.easyToFollow")}</IconBox>
+            <IconBox icon={<FileArrowUp size={32} />}>{t("landing.easilyUpload")}</IconBox>
+            <IconBox icon={<CheckCircle size={32} />}>{t("landing.bestPractices")}</IconBox>
+            <IconBox icon={<ClipboardText size={32} />}>{t("landing.easyToFollow")}</IconBox>
           </Flex>
 
           <Flex gap={10} alignItems="flex-start" direction={{ base: "column", md: "row" }}>
@@ -176,6 +178,9 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               {t("landing.createdQ")}
             </Heading>
             <Text>{t("landing.createdA")}</Text>
+            <Link href={mailto} isExternal mt="4">
+              {t("landing.tellUsYourExperience")}
+            </Link>
           </VStack>
         </Container>
       </Flex>

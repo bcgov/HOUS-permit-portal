@@ -78,14 +78,18 @@ class Integrations::LtsaParcelMapBc
   end
 
   def get_feature_attributes_by_pid_or_pin(pid:, pin:, fields: "*")
-    raise Errors::FeatureAttributesRetrievalError if (pid.present? && pin.present? || pin.blank? && pid.blank?)
+    raise Errors::FeatureAttributesRetrievalError if ((pid.present? && pin.present?) || (pin.blank? && pid.blank?))
     response =
       if pid
         get_details_by_pid(pid: pid, fields: fields)
       elsif pin
         get_details_by_pin(pin: pin, fields: fields)
       end
-    return parse_attributes_from_response(response)
+    if response.success?
+      return parse_attributes_from_response(response)
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
   end
 
   def get_coordinates_by_pid(pid)

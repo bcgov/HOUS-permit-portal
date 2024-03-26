@@ -30,6 +30,7 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
 
   def step_code_checklist_params
     params.require(:step_code_checklist).permit(
+      :builder,
       :compliance_path,
       :completed_by,
       :completed_at,

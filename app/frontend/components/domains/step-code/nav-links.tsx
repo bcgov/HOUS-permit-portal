@@ -1,10 +1,10 @@
 import { Button, HStack } from "@chakra-ui/react"
-import { ArrowCounterClockwise } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { RestartConfirmationModal } from "./restart-confirmation-modal"
 
 export const StepCodeNavLinks = observer(function StepCodeNavLinks() {
   const { stepCodeStore } = useMst()
@@ -30,14 +30,7 @@ export const StepCodeNavLinks = observer(function StepCodeNavLinks() {
           <Button variant="primary" onClick={handleSave}>
             {t("stepCode.saveAndGoBack")}
           </Button>
-          <Button
-            variant="tertiary"
-            // color="semantic.error"
-            rightIcon={<ArrowCounterClockwise />}
-            onClick={handleDeleteStepCode}
-          >
-            {t("stepCode.restart")}
-          </Button>
+          <RestartConfirmationModal />
         </>
       ) : (
         <Button variant="primary" onClick={() => navigate(-1)}>

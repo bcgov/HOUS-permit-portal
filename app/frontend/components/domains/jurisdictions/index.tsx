@@ -1,4 +1,4 @@
-import { Box, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -47,9 +47,9 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           <GridHeaders />
 
           {isSearching ? (
-            <Center p={50}>
+            <Flex py={50} gridColumn={"span 6"}>
               <SharedSpinner />
-            </Center>
+            </Flex>
           ) : (
             tableJurisdictions.map((j) => {
               return (

@@ -7,5 +7,6 @@ FactoryBot.define do
     status { :draft }
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
     association :template_version
+    pid { "999999999" }
   end
 end

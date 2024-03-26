@@ -34,10 +34,15 @@ export const ControlsHeader = observer(function ControlsHeader({
 
   return (
     <HStack
+      position="sticky"
+      zIndex="1"
+      left="0"
+      right="0"
+      top="0"
       px={6}
       py={4}
       bg={"greys.grey03"}
-      w={"full"}
+      w="calc(100vw - 368px - 15px)"
       justifyContent={"space-between"}
       boxShadow={"elevations.elevation02"}
     >

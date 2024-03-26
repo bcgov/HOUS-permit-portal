@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
+import { BuilderTopFloatingButtons } from "../../domains/requirement-template/builder-top-floating-buttons"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -149,18 +150,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
 
   return (
-    <Box as="main" overflow="hidden" h="full">
+    <Box as="main" id="submitter-view-permit">
       <Flex
         id="permitHeader"
-        position="sticky"
-        top={0}
-        zIndex={10}
         w="full"
         px={6}
         py={3}
         bg="theme.blue"
         justify="space-between"
         color="greys.white"
+        position="sticky"
+        top="0"
+        zIndex="11"
       >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
@@ -227,11 +228,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Button>
           </HStack>
         )}
+        <BuilderTopFloatingButtons top="130px" position="absolute" />
       </Flex>
-      <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
+      <Flex id="permitApplicationFieldsContainer">
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={24} position={"relative"}>
+          <Flex flex={1} direction="column" p={8} position={"relative"}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}

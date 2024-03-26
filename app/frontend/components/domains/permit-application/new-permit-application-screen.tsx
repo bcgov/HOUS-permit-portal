@@ -98,7 +98,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   }, [siteWatch?.value])
 
   return (
-    <Flex as="main" direction="column" w="full" bg="greys.white">
+    <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
         <DisclaimerInfo />

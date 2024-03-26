@@ -81,19 +81,16 @@ export function parseBoolean(value: string): boolean {
   return value.toLowerCase() === "true"
 }
 
-export function handleScrollToTop(elementId: string) {
-  document.getElementById(elementId).scrollTo({
+export function handleScrollToTop() {
+  document.documentElement.scrollTo({
     top: 0,
     behavior: "instant",
   })
+  document.body.scrollTop = 0 // For Safari
 }
 
 export function handleScrollToBottom(elementId: string) {
-  const outerFlex = document.getElementById(elementId)
-  outerFlex.scrollTo({
-    top: outerFlex.scrollHeight - outerFlex.clientHeight,
-    behavior: "instant",
-  })
+  window.scrollTo(0, document.body.scrollHeight)
 }
 
 export function formatTemplateVersion(versionDate: Date) {

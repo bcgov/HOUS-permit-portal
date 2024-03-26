@@ -1,4 +1,4 @@
-import { Box, Center, Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -55,11 +55,10 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
 
         <SearchGrid templateColumns="160px 2fr 2fr repeat(3, 1fr)">
           <GridHeaders />
-
           {isSearching ? (
-            <Center p={50}>
+            <Flex py="50" gridColumn={"span 6"}>
               <SharedSpinner />
-            </Center>
+            </Flex>
           ) : (
             currentJurisdiction.tableUsers.map((u: IUser) => {
               return (
