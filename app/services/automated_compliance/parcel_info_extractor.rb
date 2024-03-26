@@ -1,8 +1,12 @@
 class AutomatedCompliance::ParcelInfoExtractor < AutomatedCompliance::Base
   def call(permit_application)
-    return if permit_application.pid.blank?
+    return if permit_application.pid.blank? && permit_application.pin.blank?
     #extraction of parcel data can be done via LTSA base
-    attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: permit_application.pid)
+    attributes =
+      Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(
+        pid: permit_application.pid,
+        pin: permit_application.pin,
+      )
 
     #automation sets up the extracted data into compliance_data, the front end will allow the user to see what was extracted and override the result
     #lock this while it is updating in case mulitple automated compliances run at once

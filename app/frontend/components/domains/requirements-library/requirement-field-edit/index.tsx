@@ -11,12 +11,14 @@ import {
 } from "@chakra-ui/react"
 import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React from "react"
 import { Controller, FieldValues, useFieldArray } from "react-hook-form"
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
 import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
+import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
@@ -419,7 +421,28 @@ export const RequirementFieldEdit = observer(function RequirementFieldEdit<TFiel
   requirementType,
   ...rest
 }: TProps<TFieldValues>) {
-  return requirementsComponentMap[requirementType]?.(rest) ?? null
+  // removing unnecessary props based on requirement type, to prevent
+  // passing them to dom
+  const propsToRemove = (() => {
+    let toRemove = []
+
+    if (requirementType !== ERequirementType.number) {
+      toRemove.push("unitSelectProps")
+    }
+
+    if (!isMultiOptionRequirement(requirementType)) {
+      toRemove.push("multiOptionProps")
+    }
+
+    if (!isContactRequirement(requirementType)) {
+      toRemove.push("canAddMultipleContactProps")
+    }
+
+    return toRemove
+  })()
+  const formattedProps = R.omit(propsToRemove, rest)
+
+  return requirementsComponentMap[requirementType]?.(formattedProps) ?? null
 })
 
 export function hasRequirementFieldEditComponent(requirementType: ERequirementType): boolean {

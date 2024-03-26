@@ -15,7 +15,7 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
       )
     end
 
-    it "updates an field in submission data" do
+    it "updates an field in compliance data" do
       permit_application.update_column(
         :compliance_data,
         {
@@ -51,6 +51,42 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[1]),
         ).to eq("Metro Vancouver Regional District")
+      end
+    end
+  end
+
+  context "a PIN" do
+    let!(:permit_application) do
+      create(
+        :permit_application,
+        permit_type: requirement_template.permit_type,
+        activity: requirement_template.activity,
+        pin: "15304230",
+        full_address: "3090 Takaya Dr, North Vancouver, BC V7H 3A8",
+        template_version: requirement_template.published_template_version,
+      )
+    end
+
+    it "updates the field in compliance data" do
+      permit_application.update_column(
+        :compliance_data,
+        {
+          permit_application.automated_compliance_requirements.keys[0] => "previous_data",
+          "unedited" => "previous_data",
+        },
+      )
+      VCR.use_cassette("automated_compliance/parcel_info_extractor/details_pin") do
+        AutomatedCompliance::ParcelInfoExtractor.new.call(permit_application)
+        expect(
+          permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[0]),
+        ).to_not eq("previous_data")
+        expect(
+          permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[0]),
+        ).to eq("North Vancouver, The Corporation of the District of")
+        expect(
+          permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[1]),
+        ).to eq("Metro Vancouver Regional District")
+        expect(permit_application.compliance_data.dig("unedited")).to eq("previous_data")
       end
     end
   end
