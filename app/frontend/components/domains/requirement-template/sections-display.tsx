@@ -17,7 +17,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
   const { sections } = props
 
   return (
-    <Stack w={"full"} alignItems={"flex-start"} spacing={16} p={16}>
+    <Stack w={"full"} alignItems={"flex-start"} spacing={16}>
       {sections.map((section) => (
         <SectionDisplay key={section.id} section={section} {...props} />
       ))}
@@ -64,7 +64,7 @@ const SectionDisplay = observer(
           mb="20"
           mx="auto"
           pl="8"
-          pr="130px" // space for floating buttons
+          pr="var(--app-permit-form-right-white-space)"
           maxWidth="container.lg"
         >
           <Heading as="h3" variant="yellowline" fontSize="2xl">

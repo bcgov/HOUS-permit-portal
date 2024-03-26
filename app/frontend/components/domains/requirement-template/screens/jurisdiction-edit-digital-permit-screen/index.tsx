@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Flex } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -112,7 +112,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   })
 
   return (
-    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main" id="jurisdiction-edit-permit-template">
+    <Box as="main" id="jurisdiction-edit-permit-template">
       <BuilderHeader
         breadCrumbs={[
           {
@@ -128,28 +128,31 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
       />
-      <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
+      <Box borderTop={"1px solid"} borderColor={"border.base"}>
         <SectionsSidebar
           sections={templateSections}
           onItemClick={scrollIntoView}
           sectionIdToHighlight={currentSectionId}
         />
-        <Flex
-          flexDir={"column"}
-          flex={1}
-          h={"full"}
+        <Box
           bg={hasNoSections ? "greys.grey03" : undefined}
-          overflow={"auto"}
           ref={rightContainerRef}
           position={"relative"}
+          width="var(--app-sidebar-remaining-width)"
+          display="inline-block"
         >
           <Flex
-            px={6}
-            py={4}
-            bg={"greys.grey03"}
-            w={"full"}
-            justifyContent={"flex-end"}
-            boxShadow={"elevations.elevation02"}
+            position="sticky"
+            zIndex="1"
+            left="0"
+            right="0"
+            top="0"
+            px="6"
+            py="4"
+            bg="greys.grey03"
+            w="var(--app-sidebar-remaining-width)"
+            justifyContent="flex-end"
+            boxShadow="elevations.elevation02"
           >
             <ButtonGroup>
               <Button
@@ -200,10 +203,10 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               return !customization?.enabledElectiveFieldIds?.includes(requirement.id)
             }}
           />
-        </Flex>
-      </Flex>
+        </Box>
+      </Box>
       <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
-    </Flex>
+    </Box>
   )
 
   function scrollToTop() {

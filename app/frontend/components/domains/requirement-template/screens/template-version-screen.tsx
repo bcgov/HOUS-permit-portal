@@ -1,4 +1,4 @@
-import { Button, Flex } from "@chakra-ui/react"
+import { Box, Button, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -39,7 +39,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   }
 
   return (
-    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
+    <Box as="main" id="view-template-version">
       <BuilderHeader
         breadCrumbs={[
           {
@@ -51,26 +51,29 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
       />
-      <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
+      <Box borderTop={"1px solid"} borderColor={"border.base"}>
         <SectionsSidebar
           sections={templateSections}
           onItemClick={scrollIntoView}
           sectionIdToHighlight={currentSectionId}
         />
-        <Flex
-          flexDir={"column"}
-          flex={1}
-          h={"full"}
+        <Box
           bg={hasNoSections ? "greys.grey03" : undefined}
-          overflow={"auto"}
           ref={rightContainerRef}
           position={"relative"}
+          width="var(--app-sidebar-remaining-width)"
+          display="inline-block"
         >
           <Flex
-            px={6}
-            py={4}
-            bg={"greys.grey03"}
-            w={"full"}
+            position="sticky"
+            zIndex="1"
+            left="0"
+            right="0"
+            top="0"
+            px="6"
+            py="4"
+            bg="greys.grey03"
+            w="full"
             justifyContent={"flex-end"}
             boxShadow={"elevations.elevation02"}
           >
@@ -86,10 +89,10 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             setSectionRef={setSectionRef}
             formScrollToId={formScrollToId}
           />
-        </Flex>
-      </Flex>
+        </Box>
+      </Box>
       <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
-    </Flex>
+    </Box>
   )
 
   function scrollToTop() {

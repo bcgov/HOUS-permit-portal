@@ -28,7 +28,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
   return (
     <Box
       as={"section"}
-      w={"368px"}
+      w="var(--app-sidebar-width)"
       h="calc(100vh) "
       bg="greys.white"
       borderRight={"1px solid"}
@@ -39,18 +39,24 @@ export const SectionsSidebar = observer(function SectionsSidebar({
       zIndex="1"
       float="left"
     >
-      {onEdit && (
-        <HStack w={"full"} justifyContent={"space-between"} bg={"greys.grey03"} py={5} px={4}>
-          <>
-            <Text as={"h3"} fontSize={"sm"} fontWeight={400} color={"text.secondary"} textTransform={"uppercase"}>
-              {t("requirementTemplate.edit.sectionsSidebarTitle")}
-            </Text>
-            <Button variant={"secondary"} onClick={onEdit} size={"sm"}>
-              {t("requirementTemplate.edit.reorderButton")}
-            </Button>
-          </>
-        </HStack>
-      )}
+      <HStack
+        w={"full"}
+        justifyContent={"space-between"}
+        bg={"greys.grey03"}
+        py={5}
+        px={4}
+        h="var(--app-permit-grey-controlbar-height)"
+      >
+        <Text as={"h3"} fontSize={"sm"} fontWeight={400} color={"text.secondary"} textTransform={"uppercase"}>
+          {t("requirementTemplate.edit.sectionsSidebarTitle")}
+        </Text>
+        {onEdit && (
+          <Button variant={"secondary"} onClick={onEdit} size={"sm"}>
+            {t("requirementTemplate.edit.reorderButton")}
+          </Button>
+        )}
+      </HStack>
+
       <Stack w={"full"} h="calc( 100vh - 76px)" overflow={"auto"} spacing={4} pt={2} pb={80} alignItems={"flex-start"}>
         {sections?.map((section, index) => {
           const isHighlightedSection = sectionIdToHighlight === section.id

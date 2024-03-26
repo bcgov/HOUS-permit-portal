@@ -62,6 +62,7 @@ const styles = {
       borderRadius: "0",
     },
     [".chakra-portal"]: {
+      // ensure it stays above and position:sticky elements like navs
       position: "relative",
       zIndex: "99",
     },
