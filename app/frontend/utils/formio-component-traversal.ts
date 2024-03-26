@@ -23,7 +23,7 @@ const findPanelComponents = (components) => {
   return panelComponents
 }
 
-export const nestedComponentsIncomplete = (components) => {
+export const getNestedComponentsIncomplete = (components) => {
   //only look at visible objects
   //in a typical object, the dataValue is the actual value selected
   //in a multi select, this is a hash of key values with true / falses
@@ -41,7 +41,7 @@ export const getCompletedBlocksFromForm = (rootComponent) => {
   const blocksList = findPanelComponents(rootComponent.components)
   let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
-    const incompleteComponents = nestedComponentsIncomplete(panelComponent.components)
+    const incompleteComponents = getNestedComponentsIncomplete(panelComponent.components)
 
     const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
 
