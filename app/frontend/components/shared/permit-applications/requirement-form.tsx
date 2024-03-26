@@ -127,8 +127,8 @@ export const RequirementForm = observer(
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
     useEffect(() => {
-      const handleOpenStepCode = (_event) => {
-        triggerSave?.()
+      const handleOpenStepCode = async (_event) => {
+        await triggerSave?.()
         navigate("step-code", { state: { background: location } })
       }
       document.addEventListener("openStepCode", handleOpenStepCode)

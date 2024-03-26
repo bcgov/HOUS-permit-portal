@@ -244,7 +244,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def pid_or_pin_presence
-    if pin.blank? && pid.blank?
+    if ((pid.present? && pin.present?) || (pin.blank? && pid.blank?))
       errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
     end
   end

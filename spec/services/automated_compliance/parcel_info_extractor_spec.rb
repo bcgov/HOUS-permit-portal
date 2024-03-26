@@ -62,6 +62,7 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
         permit_type: requirement_template.permit_type,
         activity: requirement_template.activity,
         pin: "15304230",
+        pid: nil,
         full_address: "3090 Takaya Dr, North Vancouver, BC V7H 3A8",
         template_version: requirement_template.published_template_version,
       )
