@@ -71,10 +71,22 @@ export function isContactRequirement(requirementType: ERequirementType): boolean
 }
 
 export function isQuillEmpty(value: string) {
-  if (!value || (value.replace(/<(.|\n)*?>/g, "").trim().length === 0 && !value.includes("<img"))) {
+  if (!value) {
     return true
   }
-  return false
+
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(value, "text/html")
+
+  // Check if there are any image tags
+  const hasImage = doc.querySelector("img") !== null
+
+  // Check for non-empty text nodes or other elements
+  const hasTextOrElements = Array.from(doc.body.childNodes).some((node) => {
+    return node.nodeType === Node.TEXT_NODE ? node.textContent.trim().length > 0 : node.nodeType === Node.ELEMENT_NODE
+  })
+
+  return !hasImage && !hasTextOrElements
 }
 
 export function parseBoolean(value: string): boolean {
