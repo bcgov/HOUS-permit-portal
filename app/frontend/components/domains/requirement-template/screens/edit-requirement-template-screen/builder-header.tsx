@@ -40,7 +40,7 @@ export const BuilderHeader = observer(function BuilderHeader({
         </Text>
       </HStack>
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
-        <Heading as="h3" color={"text.primary"}>
+        <Heading as="h1">
           {requirementTemplate.permitType.name} | {requirementTemplate.activity.name}
         </Heading>
         <HStack>

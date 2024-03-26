@@ -39,12 +39,13 @@ export const ControlsHeader = observer(function ControlsHeader({
       left="0"
       right="0"
       top="0"
-      px={6}
-      py={4}
-      bg={"greys.grey03"}
-      w="calc(100vw - 368px - 15px)"
-      justifyContent={"space-between"}
-      boxShadow={"elevations.elevation02"}
+      px="6"
+      py="4"
+      bg="greys.grey03"
+      w="var(--app-sidebar-remaining-width)"
+      h="var(--app-permit-grey-controlbar-height)"
+      justifyContent="space-between"
+      boxShadow="elevations.elevation02"
     >
       <Button variant={"secondary"} isDisabled={isSubmitting} leftIcon={<Plus />} onClick={onAddSection}>
         {t("requirementTemplate.edit.addSectionButton")}

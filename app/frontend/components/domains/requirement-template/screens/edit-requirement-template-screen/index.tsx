@@ -136,7 +136,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             />
           )}
           <Box
-            width="calc(100vw - 368px - 20px)"
+            width="var(--app-sidebar-remaining-width)"
             display="inline-block"
             bg={hasNoSections ? "greys.grey03" : undefined}
             ref={rightContainerRef}
