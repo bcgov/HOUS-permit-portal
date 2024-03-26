@@ -111,7 +111,9 @@ class RequirementFormJsonService
 
     json.merge!({ data: { values: requirement.input_options["value_options"] } }) if requirement.input_type_select?
 
-    json.merge!({ values: requirement.input_options["value_options"] }) if requirement.input_type_multi_option_select?
+    if requirement.input_type_multi_option_select? || requirement.input_type_radio?
+      json.merge!({ values: requirement.input_options["value_options"] })
+    end
 
     if requirement.computed_compliance?
       json.merge!({ computedCompliance: requirement.input_options["computed_compliance"] })

@@ -218,6 +218,9 @@ const requirementsComponentMap = {
             },
           },
         }}
+        // only needed for checkbox as it doesn't use the default editableInput and uses
+        // css to style the input
+        editableInput={<></>}
         {...editableGroupProps}
       />
     )
