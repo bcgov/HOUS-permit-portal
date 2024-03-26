@@ -498,7 +498,13 @@ const options = {
           checklistGuide: "See Checklist Guide",
           saveAndGoBack: "Save and Go Back",
           back: "Back to Permit Application",
-          restart: "Restart",
+          restart: {
+            trigger: "Restart",
+            confirm: {
+              title: "Are you sure?",
+              body: "Restarting will clear all checklist fields",
+            },
+          },
           info: {
             title: "BC Step Code Compliance Checklist - Part 9 Buildings",
             energy: "Energy Step Code",
