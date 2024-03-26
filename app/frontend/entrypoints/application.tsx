@@ -1,5 +1,5 @@
 import "@bcgov/bc-sans/css/BC_Sans.css"
-import { ChakraProvider, Flex } from "@chakra-ui/react"
+import { Box, ChakraProvider } from "@chakra-ui/react"
 import { Global } from "@emotion/react"
 import React from "react"
 import { createRoot } from "react-dom/client"
@@ -35,9 +35,9 @@ const renderApp = (rootStore) => {
             <meta property="og:description" content={t("site.description")} />
             <meta property="og:image" content="/images/logo.svg" />
           </Helmet>
-          <Flex flexDirection="column" h="100vh" w="100vw" bg="greys.white" overflowX="hidden">
+          <Box>
             <Navigation />
-          </Flex>
+          </Box>
         </Provider>
       </ChakraProvider>
     )
@@ -46,8 +46,6 @@ const renderApp = (rootStore) => {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.documentElement.style.overflow = "hidden"
-  document.body.style.overflow = "hidden"
   const rootStore = setupRootStore()
   if (import.meta.env.PROD) {
     renderApp(rootStore)

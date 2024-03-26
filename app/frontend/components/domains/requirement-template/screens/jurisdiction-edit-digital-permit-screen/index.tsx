@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
 import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
@@ -62,7 +61,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const navigate = useNavigate()
   const { jurisdictionTemplateVersionCustomization, error: customizationError } =
     useJurisdictionTemplateVersionCustomization({
@@ -113,114 +112,102 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   })
 
   return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
-    <RemoveScroll style={{ width: "100%", height: "100%" }}>
-      <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
-        <BuilderHeader
-          breadCrumbs={[
-            {
-              href: "/digital-building-permits",
-              title: t("site.breadcrumb.digitalBuildingPermits"),
-            },
-            {
-              href: `/digital-building-permits/${templateVersion.id}/edit`,
-              title: t("site.breadcrumb.editPermit"),
-            },
-          ]}
-          requirementTemplate={denormalizedTemplate}
-          status={templateVersion.status}
-          versionDate={templateVersion.versionDate}
+    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main" id="jurisdiction-edit-permit-template">
+      <BuilderHeader
+        breadCrumbs={[
+          {
+            href: "/digital-building-permits",
+            title: t("site.breadcrumb.digitalBuildingPermits"),
+          },
+          {
+            href: `/digital-building-permits/${templateVersion.id}/edit`,
+            title: t("site.breadcrumb.editPermit"),
+          },
+        ]}
+        requirementTemplate={denormalizedTemplate}
+        status={templateVersion.status}
+        versionDate={templateVersion.versionDate}
+      />
+      <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
+        <SectionsSidebar
+          sections={templateSections}
+          onItemClick={scrollIntoView}
+          sectionIdToHighlight={currentSectionId}
         />
-        <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
-          <SectionsSidebar
-            sections={templateSections}
-            onItemClick={scrollIntoView}
-            sectionIdToHighlight={currentSectionId}
-          />
+        <Flex
+          flexDir={"column"}
+          flex={1}
+          h={"full"}
+          bg={hasNoSections ? "greys.grey03" : undefined}
+          overflow={"auto"}
+          ref={rightContainerRef}
+          position={"relative"}
+        >
           <Flex
-            flexDir={"column"}
-            flex={1}
-            h={"full"}
-            bg={hasNoSections ? "greys.grey03" : undefined}
-            overflow={"auto"}
-            ref={rightContainerRef}
-            position={"relative"}
+            px={6}
+            py={4}
+            bg={"greys.grey03"}
+            w={"full"}
+            justifyContent={"flex-end"}
+            boxShadow={"elevations.elevation02"}
           >
-            <Flex
-              px={6}
-              py={4}
-              bg={"greys.grey03"}
-              w={"full"}
-              justifyContent={"flex-end"}
-              boxShadow={"elevations.elevation02"}
-            >
-              <ButtonGroup>
-                <Button
-                  variant={"primary"}
-                  rightIcon={<CaretRight />}
-                  onClick={onSubmit}
-                  isDisabled={isSubmitting || !isValid}
-                  isLoading={isSubmitting}
-                >
-                  {t("ui.publish")}
-                </Button>
-                <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
-                  {t("ui.close")}
-                </Button>
-              </ButtonGroup>
-            </Flex>
-            <BuilderTopFloatingButtons />
-            <SectionsDisplay
-              sections={templateSections}
-              shouldCollapseAll={shouldCollapseAll}
-              setSectionRef={setSectionRef}
-              formScrollToId={formScrollToId}
-              renderEdit={({ denormalizedRequirementBlock }) => {
-                return (
-                  <JurisdictionRequirementBlockEditSidebar
-                    requirementBlockCustomization={getRequirementBlockCustomization(denormalizedRequirementBlock.id)}
-                    requirementBlock={denormalizedRequirementBlock}
-                    onSave={onBlockEditSave}
-                    triggerButtonProps={{
-                      isDisabled: isSubmitting,
-                    }}
-                    onResetDefault={(requirementBlockId) =>
-                      jurisdictionTemplateVersionCustomization?.customizations?.requirementBlockChanges?.[
-                        requirementBlockId
-                      ]
-                    }
-                  />
-                )
-              }}
-              requirementBlockCustomizations={watchedCustomizations?.requirementBlockChanges}
-              hideElectiveField={(requirementBlockId, requirement) => {
-                const customization = watchedCustomizations.requirementBlockChanges[requirementBlockId]
-
-                if (!customization || !customization.enabledElectiveFieldIds) {
-                  return true
-                }
-
-                return !customization?.enabledElectiveFieldIds?.includes(requirement.id)
-              }}
-            />
+            <ButtonGroup>
+              <Button
+                variant={"primary"}
+                rightIcon={<CaretRight />}
+                onClick={onSubmit}
+                isDisabled={isSubmitting || !isValid}
+                isLoading={isSubmitting}
+              >
+                {t("ui.publish")}
+              </Button>
+              <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
+                {t("ui.close")}
+              </Button>
+            </ButtonGroup>
           </Flex>
+          <BuilderTopFloatingButtons />
+          <SectionsDisplay
+            sections={templateSections}
+            isCollapsedAll={isCollapsedAll}
+            setSectionRef={setSectionRef}
+            formScrollToId={formScrollToId}
+            renderEdit={({ denormalizedRequirementBlock }) => {
+              return (
+                <JurisdictionRequirementBlockEditSidebar
+                  requirementBlockCustomization={getRequirementBlockCustomization(denormalizedRequirementBlock.id)}
+                  requirementBlock={denormalizedRequirementBlock}
+                  onSave={onBlockEditSave}
+                  triggerButtonProps={{
+                    isDisabled: isSubmitting,
+                  }}
+                  onResetDefault={(requirementBlockId) =>
+                    jurisdictionTemplateVersionCustomization?.customizations?.requirementBlockChanges?.[
+                      requirementBlockId
+                    ]
+                  }
+                />
+              )
+            }}
+            requirementBlockCustomizations={watchedCustomizations?.requirementBlockChanges}
+            hideElectiveField={(requirementBlockId, requirement) => {
+              const customization = watchedCustomizations.requirementBlockChanges[requirementBlockId]
+
+              if (!customization || !customization.enabledElectiveFieldIds) {
+                return true
+              }
+
+              return !customization?.enabledElectiveFieldIds?.includes(requirement.id)
+            }}
+          />
         </Flex>
-        <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
       </Flex>
-    </RemoveScroll>
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
+    </Flex>
   )
 
   function scrollToTop() {
     rightContainerRef.current?.scrollTo({ behavior: "smooth", top: 0 })
-  }
-
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
-
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
   }
 
   function scrollIntoView(id: string) {

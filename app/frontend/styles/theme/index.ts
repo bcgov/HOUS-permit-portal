@@ -16,9 +16,11 @@ import { space } from "./foundations/space"
 
 const styles = {
   global: {
+    html: {
+      scrollBehaviour: "smooth",
+    },
     body: {
-      overflowX: "hidden",
-      color: "text.primary", // Set your desired default body font color
+      color: "text.primary",
     },
     h1: {
       fontSize: "var(--chakra-fontSizes-4xl)",
@@ -36,11 +38,48 @@ const styles = {
       fontSize: "var(--chakra-fontSizes-lg)",
       color: "inherit",
     },
-    [".chakra-breadcrumb__list"]: {
-      paddingLeft: "0",
+    ["ul, ol"]: {
+      paddingLeft: "10",
     },
-    ["ul li"]: {
+    ["ul li, ol li"]: {
       marginBottom: "var(--chakra-sizes-2)",
+    },
+    [".chakra-toast h3"]: {
+      margin: "0",
+    },
+    [".chakra-breadcrumb__list"]: {
+      padding: "0",
+      minHeight: "46px",
+    },
+    [".chakra-breadcrumb__list, .chakra-breadcrumb__list-item"]: {
+      margin: "0",
+    },
+    [".chakra-menu__menu-list .chakra-menu__group__title"]: {
+      maxWidth: "250px",
+      marginLeft: "var(--chakra-space-3)",
+    },
+    [".chakra-menu__menu-list .chakra-menu__menuitem "]: {
+      borderRadius: "0",
+    },
+    [".chakra-portal"]: {
+      position: "relative",
+      zIndex: "99",
+    },
+    // Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind
+    [".show-menu-overlay-background"]: {
+      position: "relative",
+      zIndex: "1000",
+    },
+    [".show-menu-overlay-background::after"]: {
+      content: `""`,
+      display: "block",
+      background: "rgba(0, 0, 0, 0.25)",
+      position: "fixed",
+      top: "0",
+      left: "0",
+      width: "100vw",
+      height: "100vh",
+      zIndex: "0",
     },
   },
 }

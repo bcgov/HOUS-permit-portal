@@ -31,7 +31,7 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
         <Flex flex={1} gap={4}>
           <Phone size={32} />
           <Flex direction="column" flex={1}>
-            <Heading as="h3" fontSize="md">
+            <Heading as="h3" fontSize="md" mb="0">
               {t("contact.fields.phoneNumber")}
             </Heading>
             <Link href={`tel:+${contact.phoneNumber}`} isExternal>
@@ -42,7 +42,7 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
         <Flex flex={1} gap={4}>
           <Envelope size={32} />
           <Flex direction="column" flex={1}>
-            <Heading as="h3" fontSize="md">
+            <Heading as="h3" fontSize="md" mb="0">
               {t("contact.fields.email")}
             </Heading>
             <Link href={`mailto:${contact.email}`} isExternal>

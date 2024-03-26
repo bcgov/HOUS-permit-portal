@@ -1,10 +1,9 @@
-import { Flex, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Flex, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { useRequirementTemplate } from "../../../../../hooks/resources/use-requirement-template"
@@ -44,7 +43,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     control,
   })
   const { t } = useTranslation()
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
@@ -122,66 +121,54 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   return (
-    <RemoveScroll style={{ width: "100%", height: "calc(100% - 66px)", marginTop: "66px" }}>
-      <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
-        <FormProvider {...formMethods}>
-          <EditableBuilderHeader requirementTemplate={requirementTemplate} />
-          <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
-            {isReorderMode ? (
-              <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
+    <Box as="main" id="admin-edit-permit-template">
+      <FormProvider {...formMethods}>
+        <EditableBuilderHeader requirementTemplate={requirementTemplate} />
+        <Box borderTop={"1px solid"} borderColor={"border.base"} position="relative">
+          {isReorderMode ? (
+            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
+          ) : (
+            <SectionsSidebar
+              onEdit={openReorderMode}
+              onItemClick={scrollIntoView}
+              sectionIdToHighlight={currentSectionId}
+              sections={denormalizedSections}
+            />
+          )}
+          <Box
+            width="calc(100vw - 368px - 20px)"
+            display="inline-block"
+            bg={hasNoSections ? "greys.grey03" : undefined}
+            ref={rightContainerRef}
+          >
+            <ControlsHeader
+              onSaveDraft={onSaveDraft}
+              onScheduleDate={onSchedule}
+              onAddSection={onAddSection}
+              requirementTemplate={requirementTemplate}
+            />
+            <BuilderTopFloatingButtons />
+            {hasNoSections ? (
+              <Flex
+                justifyContent={hasNoSections ? "center" : undefined}
+                alignItems={hasNoSections ? "flex-start" : undefined}
+                flex={1}
+                w={"full"}
+                h="100vh"
+              >
+                <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"} mt="20%">
+                  {t("requirementTemplate.edit.emptyTemplateSectionText")}
+                </Text>
+              </Flex>
             ) : (
-              <SectionsSidebar
-                onEdit={openReorderMode}
-                onItemClick={scrollIntoView}
-                sectionIdToHighlight={currentSectionId}
-                sections={denormalizedSections}
-              />
+              <SectionsDisplay isCollapsedAll={isCollapsedAll} setSectionRef={setSectionRef} />
             )}
-            <Flex
-              flexDir={"column"}
-              flex={1}
-              h={"full"}
-              bg={hasNoSections ? "greys.grey03" : undefined}
-              overflow={"auto"}
-              ref={rightContainerRef}
-              position={"relative"}
-            >
-              <ControlsHeader
-                onSaveDraft={onSaveDraft}
-                onScheduleDate={onSchedule}
-                onAddSection={onAddSection}
-                requirementTemplate={requirementTemplate}
-              />
-              <BuilderTopFloatingButtons />
-              {hasNoSections ? (
-                <Flex
-                  justifyContent={hasNoSections ? "center" : undefined}
-                  alignItems={hasNoSections ? "center" : undefined}
-                  flex={1}
-                  w={"full"}
-                >
-                  <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
-                    {t("requirementTemplate.edit.emptyTemplateSectionText")}
-                  </Text>
-                </Flex>
-              ) : (
-                <SectionsDisplay shouldCollapseAll={shouldCollapseAll} setSectionRef={setSectionRef} />
-              )}
-            </Flex>
-          </Flex>
-        </FormProvider>
-        <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
-      </Flex>
-    </RemoveScroll>
+          </Box>
+        </Box>
+      </FormProvider>
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
+    </Box>
   )
-
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
-
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
-  }
 
   function scrollIntoView(id: string) {
     const element = document.getElementById(formScrollToId(id))

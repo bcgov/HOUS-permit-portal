@@ -64,12 +64,12 @@ export const ReviewPermitApplicationScreen = observer(() => {
   })
 
   return (
-    <Box as="main" overflow="hidden" h="full">
+    <Box as="main" overflow="hidden" h="full" id="review-permit-application">
       <Flex
         id="permitHeader"
         position="sticky"
         top={0}
-        zIndex={10}
+        zIndex={11}
         w="full"
         px={6}
         py={3}

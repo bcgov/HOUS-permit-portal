@@ -1,15 +1,4 @@
-import {
-  Box,
-  ButtonProps,
-  Center,
-  Flex,
-  HStack,
-  ListItem,
-  StackProps,
-  Tag,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, ButtonProps, Flex, HStack, ListItem, StackProps, Tag, UnorderedList, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -54,9 +43,9 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
         <GridHeaders />
 
         {isSearching ? (
-          <Center p={50} gridColumn={"span 4"}>
+          <Flex py={50} gridColumn={"span 6"}>
             <SharedSpinner />
-          </Center>
+          </Flex>
         ) : (
           tableRequirementBlocks.map((requirementBlock) => {
             return (
@@ -66,7 +55,9 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                 role={"row"}
                 display={"contents"}
               >
-                <SearchGridItem fontWeight={700}>{requirementBlock.name}</SearchGridItem>
+                <SearchGridItem fontWeight={700} minW="300px">
+                  {requirementBlock.name}
+                </SearchGridItem>
                 <SearchGridItem>
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
                     {requirementBlock.associations.map((association) => (
@@ -76,11 +67,11 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem>
-                  <UnorderedList>
+                <SearchGridItem minW="350px">
+                  <UnorderedList pl="0">
                     {requirementBlock.requirements.map((requirement) => {
                       return (
-                        <ListItem key={requirement.id} color={"text.secondary"} fontSize={"xs"}>
+                        <ListItem key={requirement.id} color={"text.secondary"} fontSize={"xs"} mb="1">
                           {requirement.label}
                         </ListItem>
                       )
@@ -89,7 +80,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                 </SearchGridItem>
                 <SearchGridItem fontSize={"sm"}>{format(requirementBlock.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
                 <SearchGridItem>
-                  <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"flex-start"}>
+                  <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
                     {requirementBlock.hasAnyElective && <ElectiveTag />}
                     {requirementBlock.hasAnyConditional && <HasConditionalTag />}
                   </HStack>

@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, Flex, FormControl, HStack, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Checkbox, Flex, FormControl, HStack, Heading, Icon, Text } from "@chakra-ui/react"
+import { Envelope } from "@phosphor-icons/react"
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -37,7 +38,9 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
   return (
     <CenterContainer>
       {submitted ? (
-        <Box bg="greys.white" p={10}>
+        <Box bg="greys.white" border="1px solid" borderColor="border.light" p={10} my="20vh" textAlign="center">
+          <Icon boxSize="14" color="theme.blueAlt" as={Envelope} />
+          <Heading mt="6">{t("auth.completeAccountActiviation")}</Heading>
           <Text>{t("auth.checkYourEmail")}</Text>
         </Box>
       ) : (

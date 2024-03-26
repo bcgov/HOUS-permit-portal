@@ -11,10 +11,8 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
-  VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
@@ -26,9 +24,8 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
-import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
-import { BuilderTopFloatingButtons } from "../../domains/requirement-template/builder-top-floating-buttons"
+import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomToast } from "../base/flash-message"
 import { Form } from "../chefs"
 
@@ -41,7 +38,13 @@ interface IRequirementFormProps {
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave, showHelpButton }: IRequirementFormProps) => {
+  ({
+    permitApplication,
+    onCompletedBlocksChange,
+    formRef,
+    triggerSave,
+    showHelpButton = true,
+  }: IRequirementFormProps) => {
     const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
       permitApplication
     const isMounted = useMountStatus()
@@ -55,6 +58,10 @@ export const RequirementForm = observer(
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
     const [allCollapsed, setAllCollapsed] = useState(false)
     const [imminentSubmission, setImminentSubmission] = useState(null)
+    const [floatErrorBox, setFloatErrorBox] = useState(false)
+    const [hasErrors, setHasErrors] = useState(false)
+    const [firstComponentKey, setFirstComponentKey] = useState(null)
+    const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
     const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
 
@@ -72,6 +79,17 @@ export const RequirementForm = observer(
         box?.removeEventListener("click", handleClick)
       }
     }, [])
+
+    useEffect(() => {
+      if (hasErrors) {
+        window.addEventListener("scroll", onScroll)
+      } else {
+        window.removeEventListener("scroll", onScroll)
+      }
+      return () => {
+        window.removeEventListener("scroll", onScroll)
+      }
+    }, [hasErrors])
 
     useEffect(() => {
       // This useEffect registers the intersection observers for the panels
@@ -92,7 +110,7 @@ export const RequirementForm = observer(
       const rootMarginValue = `${topValue}px 0px ${bottomValue}px 0px`
       const blockOptions = {
         rootMargin: rootMarginValue,
-        threshold: 0.001, // Adjust threshold based on needs
+        threshold: 0.0001, // Adjust threshold based on needs
       }
 
       const blockObserver = new IntersectionObserver(handleBlockIntersection, blockOptions)
@@ -119,13 +137,13 @@ export const RequirementForm = observer(
       }
     }, [])
 
-    const togglePanelCollapse = () => {
-      if (!allCollapsed) {
+    const setIsCollapsedAll = (isCollapsedAll: boolean) => {
+      if (isCollapsedAll) {
         document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
       } else {
         document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
       }
-      setAllCollapsed((cur) => !cur)
+      setIsCollapsedAllState(isCollapsedAll)
     }
 
     const mapErrorBoxData = (errors) =>
@@ -137,8 +155,10 @@ export const RequirementForm = observer(
       const entry = entries.filter((en) => en.isIntersecting)[0]
       if (!entry) return
 
-      const itemWithSectionClassName = Array.from(entry.target.classList).find((className) =>
-        className.includes("formio-component-formSubmissionDataRSTsection")
+      const itemWithSectionClassName = Array.from(entry.target.classList).find(
+        (className) =>
+          className.includes("formio-component-formSubmissionDataRSTsection") ||
+          className.includes("formio-component-section-signoff-key")
       )
 
       if (itemWithSectionClassName) {
@@ -149,6 +169,7 @@ export const RequirementForm = observer(
     }
 
     const onFormSubmit = async (submission: any) => {
+      setHasErrors(null)
       setImminentSubmission(submission)
       onOpen()
     }
@@ -163,7 +184,9 @@ export const RequirementForm = observer(
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(containerComponent.root))
       }
-      setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
+    }
+    const onScroll = (event) => {
+      setFloatErrorBox(hasErrors && isFirstComponentNearTopOfView(firstComponentKey))
     }
 
     const onChange = (changedEvent) => {
@@ -186,11 +209,20 @@ export const RequirementForm = observer(
 
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
-    }
 
-    const scrollToTop = () => {
-      handleScrollToTop("outerScrollContainer")
-      handleScrollToTop("permitApplicationFieldsContainer")
+      rootComponent.on("componentError", (error) => {
+        // when a form field has an error, we update the state of ErrorBox with the new error information
+        setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+      })
+
+      rootComponent.on("submitError", (error) => {
+        // when the form attempts to submit but has validation errors, we set a flag to show ErrorBox
+        setHasErrors(true)
+        setErrorBoxData(mapErrorBoxData(formRef.current.errors))
+      })
+
+      const firstComponent = rootComponent.form.components[0]
+      setFirstComponentKey(firstComponent.key)
     }
 
     return (
@@ -199,11 +231,20 @@ export const RequirementForm = observer(
           direction="column"
           as={"section"}
           flex={1}
-          className={"form-wrapper"}
-          scrollMargin={96}
-          mb={20}
+          className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
+          mb="40vh"
+          mx="auto"
+          pl="8"
+          pr="130px" // space for floating buttons
+          maxWidth="container.lg"
           gap={8}
           ref={boxRef}
+          id="requirement-form-wrapper"
+          sx={{
+            "[id^='error-list-'].alert.alert-danger > p::before": {
+              content: `"${t("requirementTemplate.edit.errorsBox.title", { count: errorBoxData.length })}"`,
+            },
+          }}
         >
           <ErrorsBox errorBox={errorBoxData} />
           {permitApplication?.isSubmitted && (
@@ -222,7 +263,6 @@ export const RequirementForm = observer(
               </Link>
             </Text>
           </Box>
-          {showHelpButton && <BuilderTopFloatingButtons mr={0} mt={0} />}
 
           <Form
             form={formattedFormJson}
@@ -237,14 +277,8 @@ export const RequirementForm = observer(
             onInitialized={onInitialized}
           />
         </Flex>
-        <VStack align="end" position="sticky" bottom={24} left={"100%"} zIndex={11} gap={4} w="fit-content">
-          <Button w="136px" onClick={togglePanelCollapse} variant="greyButton">
-            {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
-          </Button>
-          <Button w="136px" onClick={scrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
-            {t("ui.toTop")}
-          </Button>
-        </VStack>
+
+        <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">
             <ModalOverlay />
@@ -285,3 +319,14 @@ export const RequirementForm = observer(
     )
   }
 )
+
+function isFirstComponentNearTopOfView(firstComponentKey) {
+  const firstComponentElement = document.querySelector(`.formio-component-${firstComponentKey}`)
+  if (firstComponentElement) {
+    const firstComponentElTopY = firstComponentElement.getBoundingClientRect().y
+    const buffer = 400 // this buffer is to account for the transition-delay of displaying ErrorBox
+    return firstComponentElTopY < buffer
+  } else {
+    return false
+  }
+}

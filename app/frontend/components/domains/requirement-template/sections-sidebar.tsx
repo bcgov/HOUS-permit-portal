@@ -27,13 +27,17 @@ export const SectionsSidebar = observer(function SectionsSidebar({
 
   return (
     <Box
-      w={"368px"}
       as={"section"}
-      h={"full"}
+      w={"368px"}
+      h="calc(100vh) "
+      bg="greys.white"
       borderRight={"1px solid"}
       borderColor={"border.light"}
       boxShadow={"elevations.elevation01"}
-      overflow={"auto"}
+      position="sticky"
+      top="0"
+      zIndex="1"
+      float="left"
     >
       {onEdit && (
         <HStack w={"full"} justifyContent={"space-between"} bg={"greys.grey03"} py={5} px={4}>
@@ -47,7 +51,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
           </>
         </HStack>
       )}
-      <Stack w={"full"} spacing={4} alignItems={"flex-start"} py={2}>
+      <Stack w={"full"} h="calc( 100vh - 76px)" overflow={"auto"} spacing={4} pt={2} pb={80} alignItems={"flex-start"}>
         {sections?.map((section, index) => {
           const isHighlightedSection = sectionIdToHighlight === section.id
           return (

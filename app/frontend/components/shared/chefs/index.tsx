@@ -53,8 +53,8 @@ Templates.current = {
         }
 
         template = template.concat(
-          `<div class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><i class="ph-fill ph-lightning-a"></i>
-          ${computedComplianceText}</div>`
+          `<div class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><span><i class="ph-fill ph-lightning-a"></i>
+          ${computedComplianceText}</span></div>`
         )
       }
       return template

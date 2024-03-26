@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900");
 @import url("https://fonts.googleapis.com/css?family=Material+Icons");
 @import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
 @import url("https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css");
@@ -24,7 +23,7 @@
 
   // Typography
   .v-application {
-    font-family: -apple-system, "BlinkMacSystemFont", "BCSans", "Roboto", "Verdana", "Arial", sans-serif !important;
+    font-family: -apple-system, "BlinkMacSystemFont", "BCSans", sans-serif !important;
     line-height: 1.4;
     font-size: 0.875rem;
   }
@@ -117,6 +116,9 @@
     .fa-plus-square-o::before {
       content: "\f107";
     }
+  }
+  .card-body {
+    border-top: 1px solid var(--chakra-colors-border-light);
   }
 
   // Undo "break-all". Breaking in the middle of all words affects readability.
@@ -258,12 +260,13 @@
     background-color: #606060;
     border-radius: 3px;
     box-shadow: 0 2px 8px 0 rgba(175, 175, 175, 0.5);
-    font-size: 0.85em;
+    font-size: var(--chakra-fontSizes-sm);
   }
 
   // validation messages and help text
   .form-text {
-    font-size: 0.85em;
+    font-size: var(--chakra-fontSizes-sm);
+    line-height: 1.3;
   }
 
   .invalid-feedback {
@@ -283,6 +286,16 @@
   }
 
   // dropdowns
+
+  .choices__list {
+    vertical-align: middle;
+  }
+  .choices {
+    overflow: visible;
+    &:focus {
+      box-shadow: 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
+    }
+  }
   .choices__list--dropdown {
     .choices__item {
       &:not(.is-selected) {
@@ -349,42 +362,54 @@
   }
 }
 
-@mixin yellowBarHeader {
-  line-height: 150%;
-
-  &::before {
-    content: "";
-    display: block;
-    width: 36px;
-    height: 8px;
-    border-top: 4px solid #fcba19;
+.formio-component-panel {
+  .card-header {
+    padding: var(--chakra-space-2) var(--chakra-space-6);
+    min-height: var(--chakra-space-10);
+    border-bottom: 0;
+  }
+  .card-title {
+    display: flex;
+    justify-content: space-between;
+    i {
+      order: 2;
+    }
   }
 }
 
 .form-wrapper {
-  h2 {
-    @include yellowBarHeader;
-  }
-
+  h2,
   .formio-section-container > label {
     @include yellowBarHeader;
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 20px;
   }
 
   .card {
-    margin-bottom: 24px !important;
+    margin-bottom: var(--chakra-space-6) !important;
   }
 
   .card-body {
-    padding: 24px !important;
+    padding: var(--chakra-space-6) !important;
+
+    > .form-group:not(:empty) {
+      // each form field inside a block
+      margin-bottom: var(--chakra-space-4);
+      max-width: var(--chakra-sizes-container-sm);
+      a {
+        text-decoration: underline;
+      }
+      &:not(.contact-field-set):focus-within label:not(.form-check-label) {
+        font-weight: bold;
+      }
+      &.contact-field-set .form-group:focus-within .col-form-label {
+        font-weight: bold;
+      }
+    }
   }
 
   .card-panel-addition {
-    padding-top: 24px;
-    padding-right: 24px;
-    padding-left: 24px;
+    padding-top: var(--chakra-space-6);
+    padding-right: var(--chakra-space-6);
+    padding-left: var(--chakra-space-6);
   }
 
   .tips {
@@ -411,12 +436,33 @@
   }
 
   .compliance {
-    background-color: $blue-light !important;
+    font-size: var(--chakra-fontSizes-xs);
+    color: $bcgov-font;
+    line-height: 1;
+    text-align: left;
+    padding-left: var(--chakra-space-2);
+    margin-bottom: calc(-1 * var(--chakra-space-1));
+
+    span {
+      background-color: $bcgov-alert-info !important;
+      display: inline-block;
+      padding: var(--chakra-space-1);
+      position: relative;
+      &:after {
+        content: "";
+        display: inline-block;
+        position: absolute;
+        left: var(--chakra-space-2);
+        bottom: -5px;
+        border-top: 6px solid $bcgov-alert-info !important;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+      }
+    }
 
     .i {
-      background-color: $bcgov-blue-secondary;
-      height: 24px;
       width: 24px;
+      height: 24px;
       margin-right: 6px;
     }
   }
@@ -541,11 +587,18 @@
 
   .contact-field-set {
     border: 1px solid var(--chakra-colors-border-light);
-    padding-inline: var(--chakra-space-4);
+    padding-inline: var(--chakra-space-6);
     padding-block: var(--chakra-space-3);
     border-radius: var(--chakra-radii-sm);
     margin-top: var(--chakra-space-4);
     max-width: 562px;
+
+    .fieldset-body {
+      > .row,
+      > .form-group {
+        margin-bottom: var(--chakra-space-4);
+      }
+    }
 
     .formio-component-simpletextfield {
       display: flex;
@@ -558,6 +611,106 @@
       font-weight: 700;
       font-size: var(--chakra-fontSizes-md);
     }
+    .formio-error-wrapper {
+      padding-left: var(--chakra-space-3) !important;
+      margin-left: 0 !important;
+      width: 100%;
+      &::before {
+        margin-left: calc(-1 * var(--chakra-space-8)) !important;
+      }
+    }
+  }
+
+  // ERROR STATES
+
+  .formio-error-wrapper:not(:empty) {
+    padding: 0 var(--chakra-space-2) var(--chakra-space-2);
+    background-color: transparent;
+    border: 1px solid $bcgov-error;
+    border-left-width: 3px;
+    border-radius: var(--chakra-radii-sm);
+    padding-left: var(--chakra-space-6);
+    padding-right: var(--chakra-space-6);
+    margin-left: calc(-1 * var(--chakra-space-6) - 3px);
+    max-width: calc(var(--chakra-sizes-container-sm) + var(--chakra-space-12)) !important;
+    // to keep the input fields looking the same size
+
+    &::before {
+      content: "➤";
+      font-weight: bold;
+      color: $bcgov-font-error;
+      position: absolute;
+      margin-left: calc(-1 * var(--chakra-space-12));
+      margin-top: var(--chakra-space-1);
+    }
+
+    label:not(.form-check-label) {
+      color: $bcgov-font;
+    }
+
+    .form-text.error {
+      font-weight: bold;
+      font-style: italic;
+      font-size: var(--chakra-fontSizes-xs);
+    }
+  }
+
+  // in a block with button, don't display the padding and border if there are no help content
+  [ref="buttonMessageContainer"] .help-block:empty {
+    padding: 0;
+    border: 0;
+  }
+}
+
+#requirement-form-wrapper {
+  // style default error box that to look similar to our floating error alert box
+  [id^="error-list-"].alert.alert-danger {
+    padding-top: var(--chakra-space-7);
+    padding-left: var(--chakra-space-6);
+    padding-right: var(--chakra-space-6);
+
+    &::before {
+      content: "!";
+      font-size: 32px;
+      font-weight: bold;
+      display: inline-block;
+      height: 40px;
+      width: 40px;
+      line-height: 32px;
+      text-align: center;
+      border-radius: 100%;
+      color: $bcgov-error;
+      border: 3px solid $bcgov-error;
+      margin-bottom: var(--chakra-space-6);
+    }
+
+    > p::before {
+      //content: "Errors";
+      display: block;
+      font-size: var(--chakra-fontSizes-xl);
+      font-weight: bold;
+      margin-bottom: var(--chakra-space-2);
+    }
+
+    > ul {
+      list-style: decimal;
+    }
+  }
+
+  // the floating error alert box's show/hide
+  #floating-error-alert-box {
+    transition-property: opacity, transform;
+    transition-delay: 300ms;
+    transition-duration: 200ms;
+  }
+
+  &.float-on #floating-error-alert-box {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  &.float-off #floating-error-alert-box {
+    opacity: 0;
+    transform: translateX(200px);
   }
 }
 
