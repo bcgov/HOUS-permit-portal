@@ -76,6 +76,10 @@ if PermitApplication.first.blank?
     .permit_type_submission_contacts
     .where(email: "north-van@laterolabs.com", permit_type: permit_type1)
     .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
+  north_van
+    .permit_type_submission_contacts
+    .where(email: "north-van@laterolabs.com", permit_type: permit_type2)
+    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
   jurisdictions
     .first(10)
     .each do |jurisdiction|
