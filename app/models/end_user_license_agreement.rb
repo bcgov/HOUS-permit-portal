@@ -1,4 +1,8 @@
 class EndUserLicenseAgreement < ApplicationRecord
+  include HtmlSanitizeAttributes
+
+  sanitizable :content
+
   has_many :user_license_agreements
 
   before_create :replace_active_agreement, if: :active

@@ -1,4 +1,7 @@
 class Requirement < ApplicationRecord
+  include HtmlSanitizeAttributes
+  sanitizable :hint
+
   belongs_to :requirement_block, touch: true
 
   acts_as_list scope: :requirement_block, top_of_list: 0
