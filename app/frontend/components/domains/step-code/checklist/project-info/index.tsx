@@ -26,11 +26,7 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
         label={t(`${translationPrefix}.permitNum`)}
         inputProps={{ isDisabled: true, value: checklist.buildingPermitNumber || "" }}
       />
-      {/* TODO: builder - can we get this from the permit application? */}
-      <TextFormControl
-        label={t(`${translationPrefix}.builder`)}
-        inputProps={{ isDisabled: true, value: checklist.builder || "" }}
-      />
+      <TextFormControl label={t(`${translationPrefix}.builder`)} fieldName="builder" />
 
       <TextFormControl
         label={t(`${translationPrefix}.address`)}
