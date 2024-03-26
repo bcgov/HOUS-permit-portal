@@ -166,6 +166,16 @@ export const RequirementForm = observer(
       setErrorBoxData(mapErrorBoxData(containerComponent.root.errors))
     }
 
+    const onChange = (changedEvent) => {
+      //in the case of a multi select box, there is a change but no onblur bubbled up
+      if (changedEvent?.changed?.component?.type == "selectboxes") {
+        if (onCompletedBlocksChange) {
+          onCompletedBlocksChange(getCompletedBlocksFromForm(changedEvent?.changed?.instance?.root))
+        }
+        setErrorBoxData(mapErrorBoxData(changedEvent?.changed?.instance?.root?.errors))
+      }
+    }
+
     const onInitialized = (event) => {
       if (!formRef.current) return
       if (onCompletedBlocksChange) {
@@ -223,6 +233,7 @@ export const RequirementForm = observer(
             onSubmit={onFormSubmit}
             options={isDraft ? {} : { readOnly: true }}
             onBlur={onBlur}
+            onChange={onChange}
             onInitialized={onInitialized}
           />
         </Flex>

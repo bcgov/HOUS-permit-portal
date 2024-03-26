@@ -1,5 +1,4 @@
 import { t } from "i18next"
-import * as R from "ramda"
 
 const findPanelComponents = (components) => {
   let panelComponents = []
@@ -24,13 +23,25 @@ const findPanelComponents = (components) => {
   return panelComponents
 }
 
+export const nestedComponentsIncomplete = (components) => {
+  //only look at visible objects
+  //in a typical object, the dataValue is the actual value selected
+  //in a multi select, this is a hash of key values with true / falses
+  //in a general_contact, this is a layer of nested fields
+
+  return components
+    .filter((comp) => comp._visible)
+    .filter((comp) => {
+      //in the case of general_contacts, a fieldset has the isValid function
+      return comp.error || (comp.component.validate?.required && !comp.isValid(comp.dataValue, true))
+    })
+}
+
 export const getCompletedBlocksFromForm = (rootComponent) => {
   const blocksList = findPanelComponents(rootComponent.components)
   let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
-    const incompleteComponents = panelComponent.components.filter(
-      (comp) => comp.error || (comp.component.validate?.required && (R.isEmpty(comp.dataValue) || !comp.dataValue))
-    )
+    const incompleteComponents = nestedComponentsIncomplete(panelComponent.components)
 
     const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
 
