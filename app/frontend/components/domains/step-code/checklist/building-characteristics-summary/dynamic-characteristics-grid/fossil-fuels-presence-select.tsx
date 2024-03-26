@@ -41,7 +41,7 @@ export const FossilFuelsPresenceSelect = ({ onChange, value, options }: IProps) 
                 rounded="base"
                 shadow="base"
               >
-                {value ? t(`${translationPrefix}.fossilFuels.${value}`) : "-"}
+                {value ? t(`${translationPrefix}.fossilFuels.${value}`) : t("ui.select")}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
