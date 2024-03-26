@@ -61,7 +61,7 @@ export const RequirementForm = observer(
     const [floatErrorBox, setFloatErrorBox] = useState(false)
     const [hasErrors, setHasErrors] = useState(false)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
-    const [isCollapsedAll, setIsCollapsedAll] = useState(false)
+    const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
     const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
 
@@ -137,13 +137,13 @@ export const RequirementForm = observer(
       }
     }, [])
 
-    const togglePanelCollapse = (isCollapsedAll: boolean) => {
+    const setIsCollapsedAll = (isCollapsedAll: boolean) => {
       if (isCollapsedAll) {
         document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
       } else {
         document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
       }
-      setIsCollapsedAll(isCollapsedAll)
+      setIsCollapsedAllState(isCollapsedAll)
     }
 
     const mapErrorBoxData = (errors) =>
@@ -278,7 +278,7 @@ export const RequirementForm = observer(
           />
         </Flex>
 
-        <BuilderBottomFloatingButtons onToggleCallback={togglePanelCollapse} />
+        <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">
             <ModalOverlay />

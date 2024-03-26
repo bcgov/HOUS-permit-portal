@@ -111,10 +111,6 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     return submitMethod(currentUser.jurisdiction.id, data)
   })
 
-  const onToggleCollapseAll = (isCollapsedAll: boolean) => {
-    setIsCollapsedAll(isCollapsedAll)
-  }
-
   return (
     <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main" id="jurisdiction-edit-permit-template">
       <BuilderHeader
@@ -206,7 +202,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
           />
         </Flex>
       </Flex>
-      <BuilderBottomFloatingButtons onToggleCallback={onToggleCollapseAll} />
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
     </Flex>
   )
 

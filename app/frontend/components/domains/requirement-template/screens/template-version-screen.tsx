@@ -38,10 +38,6 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
   }
 
-  const onToggleCollapseAll = (isCollapsedAll: boolean) => {
-    setIsCollapsedAll(isCollapsedAll)
-  }
-
   return (
     <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
       <BuilderHeader
@@ -92,7 +88,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
           />
         </Flex>
       </Flex>
-      <BuilderBottomFloatingButtons onToggleCallback={onToggleCollapseAll} />
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
     </Flex>
   )
 

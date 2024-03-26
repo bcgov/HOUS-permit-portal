@@ -117,9 +117,6 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       }
     })()
   }
-  const onToggleCollapseAll = (isCollapsedAll: boolean) => {
-    setIsCollapsedAll(isCollapsedAll)
-  }
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
@@ -169,7 +166,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
           </Box>
         </Box>
       </FormProvider>
-      <BuilderBottomFloatingButtons onToggleCallback={onToggleCollapseAll} />
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
     </Box>
   )
 
