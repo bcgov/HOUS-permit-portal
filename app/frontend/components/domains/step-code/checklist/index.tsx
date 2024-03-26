@@ -1,7 +1,8 @@
 import { Accordion, Alert, Center, Container, Heading, VStack } from "@chakra-ui/react"
-import { LightningA } from "@phosphor-icons/react"
+import { LightningA, WarningCircle } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { Suspense, useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
@@ -55,18 +56,48 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             <Heading fontSize="2xl" mb={0} color="text.primary">
               {t(`${translationPrefix}.heading`)}
             </Heading>
-            <Alert
-              status="info"
-              rounded="lg"
-              borderWidth={1}
-              borderColor="semantic.info"
-              bg="semantic.infoLight"
-              gap={2}
-              color="text.primary"
-            >
-              <LightningA color="var(--chakra-colors-semantic-info)" />
-              {t(`${translationPrefix}.notice`)}
-            </Alert>
+            <VStack spacing={2}>
+              {R.isNil(checklist.proposedEnergyStep) && (
+                <Alert
+                  status="error"
+                  rounded="lg"
+                  borderWidth={1}
+                  borderColor="semantic.error"
+                  bg="semantic.errorLight"
+                  gap={2}
+                  color="text.primary"
+                >
+                  <WarningCircle color="var(--chakra-colors-semantic-error)" />
+                  {t(`${translationPrefix}.energyStepNotMet`)}
+                </Alert>
+              )}
+              {R.isNil(checklist.proposedZeroCarbonStep) && (
+                <Alert
+                  status="error"
+                  rounded="lg"
+                  borderWidth={1}
+                  borderColor="semantic.error"
+                  bg="semantic.errorLight"
+                  gap={2}
+                  color="text.primary"
+                >
+                  <WarningCircle color="var(--chakra-colors-semantic-error)" />
+                  {t(`${translationPrefix}.zeroCarbonStepNotMet`)}
+                </Alert>
+              )}
+              <Alert
+                status="info"
+                rounded="lg"
+                borderWidth={1}
+                borderColor="semantic.info"
+                bg="semantic.infoLight"
+                gap={2}
+                color="text.primary"
+              >
+                <LightningA color="var(--chakra-colors-semantic-info)" />
+                {t(`${translationPrefix}.notice`)}
+              </Alert>
+            </VStack>
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
                 <Accordion allowMultiple defaultIndex={[0, 1, 2, 3]}>

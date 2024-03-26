@@ -97,7 +97,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   const hasNoSections = templateSections.length === 0
 
   const onClose = () => {
-    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
+    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/digital-building-permits`)
   }
 
   const onBlockEditSave = (requirementBlockId: string, data: IRequirementBlockCustomization) => {

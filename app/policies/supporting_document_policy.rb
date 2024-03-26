@@ -8,4 +8,12 @@ class SupportingDocumentPolicy < ApplicationPolicy
       false
     end
   end
+
+  def destroy?
+    user.submitter? ? record.permit_application.submitter_id == user.id : false
+  end
+
+  def delete?
+    destroy?
+  end
 end
