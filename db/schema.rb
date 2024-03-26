@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_21_224402) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_26_205321) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -98,8 +98,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_21_224402) do
     t.text "contact_summary_html"
     t.jsonb "map_position"
     t.string "prefix", null: false
-    t.integer "energy_step_required"
-    t.integer "zero_carbon_step_required"
+    t.integer "energy_step_required", default: 3
+    t.integer "zero_carbon_step_required", default: 1
     t.string "slug"
     t.integer "map_zoom"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
@@ -334,6 +334,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_21_224402) do
     t.integer "epc_calculation_testing_target_type"
     t.boolean "epc_calculation_compliance"
     t.boolean "codeco"
+    t.integer "status", default: 0, null: false
+    t.string "builder"
+    t.index ["status"], name: "index_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 

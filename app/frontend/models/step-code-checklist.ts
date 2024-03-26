@@ -120,6 +120,7 @@ export const StepCodeChecklistModel = types
         { buildingCharacteristicsSummary: "buildingCharacteristicsSummaryAttributes" },
         R.pick(
           [
+            "builder",
             "buildingType",
             "compliancePath",
             "completedBy",
