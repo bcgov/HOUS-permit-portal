@@ -46,7 +46,9 @@ const options = {
           passwordRequirements:
             "Must be between 8 - 64 characters long, at least one uppercase, one lowercase, one special character, and one number.",
           alreadyHaveAccount: "Already have an account?",
-          checkYourEmail: "Please check your email inbox for the confirmation email to activate your account.",
+          completeAccountActiviation: "Please confirm your account",
+          checkYourEmail:
+            "Check your email inbox for a confirmation email to finish activating your new Building Permit Hub account.",
           tokenExpired: "Your session is no longer valid, please login again",
         },
         landing: {
