@@ -88,7 +88,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             as="div"
             minH="10"
             py={0}
-            px={6}
+            pl={6}
+            pr={3}
             display={"flex"}
             justifyContent={"space-between"}
             onClick={onClickToggle}
@@ -125,9 +126,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 />
               )}
               {isEditable && renderEdit?.()}
-              <button>
+
+              <IconButton variant="unstyled" aria-label="Collapse or expand accordion">
                 <AccordionIcon color={"text.primary"} />
-              </button>
+              </IconButton>
             </HStack>
           </AccordionButton>
         </Box>

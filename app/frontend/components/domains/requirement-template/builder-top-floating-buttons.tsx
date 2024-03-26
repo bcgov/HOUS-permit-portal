@@ -1,9 +1,9 @@
-import { Box, BoxProps, Stack, StackProps } from "@chakra-ui/react"
+import { Box, BoxProps, Stack } from "@chakra-ui/react"
 import { Info } from "@phosphor-icons/react"
 import React from "react"
 import { HelpDrawer } from "../../shared/help-drawer"
 
-interface IProps extends Partial<StackProps>, Partial<BoxProps> {}
+interface IProps extends Partial<BoxProps> {}
 
 export function BuilderTopFloatingButtons({ ...boxProps }: IProps) {
   return (
