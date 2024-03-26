@@ -100,6 +100,9 @@ en:
       jurisdiction_error:
         title: Oops
         message: Error encountered fetching jurisdiction for address
+      ltsa_unavailable_error:
+        title: Oops
+        message: The land title service is currently unavailable
     permit_classification:
       options_error:
         title: Oops

@@ -1,17 +1,31 @@
-import { Box, Container, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react"
+import {
+  Box,
+  Container,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Link,
+  ListItem,
+  Text,
+  UnorderedList,
+} from "@chakra-ui/react"
 import { ArrowSquareOut } from "@phosphor-icons/react"
+import i18next from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect, useState } from "react"
-import { Controller, FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
+import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 
 export type TSearchAddressFormData = {
@@ -22,8 +36,10 @@ interface INewPermitApplicationScreenProps {}
 
 export type TCreatePermitApplicationFormData = {
   pid: string
+  pin?: string
   permitTypeId: string
   activityId: string
+  jurisdiction: IOption
   site?: IOption
 }
 
@@ -33,22 +49,28 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
     mode: "onChange",
     defaultValues: {
       pid: "",
+      pin: "",
       permitTypeId: "",
       activityId: "",
       site: null as IOption,
+      jurisdiction: null as IOption,
     },
   })
-  const { handleSubmit, formState, control, watch } = formMethods
+  const { handleSubmit, formState, control, watch, register, setValue } = formMethods
   const { isSubmitting } = formState
   const { permitClassificationStore, permitApplicationStore, geocoderStore } = useMst()
   const { fetchGeocodedJurisdiction } = geocoderStore
-  const { fetchPermitTypeOptions, fetchActivityOptions, isLoading } = permitClassificationStore
+  const { fetchPermitTypeOptions, fetchActivityOptions } = permitClassificationStore
   const navigate = useNavigate()
-  const [siteSelected, setSiteSelected] = useState(false)
-  const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
+
+  const [pinMode, setPinMode] = useState(false)
 
   const onSubmit = async (formValues) => {
-    const params = { ...formValues, fullAddress: formValues.site.label }
+    const params = {
+      ...formValues,
+      fullAddress: formValues.site.label,
+      jurisdictionId: formValues.jurisdiction.value,
+    }
     const permitApplication = await permitApplicationStore.createPermitApplication(params)
     if (permitApplication) {
       navigate(`/permit-applications/${permitApplication.id}/edit`)
@@ -57,13 +79,21 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
   const permitTypeIdWatch = watch("permitTypeId")
   const pidWatch = watch("pid")
+  const pinWatch = watch("pin")
   const siteWatch = watch("site")
+  const jurisdictionWatch = watch("jurisdiction")
 
   useEffect(() => {
     if (!siteWatch?.value) return
     ;(async () => {
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value)
-      setJurisdiction(jurisdiction)
+      if (jurisdiction && !R.isEmpty(jurisdiction)) {
+        setPinMode(false)
+        setValue("jurisdiction", { label: jurisdiction.name, value: jurisdiction.id })
+      } else {
+        setPinMode(true)
+        setValue("jurisdiction", null)
+      }
     })()
   }, [siteWatch?.value])
 
@@ -71,63 +101,11 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
     <Flex as="main" direction="column" w="full" bg="greys.white">
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
-        <Box
-          width="full"
-          mx="auto"
-          mt="10"
-          mb="10"
-          border="1px solid"
-          borderColor="border.light"
-          borderRadius="md"
-          p="6"
-        >
-          <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
-          <UnorderedList ml="0" mt="4">
-            <ListItem>
-              <Link href={t("permitApplication.new.applicationDisclaimer_1_link")} isExternal>
-                {t("permitApplication.new.applicationDisclaimer_1")}
-                <ArrowSquareOut></ArrowSquareOut>
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link href={t("permitApplication.new.applicationDisclaimer_2_link")} isExternal>
-                {t("permitApplication.new.applicationDisclaimer_2")}
-                <ArrowSquareOut></ArrowSquareOut>
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link href={t("permitApplication.new.applicationDisclaimer_3_link")} isExternal>
-                {t("permitApplication.new.applicationDisclaimer_3")}
-                <ArrowSquareOut></ArrowSquareOut>
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link href={t("permitApplication.new.applicationDisclaimer_4_link")} isExternal>
-                {t("permitApplication.new.applicationDisclaimer_4")}
-                <ArrowSquareOut></ArrowSquareOut>
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link href={t("permitApplication.new.applicationDisclaimer_5_link")} isExternal>
-                {t("permitApplication.new.applicationDisclaimer_5")}
-                <ArrowSquareOut></ArrowSquareOut>
-              </Link>
-            </ListItem>
-          </UnorderedList>
-          <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
-          <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
-            {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
-            <ArrowSquareOut></ArrowSquareOut>
-          </Link>
-        </Box>
-
-        {/* Todo - need to check the address, compute the jurisdiction, input permit type and work type After this is
-        selected, create is called and you go to the application id in progress with the form */}
-
+        <DisclaimerInfo />
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={12} w="full" bg="greys.white">
-              <Flex as="section" direction="column" gap={2}>
+              <Flex as="section" direction="column" gap={4}>
                 <Heading as="h2" variant="yellowline">
                   {t("permitApplication.new.locationHeading")}
                 </Heading>
@@ -137,7 +115,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   render={({ field: { onChange, value } }) => {
                     return (
                       <SitesSelect
-                        setSiteSelected={setSiteSelected}
                         onChange={onChange}
                         placeholder={undefined}
                         selectedOption={value}
@@ -153,8 +130,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     )
                   }}
                 />
+                {pinMode && <PinModeInputs />}
               </Flex>
-              {siteSelected && jurisdiction && (
+              {jurisdictionWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={2}>
                   <Heading as="h2" variant="yellowline">
                     {t("permitApplication.new.permitTypeHeading")}
@@ -166,7 +144,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                       return (
                         <PermitTypeRadioSelect
                           w="full"
-                          fetchOptions={() => fetchPermitTypeOptions(true, pidWatch, jurisdiction.id)}
+                          fetchOptions={() => fetchPermitTypeOptions(true, pidWatch, jurisdictionWatch)}
                           onChange={onChange}
                           value={value}
                         />
@@ -194,3 +172,66 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
     </Flex>
   )
 })
+
+export const PinModeInputs = () => {
+  const { register, control } = useFormContext()
+  const { t } = useTranslation()
+
+  return (
+    <Flex direction="column" bg="greys.grey03" px={6} py={2} gap={4}>
+      {t("permitApplication.new.pinRequired")}
+      <Flex gap={4}>
+        <FormControl>
+          <FormLabel>{t("permitApplication.fields.pin")}</FormLabel>
+          <Input {...register("pin")} bg="greys.white" />
+        </FormControl>
+
+        <Controller
+          name="jurisdiction"
+          control={control}
+          render={({ field: { onChange, value } }) => {
+            return (
+              <JurisdictionSelect
+                onChange={onChange}
+                placeholder={undefined}
+                selectedOption={value}
+                menuPortalTarget={document.body}
+              />
+            )
+          }}
+        />
+      </Flex>
+    </Flex>
+  )
+}
+
+const DisclaimerInfo = () => {
+  const { t } = useTranslation()
+
+  const applicationDisclaimers = i18next.t("permitApplication.new.applicationDisclaimers", {
+    returnObjects: true,
+  }) as Array<{ text: string; href: string }>
+
+  return (
+    <Box width="full" mx="auto" mt="10" mb="10" border="1px solid" borderColor="border.light" borderRadius="md" p="6">
+      <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
+      <UnorderedList ml="0" mt="4">
+        {applicationDisclaimers.map((disclaimer) => {
+          return (
+            <ListItem key={disclaimer.href}>
+              <Link href={disclaimer.href} isExternal>
+                {disclaimer.text}
+                <ArrowSquareOut></ArrowSquareOut>
+              </Link>
+            </ListItem>
+          )
+        })}
+      </UnorderedList>
+      <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
+      <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
+        {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
+        <ArrowSquareOut></ArrowSquareOut>
+      </Link>
+    </Box>
+  )
+}

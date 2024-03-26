@@ -246,6 +246,8 @@ const options = {
           reviewers: "Reviewers",
           applicationsReceived: "Applications Received",
           templatesUsed: "Templates Used",
+          select: "",
+          search: "Search jurisdictions",
         },
         permitApplication: {
           referenceNumber: "Reference #",
@@ -295,6 +297,8 @@ const options = {
           },
           fields: {
             number: "Application #",
+            pin: "PIN",
+            jurisdiction: "Jurisdiction",
           },
           new: {
             locationHeading: "Location for permit",
@@ -302,20 +306,25 @@ const options = {
             workTypeHeading: "Work Type",
             applicationDisclaimerInstruction:
               "Before you submit a building permit application, please ensure your proposed building siting and design complies with:",
-            applicationDisclaimer_1: "provincial building code",
-            applicationDisclaimer_1_link: "https://www.bccodes.ca/building-code.html",
-            applicationDisclaimer_2: "local zoning bylaw",
-            applicationDisclaimer_2_link:
-              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws",
-            applicationDisclaimer_3: "official community plan regulations",
-            applicationDisclaimer_3_link:
-              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/local-government-planning/official-community-plans",
-            applicationDisclaimer_4: "applicable development permit areas",
-            applicationDisclaimer_4_link:
-              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/development-permit-areas",
-            applicationDisclaimer_5: "variances outlined in a local bylaw",
-            applicationDisclaimer_5_link:
-              "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws/board-of-variance",
+            applicationDisclaimers: [
+              { text: "provincial building code", href: "https://www.bccodes.ca/building-code.html" },
+              {
+                text: "local zoning bylaw",
+                href: "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws",
+              },
+              {
+                text: "official community plan regulations",
+                href: "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/local-government-planning/official-community-plans",
+              },
+              {
+                text: "applicable development permit areas",
+                href: "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/development-permit-areas",
+              },
+              {
+                text: "variances outlined in a local bylaw",
+                href: "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws/board-of-variance",
+              },
+            ],
             applicationDisclaimerMoreInfo:
               "For more information and specific building drawing requirements and checklists, contact your local jurisdiction.",
             applicationDisclaimerMoreInfo_CTA: "Find your local jurisdiction",
@@ -334,6 +343,7 @@ const options = {
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed: "Confirmation notifications have been sent to all individuals involved.",
+            pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -1067,9 +1077,10 @@ const options = {
           contactInstructions_3:
             "Please contact your local government for questions related to your permit application.",
           contactTeamInstructionsTitle: "Contact the Building Permit Hub Team",
-          contactTeamInstructions_1: "Do you have some feedback for the Building Permit Hub Team?",
-          contactTeamInstructions_2:
+          contactTeamInstructions: [
+            "Do you have some feedback for the Building Permit Hub Team?",
             "Do you have any questions or need assistance regarding your experience using the Building Permit Hub?",
+          ],
           contactTeamCTA: "Please contact us at",
           contactNeedHelp: "Need general help?",
           contactNeedHelpInstructions:

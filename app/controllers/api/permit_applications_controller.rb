@@ -85,12 +85,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def create
-    attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: permit_application_params[:pid])
-    jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
-    @permit_application =
-      PermitApplication.build(permit_application_params.to_h.merge(submitter: current_user, jurisdiction: jurisdiction))
+    @permit_application = PermitApplication.build(permit_application_params.to_h.merge(submitter: current_user))
     authorize @permit_application
-
     if @permit_application.save
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
@@ -116,6 +112,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     params.require(:permit_application).permit(
       :activity_id,
       :permit_type_id,
+      :jurisdiction_id,
       :full_address,
       :nickname,
       :pin,

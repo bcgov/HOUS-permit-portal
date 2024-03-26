@@ -3,6 +3,8 @@ class Api::GeocoderController < Api::ApplicationController
   after_action :verify_authorized
   skip_before_action :authenticate_user!, only: %i[site_options jurisdiction]
 
+  rescue_from Errors::FeatureAttributesRetrievalError, with: :handle_ltsa_unavailable
+
   def site_options
     authorize :geocoder, :site_options?
     begin
@@ -51,6 +53,10 @@ class Api::GeocoderController < Api::ApplicationController
   end
 
   private
+
+  def handle_ltsa_unavailable(exception)
+    render_error "geocoder.ltsa_unavailble_error", {}, exception and return
+  end
 
   def geocoder_params
     params.permit(:address, :site_id, :pid)

@@ -32,12 +32,11 @@ export const GeocoderStoreModel = types
     }),
     fetchGeocodedJurisdiction: flow(function* (siteId: string) {
       const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId)
+      let responseData = response?.data?.data
       if (response.ok) {
-        let responseData = response.data.data
         self.rootStore.jurisdictionStore.addJurisdiction(responseData)
         return responseData
       }
-      return response.ok
     }),
   }))
 

@@ -3,10 +3,11 @@ class Jurisdiction < ApplicationRecord
   friendly_id :qualified_name, use: :slugged
 
   include ActionView::Helpers::SanitizeHelper
-  searchkick searchable: %i[reverse_qualified_name qualified_name],
-             word_start: %i[reverse_qualified_name qualified_name],
-             word_middle: %i[reverse_qualified_name qualified_name],
-             word_end: %i[reverse_qualified_name qualified_name]
+  searchkick searchable: %i[name reverse_qualified_name qualified_name],
+             word_start: %i[name reverse_qualified_name qualified_name],
+             text_start: %i[name reverse_qualified_name qualified_name]
+  #  word_middle: %i[reverse_qualified_name qualified_name],
+  #  word_end: %i[reverse_qualified_name qualified_name]
 
   # Associations
   has_many :permit_applications
@@ -75,6 +76,7 @@ class Jurisdiction < ApplicationRecord
     {
       qualified_name: qualified_name,
       reverse_qualified_name: reverse_qualified_name,
+      name: name,
       type: type,
       updated_at: updated_at,
       review_managers_size: review_managers_size,
