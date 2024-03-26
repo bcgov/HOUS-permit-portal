@@ -100,7 +100,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </VStack>
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
-                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3]}>
+                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]}>
                   {/* <VStack spacing={4} pb={12}> */}
                   <ProjectInfo checklist={checklist} />
                   <ComplianceSummary checklist={checklist} />
