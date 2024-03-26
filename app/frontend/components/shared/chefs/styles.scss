@@ -117,6 +117,9 @@
       content: "\f107";
     }
   }
+  .card-body {
+    border-top: 1px solid var(--chakra-colors-border-light);
+  }
 
   // Undo "break-all". Breaking in the middle of all words affects readability.
   .formio-component .table {
@@ -356,6 +359,21 @@
     background-color: transparent;
     color: grey;
     padding: 30px;
+  }
+}
+
+.formio-component-panel {
+  .card-header {
+    padding: var(--chakra-space-2) var(--chakra-space-6);
+    min-height: var(--chakra-space-10);
+    border-bottom: 0;
+  }
+  .card-title {
+    display: flex;
+    justify-content: space-between;
+    i {
+      order: 2;
+    }
   }
 }
 

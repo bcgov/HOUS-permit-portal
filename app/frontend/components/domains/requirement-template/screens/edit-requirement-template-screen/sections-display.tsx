@@ -15,7 +15,7 @@ import { RequirementsLibraryDrawer } from "../../../requirements-library/require
 import { IRequirementTemplateForm, formScrollToId } from "./index"
 
 interface IProps {
-  shouldCollapseAll?: boolean
+  isCollapsedAll?: boolean
   setSectionRef: (el: HTMLElement, id: string) => void
 }
 
@@ -46,12 +46,12 @@ const SectionDisplay = observer(
   ({
     section,
     sectionIndex,
-    shouldCollapseAll,
+    isCollapsedAll,
     setSectionRef,
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
-    shouldCollapseAll?: boolean
+    isCollapsedAll?: boolean
     setSectionRef: (el: HTMLElement, id: string) => void
   }) => {
     const { requirementBlockStore } = useMst()
@@ -134,7 +134,7 @@ const SectionDisplay = observer(
               key={sectionBlock.id}
               requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
               onRemove={() => removeSectionBlock(index)}
-              triggerForceCollapse={shouldCollapseAll}
+              isCollapsedAll={isCollapsedAll}
               isEditable
               showEditWarning
             />

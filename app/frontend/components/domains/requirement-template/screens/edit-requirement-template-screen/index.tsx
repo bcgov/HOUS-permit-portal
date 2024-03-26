@@ -43,7 +43,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     control,
   })
   const { t } = useTranslation()
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
@@ -117,14 +117,17 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       }
     })()
   }
+  const onToggleCollapseAll = (isCollapsedAll: boolean) => {
+    setIsCollapsedAll(isCollapsedAll)
+  }
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
   return (
-    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
+    <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
         <EditableBuilderHeader requirementTemplate={requirementTemplate} />
-        <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
+        <Box borderTop={"1px solid"} borderColor={"border.base"} position="relative">
           {isReorderMode ? (
             <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
           ) : (
@@ -135,18 +138,23 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               sections={denormalizedSections}
             />
           )}
-          <Box w="full" bg={hasNoSections ? "greys.grey03" : undefined} ref={rightContainerRef} position={"relative"}>
+          <Box
+            width="calc(100vw - 368px - 20px)"
+            display="inline-block"
+            bg={hasNoSections ? "greys.grey03" : undefined}
+            ref={rightContainerRef}
+          >
             <ControlsHeader
               onSaveDraft={onSaveDraft}
               onScheduleDate={onSchedule}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
             />
-            <BuilderTopFloatingButtons top="24" />
+            <BuilderTopFloatingButtons />
             {hasNoSections ? (
               <Flex
                 justifyContent={hasNoSections ? "center" : undefined}
-                alignItems={hasNoSections ? "center" : undefined}
+                alignItems={hasNoSections ? "flex-start" : undefined}
                 flex={1}
                 w={"full"}
                 h="100vh"
@@ -156,22 +164,14 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
                 </Text>
               </Flex>
             ) : (
-              <SectionsDisplay shouldCollapseAll={shouldCollapseAll} setSectionRef={setSectionRef} />
+              <SectionsDisplay isCollapsedAll={isCollapsedAll} setSectionRef={setSectionRef} />
             )}
           </Box>
-        </Flex>
+        </Box>
       </FormProvider>
-      <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
-    </Flex>
+      <BuilderBottomFloatingButtons onToggleCallback={onToggleCollapseAll} />
+    </Box>
   )
-
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
-
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
-  }
 
   function scrollIntoView(id: string) {
     const element = document.getElementById(formScrollToId(id))

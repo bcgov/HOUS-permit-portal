@@ -48,7 +48,11 @@ const styles = {
       margin: "0",
     },
     [".chakra-breadcrumb__list"]: {
-      paddingLeft: "0",
+      padding: "0",
+      minHeight: "46px",
+    },
+    [".chakra-breadcrumb__list, .chakra-breadcrumb__list-item"]: {
+      margin: "0",
     },
     [".chakra-menu__menu-list .chakra-menu__group__title"]: {
       maxWidth: "250px",

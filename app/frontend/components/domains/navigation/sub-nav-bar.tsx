@@ -21,8 +21,6 @@ export const SubNavBar = observer(({ staticBreadCrumbs, breadCrumbContainerProps
   return (
     <Flex
       w="full"
-      bg="greys.white"
-      h="46px"
       align="center"
       position="sticky"
       zIndex={9}
@@ -90,7 +88,7 @@ interface ISiteBreadcrumbProps {
 const SiteBreadcrumbs = observer(function SiteBreadcrumb({ breadcrumbs }: ISiteBreadcrumbProps) {
   const { t } = useTranslation()
   return (
-    <Breadcrumb spacing={2} separator="/" mt={4}>
+    <Breadcrumb spacing={2} separator="/">
       <BreadcrumbItem>
         <BreadcrumbLink as={RouterLinkButton} to="/" textTransform="capitalize" variant="link">
           {t("site.home")}

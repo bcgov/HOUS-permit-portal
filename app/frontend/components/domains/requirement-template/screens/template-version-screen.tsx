@@ -25,7 +25,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const navigate = useNavigate()
 
   if (error) return <ErrorScreen error={error} />
@@ -36,6 +36,10 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
+  }
+
+  const onToggleCollapseAll = (isCollapsedAll: boolean) => {
+    setIsCollapsedAll(isCollapsedAll)
   }
 
   return (
@@ -82,26 +86,18 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
 
           <SectionsDisplay
             sections={templateSections}
-            shouldCollapseAll={shouldCollapseAll}
+            isCollapsedAll={isCollapsedAll}
             setSectionRef={setSectionRef}
             formScrollToId={formScrollToId}
           />
         </Flex>
       </Flex>
-      <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
+      <BuilderBottomFloatingButtons onToggleCallback={onToggleCollapseAll} />
     </Flex>
   )
 
   function scrollToTop() {
     rightContainerRef.current?.scrollTo({ behavior: "smooth", top: 0 })
-  }
-
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
-
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
   }
 
   function scrollIntoView(id: string) {

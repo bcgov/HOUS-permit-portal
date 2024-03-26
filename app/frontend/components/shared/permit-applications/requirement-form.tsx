@@ -11,10 +11,8 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
-  VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { ArrowUp } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
@@ -26,8 +24,8 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
-import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
+import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomToast } from "../base/flash-message"
 import { Form } from "../chefs"
 
@@ -63,6 +61,7 @@ export const RequirementForm = observer(
     const [floatErrorBox, setFloatErrorBox] = useState(false)
     const [hasErrors, setHasErrors] = useState(false)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
+    const [isCollapsedAll, setIsCollapsedAll] = useState(false)
 
     const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
 
@@ -138,13 +137,13 @@ export const RequirementForm = observer(
       }
     }, [])
 
-    const togglePanelCollapse = () => {
-      if (!allCollapsed) {
+    const togglePanelCollapse = (isCollapsedAll: boolean) => {
+      if (isCollapsedAll) {
         document.querySelectorAll(".formio-collapse-icon.fa-minus-square-o").forEach((el: HTMLDivElement) => el.click())
       } else {
         document.querySelectorAll(".formio-collapse-icon.fa-plus-square-o").forEach((el: HTMLDivElement) => el.click())
       }
-      setAllCollapsed((cur) => !cur)
+      setIsCollapsedAll(isCollapsedAll)
     }
 
     const mapErrorBoxData = (errors) =>
@@ -226,11 +225,6 @@ export const RequirementForm = observer(
       setFirstComponentKey(firstComponent.key)
     }
 
-    const scrollToTop = () => {
-      handleScrollToTop("outerScrollContainer")
-      handleScrollToTop("permitApplicationFieldsContainer")
-    }
-
     return (
       <>
         <Flex
@@ -283,14 +277,8 @@ export const RequirementForm = observer(
             onInitialized={onInitialized}
           />
         </Flex>
-        <VStack align="end" position="fixed" bottom="6" right="6" zIndex={11} gap={4} w="fit-content">
-          <Button onClick={scrollToTop} leftIcon={<ArrowUp />} variant="greyButton">
-            {t("ui.toTop")}
-          </Button>
-          <Button onClick={togglePanelCollapse} variant="greyButton">
-            {allCollapsed ? t("ui.expandAll") : t("ui.collapseAll")}
-          </Button>
-        </VStack>
+
+        <BuilderBottomFloatingButtons onToggleCallback={togglePanelCollapse} />
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">
             <ModalOverlay />

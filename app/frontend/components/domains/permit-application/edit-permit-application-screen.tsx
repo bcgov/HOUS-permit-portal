@@ -228,7 +228,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Button>
           </HStack>
         )}
-        <BuilderTopFloatingButtons top="155px" />
+        <BuilderTopFloatingButtons top="130px" position="absolute" />
       </Flex>
       <Flex id="permitApplicationFieldsContainer">
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />

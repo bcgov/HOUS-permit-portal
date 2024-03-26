@@ -46,7 +46,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
       )}
       <Drawer isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
         <DrawerOverlay />
-        <DrawerContent display={"flex"} flexDir={"column"} maxW={"900px"} h={"full"}>
+        <DrawerContent display={"flex"} flexDir={"column"} maxW={"80%"} h={"full"}>
           <DrawerCloseButton fontSize={"xs"} />
           <RequirementBlocksTable
             h={"calc(100% - 120px)"}

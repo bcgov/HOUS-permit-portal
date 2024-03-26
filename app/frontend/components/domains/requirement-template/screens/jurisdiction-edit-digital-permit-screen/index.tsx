@@ -61,7 +61,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const navigate = useNavigate()
   const { jurisdictionTemplateVersionCustomization, error: customizationError } =
     useJurisdictionTemplateVersionCustomization({
@@ -111,8 +111,12 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     return submitMethod(currentUser.jurisdiction.id, data)
   })
 
+  const onToggleCollapseAll = (isCollapsedAll: boolean) => {
+    setIsCollapsedAll(isCollapsedAll)
+  }
+
   return (
-    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
+    <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main" id="jurisdiction-edit-permit-template">
       <BuilderHeader
         breadCrumbs={[
           {
@@ -169,7 +173,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
           <BuilderTopFloatingButtons />
           <SectionsDisplay
             sections={templateSections}
-            shouldCollapseAll={shouldCollapseAll}
+            isCollapsedAll={isCollapsedAll}
             setSectionRef={setSectionRef}
             formScrollToId={formScrollToId}
             renderEdit={({ denormalizedRequirementBlock }) => {
@@ -202,20 +206,12 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
           />
         </Flex>
       </Flex>
-      <BuilderBottomFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
+      <BuilderBottomFloatingButtons onToggleCallback={onToggleCollapseAll} />
     </Flex>
   )
 
   function scrollToTop() {
     rightContainerRef.current?.scrollTo({ behavior: "smooth", top: 0 })
-  }
-
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
-
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
   }
 
   function scrollIntoView(id: string) {

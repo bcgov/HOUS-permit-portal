@@ -35,7 +35,7 @@ const renderApp = (rootStore) => {
             <meta property="og:description" content={t("site.description")} />
             <meta property="og:image" content="/images/logo.svg" />
           </Helmet>
-          <Box height="full">
+          <Box>
             <Navigation />
           </Box>
         </Provider>

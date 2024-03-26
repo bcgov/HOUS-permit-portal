@@ -81,7 +81,7 @@ export function parseBoolean(value: string): boolean {
   return value.toLowerCase() === "true"
 }
 
-export function handleScrollToTop(elementId: string) {
+export function handleScrollToTop() {
   document.documentElement.scrollTo({
     top: 0,
     behavior: "instant",

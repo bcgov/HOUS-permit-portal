@@ -7,7 +7,7 @@ interface IProps extends Partial<StackProps>, Partial<BoxProps> {}
 
 export function BuilderTopFloatingButtons({ ...boxProps }: IProps) {
   return (
-    <Box zIndex="10" position="absolute" top="90px" right="6" {...boxProps}>
+    <Box top="24" right="0" position="sticky" width="fit-content" mt="6" mr="6" ml="auto" {...boxProps}>
       <Stack spacing="4" align="right" width="fit-content">
         <HelpDrawer
           defaultButtonProps={{
