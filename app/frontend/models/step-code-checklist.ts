@@ -5,6 +5,7 @@ import {
   EStepCodeAirtightnessValue,
   EStepCodeBuildingType,
   EStepCodeChecklistStage,
+  EStepCodeChecklistStatus,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   EStepCodePrescriptiveValue,
@@ -17,6 +18,7 @@ export const StepCodeChecklistModel = types
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
     stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
+    status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
     // permit application info
     buildingPermitNumber: types.maybeNull(types.string),
     builder: types.maybeNull(types.string),
@@ -162,6 +164,9 @@ export const StepCodeChecklistModel = types
     },
     get numberOfZeroCarbonSteps() {
       return parseInt(self.maxZeroCarbonStep) - parseInt(self.minZeroCarbonStep) + 1
+    },
+    get isComplete() {
+      return self.status == EStepCodeChecklistStatus.complete
     },
   }))
   .actions((self) => ({

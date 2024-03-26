@@ -150,6 +150,11 @@ export enum EStepCodeChecklistStage {
   asBuilt = "as_built",
 }
 
+export enum EStepCodeChecklistStatus {
+  draf = "draft",
+  complete = "complete",
+}
+
 export enum EStepCodeCompliancePath {
   stepCodeERS = "step_code_ers",
   stepCodeNECB = "step_code_necb",
