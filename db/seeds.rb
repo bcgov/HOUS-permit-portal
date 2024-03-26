@@ -71,15 +71,17 @@ permit_type1 = PermitType.find_by_code("low_residential")
 permit_type2 = PermitType.find_by_code("medium_residential")
 
 puts "Seeding contacts..."
-if PermitApplication.first.blank?
-  north_van
+Jurisdiction.all.each do |j|
+  j
     .permit_type_submission_contacts
     .where(email: "north-van@laterolabs.com", permit_type: permit_type1)
     .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
-  north_van
+  j
     .permit_type_submission_contacts
     .where(email: "north-van@laterolabs.com", permit_type: permit_type2)
     .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
+end
+if PermitApplication.first.blank?
   jurisdictions
     .first(10)
     .each do |jurisdiction|
