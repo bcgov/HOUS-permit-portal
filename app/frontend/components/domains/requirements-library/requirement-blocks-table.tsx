@@ -76,8 +76,8 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem>
-                  <UnorderedList>
+                <SearchGridItem pr={0}>
+                  <UnorderedList ml={0} pl={0} w={"full"}>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
                         <ListItem key={requirement.id} color={"text.secondary"} fontSize={"xs"}>
