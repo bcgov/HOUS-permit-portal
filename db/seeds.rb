@@ -120,6 +120,7 @@ if PermitApplication.first.blank?
   # Requirments block will get created from requiremetms templates
   puts "Seeding requirements..."
   RequirementsFromXlsxSeeder.seed
+  RequirementsFromXlsxSeeder.seed_medium if Rails.env.development?
 
   # Energy Step Code Reference Tables
   StepCode::MEUIReferencesSeeder.seed!
