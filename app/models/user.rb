@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}\z/
   searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
 
   scope :review_managers, -> { where(role: User.roles[:review_manager]) }
@@ -26,6 +27,8 @@ class User < ApplicationRecord
          jwt_revocation_strategy: self
 
   enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
+
+  validates :password, presence: true, format: { with: PASSWORD_REGEX, message: :password_weak }
 
   # https://github.com/waiting-for-dev/devise-jwt
   self.skip_session_storage = %i[http_auth params_auth]

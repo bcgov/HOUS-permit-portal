@@ -34,6 +34,7 @@ const options = {
           passwordLabel: "Password",
           forgotPassword: "Forgot password?",
           passwordTooWeak: "Password too weak",
+          passwordInvalidFormat: "Password does no meet the required format",
           register: "Register for account",
           registerButton: "Register",
           forgotPasswordInstructions:
