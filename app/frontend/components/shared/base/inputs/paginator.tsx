@@ -76,7 +76,9 @@ export const Paginator = observer(({ handlePageChange, totalPages, ...pagination
           onClick={() => handlePageChange(pageToTransitionTo)}
           aria-label={"next page"}
           _after={{ display: "none !important" }}
-          isDisabled={totalPages === pageToTransitionTo && pageToTransitionTo === paginationProps.current}
+          isDisabled={
+            totalPages === 0 || (totalPages === pageToTransitionTo && pageToTransitionTo === paginationProps.current)
+          }
         ></IconButton>
       )
     }
