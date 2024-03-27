@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
-import { BuilderTopFloatingButtons } from "../builder-top-floating-buttons"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { useSectionHighlight } from "../use-section-highlight"
@@ -81,7 +81,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
               {t("ui.close")}
             </Button>
           </Flex>
-          <BuilderTopFloatingButtons top="24" />
+          <FloatingHelpDrawer top="24" />
 
           <SectionsDisplay
             sections={templateSections}

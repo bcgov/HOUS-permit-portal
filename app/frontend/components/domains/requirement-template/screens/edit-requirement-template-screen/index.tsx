@@ -17,8 +17,8 @@ import {
 } from "../../../../../types/api-request"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
-import { BuilderTopFloatingButtons } from "../../builder-top-floating-buttons"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
 import { ControlsHeader } from "./controls-header"
@@ -147,7 +147,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
             />
-            <BuilderTopFloatingButtons />
+            <FloatingHelpDrawer />
             {hasNoSections ? (
               <Flex
                 justifyContent={hasNoSections ? "center" : undefined}
