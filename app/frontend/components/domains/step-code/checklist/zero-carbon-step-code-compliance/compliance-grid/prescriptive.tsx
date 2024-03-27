@@ -6,7 +6,7 @@ import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
 import { GridRowHeader } from "../../shared/grid/row-header"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -15,16 +15,16 @@ interface IProps {
 export const Prescriptive = function Prescriptive({ checklist }: IProps) {
   return (
     <>
-      <GridColumnHeader colSpan={4}>{t(`${translationPrefix}.prescriptive.title`)}</GridColumnHeader>
+      <GridColumnHeader colSpan={4}>{t(`${i18nPrefix}.prescriptive.title`)}</GridColumnHeader>
 
-      <GridRowHeader>{t(`${translationPrefix}.prescriptive.heating`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.prescriptive.heating`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{
             isDisabled: true,
             textAlign: "center",
             value: checklist.prescriptiveHeatingRequirement
-              ? t(`${translationPrefix}.prescriptive.${checklist.prescriptiveHeatingRequirement}`)
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeatingRequirement}`)
               : "-",
           }}
         />
@@ -35,7 +35,7 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
             isDisabled: true,
             textAlign: "center",
             value: checklist.prescriptiveHeating
-              ? t(`${translationPrefix}.prescriptive.${checklist.prescriptiveHeating}`)
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeating}`)
               : "-",
           }}
         />
@@ -45,14 +45,14 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
         <RequirementsMetTag success={checklist.prescriptivePassed} />
       </GridData>
 
-      <GridRowHeader>{t(`${translationPrefix}.prescriptive.hotWater`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.prescriptive.hotWater`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{
             isDisabled: true,
             textAlign: "center",
             value: checklist.prescriptiveHotWaterRequirement
-              ? t(`${translationPrefix}.prescriptive.${checklist.prescriptiveHotWaterRequirement}`)
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWaterRequirement}`)
               : "-",
           }}
         />
@@ -63,20 +63,20 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
             isDisabled: true,
             textAlign: "center",
             value: checklist.prescriptiveHotWater
-              ? t(`${translationPrefix}.prescriptive.${checklist.prescriptiveHotWater}`)
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWater}`)
               : "-",
           }}
         />
       </GridData>
 
-      <GridRowHeader>{t(`${translationPrefix}.prescriptive.other`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.prescriptive.other`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{
             isDisabled: true,
             textAlign: "center",
             value: checklist.prescriptiveOtherRequirement
-              ? t(`${translationPrefix}.prescriptive.${checklist.prescriptiveOtherRequirement}`)
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOtherRequirement}`)
               : "-",
           }}
         />
@@ -86,9 +86,7 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveOther
-              ? t(`${translationPrefix}.prescriptive.${checklist.prescriptiveOther}`)
-              : "-",
+            value: checklist.prescriptiveOther ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOther}`) : "-",
           }}
         />
       </GridData>

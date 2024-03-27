@@ -42,6 +42,7 @@ import { RequirementTemplatesScreen } from "../requirement-template/screens/requ
 import { TemplateVersionScreen } from "../requirement-template/screens/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { StepCodeForm } from "../step-code"
+import { StepCodeChecklistPDFViewer } from "../step-code/checklist/pdf-content/viewer"
 import { SiteConfigurationManagementScreen } from "../super-admin/site-configuration-management-screen.tsx"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
@@ -148,6 +149,14 @@ const AppRoutes = observer(() => {
           <Route
             path="/permit-applications/:permitApplicationId/pdf-html"
             element={<PermitApplicationPDFViewer mode={"html"} />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/step-code-pdf-content"
+            element={<StepCodeChecklistPDFViewer mode={"pdf"} />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/step-code-pdf-html"
+            element={<StepCodeChecklistPDFViewer mode={"html"} />}
           />
         </>
       )}

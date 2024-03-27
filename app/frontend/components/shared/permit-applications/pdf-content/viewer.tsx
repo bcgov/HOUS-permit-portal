@@ -24,7 +24,7 @@ export const PermitApplicationPDFViewer = observer(function PermitApplicationPDF
   )
 })
 
-const Content = function Content({ permitApplication }: { permitApplication: IPermitApplication }) {
+function Content({ permitApplication }: { permitApplication: IPermitApplication }) {
   return (
     <Suspense fallback={<LoadingScreen />}>
       {permitApplication && <PDFContent permitApplication={permitApplication} />}

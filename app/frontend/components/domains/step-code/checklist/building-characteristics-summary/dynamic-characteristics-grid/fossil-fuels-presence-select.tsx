@@ -13,7 +13,7 @@ import { CaretDown } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React from "react"
 import { EFossilFuelsPresence } from "../../../../../../types/enums"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   onChange: (event: any) => void
@@ -41,7 +41,7 @@ export const FossilFuelsPresenceSelect = ({ onChange, value, options }: IProps) 
                 rounded="base"
                 shadow="base"
               >
-                {value ? t(`${translationPrefix}.fossilFuels.${value}`) : t("ui.select")}
+                {value ? t(`${i18nPrefix}.fossilFuels.${value}`) : t("ui.select")}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -61,7 +61,7 @@ export const FossilFuelsPresenceSelect = ({ onChange, value, options }: IProps) 
                   cursor="pointer"
                   _hover={{ bg: "hover.blue" }}
                 >
-                  {t(`${translationPrefix}.fossilFuels.${value}`)}
+                  {t(`${i18nPrefix}.fossilFuels.${value}`)}
                 </Flex>
               ))}
             </VStack>

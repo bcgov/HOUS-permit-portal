@@ -1,6 +1,6 @@
 class StepCodeChecklistPolicy < ApplicationPolicy
   def show?
-    record.step_code.submitter == user
+    record.step_code.submitter == user || user.review_staff?
   end
 
   def update?

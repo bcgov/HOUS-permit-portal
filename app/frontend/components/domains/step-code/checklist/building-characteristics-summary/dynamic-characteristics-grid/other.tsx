@@ -4,7 +4,7 @@ import { useFieldArray, useFormContext } from "react-hook-form"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 export const Other = function BuildingCharacteristicsSummaryOther() {
   const { control } = useFormContext()
@@ -21,7 +21,7 @@ export const Other = function BuildingCharacteristicsSummaryOther() {
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.other`)}
+        {t(`${i18nPrefix}.other`)}
       </GridColumnHeader>
 
       {fields.map((field, index) => (

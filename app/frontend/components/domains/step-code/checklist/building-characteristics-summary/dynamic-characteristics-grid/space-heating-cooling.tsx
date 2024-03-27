@@ -10,18 +10,18 @@ import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 import { PerformanceTypeSelect } from "./performance-type-select"
 
 export const SpaceHeatingCooling = observer(function StepCodeBuildingCharacteristicsSpaceHeatingCooling() {
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.spaceHeatingCooling`)}
+        {t(`${i18nPrefix}.spaceHeatingCooling`)}
       </GridColumnHeader>
       <GridData alignItems="start">
         <Text color="text.primary" fontWeight="bold" fontSize="md">
-          {t(`${translationPrefix}.principal`)}
+          {t(`${i18nPrefix}.principal`)}
         </Text>
       </GridData>
       <GridData />
@@ -29,7 +29,7 @@ export const SpaceHeatingCooling = observer(function StepCodeBuildingCharacteris
       <Fields variant={ESpaceHeatingCoolingVariant.principal} />
       <GridData alignItems="start">
         <Text color="text.primary" fontWeight="bold" fontSize="md">
-          {t(`${translationPrefix}.secondary`)}
+          {t(`${i18nPrefix}.secondary`)}
         </Text>
       </GridData>
       <GridData />
