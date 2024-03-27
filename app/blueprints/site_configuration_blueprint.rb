@@ -1,3 +1,3 @@
 class SiteConfigurationBlueprint < Blueprinter::Base
-  fields :maintenance_mode, :maintenance_message
+  fields :display_sitewide_message, :sitewide_message
 end

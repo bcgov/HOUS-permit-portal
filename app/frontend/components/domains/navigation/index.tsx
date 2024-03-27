@@ -49,7 +49,7 @@ import { NavBar } from "./nav-bar"
 export const Navigation = observer(() => {
   const { sessionStore, siteConfigurationStore } = useMst()
   const { loggedIn } = sessionStore
-  const { maintenanceMode, maintenanceMessage } = siteConfigurationStore
+  const { displaySitewideMessage, sitewideMessage } = siteConfigurationStore
   const { validateToken, isValidating } = sessionStore
   const { t } = useTranslation()
 
@@ -64,9 +64,9 @@ export const Navigation = observer(() => {
           <FlashMessage />
         </Box>
       </Box>
-      {maintenanceMode && (
+      {displaySitewideMessage && (
         <Center h={16} bg="theme.yellowLight">
-          {maintenanceMessage}
+          {sitewideMessage}
         </Center>
       )}
       <NavBar />

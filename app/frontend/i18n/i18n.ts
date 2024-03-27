@@ -1049,12 +1049,10 @@ const options = {
         },
         siteConfiguration: {
           title: "Site configuration management",
-          enableMaintenanceMode: "Show",
-          maintenanceMessageLabel: "System maintenance message",
-          maintenanceMessageExplanation: "This message will appear site-wide at the top of each page.",
-          maintenanceSettings: "Maintenance mode settings",
-          defaultMaintenanceMessage:
-            "The site is currently in currently undergoing maintenance. You may experience service disruptions.",
+          enableSitewideMessage: "Show",
+          sitewideMessageLabel: "Site-wide message",
+          sitewideMessageHint: "This message will appear at the top of each page for all users.",
+          sitewideMessageSettings: "Site-wide message settings",
         },
         site: {
           title: "Building Permit Hub",

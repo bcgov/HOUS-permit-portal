@@ -22,6 +22,6 @@ class Api::SiteConfigurationController < Api::ApplicationController
   end
 
   def site_configuration_params
-    params.require(:site_configuration).permit(:maintenance_mode, :maintenance_message)
+    params.require(:site_configuration).permit(:display_sitewide_message, :sitewide_message)
   end
 end

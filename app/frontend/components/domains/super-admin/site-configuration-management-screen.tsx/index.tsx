@@ -9,7 +9,6 @@ import {
   HStack,
   Heading,
   Switch,
-  Text,
   VStack,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
@@ -22,19 +21,19 @@ import { TextFormControl } from "../../../shared/form/input-form-control"
 import { SectionBox } from "../../home/section-box"
 
 export type TSiteConfiguration = {
-  maintenanceMode: boolean
-  maintenanceMessage: string | null
+  displaySitewideMessage: boolean
+  sitewideMessage: string | null
 }
 
 export const SiteConfigurationManagementScreen = observer(function SiteConfigurationManagementScreen() {
   const { siteConfigurationStore } = useMst()
-  const { maintenanceMode, defaultedMaintenanceMessage, updateSiteConfiguration, configurationLoaded } =
+  const { displaySitewideMessage, sitewideMessage, updateSiteConfiguration, configurationLoaded } =
     siteConfigurationStore
   const { t } = useTranslation()
   const navigate = useNavigate()
 
   const getFormDefaults = () => {
-    return { maintenanceMode, maintenanceMessage: defaultedMaintenanceMessage }
+    return { displaySitewideMessage, sitewideMessage }
   }
 
   const formMethods = useForm<TSiteConfiguration>({
@@ -63,7 +62,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
           <Flex mt={8} gap={16}>
             <Box minW="fit-content">
               <Heading as="h3" noOfLines={1}>
-                {t("siteConfiguration.maintenanceSettings")}
+                {t("siteConfiguration.sitewideMessageSettings")}
               </Heading>
             </Box>
             <VStack spacing={8} align="start" w="full">
@@ -71,20 +70,22 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
                 <Flex justify="space-between" w="full" gap={16}>
                   <Flex direction="column">
                     <TextFormControl
-                      label={t("siteConfiguration.maintenanceMessageLabel")}
-                      fieldName="maintenanceMessage"
+                      label={t("siteConfiguration.sitewideMessageLabel")}
+                      fieldName="sitewideMessage"
+                      hint={t("siteConfiguration.sitewideMessageHint")}
                     />
-                    <Text color="text.secondary">{t("siteConfiguration.maintenanceMessageExplanation")}</Text>
                   </Flex>
                   <FormControl display="flex" alignItems="center" w="fit-content" gap={2}>
                     <Controller
-                      name="maintenanceMode"
+                      name="displaySitewideMessage"
                       control={control}
                       render={({ field }) => (
-                        <Switch id="maintenanceMode" isChecked={field.value} onChange={field.onChange} />
+                        <Switch id="displaySitewideMessage" isChecked={field.value} onChange={field.onChange} />
                       )}
                     />
-                    <FormLabel htmlFor="maintenanceMode">{t("siteConfiguration.enableMaintenanceMode")}</FormLabel>
+                    <FormLabel htmlFor="displaySitewideMessage">
+                      {t("siteConfiguration.enableSitewideMessage")}
+                    </FormLabel>
                   </FormControl>
                 </Flex>
               </SectionBox>

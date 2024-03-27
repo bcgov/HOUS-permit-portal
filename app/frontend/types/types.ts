@@ -213,5 +213,5 @@ export interface IUserPushPayload {
 }
 
 export interface ISiteConfiguration {
-  maintenanceMode: boolean
+  displaySitewideMessage: boolean
 }

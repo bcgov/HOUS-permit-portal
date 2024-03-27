@@ -266,8 +266,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_27_191001) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.boolean "maintenance_mode"
-    t.string "maintenance_message"
+    t.boolean "display_sitewide_message"
+    t.text "sitewide_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
