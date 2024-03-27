@@ -489,6 +489,7 @@ const options = {
           subTitle: "Automatically generate your BC Energy Step Code compliance report",
           checklistGuide: "See checklist guide",
           saveAndGoBack: "Save and go back",
+          markAsComplete: "Mark as complete",
           back: "Back to permit application",
           complete: "Complete",
           restart: {
