@@ -35,6 +35,14 @@ const options = {
           forgotPassword: "Forgot password?",
           passwordTooWeak: "Password too weak",
           passwordInvalidFormat: "Password does no meet the required format",
+          passwordChecklist: {
+            title: "Password must include:",
+            length: "8-64 characters",
+            uppercase: "At least one uppercase letter",
+            lowercase: "At least one lowercase letter",
+            specialChar: "At least one special character",
+            number: "At least one number",
+          },
           register: "Register for account",
           registerButton: "Register",
           forgotPasswordInstructions:

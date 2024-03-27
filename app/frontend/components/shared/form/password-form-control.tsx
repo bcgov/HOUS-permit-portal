@@ -15,6 +15,7 @@ import React, { useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import PasswordStrengthBar from "react-password-strength-bar"
+import { PasswordChecklist } from "./password-checklist"
 
 interface IPasswordFormControlProps extends FormControlProps {
   validate?: boolean
@@ -61,9 +62,10 @@ export const PasswordFormControl = ({
             type={showPassword ? "text" : "password"}
             autoComplete={validate ? "new-password" : "on"}
           />
-          {formState?.errors?.[fieldName] && (
-            <FormErrorMessage>{formState?.errors?.[fieldName].message as string}</FormErrorMessage>
-          )}
+          {formState?.errors?.[fieldName] &&
+            formState.errors[fieldName].message !== t("auth.passwordInvalidFormat") && (
+              <FormErrorMessage>{formState?.errors?.[fieldName].message as string}</FormErrorMessage>
+            )}
         </Flex>
 
         <InputRightElement pr={14} py={1}>
@@ -77,6 +79,9 @@ export const PasswordFormControl = ({
         <Box mt={4}>
           <PasswordStrengthBar password={passwordWatch} minLength={8} />
         </Box>
+      )}
+      {formState?.errors?.[fieldName] && formState.errors[fieldName].message === t("auth.passwordInvalidFormat") && (
+        <PasswordChecklist password={passwordWatch || ""} />
       )}
     </FormControl>
   )

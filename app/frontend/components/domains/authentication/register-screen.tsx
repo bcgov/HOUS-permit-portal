@@ -20,7 +20,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
     userStore: { signUp },
   } = useMst()
   const formMethods = useForm({
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: { organization: "", certified: false, username: "", password: "", email: "" },
   })
   const { register, handleSubmit, formState, control } = formMethods
