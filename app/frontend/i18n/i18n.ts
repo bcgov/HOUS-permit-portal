@@ -1047,6 +1047,15 @@ const options = {
             },
           },
         },
+        siteConfiguration: {
+          title: "Site configuration management",
+          enableMaintenanceMode: "Show",
+          maintenanceMessageLabel: "System maintenance message",
+          maintenanceMessageExplanation: "This message will appear site-wide at the top of each page.",
+          maintenanceSettings: "Maintenance mode settings",
+          defaultMaintenanceMessage:
+            "The site is currently in currently undergoing maintenance. You may experience service disruptions.",
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",

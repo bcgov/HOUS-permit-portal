@@ -8,6 +8,7 @@ import { IPermitClassificationStore, PermitClassificationStoreModel } from "./pe
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
+import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
 import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
@@ -27,6 +28,7 @@ export const RootStoreModel = types
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
+    siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -56,6 +58,7 @@ export interface IRootStore extends IStateTreeNode {
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   stepCodeStore: IStepCodeStore
+  siteConfigurationStore: ISiteConfigurationStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
 }

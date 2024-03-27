@@ -211,3 +211,7 @@ export interface IUserPushPayload {
   eventType: ESocketEventTypes
   data: INotification | IPermitApplicationUpdate
 }
+
+export interface ISiteConfiguration {
+  maintenanceMode: boolean
+}

@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Box, Center } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,15 +40,18 @@ import { RequirementTemplatesScreen } from "../requirement-template/screens/requ
 import { TemplateVersionScreen } from "../requirement-template/screens/template-version-screen"
 import { RequirementsLibraryScreen } from "../requirements-library"
 import { StepCodeForm } from "../step-code"
+import { SiteConfigurationManagementScreen } from "../super-admin/site-configuration-management-screen.tsx"
 import { AcceptInvitationScreen } from "../users/accept-invitation-screen"
 import { InviteScreen } from "../users/invite-screen"
 import { ProfileScreen } from "../users/profile-screen"
 import { NavBar } from "./nav-bar"
 
 export const Navigation = observer(() => {
-  const { sessionStore } = useMst()
+  const { sessionStore, siteConfigurationStore } = useMst()
   const { loggedIn } = sessionStore
+  const { maintenanceMode, maintenanceMessage } = siteConfigurationStore
   const { validateToken, isValidating } = sessionStore
+  const { t } = useTranslation()
 
   useEffect(() => {
     validateToken()
@@ -61,7 +64,11 @@ export const Navigation = observer(() => {
           <FlashMessage />
         </Box>
       </Box>
-
+      {maintenanceMode && (
+        <Center h={16} bg="theme.yellowLight">
+          {maintenanceMessage}
+        </Center>
+      )}
       <NavBar />
       <EULAModal />
 
@@ -109,6 +116,7 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
+      <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
     </>
   )
 

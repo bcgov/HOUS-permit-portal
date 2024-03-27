@@ -257,6 +257,10 @@ en:
       submit_error:
         title: Oops
         message: "%{error_message}"
+    site_configuration:
+      update_success:
+        title: ""
+        message: "Successfully updated site configuration"
     step_code:
       h2k_imported:
         title: ""
