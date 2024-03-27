@@ -49,7 +49,7 @@ export const WindowsGlazedDoors = observer(function WindowsGlazedDoors() {
       </GridColumnHeader>
       {fields.map((field, index) => (
         <React.Fragment key={`buildingCharacteristicWindowsGlazedDoors${generateUUID()}`}>
-          <GridData gap={1} alignItems="start" pos="relative" borderTopWidth={index == 0 ? 1 : 0}>
+          <GridData gap={1} pos="relative" borderTopWidth={index == 0 ? 1 : 0}>
             <DetailsInput
               fieldName={`${fieldArrayName}.${index}.details`}
               isRemovable={fields.length > 1}

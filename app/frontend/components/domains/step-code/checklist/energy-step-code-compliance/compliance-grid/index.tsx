@@ -33,7 +33,7 @@ export const EnergyComplianceGrid = function EnergyComplianceGrid({ checklist }:
       <GridRowHeader colSpan={3} fontWeight="bold">
         {t(`${translationPrefix}.requirementsMet`)}
       </GridRowHeader>
-      <GridData>
+      <GridData alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.energyRequirementsPassed} />
       </GridData>
     </Grid>

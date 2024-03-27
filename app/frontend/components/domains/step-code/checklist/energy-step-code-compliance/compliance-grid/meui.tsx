@@ -43,7 +43,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
           }
         />
       </GridData>
-      <GridData rowSpan={2}>
+      <GridData rowSpan={2} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.meuiPassed} />
       </GridData>
 

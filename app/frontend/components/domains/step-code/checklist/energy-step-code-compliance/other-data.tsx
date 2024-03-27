@@ -14,25 +14,29 @@ interface IProps {
 export const OtherData = function EnergyStepCodeComplianceOtherData({ checklist }: IProps) {
   return (
     <Grid templateColumns={"repeat(1fr, 2)"}>
-      <GridColumnHeader colSpan={2}>{t(`${translationPrefix}.otherData.header`)}</GridColumnHeader>
+      <GridColumnHeader colSpan={2} borderRightWidth={1}>
+        {t(`${translationPrefix}.otherData.header`)}
+      </GridColumnHeader>
       <GridRowHeader>{t(`${translationPrefix}.otherData.software`)}</GridRowHeader>
-      <GridData>{checklist.softwareName}</GridData>
+      <GridData borderRightWidth={1}>{checklist.softwareName}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.softwareVersion`)}</GridRowHeader>
-      <GridData>{checklist.softwareVersion}</GridData>
+      <GridData borderRightWidth={1}>{checklist.softwareVersion}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.heatedFloorArea`)}</GridRowHeader>
-      <GridData>{checklist.totalHeatedFloorArea}</GridData>
+      <GridData borderRightWidth={1}>{checklist.totalHeatedFloorArea}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.volume`)}</GridRowHeader>
-      <GridData>{checklist.volume}</GridData>
+      <GridData borderRightWidth={1}>{checklist.volume}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.surfaceArea`)}</GridRowHeader>
-      <GridData>{checklist.surfaceArea}</GridData>
+      <GridData borderRightWidth={1}>{checklist.surfaceArea}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.fwdr`)}</GridRowHeader>
-      <GridData>{checklist.fwdr}</GridData>
+      <GridData borderRightWidth={1}>{checklist.fwdr}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.climateLocation`)}</GridRowHeader>
-      <GridData>{checklist.location}</GridData>
+      <GridData borderRightWidth={1}>{checklist.location}</GridData>
       <GridRowHeader>{t(`${translationPrefix}.otherData.hdd`)}</GridRowHeader>
-      <GridData>{checklist.heatingDegreeDays}</GridData>
-      <GridRowHeader>{t(`${translationPrefix}.otherData.spaceCooled`)}</GridRowHeader>
-      <GridData>{checklist.conditionedPercent}</GridData>
+      <GridData borderRightWidth={1}>{checklist.heatingDegreeDays}</GridData>
+      <GridRowHeader borderBottomWidth={1}>{t(`${translationPrefix}.otherData.spaceCooled`)}</GridRowHeader>
+      <GridData borderRightWidth={1} borderBottomWidth={1}>
+        {checklist.conditionedPercent}
+      </GridData>
     </Grid>
   )
 }

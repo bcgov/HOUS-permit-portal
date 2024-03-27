@@ -41,7 +41,7 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
         />
       </GridData>
 
-      <GridData rowSpan={3}>
+      <GridData rowSpan={3} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.prescriptivePassed} />
       </GridData>
 

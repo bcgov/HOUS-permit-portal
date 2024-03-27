@@ -20,7 +20,7 @@ export const ZeroCarbonStep = function ZeroCarbonStep({ checklist }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.requiredZeroCarbonStep }}
         />
       </GridData>
-      <GridPlaceholder colSpan={2} />
+      <GridPlaceholder borderLeftWidth={1} colSpan={2} />
     </>
   )
 }
