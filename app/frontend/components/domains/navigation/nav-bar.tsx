@@ -139,7 +139,7 @@ export const NavBar = observer(() => {
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
-              <NavBarMenu isAdmin={currentUser?.isAdmin} />
+              <NavBarMenu />
             </HStack>
           </Flex>
         </Container>
@@ -160,11 +160,9 @@ const NavBarSearch = () => {
   )
 }
 
-interface INavBarMenuProps {
-  isAdmin: boolean
-}
+interface INavBarMenuProps {}
 
-const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
+const NavBarMenu = observer(({}: INavBarMenuProps) => {
   const { t } = useTranslation()
   const { sessionStore, userStore } = useMst()
   const { currentUser } = userStore
@@ -180,6 +178,22 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
+      <MenuDivider />
+    </>
+  )
+
+  const reviewManagerOnlyItems = (
+    <>
+      <NavMenuItem
+        label={t("site.breadcrumb.submissionInbox")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+      />
+      <NavMenuItem label={t("site.breadcrumb.digitalBuildingPermits")} to={"/digital-building-permits"} />
+      <NavMenuItem
+        label={t("site.breadcrumb.configurationManagement")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
+      />
+      <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
       <MenuDivider />
     </>
   )
@@ -213,6 +227,7 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
               <MenuGroup title={currentUser.name} noOfLines={1}>
                 <MenuDivider />
                 {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                {currentUser?.isReviewManager && reviewManagerOnlyItems}
                 {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
                 {currentUser?.isSubmitter && submitterOnlyItems}
                 <HelpDrawer
