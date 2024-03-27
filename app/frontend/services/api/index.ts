@@ -328,4 +328,8 @@ export class Api {
   async updateStepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
   }
+
+  async updateUser(id: string, user: IUser) {
+    return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
+  }
 }

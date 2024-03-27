@@ -95,8 +95,8 @@ Rails.application.routes.draw do
       post "submit", on: :member
     end
 
-    resource :profile, only: [:update], controller: "users"
-    resources :users, only: [:destroy] do
+    patch "profile", to: "users#profile"
+    resources :users, only: %i[destroy update] do
       patch "restore", on: :member
       patch "accept_eula", on: :member
     end

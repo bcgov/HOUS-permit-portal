@@ -1,5 +1,5 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Archive, ClockClockwise } from "@phosphor-icons/react"
+import { Archive, ArrowsLeftRight, ClockClockwise } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -26,6 +26,10 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
     if (await user.restore()) searchModel?.search()
   }
 
+  const handleChangeRole = async () => {
+    if (await user.changeRole()) searchModel?.search()
+  }
+
   const { t } = useTranslation()
 
   const {
@@ -42,8 +46,14 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
           {t("ui.manage")}
         </MenuButton>
         <MenuList>
-          {/* TODO: change role */}
-          {/* <ManageMenuItem icon={<ArrowsLeftRight />}>{t("user.changeRole")}</ManageMenuItem> */}
+          <ManageMenuItemButton
+            color={isCurrentUser ? "greys.grey01" : "text.primary"}
+            leftIcon={<ArrowsLeftRight />}
+            onClick={handleChangeRole}
+            isDisabled={isCurrentUser}
+          >
+            {t("user.changeRole")}
+          </ManageMenuItemButton>
           {user.isDiscarded ? (
             <ManageMenuItemButton
               color="semantic.success"

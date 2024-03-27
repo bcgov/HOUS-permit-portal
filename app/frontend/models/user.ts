@@ -58,6 +58,18 @@ export const UserModel = types
       const response = yield self.environment.api.restoreUser(self.id)
       return response.ok
     }),
+    changeRole: flow(function* () {
+      if (self.role === EUserRoles.reviewManager) {
+        var newRole = EUserRoles.reviewer
+      } else if (self.role === EUserRoles.reviewer) {
+        var newRole = EUserRoles.reviewManager
+      } else {
+        return
+      }
+
+      const response = yield self.environment.api.updateUser(self.id, { role: newRole })
+      return response.ok
+    }),
     acceptEULA: flow(function* () {
       const response = yield self.environment.api.acceptEULA(self.id)
       return response.ok

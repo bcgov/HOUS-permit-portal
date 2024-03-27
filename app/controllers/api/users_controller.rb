@@ -1,5 +1,5 @@
 class Api::UsersController < Api::ApplicationController
-  before_action :find_user, only: %i[destroy restore accept_eula]
+  before_action :find_user, only: %i[destroy restore accept_eula update]
 
   def index
     perform_search
@@ -17,6 +17,17 @@ class Api::UsersController < Api::ApplicationController
   end
 
   def update
+    authorize @user
+    return render_error "misc.user_not_authorized_error" unless %w[reviewer review_manager].include?(user_params[:role])
+
+    if @user.update(user_params)
+      render_success @user, "user.update_success"
+    else
+      render_error "user.update_error"
+    end
+  end
+
+  def profile
     # Currently a user can only update themself
     @user = current_user
     authorize @user
@@ -30,7 +41,7 @@ class Api::UsersController < Api::ApplicationController
         end
       end
 
-      raise ActiveRecord::RecordInvalid unless @user.update(user_params)
+      raise ActiveRecord::RecordInvalid unless @user.update(profile_params)
     end
 
     render_success(@user, email_changed? ? "user.confirmation_sent" : "user.update_success")
@@ -72,7 +83,7 @@ class Api::UsersController < Api::ApplicationController
   private
 
   def email_changed?
-    user_params[:email] && user_params[:email] != @user.email
+    profile_params[:email] && profile_params[:email] != @user.email
   end
 
   def password_params
@@ -84,6 +95,10 @@ class Api::UsersController < Api::ApplicationController
   end
 
   def user_params
+    params.require(:user).permit(:role)
+  end
+
+  def profile_params
     params.require(:user).permit(:email, :first_name, :last_name, :organization, :certified)
   end
 end
