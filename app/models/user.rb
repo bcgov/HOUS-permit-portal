@@ -28,7 +28,7 @@ class User < ApplicationRecord
 
   enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
 
-  validates :password, presence: true, format: { with: PASSWORD_REGEX, message: :password_weak }
+  validate :validate_password_complexity
 
   # https://github.com/waiting-for-dev/devise-jwt
   self.skip_session_storage = %i[http_auth params_auth]
@@ -51,6 +51,12 @@ class User < ApplicationRecord
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
+
+  def validate_password_complexity
+    return if password.blank? || password =~ PASSWORD_REGEX
+
+    errors.add :password, I18n.t("activerecord.errors.models.user.attributes.password.password_format")
+  end
 
   def eula_variant
     { submitter: "open", reviewer: "employee", review_manager: "employee", super_admin: nil }[role.to_sym]

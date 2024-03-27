@@ -33,10 +33,10 @@ export const PasswordFormControl = ({
   const [showPassword, setShowPassword] = useState(false)
   const { register, formState, watch } = useFormContext()
   const { t } = useTranslation()
-  const passwordWatch = watch("password")
+  const passwordWatch = watch(fieldName)
 
   return (
-    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.password} {...rest}>
+    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.[fieldName]} {...rest}>
       <FormLabel>{label || t("auth.passwordLabel")}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
@@ -44,18 +44,25 @@ export const PasswordFormControl = ({
             {...register(fieldName, {
               required: required && t("ui.isRequired", { field: label }),
               validate: {
-                matchesPasswordRegex: (str) =>
-                  !required ||
-                  !validate ||
-                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
-                  t("auth.passwordInvalidFormat"),
+                matchesPasswordRegex: (str) => {
+                  if (!validate) {
+                    return true
+                  }
+
+                  if (required || passwordWatch) {
+                    return (
+                      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
+                      t("auth.passwordInvalidFormat")
+                    )
+                  }
+                },
               },
             })}
             type={showPassword ? "text" : "password"}
             autoComplete={validate ? "new-password" : "on"}
           />
-          {formState?.errors?.password && (
-            <FormErrorMessage>{formState?.errors?.password.message as string}</FormErrorMessage>
+          {formState?.errors?.[fieldName] && (
+            <FormErrorMessage>{formState?.errors?.[fieldName].message as string}</FormErrorMessage>
           )}
         </Flex>
 
