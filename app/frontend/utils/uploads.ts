@@ -1,3 +1,5 @@
+const FILE_UPLOAD_CHUNK_SIZE = import.meta.env.VITE_FILE_UPLOAD_CHUNK_SIZE || 10
+
 export const requestPresignedUrl = (file, fileName, url = "undefined") => {
   const params = new URLSearchParams({
     filename: fileName,
@@ -39,7 +41,7 @@ export const uploadFileInChunks = async (
   headers,
   file,
   progressCallback = undefined,
-  chunkSize = 10 * 1024 * 1024
+  chunkSize = FILE_UPLOAD_CHUNK_SIZE * 1024 * 1024
 ) => {
   //TODO: expect an array of signedUrls in the future
 
