@@ -37,7 +37,7 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
             title={t("home.configurationManagement.title")}
             description={t("home.configurationManagement.description")}
             icon={<Pencil size={24} />}
-            href="/content-management"
+            href="/configuration-management"
           />
         </Flex>
       </Flex>

@@ -257,6 +257,16 @@ en:
       submit_error:
         title: Error
         message: "%{error_message}"
+    site_configuration:
+      update_success:
+        title: ""
+        message: "Successfully updated site configuration"
+      show_error:
+        tite: "Oops"
+        message: "There was an error loading the site configuration"
+      update_error:
+        tite: "Oops"
+        message: "There was an error updating the site configuration"
     step_code:
       h2k_imported:
         title: ""

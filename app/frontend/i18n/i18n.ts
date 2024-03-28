@@ -1053,6 +1053,13 @@ const options = {
             },
           },
         },
+        siteConfiguration: {
+          title: "Site configuration management",
+          enableSitewideMessage: "Show",
+          sitewideMessageLabel: "Site-wide message",
+          sitewideMessageHint: "This message will appear at the top of each page for all users.",
+          sitewideMessageSettings: "Site-wide message settings",
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",

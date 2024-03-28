@@ -112,6 +112,11 @@ Rails.application.routes.draw do
     get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
     get "storage/s3/download" => "storage#download"
     delete "storage/s3/delete" => "storage#delete"
+
+    resources :site_configuration, only: [] do
+      get :show, on: :collection
+      put :update, on: :collection
+    end
   end
 
   root to: "home#index"

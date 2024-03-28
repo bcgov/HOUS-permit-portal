@@ -31,7 +31,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { TSearchParams } from "../../types/types"
+import { ISiteConfiguration, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -329,6 +329,14 @@ export class Api {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
   }
 
+  async fetchSiteConfiguration() {
+    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configurations`, {})
+  }
+
+  async updateSiteConfiguration(siteConfiguration) {
+    return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
+  }
+    
   async updateUser(id: string, user: IUser) {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
   }
