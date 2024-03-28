@@ -112,8 +112,8 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize :jurisdiction, :jurisdiction_options?
     name = jurisdiction_params["name"]
     search = Jurisdiction.search(name)
-    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j.id } }
-    render_success options, nil, { blueprint: OptionBlueprint }
+    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
+    render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
 
   private

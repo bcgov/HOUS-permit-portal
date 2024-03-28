@@ -19,6 +19,7 @@ import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
@@ -39,7 +40,7 @@ export type TCreatePermitApplicationFormData = {
   pin?: string
   permitTypeId: string
   activityId: string
-  jurisdiction: IOption
+  jurisdiction: IJurisdiction
   site?: IOption
 }
 
@@ -53,7 +54,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       permitTypeId: "",
       activityId: "",
       site: null as IOption,
-      jurisdiction: null as IOption,
+      jurisdiction: null as IJurisdiction,
     },
   })
   const { handleSubmit, formState, control, watch, register, setValue } = formMethods
@@ -69,7 +70,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
     const params = {
       ...formValues,
       fullAddress: formValues.site.label,
-      jurisdictionId: formValues.jurisdiction.value,
+      jurisdictionId: formValues.jurisdiction.id,
     }
     const permitApplication = await permitApplicationStore.createPermitApplication(params)
     if (permitApplication) {
@@ -89,7 +90,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
-        setValue("jurisdiction", { label: jurisdiction.name, value: jurisdiction.id })
+        setValue("jurisdiction", jurisdiction)
       } else {
         setPinMode(true)
         setValue("jurisdiction", null)
@@ -175,6 +176,8 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 
 export const PinModeInputs = () => {
   const { register, control } = useFormContext()
+  const { jurisdictionStore } = useMst()
+  const { addJurisdiction } = jurisdictionStore
   const { t } = useTranslation()
 
   return (
@@ -192,9 +195,12 @@ export const PinModeInputs = () => {
           render={({ field: { onChange, value } }) => {
             return (
               <JurisdictionSelect
-                onChange={onChange}
+                onChange={(value) => {
+                  addJurisdiction(value)
+                  onChange(value)
+                }}
                 placeholder={undefined}
-                selectedOption={value}
+                selectedOption={{ label: value?.reverseQualifiedName, value }}
                 menuPortalTarget={document.body}
               />
             )

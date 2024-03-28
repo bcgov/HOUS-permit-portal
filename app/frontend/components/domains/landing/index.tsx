@@ -187,11 +187,13 @@ interface IJurisdictionSearchProps {}
 
 const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   const { t } = useTranslation()
-  const { geocoderStore } = useMst()
+  const { geocoderStore, jurisdictionStore } = useMst()
   const { fetchGeocodedJurisdiction, fetchingJurisdiction } = geocoderStore
+  const { addJurisdiction } = jurisdictionStore
   const formMethods = useForm()
   const { control, watch } = formMethods
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
+  const [manualMode, setManualMode] = useState<boolean>(false)
 
   const siteWatch = watch("site")
 
@@ -199,7 +201,11 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
     if (!siteWatch?.value) return
     ;(async () => {
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch.value)
-      setJurisdiction(jurisdiction)
+      if (jurisdiction) {
+        setJurisdiction(jurisdiction)
+      } else {
+        setManualMode(true)
+      }
     })()
   }, [siteWatch?.value])
 
@@ -224,11 +230,14 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
                 }}
               />
 
-              {siteWatch?.value && !jurisdiction && !fetchingJurisdiction && (
+              {manualMode && (
                 <JurisdictionSelect
-                  onChange={(value) => setJurisdiction({ name: value.label, id: value.value })}
+                  onChange={(value) => {
+                    addJurisdiction(value)
+                    setJurisdiction(value)
+                  }}
                   placeholder={undefined}
-                  selectedOption={jurisdiction}
+                  selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
                   menuPortalTarget={document.body}
                 />
               )}
