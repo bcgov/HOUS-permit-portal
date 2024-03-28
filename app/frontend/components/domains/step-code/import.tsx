@@ -5,7 +5,7 @@ import React, { useState } from "react"
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useParams } from "react-router-dom"
 import { useMst } from "../../../setup/root"
-import { requestPresignedUrl, uploadFileInChunks } from "../../../utils/uploads"
+import { uploadFile } from "../../../utils/uploads"
 import { FileFormControl, NumberFormControl } from "../../shared/form/input-form-control"
 import { CompliancePathSelect } from "./compliance-path-select"
 
@@ -61,11 +61,8 @@ export const H2KImport = function StepCodeH2kImport() {
     const file = event.target.files[0]
     try {
       setIsUploading({ ...isUploading, [index]: true })
-      const presignResponse = await requestPresignedUrl(file, file.name)
-      const presignedData = await presignResponse.json()
+      const presignedData = await uploadFile(file, file.name)
 
-      //upload to object store put endpoint
-      await uploadFileInChunks(presignedData.signedUrls, presignedData.headers, file)
       setValue(
         `dataEntriesAttributes.${index}.h2kFile`,
         {
