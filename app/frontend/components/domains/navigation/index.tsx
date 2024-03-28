@@ -11,6 +11,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { NotFoundScreen } from "../../shared/base/not-found-screen"
 import { RedirectScreen } from "../../shared/base/redirect-screen"
 import { EULAModal } from "../../shared/eula-modal"
+import { PermitApplicationPDFViewer } from "../../shared/permit-applications/pdf-content/viewer"
 import { EmailConfirmedScreen } from "../authentication/email-confirmed-screen"
 import { ForgotPasswordScreen } from "../authentication/forgot-password-screen"
 import { LoginScreen } from "../authentication/login-screen"
@@ -139,6 +140,18 @@ const AppRoutes = observer(() => {
         element={<EnergyStepRequirementsScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
+      {import.meta.env.DEV && (
+        <>
+          <Route
+            path="/permit-applications/:permitApplicationId/pdf-content"
+            element={<PermitApplicationPDFViewer mode={"pdf"} />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/pdf-html"
+            element={<PermitApplicationPDFViewer mode={"html"} />}
+          />
+        </>
+      )}
     </>
   )
 

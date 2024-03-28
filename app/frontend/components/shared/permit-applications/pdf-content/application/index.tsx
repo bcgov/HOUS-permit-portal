@@ -9,6 +9,10 @@ import { styles } from "./styles"
 enum EComponentType {
   checkbox = "checkbox",
   container = "container",
+  datagrid = "datagrid",
+  date = "date",
+  fieldset = "fieldset",
+  columns = "columns",
   file = "file",
   number = "number",
   panel = "panel",
@@ -37,66 +41,145 @@ export const ApplicationFields = function ApplicationFields() {
 
 interface IFormComponentProps {
   component: any
-  sectionKey?: string[]
+  dataPath?: string[]
 }
-const FormComponent = function ApplicationPDFFormComponent({ component, sectionKey }: IFormComponentProps) {
+const FormComponent = function ApplicationPDFFormComponent({ component, dataPath }: IFormComponentProps) {
   const permitApplication = useContext(PermitApplicationContext)
 
+  const extractFields = (component) => {
+    if (component.input) {
+      const { isVisible } = extractFieldInfo(component)
+      return isVisible && component
+    } else if (component.components || component.columns) {
+      return R.map(extractFields, component.components || [component.columns[0]])
+    }
+  }
+
+  const fields = (components: any[]) => {
+    return R.flatten(R.map(extractFields, components)).filter((outNull) => outNull)
+  }
+
+  const extractFieldInfo = (component) => {
+    switch (component.type) {
+      case EComponentType.checklist: {
+        const options = R.path([dataPath, component.key], permitApplication.submissionData.data)
+        const label = component.label
+        const values: any = Object.keys(options).filter((key) => !!options[key])
+        return { options, values, label, isVisible: !R.isEmpty(values) && !R.isNil(label) }
+      }
+      case EComponentType.datagrid: {
+        return { value: null, label: null }
+      }
+      default:
+        const label = component.label
+        const value = R.path([...dataPath, component.key], permitApplication.submissionData.data)
+        return { value, label, isVisible: !R.isNil(value) && !R.isNil(label) }
+    }
+  }
+
   switch (component.type) {
-    case EComponentType.container:
-      const isValid = !R.isEmpty(component.title.trim()) && component.components?.length > 0
+    case EComponentType.container: {
+      dataPath = [component.key]
+      const componentFields = fields(component.components || component.columns)
+      const isValid = !R.isEmpty(component.title.trim()) && componentFields.length > 0
       if (!isValid) return null
       const { components } = component
       const firstChild: any = R.head(components)
       const additionalChildren: any = R.tail(components)
+      const firstChildFields = fields(firstChild.components)
 
       return (
         <View>
-          <View wrap={firstChild.components.length > 6}>
+          <View wrap={firstChildFields.length > 6}>
             <ContainerHeader component={component} />
-            <FormComponent key={firstChild.id} component={firstChild} sectionKey={component.key} />
+            <FormComponent key={firstChild.id} component={firstChild} dataPath={dataPath} />
           </View>
           {additionalChildren.map((child) => (
-            <FormComponent key={child.id} component={child} sectionKey={component.key} />
+            <FormComponent key={child.id} component={child} dataPath={dataPath} />
           ))}
         </View>
       )
-    case EComponentType.panel:
+    }
+    case EComponentType.panel: {
+      const numFields = fields(component.components).length
       return (
-        <View style={styles.panelContainer} wrap={component.components.length > 5}>
+        <View style={styles.panelContainer} wrap={numFields > 5}>
           <PanelHeader component={component} />
           {component.components && (
             <View style={styles.panelBodyContainer}>
               {component.components.map((child) => (
-                <FormComponent key={child.id} component={child} sectionKey={sectionKey} />
+                <FormComponent key={child.id} component={child} dataPath={dataPath} />
               ))}
             </View>
           )}
         </View>
       )
+    }
+    case EComponentType.datagrid: {
+      return (
+        <>
+          {component.components &&
+            component.components.map((child) => (
+              <FormComponent key={child.id} component={child} dataPath={[...dataPath, component.key, 0]} />
+            ))}
+        </>
+      )
+    }
+    case EComponentType.fieldset:
+      const numFields = fields(component.components).length
+
+      return (
+        numFields > 0 && (
+          <View style={styles.grid}>
+            {component.components.map((child) => (
+              <FormComponent key={child.id} component={child} dataPath={dataPath} />
+            ))}
+          </View>
+        )
+      )
+    case EComponentType.columns:
+      return (
+        <>
+          {component.columns && (
+            <View style={styles.row}>
+              {component.columns.map((column, index) => {
+                return column.components.map((child) => {
+                  return (
+                    <View style={styles.item}>
+                      <FormComponent key={child.id} component={child} dataPath={dataPath} />
+                    </View>
+                  )
+                })
+              })}
+            </View>
+          )}
+        </>
+      )
     case EComponentType.file: {
-      const value: any = R.path([sectionKey, component.key], permitApplication.submissionData.data)
-      const label = component.label
-      const isVisible = !R.isNil(value) && !R.isNil(label)
+      const { value, label, isVisible } = extractFieldInfo(component)
 
       return isVisible ? <FileField value={value} label={label} /> : null
     }
-    case EComponentType.checklist:
-      return <ChecklistField component={component} sectionKey={sectionKey} />
-    case EComponentType.checkbox:
-      return <CheckboxField component={component} sectionKey={sectionKey} />
+    case EComponentType.checklist: {
+      const { options, values, label, isVisible } = extractFieldInfo(component)
+      return isVisible ? <ChecklistField options={options} label={label} /> : null
+    }
+    case EComponentType.checkbox: {
+      const { value, label, isVisible } = extractFieldInfo(component)
+      return isVisible ? <CheckboxField value={value} label={label} /> : null
+    }
     case EComponentType.select:
     case EComponentType.text:
     case EComponentType.textarea:
     case EComponentType.number:
     case EComponentType.phone:
+    case EComponentType.date:
     case EComponentType.email: {
-      const value = R.path([sectionKey, component.key], permitApplication.submissionData.data)
-      const label = component.label
-      const isVisible = !R.isNil(value) && !R.isNil(label)
+      const { value, label, isVisible } = extractFieldInfo(component)
       return isVisible ? <InputField value={value} label={label} type={component.type} /> : null
     }
     default:
+      import.meta.env.DEV && console.log("*** missing component", component)
       return null
   }
 }
@@ -118,14 +201,8 @@ const PanelHeader = function ApplicationPDFPanelHeader({ component }) {
   )
 }
 
-const ChecklistField = function ApplicationPDFPanelChecklistField({ component, sectionKey }) {
-  const permitApplication = useContext(PermitApplicationContext)
-  let options = R.path([sectionKey, component.key], permitApplication.submissionData.data)
-  let values: any = Object.keys(options).filter((key) => !!options[key])
-  let label = component.label
-  let isVisible = !R.isEmpty(values) && !R.isNil(label)
-
-  return isVisible ? (
+const ChecklistField = function ApplicationPDFPanelChecklistField({ options, label }) {
+  return (
     <View style={styles.requirementFieldContainer} wrap={false}>
       <Text style={styles.requirementFieldLabel}>{label}</Text>
       <View style={styles.requirementFieldChecklist}>
@@ -143,15 +220,11 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ component, s
         })}
       </View>
     </View>
-  ) : null
+  )
 }
 
-const CheckboxField = function ApplicationPDFPanelCheckboxField({ component, sectionKey }) {
-  const permitApplication = useContext(PermitApplicationContext)
-  let value = R.path([sectionKey, component.key], permitApplication.submissionData.data)
-  let label = component.label
-  let isVisible = !R.isNil(value) && !R.isNil(label)
-  return isVisible ? (
+const CheckboxField = function ApplicationPDFPanelCheckboxField({ value, label }) {
+  return (
     <View style={styles.requirementFieldContainer} wrap={false}>
       <View style={styles.requirementFieldChecklistItem}>
         {value ? (
@@ -162,7 +235,7 @@ const CheckboxField = function ApplicationPDFPanelCheckboxField({ component, sec
         <Text style={styles.requirementFieldInputValue}>{label}</Text>
       </View>
     </View>
-  ) : null
+  )
 }
 
 const InputField = function ApplicationPDFInputField({ value, label, type }) {
@@ -186,7 +259,7 @@ const FileField = function ApplicationPDFFileField({ value, label }: { value: Re
         {fileExists ? (
           <Text style={styles.requirementFieldInputValue}>{R.pluck("originalName", value).join(", ")}</Text>
         ) : (
-          <Text style={styles.requirementFieldInputValue}>{t("permitApplication.fileNotAdded")}</Text>
+          <Text style={styles.requirementFieldInputValue}>{t("permitApplication.pdf.fileNotAdded")}</Text>
         )}
       </View>
     </View>

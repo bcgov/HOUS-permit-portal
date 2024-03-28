@@ -249,6 +249,18 @@ const options = {
         },
         permitApplication: {
           referenceNumber: "Reference #",
+          pdf: {
+            for: "Permit application for",
+            id: "Application ID",
+            submissionDate: "Submission date",
+            applicant: "Applicant",
+            jurisdiction: "Jurisdiction",
+            page: "Page {{pageNumber}} / {{totalPages}}",
+            fileNotAdded: "Not uploaded",
+            permitType: "Permit type",
+            contactInfo: "Contact information",
+            applicantInfo: "Applicant contact details",
+          },
           indexTitle: "My active permits",
           start: "Start a permit application",
           drafts: "Draft Permits",

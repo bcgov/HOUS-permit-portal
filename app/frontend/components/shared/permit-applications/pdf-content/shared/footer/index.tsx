@@ -14,15 +14,15 @@ export const Footer = () => {
       fixed
       render={({ pageNumber, totalPages }) => (
         <>
-          <Field label={t("permitApplication.id")} value={permitApplication.id} />
+          <Field label={t("permitApplication.pdf.id")} value={permitApplication.id} />
           <Field
-            label={t("permitApplication.submissionDate")}
+            label={t("permitApplication.pdf.submissionDate")}
             value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
           />
-          <Field label={t("permitApplication.applicant")} value={permitApplication.submitter.name} />
-          <Field label={t("permitApplication.jurisdiction")} value={permitApplication.jurisdiction.name} />
+          <Field label={t("permitApplication.pdf.applicant")} value={permitApplication.submitter.name} />
+          <Field label={t("permitApplication.pdf.jurisdiction")} value={permitApplication.jurisdiction.name} />
           <Field
-            label={t("permitApplication.page", { pageNumber: pageNumber, totalPages: totalPages })}
+            label={t("permitApplication.pdf.page", { pageNumber: pageNumber, totalPages: totalPages })}
             value={t("site.titleLong")}
           />
         </>
