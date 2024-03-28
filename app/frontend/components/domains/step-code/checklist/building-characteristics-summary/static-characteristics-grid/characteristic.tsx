@@ -39,7 +39,6 @@ export const Characteristic = function StaticCharacteristic({ fieldArrayName, ro
           )}
           <GridData
             gap={1}
-            alignItems="start"
             pos="relative"
             borderTopWidth={index == 0 ? 1 : 0}
             borderBottomWidth={isLast && index == fields.length - 1 ? 1 : 0}

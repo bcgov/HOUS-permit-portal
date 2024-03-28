@@ -43,7 +43,7 @@ export const CO2 = function CO2({ checklist }: IProps) {
           }
         />
       </GridData>
-      <GridData rowSpan={2}>
+      <GridData rowSpan={2} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.co2Passed} />
       </GridData>
 

@@ -32,7 +32,7 @@ export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ chec
       <GridRowHeader colSpan={3} fontWeight="bold">
         {t(`${translationPrefix}.requirementsMet`)}
       </GridRowHeader>
-      <GridData>
+      <GridData alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.zeroCarbonRequirementsPassed} />
       </GridData>
     </Grid>

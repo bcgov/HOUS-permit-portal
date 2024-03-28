@@ -40,7 +40,7 @@ export const TotalGHG = function TotalGhg({ checklist }: IProps) {
           }
         />
       </GridData>
-      <GridData>
+      <GridData alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.ghgPassed} />
       </GridData>
     </>
