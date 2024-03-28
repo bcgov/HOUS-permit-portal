@@ -21,7 +21,7 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
   const jurisdictionName = searchParams.get("jurisdiction_name")
 
   const formMethods = useForm({
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       firstName: user.first_name,
       lastName: user.last_name,
@@ -75,13 +75,7 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
               </Flex>
               <PasswordFormControl validate mb={0} />
               <Text>{t("auth.passwordRequirements")}</Text>
-              <Button
-                variant="primary"
-                w="full"
-                isDisabled={!isValid || isSubmitting}
-                type="submit"
-                isLoading={isSubmitting}
-              >
+              <Button variant="primary" w="full" isDisabled={isSubmitting} type="submit" isLoading={isSubmitting}>
                 {t("auth.submit")}
               </Button>
             </VStack>

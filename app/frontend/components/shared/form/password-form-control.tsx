@@ -15,6 +15,7 @@ import React, { useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import PasswordStrengthBar from "react-password-strength-bar"
+import { PasswordChecklist } from "./password-checklist"
 
 interface IPasswordFormControlProps extends FormControlProps {
   validate?: boolean
@@ -33,10 +34,10 @@ export const PasswordFormControl = ({
   const [showPassword, setShowPassword] = useState(false)
   const { register, formState, watch } = useFormContext()
   const { t } = useTranslation()
-  const passwordWatch = watch("password")
+  const passwordWatch = watch(fieldName)
 
   return (
-    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.password} {...rest}>
+    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.[fieldName]} {...rest}>
       <FormLabel>{label || t("auth.passwordLabel")}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
@@ -44,19 +45,27 @@ export const PasswordFormControl = ({
             {...register(fieldName, {
               required: required && t("ui.isRequired", { field: label }),
               validate: {
-                matchesPasswordRegex: (str) =>
-                  !required ||
-                  !validate ||
-                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
-                  t("auth.passwordTooWeak"),
+                matchesPasswordRegex: (str) => {
+                  if (!validate) {
+                    return true
+                  }
+
+                  if (required || passwordWatch) {
+                    return (
+                      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
+                      t("auth.passwordInvalidFormat")
+                    )
+                  }
+                },
               },
             })}
             type={showPassword ? "text" : "password"}
             autoComplete={validate ? "new-password" : "on"}
           />
-          {formState?.errors?.password && (
-            <FormErrorMessage>{formState?.errors?.password.message as string}</FormErrorMessage>
-          )}
+          {formState?.errors?.[fieldName] &&
+            formState.errors[fieldName].message !== t("auth.passwordInvalidFormat") && (
+              <FormErrorMessage>{formState?.errors?.[fieldName].message as string}</FormErrorMessage>
+            )}
         </Flex>
 
         <InputRightElement pr={14} py={1}>
@@ -70,6 +79,9 @@ export const PasswordFormControl = ({
         <Box mt={4}>
           <PasswordStrengthBar password={passwordWatch} minLength={8} />
         </Box>
+      )}
+      {formState?.errors?.[fieldName] && formState.errors[fieldName].message === t("auth.passwordInvalidFormat") && (
+        <PasswordChecklist password={passwordWatch || ""} />
       )}
     </FormControl>
   )

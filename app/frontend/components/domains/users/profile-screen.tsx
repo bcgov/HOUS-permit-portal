@@ -32,7 +32,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   const { email, role, firstName, lastName, username, certified, organization } = currentUser
 
   const formMethods = useForm({
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       firstName,
       lastName,
