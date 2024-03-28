@@ -230,7 +230,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         )}
         <FloatingHelpDrawer top="130px" position="absolute" />
       </Flex>
-      <Flex id="permitApplicationFieldsContainer">
+      <Box id="permitApplicationFieldsContainer">
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
           <Flex flex={1} direction="column" p={8} position={"relative"}>
@@ -243,7 +243,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             />
           </Flex>
         )}
-      </Flex>
+      </Box>
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}
