@@ -1105,7 +1105,7 @@ const options = {
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
           somethingWrong: "Something went wrong",
-          pageNotFound: "Oops, we can't find that page",
+          pageNotFound: "Error, we can't find that page",
           pageNotFoundInstructions: "Please check that the web URL has been entered correctly.",
           pageNotFoundCTA: "Go back to home",
           pageNotFoundContactInstructions: "Do you believe this to be in error or are you stuck?",

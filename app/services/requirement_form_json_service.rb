@@ -329,6 +329,7 @@ class RequirementFormJsonService
                 nil
               end
             ),
+          fileSizeMax: "#{Constants::Sizes::FILE_UPLOAD_MAX_SIZE}MB",
         }.tap do |file_hash|
           file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
             "computed_compliance"

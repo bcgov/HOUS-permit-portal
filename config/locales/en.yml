@@ -93,20 +93,20 @@ en:
         message: Please create an account and login with username and password
     geocoder:
       site_options_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching site options
       pid_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching pid for address
       jurisdiction_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching jurisdiction for address
       ltsa_unavailable_error:
-        title: Oops
+        title: Error
         message: The land title service is currently unavailable
     permit_classification:
       options_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching permit classification options
     user:
       login_error:
@@ -122,16 +122,16 @@ en:
         title: Account could not be created.
         message: "%{error_message}"
       accept_invite_error:
-        title: Oops
+        title: Error
         message: The invitation link is invalid or has expired. Please ask your administrator to re-invite you to the workspace.
       create_invite_error:
-        title: Oops
+        title: Error
         message: "Something went wrong inviting users"
       remove_invite_error:
-        title: Oops
+        title: Error
         message: "Something went wrong canceling the invite"
       resend_invite_error:
-        title: Oops
+        title: Error
         message: "Something went wrong re-sending the invite"
       authorization_error:
         title: Not authorized.
@@ -146,7 +146,7 @@ en:
         title: Success
         message: Your email was successfully confirmed
       confirmation_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       send_invitation_success:
         title: ""
@@ -155,41 +155,41 @@ en:
         title: ""
         message: The invitation has been revoked
       invite_error:
-        title: Oops
+        title: Error
         message: The users you specified weren't able to be invited. Please contact support.
       update_success:
         title: ""
         message: The user was updated successfully
       update_error:
-        title: Oops
+        title: Error
         message: "There was an error updating the user"
       update_password_error:
-        title: Oops
+        title: Error
         message: "The provided current password is incorrect"
       destroy_success:
         title: ""
         message: The user was archived successfully
       destroy_error:
-        title: "Oops"
+        title: "Error"
         message: "There was an error archiving the user"
       restore_success:
         title: ""
         message: The user was restored successfully
       restore_error:
-        title: "Oops"
+        title: "Error"
         message: "There was an error restoring the user"
       eula_accepted:
         title: ""
         message: "End-User License Agreement accepted"
     requirement_block:
       create_error:
-        title: Oops
+        title: Error
         message: "Something went wrong creating the requirement block"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       delete_error:
-        title: Oops
+        title: Error
         message: "Something went wrong deleting the requirement block"
     requirement_template:
       create_success:
@@ -202,51 +202,51 @@ en:
         title: ""
         message: "Permit has been scheduled to published."
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       destroy_success:
         title: ""
         message: "New template archived successfully"
       destroy_error:
-        title: Oops
+        title: Error
         message: "Something went wrong archiving the template"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       schedule_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       delete_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       restore_success:
         title: ""
         message: The template was restored successfully
       restore_error:
-        title: "Oops"
+        title: "Error"
         message: "There was an error restoring the template"
     jurisdiction:
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       create_success:
         title: ""
         message: "New jurisdiction created successfully!"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       update_success:
         title: ""
         message: "Jurisdiction successfully updated!"
     permit_application:
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       create_success:
         title: ""
         message: "New permit application started!"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       save_success:
         title: ""
@@ -255,28 +255,28 @@ en:
         title: ""
         message: "Permit application successfully saved as draft!"
       submit_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
     step_code:
       h2k_imported:
         title: ""
         message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
     step_code_checklist:
       update_success:
         title: ""
         message: "Step code checklist updated!"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
         message: "The user is not authorized to do this action"
       not_found_error:
-        title: "Oops"
+        title: "Error"
         message: 404 - The requested resource could not be found
     jurisdiction_template_version_customization:
       create_success:
@@ -286,10 +286,10 @@ en:
         title: ""
         message: "Jurisdiction Template Customization updated!"
       create_error:
-        title: Oops
+        title: Error
         message: "Something went wrong creating Jurisdiction Customization"
       update_error:
-        title: Oops
+        title: Error
         message: "Something went wrong updating Jurisdiction Customization"
   formio:
     requirement_template:

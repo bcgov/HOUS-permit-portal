@@ -1,4 +1,14 @@
 import { requestPresignedUrl, uploadFileInChunks } from "../../../../../../utils/uploads"
+
+import { FILE_UPLOAD_CHUNK_SIZE } from "../../constant"
+
+class StorageError extends Error {
+  constructor(message, detail) {
+    super(message) // Call the parent class constructor with the message
+    this.detail = detail
+  }
+}
+
 /* tslint:disable */
 const s3custom = function Provider(formio) {
   return {
@@ -17,11 +27,15 @@ const s3custom = function Provider(formio) {
       groupId,
       abortCallback
     ) => {
+      import.meta.env.DEV && console.log("[DEV] file uploading with options", options)
       try {
         // Step 1: Request a pre-signed URL from your Shrine.rb backend
         const response = await requestPresignedUrl(file, fileName, url)
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new StorageError(
+            `HTTP error! status: ${response.status}`,
+            "Failed to upload the file directly.  Please contact support."
+          )
         }
         const presignedData = await response.json()
 
@@ -32,7 +46,7 @@ const s3custom = function Provider(formio) {
           presignedData.headers,
           file,
           progressCallback,
-          10 * 1024 * 1024
+          FILE_UPLOAD_CHUNK_SIZE * 1024 * 1024
         )
         //if there is an error along the way, it will throw and an error
 
@@ -52,7 +66,8 @@ const s3custom = function Provider(formio) {
           },
         }
       } catch (error) {
-        throw new Error("Failed to upload the file directly.  Please contact support.")
+        import.meta.env.DEV && console.log("[DEV] file upload error", error)
+        throw new StorageError(error, "Failed to upload the file directly.  Please contact support.")
       }
     },
     deleteFile: async (fileInfo, options) => {
@@ -75,7 +90,10 @@ const s3custom = function Provider(formio) {
         //form.io assumes that the delete will just succeed, it always removes the link from the form
         //TODO: ALWAYS FORCE A SAVE ON THE FILE DATA WHEN IT IS DELETED
       } catch (error) {
-        throw new Error("The file may have failed to delete, try again.")
+        throw new StorageError(
+          error,
+          "An error occured during deletion, but please save the application and try again."
+        )
       }
     },
     downloadFile: async (fileInfo, options) => {
@@ -98,14 +116,14 @@ const s3custom = function Provider(formio) {
         })
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new StorageError(`HTTP error! status: ${response.status}`, "Failed to get a valid download url.")
         }
 
         const responseJson = await response.json()
         window.open(responseJson.url, "_blank")
         return responseJson // Resolving the promise implicitly by returning the value
       } catch (error) {
-        throw new Error("Failed to get pre-signed URL") // Rejecting the promise implicitly by throwing an error
+        throw new StorageError(error, `Failed to download the file.`) // Rejecting the promise implicitly by throwing an error
       }
     },
   }

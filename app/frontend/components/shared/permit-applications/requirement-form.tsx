@@ -27,7 +27,7 @@ import { getCompletedBlocksFromForm } from "../../../utils/formio-component-trav
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomToast } from "../base/flash-message"
-import { Form } from "../chefs"
+import { Form, defaultOptions } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -271,7 +271,7 @@ export const RequirementForm = observer(
                                      mutated*/
             submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
-            options={isDraft ? {} : { readOnly: true }}
+            options={{ ...defaultOptions, ...(isDraft ? {} : { readOnly: true }) }}
             onBlur={onBlur}
             onChange={onChange}
             onInitialized={onInitialized}

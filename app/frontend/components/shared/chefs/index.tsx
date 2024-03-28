@@ -6,6 +6,8 @@ import { t } from "i18next"
 import ChefsFormioComponents from "./additional-formio"
 import { overridePanelTemplate } from "./additional-formio/templates/panel"
 
+const FILE_UPLOAD_MAX_SIZE = import.meta.env.VITE_FILE_UPLOAD_MAX_SIZE || 10
+
 const defaultLabelTemplate = Templates.current.label.form
 const defaultButtonsTemplate = Templates.current.button.form
 
@@ -64,4 +66,16 @@ Templates.current = {
 
 Formio.use(ChefsFormioComponents)
 
-export { Form, Formio }
+const defaultOptions = {
+  componentOptions: {
+    simplefile: {
+      config: {
+        uploads: {
+          fileMaxSize: `${FILE_UPLOAD_MAX_SIZE}MB`,
+        },
+      },
+    },
+  },
+}
+
+export { Form, Formio, defaultOptions }
