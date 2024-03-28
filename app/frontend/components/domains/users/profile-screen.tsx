@@ -54,7 +54,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
   }
 
   return (
-    <Container maxW="container.lg" p={8} as="main">
+    <Container maxW="container.sm" p={8} as="main">
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex direction="column" w="full" gap={6}>
