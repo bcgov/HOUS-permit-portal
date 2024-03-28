@@ -1,4 +1,4 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EUserRoles } from "../types/enums"
@@ -52,22 +52,26 @@ export const UserModel = types
   .actions((self) => ({
     destroy: flow(function* () {
       const response = yield self.environment.api.destroyUser(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
     restore: flow(function* () {
       const response = yield self.environment.api.restoreUser(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
     changeRole: flow(function* () {
+      let newRole = null
       if (self.role === EUserRoles.reviewManager) {
-        var newRole = EUserRoles.reviewer
+        newRole = EUserRoles.reviewer
       } else if (self.role === EUserRoles.reviewer) {
-        var newRole = EUserRoles.reviewManager
+        newRole = EUserRoles.reviewManager
       } else {
         return
       }
 
       const response = yield self.environment.api.updateUser(self.id, { role: newRole })
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
     acceptEULA: flow(function* () {
