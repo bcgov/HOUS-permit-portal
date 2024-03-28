@@ -1137,6 +1137,7 @@ const options = {
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "Submission e-mail confirmed",
+            welcome: "Welcome",
           },
           questionSupport: "Question support",
         },

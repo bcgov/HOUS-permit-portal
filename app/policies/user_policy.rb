@@ -1,6 +1,10 @@
 class UserPolicy < ApplicationPolicy
+  def profile?
+    user.id == record.id
+  end
+
   def update?
-    user == record
+    (user.review_manager? && user.jurisdiction_id == record.jurisdiction_id)
   end
 
   def invite?
