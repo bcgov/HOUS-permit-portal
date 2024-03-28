@@ -100,7 +100,7 @@ en:
         message: Error encountered fetching pid for address
       jurisdiction_error:
         title: Error
-        message: Error encountered fetching jurisdiction for address
+        message: Jurisdiction could not be determined. Please manually enter your jurisdiction.
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
