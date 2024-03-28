@@ -13,8 +13,8 @@ import { useMst } from "../../../../../setup/root"
 import { IRequirementBlockCustomization, ITemplateCustomization } from "../../../../../types/types"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
-import { BuilderTopFloatingButtons } from "../../builder-top-floating-buttons"
 import { SectionsDisplay } from "../../sections-display"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
@@ -169,7 +169,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               </Button>
             </ButtonGroup>
           </Flex>
-          <BuilderTopFloatingButtons />
+          <FloatingHelpDrawer />
           <SectionsDisplay
             sections={templateSections}
             isCollapsedAll={isCollapsedAll}

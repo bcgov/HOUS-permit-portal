@@ -1,11 +1,12 @@
 import { Box, Center, Container, Flex, Image, Show, Spacer, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
-import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
+import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../setup/root"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { StepCodeChecklistForm } from "./checklist"
 import { DrawingsWarning } from "./drawings-warning"
 import { H2KImport } from "./import"
@@ -70,17 +71,20 @@ export const StepCodeForm = observer(function NewStepCodeForm() {
           }
         >
           {isLoaded && currentPermitApplication && (
-            <Container my={10} maxW="780px" px={0}>
-              {!currentStepCode ? (
-                <VStack spacing={8} align="start" w="full" pb={20}>
-                  <Title />
-                  <Info />
-                  <DrawingsWarning />
-                  <H2KImport />
-                </VStack>
-              ) : (
-                <StepCodeChecklistForm />
-              )}
+            <Container maxW="container.lg">
+              <FloatingHelpDrawer top="24" />
+              <Container my={10} maxW="780px" px={0}>
+                {!currentStepCode ? (
+                  <VStack spacing={8} align="start" w="full" pb={20}>
+                    <Title />
+                    <Info />
+                    <DrawingsWarning />
+                    <H2KImport />
+                  </VStack>
+                ) : (
+                  <StepCodeChecklistForm />
+                )}
+              </Container>
             </Container>
           )}
         </Suspense>
