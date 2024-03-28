@@ -67,7 +67,7 @@ const panel: Record<TPanelKey, any> = {
   },
   panelBodyContainer: {
     ...flexColumn,
-    gap: 8,
+    gap: 4,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     borderWidth: 1,
@@ -134,6 +134,32 @@ const panel: Record<TPanelKey, any> = {
   },
 }
 
+const fieldset = {
+  fieldsetContainer: {},
+}
+
+type TColumnKey = "grid" | "row" | "item"
+const columns: Record<TColumnKey, any> = {
+  grid: {
+    borderWidth: 1,
+    borderColor: theme.colors.border.light,
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderRadius: 4,
+  },
+  row: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 20,
+    width: "100%",
+  },
+  item: {
+    flex: 1,
+  },
+}
+
 export const styles = StyleSheet.create({
   page,
   outerContainer: {
@@ -142,4 +168,6 @@ export const styles = StyleSheet.create({
   },
   ...section,
   ...panel,
+  ...fieldset,
+  ...columns,
 })

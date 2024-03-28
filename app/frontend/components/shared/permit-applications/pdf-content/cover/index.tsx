@@ -16,7 +16,7 @@ export const CoverPage = function PermitApplicationPDFCoverPage() {
           <Image src={"/images/logo.png"} style={styles.logo} />
           <Text style={styles.title}>{t("site.title")}</Text>
         </View>
-        <Text style={styles.subTitle}>{t("permitApplication.for")}</Text>
+        <Text style={styles.subTitle}>{t("permitApplication.pdf.for")}</Text>
         <View style={styles.calloutBoxOuter}>
           <View style={styles.calloutBoxInner}>
             <View style={styles.calloutBoxContent}>
@@ -27,19 +27,19 @@ export const CoverPage = function PermitApplicationPDFCoverPage() {
         </View>
         <View style={styles.applicationDetailsContainer}>
           <View style={styles.applicationDetailsRow}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.id")}</Text>
+            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.id")}</Text>
             <Text style={styles.applicationDetailsValue}>{permitApplication.number}</Text>
           </View>
           <View style={styles.applicationDetailsRow}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.submissionDate")}</Text>
+            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.submissionDate")}</Text>
             <Text style={styles.applicationDetailsValue}>{format(permitApplication.submittedAt, "yyyy-MM-dd")}</Text>
           </View>
           <View style={styles.applicationDetailsRow}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.applicant")}</Text>
+            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.applicant")}</Text>
             <Text style={styles.applicationDetailsValue}>{permitApplication.submitter.name}</Text>
           </View>
           <View style={R.mergeRight(styles.applicationDetailsRow, { borderBottomWidth: "0pt" })}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.permitType")}</Text>
+            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.permitType")}</Text>
             <Text
               style={styles.applicationDetailsValue}
             >{`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}</Text>
