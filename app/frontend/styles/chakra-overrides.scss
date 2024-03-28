@@ -60,3 +60,8 @@
     z-index: 0;
   }
 }
+
+// when admin is reordering sections, don't show the requirement templates form on the right (nor make it interactable)
+#sections-sidebar-reordering + #editing-permit-requirements-form {
+  display: none;
+}

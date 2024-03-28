@@ -25,6 +25,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
 
   return (
     <Stack
+      id="sections-display-form-blocks"
       w={"full"}
       alignItems={"flex-start"}
       spacing={16}

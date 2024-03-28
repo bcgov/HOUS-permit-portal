@@ -64,7 +64,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   })
 
   return (
-    <Box as="main" id="review-permit-application">
+    <Box as="main" id="reviewing-permit-application">
       <Flex
         id="permitHeader"
         position="sticky"

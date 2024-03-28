@@ -27,6 +27,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
 
   return (
     <Box
+      id="sections-sidebar"
       as={"section"}
       w="var(--app-sidebar-width)"
       h="calc(100vh) "

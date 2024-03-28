@@ -161,12 +161,31 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
 
   return (
     <Box
-      w="var(--app-sidebar-width)"
+      id="sections-sidebar-reordering"
       as={"section"}
-      minH="70vh"
-      h={"full"}
+      w="var(--app-sidebar-width)"
+      h="calc(100vh) "
+      bg="greys.white"
+      borderRight={"1px solid"}
+      borderColor={"border.light"}
       boxShadow={"elevations.elevation01"}
-      overflow={"auto"}
+      position="sticky"
+      top="0"
+      zIndex="1"
+      float="left"
+      _after={{
+        // hide the form side so user can focus on drag /up down and can't click the form accordions (in sections-display)
+        content: `""`,
+        display: "block",
+        width: "var(--app-sidebar-remaining-width)",
+        height: "full",
+        background: "greys.grey03",
+        position: "absolute",
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "var(--app-sidebar-width)",
+      }}
     >
       <Flex w={"full"} justifyContent={"flex-end"} bg={"theme.blue"} py={5} px={4}>
         <ButtonGroup size={"sm"}>
@@ -196,13 +215,15 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
       >
         <VStack
           w={"full"}
+          h="calc( 100vh - 76px)"
+          overflow={"auto"}
           alignItems={"flex-start"}
           align-self={"stretch"}
           px={3}
-          py={2}
+          pt={2}
+          pb={80}
           borderRight={"1px solid"}
           borderColor={"border.light"}
-          h={"100%"}
           boxSizing={"border-box"}
         >
           <SortableContext items={sortedSectionIds} strategy={verticalListSortingStrategy}>

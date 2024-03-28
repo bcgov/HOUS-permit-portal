@@ -136,6 +136,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             />
           )}
           <Box
+            id="editing-permit-requirements-form"
             width="var(--app-sidebar-remaining-width)"
             display="inline-block"
             bg={hasNoSections ? "greys.grey03" : undefined}
