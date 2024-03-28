@@ -1,6 +1,4 @@
-import { requestPresignedUrl, uploadFileInChunks } from "../../../../../../utils/uploads"
-
-import { FILE_UPLOAD_CHUNK_SIZE } from "../../constant"
+import { uploadFile } from "../../../../../../utils/uploads"
 
 class StorageError extends Error {
   constructor(message, detail) {
@@ -29,27 +27,7 @@ const s3custom = function Provider(formio) {
     ) => {
       import.meta.env.DEV && console.log("[DEV] file uploading with options", options)
       try {
-        // Step 1: Request a pre-signed URL from your Shrine.rb backend
-        const response = await requestPresignedUrl(file, fileName, url)
-        if (!response.ok) {
-          throw new StorageError(
-            `HTTP error! status: ${response.status}`,
-            "Failed to upload the file directly.  Please contact support."
-          )
-        }
-        const presignedData = await response.json()
-
-        // Step 2: Upload the file directly to the storage service using the pre-signed URL
-        // Dell ECS S3 does not support POST object, we need to use PUT and chunked transfer encoding
-        await uploadFileInChunks(
-          presignedData.signedUrls,
-          presignedData.headers,
-          file,
-          progressCallback,
-          FILE_UPLOAD_CHUNK_SIZE * 1024 * 1024
-        )
-        //if there is an error along the way, it will throw and an error
-
+        const presignedData = await uploadFile(file, fileName, progressCallback)
         return {
           storage: "s3custom",
           filename: fileName,
@@ -62,7 +40,7 @@ const s3custom = function Provider(formio) {
             filename: file.name,
             size: file.size,
             mime_type: file.type,
-            content_disposition: presignedData?.headers?.["Content-Disposition"],
+            content_disposition: presignedData?.headers?.["Content-Disposition"], //if multiplart this is moved inline
           },
         }
       } catch (error) {

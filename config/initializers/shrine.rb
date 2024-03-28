@@ -62,12 +62,21 @@ Shrine.plugin :presign_endpoint,
                     # transfer_encoding: "chunked",
                   }
                 }
+Shrine.plugin :uppy_s3_multipart
 
 class Shrine::Storage::S3
+  #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L105
+  #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L240
+  #https://github.com/janko/uppy-s3_multipart/blob/master/lib/uppy/s3_multipart/client.rb
+  #uppy utilizes functionality to hit the endpoint to create a multi upload request and then allow you to batch sign urls for each part
+  #we want to simulate something similar for form.io, but to simplify it we will use a presign put
+  #one thing to watch out for is that presign_put uses shortly timed urls
+
   def presign_put(id, options)
     obj = object(id)
 
-    signed_urls = [obj.presigned_url(:put, options)]
+    #chunking handled by uppy
+    signed_url = obj.presigned_url(:put, options)
     url = Shrine.storages[:cache].url(id, public: false, expires_in: 3600)
     # When any of these options are specified, the corresponding request
     # headers must be included in the upload request.
@@ -79,7 +88,7 @@ class Shrine::Storage::S3
     headers["Content-Language"] = options[:content_language] if options[:content_language]
     headers["Content-MD5"] = options[:content_md5] if options[:content_md5]
 
-    { method: :put, url: url, signedUrls: signed_urls, headers: headers, key: obj.key }
+    { method: :put, url: url, signed_url: signed_url, headers: headers, key: obj.key }
   end
 
   # ECS S3 copy function does not take as many params, it works when its plain.  You can test in the code below to verify.
