@@ -344,6 +344,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_27_191001) do
     t.integer "epc_calculation_testing_target_type"
     t.boolean "epc_calculation_compliance"
     t.boolean "codeco"
+    t.integer "status", default: 0, null: false
+    t.string "builder"
+    t.index ["status"], name: "index_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 

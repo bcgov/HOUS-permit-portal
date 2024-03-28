@@ -157,19 +157,24 @@ const requirementsComponentMap = {
     )
   },
 
-  [ERequirementType.checkbox]({ options = defaultOptions, ...genericDisplayProps }: TRequirementFieldDisplayProps) {
+  [ERequirementType.checkbox]({
+    options = defaultOptions,
+    labelProps,
+    ...genericDisplayProps
+  }: TRequirementFieldDisplayProps) {
     return (
       <GenericFieldDisplay
         containerProps={{
-          display: "flex",
-          flexDir: "row-reverse",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          sx: {
-            label: { mb: 0 },
-          },
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
         }}
-        inputDisplay={<Checkbox mr={2} />}
+        labelProps={{
+          ...labelProps,
+          mb: 0,
+          order: 2,
+        }}
+        inputDisplay={<Checkbox mr={2} order={1} />}
+        editorContainerProps={{ order: 3, gridColumn: "span 2" }}
         {...genericDisplayProps}
       />
     )

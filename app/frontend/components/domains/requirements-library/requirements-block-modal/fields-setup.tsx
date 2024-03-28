@@ -165,18 +165,10 @@ export const FieldsSetup = observer(function FieldsSetup() {
                         "aria-label": "Edit Label",
                       }}
                       editableHelperTextProps={{
-                        getStateBasedEditableProps: (isEditing) =>
-                          isEditing
-                            ? {}
-                            : {
-                                color: !!watchedHint ? "text.secondary" : "text.link",
-                                textDecoration: watchedHint ? undefined : "underline",
-                              },
                         controlProps: {
                           control: control,
                           name: `requirementsAttributes.${index}.hint`,
                         },
-                        "aria-label": "Edit Helper Text",
                       }}
                       isOptionalCheckboxProps={{
                         controlProps: {

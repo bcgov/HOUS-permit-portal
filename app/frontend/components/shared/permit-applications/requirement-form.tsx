@@ -27,7 +27,7 @@ import { getCompletedBlocksFromForm } from "../../../utils/formio-component-trav
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomToast } from "../base/flash-message"
-import { Form } from "../chefs"
+import { Form, defaultOptions } from "../chefs"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -127,8 +127,8 @@ export const RequirementForm = observer(
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
     useEffect(() => {
-      const handleOpenStepCode = (_event) => {
-        triggerSave?.()
+      const handleOpenStepCode = async (_event) => {
+        await triggerSave?.()
         navigate("step-code", { state: { background: location } })
       }
       document.addEventListener("openStepCode", handleOpenStepCode)
@@ -235,7 +235,7 @@ export const RequirementForm = observer(
           mb="40vh"
           mx="auto"
           pl="8"
-          pr="130px" // space for floating buttons
+          pr="var(--app-permit-form-right-white-space)"
           maxWidth="container.lg"
           gap={8}
           ref={boxRef}
@@ -271,7 +271,7 @@ export const RequirementForm = observer(
                                      mutated*/
             submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
-            options={isDraft ? {} : { readOnly: true }}
+            options={{ ...defaultOptions, ...(isDraft ? {} : { readOnly: true }) }}
             onBlur={onBlur}
             onChange={onChange}
             onInitialized={onInitialized}

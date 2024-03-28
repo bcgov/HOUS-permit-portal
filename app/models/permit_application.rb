@@ -209,10 +209,11 @@ class PermitApplication < ApplicationRecord
 
   def notify_user_application_updated
     return if new_record?
-
-    return unless saved_change_to_viewed_at? || saved_change_to_reference_number?
-
-    PermitHubMailer.notify_application_updated(submitter, self).deliver_later
+    viewed_at_change = previous_changes.dig("viewed_at")
+    # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
+    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
+      PermitHubMailer.notify_application_updated(submitter, self).deliver_later
+    end
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -244,7 +245,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def pid_or_pin_presence
-    if pin.blank? && pid.blank?
+    if ((pid.present? && pin.present?) || (pin.blank? && pid.blank?))
       errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
     end
   end

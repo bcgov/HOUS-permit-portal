@@ -111,7 +111,9 @@ class RequirementFormJsonService
 
     json.merge!({ data: { values: requirement.input_options["value_options"] } }) if requirement.input_type_select?
 
-    json.merge!({ values: requirement.input_options["value_options"] }) if requirement.input_type_multi_option_select?
+    if requirement.input_type_multi_option_select? || requirement.input_type_radio?
+      json.merge!({ values: requirement.input_options["value_options"] })
+    end
 
     if requirement.computed_compliance?
       json.merge!({ computedCompliance: requirement.input_options["computed_compliance"] })
@@ -327,6 +329,7 @@ class RequirementFormJsonService
                 nil
               end
             ),
+          fileSizeMax: "#{Constants::Sizes::FILE_UPLOAD_MAX_SIZE}MB",
         }.tap do |file_hash|
           file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
             "computed_compliance"

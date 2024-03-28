@@ -150,11 +150,21 @@ export enum EStepCodeChecklistStage {
   asBuilt = "as_built",
 }
 
+export enum EStepCodeChecklistStatus {
+  draf = "draft",
+  complete = "complete",
+}
+
 export enum EStepCodeCompliancePath {
   stepCodeERS = "step_code_ers",
   stepCodeNECB = "step_code_necb",
   passiveHouse = "passive_house",
   stepCode = "step_code",
+}
+
+export enum EStepCodePrescriptiveValue {
+  zeroCarbon = "zero_carbon",
+  carbon = "carbon",
 }
 
 export enum EStepCodeAirtightnessValue {

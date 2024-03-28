@@ -332,7 +332,7 @@ const options = {
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
-              "A confirmation email has also been sent to the applicant and {{ jurisdictionName }}'s building permit office",
+              "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
             pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
           },
           edit: {
@@ -390,6 +390,8 @@ const options = {
             noFormFieldsAdded: "No form fields have been added yet, start by clicking the Add button.",
             defaultRequirementLabel: "Label",
             addHelpText: "Add help text",
+            addHelpTextLabel: "Help text",
+            editHelpTextLabel: "Edit help text",
             helpTextPlaceHolder: "Help text",
             optionalForSubmitters: "This field is optional for submitters",
             isAnElectiveField: "This is an elective field for local jurisdictions",
@@ -483,11 +485,13 @@ const options = {
           },
         },
         stepCode: {
-          title: "Step Code Auto-Compliance Tool",
-          subTitle: "Automatically generate your BC Energy Step Code Compliance Report",
-          checklistGuide: "See Checklist Guide",
+          title: "Step code auto-compliance tool",
+          subTitle: "Automatically generate your BC Energy Step Code compliance report",
+          checklistGuide: "See checklist guide",
           saveAndGoBack: "Save and go back",
+          markAsComplete: "Mark as complete",
           back: "Back to permit application",
+          complete: "Complete",
           restart: {
             trigger: "Restart",
             confirm: {
@@ -798,6 +802,8 @@ const options = {
                 heating: "Heating",
                 hotWater: "Hot water",
                 other: "All building systems, equipment, and appliances",
+                zero_carbon: "zero carbon",
+                carbon: "carbon",
               },
               requirementsMet: "Target reached:",
             },
@@ -1106,7 +1112,7 @@ const options = {
           error: "Something went wrong, please try refreshing the page",
           menu: "Menu",
           somethingWrong: "Something went wrong",
-          pageNotFound: "Oops, we can't find that page",
+          pageNotFound: "Error, we can't find that page",
           pageNotFoundInstructions: "Please check that the web URL has been entered correctly.",
           pageNotFoundCTA: "Go back to home",
           pageNotFoundContactInstructions: "Do you believe this to be in error or are you stuck?",
@@ -1138,6 +1144,7 @@ const options = {
             energyStep: "Energy Step Code requirements",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "Submission e-mail confirmed",
+            welcome: "Welcome",
           },
           questionSupport: "Question support",
         },

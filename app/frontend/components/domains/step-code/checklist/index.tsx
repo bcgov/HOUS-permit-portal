@@ -1,4 +1,4 @@
-import { Accordion, Alert, Center, Container, Heading, VStack } from "@chakra-ui/react"
+import { Accordion, Alert, Center, Container, HStack, Heading, Tag, VStack } from "@chakra-ui/react"
 import { LightningA, WarningCircle } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -53,9 +53,23 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
       {checklist?.isLoaded && (
         <Container my={10} maxW="780px" px={0}>
           <VStack gap={8} align="stretch">
-            <Heading fontSize="2xl" mb={0} color="text.primary">
-              {t(`${translationPrefix}.heading`)}
-            </Heading>
+            <HStack spacing={5}>
+              <Heading fontSize="2xl" mb={0} color="text.primary">
+                {t(`${translationPrefix}.heading`)}
+              </Heading>
+              <Tag
+                p={1}
+                bg={checklist.isComplete ? "theme.blue" : "greys.grey03"}
+                color={checklist.isComplete ? "greys.white" : "text.primary"}
+                fontWeight="bold"
+                border="1px solid"
+                borderColor="border.base"
+                textTransform="uppercase"
+                minW="fit-content"
+              >
+                {checklist.status}
+              </Tag>
+            </HStack>
             <VStack spacing={2}>
               {R.isNil(checklist.proposedEnergyStep) && (
                 <Alert
@@ -100,7 +114,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </VStack>
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
-                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3]}>
+                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]}>
                   {/* <VStack spacing={4} pb={12}> */}
                   <ProjectInfo checklist={checklist} />
                   <ComplianceSummary checklist={checklist} />

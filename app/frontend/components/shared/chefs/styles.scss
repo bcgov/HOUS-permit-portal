@@ -510,13 +510,15 @@
     }
   }
 
-  .help-block {
-    display: block;
-    margin-top: 16px;
-    border: 1px solid var(--chakra-colors-error);
-    border-radius: 8px;
-    background-color: var(--chakra-colors-semantic-errorLight);
-    padding: 12px;
+  .has-error {
+    .help-block {
+      display: block;
+      margin-top: 16px;
+      border: 1px solid var(--chakra-colors-error);
+      border-radius: 8px;
+      background-color: var(--chakra-colors-semantic-errorLight);
+      padding: 12px;
+    }
   }
 
   .contact-data-grid {

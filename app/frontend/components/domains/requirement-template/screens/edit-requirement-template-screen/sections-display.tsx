@@ -32,7 +32,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
       mb="20"
       mx="auto"
       pl="8"
-      pr="130px" // space for floating buttons
+      pr="var(--app-permit-form-right-white-space)"
       maxWidth="container.lg"
     >
       {watchedSections.map((section, index) => (

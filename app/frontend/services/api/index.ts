@@ -336,4 +336,8 @@ export class Api {
   async updateSiteConfiguration(siteConfiguration) {
     return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
   }
+    
+  async updateUser(id: string, user: IUser) {
+    return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
+  }
 }

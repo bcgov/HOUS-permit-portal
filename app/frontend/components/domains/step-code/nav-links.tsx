@@ -1,20 +1,27 @@
-import { Button, HStack } from "@chakra-ui/react"
+import { Button, HStack, Input } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
+import { EStepCodeChecklistStatus } from "../../../types/enums"
 import { RestartConfirmationModal } from "./restart-confirmation-modal"
 
 export const StepCodeNavLinks = observer(function StepCodeNavLinks() {
   const { stepCodeStore } = useMst()
+  const { currentStepCode } = stepCodeStore
+  const checklist = currentStepCode?.preConstructionChecklist
   const navigate = useNavigate()
+  const { handleSubmit, register, formState } = useForm()
+  const { isValid, isSubmitting } = formState
 
-  const handleDeleteStepCode = async () => {
-    await stepCodeStore.deleteStepCode()
+  const onComplete = async (values) => {
+    await currentStepCode.updateStepCodeChecklist(checklist.id, values)
   }
 
   const handleSave = async () => {
+    //@ts-ignore
     document.stepCodeChecklistForm.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))
   }
 
@@ -27,10 +34,21 @@ export const StepCodeNavLinks = observer(function StepCodeNavLinks() {
 
       {stepCodeStore.currentStepCode ? (
         <>
-          <Button variant="primary" onClick={handleSave}>
+          <RestartConfirmationModal />
+          <Button variant="secondary" onClick={handleSave}>
             {t("stepCode.saveAndGoBack")}
           </Button>
-          <RestartConfirmationModal />
+          <form onSubmit={handleSubmit(onComplete)}>
+            <Input type="hidden" value={EStepCodeChecklistStatus.complete} {...register("status")} />
+            <Button
+              variant="primary"
+              isLoading={isSubmitting}
+              isDisabled={checklist.isComplete || isSubmitting || !isValid}
+              type="submit"
+            >
+              {t("stepCode.markAsComplete")}
+            </Button>
+          </form>
         </>
       ) : (
         <Button variant="primary" onClick={() => navigate(-1)}>

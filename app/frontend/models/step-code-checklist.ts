@@ -5,8 +5,10 @@ import {
   EStepCodeAirtightnessValue,
   EStepCodeBuildingType,
   EStepCodeChecklistStage,
+  EStepCodeChecklistStatus,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EStepCodePrescriptiveValue,
 } from "../types/enums"
 import { renameKeys } from "../utils/utility-functions"
 import { StepCodeBuildingCharacteristicsSummaryModel } from "./step-code-building-characteristic-summary"
@@ -16,6 +18,7 @@ export const StepCodeChecklistModel = types
     id: types.identifier,
     isLoaded: types.maybeNull(types.boolean),
     stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
+    status: types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
     // permit application info
     buildingPermitNumber: types.maybeNull(types.string),
     builder: types.maybeNull(types.string),
@@ -99,12 +102,24 @@ export const StepCodeChecklistModel = types
     totalGhg: types.maybeNull(types.string),
     totalGhgRequirement: types.maybeNull(types.string),
     prescriptivePassed: types.maybeNull(types.boolean),
-    prescriptiveHeating: types.maybeNull(types.string),
-    prescriptiveHeatingRequirement: types.maybeNull(types.string),
-    prescriptiveHotWater: types.maybeNull(types.string),
-    prescriptiveHotWaterRequirement: types.maybeNull(types.string),
-    prescriptiveOther: types.maybeNull(types.string),
-    prescriptiveOtherRequirement: types.maybeNull(types.string),
+    prescriptiveHeating: types.maybeNull(
+      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
+    ),
+    prescriptiveHeatingRequirement: types.maybeNull(
+      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
+    ),
+    prescriptiveHotWater: types.maybeNull(
+      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
+    ),
+    prescriptiveHotWaterRequirement: types.maybeNull(
+      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
+    ),
+    prescriptiveOther: types.maybeNull(
+      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
+    ),
+    prescriptiveOtherRequirement: types.maybeNull(
+      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
+    ),
   })
   .extend(withEnvironment())
   .views((self) => ({
@@ -120,6 +135,7 @@ export const StepCodeChecklistModel = types
         { buildingCharacteristicsSummary: "buildingCharacteristicsSummaryAttributes" },
         R.pick(
           [
+            "builder",
             "buildingType",
             "compliancePath",
             "completedBy",
@@ -148,6 +164,9 @@ export const StepCodeChecklistModel = types
     },
     get numberOfZeroCarbonSteps() {
       return parseInt(self.maxZeroCarbonStep) - parseInt(self.minZeroCarbonStep) + 1
+    },
+    get isComplete() {
+      return self.status == EStepCodeChecklistStatus.complete
     },
   }))
   .actions((self) => ({
