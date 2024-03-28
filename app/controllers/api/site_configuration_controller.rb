@@ -1,10 +1,10 @@
 class Api::SiteConfigurationController < Api::ApplicationController
-  before_action :set_site_configuration, only: %i[index create]
+  before_action :set_site_configuration, only: %i[show update]
 
   skip_after_action :verify_policy_scoped
   after_action :verify_authorized
 
-  def index
+  def show
     authorize :site_configuration, :index?
     if @site_configuration.present?
       return render_success @site_configuration
@@ -13,7 +13,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
     end
   end
 
-  def create
+  def update
     authorize :site_configuration, :create?
     if @site_configuration.update(site_configuration_params)
       render_success @site_configuration, "site_configuration.update_success"

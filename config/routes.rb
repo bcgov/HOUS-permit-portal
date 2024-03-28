@@ -113,7 +113,10 @@ Rails.application.routes.draw do
     get "storage/s3/download" => "storage#download"
     delete "storage/s3/delete" => "storage#delete"
 
-    resources :site_configuration, only: %i[index create]
+    resources :site_configuration, only: [] do
+      get :show, on: :collection
+      put :update, on: :collection
+    end
   end
 
   root to: "home#index"

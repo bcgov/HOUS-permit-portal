@@ -10,6 +10,6 @@ class SiteConfiguration < ApplicationRecord
 
   # A private method to ensure only one record exists
   def ensure_single_record
-    throw :abort if SiteConfiguration.count > 0
+    errors.add(:base, "There can only be one SiteConfiguration record") if SiteConfiguration.count > 0
   end
 end

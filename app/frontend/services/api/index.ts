@@ -330,10 +330,10 @@ export class Api {
   }
 
   async fetchSiteConfiguration() {
-    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configurations`, {})
   }
 
   async updateSiteConfiguration(siteConfiguration) {
-    return this.client.post<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
+    return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
   }
 }
