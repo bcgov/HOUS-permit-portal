@@ -15,6 +15,9 @@ export function generateUUID() {
   )
 }
 
+/**
+ * Prevent users from triggering the provided function multiple times within a the specified {delay} time period.
+ */
 export function debounce<T extends (...args: any[]) => any>(func: T, delay: number): TDebouncedFunction<T> {
   let timeoutId: NodeJS.Timeout
 

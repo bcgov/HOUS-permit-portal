@@ -30,12 +30,13 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
     <Flex
       direction="column"
       boxShadow="md"
-      flexBasis={378}
-      minWidth={378}
+      width="var(--app-sidebar-width)"
       position="sticky"
       top={permitHeaderHeight}
       bottom="0"
       height={`calc(100vh - ${permitHeaderHeight}px)`}
+      float="left"
+      id="permit-checklist-sidebar"
     >
       <Box overflowY="auto" border="1px solid" borderColor="greys.grey02">
         <Tabs orientation="vertical" index={selectedTabIndex} w="full">

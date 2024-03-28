@@ -55,10 +55,10 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                 role={"row"}
                 display={"contents"}
               >
-                <SearchGridItem fontWeight={700} minW="300px">
+                <SearchGridItem fontWeight={700} minW="250px">
                   {requirementBlock.name}
                 </SearchGridItem>
-                <SearchGridItem>
+                <SearchGridItem maxW="200px">
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
                     {requirementBlock.associations.map((association) => (
                       <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
@@ -67,7 +67,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem pr={0} minW="350px">
+                <SearchGridItem pr={0} minW="280px">
                   <UnorderedList ml={0} pl={0} w={"full"}>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
@@ -78,10 +78,12 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     })}
                   </UnorderedList>
                 </SearchGridItem>
-                <SearchGridItem fontSize={"sm"}>{format(requirementBlock.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
-                <SearchGridItem>
+                <SearchGridItem maxW="150px" fontSize={"sm"}>
+                  {format(requirementBlock.updatedAt, "yyyy-MM-dd")}
+                </SearchGridItem>
+                <SearchGridItem maxW="200px">
                   <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
-                    {requirementBlock.hasAnyElective && <ElectiveTag />}
+                    {requirementBlock.hasAnyElective && <ElectiveTag hasElective />}
                     {requirementBlock.hasAnyConditional && <HasConditionalTag />}
                   </HStack>
                 </SearchGridItem>

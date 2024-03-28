@@ -1,4 +1,5 @@
 import { Box, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { ArrowSquareOut } from "@phosphor-icons/react/dist/ssr"
 import i18next from "i18next"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -47,7 +48,7 @@ export const ContactScreen = () => {
         <Box px="6" py="4">
           <UnorderedList m="0" pl="4">
             {contactTeamInstructions.map((inst) => (
-              <ListItem>{inst}</ListItem>
+              <ListItem key={inst}>{inst}</ListItem>
             ))}
           </UnorderedList>
 
@@ -71,7 +72,7 @@ export const ContactScreen = () => {
           isExternal
           ml="1"
         >
-          {t("site.contactNeedHelpCTA")}.
+          {t("site.contactNeedHelpCTA")} <ArrowSquareOut></ArrowSquareOut>
         </Link>
       </Text>
     </Container>

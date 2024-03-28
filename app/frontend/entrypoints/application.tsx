@@ -29,10 +29,10 @@ const renderApp = (rootStore) => {
           <Global styles={GlobalStyles} />
           <Helmet>
             <title>{t("site.title")}</title>
-            <meta name="description" content={t("site.description")} />
-            <meta name="keywords" content={t("site.keywords")} />
+            <meta name="description" content={t("site.metaDescription")} />
+            <meta name="keywords" content={t("site.metaKeywords")} />
             <meta property="og:title" content={t("site.title")} />
-            <meta property="og:description" content={t("site.description")} />
+            <meta property="og:description" content={t("site.metaDescription")} />
             <meta property="og:image" content="/images/logo.svg" />
           </Helmet>
           <Box>

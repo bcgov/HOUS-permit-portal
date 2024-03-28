@@ -64,7 +64,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   })
 
   return (
-    <Box as="main" overflow="hidden" h="full" id="review-permit-application">
+    <Box as="main" id="review-permit-application">
       <Flex
         id="permitHeader"
         position="sticky"
@@ -121,10 +121,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
           </Button>
         </Stack>
       </Flex>
-      <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
+      <Box id="permitApplicationFieldsContainer">
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={24}>
+          <Flex flex={1} direction="column" p={8} position={"relative"}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
@@ -133,7 +133,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             />
           </Flex>
         )}
-      </Flex>
+      </Box>
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}

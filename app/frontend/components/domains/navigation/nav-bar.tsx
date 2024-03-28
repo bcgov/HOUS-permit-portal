@@ -174,16 +174,16 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
   }
 
   const superAdminOnlyItems = (
-    <>
+    <MenuGroup>
       <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <MenuDivider />
-    </>
+    </MenuGroup>
   )
 
   const reviewManagerOnlyItems = (
-    <>
+    <MenuGroup>
       <NavMenuItem
         label={t("site.breadcrumb.submissionInbox")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
@@ -195,15 +195,25 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
       />
       <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
       <MenuDivider />
-    </>
+    </MenuGroup>
   )
 
   const adminOrManagerItems = <></>
 
+  const reviwerOnlyItems = (
+    <MenuGroup>
+      <NavMenuItem
+        label={t("site.breadcrumb.submissionInbox")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+      />
+      <MenuDivider />
+    </MenuGroup>
+  )
+
   const submitterOnlyItems = <></>
 
   return (
-    <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)}>
+    <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)} computePositionOnMount>
       <MenuButton
         as={Button}
         borderRadius="lg"
@@ -229,6 +239,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                 {currentUser?.isSuperAdmin && superAdminOnlyItems}
                 {currentUser?.isReviewManager && reviewManagerOnlyItems}
                 {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                {currentUser?.isReviewer && reviwerOnlyItems}
                 {currentUser?.isSubmitter && submitterOnlyItems}
                 <HelpDrawer
                   renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}

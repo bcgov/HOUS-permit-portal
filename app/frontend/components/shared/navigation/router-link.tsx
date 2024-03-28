@@ -9,7 +9,7 @@ export interface IRouterLinkProps extends LinkProps {
 
 export const RouterLink = forwardRef<HTMLAnchorElement, IRouterLinkProps>(({ to, children, onClick, ...rest }, ref) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    handleScrollToTop("outerScrollContainer")
+    handleScrollToTop()
   }
 
   return (
