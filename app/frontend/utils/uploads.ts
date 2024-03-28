@@ -1,4 +1,4 @@
-const FILE_UPLOAD_CHUNK_SIZE = import.meta.env.VITE_FILE_UPLOAD_CHUNK_SIZE || 10
+import { FILE_UPLOAD_CHUNK_SIZE } from "../components/shared/chefs/additional-formio/constant"
 
 export const requestPresignedUrl = (file, fileName, url = "undefined") => {
   const params = new URLSearchParams({

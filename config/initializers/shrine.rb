@@ -8,6 +8,13 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
+module Constants
+  module Sizes
+    FILE_UPLOAD_MAX_SIZE = ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d || 100
+    FILE_UPLOAD_ZIP_MAX_SIZE = FILE_UPLOAD_MAX_SIZE * 10
+  end
+end
+
 if Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
   Shrine.storages = {
     cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
@@ -39,7 +46,7 @@ Shrine.plugin :add_metadata
 # Shrine.plugin :url_options, cache: url_options, store: url_options
 Shrine.plugin :form_assign
 Shrine.plugin :data_uri
-Shrine.plugin :remote_url, max_size: (ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d || 100) * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
+Shrine.plugin :remote_url, max_size: Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
 
 Shrine.plugin :presign_endpoint,
               presign_options:

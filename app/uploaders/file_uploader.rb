@@ -2,7 +2,7 @@ class FileUploader < Shrine
   plugin :validation_helpers
 
   Attacher.validate do
-    validate_max_size (ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d || 100) * 1024 * 1024 #100 MB to start
+    validate_max_size Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 #100 MB to start
     #could be images, excel files, bims, we do not have an exhaustive list right now.
   end
 

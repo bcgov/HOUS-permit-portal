@@ -1,6 +1,6 @@
 import { requestPresignedUrl, uploadFileInChunks } from "../../../../../../utils/uploads"
 
-const FILE_UPLOAD_CHUNK_SIZE = import.meta.env.VITE_FILE_UPLOAD_CHUNK_SIZE || 10
+import { FILE_UPLOAD_CHUNK_SIZE } from "../../constant"
 
 class StorageError extends Error {
   constructor(message, detail) {
