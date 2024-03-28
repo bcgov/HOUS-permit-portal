@@ -18,6 +18,7 @@ class RequirementBlock < ApplicationRecord
   validates :sku, uniqueness: true, presence: true
   validates :name, uniqueness: true, presence: true
   validates :display_name, presence: true
+  validate :validate_display_description_rich_text
   before_validation :set_sku
 
   acts_as_taggable_on :associations
@@ -80,6 +81,14 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def validate_display_description_rich_text
+    return unless display_description.present?
+
+    unless HtmlValidationHelper.valid_html?(display_description)
+      errors.add(:display_description, "must be valid rich text html")
+    end
+  end
 
   def configurations_search_list
     configurations = []
