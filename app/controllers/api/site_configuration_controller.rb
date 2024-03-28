@@ -6,13 +6,20 @@ class Api::SiteConfigurationController < Api::ApplicationController
 
   def index
     authorize :site_configuration, :index?
-    render_success @site_configuration
+    if @site_configuration.present?
+      return render_success @site_configuration
+    else
+      return render_error "site_configuration.show_error", {}, nil
+    end
   end
 
   def create
     authorize :site_configuration, :create?
-    @site_configuration.update(site_configuration_params)
-    render_success @site_configuration, "site_configuration.update_success"
+    if @site_configuration.update(site_configuration_params)
+      render_success @site_configuration, "site_configuration.update_success"
+    else
+      return render_error "site_configuration.update_error", {}, nil
+    end
   end
 
   private
