@@ -259,7 +259,7 @@ const FileField = function ApplicationPDFFileField({ value, label }: { value: Re
         {fileExists ? (
           <Text style={styles.requirementFieldInputValue}>{R.pluck("originalName", value).join(", ")}</Text>
         ) : (
-          <Text style={styles.requirementFieldInputValue}>{t("permitApplication.fileNotAdded")}</Text>
+          <Text style={styles.requirementFieldInputValue}>{t("permitApplication.pdf.fileNotAdded")}</Text>
         )}
       </View>
     </View>
