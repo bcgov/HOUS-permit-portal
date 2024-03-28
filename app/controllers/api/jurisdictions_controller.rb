@@ -5,7 +5,7 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
-  skip_before_action :authenticate_user!, only: %i[show]
+  skip_before_action :authenticate_user!, only: %i[show jurisdiction_options]
 
   def index
     perform_search
