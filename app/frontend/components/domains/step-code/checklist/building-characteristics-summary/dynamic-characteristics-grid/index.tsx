@@ -12,7 +12,12 @@ import { SpaceHeatingCooling } from "./space-heating-cooling"
 import { Ventilation } from "./ventilation"
 import { WindowsGlazedDoors } from "./windows-glazed-doors"
 
-export const DynamicCharacteristicsGrid = function DynamicCharacteristicsGrid({ checklist }) {
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export const DynamicCharacteristicsGrid = function DynamicCharacteristicsGrid({ checklist }: IProps) {
   return (
     <Grid templateColumns={"auto repeat(2, 1fr)"}>
       <RowHeader fontSize="sm">{t(`${i18nPrefix}.details`)}</RowHeader>

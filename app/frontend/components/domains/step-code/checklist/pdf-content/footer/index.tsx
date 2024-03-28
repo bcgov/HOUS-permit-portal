@@ -1,13 +1,17 @@
 import { Text, View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
-import React, { useContext } from "react"
-import { StepCodeChecklistContext } from "../step-code-checklist-context"
+import React from "react"
+import { IPermitApplication } from "../../../../../../models/permit-application"
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { styles } from "./styles"
 
-export const Footer = () => {
-  const { checklist, permitApplication } = useContext(StepCodeChecklistContext)
+interface IProps {
+  checklist: IStepCodeChecklist
+  permitApplication: IPermitApplication
+}
 
+export const Footer = ({ checklist, permitApplication }) => {
   return (
     <View
       style={styles.container}

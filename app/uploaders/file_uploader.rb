@@ -13,11 +13,10 @@ class FileUploader < Shrine
       parent_model = record.permit_application.class.name.underscore #permit application nesting
       parent_id = record.permit_application.id
       identifier = record.id || "temp" # Use 'temp' if record ID is nil
-
       # Construct the path with support for derivatives
       path = [parent_model, parent_id, identifier]
       path << derivative.to_s if derivative # Append derivative name if present
-      if record[:file_data]["storage"] == "cache"
+      if record.file_data && record.file_data["storage"] == "cache"
         path << record[:file_data]["id"] #get the same name as it did in the cache
       else
         path << super # Call the original generate_location method for the filename

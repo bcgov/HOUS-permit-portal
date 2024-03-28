@@ -1,20 +1,21 @@
 import { Text, View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
-import React, { useContext } from "react"
+import React from "react"
 import { datefnsAppDateFormat } from "../../../../../../constants"
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../styles/theme"
 import { i18nPrefix } from "../../completed-by/i18n-prefix"
 import { CheckBox } from "../shared/check-box"
 import { Field } from "../shared/field"
 import { HStack } from "../shared/h-stack"
 import { VStack } from "../shared/v-stack"
-import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 
-export const CompletedBy = function StepCodeChecklistPDFCompletedBy() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export const CompletedBy = function StepCodeChecklistPDFCompletedBy({ checklist }: IProps) {
   return (
     <View style={styles.panelContainer} break>
       <View style={styles.panelHeader}>

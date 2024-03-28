@@ -45,6 +45,8 @@ en:
           attributes:
             file:
               max_size: "must not be larger than %{max_size} bytes"
+            data_key:
+              duplicate: "file already exists for this permit application"
         user:
           attributes:
             uid:

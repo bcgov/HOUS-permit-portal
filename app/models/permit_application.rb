@@ -44,7 +44,7 @@ class PermitApplication < ApplicationRecord
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
-  after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 

@@ -1,14 +1,15 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { i18nPrefix } from "../../project-info/i18n-prefix"
 import { Field } from "../shared/field"
-import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 
-export const ProjectInfo = function StepCodeChecklistPDFProjectInfo() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export const ProjectInfo = function StepCodeChecklistPDFProjectInfo({ checklist }: IProps) {
   return (
     <View style={styles.panelContainer}>
       <View style={styles.panelHeader}>

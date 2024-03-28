@@ -1,7 +1,8 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { ESpaceHeatingCoolingPerformanceType, ESpaceHeatingCoolingVariant } from "../../../../../../../types/enums"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
@@ -9,9 +10,12 @@ import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefi
 import { Field } from "../../shared/field"
 import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
-import { StepCodeChecklistContext } from "../../step-code-checklist-context"
 
-export function SpaceHeatingCooling() {
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+
+export function SpaceHeatingCooling({ checklist }: IProps) {
   return (
     <>
       <HStack
@@ -49,7 +53,7 @@ export function SpaceHeatingCooling() {
         <GridItem style={{ flexBasis: "25%", minWidth: "25%" }} />
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", borderRightWidth: 0 }} />
       </HStack>
-      <Fields variant={ESpaceHeatingCoolingVariant.principal} />
+      <Fields variant={ESpaceHeatingCoolingVariant.principal} checklist={checklist} />
       <HStack
         style={{
           width: "100%",
@@ -67,13 +71,16 @@ export function SpaceHeatingCooling() {
         <GridItem style={{ flexBasis: "25%", minWidth: "25%" }} />
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", borderRightWidth: 0 }} />
       </HStack>
-      <Fields variant={ESpaceHeatingCoolingVariant.secondary} />
+      <Fields variant={ESpaceHeatingCoolingVariant.secondary} checklist={checklist} />
     </>
   )
 }
 
-function Fields({ variant }) {
-  const { checklist } = useContext(StepCodeChecklistContext)
+interface IFieldsProps {
+  variant: ESpaceHeatingCoolingVariant
+  checklist: IStepCodeChecklist
+}
+function Fields({ variant, checklist }: IFieldsProps) {
   const variantLines = R.filter(
     (f) => f.variant == variant,
     checklist.buildingCharacteristicsSummary.spaceHeatingCoolingLines

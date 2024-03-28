@@ -1,9 +1,9 @@
 import { Page, Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
-import React, { useContext } from "react"
+import React from "react"
+import { IPermitApplication } from "../../../../../models/permit-application"
 import { Footer } from "../shared/footer"
-import { PermitApplicationContext } from "../shared/permit-application-context"
 import { styles } from "./styles"
 
 enum EComponentType {
@@ -24,28 +24,33 @@ enum EComponentType {
   textarea = "textarea",
 }
 
-export const ApplicationFields = function ApplicationFields() {
-  const permitApplication = useContext(PermitApplicationContext)
-
+export const ApplicationFields = function ApplicationFields({
+  permitApplication,
+}: {
+  permitApplication: IPermitApplication
+}) {
   return (
     <Page size="LETTER" style={styles.page}>
       <View style={styles.outerContainer}>
         {permitApplication.formattedFormJson.components.map((c) => (
-          <FormComponent key={c.id} component={c} />
+          <FormComponent key={c.id} component={c} permitApplication={permitApplication} />
         ))}
       </View>
-      <Footer />
+      <Footer permitApplication={permitApplication} />
     </Page>
   )
 }
 
 interface IFormComponentProps {
+  permitApplication: IPermitApplication
   component: any
   dataPath?: string[]
 }
-const FormComponent = function ApplicationPDFFormComponent({ component, dataPath }: IFormComponentProps) {
-  const permitApplication = useContext(PermitApplicationContext)
-
+const FormComponent = function ApplicationPDFFormComponent({
+  permitApplication,
+  component,
+  dataPath,
+}: IFormComponentProps) {
   const extractFields = (component) => {
     if (component.input) {
       const { isVisible } = extractFieldInfo(component)
@@ -92,10 +97,15 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
         <View>
           <View wrap={firstChildFields.length > 6}>
             <ContainerHeader component={component} />
-            <FormComponent key={firstChild.id} component={firstChild} dataPath={dataPath} />
+            <FormComponent
+              key={firstChild.id}
+              component={firstChild}
+              dataPath={dataPath}
+              permitApplication={permitApplication}
+            />
           </View>
           {additionalChildren.map((child) => (
-            <FormComponent key={child.id} component={child} dataPath={dataPath} />
+            <FormComponent key={child.id} component={child} dataPath={dataPath} permitApplication={permitApplication} />
           ))}
         </View>
       )
@@ -108,7 +118,12 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
           {component.components && (
             <View style={styles.panelBodyContainer}>
               {component.components.map((child) => (
-                <FormComponent key={child.id} component={child} dataPath={dataPath} />
+                <FormComponent
+                  key={child.id}
+                  component={child}
+                  dataPath={dataPath}
+                  permitApplication={permitApplication}
+                />
               ))}
             </View>
           )}
@@ -120,7 +135,12 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
         <>
           {component.components &&
             component.components.map((child) => (
-              <FormComponent key={child.id} component={child} dataPath={[...dataPath, component.key, 0]} />
+              <FormComponent
+                key={child.id}
+                component={child}
+                dataPath={[...dataPath, component.key, 0]}
+                permitApplication={permitApplication}
+              />
             ))}
         </>
       )
@@ -132,7 +152,12 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
         numFields > 0 && (
           <View style={styles.grid}>
             {component.components.map((child) => (
-              <FormComponent key={child.id} component={child} dataPath={dataPath} />
+              <FormComponent
+                key={child.id}
+                component={child}
+                dataPath={dataPath}
+                permitApplication={permitApplication}
+              />
             ))}
           </View>
         )
@@ -146,7 +171,12 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
                 return column.components.map((child) => {
                   return (
                     <View style={styles.item}>
-                      <FormComponent key={child.id} component={child} dataPath={dataPath} />
+                      <FormComponent
+                        key={child.id}
+                        component={child}
+                        dataPath={dataPath}
+                        permitApplication={permitApplication}
+                      />
                     </View>
                   )
                 })
