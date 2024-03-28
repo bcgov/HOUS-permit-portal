@@ -34,7 +34,7 @@ const options = {
           passwordLabel: "Password",
           forgotPassword: "Forgot password?",
           passwordTooWeak: "Password too weak",
-          passwordInvalidFormat: "Password does no meet the required format",
+          passwordInvalidFormat: "Password does not meet the required format",
           passwordChecklist: {
             title: "Password must include:",
             length: "8-64 characters",
