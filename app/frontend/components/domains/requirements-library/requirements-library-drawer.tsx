@@ -44,7 +44,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
           {t("requirementTemplate.edit.addRequirementButton")}
         </Button>
       )}
-      <Drawer isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
+      <Drawer id="add-requirement-drawer" isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
         <DrawerOverlay />
         <DrawerContent display={"flex"} flexDir={"column"} maxW={"80%"} h={"full"}>
           <DrawerCloseButton fontSize={"xs"} />

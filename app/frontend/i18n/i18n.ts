@@ -357,6 +357,7 @@ const options = {
         requirementsLibrary: {
           addAnotherPerson: "Add another person",
           elective: "Elective",
+          hasElective: "Has Elective(s)",
           hasConditionalLogic: "Has Conditional Logic",
           associationsInfo: "Sections, tags, etc...",
           index: {
