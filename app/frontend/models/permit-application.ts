@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
@@ -78,6 +79,13 @@ export const PermitApplicationModel = types
     },
   }))
   .views((self) => ({
+    get statusTagText() {
+      if (self.status === EPermitApplicationStatus.submitted) {
+        return self.isViewed ? t("permitApplication.viewed") : self.status
+      } else {
+        return self.status
+      }
+    },
     indexOfBlockId: (blockId: string) => {
       if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)

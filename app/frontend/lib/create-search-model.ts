@@ -22,7 +22,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
       showArchived: types.optional(types.boolean, false),
-      statusFilter: types.maybeNull(types.enumeration(filterableStatuses)),
+      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
