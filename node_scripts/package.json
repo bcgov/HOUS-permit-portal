@@ -1,0 +1,25 @@
+{
+  "name": "node_scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate_pdf.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "generate_pdf": "babel-node generate_pdf.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.3",
+    "@babel/node": "^7.23.9",
+    "@babel/preset-env": "^7.24.3",
+    "@babel/preset-react": "^7.24.1"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^3.4.2",
+    "react": "^18.2.0"
+  }
+}

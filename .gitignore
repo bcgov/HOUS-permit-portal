@@ -59,3 +59,5 @@ node_modules
 deleteme.*
 
 /devops/docker/**/*.tar.gz
+
+/generated_pdfs
