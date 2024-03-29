@@ -10,6 +10,7 @@
 //  large cards that should behave like a button (eg. have whole box clickable without changing markup)
 .jumbo-buttons {
   position: relative;
+  overflow: hidden;
   .chakra-button {
     position: static;
     &::after {

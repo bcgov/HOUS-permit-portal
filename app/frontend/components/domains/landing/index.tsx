@@ -231,9 +231,9 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
         w="lg"
         gap={4}
         borderRadius="md"
-        color={siteWatch?.value ? "greys.white" : "theme.blueAlt"}
+        color={siteWatch?.value ? "greys.white" : "theme.secondary"}
         _hover={{
-          background: "theme.blue",
+          background: siteWatch?.value ? "theme.blue" : null,
           transition: "background 100ms ease-in",
         }}
       >
