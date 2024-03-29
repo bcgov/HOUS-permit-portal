@@ -146,44 +146,37 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
           <Text>{t("landing.permitImportance")}</Text>
         </VStack>
       </Container>
-      <Flex w="full" bg="greys.grey03">
+      <Box bg="greys.grey03">
         <Container maxW="container.lg" py={10} px={8}>
-          <Flex as="section" direction="column" gap={6}>
+          <VStack as="section" direction="column" gap={6}>
             <JurisdictionSearch />
-            <VStack w="full" gap={2} textAlign="center" py={4} px={8}>
-              <Heading as="h3" fontSize="md">
-                {t("landing.whenNotNecessaryQ")}
-              </Heading>
-              <Text>{t("landing.whenNotNecessaryA")}</Text>
-            </VStack>
-          </Flex>
-        </Container>
-      </Flex>
-      <Flex w="full" bg="greys.white">
-        <Container maxW="container.lg" py={16} px={8}>
-          <Flex direction="column" gap={6}>
-            <VStack as="section" w="full" gap={2} textAlign="center">
-              <Heading as="h3" fontSize="md">
-                {t("landing.expectQ")}
-              </Heading>
-              <Text>{t("landing.expectA")}</Text>
-            </VStack>
-          </Flex>
-        </Container>
-      </Flex>
-      <Flex w="full" bg="greys.grey03">
-        <Container maxW="container.lg" py={10}>
-          <VStack as="section" w="full" gap={2} textAlign="center">
-            <Heading as="h3" fontSize="md">
-              {t("landing.createdQ")}
+
+            <Heading as="h3" fontSize="md" mt="8">
+              {t("landing.whenNotNecessaryQ")}
             </Heading>
-            <Text>{t("landing.createdA")}</Text>
-            <Link href={mailto} isExternal mt="4">
-              {t("landing.tellUsYourExperience")}
-            </Link>
+            <Text>{t("landing.whenNotNecessaryA")}</Text>
           </VStack>
         </Container>
-      </Flex>
+      </Box>
+      <Box bg="greys.white">
+        <Container maxW="container.lg" py={16} px={8} textAlign="center" gap="6">
+          <Heading as="h3" fontSize="md">
+            {t("landing.expectQ")}
+          </Heading>
+          <Text>{t("landing.expectA")}</Text>
+        </Container>
+      </Box>
+      <Box bg="greys.grey03">
+        <Container maxW="container.lg" py={10} gap="2" textAlign="center">
+          <Heading as="h3" fontSize="md">
+            {t("landing.createdQ")}
+          </Heading>
+          <Text>{t("landing.createdA")}</Text>
+          <Link href={mailto} isExternal mt="4">
+            {t("landing.tellUsYourExperience")}
+          </Link>
+        </Container>
+      </Box>
     </Flex>
   )
 })
@@ -210,7 +203,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
-      <Flex bg="white" w={{ base: "full", md: "50%" }} p={6} gap={4}>
+      <Flex bg="white" w="lg" p={6} gap={4} borderRadius="md">
         <FormProvider {...formMethods}>
           <form style={{ width: "100%" }}>
             <Flex direction="column" gap={6}>
@@ -235,17 +228,29 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
       <Center
         bg={siteWatch?.value ? "theme.blueAlt" : "greys.white"}
         minH={243}
-        w={{ base: "full", md: "50%" }}
-        p={6}
+        w="lg"
         gap={4}
+        borderRadius="md"
         color={siteWatch?.value ? "greys.white" : "theme.blueAlt"}
+        _hover={{
+          background: "theme.blue",
+          transition: "background 100ms ease-in",
+        }}
       >
         {siteWatch?.value ? (
-          <VStack gap={8}>
+          <VStack
+            gap={8}
+            className="jumbo-buttons"
+            w="full"
+            height="full"
+            p={6}
+            alignItems="center"
+            justifyContent="center"
+          >
             <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
               {t("landing.localJurisdiction")}
             </Text>
-            <HStack gap={4}>
+            <HStack gap={2}>
               <Text fontSize="2xl" fontWeight="bold">
                 {jurisdiction?.name}
               </Text>
@@ -259,6 +264,9 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
               to={`/jurisdictions/${jurisdiction?.id}`}
               icon={<CaretRight size={16} />}
               textDecoration={"underline"}
+              _hover={{
+                background: "none",
+              }}
             >
               {t("landing.learnRequirements")}
             </RouterLinkButton>

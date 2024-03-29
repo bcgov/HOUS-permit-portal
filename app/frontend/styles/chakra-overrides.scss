@@ -8,16 +8,19 @@
 
 /* Admin Panel's  */
 //  large cards that should behave like a button (eg. have whole box clickable without changing markup)
-.jumbo-buttons .chakra-button {
-  position: static;
-  &::after {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    content: "";
-    display: block;
+.jumbo-buttons {
+  position: relative;
+  .chakra-button {
+    position: static;
+    &::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      display: block;
+    }
   }
 }
 
