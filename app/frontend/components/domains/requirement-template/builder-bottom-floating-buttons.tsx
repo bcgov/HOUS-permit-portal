@@ -13,7 +13,7 @@ export function BuilderBottomFloatingButtons({ isCollapsedAll, setIsCollapsedAll
   const debouncedHandleClick = useCallback(debounce(onClickButton, 250), [onClickButton])
 
   return (
-    <Stack spacing={4} position="fixed" bottom={6} right={10} alignItems={"flex-end"}>
+    <Stack spacing={4} position="fixed" bottom={6} right={6} alignItems={"flex-end"}>
       <Button variant="greyButton" leftIcon={<ArrowUp />} onClick={handleScrollToTop}>
         {t("requirementTemplate.edit.goToTop")}
       </Button>

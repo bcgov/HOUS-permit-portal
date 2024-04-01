@@ -277,7 +277,7 @@ const ManageElectiveFieldsView = ({
         {electiveFields.map((requirementField) => {
           const enabled = enabledFieldIds.includes(requirementField.id)
           return (
-            <Stack key={requirementField.id}>
+            <Stack key={requirementField.id} mb="8">
               <Stack
                 flexDir={"row"}
                 spacing={2}
@@ -314,7 +314,7 @@ const ManageElectiveFieldsView = ({
         })}
       </Stack>
 
-      <ButtonGroup size={"md"} justifyContent={"flex-start"} gap={6}>
+      <ButtonGroup size={"md"} justifyContent={"flex-start"} gap={6} pb="6">
         <Button
           variant={"primary"}
           onClick={() => onAddFields([...new Set(enabledFieldIds)], enabledFieldReasons)}
