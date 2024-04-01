@@ -33,7 +33,6 @@ class Requirement < ApplicationRecord
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
-  validate :validate_hint_rich_text
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code,
                       with: /_file\z/,
@@ -85,12 +84,6 @@ class Requirement < ApplicationRecord
   end
 
   private
-
-  def validate_hint_rich_text
-    return unless hint.present?
-
-    errors.add(:hint, "must be valid rich text html") unless HtmlValidationHelper.valid_html?(hint)
-  end
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code

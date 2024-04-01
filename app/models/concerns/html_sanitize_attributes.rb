@@ -21,10 +21,25 @@ module HtmlSanitizeAttributes
   class_methods do
     def sanitizable(*attributes)
       @sanitizable_attributes = attributes
+      validates_rich_text(*attributes)
     end
 
     def sanitizable_attributes
       @sanitizable_attributes || []
+    end
+
+    def validates_rich_text(*attributes)
+      attributes.each do |attribute|
+        define_method("validate_#{attribute}_rich_text") do
+          return unless send(attribute).present?
+
+          unless HtmlValidationHelper.valid_html?(send(attribute))
+            errors.add(attribute.to_sym, "must be valid rich text html.")
+          end
+        end
+
+        validate "validate_#{attribute}_rich_text".to_sym
+      end
     end
   end
 end
