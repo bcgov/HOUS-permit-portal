@@ -26,28 +26,30 @@ class PermitClassificationSeeder
       {
         name: "New Construction",
         code: "new_construction",
-        description: "Lorem ipsum some kind of activity",
+        description:
+          "Includes the addition to an existing building (infill development) but not the renovation of an existing home to include a secondary suite.",
         enabled: true,
         type: "Activity",
       },
       {
         name: "Addition, Alteration, or Renovation",
         code: "addition_alteration_renovation",
-        description: "Lorem ipsum some kind of activity",
+        description:
+          "Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).",
         enabled: false,
         type: "Activity",
       },
       {
         name: "Site Alteration",
         code: "site_alteration",
-        description: "Lorem ipsum some kind of activity",
+        description: "Lorem ipsum TODO add description",
         enabled: false,
         type: "Activity",
       },
       {
         name: "Demolition",
         code: "demolition",
-        description: "Lorem ipsum some kind of activity",
+        description: "Lorem ipsum TODO add description",
         enabled: false,
         type: "Activity",
       },
