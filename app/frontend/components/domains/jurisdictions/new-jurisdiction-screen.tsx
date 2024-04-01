@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Center,
   Container,
   Flex,
   FormControl,
@@ -14,18 +13,22 @@ import {
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionTypes } from "../../../types/enums"
 import { AsyncRadioGroup } from "../../shared/base/inputs/async-radio-group"
 import { TextFormControl } from "../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 
 export type TCreateJurisdictionFormData = {
   name: string
   localityType: string
+  postalAddress: string
+  regionalDistrict: IJurisdiction
 }
 
 export const NewJurisdictionScreen = observer(() => {
@@ -41,16 +44,19 @@ export const NewJurisdictionScreen = observer(() => {
     defaultValues: {
       name: "",
       localityType: "",
+      postalAddress: "",
+      regionalDistrict: null,
     },
   })
 
   const navigate = useNavigate()
-  const { handleSubmit, formState } = formMethods
+  const { handleSubmit, formState, control } = formMethods
 
   const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
-    const createdJurisdiction = (await createJurisdiction(formData)) as IJurisdiction
+    const submissionData = { ...formData, regionalDistrictId: formData.regionalDistrict.id }
+    const createdJurisdiction = (await createJurisdiction(submissionData)) as IJurisdiction
     if (createdJurisdiction) {
       setJurisdiction(createdJurisdiction)
     }
@@ -98,7 +104,10 @@ export const NewJurisdictionScreen = observer(() => {
                   borderColor="border.light"
                 >
                   <Flex gap={8}>
-                    <Center w="50%">
+                    <Flex w="50%">
+                      <Text mr={4} mt={10}>
+                        The
+                      </Text>
                       {useCustom ? (
                         <TextFormControl
                           label={t("jurisdiction.fields.localityType")}
@@ -112,7 +121,11 @@ export const NewJurisdictionScreen = observer(() => {
                           fieldName={"localityType"}
                         />
                       )}
-                    </Center>
+
+                      <Text ml={8} mt={10}>
+                        of
+                      </Text>
+                    </Flex>
                     <Box w="50%">
                       <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
                     </Box>
@@ -124,6 +137,33 @@ export const NewJurisdictionScreen = observer(() => {
                     </FormLabel>
                     <Switch id="use-custom" isChecked={useCustom} onChange={handleToggleCustom} />
                   </FormControl>
+                  <Flex gap={8}>
+                    <Box w="50%">
+                      <TextFormControl
+                        label={t("jurisdiction.new.postalAddressLabel")}
+                        fieldName={"postalAddress"}
+                        required
+                      />
+                    </Box>
+
+                    <Box w="50%">
+                      <Controller
+                        name="regionalDistrict"
+                        control={control}
+                        render={({ field: { onChange, value } }) => {
+                          return (
+                            <JurisdictionSelect
+                              title={t("jurisdiction.fields.regionalDistrictName")}
+                              onChange={onChange}
+                              jurisdictionType={EJurisdictionTypes.regionalDistrict}
+                              selectedOption={{ label: value?.reverseQualifiedName, value }}
+                              menuPortalTarget={document.body}
+                            />
+                          )
+                        }}
+                      />
+                    </Box>
+                  </Flex>
                 </Flex>
                 <Flex gap={4}>
                   <Button

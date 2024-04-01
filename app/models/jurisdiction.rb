@@ -34,12 +34,6 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
-  def regional_district_name
-    return nil if self.class == RegionalDistrict
-
-    regional_district&.reverse_qualified_name
-  end
-
   def review_managers
     users&.kept&.review_managers
   end
@@ -126,6 +120,14 @@ class Jurisdiction < ApplicationRecord
     permit_applications.unviewed
   end
 
+  def self.class_for_locality_type(locality_type)
+    if locality_type == RegionalDistrict.locality_type
+      RegionalDistrict
+    else
+      SubDistrict
+    end
+  end
+
   private
 
   def sanitize_html_fields
@@ -144,7 +146,6 @@ class Jurisdiction < ApplicationRecord
   end
 
   def normalize_name
-    # binding.pry
     # Replace underscores with spaces
     normalized = name.gsub("_", " ")
 

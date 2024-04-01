@@ -51,7 +51,10 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   # POST /api/jurisdiction
   def create
-    @jurisdiction = Jurisdiction.build(jurisdiction_params)
+    class_to_use = class_for_locality_type(jurisdiction_params[:locality_type])
+
+    @jurisdiction = class_to_use.build(jurisdiction_params)
+
     authorize @jurisdiction
 
     if @jurisdiction.save
@@ -111,7 +114,12 @@ class Api::JurisdictionsController < Api::ApplicationController
   def jurisdiction_options
     authorize :jurisdiction, :jurisdiction_options?
     name = jurisdiction_params["name"]
-    search = Jurisdiction.search(name)
+    type = jurisdiction_params["type"]
+
+    filters = {}
+    filters = { where: { type: type } } if type.present?
+
+    search = Jurisdiction.search(name, **filters)
     options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
     render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
@@ -121,7 +129,10 @@ class Api::JurisdictionsController < Api::ApplicationController
   def jurisdiction_params
     params.require(:jurisdiction).permit(
       :name,
+      :type,
       :locality_type,
+      :address,
+      :regional_district_id,
       :description_html,
       :checklist_html,
       :look_out_html,

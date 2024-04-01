@@ -9,6 +9,7 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { RouterLink } from "../../shared/navigation/router-link"
 import { LimitedGridHeaders } from "./limited-grid-header"
 
 export const LimitedJurisdictionIndexScreen = observer(function JurisdictionIndex() {
@@ -48,7 +49,9 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
             tableJurisdictions.map((j) => {
               return (
                 <Box key={j.id} className={"jurisdiction-index-grid-row"} role={"row"} display={"contents"}>
-                  <SearchGridItem fontWeight={700}>{j.reverseQualifiedName}</SearchGridItem>
+                  <SearchGridItem fontWeight={700}>
+                    <RouterLink to={`/jurisdictions/${j.id}`}>{j.reverseQualifiedName}</RouterLink>
+                  </SearchGridItem>
                   <SearchGridItem>{j.regionalDistrictName}</SearchGridItem>
                 </Box>
               )
