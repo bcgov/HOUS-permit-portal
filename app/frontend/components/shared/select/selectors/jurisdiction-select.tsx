@@ -6,13 +6,14 @@ import React, { useCallback } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, StylesConfig, components } from "react-select"
+import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TJurisdictionSelectProps = {
-  onChange: (option: IOption) => void
-  selectedOption: IOption
+  onChange: (option: IOption<IJurisdiction>) => void
+  selectedOption: IOption<IJurisdiction>
   jurisdictionName?: string
 } & Partial<TAsyncSelectProps>
 
@@ -33,7 +34,7 @@ export const JurisdictionSelect = observer(function ({
 
   const fetchJurisdictionOptions = (name: string, callback: (options) => void) => {
     if (name.length > 3) {
-      fetchOptions(name).then((options: IOption[]) => {
+      fetchOptions(name).then((options: IOption<IJurisdiction>[]) => {
         setValue(jurisdictionName, null)
         callback(options)
       })
@@ -42,7 +43,7 @@ export const JurisdictionSelect = observer(function ({
 
   const debouncedFetchOptions = useCallback(debounce(fetchJurisdictionOptions, 1000), [])
 
-  const customStyles: StylesConfig<IOption, boolean> = {
+  const customStyles: StylesConfig<IOption<IJurisdiction>, boolean> = {
     container: (provided) => ({
       ...provided,
       padding: 0,
@@ -67,9 +68,11 @@ export const JurisdictionSelect = observer(function ({
     <FormControl w="full">
       <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
       <InputGroup w="full">
-        <AsyncSelect<IOption, boolean>
+        <AsyncSelect<IOption<IJurisdiction>, boolean>
           isClearable={true}
-          onChange={onChange}
+          onChange={(option: IOption<IJurisdiction>) => {
+            onChange(option.value)
+          }}
           placeholder={t("ui.search")}
           value={selectedOption}
           defaultValue={null}
@@ -90,7 +93,7 @@ export const JurisdictionSelect = observer(function ({
   )
 })
 
-const Option = (props: OptionProps<IOption>) => {
+const Option = (props: OptionProps<IOption<IJurisdiction>>) => {
   return (
     <components.Option {...props}>
       <HStack color={"text.secondary"} fontSize={"xs"}>
@@ -101,7 +104,7 @@ const Option = (props: OptionProps<IOption>) => {
   )
 }
 
-const Control = ({ children, ...props }: ControlProps<IOption>) => {
+const Control = ({ children, ...props }: ControlProps<IOption<IJurisdiction>>) => {
   return (
     <components.Control {...props}>
       <MapPin size={"16.7px"} />

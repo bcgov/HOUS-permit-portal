@@ -5,7 +5,7 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
-  skip_before_action :authenticate_user!, only: %i[show]
+  skip_before_action :authenticate_user!, only: %i[show jurisdiction_options]
 
   def index
     perform_search
@@ -112,8 +112,8 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize :jurisdiction, :jurisdiction_options?
     name = jurisdiction_params["name"]
     search = Jurisdiction.search(name)
-    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j.id } }
-    render_success options, nil, { blueprint: OptionBlueprint }
+    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
+    render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
 
   private

@@ -33,7 +33,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def accept_eula?
-    update?
+    profile?
   end
 
   class Scope < Scope

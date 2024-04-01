@@ -23,8 +23,10 @@ import { useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddressSelect } from "../../shared/select/selectors/address-select"
+import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 
 interface ILandingScreenProps {}
 
@@ -183,13 +185,15 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
 
 interface IJurisdictionSearchProps {}
 
-const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
+const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   const { t } = useTranslation()
-  const { geocoderStore } = useMst()
-  const { fetchGeocodedJurisdiction } = geocoderStore
+  const { geocoderStore, jurisdictionStore } = useMst()
+  const { fetchGeocodedJurisdiction, fetchingJurisdiction } = geocoderStore
+  const { addJurisdiction } = jurisdictionStore
   const formMethods = useForm()
   const { control, watch } = formMethods
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
+  const [manualMode, setManualMode] = useState<boolean>(false)
 
   const siteWatch = watch("site")
 
@@ -197,7 +201,11 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
     if (!siteWatch?.value) return
     ;(async () => {
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch.value)
-      setJurisdiction(jurisdiction)
+      if (jurisdiction) {
+        setJurisdiction(jurisdiction)
+      } else {
+        setManualMode(true)
+      }
     })()
   }, [siteWatch?.value])
 
@@ -221,23 +229,35 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
                   return <AddressSelect onChange={onChange} value={value} />
                 }}
               />
+
+              {manualMode && (
+                <JurisdictionSelect
+                  onChange={(value) => {
+                    addJurisdiction(value)
+                    setJurisdiction(value)
+                  }}
+                  placeholder={undefined}
+                  selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
+                  menuPortalTarget={document.body}
+                />
+              )}
             </Flex>
           </form>
         </FormProvider>
       </Flex>
       <Center
-        bg={siteWatch?.value ? "theme.blueAlt" : "greys.white"}
+        bg={jurisdiction ? "theme.blueAlt" : "greys.white"}
         minH={243}
         w="lg"
         gap={4}
         borderRadius="md"
-        color={siteWatch?.value ? "greys.white" : "theme.secondary"}
+        color={jurisdiction ? "greys.white" : "theme.secondary"}
         _hover={{
-          background: siteWatch?.value ? "theme.blue" : null,
+          background: jurisdiction ? "theme.blue" : null,
           transition: "background 100ms ease-in",
         }}
       >
-        {siteWatch?.value ? (
+        {jurisdiction ? (
           <VStack
             gap={8}
             className="jumbo-buttons"
@@ -251,7 +271,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
               {t("landing.localJurisdiction")}
             </Text>
             <HStack gap={2}>
-              <Text fontSize="2xl" fontWeight="bold">
+              <Text fontSize="2xl" fontWeight="bold" textAlign="center">
                 {jurisdiction?.name}
               </Text>
               <Box color="theme.yellow">
@@ -261,7 +281,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
             <RouterLinkButton
               variant="ghost"
               color="greys.white"
-              to={`/jurisdictions/${jurisdiction?.id}`}
+              to={`/jurisdictions/${jurisdiction.id}`}
               icon={<CaretRight size={16} />}
               textDecoration={"underline"}
               _hover={{
@@ -273,7 +293,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
           </VStack>
         ) : (
           <VStack gap={6}>
-            <MapPin size={40} />
+            <Center h={50}>{fetchingJurisdiction ? <SharedSpinner /> : <MapPin size={40} />}</Center>
             <Text fontStyle="italic" textAlign="center">
               {t("landing.reqsVary")}
             </Text>
@@ -282,7 +302,7 @@ const JurisdictionSearch = ({}: IJurisdictionSearchProps) => {
       </Center>
     </Flex>
   )
-}
+})
 
 interface IIconBoxProps extends BoxProps {
   icon: ReactNode
