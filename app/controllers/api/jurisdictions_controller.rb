@@ -51,7 +51,7 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   # POST /api/jurisdiction
   def create
-    class_to_use = class_for_locality_type(jurisdiction_params[:locality_type])
+    class_to_use = Jurisdiction.class_for_locality_type(jurisdiction_params[:locality_type])
 
     @jurisdiction = class_to_use.build(jurisdiction_params)
 
