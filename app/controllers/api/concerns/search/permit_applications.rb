@@ -3,7 +3,7 @@ module Api::Concerns::Search::PermitApplications
 
   def perform_permit_application_search
     search_conditions = {
-      order: order,
+      order: permit_application_order,
       match: :word_start,
       page: permit_application_search_params[:page],
       per_page:
@@ -37,7 +37,7 @@ module Api::Concerns::Search::PermitApplications
       return
     end
 
-    @permit_application_search = PermitApplication.search(query, **search_conditions)
+    @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
   end
 
   private
@@ -46,11 +46,11 @@ module Api::Concerns::Search::PermitApplications
     params.permit(:query, :page, :per_page, :status_filter, sort: %i[field direction])
   end
 
-  def query
+  def permit_application_query
     permit_application_search_params[:query].present? ? permit_application_search_params[:query] : "*"
   end
 
-  def order
+  def permit_application_order
     if (sort = permit_application_search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     elsif current_user.submitter?

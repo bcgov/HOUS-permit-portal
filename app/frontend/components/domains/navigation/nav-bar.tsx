@@ -175,7 +175,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
 
   const superAdminOnlyItems = (
     <MenuGroup>
-      <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+      {/* <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} /> */}
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <MenuDivider />
@@ -236,6 +236,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
               </Text>
               <MenuGroup title={currentUser.name} noOfLines={1}>
                 <MenuDivider />
+                <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                 {currentUser?.isSuperAdmin && superAdminOnlyItems}
                 {currentUser?.isReviewManager && reviewManagerOnlyItems}
                 {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
@@ -256,8 +257,10 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
               </MenuList>
               <MenuDivider />
               <NavMenuItem label={t("site.home")} to="/" />
+              <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
             </>
           )}
+
           <MenuDivider />
           <MenuItem>
             <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>

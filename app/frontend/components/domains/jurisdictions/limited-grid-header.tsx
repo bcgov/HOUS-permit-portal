@@ -8,17 +8,22 @@ import { SearchInput } from "../../shared/base/search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
-export const GridHeaders = observer(function GridHeaders() {
+export const LimitedGridHeaders = observer(function GridHeaders() {
   const { jurisdictionStore } = useMst()
   const { sort, toggleSort, getSortColumnHeader } = jurisdictionStore
   const { t } = useTranslation()
+
+  enum ELimitedJurisdictionSortFields {
+    reverseQualifiedName = "reverse_qualified_name",
+    regionalDistrict = "regional_district_name",
+  }
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 5"}
+          gridColumn={"span 2"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
@@ -29,27 +34,23 @@ export const GridHeaders = observer(function GridHeaders() {
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
-        {Object.values(EJurisdictionSortFields).map((field) => {
-          if (field === EJurisdictionSortFields.regionalDistrict) return
-          return (
-            <GridHeader key={field} role={"columnheader"}>
-              <Flex
-                w={"full"}
-                as={"button"}
-                justifyContent={"space-between"}
-                cursor="pointer"
-                onClick={() => toggleSort(field)}
-                borderRight={"1px solid"}
-                borderColor={"border.light"}
-                px={4}
-              >
-                <Text textAlign="left">{getSortColumnHeader(field)}</Text>
-                <SortIcon<EJurisdictionSortFields> field={field} currentSort={sort} />
-              </Flex>
-            </GridHeader>
-          )
-        })}
-        <GridHeader role={"columnheader"} />
+        {Object.values(ELimitedJurisdictionSortFields).map((field) => (
+          <GridHeader key={field as any as EJurisdictionSortFields} role={"columnheader"}>
+            <Flex
+              w={"full"}
+              as={"button"}
+              justifyContent={"space-between"}
+              cursor="pointer"
+              onClick={() => toggleSort(field as any as EJurisdictionSortFields)}
+              borderRight={"1px solid"}
+              borderColor={"border.light"}
+              px={4}
+            >
+              <Text textAlign="left">{getSortColumnHeader(field as any as EJurisdictionSortFields)}</Text>
+              <SortIcon<EJurisdictionSortFields> field={field as any as EJurisdictionSortFields} currentSort={sort} />
+            </Flex>
+          </GridHeader>
+        ))}
       </Box>
     </Box>
   )

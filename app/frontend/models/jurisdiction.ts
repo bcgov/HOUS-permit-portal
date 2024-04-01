@@ -17,6 +17,7 @@ export const JurisdictionModel = types
     submissionEmail: types.maybeNull(types.string),
     qualifiedName: types.string,
     reverseQualifiedName: types.string,
+    regionalDistrictName: types.maybeNull(types.string),
     localityType: types.string,
     qualifier: types.string,
     reviewManagersSize: types.number,

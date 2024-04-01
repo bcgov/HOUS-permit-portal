@@ -4,14 +4,14 @@ module Api::Concerns::Search::Jurisdictions
   def perform_search
     @search =
       Jurisdiction.search(
-        query,
-        order: order,
+        jurisdiction_query,
+        order: jurisdiction_order,
         match: :word_start,
-        page: search_params[:page],
+        page: jurisdiction_search_params[:page],
         per_page:
           (
-            if search_params[:page]
-              (search_params[:per_page] || Kaminari.config.default_per_page)
+            if jurisdiction_search_params[:page]
+              (jurisdiction_search_params[:per_page] || Kaminari.config.default_per_page)
             else
               nil
             end
@@ -21,19 +21,19 @@ module Api::Concerns::Search::Jurisdictions
 
   private
 
-  def search_params
+  def jurisdiction_search_params
     params.permit(:query, :page, :per_page, sort: %i[field direction])
   end
 
-  def query
-    search_params[:query].present? ? search_params[:query] : "*"
+  def jurisdiction_query
+    jurisdiction_search_params[:query].present? ? jurisdiction_search_params[:query] : "*"
   end
 
-  def order
-    if (sort = search_params[:sort])
+  def jurisdiction_order
+    if (sort = jurisdiction_search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     else
-      { created_at: { order: :desc, unmapped_type: "long" } }
+      { name: { order: :asc, unmapped_type: "long" } }
     end
   end
 end

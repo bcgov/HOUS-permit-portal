@@ -235,6 +235,7 @@ const options = {
             permitApplicationsSize: "Applications received",
             templatesUsed: "Templates used",
             mapPosition: "Map position",
+            regionalDistrictName: "Regional District",
           },
           submissionEmailConfirmed: {
             heading: "Email confirmed!",

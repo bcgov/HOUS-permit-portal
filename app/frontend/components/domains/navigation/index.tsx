@@ -23,6 +23,7 @@ import { EnergyStepRequirementsScreen } from "../home/review-manager/configurati
 import { SubmissionsInboxSetupScreen } from "../home/review-manager/configuration-management-screen/submissions-inbox-setup-screen"
 import { JurisdictionIndexScreen } from "../jurisdictions/index"
 import { JurisdictionScreen } from "../jurisdictions/jurisdiction-screen"
+import { LimitedJurisdictionIndexScreen } from "../jurisdictions/limited-jurisdiction-index-screen"
 import { NewJurisdictionScreen } from "../jurisdictions/new-jurisdiction-screen"
 import { JurisdictionSubmissionInboxScreen } from "../jurisdictions/submission-inbox/jurisdiction-submisson-inbox-screen"
 import { JurisdictionUserIndexScreen } from "../jurisdictions/users"
@@ -182,15 +183,12 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
-        <Route path="/welcome" element={<LandingScreen />} />
         {loggedIn ? (
           <>
             <Route path="/" element={<HomeScreen />} />
-            {currentUser?.isSuperAdmin ? null : <Route path="/jurisdictions" element={<RedirectScreen />} />}
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
             <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
 
             {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
             {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
@@ -202,7 +200,6 @@ const AppRoutes = observer(() => {
           <>
             <Route path="/" element={<RedirectScreen path="/welcome" />} />
             <Route path="/login" element={<LoginScreen />} />
-            <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
             <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
             <Route path="/reset-password" element={<ResetPasswordScreen />} />
             <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
@@ -211,7 +208,9 @@ const AppRoutes = observer(() => {
         )}
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
-
+        <Route path="/welcome" element={<LandingScreen />} />
+        <Route path="/jurisdictions" element={<LimitedJurisdictionIndexScreen />} />
+        <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
       {background && (

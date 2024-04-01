@@ -32,6 +32,12 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
+  def regional_district_name
+    return nil if self.class == RegionalDistrict
+
+    regional_district&.reverse_qualified_name
+  end
+
   def review_managers
     users&.kept&.review_managers
   end
@@ -76,6 +82,7 @@ class Jurisdiction < ApplicationRecord
     {
       qualified_name: qualified_name,
       reverse_qualified_name: reverse_qualified_name,
+      regional_district_name: regional_district_name,
       name: name,
       type: type,
       updated_at: updated_at,
