@@ -10,7 +10,14 @@ require "shrine/storage/s3"
 
 module Constants
   module Sizes
-    FILE_UPLOAD_MAX_SIZE = ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d || 100
+    FILE_UPLOAD_MAX_SIZE =
+      (
+        if ENV["VITE_FILE_UPLOAD_MAX_SIZE"].present?
+          ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d
+        else
+          100
+        end
+      )
     FILE_UPLOAD_ZIP_MAX_SIZE = FILE_UPLOAD_MAX_SIZE * 10
   end
 end
