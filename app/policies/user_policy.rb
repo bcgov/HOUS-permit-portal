@@ -33,7 +33,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def accept_eula?
-    record.id == user.id
+    profile?
   end
 
   class Scope < Scope

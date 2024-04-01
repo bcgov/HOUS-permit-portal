@@ -80,11 +80,11 @@ export const PermitApplicationModel = types
   }))
   .views((self) => ({
     get statusTagText() {
-      if (self.status === EPermitApplicationStatus.submitted) {
-        return self.isViewed ? t("permitApplication.viewed") : self.status
-      } else {
-        return self.status
+      if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
+        return t("permitApplication.viewed")
       }
+
+      return self.status
     },
     indexOfBlockId: (blockId: string) => {
       if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
