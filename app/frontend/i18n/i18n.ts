@@ -218,6 +218,7 @@ const options = {
             createButton: "Create jurisdiction",
             nameLabel: "Name of local jurisdiction",
             nextStep: "The next step is to invite users",
+            useCustom: "Use a custom locality type",
           },
           index: {
             title: "Jurisdictions",
