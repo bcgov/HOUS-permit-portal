@@ -6,7 +6,7 @@ import { t } from "i18next"
 import ChefsFormioComponents from "./additional-formio"
 import { overridePanelTemplate } from "./additional-formio/templates/panel"
 
-const FILE_UPLOAD_MAX_SIZE = import.meta.env.VITE_FILE_UPLOAD_MAX_SIZE || 10
+import { FILE_UPLOAD_MAX_SIZE } from "./additional-formio/constant"
 
 const defaultLabelTemplate = Templates.current.label.form
 const defaultButtonsTemplate = Templates.current.button.form
