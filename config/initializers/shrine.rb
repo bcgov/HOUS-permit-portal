@@ -15,12 +15,10 @@ module Constants
   end
 end
 
-if Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
-  Shrine.storages = {
-    cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
-    store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
-  }
-else
+SHRINE_USE_S3 =
+  !(Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?)
+
+if SHRINE_USE_S3
   s3_options = {
     bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
     endpoint: ENV["BCGOV_OBJECT_STORAGE_ENDPOINT"],
@@ -32,6 +30,11 @@ else
   Shrine.storages = {
     cache: Shrine::Storage::S3.new(public: false, prefix: "cache", **s3_options),
     store: Shrine::Storage::S3.new(public: false, **s3_options),
+  }
+else
+  Shrine.storages = {
+    cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
+    store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
   }
 end
 
@@ -62,7 +65,7 @@ Shrine.plugin :presign_endpoint,
                     # transfer_encoding: "chunked",
                   }
                 }
-Shrine.plugin :uppy_s3_multipart
+Shrine.plugin :uppy_s3_multipart if SHRINE_USE_S3
 
 class Shrine::Storage::S3
   #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L105
