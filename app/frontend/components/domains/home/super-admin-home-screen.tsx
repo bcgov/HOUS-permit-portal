@@ -9,7 +9,7 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
   const { t } = useTranslation()
 
   return (
-    <Container maxW="container.md" py={8}>
+    <Container maxW="container.md" py={16}>
       <Flex direction="column" align="center" w="full">
         <Heading as="h1" mb={8}>
           {t("home.superAdminTitle")}

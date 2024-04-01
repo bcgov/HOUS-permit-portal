@@ -23,6 +23,7 @@ import {
 } from "../../../types/types"
 import { isQuillEmpty } from "../../../utils/utility-functions"
 import { Editor } from "../../shared/editor/editor"
+import { ElectiveTag } from "../../shared/elective-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
@@ -196,9 +197,11 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   >
                     <Box
                       w={"full"}
+                      position="relative"
+                      pr="var(--app-permit-fieldset-right-white-space)"
                       sx={{
                         "& input": {
-                          maxW: "339px",
+                          maxW: "var(--app-permit-input-field-short)",
                         },
                       }}
                     >
@@ -218,6 +221,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         showAddPersonButton={!!requirement?.inputOptions?.canAddMultipleContacts}
                         required={requirement.required}
                       />
+                      {requirement?.elective && <ElectiveTag position="absolute" right="0" top="0" />}
                     </Box>
                   </Box>
                 )
