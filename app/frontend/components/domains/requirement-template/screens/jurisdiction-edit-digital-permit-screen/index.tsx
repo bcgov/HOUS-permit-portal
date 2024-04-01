@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
 import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
-import { IJurisdiction } from "../../../../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../../../../models/jurisdiction-template-version-customization"
 import { useMst } from "../../../../../setup/root"
 import { IRequirementBlockCustomization, ITemplateCustomization } from "../../../../../types/types"
@@ -30,12 +29,10 @@ export interface IJurisdictionTemplateVersionCustomizationForm {
 }
 
 function formFormDefaults(
-  jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomization | undefined,
-  jurisdiction: IJurisdiction
+  jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomization | undefined
 ): IJurisdictionTemplateVersionCustomizationForm {
   if (!jurisdictionTemplateVersionCustomization) {
     return {
-      jurisdictionId: jurisdiction?.id,
       customizations: {
         requirementBlockChanges: {},
       },
@@ -43,7 +40,6 @@ function formFormDefaults(
   }
 
   return {
-    jurisdictionId: jurisdiction?.jurisdictionId,
     customizations: { requirementBlockChanges: {}, ...jurisdictionTemplateVersionCustomization.customizations },
   }
 }
@@ -71,7 +67,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     })
 
   const formMethods = useForm<IJurisdictionTemplateVersionCustomizationForm>({
-    defaultValues: formFormDefaults(jurisdictionTemplateVersionCustomization, currentUser?.jurisdiction),
+    defaultValues: formFormDefaults(jurisdictionTemplateVersionCustomization),
   })
   const { formState, handleSubmit, setValue, reset, watch } = formMethods
 
@@ -84,7 +80,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   }
 
   useEffect(() => {
-    reset(formFormDefaults(jurisdictionTemplateVersionCustomization, currentUser?.jurisdiction))
+    reset(formFormDefaults(jurisdictionTemplateVersionCustomization))
   }, [jurisdictionTemplateVersionCustomization?.customizations])
 
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
@@ -104,11 +100,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   }
 
   const onSubmit = handleSubmit((data) => {
-    const submitMethod = jurisdictionTemplateVersionCustomization
-      ? templateVersion.updateJurisdictionTemplateVersionCustomization
-      : templateVersion.createJurisdictionTemplateVersionCustomization
-
-    return submitMethod(currentUser.jurisdiction.id, data)
+    return templateVersion.createOrUpdateJurisdictionTemplateVersionCustomization(currentUser.jurisdiction.id, data)
   })
 
   return (
