@@ -1,4 +1,17 @@
-import { Box, Button, Center, Container, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Center,
+  Container,
+  Flex,
+  FormControl,
+  FormLabel,
+  HStack,
+  Heading,
+  Switch,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -18,6 +31,7 @@ export type TCreateJurisdictionFormData = {
 export const NewJurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>()
+  const [useCustom, setUseCustom] = useState<boolean>(false)
   const {
     jurisdictionStore: { createJurisdiction, fetchLocalityTypeOptions },
   } = useMst()
@@ -41,6 +55,9 @@ export const NewJurisdictionScreen = observer(() => {
       setJurisdiction(createdJurisdiction)
     }
   }
+
+  const handleToggleCustom = () => setUseCustom(!useCustom)
+
   return (
     <Container maxW="container.lg" p={8} as="main">
       <FormProvider {...formMethods}>
@@ -82,16 +99,31 @@ export const NewJurisdictionScreen = observer(() => {
                 >
                   <Flex gap={8}>
                     <Center w="50%">
-                      <AsyncRadioGroup
-                        label={t("jurisdiction.fields.localityType")}
-                        fetchOptions={fetchLocalityTypeOptions}
-                        fieldName={"localityType"}
-                      />
+                      {useCustom ? (
+                        <TextFormControl
+                          label={t("jurisdiction.fields.localityType")}
+                          fieldName={"localityType"}
+                          required
+                        />
+                      ) : (
+                        <AsyncRadioGroup
+                          label={t("jurisdiction.fields.localityType")}
+                          fetchOptions={fetchLocalityTypeOptions}
+                          fieldName={"localityType"}
+                        />
+                      )}
                     </Center>
                     <Box w="50%">
                       <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
                     </Box>
                   </Flex>
+
+                  <FormControl display="flex" alignItems="center">
+                    <FormLabel htmlFor="email-alerts" mb="0">
+                      {t("jurisdiction.new.useCustom")}
+                    </FormLabel>
+                    <Switch id="use-custom" isChecked={useCustom} onChange={handleToggleCustom} />
+                  </FormControl>
                 </Flex>
                 <Flex gap={4}>
                   <Button

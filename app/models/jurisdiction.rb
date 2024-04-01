@@ -19,9 +19,11 @@ class Jurisdiction < ApplicationRecord
   has_many :requirement_templates, through: :template_versions
   has_many :permit_type_submission_contacts
 
-  validates :name, uniqueness: { scope: :locality_type }
+  validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
 
+  before_validation :normalize_locality_type
+  before_validation :normalize_name
   before_validation :set_type_based_on_locality
   before_save :sanitize_html_fields
 
@@ -132,5 +134,41 @@ class Jurisdiction < ApplicationRecord
     else
       self.type = "SubDistrict"
     end
+  end
+
+  def normalize_name
+    # binding.pry
+    # Replace underscores with spaces
+    normalized = name.gsub("_", " ")
+
+    # Remove commas and periods
+    normalized.gsub(/[,.]/, "")
+
+    # Remove leading and trailing whitespaces
+    normalized.strip!
+
+    self.name = normalized
+  end
+
+  def normalize_locality_type
+    # Convert to lowercase
+    normalized = locality_type.downcase
+
+    # Replace underscores with spaces
+    normalized.gsub("_", " ")
+
+    # Remove commas and periods
+    normalized.gsub(/[,.]/, "")
+
+    # Remove leading and trailing whitespaces
+    normalized.strip!
+
+    # Remove leading "the" or "of", case insensitive
+    normalized.sub!(/\A(the|of)\s+/, "")
+
+    # Remove trailing "the" or "of", case insensitive
+    normalized.sub!(/\s+(the|of)\z/, "")
+
+    self.locality_type = normalized
   end
 end
