@@ -173,20 +173,23 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
       top="0"
       zIndex="1"
       float="left"
-      _after={{
-        // hide the form side so user can focus on drag /up down and can't click the form accordions (in sections-display)
-        content: `""`,
-        display: "block",
-        width: "var(--app-sidebar-remaining-width)",
-        height: "full",
-        background: "greys.grey03",
-        position: "absolute",
-        top: "0",
-        right: "0",
-        bottom: "0",
-        left: "var(--app-sidebar-width)",
-      }}
     >
+      <Box
+        width="var(--app-sidebar-remaining-width)"
+        height="full"
+        bg="greys.grey03"
+        position="absolute"
+        top="0"
+        right="0"
+        bottom="0"
+        left="var(--app-sidebar-width)"
+
+        // hide the form side so user can focus on drag /up down and can't click the form accordions (in sections-display)
+      >
+        <Text fontStyle="italic" textAlign="center" color="text.secondary" my="30%">
+          {t("requirementTemplate.edit.dndInstructions")}
+        </Text>
+      </Box>
       <Flex w={"full"} justifyContent={"flex-end"} bg={"theme.blue"} py={5} px={4}>
         <ButtonGroup size={"sm"}>
           <Button variant={"primaryInverse"} onClick={() => onDone(dndSectionMap, sortedSectionIds)}>

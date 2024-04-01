@@ -954,6 +954,8 @@ const options = {
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
+            dndInstructions:
+              "Change the order of requirements by using the menu on the left to drag items up or down. Click the 'Done' button to return to the form.",
             addSectionButton: "Add section",
             addRequirementButton: "Add requirement",
             saveDraft: "Save as draft",
