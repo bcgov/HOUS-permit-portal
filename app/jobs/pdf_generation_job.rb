@@ -28,6 +28,7 @@ class PdfGenerationJob
     }.to_json
 
     # Run Node.js script as a child process, passing JSON data as an argument
+    puts NodeScripts::NODE_SCRIPTS_DIR
     stdout, stderr, status =
       Open3.capture3(
         "npm",
