@@ -289,7 +289,7 @@ const options = {
             status: "Status",
           },
           submissionInbox: {
-            contactInviteWarning: "Please have a Review Manager setup the Submission Inbox for all permit types.",
+            contactInviteWarning: "Please have a Review Manager setup the Submissions Inbox for all permit types.",
             title: "Submissions inbox",
             tableHeading: "Permit applications",
             submissionsSentTo:
@@ -369,6 +369,7 @@ const options = {
         requirementsLibrary: {
           addAnotherPerson: "Add another person",
           elective: "Elective",
+          hasElective: "Has Elective(s)",
           hasConditionalLogic: "Has Conditional Logic",
           associationsInfo: "Sections, tags, etc...",
           index: {
@@ -965,6 +966,8 @@ const options = {
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
+            dndInstructions:
+              "Change the order of requirements by using the menu on the left to drag items up or down. Click the 'Done' button to return to the form.",
             addSectionButton: "Add section",
             addRequirementButton: "Add requirement",
             saveDraft: "Save as draft",
@@ -1112,9 +1115,9 @@ const options = {
           aboutTitle: "About",
           disclaimerTitle: "Disclaimer",
           copyrightHolder: "Government of British Columbia.",
-          description:
+          metaDescription:
             "The Building Permit Hub helps you submit a building permit application through a streamlined and standardized approach across jurisdictions in B.C. This tool connects you with local government and First Nation information to support the building permit submission process.",
-          keywords: "BC, british columba, permit, portal, hub, permitting, permit application",
+          metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",
           activePermits: "Active permits",
@@ -1146,7 +1149,7 @@ const options = {
             editTemplate: "Edit template",
             editPermit: "Edit permit",
             permitApplications: "Permit applications",
-            submissionInbox: "Submission inbox",
+            submissionInbox: "Submissions inbox",
             configuration: "Configure jurisdiction",
             sucessfulSubmission: "Application submitted",
             stepCodes: "Step Codes",

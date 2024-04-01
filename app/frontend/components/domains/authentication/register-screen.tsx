@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { handleScrollToTop } from "../../../utils/utility-functions"
 import { BackButton } from "../../shared/buttons/back-button"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
@@ -32,6 +33,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
   const onSubmit = async (formData) => {
     if (await signUp(formData)) {
       setSubmitted(true)
+      handleScrollToTop()
     }
   }
 

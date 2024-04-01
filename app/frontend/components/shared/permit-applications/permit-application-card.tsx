@@ -1,5 +1,5 @@
 import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
-import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretRight, Pencil } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -129,6 +129,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             to={`/permit-applications/${id}/edit`}
             variant="primary"
             w={{ base: "full", md: "fit-content" }}
+            leftIcon={<Pencil />}
           >
             {permitApplication.isSubmitted ? t("ui.view") : t("ui.resume")}
           </RouterLinkButton>

@@ -61,11 +61,7 @@ const styles = {
     [".chakra-menu__menu-list .chakra-menu__menuitem "]: {
       borderRadius: "0",
     },
-    [".chakra-portal"]: {
-      // ensure it stays above and position:sticky elements like navs
-      position: "relative",
-      zIndex: "99",
-    },
+
     // Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind
     [".show-menu-overlay-background"]: {
       position: "relative",

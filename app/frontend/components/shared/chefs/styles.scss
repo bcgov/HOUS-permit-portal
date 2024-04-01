@@ -180,9 +180,9 @@
     }
   }
 
-
   // disabled form inputs
-  .form-control, .form-check-input:not(:checked) {
+  .form-control,
+  .form-check-input:not(:checked) {
     &:disabled,
     &[disabled="disabled"] {
       background-color: var(--chakra-colors-greys-grey03);
@@ -190,7 +190,6 @@
       cursor: not-allowed;
     }
   }
-
 
   // remove alert icons from invalid fields
   .form-control.is-invalid,
@@ -337,7 +336,7 @@
   // radio buttons and checkboxes
   .form-radio {
     .form-check {
-      margin-bottom: 5px;
+      margin-bottom: 0.5rem;
 
       .form-check-label {
         font-size: 1em;
@@ -347,7 +346,7 @@
         }
 
         span {
-          margin-left: 5px;
+          margin-left: 0.25rem;
         }
       }
     }

@@ -73,17 +73,15 @@ export const Navigation = observer(() => {
       <NavBar />
       <EULAModal />
 
-      <Box id="outerScrollContainer">
-        {isValidating ? (
-          <LoadingScreen />
-        ) : (
-          <>
-            <AppRoutes />
+      {isValidating ? (
+        <LoadingScreen />
+      ) : (
+        <>
+          <AppRoutes />
 
-            <Footer />
-          </>
-        )}
-      </Box>
+          <Footer />
+        </>
+      )}
     </BrowserRouter>
   )
 })

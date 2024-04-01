@@ -8,16 +8,20 @@
 
 /* Admin Panel's  */
 //  large cards that should behave like a button (eg. have whole box clickable without changing markup)
-.jumbo-buttons .chakra-button {
-  position: static;
-  &::after {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    content: "";
-    display: block;
+.jumbo-buttons {
+  position: relative;
+  overflow: hidden;
+  .chakra-button {
+    position: static;
+    &::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      display: block;
+    }
   }
 }
 
@@ -59,4 +63,9 @@
     margin-top: -8px;
     z-index: 0;
   }
+}
+
+// when admin is reordering sections, don't show the requirement templates form on the right (nor make it interactable)
+#sections-sidebar-reordering + #editing-permit-requirements-form {
+  display: none;
 }

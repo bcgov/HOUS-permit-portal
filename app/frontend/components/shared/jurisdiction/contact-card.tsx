@@ -1,4 +1,4 @@
-import { Flex, GridItem, GridItemProps, Heading, Link } from "@chakra-ui/react"
+import { Box, Flex, GridItem, GridItemProps, Heading, Link } from "@chakra-ui/react"
 import { Envelope, Phone } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -22,16 +22,18 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
       p={4}
       {...rest}
     >
-      <Heading as="h3" fontSize="lg">
+      <Heading as="h3" mb="1">
         {contact.name}
       </Heading>
       {contact.department && `${contact.department} - `}
       {contact.title}
-      <Flex mt={2} direction={{ base: "column", md: "row" }} gap={2}>
-        <Flex flex={1} gap={4}>
-          <Phone size={32} />
+      <Flex mt={4} direction={{ base: "column", md: "row" }} gap={2}>
+        <Flex flex={1} gap={4} alignItems="flex-start">
+          <Box bg="theme.blueAlt" borderRadius="full" p="6px" w="8">
+            <Phone weight="fill" size="full" color="white" />
+          </Box>
           <Flex direction="column" flex={1}>
-            <Heading as="h3" fontSize="md" mb="0">
+            <Heading as="h4" fontSize="md" mb="0">
               {t("contact.fields.phoneNumber")}
             </Heading>
             <Link href={`tel:+${contact.phoneNumber}`} isExternal>
@@ -39,10 +41,12 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
             </Link>
           </Flex>
         </Flex>
-        <Flex flex={1} gap={4}>
-          <Envelope size={32} />
+        <Flex flex={1} gap={4} alignItems="flex-start">
+          <Box bg="theme.blueAlt" borderRadius="full" p="6px" w="8">
+            <Envelope weight="fill" size="full" color="white" />
+          </Box>
           <Flex direction="column" flex={1}>
-            <Heading as="h3" fontSize="md" mb="0">
+            <Heading as="h4" fontSize="md" mb="0">
               {t("contact.fields.email")}
             </Heading>
             <Link href={`mailto:${contact.email}`} isExternal>
