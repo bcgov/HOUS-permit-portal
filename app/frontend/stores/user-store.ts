@@ -70,7 +70,9 @@ export const UserStoreModel = types
     }),
     updateProfile: flow(function* (formData) {
       const { ok, data: response } = yield self.environment.api.updateProfile(formData)
-      self.mergeUpdate(response.data, "usersMap")
+      if (ok) {
+        self.mergeUpdate(response.data, "usersMap")
+      }
       return response.ok
     }),
     fetchEULA: flow(function* () {
