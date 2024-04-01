@@ -5,9 +5,10 @@ require "fileutils"
 class PdfGenerationJob
   include Sidekiq::Worker
 
-  include Sidekiq::Worker
+  def perform(permit_application_id)
+    permit_application = PermitApplication.find(permit_application_id)
+    return if permit_application.blank?
 
-  def perform()
     generation_directory_path = Rails.root.join("generated_pdfs")
 
     # Check if the directory exists, and if not, create it
@@ -18,17 +19,14 @@ class PdfGenerationJob
 
     # Convert data to JSON string
     pdf_json_data = {
-      document: {
-        title: "My PDF",
-        content: "Hello, World!",
-      },
+      permitApplication: PermitApplicationBlueprint.render(permit_application, view: :extended),
       meta: {
         generationPath: generation_directory_path.join("my_pdf.pdf").to_s,
       },
     }.to_json
 
     # Run Node.js script as a child process, passing JSON data as an argument
-    puts NodeScripts::NODE_SCRIPTS_DIR
+    # Rails.logger.info NodeScripts::NODE_SCRIPTS_DIR
     stdout, stderr, status =
       Open3.capture3(
         "npm",
@@ -40,9 +38,11 @@ class PdfGenerationJob
 
     # Check for errors or handle output
     if status.success?
-      puts "Node generate_pdf_script.js process succeeded: #{stdout}"
+      Rails.logger.info "Pdf generation process succeeded: #{stdout}"
+      true
     else
-      puts "Node generate_pdf_script.js process failed: #{stderr}"
+      Rails.logger.error "Pdf generation process failed: #{stderr}"
+      false
     end
   end
 end
