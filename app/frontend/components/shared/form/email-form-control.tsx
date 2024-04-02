@@ -43,7 +43,7 @@ export const EmailFormControl = ({
 }: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
-  const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)
+  const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState?.errors)
 
   return (
     <FormControl isInvalid={errorMessage && !inputProps?.isDisabled} {...rest}>
