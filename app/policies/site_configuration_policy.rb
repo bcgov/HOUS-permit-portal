@@ -3,7 +3,7 @@ class SiteConfigurationPolicy < ApplicationPolicy
     user.super_admin?
   end
 
-  def index?
+  def show?
     true
   end
 end
