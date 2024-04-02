@@ -49,24 +49,26 @@ const s3custom = function Provider(formio) {
       }
     },
     deleteFile: async (fileInfo, options) => {
+      //By default form io always deletes the file, no matter success or failure from backend.
+      //Only for files that are in cache (before a save), should have the delete call the cache directly.
+
       //assume we will not have public-read acl, use shrine to generate the request
       try {
-        //if there are no model / model_ids, and id starts with cache they ar part of cache
-        const params = new URLSearchParams({
-          id: fileInfo.id,
-          ...(fileInfo.model && { model: fileInfo.model }),
-          ...(fileInfo.modelId && { model_id: fileInfo.modelId }),
-        })
-
-        const response = await fetch(`/api/storage/s3/delete?${params.toString()}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        })
-        //form.io assumes that the delete will just succeed, it always removes the link from the form
-        //TODO: ALWAYS FORCE A SAVE ON THE FILE DATA WHEN IT IS DELETED
+        //if there is no model info, it is an unpersisted cache item
+        if (id.startsWith("cache/")) {
+          const params = new URLSearchParams({
+            id: fileInfo.id,
+          })
+          const response = await fetch(`/api/storage/s3/delete?${params.toString()}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          })
+        } else {
+          //form.io assumes that the delete will just succeed, it always removes the link from the form
+        }
       } catch (error) {
         throw new StorageError(
           error,
