@@ -8,13 +8,16 @@ import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, StylesConfig, components } from "react-select"
 import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
+import { EJurisdictionTypes } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TJurisdictionSelectProps = {
   onChange: (option: IOption<IJurisdiction>) => void
   selectedOption: IOption<IJurisdiction>
+  title?: string
   jurisdictionName?: string
+  jurisdictionType?: EJurisdictionTypes
 } & Partial<TAsyncSelectProps>
 
 // Please be advised that this is expected to be used within a form context!
@@ -23,7 +26,9 @@ export const JurisdictionSelect = observer(function ({
   onChange,
   selectedOption,
   stylesToMerge,
+  title,
   jurisdictionName = "jurisdiction",
+  jurisdictionType = null,
   ...rest
 }: TJurisdictionSelectProps) {
   const { jurisdictionStore } = useMst()
@@ -34,7 +39,7 @@ export const JurisdictionSelect = observer(function ({
 
   const fetchJurisdictionOptions = (name: string, callback: (options) => void) => {
     if (name.length > 3) {
-      fetchOptions(name).then((options: IOption<IJurisdiction>[]) => {
+      fetchOptions(name, jurisdictionType).then((options: IOption<IJurisdiction>[]) => {
         setValue(jurisdictionName, null)
         callback(options)
       })
@@ -66,7 +71,7 @@ export const JurisdictionSelect = observer(function ({
 
   return (
     <FormControl w="full">
-      <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
+      <FormLabel>{title ?? t("jurisdiction.index.title")}</FormLabel>
       <InputGroup w="full">
         <AsyncSelect<IOption<IJurisdiction>, boolean>
           isClearable={true}

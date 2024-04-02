@@ -217,7 +217,9 @@ const options = {
             title: "Create new jurisdiction",
             createButton: "Create jurisdiction",
             nameLabel: "Name of local jurisdiction",
+            postalAddressLabel: "Postal address",
             nextStep: "The next step is to invite users",
+            useCustom: "Use a custom locality type",
           },
           index: {
             title: "Jurisdictions",
@@ -235,6 +237,7 @@ const options = {
             permitApplicationsSize: "Applications received",
             templatesUsed: "Templates used",
             mapPosition: "Map position",
+            regionalDistrictName: "Regional district",
           },
           submissionEmailConfirmed: {
             heading: "Email confirmed!",
@@ -935,7 +938,7 @@ const options = {
             email: "Email",
             name: "Name",
             createdAt: "Date added",
-            lastSignIn: "Last sign in",
+            lastSignInAt: "Last sign in",
           },
           index: {
             tableHeading: "User accounts",

@@ -10,12 +10,10 @@ import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
-import { ManageJurisdictionMenu } from "../../shared/jurisdiction/manage-jurisdiction-menu"
 import { RouterLink } from "../../shared/navigation/router-link"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { GridHeaders } from "./grid-header"
 
-export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
+export const LimitedJurisdictionIndexScreen = observer(function JurisdictionIndex() {
   const { jurisdictionStore } = useMst()
   const {
     tableJurisdictions,
@@ -39,38 +37,26 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
             <Heading as="h1">{t("jurisdiction.index.title")}</Heading>
             <Text color={"text.secondary"}>{t("jurisdiction.index.description")}</Text>
           </Box>
-          <RouterLinkButton variant={"primary"} to={"/jurisdictions/new"}>
-            {t("jurisdiction.index.createButton")}
-          </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="3fr repeat(3, 1fr) 1fr">
+        <SearchGrid templateColumns="3fr 3fr">
           <GridHeaders
-            span={5}
-            includeActionColumn
-            columns={Object.values(EJurisdictionSortFields).filter(
-              (field) => field !== EJurisdictionSortFields.regionalDistrict
-            )}
+            span={2}
+            columns={[EJurisdictionSortFields.reverseQualifiedName, EJurisdictionSortFields.regionalDistrict]}
           />
 
           {isSearching ? (
-            <Flex py={50} gridColumn={"span 5"}>
+            <Flex py={50} gridColumn={"span 2"}>
               <SharedSpinner />
             </Flex>
           ) : (
             tableJurisdictions.map((j) => {
               return (
                 <Box key={j.id} className={"jurisdiction-index-grid-row"} role={"row"} display={"contents"}>
-                  <SearchGridItem fontWeight={700}>{j.reverseQualifiedName}</SearchGridItem>
-                  <SearchGridItem>{j.reviewManagersSize}</SearchGridItem>
-                  <SearchGridItem>{j.reviewersSize}</SearchGridItem>
-                  <SearchGridItem>{j.permitApplicationsSize}</SearchGridItem>
-                  <SearchGridItem>
-                    <Flex justify="center" w="full" gap={3}>
-                      <RouterLink to={`${j.slug}/users/invite`}>{t("user.invite")}</RouterLink>
-                      <ManageJurisdictionMenu jurisdiction={j} searchModel={jurisdictionStore} />
-                    </Flex>
+                  <SearchGridItem fontWeight={700}>
+                    <RouterLink to={`/jurisdictions/${j.id}`}>{j.reverseQualifiedName}</RouterLink>
                   </SearchGridItem>
+                  <SearchGridItem>{j.regionalDistrictName}</SearchGridItem>
                 </Box>
               )
             })

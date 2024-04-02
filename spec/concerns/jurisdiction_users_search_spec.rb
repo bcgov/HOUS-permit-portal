@@ -4,7 +4,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionUsers, type: :controller do
   # This assumes you have a dummy controller for testing the concern
   controller(Api::ApplicationController) { include Api::Concerns::Search::JurisdictionUsers }
 
-  let(:jurisdiction) { create(:jurisdiction) }
+  let(:jurisdiction) { create(:sub_district) }
   let!(:review_managers) { create_list(:user, 5, :review_manager, jurisdiction: jurisdiction) }
   let!(:unexpected_users) { create_list(:user, 5, :reviewer, jurisdiction: jurisdiction) }
   let(:super_admin) { create(:user, :super_admin) }

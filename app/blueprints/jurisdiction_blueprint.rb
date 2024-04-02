@@ -17,6 +17,7 @@ class JurisdictionBlueprint < Blueprinter::Base
          :map_zoom,
          :energy_step_required,
          :zero_carbon_step_required,
+         :regional_district_name,
          :created_at,
          :updated_at
 

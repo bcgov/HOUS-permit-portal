@@ -47,11 +47,17 @@ export enum ERequirementLibrarySortFields {
   configurations = "configurations",
 }
 
+export enum EJurisdictionTypes {
+  subDistrict = "SubDistrict",
+  regionalDistrict = "RegionalDistrict",
+}
+
 export enum EJurisdictionSortFields {
   reverseQualifiedName = "reverse_qualified_name",
   reviewManagersSize = "review_managers_size",
   reviewersSize = "reviewers_size",
   permitApplicationsSize = "permit_applications_size",
+  regionalDistrict = "regional_district_name",
 }
 
 export enum EUserSortFields {
@@ -59,7 +65,7 @@ export enum EUserSortFields {
   email = "email",
   name = "name",
   createdAt = "created_at",
-  lastSignIn = "last_sign_in",
+  lastSignInAt = "last_sign_in_at",
 }
 
 export enum ERequirementTemplateSortFields {

@@ -26,6 +26,7 @@ import {
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
+  EJurisdictionTypes,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -114,8 +115,10 @@ export class Api {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
 
-  async fetchJurisdictionOptions(name: string) {
-    return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, { jurisdiction: { name } })
+  async fetchJurisdictionOptions(name: string, type: EJurisdictionTypes) {
+    return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, {
+      jurisdiction: { name, type },
+    })
   }
 
   async fetchPermitClassifications() {

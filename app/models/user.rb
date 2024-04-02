@@ -77,7 +77,7 @@ class User < ApplicationRecord
       email: email,
       jurisdiction_id: jurisdiction_id,
       discarded: discarded_at.present?,
-      # last_sign_in: "TODO",
+      last_sign_in_at: last_sign_in_at,
     }
   end
 

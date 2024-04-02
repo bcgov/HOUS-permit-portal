@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Api::JurisdictionsController, type: :controller do
-  let(:jurisdiction) { create(:jurisdiction) }
+  let(:jurisdiction) { create(:sub_district) }
   let(:super_admin) { create(:user, :super_admin) }
   let!(:review_managers) { create_list(:user, 5, :review_manager, jurisdiction: jurisdiction) }
   let!(:discarded_review_managers) do

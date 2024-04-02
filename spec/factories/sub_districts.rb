@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :jurisdiction do
+  factory :sub_district do
     name { Faker::Address.city }
     type { "SubDistrict" }
     locality_type { "city" }
