@@ -50,7 +50,7 @@ en:
             uid:
               taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
             password:
-              password_format: "Password does no meet the required format"
+              password_format: "Does not meet the required format"
   application_mailer:
     subject_start: "Building Permit Hub"
     subjects:

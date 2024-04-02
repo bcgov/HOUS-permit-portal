@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Input, Select, Tag, Text } from "@chakra-ui/react"
+import { Button, Flex, FormControl, FormLabel, HStack, Input, Select, Tag, Text } from "@chakra-ui/react"
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -51,8 +51,8 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
         <EmailFormControl fieldName={`users.${index}.email`} validate required />
         <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} required />
         <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} required />
-        <Box alignSelf="flex-end">
-          {isSubmitting && <SharedSpinner />}
+        <Flex alignSelf="flex-end" align="flex-end">
+          {isSubmitting && <SharedSpinner my={0} />}
           {invited && !taken && (
             <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success">
               <HStack color="semantic.success">
@@ -74,7 +74,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
               {t("ui.remove")}
             </Button>
           )}
-        </Box>
+        </Flex>
       </HStack>
     </Flex>
   )

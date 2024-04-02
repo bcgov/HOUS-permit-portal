@@ -53,6 +53,7 @@ class User < ApplicationRecord
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
 
   def validate_password_complexity
+    return unless confirmed_at.present?
     return if password.blank? || password =~ PASSWORD_REGEX
 
     errors.add :password, I18n.t("activerecord.errors.models.user.attributes.password.password_format")

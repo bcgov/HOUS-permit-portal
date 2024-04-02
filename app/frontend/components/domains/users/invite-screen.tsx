@@ -29,10 +29,10 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   } = useMst()
 
   const defaultUserValues = {
-    role: null,
+    role: "" as EUserRoles,
     jurisdictionId: currentJurisdiction?.id,
-    firstName: null,
-    lastName: null,
+    firstName: "",
+    lastName: "",
   }
 
   const formMethods = useForm<TInviteFormData>({

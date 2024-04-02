@@ -2,6 +2,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
   before_action :set_site_configuration, only: %i[show update]
 
   skip_after_action :verify_policy_scoped
+  skip_before_action :authenticate_user!, only: %i[show]
   after_action :verify_authorized
 
   def show
