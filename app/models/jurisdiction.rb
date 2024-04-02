@@ -120,16 +120,6 @@ class Jurisdiction < ApplicationRecord
     permit_applications.unviewed
   end
 
-  def regional_district_name
-    self.cast_to_appropriate_class.regional_district&.name
-  end
-
-  def cast_to_appropriate_class
-    return self if self.type == self.class.to_s
-
-    self.becomes(self.type.constantize)
-  end
-
   def self.class_for_locality_type(locality_type)
     if locality_type == RegionalDistrict.locality_type
       RegionalDistrict
