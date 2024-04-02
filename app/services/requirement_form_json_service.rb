@@ -321,15 +321,8 @@ class RequirementFormJsonService
       return(
         {
           type: "simplefile",
-          storage:
-            (
-              if (!Rails.env.test? && ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].present?)
-                "s3custom"
-              else
-                nil
-              end
-            ),
-          fileSizeMax: "#{Constants::Sizes::FILE_UPLOAD_MAX_SIZE}MB",
+          storage: "s3custom",
+          #fileMaxSize driven by front end defaults, do not set in requirements as it fixes it
         }.tap do |file_hash|
           file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
             "computed_compliance"
