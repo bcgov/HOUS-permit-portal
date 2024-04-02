@@ -39,6 +39,9 @@ export const JurisdictionStoreModel = types
     get jurisdictions() {
       return Array.from(self.jurisdictionMap.values())
     },
+    get regionalDistrictLocalityType() {
+      return "regional district"
+    },
   }))
   .actions((self) => ({
     // Action to add a new Jurisdiction

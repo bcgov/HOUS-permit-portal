@@ -36,7 +36,7 @@ export const NewJurisdictionScreen = observer(() => {
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>()
   const [useCustom, setUseCustom] = useState<boolean>(false)
   const {
-    jurisdictionStore: { createJurisdiction, fetchLocalityTypeOptions },
+    jurisdictionStore: { createJurisdiction, fetchLocalityTypeOptions, regionalDistrictLocalityType },
   } = useMst()
 
   const formMethods = useForm<TCreateJurisdictionFormData>({
@@ -50,7 +50,8 @@ export const NewJurisdictionScreen = observer(() => {
   })
 
   const navigate = useNavigate()
-  const { handleSubmit, formState, control } = formMethods
+  const { handleSubmit, formState, control, watch } = formMethods
+  const localityTypeWatch = watch("localityType")
 
   const { isSubmitting, isValid } = formState
 
@@ -155,6 +156,7 @@ export const NewJurisdictionScreen = observer(() => {
                             <JurisdictionSelect
                               title={t("jurisdiction.fields.regionalDistrictName")}
                               onChange={onChange}
+                              isDisabled={localityTypeWatch == regionalDistrictLocalityType}
                               jurisdictionType={EJurisdictionTypes.regionalDistrict}
                               selectedOption={{ label: value?.reverseQualifiedName, value }}
                               menuPortalTarget={document.body}
