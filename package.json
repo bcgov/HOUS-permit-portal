@@ -77,7 +77,8 @@
     "react-quill": "^2.0.0",
     "react-remove-scroll": "^2.5.7",
     "react-router-dom": "^6.20.0",
-    "react-select": "^5.8.0"
+    "react-select": "^5.8.0",
+    "restructure": "^3.0.0"
   },
   "overrides": {
     "vite": {

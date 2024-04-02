@@ -1,8 +1,9 @@
-import { Document, Font, Page } from "@react-pdf/renderer"
+import { Font, Page } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
+import { PDFDocument } from "../../../../shared/pdf"
 import { styles } from "../../../../shared/permit-applications/pdf-content/application/styles"
 import { CoverPage } from "../../../../shared/permit-applications/pdf-content/cover"
 import { Footer } from "../../../../shared/permit-applications/pdf-content/shared/footer"
@@ -28,7 +29,7 @@ export const PDFContent = function StepCodeChecklistPDFContent({
   assetDirectoryPath,
 }: IProps) {
   return (
-    <Document>
+    <PDFDocument assetDirectoryPath={assetDirectoryPath}>
       <CoverPage
         permitApplication={permitApplication}
         subTitle={t("stepCodeChecklist.pdf.for")}
@@ -44,6 +45,6 @@ export const PDFContent = function StepCodeChecklistPDFContent({
         <ZeroCarbonStepCompliance checklist={checklist} />
         <Footer permitApplication={permitApplication} />
       </Page>
-    </Document>
+    </PDFDocument>
   )
 }
