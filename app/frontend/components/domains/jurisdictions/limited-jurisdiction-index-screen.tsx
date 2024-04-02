@@ -4,13 +4,14 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { RouterLink } from "../../shared/navigation/router-link"
-import { LimitedGridHeaders } from "./limited-grid-header"
+import { GridHeaders } from "./grid-header"
 
 export const LimitedJurisdictionIndexScreen = observer(function JurisdictionIndex() {
   const { jurisdictionStore } = useMst()
@@ -39,7 +40,10 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
         </Flex>
 
         <SearchGrid templateColumns="3fr 3fr">
-          <LimitedGridHeaders />
+          <GridHeaders
+            span={2}
+            columns={[EJurisdictionSortFields.reverseQualifiedName, EJurisdictionSortFields.regionalDistrict]}
+          />
 
           {isSearching ? (
             <Flex py={50} gridColumn={"span 2"}>

@@ -175,7 +175,6 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
 
   const superAdminOnlyItems = (
     <MenuGroup>
-      {/* <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} /> */}
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <MenuDivider />

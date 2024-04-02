@@ -4,6 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -44,10 +45,16 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
         </Flex>
 
         <SearchGrid templateColumns="3fr repeat(3, 1fr) 1fr">
-          <GridHeaders />
+          <GridHeaders
+            span={5}
+            includeActionColumn
+            columns={Object.values(EJurisdictionSortFields).filter(
+              (field) => field !== EJurisdictionSortFields.regionalDistrict
+            )}
+          />
 
           {isSearching ? (
-            <Flex py={50} gridColumn={"span 6"}>
+            <Flex py={50} gridColumn={"span 5"}>
               <SharedSpinner />
             </Flex>
           ) : (

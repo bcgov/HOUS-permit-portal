@@ -63,7 +63,7 @@ export const NewJurisdictionScreen = observer(() => {
     }
   }
 
-  const handleToggleCustom = () => setUseCustom(!useCustom)
+  const handleToggleCustom = () => setUseCustom((pastState) => !pastState)
 
   return (
     <Container maxW="container.lg" p={8} as="main">
@@ -133,7 +133,7 @@ export const NewJurisdictionScreen = observer(() => {
                   </Flex>
 
                   <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="email-alerts" mb="0">
+                    <FormLabel htmlFor="use-custom" mb="0">
                       {t("jurisdiction.new.useCustom")}
                     </FormLabel>
                     <Switch id="use-custom" isChecked={useCustom} onChange={handleToggleCustom} />
