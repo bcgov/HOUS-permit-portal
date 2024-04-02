@@ -30,6 +30,7 @@ class RequirementFormJsonService
       inputFormat: "plain",
     },
     date: {
+      tableView: false,
       enableTime: false,
       datePicker: {
         disableWeekends: false,
@@ -37,6 +38,8 @@ class RequirementFormJsonService
       },
       enableMinDateInput: false,
       enableMaxDateInput: false,
+      type: "datetime",
+      input: true,
       widget: {
         type: "calendar",
         displayInTimezone: "viewer",
@@ -44,7 +47,7 @@ class RequirementFormJsonService
         useLocaleSettings: false,
         allowInput: true,
         mode: "single",
-        enableTime: true,
+        enableTime: false,
         noCalendar: false,
         format: "yyyy-MM-dd",
         hourIncrement: 1,
