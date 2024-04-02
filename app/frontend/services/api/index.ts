@@ -287,23 +287,12 @@ export class Api {
     )
   }
 
-  async createJurisdictionTemplateVersionCustomization(
+  async createOrUpdateJurisdictionTemplateVersionCustomization(
     templateId: string,
     jurisdictionId: string,
     jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
   ) {
     return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
-      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
-      { jurisdictionTemplateVersionCustomization }
-    )
-  }
-
-  async updateJurisdictionTemplateVersionCustomization(
-    templateId: string,
-    jurisdictionId: string,
-    jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
-  ) {
-    return this.client.put<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
       { jurisdictionTemplateVersionCustomization }
     )
