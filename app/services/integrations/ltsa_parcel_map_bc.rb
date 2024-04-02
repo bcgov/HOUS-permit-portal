@@ -78,7 +78,8 @@ class Integrations::LtsaParcelMapBc
   end
 
   def get_feature_attributes_by_pid_or_pin(pid:, pin:, fields: "*")
-    raise Errors::FeatureAttributesRetrievalError if ((pid.present? && pin.present?) || (pin.blank? && pid.blank?))
+    raise Errors::FeatureAttributesRetrievalError if pin.blank? && pid.blank?
+    #always prioritize pid over pin
     response =
       if pid
         get_details_by_pid(pid: pid, fields: fields)
