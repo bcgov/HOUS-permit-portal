@@ -5,7 +5,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
   after_action :verify_authorized
 
   def show
-    authorize :site_configuration, :index?
+    authorize :site_configuration, :show?
     if @site_configuration.present?
       return render_success @site_configuration
     else
