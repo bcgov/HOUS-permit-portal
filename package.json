@@ -91,7 +91,8 @@
     "prepare": "husky install",
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
-    "generate-pdf": "node --loader ts-node/esm node_scripts/generate_pdf.ts"
+    "build:ssr": "vite build --ssr",
+    "generate-pdf": " node public/vite-ssr/ssr.js"
   },
   "lint-staged": {
     "*.{js,css,md,rb,ts,tsx}": [
