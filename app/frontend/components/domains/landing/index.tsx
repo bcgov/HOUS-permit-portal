@@ -17,6 +17,7 @@ import {
 import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -198,7 +199,11 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   const siteWatch = watch("site")
 
   useEffect(() => {
-    if (!siteWatch?.value) return
+    // siteWatch.value may contain an empty string
+    // If this is the case, let through this conditional
+    // in order to let jurisdiction search fail and set manual mode
+    // empty string does not count as isNil but undefined does
+    if (R.isNil(siteWatch?.value)) return
     ;(async () => {
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch.value)
       if (jurisdiction) {

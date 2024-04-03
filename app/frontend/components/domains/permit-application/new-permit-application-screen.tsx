@@ -85,7 +85,14 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const jurisdictionWatch = watch("jurisdiction")
 
   useEffect(() => {
-    if (!siteWatch?.value) return
+    if (R.isNil(siteWatch?.value)) return
+
+    if (siteWatch.value == "") {
+      setPinMode(true)
+      setValue("jurisdiction", null)
+      return
+    }
+
     ;(async () => {
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
