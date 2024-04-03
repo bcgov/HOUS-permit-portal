@@ -11,6 +11,12 @@ class Api::ApplicationController < ActionController::API
   after_action :verify_authorized, except: %i[index], unless: :skip_pundit?
   after_action :verify_policy_scoped, only: %i[index], unless: :skip_pundit?
 
+  def index
+    # This parent application controller throws errors from above after_actions
+    # if the subclass does not implement this method. This is provided as a fallback.
+    raise NotImplementedError, "The index method is not implemented."
+  end
+
   protected
 
   def apply_search_authorization(results, policy_action = action_name)
