@@ -118,7 +118,7 @@ export const NavBar = observer(() => {
             <Spacer />
             <HStack gap={3}>
               {!loggedIn && <HelpDrawer />}
-              {currentUser?.isSubmitter || (!loggedIn && <NavBarSearch />)}
+              {currentUser?.isSubmitter && <NavBarSearch />}
               {currentUser?.isSubmitter && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
