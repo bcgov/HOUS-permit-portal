@@ -3,13 +3,13 @@ import { t } from "i18next"
 import * as R from "ramda"
 import React, { useContext } from "react"
 import { theme } from "../../../../../../styles/theme"
+import { i18nPrefix } from "../../compliance-summary/i18n-prefix"
 import { Divider } from "../shared/divider"
 import { Field } from "../shared/field"
 import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 
 export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary() {
-  const i18nPrefix = "stepCodeChecklist.edit.codeComplianceSummary"
   const { checklist } = useContext(StepCodeChecklistContext)
 
   return (

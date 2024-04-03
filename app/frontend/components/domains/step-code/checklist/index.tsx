@@ -40,7 +40,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
     if (result) navigate(-1)
   }
 
-  const translationPrefix = "stepCodeChecklist.edit"
+  const i18nPrefix = "stepCodeChecklist.edit"
 
   return (
     <Suspense
@@ -55,7 +55,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
           <VStack gap={8} align="stretch">
             <HStack spacing={5}>
               <Heading fontSize="2xl" mb={0} color="text.primary">
-                {t(`${translationPrefix}.heading`)}
+                {t(`${i18nPrefix}.heading`)}
               </Heading>
               <Tag
                 p={1}
@@ -82,7 +82,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                   color="text.primary"
                 >
                   <WarningCircle color="var(--chakra-colors-semantic-error)" />
-                  {t(`${translationPrefix}.energyStepNotMet`)}
+                  {t(`${i18nPrefix}.energyStepNotMet`)}
                 </Alert>
               )}
               {R.isNil(checklist.proposedZeroCarbonStep) && (
@@ -96,7 +96,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                   color="text.primary"
                 >
                   <WarningCircle color="var(--chakra-colors-semantic-error)" />
-                  {t(`${translationPrefix}.zeroCarbonStepNotMet`)}
+                  {t(`${i18nPrefix}.zeroCarbonStepNotMet`)}
                 </Alert>
               )}
               <Alert
@@ -109,7 +109,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                 color="text.primary"
               >
                 <LightningA color="var(--chakra-colors-semantic-info)" />
-                {t(`${translationPrefix}.notice`)}
+                {t(`${i18nPrefix}.notice`)}
               </Alert>
             </VStack>
             <FormProvider {...formMethods}>

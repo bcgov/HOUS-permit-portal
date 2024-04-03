@@ -8,7 +8,7 @@ import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { EnergySteps } from "./energy-steps"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 import { ZeroCarbonSteps } from "./zero-carbon-steps"
 
 interface IProps {
@@ -19,12 +19,12 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
   const { control } = useFormContext()
 
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
+    <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
       <TextFormControl
-        label={t(`${translationPrefix}.compliancePath.label`)}
+        label={t(`${i18nPrefix}.compliancePath.label`)}
         inputProps={{
           isDisabled: true,
-          value: t(`${translationPrefix}.compliancePath.options.${checklist.compliancePath}`),
+          value: t(`${i18nPrefix}.compliancePath.options.${checklist.compliancePath}`),
         }}
       />
 
@@ -33,11 +33,11 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
         {/* Energy */}
         <VStack flex={1} spacing={4} borderWidth={1} rounded="md" p={4}>
           <Heading as="h3" mb={0} fontSize="lg">
-            {t(`${translationPrefix}.energyStepCode.heading`)}
+            {t(`${i18nPrefix}.energyStepCode.heading`)}
           </Heading>
 
           <VStack align="stretch">
-            <Text>{t(`${translationPrefix}.energyStepCode.stepRequired`) + ": "}</Text>
+            <Text>{t(`${i18nPrefix}.energyStepCode.stepRequired`) + ": "}</Text>
             <StepBox>{checklist.requiredEnergyStep}</StepBox>
           </VStack>
 
@@ -45,7 +45,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
             <EnergySteps checklist={checklist} />
 
             <VStack>
-              <Text fontSize="md">{t(`${translationPrefix}.energyStepCode.stepProposed`) + ": "}</Text>
+              <Text fontSize="md">{t(`${i18nPrefix}.energyStepCode.stepProposed`) + ": "}</Text>
               <TextFormControl
                 inputProps={{
                   isDisabled: true,
@@ -61,11 +61,11 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
         {/* Zero Carbon */}
         <VStack flex={1} spacing={4} borderWidth={1} rounded="md" p={4}>
           <Heading as="h3" mb={0} fontSize="md">
-            {t(`${translationPrefix}.zeroCarbonStepCode.heading`)}
+            {t(`${i18nPrefix}.zeroCarbonStepCode.heading`)}
           </Heading>
 
           <VStack align="stretch">
-            <Text>{t(`${translationPrefix}.zeroCarbonStepCode.stepRequired`) + ": "}</Text>
+            <Text>{t(`${i18nPrefix}.zeroCarbonStepCode.stepRequired`) + ": "}</Text>
             <StepBox>{checklist.requiredZeroCarbonStep}</StepBox>
           </VStack>
 
@@ -73,7 +73,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
             <ZeroCarbonSteps checklist={checklist} />
 
             <VStack>
-              <Text fontSize="md">{t(`${translationPrefix}.zeroCarbonStepCode.stepProposed`) + ": "}</Text>
+              <Text fontSize="md">{t(`${i18nPrefix}.zeroCarbonStepCode.stepProposed`) + ": "}</Text>
               <TextFormControl
                 inputProps={{
                   isDisabled: true,
@@ -93,19 +93,19 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
       {/* TODO: pre-populate from application drawings */}
       <VStack align="start" w="full">
         <Text fontWeight="bold" fontSize="md">
-          {t(`${translationPrefix}.planInfo.title`)}
+          {t(`${i18nPrefix}.planInfo.title`)}
         </Text>
         <HStack w="full">
           <TextFormControl
-            label={t(`${translationPrefix}.planInfo.author`)}
+            label={t(`${i18nPrefix}.planInfo.author`)}
             inputProps={{ isDisabled: true, value: checklist.planAuthor || "" }}
           />
           <TextFormControl
-            label={t(`${translationPrefix}.planInfo.version`)}
+            label={t(`${i18nPrefix}.planInfo.version`)}
             inputProps={{ isDisabled: true, value: checklist.planVersion || "" }}
           />
           <TextFormControl
-            label={t(`${translationPrefix}.planInfo.date`)}
+            label={t(`${i18nPrefix}.planInfo.date`)}
             inputProps={{ isDisabled: true, value: checklist.planDate || "" }}
             leftElement={<CalendarBlank />}
           />

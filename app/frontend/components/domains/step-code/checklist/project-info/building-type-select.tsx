@@ -15,7 +15,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../setup/root"
 import { EStepCodeBuildingType } from "../../../../../types/enums"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   onChange: (event: any) => void
@@ -43,9 +43,7 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
                 rounded="base"
                 shadow="base"
               >
-                {value
-                  ? t(`${translationPrefix}.buildingType.options.${value}`)
-                  : t(`${translationPrefix}.buildingType.placeholder`)}
+                {value ? t(`${i18nPrefix}.buildingType.options.${value}`) : t(`${i18nPrefix}.buildingType.placeholder`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -65,7 +63,7 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
                   cursor="pointer"
                   _hover={{ bg: "hover.blue" }}
                 >
-                  {t(`${translationPrefix}.buildingType.options.${value}`)}
+                  {t(`${i18nPrefix}.buildingType.options.${value}`)}
                 </Flex>
               ))}
             </VStack>
