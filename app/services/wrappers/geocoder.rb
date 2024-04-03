@@ -18,6 +18,12 @@ class Wrappers::Geocoder < Wrappers::Base
       brief: true,
       maxResults: 10,
       outputSRS: 4326,
+      # A few more params available for experimentation:
+      #   locationDescriptor: "any",
+      #   interpolation: "adaptive",
+      #   echo: true,
+      #   setBack: 0,
+      #   provinceCode: "BC"
     }
 
     site_params[:addressString] = address_string if address_string.present?
@@ -26,7 +32,7 @@ class Wrappers::Geocoder < Wrappers::Base
     r = get("/addresses.#{OUTPUT_FORMAT}", site_params)
     return(
       r["features"]
-        .filter { |f| f["properties"]["siteID"].present? }
+        .filter { |f| %w[CIVIC_NUMBER BLOCK].include?(f["properties"]["matchPrecision"]) }
         .map { |site| { label: site["properties"]["fullAddress"], value: site["properties"]["siteID"] } }
     )
   end
