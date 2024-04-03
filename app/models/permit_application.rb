@@ -31,6 +31,7 @@ class PermitApplication < ApplicationRecord
 
   enum status: { draft: 0, submitted: 1 }, _default: 0
 
+  delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
@@ -142,7 +143,7 @@ class PermitApplication < ApplicationRecord
   private
 
   def assign_default_nickname
-    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+    self.nickname = "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number

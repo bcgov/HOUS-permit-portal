@@ -64,7 +64,7 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
       case EComponentType.checklist: {
         const options = R.path([dataPath, component.key], permitApplication.submissionData.data)
         const label = component.label
-        const values: any = Object.keys(options).filter((key) => !!options[key])
+        const values: any = Object.keys(options ?? {}).filter((key) => !!options[key])
         return { options, values, label, isVisible: !R.isEmpty(values) && !R.isNil(label) }
       }
       case EComponentType.datagrid: {

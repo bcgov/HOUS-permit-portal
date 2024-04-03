@@ -139,6 +139,9 @@ export const NavBar = observer(() => {
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
+              <RouterLinkButton variant="tertiary" to="/jurisdictions" color={loggedIn ? "greys.white" : "black"}>
+                {t("home.jurisdictionsTitle")}
+              </RouterLinkButton>
               <NavBarMenu />
             </HStack>
           </Flex>
@@ -256,7 +259,6 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
               </MenuList>
               <MenuDivider />
               <NavMenuItem label={t("site.home")} to="/" />
-              <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
             </>
           )}
 

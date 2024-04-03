@@ -45,8 +45,16 @@ export const RequirementForm = observer(
     triggerSave,
     showHelpButton = true,
   }: IRequirementFormProps) => {
-    const { submissionData, setSelectedTabIndex, indexOfBlockId, formJson, blockClasses, formattedFormJson, isDraft } =
-      permitApplication
+    const {
+      jurisdiction,
+      submissionData,
+      setSelectedTabIndex,
+      indexOfBlockId,
+      formJson,
+      blockClasses,
+      formattedFormJson,
+      isDraft,
+    } = permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -247,11 +255,18 @@ export const RequirementForm = observer(
           }}
         >
           <ErrorsBox errorBox={errorBoxData} />
-          {permitApplication?.isSubmitted && (
+
+          {permitApplication?.isSubmitted ? (
             <CustomToast
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
+                jurisdictionName: jurisdiction.qualifiedName,
               })}
+              status="info"
+            />
+          ) : (
+            <CustomToast
+              description={t("permitApplication.show.submittingTo", { jurisdictionName: jurisdiction.qualifiedName })}
               status="info"
             />
           )}
