@@ -25,6 +25,7 @@ class RequirementFormJsonService
       type: "simplesignatureadvanced",
     },
     number: {
+      delimiter: true,
       applyMaskOn: "change",
       mask: false,
       inputFormat: "plain",

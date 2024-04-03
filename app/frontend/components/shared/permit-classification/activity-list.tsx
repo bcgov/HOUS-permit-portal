@@ -54,8 +54,8 @@ const ActivityBox = ({ activity }: IActivityBoxProps) => {
       p={6}
       border={activity.enabled ? "1px solid" : "none"}
       borderColor="border.light"
-      w="fit-content"
-      minW={{ base: "full", sm: "473px" }}
+      w="50%"
+      minW={{ base: "50%", sm: "473px" }}
       bg={activity.enabled ? "white" : "greys.grey03"}
     >
       <Flex gap={8}>
