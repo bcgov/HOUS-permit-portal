@@ -231,7 +231,7 @@ types" do
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|dateRequirement",
-          type: "date",
+          type: "datetime",
           input: true,
           label: "Date  Requirement",
           enableTime: false,
