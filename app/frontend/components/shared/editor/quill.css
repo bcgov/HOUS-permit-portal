@@ -24,6 +24,7 @@
 
 .quill .ql-container {
   font-size: 1rem;
+  font-family: inherit;
   /* border: 0 !important; */
 }
 

@@ -56,7 +56,7 @@ export const overridePanelTemplate = (ctx) => {
   ) {
     __p += `\n <div class="card-panel-addition">`
     if (ctx.component?.description) {
-      __p += `\n <div>${ctx.component?.description}</div>`
+      __p += `\n <div class="requirement-block-description">${ctx.component?.description}</div>`
     }
     if (ctx.component?.tip) {
       __p += `\n <div class="tips"><h3 class="tips-header"><i class="ph-fill ph-seal-check"></i>Tip</h3>${ctx.component?.tip}</div>`
