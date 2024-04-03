@@ -109,6 +109,8 @@ const options = {
           findYourAuth: "Find your local building permit authority.",
           localJurisdiction: "Local jurisdiction",
           learnRequirements: "Learn about local requirements",
+          cantFind: "Can't find your address?",
+          browseList: "Browse list of jurisdictions",
         },
         ui: {
           tip: "Tip",
@@ -368,7 +370,8 @@ const options = {
             clickToWriteNickname: "Click to write a nickname",
           },
           show: {
-            wasSubmitted: "Application was submitted on {{ date }}",
+            wasSubmitted: "Application was submitted on {{ date }} to {{ jurisdictionName }}",
+            submittingTo: "You're applying to the {{ jurisdictionName }}",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
             contactSummaryHeading: "List of all contacts on this application",
