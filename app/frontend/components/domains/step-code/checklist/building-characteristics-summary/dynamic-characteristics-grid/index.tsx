@@ -1,8 +1,8 @@
 import { Grid } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
+import { i18nPrefix } from "../i18n-prefix"
 import { RowHeader } from "../row-header"
-import { translationPrefix } from "../translation-prefix"
 import { Airtightness } from "./airtightness"
 import { Doors } from "./doors"
 import { FossilFuels } from "./fossil-fuels"
@@ -15,9 +15,9 @@ import { WindowsGlazedDoors } from "./windows-glazed-doors"
 export const DynamicCharacteristicsGrid = function DynamicCharacteristicsGrid({ checklist }) {
   return (
     <Grid templateColumns={"auto repeat(2, 1fr)"}>
-      <RowHeader fontSize="sm">{t(`${translationPrefix}.details`)}</RowHeader>
+      <RowHeader fontSize="sm">{t(`${i18nPrefix}.details`)}</RowHeader>
       <RowHeader colSpan={2} borderRightWidth={1} fontSize="sm" alignItems="center">
-        {t(`${translationPrefix}.performanceValues`)}
+        {t(`${i18nPrefix}.performanceValues`)}
       </RowHeader>
       <WindowsGlazedDoors />
       <Doors />

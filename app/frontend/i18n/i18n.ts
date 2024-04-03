@@ -376,6 +376,7 @@ const options = {
             downloadPrompt: "Choose specific files or entire package:",
             downloadZip: "Download attached files",
             downloadForm: "Download application form",
+            downloadStepCode: "Download step code checklist",
           },
         },
         requirementsLibrary: {

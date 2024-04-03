@@ -8,7 +8,7 @@ import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 import { PerformanceTypeSelect } from "./performance-type-select"
 
 export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
@@ -29,7 +29,7 @@ export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.doors`)}
+        {t(`${i18nPrefix}.doors`)}
       </GridColumnHeader>
 
       {fields.map((field, index) => {

@@ -8,7 +8,7 @@ import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
 import { GridRowHeader } from "../../shared/grid/row-header"
 import { UnitsText } from "../../shared/grid/units-text"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -18,16 +18,16 @@ export const MEUI = function MEUI({ checklist }: IProps) {
   return (
     <>
       <GridRowHeader>
-        <Text as="span">{t(`${translationPrefix}.meui`)}</Text>
+        <Text as="span">{t(`${i18nPrefix}.meui`)}</Text>
       </GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.meuiRequirement || "-" }}
-          hint={t(`${translationPrefix}.max`)}
+          hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
-              <UnitsText>{t(`${translationPrefix}.meuiUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.meuiUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.meuiUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.meuiUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
@@ -37,8 +37,8 @@ export const MEUI = function MEUI({ checklist }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.meui || "-" }}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
-              <UnitsText>{t(`${translationPrefix}.meuiUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.meuiUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.meuiUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.meuiUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
@@ -47,7 +47,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
         <RequirementsMetTag success={checklist.meuiPassed} />
       </GridData>
 
-      <GridRowHeader>{t(`${translationPrefix}.meuiImprovement`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.meuiImprovement`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{
@@ -55,7 +55,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
             textAlign: "center",
             value: checklist.meuiPercentImprovementRequirement || "-",
           }}
-          hint={t(`${translationPrefix}.min`)}
+          hint={t(`${i18nPrefix}.min`)}
           rightElement={<Percent />}
         />
       </GridData>

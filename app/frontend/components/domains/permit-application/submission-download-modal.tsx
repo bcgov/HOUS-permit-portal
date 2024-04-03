@@ -24,8 +24,8 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { formatBytes } from "../../../utils/utility-functions"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
-import { PDFContent } from "../../shared/permit-applications/pdf-content"
-
+import { PDFContent as PermitApplicationPDF } from "../../shared/permit-applications/pdf-content"
+import { PDFContent as StepCodePDF } from "../step-code/checklist/pdf-content"
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
   renderTrigger?: (onOpen: () => void) => React.ReactNode
@@ -35,7 +35,8 @@ export const SubmissionDownloadModal = observer(
   ({ permitApplication, renderTrigger }: ISubmissionDownloadModalProps) => {
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
-    const { supportingDocuments, zipfileUrl, zipfileName } = permitApplication
+    const { supportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
+    const checklist = stepCode?.preConstructionChecklist
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -46,6 +47,11 @@ export const SubmissionDownloadModal = observer(
         permitApplicationStore.fetchPermitApplication(permitApplication?.id)
       }
     }, [permitApplication?.isFullyLoaded, isOpen])
+
+    useEffect(() => {
+      const fetch = async () => await checklist.load()
+      checklist && !checklist.isLoaded && fetch()
+    }, [checklist?.isLoaded])
 
     return (
       <>
@@ -99,7 +105,7 @@ export const SubmissionDownloadModal = observer(
                       {t("permitApplication.show.downloadZip")}
                     </Button>
                     <PDFDownloadLink
-                      document={permitApplication && <PDFContent permitApplication={permitApplication} />}
+                      document={permitApplication && <PermitApplicationPDF permitApplication={permitApplication} />}
                       fileName="application.pdf"
                       style={{ width: "100%" }}
                     >
@@ -113,6 +119,30 @@ export const SubmissionDownloadModal = observer(
                             leftIcon={<FilePdf />}
                           >
                             {t("permitApplication.show.downloadForm")}
+                          </Button>
+                        )
+                      }}
+                    </PDFDownloadLink>
+                    <PDFDownloadLink
+                      document={
+                        permitApplication &&
+                        checklist?.isLoaded && (
+                          <StepCodePDF permitApplication={permitApplication} checklist={checklist} />
+                        )
+                      }
+                      fileName="step-code-checklist.pdf"
+                      style={{ width: "100%" }}
+                    >
+                      {({ blob, url, loading, error }) => {
+                        return (
+                          <Button
+                            isLoading={loading}
+                            isDisabled={loading || !!error}
+                            variant="primary"
+                            w="full"
+                            leftIcon={<FilePdf />}
+                          >
+                            {t("permitApplication.show.downloadStepCode")}
                           </Button>
                         )
                       }}

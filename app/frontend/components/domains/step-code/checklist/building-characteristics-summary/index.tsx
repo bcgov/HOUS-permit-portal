@@ -3,12 +3,12 @@ import { t } from "i18next"
 import React from "react"
 import { ChecklistSection } from "../shared/checklist-section"
 import { DynamicCharacteristicsGrid } from "./dynamic-characteristics-grid"
+import { i18nPrefix } from "./i18n-prefix"
 import { StaticCharacteristicsGrid } from "./static-characteristics-grid"
-import { translationPrefix } from "./translation-prefix"
 
 export const BuildingCharacteristicsSummary = function BuildingCharacteristicsSummary({ checklist }) {
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
+    <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
       <VStack spacing={6}>
         <StaticCharacteristicsGrid />
         <DynamicCharacteristicsGrid checklist={checklist} />
