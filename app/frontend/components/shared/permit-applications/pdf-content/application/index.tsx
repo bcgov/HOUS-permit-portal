@@ -13,7 +13,7 @@ enum EComponentType {
   date = "date",
   fieldset = "fieldset",
   columns = "columns",
-  file = "file",
+  file = "simplefile",
   number = "number",
   panel = "panel",
   select = "select",
