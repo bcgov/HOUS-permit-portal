@@ -75,10 +75,6 @@ class RequirementBlock < ApplicationRecord
     }
   end
 
-  def lookup_props(section_key = nil)
-    requirements.map { |r| r.lookup_props(key(section_key)) }
-  end
-
   private
 
   def configurations_search_list

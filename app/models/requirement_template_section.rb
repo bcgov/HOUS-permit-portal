@@ -24,8 +24,4 @@ class RequirementTemplateSection < ApplicationRecord
       components: requirement_blocks.map { |rb| rb.to_form_json(key) },
     }
   end
-
-  def lookup_props
-    requirement_blocks.map { |rb| rb.lookup_props(key) }.flatten
-  end
 end
