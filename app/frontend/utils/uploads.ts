@@ -3,6 +3,8 @@ import {
   MAX_NUMBER_OF_PARTS,
 } from "../components/shared/chefs/additional-formio/constant"
 
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+
 export const uploadFile = async (file, fileName, progressCallback = undefined) => {
   try {
     const numberOfParts = Math.ceil(file.size / FILE_UPLOAD_CHUNK_SIZE_IN_BYTES)
@@ -167,8 +169,6 @@ export const completeMultipart = async (uploadId, key, parts) => {
   }
 }
 
-const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
-
 export const uploadFileInChunks = async (signedUrls, headers, file, partCount, progressCallback = undefined) => {
   try {
     let chunkSize = FILE_UPLOAD_CHUNK_SIZE_IN_BYTES
@@ -182,7 +182,7 @@ export const uploadFileInChunks = async (signedUrls, headers, file, partCount, p
     while (start < file.size) {
       let end = start + chunkSize
       const chunk = file.slice(start, end)
-      await sleep(1500)
+      import.meta.env.DEV && (await sleep(1500))
 
       // const contentRange = `bytes ${start}-${end - 1}/${file.size}`
       const signedUrl = signedUrls[`${partNumber}`]

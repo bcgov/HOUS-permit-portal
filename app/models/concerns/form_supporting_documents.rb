@@ -59,9 +59,7 @@ module FormSupportingDocuments
     #data from individual documents
     grouped_compliance_data =
       active_supporting_documents.where.not(compliance_data: {}).map { |sd| sd.compliance_message_view }
-    grouped_compliance_data
-      .group_by { |sd| sd["data_key"] }
-      .each { |key, value| joined[key] = value.map { |v| v["message"] }.uniq.join(",") }
+    grouped_compliance_data.group_by { |sd| sd["data_key"] }.each { |key, value| joined[key] = value }
 
     joined
   end

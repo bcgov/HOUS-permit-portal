@@ -42,8 +42,13 @@ Templates.current = {
 
         let computedComplianceText
         if (result) {
-          if (ctx?.component?.computedCompliance == "DigitalSealValidator") {
+          if (ctx?.component?.computedCompliance?.module == "DigitalSealValidator") {
+            //assume an array of one response or an array of responses for multiple files
+            //utilize id in the compliance messge to check if the front end id matches the file
             computedComplianceText = result
+              .filter((fileMessage) => ctx.value.find((v) => v.id == fileMessage.id))
+              .map((fileMessage) => fileMessage.message)
+              .join(",")
           } else {
             //assume all complianes are default values except for seal validators
             computedComplianceText = t("automatedCompliance.defaultValueMessage", { defaultValue: result })
@@ -55,7 +60,7 @@ Templates.current = {
         }
 
         template = template.concat(
-          `<div class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><span><i class="ph-fill ph-lightning-a"></i>
+          `<div key={'${ctx?.id}-compliance'} class="compliance" data-compliance='${ctx?.component?.computedCompliance?.module}'><span><i class="ph-fill ph-lightning-a"></i>
           ${computedComplianceText}</span></div>`
         )
       }

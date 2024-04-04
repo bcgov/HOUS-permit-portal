@@ -23,6 +23,7 @@ class SupportingDocument < ApplicationRecord
 
   def compliance_message_view
     {
+      "id" => file_id,
       "data_key" => data_key,
       "message" =>
         compliance_data["error"] ||

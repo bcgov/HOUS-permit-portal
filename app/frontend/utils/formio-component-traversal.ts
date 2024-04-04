@@ -103,7 +103,8 @@ export const combineComplianceHints = (
     // Note the result is either a string or a object, to be handled by the renderer
     if (item && item.computedCompliance) {
       item.computedComplianceResult = value
-      if (item.computedCompliance != "DigitalSealValidator") {
+      if (item.computedCompliance?.module != "DigitalSealValidator") {
+        //there is no default value for a file
         item.defaultValue = value
       }
     }
