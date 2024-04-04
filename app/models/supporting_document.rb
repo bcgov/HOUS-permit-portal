@@ -50,6 +50,10 @@ class SupportingDocument < ApplicationRecord
     }
   end
 
+  def standardized_filename
+    "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}.#{file_data["id"].split(".").last}"
+  end
+
   def summarizeString(parsed_signature)
     "#{parsed_signature[:name]} (#{parsed_signature[:subject]}) signed at #{parsed_signature[:date]}"
   end
