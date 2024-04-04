@@ -134,7 +134,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def supporting_document_params
     params.require(:permit_application).permit(
-      supporting_documents_attributes: [:data_key, file: %i[id storage metadata]],
+      supporting_documents_attributes: [:data_key, file: [:id, :storage, metadata: {}]],
     )
   end
 

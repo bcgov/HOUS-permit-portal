@@ -40,7 +40,7 @@ const s3custom = function Provider(formio) {
             ? presignedUploadResponse.key.slice(6)
             : presignedUploadResponse?.key,
           metadata: {
-            filename: fileName || file.name,
+            filename: file.name,
             size: file.size,
             mime_type: file.type,
             content_disposition: presignedUploadResponse?.headers?.["Content-Disposition"], //if multiplart this is moved inline
