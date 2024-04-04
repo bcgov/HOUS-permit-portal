@@ -3,6 +3,7 @@ import { t } from "i18next"
 import React, { useContext } from "react"
 import { theme } from "../../../../../../../styles/theme"
 import { EHotWaterPerformanceType } from "../../../../../../../types/enums"
+import { generateUUID } from "../../../../../../../utils/utility-functions"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
 import { Field } from "../../shared/field"
 import { GridItem } from "../../shared/grid-item"
@@ -36,6 +37,7 @@ export function HotWater() {
       </HStack>
       {checklist.buildingCharacteristicsSummary.hotWaterLines.map((line, index) => (
         <HStack
+          key={generateUUID()}
           style={{
             width: "100%",
             alignItems: "stretch",
