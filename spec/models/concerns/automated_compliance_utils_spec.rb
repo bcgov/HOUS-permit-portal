@@ -20,10 +20,13 @@ RSpec.describe AutomatedComplianceUtils do
       expect(
         permit_application
           .automated_compliance_requirements
-          .select { |key, req| req&.input_options&.dig("computed_compliance").present? }
-          .map { |key, req| req },
+          .select { |key, req| req&.dig("computedCompliance").present? }
+          .map { |key, req| req["id"] },
       ).to eq(
-        requirement_template.requirements.select { |req| req&.input_options&.dig("computed_compliance").present? },
+        requirement_template
+          .requirements
+          .select { |req| req&.input_options&.dig("computed_compliance").present? }
+          .map(&:id),
       )
     end
   end

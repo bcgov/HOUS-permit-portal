@@ -98,6 +98,7 @@ class RequirementFormJsonService
           id: requirement.id,
           key: requirement.key(requirement_block_key),
           type: requirement.input_type,
+          requirementInputType: requirement.input_type,
           input: true,
           label: requirement.label,
           widget: {
@@ -328,11 +329,11 @@ class RequirementFormJsonService
           storage: "s3custom",
           #fileMaxSize driven by front end defaults, do not set in requirements as it fixes it
         }.tap do |file_hash|
-          file_hash["computedCompliance"] = input_options["computed_compliance"] if input_options[
+          file_hash[:computedCompliance] = input_options["computed_compliance"] if input_options[
             "computed_compliance"
           ].present?
-          file_hash["multiple"] = true if input_options["multiple"].present?
-          file_hash["custom_class"] = "formio-component-file" if file_hash[:type] != "file"
+          file_hash[:multiple] = true if input_options["multiple"].present?
+          file_hash[:custom_class] = "formio-component-file" if file_hash[:type] != "file"
         end
       )
     end

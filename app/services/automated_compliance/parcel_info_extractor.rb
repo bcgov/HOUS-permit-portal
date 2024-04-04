@@ -14,7 +14,7 @@ class AutomatedCompliance::ParcelInfoExtractor < AutomatedCompliance::Base
       permit_application
         .automated_compliance_requirements_for_module("ParcelInfoExtractor")
         .each do |field_id, req|
-          value = attributes[req.input_options.dig("computed_compliance", "value")]
+          value = attributes[req.dig("computedCompliance", "value")]
           permit_application.compliance_data[field_id] = value if value
         end
       permit_application.save!
