@@ -37,7 +37,6 @@ module StepCodeFieldExtraction
   end
 
   def step_code_plan_document #looks for the first instance that matches the plan field
-    # supporting_documents.where("data_key LIKE '%?'", step_code_plan_field)
     @doc ||= active_supporting_documents.find_by(data_key: step_code_plan_field)
   end
 
