@@ -73,6 +73,7 @@ FactoryBot.define do
         end
         #publish a template_version
         create(:template_version, requirement_template: template, form_json: template.to_form_json, status: "published")
+        template.reload
       end
     end
 
@@ -98,6 +99,7 @@ FactoryBot.define do
         end
         #publish a template version
         create(:template_version, requirement_template: template, form_json: template.to_form_json, status: "published")
+        template.reload
       end
     end
   end

@@ -5,7 +5,7 @@ FactoryBot.define do
     requirement_blocks_json { "{}" }
     version_diff { "{}" }
     version_date { "2024-02-15" }
-    status { 0 }
+    status { 1 }
     requirement_template { RequirementTemplate.first || association(:requirement_template) }
   end
 end

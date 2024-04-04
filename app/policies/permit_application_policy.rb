@@ -22,6 +22,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     record.draft? ? record.submitter == user : (user.review_manager? || user.reviewer?)
   end
 
+  def upload_supporting_document?
+    record.draft? && record.submitter == user
+  end
+
   def submit?
     update?
   end

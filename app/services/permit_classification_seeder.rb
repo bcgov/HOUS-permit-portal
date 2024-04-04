@@ -13,14 +13,14 @@ class PermitClassificationSeeder
         name: "Medium Density Residential",
         code: "medium_residential",
         description: "Lorem ipsum medium residential",
-        enabled: true,
+        enabled: false,
         type: "PermitType",
       },
       {
         name: "High Density Residential",
         code: "high_residential",
         description: "Lorem ipsum high residential",
-        enabled: true,
+        enabled: false,
         type: "PermitType",
       },
       {

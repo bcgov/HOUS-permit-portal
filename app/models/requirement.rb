@@ -65,10 +65,6 @@ class Requirement < ApplicationRecord
     form_json_service.to_form_json(requirement_block_key)
   end
 
-  def lookup_props(requirement_block_key = requirement_block&.key)
-    { key(requirement_block_key) => self }
-  end
-
   def computed_compliance?
     input_options["computed_compliance"].present?
   end

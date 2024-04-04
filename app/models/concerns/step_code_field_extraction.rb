@@ -37,12 +37,11 @@ module StepCodeFieldExtraction
   end
 
   def step_code_plan_document #looks for the first instance that matches the plan field
-    # supporting_documents.where("data_key LIKE '%?'", step_code_plan_field)
-    @doc ||= supporting_documents.find_by(data_key: step_code_plan_field)
+    @doc ||= active_supporting_documents.find_by(data_key: step_code_plan_field)
   end
 
   def requirement_energy_step_code_key_value
     #energy stepcode is a unique field, look at the published form_json to find item with lookup_type: "energy_step_code"
-    requirements_lookups.find { |k, v| v.input_type == "energy_step_code" }
+    requirements_lookups.find { |k, v| v["requirementInputType"] == "energy_step_code" }
   end
 end
