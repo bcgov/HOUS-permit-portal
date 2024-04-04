@@ -61,7 +61,7 @@ export const combineComplianceHints = (
   const fileComponents = findFileComponents(updatedJson.components)
   fileComponents.forEach((fileComponent) => {
     if (fileComponent.multiple) {
-      //For multiple files do something else
+      //TODO: For multiple files do something else.  We haven't had a use case or enabled mutiple file uploads yet.
     } else {
       fileComponent["fileKey"] = fileComponent.key
     }

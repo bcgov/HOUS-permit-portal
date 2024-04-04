@@ -29,8 +29,7 @@ class Api::StorageController < Api::ApplicationController
       Shrine.storages[:cache].delete(params[:id])
       render json: { id: params[:id] }, status: :ok
     elsif params[:model_id] && AUTHORIZED_S3_MODELS.include?(params[:model])
-      # if the object is already persisted to storage, we don't delete it.  The deletion happens during cleanup jobs.
-      # record = params[:model].safe_constantize.find_by_id(params[:model_id])
+      # if the object is already persisted to storage, we don't delete it.  The deletion happens during cleanup jobs.  See history if we need to bring this back.
       render json: { id: params[:id] }, status: :ok
     else
       render_error("misc.not_found_error", { status: :not_found }, e)

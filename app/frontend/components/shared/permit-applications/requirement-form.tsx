@@ -230,8 +230,6 @@ export const RequirementForm = observer(
       ...(isDraft ? {} : { readOnly: true }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
-      // documentParent: "PermitApplication",
-      // documentParentId: permitApplication.id,
       persistFileUploadAction: "PATCH",
       persistFileUploadUrl: `/api/permit_applications/${permitApplication.id}/upload_supporting_document`,
     }

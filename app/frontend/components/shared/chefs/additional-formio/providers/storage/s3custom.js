@@ -63,7 +63,7 @@ const s3custom = function Provider(formio) {
           presignedPermitApplicationPayload,
           presignedPayload
         )
-        console.log("***", persistedResponse)
+
         return persistedResponse
       } catch (error) {
         import.meta.env.DEV && console.log("[DEV] file upload error", error)

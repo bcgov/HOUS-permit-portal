@@ -6,5 +6,14 @@ class AutomatedCompliance::DigitalSealValidatorJob
     permit_application = PermitApplication.find(permit_application_id)
     return if permit_application.blank?
     AutomatedCompliance::DigitalSealValidator.new.call(permit_application)
+
+    permit_application.assign_attributes(front_end_form_update: permit_application.formatted_compliance_data)
+
+    WebsocketBroadcaster.push_update_to_relevant_users(
+      permit_application.collaborators,
+      "permit_application",
+      "update",
+      PermitApplicationBlueprint.render_as_hash(permit_application, { view: :compliance_update }),
+    )
   end
 end

@@ -2,17 +2,10 @@ class SupportingDocumentBlueprint < Blueprinter::Base
   fields :file_name, :file_url, :file_size
 
   view :form_io_details do
-    #update later since this particular call will not utilize humps on front end
-    field :id do |sd, options|
-      sd.file_id
-    end
-
+    field :file_id, name: :id
+    field :id, name: :modelId #convert here, not using humps in front end for this call
     field :model do |sd, options|
       "SupportingDocument"
-    end
-
-    field :modelId do |sd, options|
-      sd.id
     end
   end
 end

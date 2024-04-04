@@ -5,41 +5,29 @@ module FormSupportingDocuments
   included do
     has_many :supporting_documents, dependent: :destroy
     has_many :active_supporting_documents,
-             ->(permit_application) do
-               where(
-                 id:
-                   permit_application.find_file_fields_and_transform!(
-                     permit_application.submission_data,
-                     [],
-                   ) { |file_field_key, file_array| file_array.map { |fa| fa["model_id"] } },
-               )
-             end,
+             ->(permit_application) { where(id: permit_application.supporting_doc_ids_from_submission_data) },
              class_name: "SupportingDocument"
     has_many :inactive_supporting_documents,
              ->(permit_application) do
                where
-                 .not(
-                   id:
-                     permit_application.find_file_fields_and_transform!(
-                       permit_application.submission_data,
-                       [],
-                     ) { |file_field_key, file_array| file_array.map { |fa| fa["model_id"] } },
-                 )
+                 .not(id: permit_application.supporting_doc_ids_from_submission_data)
                  .where.not(data_key: %i[permit_application_submission step_code_submission])
              end,
              class_name: "SupportingDocument"
     has_many :completed_supporting_documents,
              ->(permit_application) do
-               where(
-                 id:
-                   permit_application.find_file_fields_and_transform!(
-                     permit_application.submission_data,
-                     [],
-                   ) { |file_field_key, file_array| file_array.map { |fa| fa["model_id"] } },
-               ).or(where(data_key: %i[permit_application_submission step_code_submission]))
+               where(id: permit_application.supporting_doc_ids_from_submission_data).or(
+                 where(data_key: %i[permit_application_submission step_code_submission]),
+               )
              end,
              class_name: "SupportingDocument"
     accepts_nested_attributes_for :supporting_documents, allow_destroy: true
+  end
+
+  def supporting_doc_ids_from_submission_data
+    find_file_fields_and_transform!(submission_data, []) do |file_field_key, file_array|
+      file_array.map { |fa| fa["model_id"] }
+    end
   end
 
   def formatted_compliance_data
