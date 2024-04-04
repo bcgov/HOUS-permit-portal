@@ -100,7 +100,7 @@ export const Button = {
       borderWidth: 1,
       borderColor: "border.light",
       textDecor: "none",
-      minWidth: "120px",
+      minWidth: "132px",
       height: "9",
       paddingTop: "0",
       paddingBottom: "0",
