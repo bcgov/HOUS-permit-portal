@@ -10,7 +10,7 @@ class AutomatedCompliance::HistoricSite < AutomatedCompliance::Base
         permit_application
           .automated_compliance_requirements_for_module("HistoricSite")
           .each do |field_id, req|
-            if attributes[req.input_options.dig("computed_compliance", "value")] == "Y"
+            if attributes[req.dig("computedCompliance", "value")] == "Y"
               permit_application.compliance_data[field_id] = "yes"
             end
           end

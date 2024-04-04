@@ -24,4 +24,15 @@ module TraverseDataJson
     end
     files
   end
+
+  def flatten_requirements_from_form_hash(data_hash)
+    return [] if data_hash.blank? && data_hash&.dig("components").blank?
+    #assume the layering is template containing sections, sections containing blocks, blocks contining requirements
+    #requirements may have nesting (like general contact, etc),  but in our purpose we skip this
+    #TODO: explore performanc edifference to move this straight into jsonb functions
+    data_hash["components"]
+      .map { |section_json| section_json["components"].map { |blocks_json| blocks_json["components"].flatten }.flatten }
+      .flatten
+      .reduce({}) { |obj, requirement| obj.merge({ requirement["key"] => requirement }) }
+  end
 end

@@ -180,6 +180,7 @@ types" do
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+          requirementInputType: "text",
           type: "simpletextfield",
           input: true,
           label: "Text Requirement",
@@ -205,6 +206,7 @@ types" do
           },
           applyMaskOn: "change",
           mask: false,
+          requirementInputType: "number",
           inputFormat: "plain",
         }
 
@@ -219,6 +221,7 @@ types" do
           type: "checkbox",
           input: true,
           label: "Checkbox Requirement",
+          requirementInputType: "checkbox",
           widget: {
             type: "input",
           },
@@ -236,6 +239,7 @@ types" do
           tableView: false,
           input: true,
           label: "Date  Requirement",
+          requirementInputType: "date",
           enableTime: false,
           datePicker: {
             disableWeekends: false,
@@ -283,6 +287,7 @@ types" do
           type: "select",
           input: true,
           label: "select Requirement",
+          requirementInputType: "select",
           widget: {
             type: "choicesjs",
           },
@@ -312,6 +317,7 @@ types" do
           key: "#{requirement.requirement_block.key}|multiOptionSelectRequirement",
           label: "Multi option select Requirement",
           optionsLabelPosition: "right",
+          requirementInputType: "multi_option_select",
           tableView: false,
           type: "selectboxes",
           widget: {
@@ -319,6 +325,25 @@ types" do
           },
           optionsLabelPosition: "right",
           values: select_options,
+        }
+
+        expect(form_json).to eq(expected_form_json)
+      end
+
+      it "returns correct form json for file requirement" do
+        requirement = create(:requirement, label: "File Requirement", input_type: "file")
+        form_json = requirement.to_form_json.reject { |key| key == :id }
+        expected_form_json = {
+          key: "#{requirement.requirement_block.key}|fileRequirement_file",
+          storage: "s3custom",
+          type: "simplefile",
+          custom_class: "formio-component-file",
+          input: true,
+          label: "File Requirement",
+          requirementInputType: "file",
+          widget: {
+            type: "input",
+          },
         }
 
         expect(form_json).to eq(expected_form_json)
@@ -337,6 +362,7 @@ types" do
           form_json = requirement.to_form_json.reject { |key| key == :id }
           expected_form_json = {
             key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            requirementInputType: "text",
             type: "simpletextfield",
             elective: true,
             input: true,
