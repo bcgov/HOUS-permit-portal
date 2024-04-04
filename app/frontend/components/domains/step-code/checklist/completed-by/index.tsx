@@ -8,53 +8,41 @@ import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { DatePicker } from "../../../../shared/date-picker"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
 }
 
 export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) {
-  const translationPrefix = "stepCodeChecklist.edit.completedBy"
   const { control } = useFormContext()
 
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
-      <Text fontSize="md">{t(`${translationPrefix}.description`)}</Text>
+    <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
+      <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
       <VStack borderWidth={1} p={4} rounded="sm" borderColor="border.light" align="start" w="full">
-        <Text fontWeight="bold">{t(`${translationPrefix}.energyAdvisor`)}</Text>
+        <Text fontWeight="bold">{t(`${i18nPrefix}.energyAdvisor`)}</Text>
         <HStack w="full">
-          <TextFormControl label={t(`${translationPrefix}.name`)} fieldName="completedBy" />
-          <TextFormControl label={t(`${translationPrefix}.company`)} fieldName="completedByCompany" />
+          <TextFormControl label={t(`${i18nPrefix}.name`)} fieldName="completedBy" />
+          <TextFormControl label={t(`${i18nPrefix}.company`)} fieldName="completedByCompany" />
         </HStack>
 
         <HStack w="full">
-          <TextFormControl
-            leftElement={<Envelope />}
-            label={t(`${translationPrefix}.email`)}
-            fieldName="completedByEmail"
-          />
-          <TextFormControl
-            leftElement={<Phone />}
-            label={t(`${translationPrefix}.phone`)}
-            fieldName="completedByPhone"
-          />
+          <TextFormControl leftElement={<Envelope />} label={t(`${i18nPrefix}.email`)} fieldName="completedByEmail" />
+          <TextFormControl leftElement={<Phone />} label={t(`${i18nPrefix}.phone`)} fieldName="completedByPhone" />
         </HStack>
 
         {/* TODO: Address picker */}
-        <TextFormControl
-          leftElement={<MapPin />}
-          label={t(`${translationPrefix}.address`)}
-          fieldName="completedByAddress"
-        />
+        <TextFormControl leftElement={<MapPin />} label={t(`${i18nPrefix}.address`)} fieldName="completedByAddress" />
 
         <HStack w="full">
-          <TextFormControl label={t(`${translationPrefix}.organization`)} fieldName="completedByServiceOrganization" />
-          <TextFormControl label={t(`${translationPrefix}.energyAdvisorId`)} fieldName="energyAdvisorId" />
+          <TextFormControl label={t(`${i18nPrefix}.organization`)} fieldName="completedByServiceOrganization" />
+          <TextFormControl label={t(`${i18nPrefix}.energyAdvisorId`)} fieldName="energyAdvisorId" />
         </HStack>
       </VStack>
 
       <FormControl>
-        <FormLabel>{t(`${translationPrefix}.date`)}</FormLabel>
+        <FormLabel>{t(`${i18nPrefix}.date`)}</FormLabel>
         <Controller
           control={control}
           name="completedAt"
@@ -71,17 +59,14 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
           render={({ field: { onChange, value } }) => {
             return (
               <Checkbox isChecked={value} onChange={onChange}>
-                {t(`${translationPrefix}.codeco`)}
+                {t(`${i18nPrefix}.codeco`)}
               </Checkbox>
             )
           }}
         />
       </FormControl>
 
-      <TextFormControl
-        label={t(`${translationPrefix}.pFile`)}
-        inputProps={{ isDisabled: true, value: checklist.pFileNo }}
-      />
+      <TextFormControl label={t(`${i18nPrefix}.pFile`)} inputProps={{ isDisabled: true, value: checklist.pFileNo }} />
     </ChecklistSection>
   )
 })

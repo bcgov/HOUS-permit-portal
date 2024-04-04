@@ -197,6 +197,7 @@ types" do
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|numberRequirement",
           type: "number",
+          delimiter: true,
           input: true,
           label: "Number Requirement",
           widget: {

@@ -1,7 +1,7 @@
 import { Flex, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 export const EnergySteps = function EnergySteps({ checklist }) {
   return (
@@ -25,7 +25,7 @@ export const EnergySteps = function EnergySteps({ checklist }) {
           <VStack key={`energyStepsStep${step}`} align="stretch" flex={1}>
             {isRequiredStep && (
               <Text fontSize="xs" textAlign="center">
-                {t(`${translationPrefix}.required`)}
+                {t(`${i18nPrefix}.required`)}
               </Text>
             )}
             <Flex
@@ -39,7 +39,7 @@ export const EnergySteps = function EnergySteps({ checklist }) {
               borderColor={isRequiredStep ? "semantic.info" : "border.base"}
               bg={isRequiredStep ? "semantic.infoLight" : "greys.grey03"}
             >
-              {t(`${translationPrefix}.energyStepCode.steps.${step}`)}
+              {t(`${i18nPrefix}.energyStepCode.steps.${step}`)}
             </Flex>
           </VStack>
         )

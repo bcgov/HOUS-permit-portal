@@ -1,12 +1,12 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React, { useContext } from "react"
+import { i18nPrefix } from "../../project-info/i18n-prefix"
 import { Field } from "../shared/field"
 import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 
 export const ProjectInfo = function StepCodeChecklistPDFProjectInfo() {
-  const i18nPrefix = "stepCodeChecklist.edit.projectInfo"
   const { checklist } = useContext(StepCodeChecklistContext)
 
   return (
