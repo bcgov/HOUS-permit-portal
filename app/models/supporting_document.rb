@@ -36,6 +36,10 @@ class SupportingDocument < ApplicationRecord
     }
   end
 
+  def file_id
+    file_data.dig("id")
+  end
+
   def file_size
     file_data.dig("metadata", "size")
   end

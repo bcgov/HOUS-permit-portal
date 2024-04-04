@@ -1,4 +1,4 @@
-import { uploadFile } from "../../../../../../utils/uploads"
+import { persistFileUpload, uploadFile } from "../../../../../../utils/uploads"
 
 class StorageError extends Error {
   constructor(message, detail) {
@@ -25,24 +25,46 @@ const s3custom = function Provider(formio) {
       groupId,
       abortCallback
     ) => {
-      import.meta.env.DEV && console.log("[DEV] file uploading with options", options)
+      import.meta.env.DEV && console.log("[DEV] file uploading with options", fileKey, options)
       try {
-        const presignedData = await uploadFile(file, fileName, progressCallback)
-        return {
-          storage: "s3custom",
-          filename: fileName,
+        const presignedUploadResponse = await uploadFile(file, fileName, progressCallback)
+
+        const presignedPayload = {
+          storage: "cache",
+          filename: fileName || file.name,
           size: file.size,
           type: file.type,
           groupPermissions,
           groupId,
-          id: presignedData?.key || presignedData?.id,
+          id: presignedUploadResponse?.key?.startsWith("cache/")
+            ? presignedUploadResponse.key.slice(6)
+            : presignedUploadResponse?.key,
           metadata: {
-            filename: file.name,
+            filename: fileName || file.name,
             size: file.size,
             mime_type: file.type,
-            content_disposition: presignedData?.headers?.["Content-Disposition"], //if multiplart this is moved inline
+            content_disposition: presignedUploadResponse?.headers?.["Content-Disposition"], //if multiplart this is moved inline
           },
         }
+        const presignedPermitApplicationPayload = {
+          permit_application: {
+            supporting_documents_attributes: [
+              {
+                file: presignedPayload,
+                data_key: fileKey,
+              },
+            ],
+          },
+        }
+
+        const persistedResponse = await persistFileUpload(
+          options?.config?.formCustomOptions?.persistFileUploadAction,
+          options?.config?.formCustomOptions?.persistFileUploadUrl,
+          presignedPermitApplicationPayload,
+          presignedPayload
+        )
+        console.log("***", persistedResponse)
+        return persistedResponse
       } catch (error) {
         import.meta.env.DEV && console.log("[DEV] file upload error", error)
         throw new StorageError(error, "Failed to upload the file directly.  Please contact support.")
@@ -55,7 +77,7 @@ const s3custom = function Provider(formio) {
       //assume we will not have public-read acl, use shrine to generate the request
       try {
         //if there is no model info, it is an unpersisted cache item
-        if (id.startsWith("cache/")) {
+        if (fileInfo.id.startsWith("cache/")) {
           const params = new URLSearchParams({
             id: fileInfo.id,
           })

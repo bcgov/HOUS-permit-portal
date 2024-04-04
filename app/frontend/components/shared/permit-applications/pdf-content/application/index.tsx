@@ -179,7 +179,7 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
       return isVisible ? <InputField value={value} label={label} type={component.type} /> : null
     }
     default:
-      import.meta.env.DEV && console.log("*** missing component", component)
+      import.meta.env.DEV && console.log("[DEV]: missing component", component)
       return null
   }
 }

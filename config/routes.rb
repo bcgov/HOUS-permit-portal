@@ -91,6 +91,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
+      patch "upload_supporting_document", on: :member
     end
 
     patch "profile", to: "users#profile"
@@ -109,6 +110,7 @@ Rails.application.routes.draw do
 
     get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
     get "storage/s3/download" => "storage#download"
+    delete "storage/s3/delete" => "storage#delete"
 
     mount Shrine.uppy_s3_multipart(:cache) => "/storage/s3/multipart" if SHRINE_USE_S3
     resources :site_configuration, only: [] do

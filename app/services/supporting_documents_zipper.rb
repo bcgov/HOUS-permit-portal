@@ -21,7 +21,7 @@ class SupportingDocumentsZipper
 
   def create_zip_file
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
-      permit_application.supporting_documents.each do |document|
+      permit_application.completed_supporting_documents.each do |document|
         file_path = download_file(document)
         zipfile.add("#{SecureRandom.alphanumeric(4)}_#{document.file_name}", file_path) if file_path
       end

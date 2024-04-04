@@ -225,6 +225,17 @@ export const RequirementForm = observer(
       setFirstComponentKey(firstComponent.key)
     }
 
+    let permitAppOptions = {
+      ...defaultOptions,
+      ...(isDraft ? {} : { readOnly: true }),
+    }
+    permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
+      // documentParent: "PermitApplication",
+      // documentParentId: permitApplication.id,
+      persistFileUploadAction: "PATCH",
+      persistFileUploadUrl: `/api/permit_applications/${permitApplication.id}/upload_supporting_document`,
+    }
+
     return (
       <>
         <Flex
@@ -271,7 +282,7 @@ export const RequirementForm = observer(
                                      mutated*/
             submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
-            options={{ ...defaultOptions, ...(isDraft ? {} : { readOnly: true }) }}
+            options={permitAppOptions}
             onBlur={onBlur}
             onChange={onChange}
             onInitialized={onInitialized}

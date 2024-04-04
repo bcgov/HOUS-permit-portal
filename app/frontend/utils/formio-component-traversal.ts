@@ -1,27 +1,27 @@
 import { t } from "i18next"
 
-const findPanelComponents = (components) => {
-  let panelComponents = []
+const findComponentsByType = (components, type) => {
+  let foundComponents = []
 
   // Function to recursively traverse the components
   function traverseComponents(subComponents) {
-    subComponents.forEach((container) => {
-      // Check if the component type is 'panel'
-      if (container?.component?.type === "panel" || container?.type === "panel") {
-        // If it is a panel, add it to the list
-        panelComponents.push(container)
-      } else if (container.components && container.components.length) {
+    subComponents.forEach((component) => {
+      if (component?.component?.type === type || component?.type === type) {
+        // If the component matches the type, add it to the list
+        foundComponents.push(component)
+      } else if (component.components && component.components.length) {
         // If the component has nested components, traverse them recursively
-        traverseComponents(container.components)
+        traverseComponents(component.components)
       }
     })
   }
 
-  // Start traversing from the top-level components
   traverseComponents(components)
-
-  return panelComponents
+  return foundComponents
 }
+
+const findPanelComponents = (components) => findComponentsByType(components, "panel")
+const findFileComponents = (components) => findComponentsByType(components, "simplefile")
 
 export const getNestedComponentsIncomplete = (components) => {
   //only look at visible objects
@@ -56,6 +56,17 @@ export const combineComplianceHints = (
   formattedComplianceData
 ) => {
   let updatedJson = formJson
+  //special step - utilize the fileKey variable in simplefile to pass the file through, this is done this way to not modify the underlying chefs simplefile implementation
+  //currently better than doing on on the requirement_json service as we will likley modify items in the long run
+  const fileComponents = findFileComponents(updatedJson.components)
+  fileComponents.forEach((fileComponent) => {
+    if (fileComponent.multiple) {
+      //For multiple files do something else
+    } else {
+      fileComponent["fileKey"] = fileComponent.key
+    }
+  })
+
   //jurisdicition-form customizations
   const blocksLookups = templateVersionCustomizationsByJurisdiction?.requirementBlockChanges || {}
   const blocksList = findPanelComponents(updatedJson.components)
