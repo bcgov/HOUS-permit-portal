@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, StylesConfig, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
+import { RouterLink } from "../../navigation/router-link"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
@@ -86,6 +87,9 @@ export const AddressSelect = observer(function ({
           {...rest}
         />
       </InputGroup>
+      <Text mt={2}>
+        {t("landing.cantFind")} <RouterLink to="/jurisdictions">{t("landing.browseList")}</RouterLink>
+      </Text>
     </FormControl>
   )
 })

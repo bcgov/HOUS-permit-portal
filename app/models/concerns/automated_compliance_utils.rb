@@ -19,7 +19,7 @@ module AutomatedComplianceUtils
     if requirement.input_options.dig("computed_compliance", "module") == "DigitalSealValidator"
       #if there is no related supporting document, consider this okay and not run the autopopulate again
       #if there is a supporting document, check if the compliance has a result, if not, let it know as unfilled
-      doc = supporting_documents.find_by(data_key: field_id)
+      doc = active_supporting_documents.find_by(data_key: field_id)
       doc.present? ? doc.compliance_data.empty? : false
 
       #ALTERNATIVELY search submssion data itself, identify fields with values and loop through

@@ -13,7 +13,7 @@ enum EComponentType {
   date = "date",
   fieldset = "fieldset",
   columns = "columns",
-  file = "file",
+  file = "simplefile",
   number = "number",
   panel = "panel",
   select = "select",
@@ -64,7 +64,7 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
       case EComponentType.checklist: {
         const options = R.path([dataPath, component.key], permitApplication.submissionData.data)
         const label = component.label
-        const values: any = Object.keys(options).filter((key) => !!options[key])
+        const values: any = Object.keys(options ?? {}).filter((key) => !!options[key])
         return { options, values, label, isVisible: !R.isEmpty(values) && !R.isNil(label) }
       }
       case EComponentType.datagrid: {
@@ -179,7 +179,7 @@ const FormComponent = function ApplicationPDFFormComponent({ component, dataPath
       return isVisible ? <InputField value={value} label={label} type={component.type} /> : null
     }
     default:
-      import.meta.env.DEV && console.log("*** missing component", component)
+      import.meta.env.DEV && console.log("[DEV]: missing component", component)
       return null
   }
 }

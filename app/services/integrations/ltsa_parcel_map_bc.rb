@@ -28,7 +28,7 @@ class Integrations::LtsaParcelMapBc
     @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
   end
 
-  def search_pin_from_coordinates(coord_array: [], field: "*")
+  def search_pin_from_coordinates(coord_array: [], fields: "*")
     #assume we use SR4326 as geocoder defaults to that as its main coordinate version
     query = "returnIdsOnly=false&returnCountOnly=false"
     query += "&where=PIN+IS+NOT+NULL&geometry=#{coord_array.join("%2C")}"

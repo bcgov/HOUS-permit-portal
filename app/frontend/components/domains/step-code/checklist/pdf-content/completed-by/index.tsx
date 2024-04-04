@@ -4,6 +4,7 @@ import { t } from "i18next"
 import React, { useContext } from "react"
 import { datefnsAppDateFormat } from "../../../../../../constants"
 import { theme } from "../../../../../../styles/theme"
+import { i18nPrefix } from "../../completed-by/i18n-prefix"
 import { CheckBox } from "../shared/check-box"
 import { Field } from "../shared/field"
 import { HStack } from "../shared/h-stack"
@@ -12,7 +13,6 @@ import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 
 export const CompletedBy = function StepCodeChecklistPDFCompletedBy() {
-  const i18nPrefix = "stepCodeChecklist.edit.completedBy"
   const { checklist } = useContext(StepCodeChecklistContext)
 
   return (

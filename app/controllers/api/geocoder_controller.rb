@@ -40,11 +40,11 @@ class Api::GeocoderController < Api::ApplicationController
       wrapper = Wrappers::Geocoder.new
       pids = wrapper.pids(geocoder_params[:site_id])
       first_pid = pids.first
-      raise StadardError unless first_pid.present?
+      raise StandardError unless first_pid.present?
 
       attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: first_pid)
       jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
-      raise StadardError unless jurisdiction.present?
+      raise StandardError unless jurisdiction.present?
 
       render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint }
     rescue StandardError => e

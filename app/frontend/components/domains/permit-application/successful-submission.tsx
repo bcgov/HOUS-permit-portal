@@ -17,14 +17,14 @@ export const SuccessfulSubmissionScreen = observer(() => {
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const { jurisdiction, number } = currentPermitApplication
-  const { name, primaryContact } = jurisdiction
+  const { qualifiedName, primaryContact } = jurisdiction
   return (
     <Container maxW="container.lg">
       <Flex direction="column" align="center" my={24} gap={8}>
         <Icon as={CheckCircle} boxSize="14" color="semantic.success" />
         <VStack>
           <Heading as="h1">{t("permitApplication.new.submitted")}</Heading>
-          <Text>{t("permitApplication.new.emailed", { jurisdictionName: name })}</Text>
+          <Text>{t("permitApplication.new.emailed", { jurisdictionName: qualifiedName })}</Text>
           <Tag mt="4" color="semantic.info" border="1px solid" borderColor="semantic.info" p={2}>
             {t("permitApplication.new.yourReference", { number })}
           </Tag>
@@ -38,7 +38,7 @@ export const SuccessfulSubmissionScreen = observer(() => {
               <Text as="span" fontWeight="700">
                 {t("permitApplication.new.hearBack")}
               </Text>{" "}
-              {t("permitApplication.new.contactInstruction", { jurisdictionName: name })}
+              {t("permitApplication.new.contactInstruction", { jurisdictionName: qualifiedName })}
             </Text>
             {primaryContact && <ContactCard w="fit-content" contact={primaryContact} />}
           </Flex>

@@ -197,6 +197,7 @@ types" do
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|numberRequirement",
           type: "number",
+          delimiter: true,
           input: true,
           label: "Number Requirement",
           widget: {
@@ -232,6 +233,7 @@ types" do
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|dateRequirement",
           type: "datetime",
+          tableView: false,
           input: true,
           label: "Date  Requirement",
           enableTime: false,
@@ -248,7 +250,7 @@ types" do
             useLocaleSettings: false,
             allowInput: true,
             mode: "single",
-            enableTime: true,
+            enableTime: false,
             noCalendar: false,
             format: "yyyy-MM-dd",
             hourIncrement: 1,

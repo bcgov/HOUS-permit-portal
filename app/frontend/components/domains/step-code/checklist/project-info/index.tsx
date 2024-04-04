@@ -8,7 +8,7 @@ import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { BuildingTypeSelect } from "./building-type-select"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -18,33 +18,30 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
   const { control } = useFormContext()
 
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
+    <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
       <Text fontSize="lg" fontWeight="bold">
-        {t(`${translationPrefix}.stages.${checklist.stage}`)}
+        {t(`${i18nPrefix}.stages.${checklist.stage}`)}
       </Text>
       <TextFormControl
-        label={t(`${translationPrefix}.permitNum`)}
+        label={t(`${i18nPrefix}.permitNum`)}
         inputProps={{ isDisabled: true, value: checklist.buildingPermitNumber || "" }}
       />
-      <TextFormControl label={t(`${translationPrefix}.builder`)} fieldName="builder" />
+      <TextFormControl label={t(`${i18nPrefix}.builder`)} fieldName="builder" />
 
       <TextFormControl
-        label={t(`${translationPrefix}.address`)}
+        label={t(`${i18nPrefix}.address`)}
         inputProps={{ isDisabled: true, value: checklist.address || "" }}
         leftElement={<MapPin size={20} color="var(--chakra-colors-greys-grey01)" />}
       />
       <TextFormControl
-        label={t(`${translationPrefix}.jurisdiction`)}
+        label={t(`${i18nPrefix}.jurisdiction`)}
         inputProps={{ isDisabled: true, value: checklist.jurisdictionName }}
       />
-      <TextFormControl
-        label={t(`${translationPrefix}.pid`)}
-        inputProps={{ isDisabled: true, value: checklist.pid || "" }}
-      />
+      <TextFormControl label={t(`${i18nPrefix}.pid`)} inputProps={{ isDisabled: true, value: checklist.pid || "" }} />
 
       <Flex gap={2} w="full">
         <FormControl flex={1}>
-          <FormLabel>{t(`${translationPrefix}.buildingType.label`)}</FormLabel>
+          <FormLabel>{t(`${i18nPrefix}.buildingType.label`)}</FormLabel>
           <InputGroup>
             <Controller
               control={control}
@@ -56,7 +53,7 @@ export const ProjectInfo = observer(function ProjectInfo({ checklist }: IProps) 
 
         <TextFormControl
           flex={1}
-          label={t(`${translationPrefix}.dwellingUnits`)}
+          label={t(`${i18nPrefix}.dwellingUnits`)}
           inputProps={{ isDisabled: true, value: checklist.dwellingUnitsCount || "-" }}
         />
       </Flex>

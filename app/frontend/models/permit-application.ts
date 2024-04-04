@@ -112,7 +112,14 @@ export const PermitApplicationModel = types
       const unfilteredContacts = allContactFieldPairs
         .map((pairs) => {
           //contactField usually has an array of contacts
-          const [blockId, contactArray] = pairs
+          let [blockId, contactArray] = pairs
+
+          // Check if contactArray is not an array
+          if (!Array.isArray(contactArray)) {
+            // If it's not an array, wrap it in an array
+            contactArray = [contactArray]
+          }
+
           const reformatObject = (contact, index) => {
             if (R.keys(contact).find((key: string) => key.includes("_contact"))) {
               const firstName = contact[R.keys(contact).find((key: string) => key.includes("_contact|firstName"))!]
@@ -131,7 +138,7 @@ export const PermitApplicationModel = types
               null
             }
           }
-          return contactArray.map((contact, index) => reformatObject(contact, index)).filter((outNull) => outNull)
+          return contactArray?.map((contact, index) => reformatObject(contact, index)).filter((outNull) => outNull)
         })
         .flat()
 

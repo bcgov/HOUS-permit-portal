@@ -7,7 +7,7 @@ interface IProps {
   success: boolean
 }
 export const RequirementsMetTag = function RequirementsMetTag({ success }: IProps) {
-  const translationPrefix = "stepCodeChecklist.edit.complianceGrid.requirementsMetTag"
+  const i18nPrefix = "stepCodeChecklist.edit.complianceGrid.requirementsMetTag"
   return (
     <Tag
       bg={success ? "semantic.successLight" : "semantic.errorLight"}
@@ -15,7 +15,7 @@ export const RequirementsMetTag = function RequirementsMetTag({ success }: IProp
       textTransform="uppercase"
     >
       <TagLeftIcon boxSize="12px" as={success ? Check : X} />
-      <TagLabel>{success ? t(`${translationPrefix}.pass`) : t(`${translationPrefix}.fail`)}</TagLabel>
+      <TagLabel>{success ? t(`${i18nPrefix}.pass`) : t(`${i18nPrefix}.fail`)}</TagLabel>
     </Tag>
   )
 }
