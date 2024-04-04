@@ -1,7 +1,7 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
-  include Api::Concerns::FormSupportingDocuments
-  before_action :set_permit_application, only: %i[show update submit]
+
+  before_action :set_permit_application, only: %i[show update submit upload_supporting_document]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -38,10 +38,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     submission_section = permit_application_params.dig("submission_data", "data", "section-completion-key")
     submission_section&.each { |key, value| submission_section[key] = nil }
 
-    if @permit_application.draft? &&
-         @permit_application.update_and_respond_with_backend_changes(
-           extract_s3_uploads_from_params(permit_application_params),
-         )
+    if @permit_application.draft? && @permit_application.update(permit_application_params)
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
       end
@@ -60,17 +57,30 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
+  def upload_supporting_document
+    authorize @permit_application
+    success = @permit_application.update(supporting_document_params)
+    if success
+      regex_pattern =
+        "(#{supporting_document_params["supporting_documents_attributes"].map { |spd| spd.dig("file", "id") }.compact.join("|")})$"
+      render_success @permit_application.supporting_documents.file_ids_with_regex(regex_pattern),
+                     nil,
+                     { blueprint: SupportingDocumentBlueprint, blueprint_opts: { view: :form_io_details } }
+    else
+      render_error "permit_application.update_error",
+                   message_opts: {
+                     error_message: @permit_application.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
   def submit
     authorize @permit_application
     signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
 
     # for submissions, we do not run the automated compliance as that should have already been complete
     if signed &&
-         @permit_application.update_and_respond_with_backend_changes(
-           extract_s3_uploads_from_params(
-             permit_application_params.merge(status: :submitted, signed_off_at: Time.current),
-           ),
-         )
+         @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
       @permit_application.send_submit_notifications
 
       render_success @permit_application,
@@ -117,9 +127,14 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :nickname,
       :pin,
       :pid,
-      supporting_documents_attributes: %i[file data_key],
       submission_data: {
       },
+    )
+  end
+
+  def supporting_document_params
+    params.require(:permit_application).permit(
+      supporting_documents_attributes: [:data_key, file: [:id, :storage, metadata: {}]],
     )
   end
 

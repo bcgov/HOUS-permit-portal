@@ -17,9 +17,6 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
   has_one :step_code
 
-  has_many :supporting_documents, dependent: :destroy
-  accepts_nested_attributes_for :supporting_documents, allow_destroy: true
-
   # Custom validation
 
   validate :submitter_must_have_role
