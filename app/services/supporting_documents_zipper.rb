@@ -30,7 +30,7 @@ class SupportingDocumentsZipper
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
       permit_application.supporting_documents.each do |document|
         file_path = download_file(document)
-        zipfile.add("#{SecureRandom.alphanumeric(4)}_#{document.file_name}", file_path) if file_path
+        zipfile.add(document.standardized_filename, file_path) if file_path
       end
     end
   end

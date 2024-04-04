@@ -36,6 +36,10 @@ class SupportingDocument < ApplicationRecord
     }
   end
 
+  def standardized_filename
+    "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}.#{file_data["id"].split(".").last}"
+  end
+
   def file_size
     file_data.dig("metadata", "size")
   end
