@@ -118,7 +118,8 @@ export const NavBar = observer(() => {
             <Spacer />
             <HStack gap={3}>
               {!loggedIn && <HelpDrawer />}
-              {currentUser?.isSubmitter && <NavBarSearch />}
+              {/* todo: navbar search? */}
+              {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
               {currentUser?.isSubmitter && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
@@ -139,9 +140,11 @@ export const NavBar = observer(() => {
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
-              <RouterLinkButton variant="tertiary" to="/jurisdictions" color={loggedIn ? "greys.white" : "black"}>
-                {t("home.jurisdictionsTitle")}
-              </RouterLinkButton>
+              {(!loggedIn || currentUser?.isSubmitter) && (
+                <RouterLinkButton variant="tertiary" to="/jurisdictions">
+                  {t("home.jurisdictionsTitle")}
+                </RouterLinkButton>
+              )}
               <NavBarMenu />
             </HStack>
           </Flex>
@@ -238,7 +241,9 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
               </Text>
               <MenuGroup title={currentUser.name} noOfLines={1}>
                 <MenuDivider />
-                <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                {!currentUser.isReviewStaff && (
+                  <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                )}
                 {currentUser?.isSuperAdmin && superAdminOnlyItems}
                 {currentUser?.isReviewManager && reviewManagerOnlyItems}
                 {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
@@ -259,6 +264,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
               </MenuList>
               <MenuDivider />
               <NavMenuItem label={t("site.home")} to="/" />
+              <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
             </>
           )}
 

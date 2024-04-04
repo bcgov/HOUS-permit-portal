@@ -65,7 +65,7 @@ const options = {
           intro:
             "The B.C. government is working with partners across all levels of government and First Nations to standardize and streamline the building permit process and unlock the construction of more homes, faster.",
           easilyUpload: "Easily upload required building permit information",
-          bestPractices: "Best-practices from local jurisdictions",
+          bestPractices: "Standardized requirements across participating jurisdictions",
           easyToFollow: "Easy to follow instructions to help you submit a building permit application",
           accessMyPermits: "Access my building permits",
           accessExplanation:
