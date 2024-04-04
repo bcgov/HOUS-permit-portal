@@ -1,6 +1,6 @@
 import { IconButton, Tag } from "@chakra-ui/react"
 import { Tag as TagIcon, X as XIcon } from "@phosphor-icons/react"
-import { debounce } from "lodash"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useCallback } from "react"
 import { ControlProps, MultiValueProps, OptionProps, components } from "react-select"

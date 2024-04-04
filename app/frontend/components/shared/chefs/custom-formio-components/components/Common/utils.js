@@ -1,8 +1,13 @@
-import _ from "lodash"
+import each from "lodash/each"
+import filter from "lodash/filter"
+import isEqual from "lodash/isEqual"
+import sortBy from "lodash/sortBy"
+import unionWith from "lodash/unionWith"
 import Evaluator from "./Evaluator.js"
+
 const EditFormUtils = {
   sortAndFilterComponents(components) {
-    return _.filter(_.sortBy(components, "weight"), (item) => !item.ignore)
+    return filter(sortBy(components, "weight"), (item) => !item.ignore)
   },
   unifyComponents(objValue, srcValue) {
     if (objValue.key && srcValue.key) {
@@ -11,19 +16,19 @@ const EditFormUtils = {
       }
       if (objValue.key === srcValue.key) {
         // Create complete objects by including missing keys.
-        _.each(objValue, (value, prop) => {
+        each(objValue, (value, prop) => {
           if (objValue.overrideEditForm || !srcValue.hasOwnProperty(prop)) {
             srcValue[prop] = value
           }
         })
-        _.each(srcValue, (value, prop) => {
+        each(srcValue, (value, prop) => {
           if (srcValue.overrideEditForm || !objValue.hasOwnProperty(prop)) {
             objValue[prop] = value
           }
         })
         if (objValue.components) {
           srcValue.components = EditFormUtils.sortAndFilterComponents(
-            _.unionWith(objValue.components, srcValue.components, EditFormUtils.unifyComponents)
+            unionWith(objValue.components, srcValue.components, EditFormUtils.unifyComponents)
           )
         }
         return true
@@ -31,7 +36,7 @@ const EditFormUtils = {
         return false
       }
     }
-    return _.isEqual(objValue, srcValue)
+    return isEqual(objValue, srcValue)
   },
   logicVariablesTable(additional) {
     additional = additional || ""
