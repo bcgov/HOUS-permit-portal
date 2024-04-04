@@ -7,7 +7,14 @@ class SupportingDocumentsZipper
   def initialize(permit_application_id)
     @permit_application = PermitApplication.find(permit_application_id)
     @temp_files = []
-    @file_path = Rails.root.join("tmp", "#{@permit_application.number}_#{Time.now.to_i}.zip")
+    # Ensure tmp/zipfiles directory exists
+    zipfiles_directory = Rails.root.join("tmp", "zipfiles")
+    FileUtils.mkdir_p(zipfiles_directory) unless File.directory?(zipfiles_directory)
+    submitter = @permit_application.submitter
+    @file_path =
+      zipfiles_directory.join(
+        "#{@permit_application.number}.#{submitter.first_name.first}.#{submitter.last_name}.#{Date.today.strftime("%Y.%m.%d")}.zip",
+      )
   end
 
   def perform
