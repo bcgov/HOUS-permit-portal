@@ -78,6 +78,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
+    if (formio.pristine) return
+
     const submissionData = formio.data
     try {
       const response = await currentPermitApplication.update({
@@ -88,6 +90,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         updateFormIoValues(formio, response.data.data.frontEndFormUpdate)
         //update file hashes that have been changed
       }
+      formio.setPristine(true)
       return response.ok
     } catch (e) {
       return false
