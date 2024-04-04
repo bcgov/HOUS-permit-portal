@@ -6,6 +6,7 @@ class Api::SessionsController < Devise::SessionsController
 
   def create
     user = User.find_by(username: params[:user][:username])
+    return render_error("user.login_error", status: :unauthorized) if user.present? && user.discarded?
     return render_error("user.not_confirmed_error", status: :unauthorized) if user.present? && !user.confirmed?
     self.resource = warden.authenticate(auth_options)
     return render_error("user.login_error", status: :unauthorized) unless self.resource.present?
