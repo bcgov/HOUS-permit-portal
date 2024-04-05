@@ -121,10 +121,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
           </Button>
         </Stack>
       </Flex>
-      <Box id="permitApplicationFieldsContainer">
+      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"}>
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}

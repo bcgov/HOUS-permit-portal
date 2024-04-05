@@ -81,7 +81,15 @@ export const FieldsSetup = observer(function FieldsSetup() {
       </Text>
 
       <Box as={"section"} w={"full"} border={"1px solid"} borderColor={"border.light"} borderRadius={"lg"} mt={4}>
-        <Flex py={3} px={6} w={"full"} background={"greys.grey04"}>
+        <Flex
+          py={2}
+          px={6}
+          w={"full"}
+          background={"greys.grey04"}
+          borderTopRadius="lg"
+          borderBottom="1px solid"
+          borderBottomColor="border.light"
+        >
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
             fontWeight={700}

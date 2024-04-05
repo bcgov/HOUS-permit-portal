@@ -147,7 +147,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const scrollToBottom = () => {
-    handleScrollToBottom("permitApplicationFieldsContainer")
+    handleScrollToBottom()
   }
 
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
@@ -165,6 +165,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         position="sticky"
         top="0"
         zIndex="11"
+        flexDirection={{ base: "column", md: "row" }}
       >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
@@ -207,7 +208,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               </Tooltip>
             </form>
 
-            <Text>{permitTypeAndActivity}</Text>
+            <Text noOfLines={1}>{permitTypeAndActivity}</Text>
             <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
@@ -231,12 +232,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Button>
           </HStack>
         )}
-        <FloatingHelpDrawer top="130px" position="absolute" />
+        <FloatingHelpDrawer top={{ base: "145px", md: "130px" }} position="absolute" />
       </Flex>
-      <Box id="permitApplicationFieldsContainer">
+      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"}>
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}

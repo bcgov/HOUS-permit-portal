@@ -120,7 +120,12 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
       />
-      <Box borderTop={"1px solid"} borderColor={"border.base"}>
+      <Box
+        borderTop={"1px solid"}
+        borderColor={"border.base"}
+        id="sidebar-and-form-container"
+        sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}
+      >
         <SectionsSidebar
           sections={templateSections}
           onItemClick={scrollIntoView}
@@ -130,8 +135,9 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
           bg={hasNoSections ? "greys.grey03" : undefined}
           ref={rightContainerRef}
           position={"relative"}
-          width="var(--app-sidebar-remaining-width)"
-          display="inline-block"
+          display="flex"
+          flexDirection="column"
+          id="form-template"
         >
           <Flex
             position="sticky"
@@ -161,7 +167,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               </Button>
             </ButtonGroup>
           </Flex>
-          <FloatingHelpDrawer />
+          <FloatingHelpDrawer top="100px" />
           <SectionsDisplay
             sections={templateSections}
             isCollapsedAll={isCollapsedAll}

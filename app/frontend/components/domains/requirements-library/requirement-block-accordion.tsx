@@ -148,8 +148,13 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   p: 0,
                 },
               }}
-              px={2}
+              px={6}
               my={4}
+              mx="-4"
+              pb={4}
+              className="requirement-block-description"
+              borderBottom="1px solid"
+              borderBottomColor="border.light"
             >
               <Editor htmlValue={requirementBlock.displayDescription} readonly />
             </Box>

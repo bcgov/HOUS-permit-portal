@@ -61,6 +61,9 @@ const styles = {
     [".chakra-menu__menu-list .chakra-menu__menuitem "]: {
       borderRadius: "0",
     },
+    [".requirement-block-description"]: {
+      marginBottom: "var(--chakra-sizes-6)",
+    },
 
     // Nav menu: when user clicks the Menu and the dropdown menu is opened, dim the page behind
     [".show-menu-overlay-background"]: {
