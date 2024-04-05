@@ -31,7 +31,7 @@ class User < ApplicationRecord
   validate :validate_password_complexity
 
   # https://github.com/waiting-for-dev/devise-jwt
-  self.skip_session_storage = %i[http_auth params_auth]
+  self.skip_session_storage = %i[params_auth]
 
   # Associations
   belongs_to :jurisdiction, optional: true
