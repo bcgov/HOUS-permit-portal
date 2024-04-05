@@ -1,4 +1,4 @@
-module Api::Concerns::Search::JurisdictionUsers
+module Api::Concerns::Search::AdminUsers
   extend ActiveSupport::Concern
 
   def perform_user_search
@@ -6,15 +6,11 @@ module Api::Concerns::Search::JurisdictionUsers
       User.search(
         user_query,
         where: {
-          jurisdiction_id: @jurisdiction&.id,
           discarded: discarded,
-          # Only show the review managers if current user is a super admin, but also show reviewers if a review manager
           role:
             (
               if current_user.super_admin?
-                ["review_manager"]
-              elsif current_user.review_manager?
-                %w[review_manager reviewer]
+                ["super_admin"]
               else
                 nil
               end

@@ -1,16 +1,13 @@
 import { Box, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
 import { useSearch } from "../../../../hooks/use-search"
 import { IUser } from "../../../../models/user"
 import { useMst } from "../../../../setup/root"
-import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
-import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { ToggleArchivedButton } from "../../../shared/buttons/show-archived-button"
 import { SearchGrid } from "../../../shared/grid/search-grid"
@@ -18,13 +15,13 @@ import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { ManageUserMenu } from "../../../shared/user/manage-user-menu"
 import { RoleTag } from "../../../shared/user/role-tag"
-import { GridHeaders } from "./grid-header"
+import { GridHeaders } from "../../jurisdictions/users/grid-header"
 
-export const JurisdictionUserIndexScreen = observer(function JurisdictionUserIndex() {
+export const AdminUserIndexScreen = observer(() => {
+  const i18nPrefix = "siteConfiguration.adminUserIndex"
   const { t } = useTranslation()
-  const { userStore } = useMst()
-  const { currentJurisdiction, error } = useJurisdiction()
-
+  const { userStore, jurisdictionStore } = useMst()
+  const { resetCurrentJurisdiction } = jurisdictionStore
   const {
     currentPage,
     totalPages,
@@ -34,19 +31,23 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
     handlePageChange,
     isSearching,
     showArchived,
+    tableUsers,
   } = userStore
 
-  useSearch(userStore, [currentJurisdiction?.id, showArchived])
+  useEffect(() => {
+    // The userStore shares search functionality with the jurisdiction specific screens
+    // the absense of currentJurisdiction indicates to that method that this is the admin search.
+    resetCurrentJurisdiction()
+  }, [])
 
-  if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction) return <LoadingScreen />
+  useSearch(userStore, [showArchived])
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
-            <Heading as="h1">{currentJurisdiction?.qualifiedName}</Heading>
+            <Heading as="h1">{t(`${i18nPrefix}.title`)}</Heading>
           </Box>
           <RouterLinkButton alignSelf="flex-end" to={"invite"}>
             {t("user.index.inviteButton")}
@@ -60,7 +61,7 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
               <SharedSpinner />
             </Flex>
           ) : (
-            userStore.tableUsers.map((u: IUser) => {
+            tableUsers.map((u: IUser) => {
               return (
                 <Box key={u.id} className={"jurisdiction-user-index-grid-row"} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight={700}>{<RoleTag role={u.role} />}</SearchGridItem>

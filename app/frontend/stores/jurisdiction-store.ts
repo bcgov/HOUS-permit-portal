@@ -109,6 +109,9 @@ export const JurisdictionStoreModel = types
     setCurrentJurisdiction(jurisdictionId) {
       self.currentJurisdiction = jurisdictionId
     },
+    resetCurrentJurisdiction() {
+      self.currentJurisdiction = null
+    },
     setCurrentJurisdictionBySlug(slug) {
       const j = self.jurisdictions.find((j) => j.slug == slug)
       self.currentJurisdiction = j?.id

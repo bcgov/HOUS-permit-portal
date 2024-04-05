@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { values } from "mobx"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
@@ -9,6 +10,7 @@ import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
 import { EUserSortFields } from "../types/enums"
 import { IEULA } from "../types/types"
+import { toCamelCase } from "../utils/utility-functions"
 
 export const UserStoreModel = types
   .compose(
@@ -17,8 +19,9 @@ export const UserStoreModel = types
       currentUser: types.maybeNull(types.safeReference(UserModel)),
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
       eula: types.maybeNull(types.frozen<IEULA>()),
+      tableUsers: types.array(types.reference(UserModel)),
     }),
-    createSearchModel<EUserSortFields>("searchUsers", Object.values(EUserSortFields))
+    createSearchModel<EUserSortFields>("searchUsers")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -34,8 +37,15 @@ export const UserStoreModel = types
     get takenEmails(): string[] {
       return self.invitationResponse?.data?.emailTaken?.map((user) => user.email) || []
     },
+    getSortColumnHeader(field: EUserSortFields) {
+      //@ts-ignore
+      return t(`user.fields.${toCamelCase(field)}`)
+    },
   }))
   .actions((self) => ({
+    setTableUsers: (users) => {
+      self.tableUsers = users.map((user) => user.id)
+    },
     setUsers(users) {
       R.forEach((u) => self.usersMap.put(u), users)
     },
@@ -89,21 +99,25 @@ export const UserStoreModel = types
         self.resetPages()
       }
 
-      const response = yield self.environment.api.fetchJurisdictionUsers(
-        self.rootStore.jurisdictionStore.currentJurisdiction.id,
-        {
-          query: self.query,
-          sort: self.sort,
-          page: opts?.page ?? self.currentPage,
-          perPage: opts?.countPerPage ?? self.countPerPage,
-          showArchived: self.showArchived,
-        }
-      )
+      const searchParams = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
+      }
+
+      const response = yield self.rootStore.jurisdictionStore.currentJurisdiction?.id
+        ? self.environment.api.fetchJurisdictionUsers(
+            self.rootStore.jurisdictionStore.currentJurisdiction.id,
+            searchParams
+          )
+        : self.environment.api.fetchAdminUsers(searchParams)
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "usersMap")
 
-        self.rootStore.jurisdictionStore.currentJurisdiction.setTableUsers(response.data.data)
+        self.setTableUsers(response.data.data)
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount

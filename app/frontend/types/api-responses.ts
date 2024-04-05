@@ -24,7 +24,7 @@ export interface IRequirementTemplateResponse extends IApiResponse<IRequirementT
 
 export interface IJurisdictionResponse extends IApiResponse<IJurisdiction[], IPageMeta> {}
 
-export interface IJurisdictionUserResponse extends IApiResponse<IUser[], IPageMeta> {}
+export interface IUsersResponse extends IApiResponse<IUser[], IPageMeta> {}
 
 export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPermitApplication[], IPageMeta> {}
 
