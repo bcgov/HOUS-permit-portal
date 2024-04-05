@@ -153,7 +153,7 @@ export const PermitApplicationStoreModel = types
     }),
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication?.stepCode &&
+      self.currentPermitApplication &&
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
