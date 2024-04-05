@@ -6,7 +6,6 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-ro
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
-import { Footer } from "../../shared/base/footer"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAModal } from "../../shared/eula-modal"
 import { NavBar } from "./nav-bar"
@@ -152,6 +151,7 @@ const ProfileScreen = lazy(() =>
 const RedirectScreen = lazy(() =>
   import("../../shared/base/redirect-screen").then((module) => ({ default: module.RedirectScreen }))
 )
+const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({ default: module.Footer })))
 
 export const Navigation = observer(() => {
   const { sessionStore, siteConfigurationStore } = useMst()
