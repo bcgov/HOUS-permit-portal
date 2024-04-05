@@ -2,13 +2,13 @@ import { Document, Font, Page } from "@react-pdf/renderer"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
+import { Footer } from "../../../../shared/base/footer"
 import { styles } from "../../../../shared/permit-applications/pdf-content/application/styles"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
 import { ComplianceSummary } from "./compliance-summary"
 import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
 import { EnergyStepCompliance } from "./energy-step-compliance"
-import { Footer } from "./footer"
 import { ProjectInfo } from "./project-info"
 import { ZeroCarbonStepCompliance } from "./zero-carbon-step-compliance"
 
@@ -30,7 +30,7 @@ export const PDFContent = function StepCodeChecklistPDFContent({ checklist, perm
         <EnergyPerformanceCompliance checklist={checklist} />
         <EnergyStepCompliance checklist={checklist} />
         <ZeroCarbonStepCompliance checklist={checklist} />
-        <Footer checklist={checklist} permitApplication={permitApplication} />
+        <Footer permitApplication={permitApplication} />
       </Page>
     </Document>
   )
