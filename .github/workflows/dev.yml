@@ -36,8 +36,6 @@ jobs:
             app=dev-hous-permit-portal
             git-sha=${{ github.sha }}
           containerfiles: ./devops/docker/app/Dockerfile
-        env:
-          VITE_BCGOV_HELP_IFRAME_URL: ${{ vars.VITE_BCGOV_HELP_IFRAME_URL }}
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:

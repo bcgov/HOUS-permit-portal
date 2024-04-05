@@ -56,9 +56,7 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
               },
             }}
           >
-            {import.meta.env.VITE_BCGOV_HELP_IFRAME_URL && (
-              <iframe src={import.meta.env.VITE_BCGOV_HELP_IFRAME_URL} title="Help"></iframe>
-            )}
+            <iframe src="https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE" title="Help"></iframe>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
