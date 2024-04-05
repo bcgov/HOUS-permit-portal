@@ -31,6 +31,8 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
       <Flex
         direction="column"
         boxShadow="md"
+        borderRight="1px solid"
+        borderRightColor="greys.grey02"
         width="var(--app-sidebar-width)"
         position="sticky"
         top={permitHeaderHeight}
@@ -39,7 +41,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
         float="left"
         id="permit-checklist-sidebar"
       >
-        <Box overflowY="auto" border="1px solid" borderColor="greys.grey02">
+        <Box overflowY="auto">
           <Tabs orientation="vertical" index={selectedTabIndex} w="full">
             <TabList w="full" border={0} py="4" pb={navHeight}>
               {formJson.components.map((section) => {
