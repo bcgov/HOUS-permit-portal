@@ -124,7 +124,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
         <EditableBuilderHeader requirementTemplate={requirementTemplate} />
-        <Box borderTop={"1px solid"} borderColor={"border.base"} position="relative">
+        <Box
+          id="sidebar-and-form-container"
+          borderTop={"1px solid"}
+          borderColor={"border.base"}
+          position="relative"
+          sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}
+        >
           {isReorderMode ? (
             <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
           ) : (

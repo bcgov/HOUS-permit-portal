@@ -39,7 +39,7 @@ $error: #d9292f;
 
 html {
   --app-sidebar-width: 368px;
-  --app-sidebar-remaining-width: calc(100vw - var(--app-sidebar-width) - 16px);
+  --app-sidebar-remaining-width: calc(100vw - var(--app-sidebar-width));
   --app-permit-form-right-white-space: 170px; // space for floating greyButtons
   --app-permit-grey-controlbar-height: 72px;
   --app-permit-fieldset-right-white-space: 140px;
