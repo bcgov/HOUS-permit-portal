@@ -7,12 +7,13 @@ import { CoverPage } from "./cover"
 
 interface IProps {
   permitApplication: IPermitApplication
+  assetDirectoryPath?: string
 }
 
-export const PDFContent = function PermitApplicationPDFContent({ permitApplication }: IProps) {
+export const PDFContent = function PermitApplicationPDFContent({ permitApplication, assetDirectoryPath }: IProps) {
   return (
     <Document>
-      <CoverPage permitApplication={permitApplication} />
+      <CoverPage permitApplication={permitApplication} assetDirectoryPath={assetDirectoryPath} />
       <ApplicationFields permitApplication={permitApplication} />
     </Document>
   )

@@ -28,10 +28,14 @@ const generatePdfs = async (pdfJsonData) => {
     )
 
     const permitApplicationPDFPath = pdfData.meta.generationPaths.permitApplication
+    const assetDirectoryPath = pdfData.meta.assetDirectoryPath
 
     permitApplicationPDFPath &&
       (await ReactPDF.renderToFile(
-        <PermitApplicationPDFContent permitApplication={pdfData.permitApplication} />,
+        <PermitApplicationPDFContent
+          permitApplication={pdfData.permitApplication}
+          assetDirectoryPath={assetDirectoryPath}
+        />,
         permitApplicationPDFPath
       ))
 

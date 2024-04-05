@@ -12,6 +12,7 @@ class PdfGenerationJob
     checklist = permit_application&.step_code&.pre_construction_checklist
 
     generation_directory_path = Rails.root.join("tmp/files")
+    asset_directory_path = Rails.root.join("public")
 
     # Check if the directory exists, and if not, create it
     unless File.directory?(generation_directory_path)
@@ -32,6 +33,7 @@ class PdfGenerationJob
           permitApplication: generation_directory_path.join(application_filename).to_s,
           stepCodeChecklist: checklist && generation_directory_path.join(step_code_filename).to_s,
         },
+        assetDirectoryPath: asset_directory_path.to_s,
       },
     }.to_json
 
