@@ -78,7 +78,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
-    if (formio.pristine) return
+    if (formio.pristine) return true
 
     const submissionData = formio.data
     try {
