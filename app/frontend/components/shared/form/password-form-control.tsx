@@ -51,10 +51,7 @@ export const PasswordFormControl = ({
                   }
 
                   if (required || passwordWatch) {
-                    return (
-                      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}$/.test(str) ||
-                      t("auth.passwordInvalidFormat")
-                    )
+                    return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}$/.test(str) || t("auth.passwordInvalidFormat")
                   }
                 },
               },
