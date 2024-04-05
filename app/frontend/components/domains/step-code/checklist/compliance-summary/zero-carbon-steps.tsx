@@ -1,9 +1,14 @@
 import { Flex, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { i18nPrefix } from "./i18n-prefix"
 
-export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }) {
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+
+export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }: IProps) {
   return (
     <Flex align="end" w="full">
       {[...Array(checklist.numberOfZeroCarbonSteps).keys()].map((stepOffset) => {

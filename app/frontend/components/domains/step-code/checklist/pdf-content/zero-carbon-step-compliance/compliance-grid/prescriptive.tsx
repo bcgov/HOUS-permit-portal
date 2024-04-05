@@ -1,6 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../zero-carbon-step-code-compliance/i18n-prefix"
 import { Field } from "../../shared/field"
@@ -8,11 +9,12 @@ import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
 import { RequirementsMetTag } from "../../shared/requirements-met-tag"
 import { VStack } from "../../shared/v-stack"
-import { StepCodeChecklistContext } from "../../step-code-checklist-context"
 
-export function Prescriptive() {
-  const { checklist } = useContext(StepCodeChecklistContext)
+interface IProps {
+  checklist: IStepCodeChecklist
+}
 
+export function Prescriptive({ checklist }: IProps) {
   return (
     <>
       <HStack

@@ -1,19 +1,23 @@
-import { Image, Page, Text, View } from "@react-pdf/renderer"
+import { Page, Text, View } from "@react-pdf/renderer"
+// import { Image } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
 import * as R from "ramda"
-import React, { useContext } from "react"
-import { PermitApplicationContext } from "../shared/permit-application-context"
+import React from "react"
+import { IPermitApplication } from "../../../../../models/permit-application"
 import { styles } from "./styles"
 
-export const CoverPage = function PermitApplicationPDFCoverPage() {
-  const permitApplication = useContext(PermitApplicationContext)
-
+export const CoverPage = function PermitApplicationPDFCoverPage({
+  permitApplication,
+}: {
+  permitApplication: IPermitApplication
+}) {
   return (
     <Page size="LETTER" style={styles.page}>
       <View style={styles.outerContainer}>
         <View style={styles.titleContainer}>
-          <Image src={"/images/logo.png"} style={styles.logo} />
+          {/* TOOD: fix image (and font) loading when downloading via SSR */}
+          {/* <Image src={"/images/logo.png"} style={styles.logo} /> */}
           <Text style={styles.title}>{t("site.title")}</Text>
         </View>
         <Text style={styles.subTitle}>{t("permitApplication.pdf.for")}</Text>

@@ -1,17 +1,18 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../styles/theme"
 import { i18nPrefix } from "../../compliance-summary/i18n-prefix"
 import { Divider } from "../shared/divider"
 import { Field } from "../shared/field"
-import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 
-export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary({ checklist }: IProps) {
   return (
     <View style={styles.panelContainer} break>
       <View style={styles.panelHeader}>

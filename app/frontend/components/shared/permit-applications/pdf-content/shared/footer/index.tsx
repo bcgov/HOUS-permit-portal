@@ -1,13 +1,11 @@
 import { Text, View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
-import React, { useContext } from "react"
-import { PermitApplicationContext } from "../permit-application-context"
+import React from "react"
+import { IPermitApplication } from "../../../../../../models/permit-application"
 import { styles } from "./styles"
 
-export const Footer = () => {
-  const permitApplication = useContext(PermitApplicationContext)
-
+export const Footer = ({ permitApplication }: { permitApplication: IPermitApplication }) => {
   return (
     <View
       style={styles.container}

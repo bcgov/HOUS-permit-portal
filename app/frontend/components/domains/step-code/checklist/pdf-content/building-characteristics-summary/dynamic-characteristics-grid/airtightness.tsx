@@ -1,19 +1,20 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import * as R from "ramda"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
 import { Field } from "../../shared/field"
 import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
 import { VStack } from "../../shared/v-stack"
-import { StepCodeChecklistContext } from "../../step-code-checklist-context"
 import { styles } from "../../styles"
 
-export function Airtightness() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export function Airtightness({ checklist }: IProps) {
   return (
     <View wrap={false}>
       <HStack

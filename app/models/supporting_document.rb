@@ -2,6 +2,8 @@ class SupportingDocument < ApplicationRecord
   belongs_to :permit_application
   include FileUploader.Attachment(:file)
 
+  validate :unique_data_key
+
   scope :file_ids_with_regex, ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
   scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data is NULL") }
 
@@ -76,5 +78,12 @@ class SupportingDocument < ApplicationRecord
       expires_in: 3600,
       response_content_disposition: "attachment; filename=\"#{file.original_filename}\"",
     )
+  end
+
+  UNIQUE_DATA_KEYS = %i[permit_application_pdf step_code_checklist_pdf]
+  def unique_data_key
+    return unless UNIQUE_DATA_KEYS.include?(data_key)
+    return if !permit_application.supporting_documents.not(self).find_by(data_key: data_key)
+    self.errors.add(:data_key, i18n.t("errors.models.supporting_documents.attributes.data_key.duplicate"))
   end
 end

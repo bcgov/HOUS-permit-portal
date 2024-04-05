@@ -1,6 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { EHotWaterPerformanceType } from "../../../../../../../types/enums"
 import { generateUUID } from "../../../../../../../utils/utility-functions"
@@ -8,11 +9,10 @@ import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefi
 import { Field } from "../../shared/field"
 import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
-import { StepCodeChecklistContext } from "../../step-code-checklist-context"
-
-export function HotWater() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export function HotWater({ checklist }: IProps) {
   return (
     <>
       <HStack

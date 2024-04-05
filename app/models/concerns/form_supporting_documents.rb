@@ -11,13 +11,13 @@ module FormSupportingDocuments
              ->(permit_application) do
                where
                  .not(id: permit_application.supporting_doc_ids_from_submission_data)
-                 .where.not(data_key: %i[permit_application_submission step_code_submission])
+                 .where.not(data_key: %i[permit_application_pdf step_code_checklist_pdf])
              end,
              class_name: "SupportingDocument"
     has_many :completed_supporting_documents,
              ->(permit_application) do
                where(id: permit_application.supporting_doc_ids_from_submission_data).or(
-                 where(data_key: %i[permit_application_submission step_code_submission]),
+                 where(data_key: %i[permit_application_pdf step_code_checklist_pdf]),
                )
              end,
              class_name: "SupportingDocument"

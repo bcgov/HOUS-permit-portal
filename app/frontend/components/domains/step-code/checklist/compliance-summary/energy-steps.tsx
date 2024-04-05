@@ -3,7 +3,13 @@ import { t } from "i18next"
 import React from "react"
 import { i18nPrefix } from "./i18n-prefix"
 
-export const EnergySteps = function EnergySteps({ checklist }) {
+import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
+
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+
+export const EnergySteps = function EnergySteps({ checklist }: IProps) {
   return (
     <Flex align="end" w="full">
       {[...Array(checklist.numberOfEnergySteps).keys()].map((stepOffset) => {

@@ -1,18 +1,19 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { i18nPrefix } from "../../energy-step-code-compliance/i18n-prefix"
 import { Field } from "../shared/field"
 import { HStack } from "../shared/h-stack"
 import { VStack } from "../shared/v-stack"
-import { StepCodeChecklistContext } from "../step-code-checklist-context"
 import { styles } from "../styles"
 import { EnergyComplianceGrid } from "./compliance-grid"
 import { OtherData } from "./other-data"
 
-export const EnergyStepCompliance = function StepCodeChecklistPDFEnergyStepCompliance() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export const EnergyStepCompliance = function StepCodeChecklistPDFEnergyStepCompliance({ checklist }: IProps) {
   return (
     <View style={{ ...styles.panelContainer, marginTop: 18 }}>
       <View style={styles.panelHeader}>
@@ -33,8 +34,8 @@ export const EnergyStepCompliance = function StepCodeChecklistPDFEnergyStepCompl
         </HStack>
 
         <VStack style={{ spacing: 18 }}>
-          <EnergyComplianceGrid />
-          <OtherData />
+          <EnergyComplianceGrid checklist={checklist} />
+          <OtherData checklist={checklist} />
         </VStack>
       </View>
     </View>

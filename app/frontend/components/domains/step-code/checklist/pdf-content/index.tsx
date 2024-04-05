@@ -10,7 +10,6 @@ import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
 import { EnergyStepCompliance } from "./energy-step-compliance"
 import { Footer } from "./footer"
 import { ProjectInfo } from "./project-info"
-import { StepCodeChecklistContext } from "./step-code-checklist-context"
 import { ZeroCarbonStepCompliance } from "./zero-carbon-step-compliance"
 
 Font.registerHyphenationCallback((word) => [word])
@@ -24,16 +23,14 @@ export const PDFContent = function StepCodeChecklistPDFContent({ checklist, perm
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <StepCodeChecklistContext.Provider value={{ checklist, permitApplication }}>
-          <ProjectInfo />
-          <ComplianceSummary />
-          <CompletedBy />
-          <BuildingCharacteristicsSummary />
-          <EnergyPerformanceCompliance />
-          <EnergyStepCompliance />
-          <ZeroCarbonStepCompliance />
-          <Footer />
-        </StepCodeChecklistContext.Provider>
+        <ProjectInfo checklist={checklist} />
+        <ComplianceSummary checklist={checklist} />
+        <CompletedBy checklist={checklist} />
+        <BuildingCharacteristicsSummary checklist={checklist} />
+        <EnergyPerformanceCompliance checklist={checklist} />
+        <EnergyStepCompliance checklist={checklist} />
+        <ZeroCarbonStepCompliance checklist={checklist} />
+        <Footer checklist={checklist} permitApplication={permitApplication} />
       </Page>
     </Document>
   )

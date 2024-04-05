@@ -1,16 +1,17 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
-import React, { useContext } from "react"
+import React from "react"
+import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../styles/theme"
 import { i18nPrefix } from "../../energy-step-code-compliance/i18n-prefix"
 import { GridItem } from "../shared/grid-item"
 import { HStack } from "../shared/h-stack"
 import { VStack } from "../shared/v-stack"
-import { StepCodeChecklistContext } from "../step-code-checklist-context"
 
-export function OtherData() {
-  const { checklist } = useContext(StepCodeChecklistContext)
-
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+export function OtherData({ checklist }: IProps) {
   return (
     <VStack style={{ width: "100%", borderWidth: 0.75, borderColor: theme.colors.border.light, gap: 0 }} wrap={false}>
       <HStack

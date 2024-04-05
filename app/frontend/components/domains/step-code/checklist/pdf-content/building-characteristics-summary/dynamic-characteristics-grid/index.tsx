@@ -1,6 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
 import { GridItem } from "../../shared/grid-item"
@@ -15,7 +16,11 @@ import { SpaceHeatingCooling } from "./space-heating-cooling"
 import { Ventilation } from "./ventilation"
 import { WindowsGlazedDoors } from "./windows-glazed-doors"
 
-export function DynamicCharacteristicsGrid() {
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+
+export function DynamicCharacteristicsGrid({ checklist }: IProps) {
   return (
     <VStack style={{ width: "100%", borderWidth: 0.75, borderColor: theme.colors.border.light, gap: 0 }}>
       <HStack
@@ -47,14 +52,14 @@ export function DynamicCharacteristicsGrid() {
           <Text style={{ fontSize: 10.5 }}>{t(`${i18nPrefix}.performanceValues`)}</Text>
         </GridItem>
       </HStack>
-      <WindowsGlazedDoors />
-      <Doors />
-      <Airtightness />
-      <SpaceHeatingCooling />
-      <HotWater />
-      <Ventilation />
-      <Other />
-      <FossilFuels />
+      <WindowsGlazedDoors checklist={checklist} />
+      <Doors checklist={checklist} />
+      <Airtightness checklist={checklist} />
+      <SpaceHeatingCooling checklist={checklist} />
+      <HotWater checklist={checklist} />
+      <Ventilation checklist={checklist} />
+      <Other checklist={checklist} />
+      <FossilFuels checklist={checklist} />
     </VStack>
   )
 }
