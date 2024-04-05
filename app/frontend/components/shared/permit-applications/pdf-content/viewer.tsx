@@ -1,11 +1,10 @@
 import { PDFViewer } from "@react-pdf/renderer"
 import { observer } from "mobx-react-lite"
 import React, { Suspense } from "react"
+import { PDFContent } from "."
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { LoadingScreen } from "../../base/loading-screen"
-
-const PDFContent = React.lazy(() => import("./index").then((module) => ({ default: module.PDFContent })))
 
 interface IProps {
   mode: "html" | "pdf"
