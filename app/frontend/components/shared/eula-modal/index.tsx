@@ -14,7 +14,8 @@ import React, { Suspense, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useMst } from "../../../setup/root"
 import { LoadingScreen } from "../base/loading-screen"
-import { Editor } from "../editor/editor"
+
+const Editor = React.lazy(() => import("../editor/editor").then((module) => ({ default: module.Editor })))
 
 export const EULAModal = observer(function EULAModel() {
   const { sessionStore, userStore } = useMst()

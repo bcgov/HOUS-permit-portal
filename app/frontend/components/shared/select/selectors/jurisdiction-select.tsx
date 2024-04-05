@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
-import { debounce } from "lodash"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useCallback } from "react"
 import { useFormContext } from "react-hook-form"

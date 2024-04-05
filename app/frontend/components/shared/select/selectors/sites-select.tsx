@@ -1,6 +1,6 @@
 import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
-import { debounce } from "lodash"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useCallback, useRef, useState } from "react"
@@ -115,7 +115,12 @@ export const SitesSelect = observer(function ({
                   <Select
                     options={pidOptions}
                     ref={pidSelectRef}
-                    value={pidOptions.find((option) => option.value === value) ?? { label: null, value: null }}
+                    value={
+                      pidOptions.find((option) => option.value === value) ?? {
+                        label: null,
+                        value: null,
+                      }
+                    }
                     onChange={(option) => {
                       onChange(option.value)
                     }}

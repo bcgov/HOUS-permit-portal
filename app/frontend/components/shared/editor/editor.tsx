@@ -1,4 +1,4 @@
-import { debounce } from "lodash"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useRef } from "react"
 import ReactQuill, { Quill, ReactQuillProps } from "react-quill"
