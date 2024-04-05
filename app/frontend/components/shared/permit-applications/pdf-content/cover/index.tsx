@@ -1,5 +1,4 @@
-import { Page, Text, View } from "@react-pdf/renderer"
-// import { Image } from "@react-pdf/renderer"
+import { Image, Page, Text, View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
 import * as R from "ramda"
@@ -9,15 +8,18 @@ import { styles } from "./styles"
 
 export const CoverPage = function PermitApplicationPDFCoverPage({
   permitApplication,
+  assetDirectoryPath,
 }: {
   permitApplication: IPermitApplication
+  assetDirectoryPath?: string
 }) {
+  const logoUrl = `${import.meta.env.SSR ? assetDirectoryPath : ""}/images/logo.png`
   return (
     <Page size="LETTER" style={styles.page}>
       <View style={styles.outerContainer}>
         <View style={styles.titleContainer}>
           {/* TOOD: fix image (and font) loading when downloading via SSR */}
-          {/* <Image src={"/images/logo.png"} style={styles.logo} /> */}
+          <Image src={logoUrl} style={styles.logo} />
           <Text style={styles.title}>{t("site.title")}</Text>
         </View>
         <Text style={styles.subTitle}>{t("permitApplication.pdf.for")}</Text>
