@@ -205,6 +205,11 @@ export const RequirementForm = observer(
         }
         setErrorBoxData(mapErrorBoxData(changedEvent?.changed?.instance?.root?.errors))
       }
+      if (changedEvent?.changed?.component?.type == "simplefile") {
+        //https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
+        //no pristine sets for file upldates, but they are present in outher components, workaround this by dealing with change events
+        changedEvent?.changed?.instance?.root?.setPristine(false)
+      }
     }
 
     const onInitialized = (event) => {
