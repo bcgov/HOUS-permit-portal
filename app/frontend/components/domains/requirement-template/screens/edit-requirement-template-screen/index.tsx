@@ -143,8 +143,8 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
           )}
           <Box
             id="editing-permit-requirements-form"
-            width="var(--app-sidebar-remaining-width)"
-            display="inline-block"
+            display="flex"
+            flexDirection="column"
             bg={hasNoSections ? "greys.grey03" : undefined}
             ref={rightContainerRef}
           >
@@ -154,14 +154,14 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
             />
-            <FloatingHelpDrawer />
+            <FloatingHelpDrawer top="100px" />
             {hasNoSections ? (
               <Flex
                 justifyContent={hasNoSections ? "center" : undefined}
                 alignItems={hasNoSections ? "flex-start" : undefined}
                 flex={1}
                 w={"full"}
-                h="100vh"
+                minH="100vh"
               >
                 <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"} mt="20%">
                   {t("requirementTemplate.edit.emptyTemplateSectionText")}
