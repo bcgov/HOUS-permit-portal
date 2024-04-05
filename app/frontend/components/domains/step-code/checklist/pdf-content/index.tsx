@@ -1,9 +1,11 @@
 import { Document, Font, Page } from "@react-pdf/renderer"
+import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { Footer } from "../../../../shared/base/footer"
 import { styles } from "../../../../shared/permit-applications/pdf-content/application/styles"
+import { CoverPage } from "../../../../shared/permit-applications/pdf-content/cover"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
 import { ComplianceSummary } from "./compliance-summary"
@@ -22,6 +24,7 @@ interface IProps {
 export const PDFContent = function StepCodeChecklistPDFContent({ checklist, permitApplication }: IProps) {
   return (
     <Document>
+      <CoverPage permitApplication={permitApplication} subTitle={t("stepCodeChecklist.pdf.for")} />
       <Page size="LETTER" style={styles.page}>
         <ProjectInfo checklist={checklist} />
         <ComplianceSummary checklist={checklist} />

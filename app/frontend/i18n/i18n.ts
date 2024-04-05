@@ -575,6 +575,9 @@ const options = {
           },
         },
         stepCodeChecklist: {
+          pdf: {
+            for: "Step code pre-construction checklist for",
+          },
           edit: {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
             notice: "Relevant data fields below has been filled in for you by Auto-Compliance.",

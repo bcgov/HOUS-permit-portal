@@ -6,13 +6,17 @@ import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { styles } from "./styles"
 
+interface IProps {
+  permitApplication: IPermitApplication
+  subTitle: string
+  assetDirectoryPath?: string
+}
+
 export const CoverPage = function PermitApplicationPDFCoverPage({
   permitApplication,
+  subTitle,
   assetDirectoryPath,
-}: {
-  permitApplication: IPermitApplication
-  assetDirectoryPath?: string
-}) {
+}: IProps) {
   const logoUrl = `${import.meta.env.SSR ? assetDirectoryPath : ""}/images/logo.png`
   return (
     <Page size="LETTER" style={styles.page}>
@@ -22,7 +26,7 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
           <Image src={logoUrl} style={styles.logo} />
           <Text style={styles.title}>{t("site.title")}</Text>
         </View>
-        <Text style={styles.subTitle}>{t("permitApplication.pdf.for")}</Text>
+        <Text style={styles.subTitle}>{subTitle}</Text>
         <View style={styles.calloutBoxOuter}>
           <View style={styles.calloutBoxInner}>
             <View style={styles.calloutBoxContent}>
