@@ -37,7 +37,7 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
         <Box color="semantic.error">
           <WarningCircle size={24} aria-label={"Warning icon"} />
         </Box>
-        <Heading as="h4" overflowWrap={"break-word"}>
+        <Heading as="h4" mb="0" overflowWrap={"break-word"}>
           {t("requirementTemplate.edit.errorsBox.title", { count: errorBox.length })}
         </Heading>
         <Button
@@ -49,7 +49,9 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
         ></Button>
       </Flex>
       <Collapse in={isOpen}>
-        <Text fontSize="sm">{t("requirementTemplate.edit.errorsBox.instructions")}</Text>
+        <Text fontSize="sm" mt="2">
+          {t("requirementTemplate.edit.errorsBox.instructions")}
+        </Text>
 
         <OrderedList
           mt="2"

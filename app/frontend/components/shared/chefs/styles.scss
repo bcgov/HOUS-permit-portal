@@ -1,9 +1,15 @@
-@import url("https://fonts.googleapis.com/css?family=Material+Icons");
 @import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
+// Font Awesome icons for: "fa-plus-square, fa-minus-square, fa-cloud
 @import url("https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css");
+// Phosphor icon for the compliance lightning
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "formiojs/dist/formio.form.css";
 @import "../../../styles/global-theme-variables.scss";
+
+:root {
+  --bs-font-sans-serif: "BC Sans";
+  --bs-body-color: $bcgov-font;
+}
 
 /* ======================================
 
@@ -23,7 +29,7 @@
 
   // Typography
   .v-application {
-    font-family: -apple-system, "BlinkMacSystemFont", "BCSans", sans-serif !important;
+    font-family: "BCSans", sans-serif !important;
     line-height: 1.4;
     font-size: 0.875rem;
   }
@@ -391,7 +397,7 @@
 
     > .form-group:not(:empty) {
       // each form field inside a block
-      margin-bottom: var(--chakra-space-4);
+      margin-bottom: var(--chakra-space-6);
       max-width: var(--chakra-sizes-container-sm);
       a {
         text-decoration: underline;
@@ -483,6 +489,60 @@
       height: 24px;
       width: 24px;
       margin-right: 6px;
+    }
+  }
+
+  // File upload
+  .formio-component-file {
+    .list-group-header {
+      font-size: var(--chakra-fontSizes-sm);
+      background-color: var(--chakra-colors-greys-grey03);
+      color: var(--chakra-colors-text-secondary);
+      border: 0;
+      padding-top: var(--chakra-space-1);
+      padding-bottom: var(--chakra-space-1);
+    }
+
+    // upload area
+    .fileSelector {
+      background-color: var(--chakra-colors-theme-blueLight);
+      border-color: var(--chakra-colors-theme-blueShadedLight);
+      color: $bcgov-link;
+      font-size: var(--chakra-fontSizes-sm);
+      border-radius: var(--chakra-radii-md);
+      margin-bottom: 0.5rem;
+      transition:
+        background-color 200ms ease-in-out,
+        border-color 200ms ease-in-out;
+      a {
+        color: inherit;
+      }
+      &:hover {
+        background-color: var(--chakra-colors-semantic-infoLight);
+      }
+    }
+    .file {
+      border-radius: var(--chakra-radii-sm);
+      border: 1px solid var(--chakra-colors-border-light);
+      padding: 0 var(--chakra-space-2);
+      font-size: var(--chakra-fontSizes-sm);
+
+      .fileName {
+        [ref="fileStatusRemove"] {
+          color: $bcgov-font-error;
+          margin: 0 var(--chakra-space-1);
+          padding: 6px;
+          border-radius: var(--chakra-radii-full);
+          &:hover {
+            background-color: var(--chakra-colors-semantic-errorLight);
+            cursor: pointer;
+          }
+        }
+      }
+
+      .alert {
+        padding: var(--chakra-space-1) var(--chakra-space-2);
+      }
     }
   }
 
