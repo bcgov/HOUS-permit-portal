@@ -62,7 +62,7 @@ en:
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_application_updated: "Updated application status: %{permit_application_number}"
-      remind_reviewers: "Your report on outstanding permit applications"
+      remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
   arbitrary_message_construct:
     devise:
@@ -327,5 +327,4 @@ en:
       error: "%{field_name} performance type must be one of %{accepted_values}"
   model_validation:
     jurisdiction_template_version_customization:
-      enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of 
-      {accepted_reasons}"
+      enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"

@@ -109,7 +109,7 @@ export const JurisdictionScreen = observer(() => {
                     initialTriggerText={t("jurisdiction.edit.addDescription")}
                     name={"descriptionHtml"}
                   />
-                  <RouterLinkButton to="#" variant="primary">
+                  <RouterLinkButton to="/permit-applications/new" variant="primary">
                     {t("jurisdiction.startApplication")}
                   </RouterLinkButton>
                 </Flex>
