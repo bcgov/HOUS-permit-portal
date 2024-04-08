@@ -115,16 +115,18 @@ export const PermitApplicationStoreModel = types
         self.resetPages()
       }
 
-      const response = yield self.environment.api.fetchPermitApplications(
-        self.rootStore?.jurisdictionStore?.currentJurisdiction?.id,
-        {
-          query: self.query,
-          sort: self.sort,
-          page: opts?.page ?? self.currentPage,
-          perPage: opts?.countPerPage ?? self.countPerPage,
-          statusFilter: self.statusFilter,
-        }
-      )
+      const searchParams = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        statusFilter: self.statusFilter,
+      }
+      const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
+
+      const response = currentJurisdictionId
+        ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
+        : yield self.environment.api.fetchPermitApplications(searchParams)
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
