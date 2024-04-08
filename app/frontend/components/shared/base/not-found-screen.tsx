@@ -3,21 +3,14 @@ import { ListMagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useMst } from "../../../setup/root"
 import { IHomeScreenProps } from "../../domains/home"
 import { RouterLink } from "../navigation/router-link"
 import { RouterLinkButton } from "../navigation/router-link-button"
-import { LoadingScreen } from "./loading-screen"
 
 interface INotFoundScreenProps extends IHomeScreenProps {}
 
 export const NotFoundScreen = observer(({ ...rest }: INotFoundScreenProps) => {
   const { t } = useTranslation()
-  const {
-    sessionStore: { isLoggingOut },
-  } = useMst()
-
-  if (isLoggingOut) return <LoadingScreen />
 
   return (
     <Container maxW="container.lg">
