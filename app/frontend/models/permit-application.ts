@@ -106,8 +106,42 @@ export const PermitApplicationModel = types
       const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
       const blockHasContactInName = (blocks) => blocks.filter((block) => block[0].includes("contact"))
 
+      type ArrayElement = [string, any]
+      type ParsedObject = { [key: string]: any }
+
+      const transformSingleContactFields = (arr: ArrayElement[]): ArrayElement[] => {
+        const resultMap: Map<string, ParsedObject> = new Map()
+        const result: ArrayElement[] = []
+
+        arr.forEach(([key, value]) => {
+          const parts = key.split("|")
+          if (parts.length > 3) {
+            // For keys that need to be combined
+            const uniqueKey = parts.slice(0, 3).join("|")
+            const property = key
+            if (!resultMap.has(uniqueKey)) {
+              resultMap.set(uniqueKey, {})
+            }
+            const currentValue = resultMap.get(uniqueKey)!
+            currentValue[property] = value
+          } else {
+            // For keys that don't need processing
+            result.push([key, value])
+          }
+        })
+
+        // Merge processed items back into the result array
+        resultMap.forEach((value, key) => {
+          result.push([key, [value]])
+        })
+
+        return result
+      }
+
       // Flatten one level of arrays to get a single array of [key, value] pairs
-      const allContactFieldPairs = blockHasContactInName(R.chain(R.identity, sectionsPairs))
+      const allContactFieldPairs = transformSingleContactFields(
+        blockHasContactInName(R.chain(R.identity, sectionsPairs))
+      )
 
       const unfilteredContacts = allContactFieldPairs
         .map((pairs) => {
@@ -122,16 +156,16 @@ export const PermitApplicationModel = types
 
           const reformatObject = (contact, index) => {
             if (R.keys(contact).find((key: string) => key.includes("_contact"))) {
-              const firstName = contact[R.keys(contact).find((key: string) => key.includes("_contact|firstName"))!]
-              const lastName = contact[R.keys(contact).find((key: string) => key.includes("_contact|lastName"))!]
+              const firstName = contact[R.keys(contact).find((key: string) => key.includes("|firstName"))!]
+              const lastName = contact[R.keys(contact).find((key: string) => key.includes("|lastName"))!]
               const rbId = blockId.split("|RB")[1].split("|")[0]
               return {
                 id: `${blockId}|${index}`,
-                address: contact[R.keys(contact).find((key: string) => key.includes("_contact|address"))!],
-                cell: contact[R.keys(contact).find((key: string) => key.includes("_contact|cell"))!],
-                email: contact[R.keys(contact).find((key: string) => key.includes("_contact|email"))!],
+                address: contact[R.keys(contact).find((key: string) => key.includes("|address"))!],
+                cell: contact[R.keys(contact).find((key: string) => key.includes("|cell"))!],
+                email: contact[R.keys(contact).find((key: string) => key.includes("|email"))!],
                 name: `${firstName} ${lastName}`.trim(),
-                phone: contact[R.keys(contact).find((key: string) => key.includes("_contact|phone"))!],
+                phone: contact[R.keys(contact).find((key: string) => key.includes("|phone"))!],
                 title: blockIdToTitleMapping[rbId],
               }
             } else {
