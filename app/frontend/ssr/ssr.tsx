@@ -44,7 +44,11 @@ const generatePdfs = async (pdfJsonData) => {
       const stepCodeChecklistPDFPath = pdfData.meta.generationPaths.stepCodeChecklist
       stepCodeChecklistPDFPath &&
         (await ReactPDF.renderToFile(
-          <StepCodeChecklistPDFContent permitApplication={pdfData.permitApplication} checklist={pdfData.checklist} />,
+          <StepCodeChecklistPDFContent
+            permitApplication={pdfData.permitApplication}
+            checklist={pdfData.checklist}
+            assetDirectoryPath={assetDirectoryPath}
+          />,
           stepCodeChecklistPDFPath
         ))
     }
