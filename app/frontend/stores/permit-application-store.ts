@@ -156,6 +156,10 @@ export const PermitApplicationStoreModel = types
       self.currentPermitApplication &&
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
+    resetCurrentPermitApplication() {
+      self.currentPermitApplication = null
+      self.rootStore.stepCodeStore.setCurrentStepCode(null)
+    },
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
       //based on the eventType do stuff
       switch (payload.eventType) {
