@@ -39,7 +39,7 @@ en:
             submitter:
               incorrect_role: "must have the submitter role"
             jurisdiction:
-              no_contact: "must have at least one submission contact email for this permit type."
+              no_contact: "not available."
             pid_or_pin: "must have a pid or pin."
         supporting_document:
           attributes:
