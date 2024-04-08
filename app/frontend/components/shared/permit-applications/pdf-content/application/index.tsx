@@ -4,8 +4,9 @@ import * as R from "ramda"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { generateUUID } from "../../../../../utils/utility-functions"
+import { theme } from "../../../../../styles/theme"
 import { Footer } from "../shared/footer"
-import { styles } from "./styles"
+import { page } from "../shared/styles/page"
 
 enum EComponentType {
   checkbox = "checkbox",
@@ -31,8 +32,8 @@ export const ApplicationFields = function ApplicationFields({
   permitApplication: IPermitApplication
 }) {
   return (
-    <Page size="LETTER" style={styles.page}>
-      <View style={styles.outerContainer}>
+    <Page size="LETTER" style={page}>
+      <View style={{ overflow: "hidden" }}>
         {permitApplication.formattedFormJson.components.map((c) => (
           <FormComponent key={c.id} component={c} permitApplication={permitApplication} />
         ))}
@@ -114,10 +115,29 @@ const FormComponent = function ApplicationPDFFormComponent({
     case EComponentType.panel: {
       const numFields = fields(component.components).length
       return (
-        <View style={styles.panelContainer} wrap={numFields > 5}>
+        <View
+          style={{
+            borderColor: theme.colors.border.light,
+            marginBottom: 24,
+            width: "100%",
+          }}
+          wrap={numFields > 5}
+        >
           <PanelHeader component={component} />
           {component.components && (
-            <View style={styles.panelBodyContainer}>
+            <View
+              style={{
+                gap: 4,
+                borderBottomLeftRadius: 8,
+                borderBottomRightRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.colors.border.light,
+                paddingTop: 12,
+                paddingBottom: 12,
+                paddingLeft: 24,
+                paddingRight: 24,
+              }}
+            >
               {component.components.map((child) => (
                 <FormComponent
                   key={generateUUID()}
@@ -151,7 +171,17 @@ const FormComponent = function ApplicationPDFFormComponent({
 
       return (
         numFields > 0 && (
-          <View style={styles.grid}>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: theme.colors.border.light,
+              paddingLeft: 20,
+              paddingRight: 20,
+              paddingTop: 8,
+              paddingBottom: 8,
+              borderRadius: 4,
+            }}
+          >
             {component.components.map((child) => (
               <FormComponent
                 key={generateUUID()}
@@ -167,16 +197,19 @@ const FormComponent = function ApplicationPDFFormComponent({
       return (
         <>
           {component.columns && (
-            <View style={styles.row}>
-              {component.columns
-                .map((column, index) => {
-                  return column.components.map((child) => {
-                    return (
-                      <View key={generateUUID()} style={styles.item}>
-                        <FormComponent component={child} dataPath={dataPath} permitApplication={permitApplication} />
-                      </View>
-                    )
-                  })
+            <View style={{ flexDirection: "row", gap: 20, width: "100%" }}>
+              {component.columns.map((column, index) => {
+                return column.components.map((child) => {
+                  return (
+                    <View key={generateUUID()} style={{ flex: 1 }}>
+                      <FormComponent
+                        key={child.id}
+                        component={child}
+                        dataPath={dataPath}
+                        permitApplication={permitApplication}
+                      />
+                    </View>
+                  )
                 })
                 .flat()}
             </View>
@@ -214,37 +247,52 @@ const FormComponent = function ApplicationPDFFormComponent({
 
 const ContainerHeader = function ApplicationPDFContainerHeader({ component }) {
   return (
-    <View style={styles.sectionHeaderContainer} wrap={false}>
-      <View style={styles.sectionHeaderLine} />
-      <Text style={styles.sectionHeading}>{component.title}</Text>
+    <View style={{ marginTop: 32, paddingBottom: 15, gap: 8 }} wrap={false}>
+      <View
+        style={{
+          borderWidth: 3,
+          borderColor: theme.colors.theme.yellow,
+          width: 27,
+          backgroundColor: theme.colors.theme.yellow,
+        }}
+      />
+      <Text style={{ fontSize: 20, fontWeight: 700 }}>{component.title}</Text>
     </View>
   )
 }
 
 const PanelHeader = function ApplicationPDFPanelHeader({ component }) {
   return (
-    <View style={styles.panelHeaderContainer} fixed>
-      <Text style={styles.panelHeading}>{component.title}</Text>
+    <View
+      style={{
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        paddingTop: 8,
+        paddingBottom: 8,
+        paddingLeft: 24,
+        paddingRight: 24,
+        borderWidth: 1,
+        borderBottomWidth: 0,
+        borderColor: theme.colors.border.light,
+        backgroundColor: theme.colors.greys.grey04,
+        width: "100%",
+      }}
+      fixed
+    >
+      <Text style={{ fontSize: 12, fontWeight: 700 }}>{component.title}</Text>
     </View>
   )
 }
 
 const ChecklistField = function ApplicationPDFPanelChecklistField({ options, label }) {
   return (
-    <View style={styles.requirementFieldContainer} wrap={false}>
-      <Text style={styles.requirementFieldLabel}>{label}</Text>
-      <View style={styles.requirementFieldChecklist}>
+    <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
+      <Text style={{ fontSize: 12, color: theme.colors.text.primary, paddingBottom: 4, marginBottom: 4 }}>{label}</Text>
+      <View style={{ gap: 8 }}>
         {Object.keys(options).map((key) => {
-          return (
-            <View key={key} style={styles.requirementFieldChecklistItem}>
-              {options[key] ? (
-                <View style={styles.requirementFieldCheckboxFilled} />
-              ) : (
-                <View style={styles.requirementFieldCheckboxOutline} />
-              )}
-              <Text style={styles.requirementFieldInputValue}>{key}</Text>
-            </View>
-          )
+          return <Checkbox key={key} isChecked={options[key]} label={key} />
         })}
       </View>
     </View>
@@ -253,43 +301,79 @@ const ChecklistField = function ApplicationPDFPanelChecklistField({ options, lab
 
 const CheckboxField = function ApplicationPDFPanelCheckboxField({ value, label }) {
   return (
-    <View style={styles.requirementFieldContainer} wrap={false}>
-      <View style={styles.requirementFieldChecklistItem}>
-        {value ? (
-          <View style={styles.requirementFieldCheckboxFilled} />
-        ) : (
-          <View style={styles.requirementFieldCheckboxOutline} />
-        )}
-        <Text style={styles.requirementFieldInputValue}>{label}</Text>
-      </View>
+    <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
+      <Checkbox isChecked={value} label={label} />
     </View>
   )
 }
 
-const InputField = function ApplicationPDFInputField({ value, label, type }) {
+function Checkbox({ isChecked, label }) {
   return (
-    <View style={styles.requirementFieldContainer} wrap={false}>
-      <Text style={styles.requirementFieldLabel}>{label}</Text>
-      <View style={styles.requirementFieldInput}>
-        <Text style={styles.requirementFieldInputValue}>{value}</Text>
-      </View>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+      <View
+        style={{
+          width: 8,
+          height: 8,
+          borderColor: theme.colors.border.dark,
+          borderWidth: isChecked ? 0 : 0.75,
+          backgroundColor: isChecked ? theme.colors.text.primary : theme.colors.greys.white,
+        }}
+      />
+
+      <Text style={{ fontSize: 12, color: theme.colors.text.primary }}>{label}</Text>
     </View>
   )
+}
+
+const InputField = function ApplicationPDFInputField({ value, label }) {
+  return <RequirementField label={label} value={value} />
 }
 
 const FileField = function ApplicationPDFFileField({ value, label }: { value: Record<string, any>[]; label: string }) {
   const fileExists = value && !R.isEmpty(value)
 
   return (
-    <View style={styles.requirementFieldContainer} wrap={false}>
-      <Text style={styles.requirementFieldLabel}>{label}</Text>
-      <View style={styles.requirementFieldInput}>
-        {fileExists ? (
-          <Text style={styles.requirementFieldInputValue}>{R.pluck("originalName", value).join(", ")}</Text>
-        ) : (
-          <Text style={styles.requirementFieldInputValue}>{t("permitApplication.pdf.fileNotAdded")}</Text>
-        )}
-      </View>
+    <RequirementField
+      label={label}
+      value={fileExists ? R.pluck("originalName", value).join(", ") : t("permitApplication.pdf.fileNotAdded")}
+    />
+  )
+}
+
+function RequirementField({ label, value }) {
+  return (
+    <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
+      <Label label={label} />
+      <Input value={value} />
+    </View>
+  )
+}
+
+function Label({ label }) {
+  return (
+    <Text style={{ fontSize: 12, color: theme.colors.text.primary, paddingBottom: 4, marginBottom: 4 }}>{label}</Text>
+  )
+}
+
+function Input({ value }) {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        minHeight: 28,
+        borderColor: theme.colors.border.light,
+        borderRadius: 4,
+        borderWidth: 1,
+        paddingTop: 6,
+        paddingBottom: 6,
+        marginBottom: 6,
+        paddingLeft: 12,
+        paddingRight: 12,
+        fontSize: 12,
+      }}
+    >
+      <Text>{value}</Text>
     </View>
   )
 }

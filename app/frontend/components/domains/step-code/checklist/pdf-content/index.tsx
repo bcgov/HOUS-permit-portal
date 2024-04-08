@@ -4,9 +4,9 @@ import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { PDFDocument } from "../../../../shared/pdf"
-import { styles } from "../../../../shared/permit-applications/pdf-content/application/styles"
 import { CoverPage } from "../../../../shared/permit-applications/pdf-content/cover"
 import { Footer } from "../../../../shared/permit-applications/pdf-content/shared/footer"
+import { page } from "../../../../shared/permit-applications/pdf-content/shared/styles/page"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
 import { ComplianceSummary } from "./compliance-summary"
@@ -35,7 +35,7 @@ export const PDFContent = function StepCodeChecklistPDFContent({
         subTitle={t("stepCodeChecklist.pdf.for")}
         assetDirectoryPath={assetDirectoryPath}
       />
-      <Page size="LETTER" style={styles.page}>
+      <Page size="LETTER" style={page}>
         <ProjectInfo checklist={checklist} />
         <ComplianceSummary checklist={checklist} />
         <CompletedBy checklist={checklist} />

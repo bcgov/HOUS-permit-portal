@@ -1,15 +1,13 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
-import * as R from "ramda"
 import React from "react"
 import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../building-characteristics-summary/i18n-prefix"
-import { Field } from "../../shared/field"
+import { Field, Input } from "../../shared/field"
 import { GridItem } from "../../shared/grid-item"
 import { HStack } from "../../shared/h-stack"
 import { VStack } from "../../shared/v-stack"
-import { styles } from "../../styles"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -45,17 +43,16 @@ export function Airtightness({ checklist }: IProps) {
         }}
       >
         <GridItem style={{ flexBasis: "50%", minWidth: "50%" }}>
-          <View
-            style={R.mergeRight(styles.input, {
+          <Input
+            value={checklist.buildingCharacteristicsSummary.airtightness.details}
+            inputStyles={{
               width: "100%",
               height: "100%",
               alignItems: "flex-start",
               paddingTop: 3.5,
               paddingBottom: 3.5,
-            })}
-          >
-            <Text>{checklist.buildingCharacteristicsSummary.airtightness.details}</Text>
-          </View>
+            }}
+          />
         </GridItem>
         <GridItem style={{ flexBasis: "50%", minWidth: "50%", borderRightWidth: 0 }}>
           <VStack style={{ width: "100%" }}>
