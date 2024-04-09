@@ -198,7 +198,8 @@ const options = {
             addLookOut: 'Click to add a "Look Out" section',
             displayContactSummaryLabel: "Contact Summary Section (public)",
             addContactSummary: "Click to add a Contact Summary section",
-            clickToEditContacts: "Click to edit contacts",
+            clickToEditContacts:
+              "Click to edit contacts. The first contact will be displayed upon successful permit application submission.",
             clickToShowContacts: "Click to show contacts as they will be seen",
             clickToEditMap: "Click to edit map",
             clickToSeeMap: "Click to see map",

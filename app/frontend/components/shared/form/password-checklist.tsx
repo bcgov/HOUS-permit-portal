@@ -21,7 +21,7 @@ export function PasswordChecklist({ password }: IProps) {
     },
     {
       requirement: t("auth.passwordChecklist.specialChar"),
-      isMet: /[@$!%*#?&]/.test(password),
+      isMet: /[\W_]/.test(password),
     },
     { requirement: t("auth.passwordChecklist.number"), isMet: /\d/.test(password) },
   ]
