@@ -51,4 +51,11 @@ class PermitHubMailer < ApplicationMailer
     @permit_type_submission_contact = permit_type_submission_contact
     send_mail(email: permit_type_submission_contact.email, template_key: "permit_type_submission_contact_confirm")
   end
+
+  def send_mail(*args, **kwargs)
+    return if @user.discarded?
+    return unless @user.confirmed?
+
+    super(*args, **kwargs)
+  end
 end
