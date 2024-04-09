@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import React, { useEffect } from "react"
-import "react-datepicker/dist/react-datepicker.css"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../../types/enums"

@@ -2,6 +2,7 @@ import { Box, BoxProps, Button, Text } from "@chakra-ui/react"
 import { CalendarBlank, CaretDown } from "@phosphor-icons/react"
 import React, { forwardRef } from "react"
 import ReactDatePicker, { ReactDatePickerProps } from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../constants"
 
