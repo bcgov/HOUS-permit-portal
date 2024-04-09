@@ -74,7 +74,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const handleSave = async () => {
+  const handleSave = async ({ autosave }: { autosave?: boolean } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
@@ -85,6 +85,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       const response = await currentPermitApplication.update({
         submissionData: { data: submissionData },
         nickname: nicknameWatch,
+        autosave,
       })
       if (response.ok && response.data.data.frontEndFormUpdate) {
         updateFormIoValues(formio, response.data.data.frontEndFormUpdate)
@@ -136,7 +137,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     }
   }
 
-  useInterval(handleSave, 60000) // save progress every minute
+  useInterval(() => handleSave({ autosave: true }), 60000) // save progress every minute
 
   useEffect(() => {
     // sets the defaults subject to application load
