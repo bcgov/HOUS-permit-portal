@@ -124,9 +124,20 @@ class Requirement < ApplicationRecord
   end
 
   def convert_value_options
-    # all values MUST be converted to camelCase to be compatible with rehyration on front end
+    return unless attribute_changed?(:input_options)
+    # all values MUST be converted to camelCase and stripped of white space to be compatible with rehyration on front
+    # end
     input_options["value_options"] = input_options["value_options"].map do |option_json|
-      option_json.merge("value" => option_json["value"].camelize(:lower))
+      # camelize the value
+      # this is a two step process as camelize only camelizes individual words and ignores spaces
+
+      # remove spaces to make one word and capitalize each word
+      value = option_json["value"]
+      words = value.split(" ").map(&:capitalize)
+
+      # join the words together and then run camelize
+      formatted_value = words.join("").strip.camelize(:lower)
+      option_json.merge("value" => formatted_value)
     end
   end
 
