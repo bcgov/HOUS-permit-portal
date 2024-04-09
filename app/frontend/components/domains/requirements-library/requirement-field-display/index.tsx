@@ -173,7 +173,7 @@ const requirementsComponentMap = {
           mb: 0,
           order: 2,
         }}
-        inputDisplay={<Checkbox mr={2} order={1} />}
+        inputDisplay={<Checkbox mr={2} order={1} alignItems="flex-start" pt="1.5" />}
         editorContainerProps={{ order: 3, gridColumn: "span 2" }}
         {...genericDisplayProps}
       />
@@ -190,7 +190,14 @@ const requirementsComponentMap = {
           <CheckboxGroup>
             <Stack>
               {options.map((option, index) => (
-                <Checkbox key={index} value={option}>
+                <Checkbox
+                  key={index}
+                  value={option}
+                  alignItems="flex-start"
+                  sx={{
+                    "& .chakra-checkbox__control": { marginTop: "1" },
+                  }}
+                >
                   {option}
                 </Checkbox>
               ))}
