@@ -1092,7 +1092,7 @@ const options = {
             description: "View and manage administrative users",
           },
           sitewideMessage: {
-            title: "Site-Wide message",
+            title: "Site-wide message",
             description: "Enable and configure a site-wide message",
             enable: "Show",
             label: "Site-wide message",

@@ -56,7 +56,7 @@ RSpec.describe Api::Concerns::Search::AdminUsers, type: :controller do
       let(:cur_user) { create(:user, :review_manager, jurisdiction: jurisdiction) }
       let(:user_search_params) { { query: "", page: 1, per_page: 10 } }
 
-      it "returns all jurisdiction users for review_manager" do
+      it "does not return a search for review_manager" do
         controller.perform_user_search
         expect(controller.instance_variable_get(:@user_search).results).to be_empty
       end
