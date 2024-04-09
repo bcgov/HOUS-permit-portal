@@ -3,7 +3,7 @@ import { Instance, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitApplicationStatus } from "../types/enums"
+import { EPermitApplicationStatus, ERequirementType } from "../types/enums"
 import { IDownloadableFile, IFormIOBlock, IFormJson, ISubmissionData, ITemplateCustomization } from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
@@ -97,89 +97,116 @@ export const PermitApplicationModel = types
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
     },
     get contacts() {
-      const blockIdToTitleMapping = R.pipe(
-        R.prop("components"), // Access the top-level components array
-        R.chain(R.prop("components")), // Flatten nested components into a single array
-        R.reduce((acc, { id, title }) => ({ ...acc, [id]: title }), {}) // Create an ID to title mapping
+      // traverses the nest form json components
+      // and collects the label for contact requirements
+      const contactKeyToLabelMapping = R.pipe(
+        R.prop("components"),
+        R.chain(R.prop("components")),
+        R.chain(R.prop("components")),
+        R.reduce((acc, { id, key, title, components, label }) => {
+          if (key.includes("multi_contact")) {
+            const firstComponent = components[0]
+
+            if (firstComponent) {
+              acc[firstComponent.key] = firstComponent.label
+            }
+          }
+
+          if (key.includes(ERequirementType.generalContact) || key.includes(ERequirementType.professionalContact)) {
+            acc[key] = label
+          }
+
+          return acc
+        }, {})
       )(self.formJson)
       // Convert each section's object into an array of [key, value] pairs
       const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
-      const blockHasContactInName = (blocks) => blocks.filter((block) => block[0].includes("contact"))
 
-      type ArrayElement = [string, any]
-      type ParsedObject = { [key: string]: any }
+      // Filters out non contact form components
+      const getContactBlocks = (blocks) =>
+        blocks.filter(
+          (block) =>
+            block[0].includes("multi_contact") ||
+            block[0].includes(ERequirementType.generalContact) ||
+            block[0].includes(ERequirementType.professionalContact)
+        )
 
-      const transformSingleContactFields = (arr: ArrayElement[]): ArrayElement[] => {
-        const resultMap: Map<string, ParsedObject> = new Map()
-        const result: ArrayElement[] = []
-
-        arr.forEach(([key, value]) => {
-          const parts = key.split("|")
-          if (parts.length > 3) {
-            // For keys that need to be combined
-            const uniqueKey = parts.slice(0, 3).join("|")
-            const property = key
-            if (!resultMap.has(uniqueKey)) {
-              resultMap.set(uniqueKey, {})
-            }
-            const currentValue = resultMap.get(uniqueKey)!
-            currentValue[property] = value
-          } else {
-            // For keys that don't need processing
-            result.push([key, value])
-          }
-        })
-
-        // Merge processed items back into the result array
-        resultMap.forEach((value, key) => {
-          result.push([key, [value]])
-        })
-
-        return result
+      const insertFullNameToContact = (contact: { firstName?: string; lastName?: string; name?: string }) => {
+        contact.name = `${contact?.firstName ?? ""} ${contact?.lastName ?? ""}`.trim()
       }
 
       // Flatten one level of arrays to get a single array of [key, value] pairs
-      const allContactFieldPairs = transformSingleContactFields(
-        blockHasContactInName(R.chain(R.identity, sectionsPairs))
+      const allContactFieldPairs = getContactBlocks(R.chain(R.identity, sectionsPairs))
+
+      // single contact field value is not an array and they have each contact field input
+      // as a separate value so we combine the individual field to an array of contact objects
+      const singleContacts = Object.values(
+        allContactFieldPairs
+          .filter(([_key, val]) => !Array.isArray(val))
+          .reduce((acc, [key, val]) => {
+            const splitKey = key.split("|")
+            // the end of the key is the contact input field name e.g. firstName, email etc.
+            const fieldName = splitKey.pop()
+
+            //  the rest of the key is the shared key path
+            //  e.g. formSubmissionDataRSTsectioncId|RBId|owner_contact_block|multi_contact|general_contact
+            const sharedKeyPath = splitKey.join("|")
+
+            if (!(sharedKeyPath in acc)) {
+              acc[sharedKeyPath] = {}
+            }
+
+            acc[sharedKeyPath][fieldName] = val
+
+            if (!("title" in acc[sharedKeyPath])) {
+              acc[sharedKeyPath].title = contactKeyToLabelMapping[sharedKeyPath]
+            }
+
+            return acc
+          }, {})
       )
 
-      const unfilteredContacts = allContactFieldPairs
-        .map((pairs) => {
-          //contactField usually has an array of contacts
-          let [blockId, contactArray] = pairs
+      singleContacts.forEach(insertFullNameToContact)
 
-          // Check if contactArray is not an array
-          if (!Array.isArray(contactArray)) {
-            // If it's not an array, wrap it in an array
-            contactArray = [contactArray]
-          }
+      const reformatContactObjectFromMultiContactSubmission = (contact: Record<string, string>) => {
+        const formattedContactObject = {}
 
-          const reformatObject = (contact, index) => {
-            if (R.keys(contact).find((key: string) => key.includes("_contact"))) {
-              const firstName = contact[R.keys(contact).find((key: string) => key.includes("|firstName"))!]
-              const lastName = contact[R.keys(contact).find((key: string) => key.includes("|lastName"))!]
-              const rbId = blockId.split("|RB")[1].split("|")[0]
-              return {
-                id: `${blockId}|${index}`,
-                address: contact[R.keys(contact).find((key: string) => key.includes("|address"))!],
-                cell: contact[R.keys(contact).find((key: string) => key.includes("|cell"))!],
-                email: contact[R.keys(contact).find((key: string) => key.includes("|email"))!],
-                name: `${firstName} ${lastName}`.trim(),
-                phone: contact[R.keys(contact).find((key: string) => key.includes("|phone"))!],
-                title: blockIdToTitleMapping[rbId],
-              }
-            } else {
-              null
-            }
+        Object.keys(contact).forEach((key) => {
+          const splitKey = key.split("|")
+          // the end of the key is the contact input field name e.g. firstName, email etc.
+          const fieldName = splitKey.pop()
+
+          formattedContactObject[fieldName] = contact[key]
+
+          if (!("title" in formattedContactObject)) {
+            const parentKey = splitKey.join("|")
+            // sets the title form the parent field set
+            formattedContactObject["title"] = contactKeyToLabelMapping[parentKey]
           }
-          return contactArray?.map((contact, index) => reformatObject(contact, index)).filter((outNull) => outNull)
         })
-        .flat()
 
-      return unfilteredContacts.filter((contact) => {
-        const omitted = R.omit(["id", "title"], contact)
-        return R.keys(omitted).length > 0 && R.values(omitted).some((value) => value && !R.isEmpty(value))
-      })
+        insertFullNameToContact(formattedContactObject)
+
+        return formattedContactObject
+      }
+
+      // multi contact field pairs value is an array, so we filter them out then
+      // format all contacts into an array of contact objects
+      const multiContacts = allContactFieldPairs
+        .filter(([_key, val]) => Array.isArray(val))
+        .reduce((acc, [parentKey, contactArray]) => {
+          contactArray.forEach((unformattedContact) => {
+            const formattedContact: Record<string, string> =
+              reformatContactObjectFromMultiContactSubmission(unformattedContact)
+
+            acc.push(formattedContact)
+          })
+
+          return acc
+        }, [])
+
+      //   returns a single array of all contacts
+      return singleContacts.concat(multiContacts)
     },
   }))
   .actions((self) => ({

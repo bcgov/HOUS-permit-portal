@@ -153,7 +153,7 @@ class RequirementFormJsonService
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
     if requirement.input_options["can_add_multiple_contacts"].blank?
-      return(get_contact_field_set_form_json(requirement.key(requirement_block_key)))
+      return(get_contact_field_set_form_json("#{requirement.key(requirement_block_key)}|#{requirement.input_type}"))
     end
 
     get_multi_contact_datagrid_form_json(requirement_block_key)
@@ -210,11 +210,8 @@ class RequirementFormJsonService
     }
   end
 
-  def get_contact_field_set_form_json(key = nil, parent_key = nil)
+  def get_contact_field_set_form_json(key)
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
-
-    key = "#{requirement.input_type}" if key.nil?
-    key = "#{parent_key}|#{key}" if parent_key.present?
 
     contact_components =
       (
@@ -284,6 +281,7 @@ class RequirementFormJsonService
   def get_multi_contact_datagrid_form_json(requirement_block_key = requirement&.requirement_block&.key)
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
+    key = "#{requirement.key(requirement_block_key)}|multi_contact"
     {
       label: "Multi Contact",
       reorder: false,
@@ -295,24 +293,10 @@ class RequirementFormJsonService
       hideLabel: true,
       tableView: false,
       custom_class: "contact-data-grid",
-      defaultValue: [
-        {
-          firstName: "",
-          email: "",
-          lastName: "",
-          phone: "",
-          address: "", # TODO: address is a text now, replace with address type when implemented
-          businessName: "",
-          businessLicense: "",
-          organization: "",
-          professionalAssociation: "",
-          professionalNumber: "",
-        },
-      ],
-      key: requirement.key(requirement_block_key),
+      key: key,
       type: "datagrid",
       input: true,
-      components: [get_contact_field_set_form_json(nil, requirement_block_key)],
+      components: [get_contact_field_set_form_json("#{key}|#{requirement.input_type}")],
     }
   end
 
@@ -327,7 +311,7 @@ class RequirementFormJsonService
         {
           type: "simplefile",
           storage: "s3custom",
-          #fileMaxSize driven by front end defaults, do not set in requirements as it fixes it
+          # fileMaxSize driven by front end defaults, do not set in requirements as it fixes it
         }.tap do |file_hash|
           file_hash[:computedCompliance] = input_options["computed_compliance"] if input_options[
             "computed_compliance"
