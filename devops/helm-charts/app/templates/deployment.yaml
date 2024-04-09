@@ -62,6 +62,26 @@ spec:
           - '-c'
           args: {{ .spec.containers.args }}
           {{- end }}
+        {{- if eq .process "web" }}
+        - name: log-sidecar
+          image: busybox
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          command: ["/bin/sh"]
+          args: ["-c", "tail -n+1 -f /var/log/app/$POD_NAME.log"]
+          volumeMounts:
+          - name: log-volume
+            mountPath: /var/log/app
+        {{- end }}
+      {{- if eq .process "web" }}
+      volumes:
+        - name: log-volume
+          persistentVolumeClaim:
+            claimName: compliance-log-pvc
+      {{- end }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
