@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Center,
   Container,
   Flex,
   FormControl,
@@ -85,6 +86,7 @@ export const JurisdictionScreen = observer(() => {
 
   const onSubmit = async (formData) => {
     await update(formData)
+    reset(getDefaultJurisdictionValues())
   }
 
   return (
@@ -181,8 +183,10 @@ export const JurisdictionScreen = observer(() => {
               </Flex>
 
               <Can action={"jurisdiction:manage"} data={{ jurisdiction: currentJurisdiction }}>
-                <Flex w="full" justify="center">
+                <Center w="full" position="fixed" bottom={0} left={0} right={0}>
                   <Button
+                    size="lg"
+                    mb={4}
                     variant="primary"
                     type="submit"
                     isDisabled={isSubmitting}
@@ -191,7 +195,7 @@ export const JurisdictionScreen = observer(() => {
                   >
                     {t("ui.save")}
                   </Button>
-                </Flex>
+                </Center>
               </Can>
             </Flex>
           </form>

@@ -78,6 +78,10 @@ Rails.application.routes.draw do
       get "jurisdiction_options", on: :collection
     end
 
+    resources :contacts, only: %i[create] do
+      get "contact_options", on: :collection
+    end
+
     resources :permit_classifications, only: %i[index] do
       post "permit_classification_options", on: :collection
     end

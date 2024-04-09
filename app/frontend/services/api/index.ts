@@ -2,6 +2,7 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
+import { TCreateContactFormData } from "../../components/shared/contact/create-contact-modal"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -32,7 +33,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { ISiteConfiguration, TSearchParams } from "../../types/types"
+import { IContact, ISiteConfiguration, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -115,6 +116,10 @@ export class Api {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
 
+  async fetchContactOptions(query) {
+    return this.client.get<IOptionResponse<IContact>>(`/contacts/contact_options`, { query })
+  }
+
   async fetchJurisdictionOptions(name: string, type: EJurisdictionTypes) {
     return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, {
       jurisdiction: { name, type },
@@ -122,7 +127,7 @@ export class Api {
   }
 
   async fetchPermitClassifications() {
-    return this.client.get<IOptionResponse>(`/permit_classifications`)
+    return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`)
   }
 
   async fetchPermitClassificationOptions(
@@ -346,5 +351,9 @@ export class Api {
 
   async updateUser(id: string, user: IUser) {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
+  }
+
+  async createContact(params: TCreateContactFormData) {
+    return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }
 }

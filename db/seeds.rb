@@ -88,12 +88,13 @@ if PermitApplication.first.blank?
       if jurisdiction.contacts.blank?
         rand(3..5).times do |n|
           Contact.create!(
-            name: "Contact #{n}",
+            first_name: "Contactfirst #{n}",
+            last_name: "Contactlast #{n}",
             title: "Title #{n}",
             department: "Department #{n}",
             email: "contact_#{n}_#{jurisdiction.id}@example.com",
-            phone_number: "604-456-7802",
-            jurisdiction_id: jurisdiction.id,
+            phone: "604-456-7802",
+            contactable: jurisdiction,
           )
         end
         jurisdiction.reload
@@ -107,6 +108,26 @@ if PermitApplication.first.blank?
       end
     end
 
+  User
+    .submitter
+    .first(10)
+    .each do |user|
+      if user.contacts.blank?
+        rand(3..5).times do |n|
+          Contact.create!(
+            first_name: "Usercontactfirst #{n}",
+            last_name: "Usercontactlast #{n}",
+            title: "Title #{n}",
+            department: "Department #{n}",
+            email: "user_contact_#{n}_#{user.id}@example.com",
+            address: "Address #{n}",
+            phone: "604-456-7802",
+            contactable: user,
+          )
+        end
+      end
+    end
+  Contact.reindex
   puts "Seeding requirement templates..."
   # Create RequirementTemplate records
   RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)

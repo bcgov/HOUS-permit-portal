@@ -59,7 +59,7 @@ export const EmailFormControl = ({
             {...register(fieldName, {
               required: required && t("ui.isRequired", { field: t("auth.emailLabel") }),
               validate: {
-                matchesEmailRegex: (str) => !validate || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
+                matchesEmailRegex: (str) => !validate || !required || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
               },
             })}
             bg="greys.white"

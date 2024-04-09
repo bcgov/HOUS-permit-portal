@@ -153,7 +153,9 @@ class RequirementFormJsonService
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
     if requirement.input_options["can_add_multiple_contacts"].blank?
-      return(get_contact_field_set_form_json("#{requirement.key(requirement_block_key)}|#{requirement.input_type}"))
+      return(
+        get_contact_field_set_form_json("#{requirement.key(requirement_block_key)}|#{requirement.input_type}", false)
+      )
     end
 
     get_multi_contact_datagrid_form_json(requirement_block_key)
@@ -210,7 +212,7 @@ class RequirementFormJsonService
     }
   end
 
-  def get_contact_field_set_form_json(key)
+  def get_contact_field_set_form_json(key, is_multi)
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
     contact_components =
@@ -231,7 +233,7 @@ class RequirementFormJsonService
       hideLabel: true,
       input: false,
       tableView: false,
-      components: contact_components,
+      components: contact_components << get_autofill_contact_button_form_json(key, is_multi),
     }
 
     form_json[:id] = requirement.id if requirement.input_options["can_add_multiple_contacts"].blank?
@@ -282,6 +284,17 @@ class RequirementFormJsonService
     ]
   end
 
+  def get_autofill_contact_button_form_json(parent_key, is_multi)
+    {
+      type: "button",
+      action: "custom",
+      title: I18n.t("formio.requirement_template.autofill_contact"),
+      label: I18n.t("formio.requirement_template.autofill_contact"),
+      custom:
+        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{parent_key}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));",
+    }
+  end
+
   def get_multi_contact_datagrid_form_json(requirement_block_key = requirement&.requirement_block&.key)
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
@@ -301,7 +314,7 @@ class RequirementFormJsonService
       key: key,
       type: "datagrid",
       input: true,
-      components: [get_contact_field_set_form_json("#{key}|#{requirement.input_type}")],
+      components: [get_contact_field_set_form_json("#{key}|#{requirement.input_type}", true)],
     }
   end
 

@@ -1,14 +1,17 @@
 import {
+  Box,
   FormControl,
   FormControlProps,
   FormErrorMessage,
   FormHelperText,
   FormLabel,
+  HStack,
   Input,
   InputGroup,
   InputLeftElement,
   InputRightElement,
 } from "@chakra-ui/react"
+import { AsteriskSimple } from "@phosphor-icons/react"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
@@ -25,6 +28,7 @@ interface IInputFormControlProps extends FormControlProps {
   leftElement?: JSX.Element
   rightElement?: JSX.Element
   inputProps?: any
+  key?: string
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
@@ -61,6 +65,7 @@ const InputFormControl = ({
   leftElement,
   rightElement,
   inputProps = {},
+  key = fieldName,
   ...rest
 }: IInputFormControlProps) => {
   const { register, formState } = useFormContext()
@@ -73,8 +78,18 @@ const InputFormControl = ({
 
   return (
     <FormControl isInvalid={!!errorMessage} {...rest}>
-      {label && <FormLabel>{label}</FormLabel>}
-      <InputGroup w="full" d="flex" flexDirection="column">
+      {label && (
+        <HStack gap={0}>
+          <FormLabel>{label} </FormLabel>
+          {required && (
+            <Box color="semantic.error" ml={-2} mb={2}>
+              <AsteriskSimple />
+            </Box>
+          )}
+        </HStack>
+      )}
+
+      <InputGroup w="full" display="flex" flexDirection="column">
         <Input bg="greys.white" {...registerProps} {...inputProps} />
         {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
         {hint && <FormHelperText color="border.base">{hint}</FormHelperText>}

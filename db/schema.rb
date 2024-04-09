@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_04_171321) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_10_164337) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -41,18 +41,27 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_04_171321) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.string "name"
     t.string "title"
     t.string "email"
-    t.string "phone_number"
+    t.string "phone"
     t.string "extension"
-    t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "department"
     t.string "organization"
     t.string "cell_number"
-    t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
+    t.string "first_name", default: "", null: false
+    t.string "last_name", default: "", null: false
+    t.string "cell"
+    t.text "address"
+    t.string "business_name"
+    t.string "business_license"
+    t.string "professional_association"
+    t.string "professional_number"
+    t.string "contactable_type"
+    t.uuid "contactable_id"
+    t.index %w[contactable_type contactable_id],
+            name: "index_contacts_on_contactable"
   end
 
   create_table "end_user_license_agreements",
@@ -595,7 +604,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_04_171321) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
-  add_foreign_key "contacts", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",

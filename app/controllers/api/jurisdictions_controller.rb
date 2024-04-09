@@ -142,7 +142,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
-      contacts_attributes: %i[id name department title phone_number email],
+      contacts_attributes: %i[id first_name last_name department title phone cell email],
       permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
     )
   end

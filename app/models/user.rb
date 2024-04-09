@@ -1,13 +1,19 @@
 class User < ApplicationRecord
   PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}\z/
-  searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
+  searchkick searchable: %i[first_name last_name username email],
+             word_start: %i[first_name last_name username email]
 
   scope :review_managers, -> { where(role: User.roles[:review_manager]) }
   scope :reviewers, -> { where(role: User.roles[:reviewer]) }
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
+  devise :invitable,
+         :database_authenticatable,
+         :registerable,
+         :recoverable,
+         :rememberable,
+         :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
 
@@ -26,7 +32,13 @@ class User < ApplicationRecord
          omniauth_providers: %i[keycloak],
          jwt_revocation_strategy: self
 
-  enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
+  enum role: {
+         submitter: 0,
+         review_manager: 1,
+         reviewer: 2,
+         super_admin: 3
+       },
+       _default: 0
 
   validate :validate_password_complexity
 
@@ -35,9 +47,14 @@ class User < ApplicationRecord
 
   # Associations
   belongs_to :jurisdiction, optional: true
-  has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
-  has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
+  has_many :permit_applications,
+           foreign_key: "submitter_id",
+           dependent: :destroy
+  has_many :applied_jurisdictions,
+           through: :permit_applications,
+           source: :jurisdiction
   has_many :license_agreements, class_name: "UserLicenseAgreement"
+  has_many :contacts, as: :contactable, dependent: :destroy
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
@@ -55,11 +72,21 @@ class User < ApplicationRecord
   def validate_password_complexity
     return if password.blank? || password =~ PASSWORD_REGEX
 
-    errors.add :password, I18n.t("activerecord.errors.models.user.attributes.password.password_format")
+    errors.add :password,
+               I18n.t(
+                 "activerecord.errors.models.user.attributes.password.password_format"
+               )
   end
 
   def eula_variant
-    { submitter: "open", reviewer: "employee", review_manager: "employee", super_admin: nil }[role.to_sym]
+    {
+      submitter: "open",
+      reviewer: "employee",
+      review_manager: "employee",
+      super_admin: nil
+    }[
+      role.to_sym
+    ]
   end
 
   def name
@@ -77,7 +104,7 @@ class User < ApplicationRecord
       email: email,
       jurisdiction_id: jurisdiction_id,
       discarded: discarded_at.present?,
-      last_sign_in_at: last_sign_in_at,
+      last_sign_in_at: last_sign_in_at
     }
   end
 
@@ -90,7 +117,11 @@ class User < ApplicationRecord
   end
 
   def accept_invitation_with_omniauth(auth)
-    update(password: Devise.friendly_token[0, 20], provider: auth.provider, uid: auth.uid)
+    update(
+      password: Devise.friendly_token[0, 20],
+      provider: auth.provider,
+      uid: auth.uid
+    )
     accept_invitation! if valid?
   end
 
@@ -111,7 +142,10 @@ class User < ApplicationRecord
   def reindex_jurisdiction_user_size
     return unless jurisdiction.present?
 
-    jurisdiction.reindex if saved_change_to_jurisdiction_id? || saved_change_to_role? || destroyed? || new_record?
+    if saved_change_to_jurisdiction_id? || saved_change_to_role? ||
+         destroyed? || new_record?
+      jurisdiction.reindex
+    end
   end
 
   def refresh_search_index
@@ -119,20 +153,32 @@ class User < ApplicationRecord
   end
 
   def confirmed_user_has_fields
-    errors.add(:user, "Confirmed user must have username") unless !confirmed? || username.present?
-    errors.add(:user, "Confirmed user must have first_name") unless !confirmed? || first_name.present?
-    errors.add(:user, "Confirmed user must have last_name") unless !confirmed? || last_name.present?
+    unless !confirmed? || username.present?
+      errors.add(:user, "Confirmed user must have username")
+    end
+    unless !confirmed? || first_name.present?
+      errors.add(:user, "Confirmed user must have first_name")
+    end
+    unless !confirmed? || last_name.present?
+      errors.add(:user, "Confirmed user must have last_name")
+    end
   end
 
   def jurisdiction_must_belong_to_correct_roles
     if jurisdiction.present? && !reviewer? && !review_manager?
-      errors.add(:jurisdiction, "Cannot be present when user is not a reviewer or review manager")
+      errors.add(
+        :jurisdiction,
+        "Cannot be present when user is not a reviewer or review manager"
+      )
     end
   end
 
   def unique_bceid
     return unless uid.present?
-    existing_user = User.where.not(uid: nil).find_by(uid: uid, provider: provider)
-    errors.add(:uid, :taken, jurisdiction: existing_user.jurisdiction.name) if existing_user && existing_user != self
+    existing_user =
+      User.where.not(uid: nil).find_by(uid: uid, provider: provider)
+    if existing_user && existing_user != self
+      errors.add(:uid, :taken, jurisdiction: existing_user.jurisdiction.name)
+    end
   end
 end

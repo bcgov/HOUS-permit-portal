@@ -39,6 +39,7 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
+  before_validation :populate_base_form_data, on: :create
   before_save :set_submitted_at, if: :status_changed?
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -105,6 +106,10 @@ class PermitApplication < ApplicationRecord
     return unless template_version.blank?
 
     self.template_version = current_published_template_version
+  end
+
+  def populate_base_form_data
+    self.submission_data = { data: {} }
   end
 
   def submitter_frontend_url
