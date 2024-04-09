@@ -166,11 +166,13 @@ export const PermitApplicationModel = types
       })
       self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
     },
-    update: flow(function* (params) {
+    update: flow(function* ({ autosave, ...params }) {
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
         const { data: permitApplication } = response.data
-        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        if (!autosave) {
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
       }
       return response
     }),
