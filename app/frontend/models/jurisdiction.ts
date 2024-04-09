@@ -1,13 +1,9 @@
-import { t } from "i18next"
 import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EUserSortFields } from "../types/enums"
 import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
-import { toCamelCase } from "../utils/utility-functions"
 import { PermitApplicationModel } from "./permit-application"
-import { UserModel } from "./user"
 
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
@@ -31,7 +27,6 @@ export const JurisdictionModel = types
     permitTypeSubmissionContacts: types.array(types.frozen<IPermitTypeSubmissionContact>()),
     createdAt: types.Date,
     updatedAt: types.Date,
-    tableUsers: types.array(types.reference(UserModel)),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
@@ -42,10 +37,6 @@ export const JurisdictionModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
-    getUserSortColumnHeader(field: EUserSortFields) {
-      //@ts-ignore
-      return t(`user.fields.${toCamelCase(field)}`)
-    },
     get primaryContact() {
       if (self.contacts.length === 0) return null
       if (self.contacts.length === 1) return self.contacts[0]
@@ -71,9 +62,6 @@ export const JurisdictionModel = types
     },
   }))
   .actions((self) => ({
-    setTableUsers: (users) => {
-      self.tableUsers = users.map((user) => user.id)
-    },
     setTablePermitApplications: (permitApplications) => {
       self.tablePermitApplications = permitApplications.map((pa) => pa.id)
     },

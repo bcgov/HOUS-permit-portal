@@ -1,5 +1,5 @@
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
-import { TSiteConfiguration } from "../components/domains/super-admin/site-configuration-management-screen.tsx"
+import { TSiteConfiguration } from "../components/domains/super-admin/site-configuration-management/sitewide-message-screen.js"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 

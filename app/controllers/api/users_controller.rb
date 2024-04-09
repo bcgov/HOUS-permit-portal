@@ -1,16 +1,21 @@
 class Api::UsersController < Api::ApplicationController
+  include Api::Concerns::Search::AdminUsers
+
   before_action :find_user, only: %i[destroy restore accept_eula update]
+  skip_after_action :verify_policy_scoped, only: %i[index]
 
   def index
-    perform_search
+    authorize :user, :index?
+    perform_user_search
+    authorized_results = apply_search_authorization(@user_search.results, "search_admin_users")
 
-    render_success @search.results,
+    render_success authorized_results,
                    nil,
                    {
                      meta: {
-                       total_pages: @search.total_pages,
-                       total_count: @search.total_count,
-                       current_page: @search.current_page,
+                       total_pages: @user_search.total_pages,
+                       total_count: @user_search.total_count,
+                       current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
                    }

@@ -78,7 +78,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_users
     authorize @jurisdiction
     perform_user_search
-    authorized_results = apply_search_authorization(@user_search.results, "search_users")
+    authorized_results = apply_search_authorization(@user_search.results, "search_jurisdiction_users")
     render_success authorized_results,
                    nil,
                    {

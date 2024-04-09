@@ -98,6 +98,7 @@ Rails.application.routes.draw do
     resources :users, only: %i[destroy update] do
       patch "restore", on: :member
       patch "accept_eula", on: :member
+      post "search", on: :collection, to: "users#index"
     end
 
     resources :end_user_license_agreement, only: %i[index]

@@ -17,12 +17,12 @@ import {
   IApiResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
-  IJurisdictionUserResponse,
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
   IResetPasswordResponse,
   IUserResponse,
+  IUsersResponse,
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
@@ -159,7 +159,11 @@ export class Api {
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
-    return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
+    return this.client.post<IUsersResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
+  }
+
+  async fetchAdminUsers(params?: TSearchParams<EUserSortFields>) {
+    return this.client.post<IUsersResponse>(`/users/search`, params)
   }
 
   async fetchPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {

@@ -25,7 +25,7 @@ export type TSiteConfiguration = {
   sitewideMessage: string | null
 }
 
-export const SiteConfigurationManagementScreen = observer(function SiteConfigurationManagementScreen() {
+export const SitewideMessageScreen = observer(function SitewideMessageScreen() {
   const { siteConfigurationStore } = useMst()
   const { displaySitewideMessage, sitewideMessage, updateSiteConfiguration, configurationLoaded } =
     siteConfigurationStore
@@ -55,14 +55,14 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
   return (
     <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1} as="main">
       <Heading mb={0} fontSize="3xl">
-        {t("siteConfiguration.title")}
+        {t("siteConfiguration.sitewideMessage.title")}
       </Heading>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex mt={8} gap={16}>
             <Box minW="fit-content">
               <Heading as="h3" noOfLines={1}>
-                {t("siteConfiguration.sitewideMessageSettings")}
+                {t("siteConfiguration.sitewideMessage.settings")}
               </Heading>
             </Box>
             <VStack spacing={8} align="start" w="full">
@@ -70,9 +70,9 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
                 <Flex justify="space-between" w="full" gap={16}>
                   <Flex direction="column">
                     <TextFormControl
-                      label={t("siteConfiguration.sitewideMessageLabel")}
+                      label={t("siteConfiguration.sitewideMessage.label")}
                       fieldName="sitewideMessage"
-                      hint={t("siteConfiguration.sitewideMessageHint")}
+                      hint={t("siteConfiguration.sitewideMessage.hint")}
                     />
                   </Flex>
                   <FormControl display="flex" alignItems="center" w="fit-content" gap={2}>
@@ -84,7 +84,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
                       )}
                     />
                     <FormLabel htmlFor="displaySitewideMessage">
-                      {t("siteConfiguration.enableSitewideMessage")}
+                      {t("siteConfiguration.sitewideMessage.enable")}
                     </FormLabel>
                   </FormControl>
                 </Flex>

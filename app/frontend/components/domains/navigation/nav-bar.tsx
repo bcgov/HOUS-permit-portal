@@ -183,6 +183,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
     <MenuGroup>
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
+      <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
       <MenuDivider />
     </MenuGroup>
   )

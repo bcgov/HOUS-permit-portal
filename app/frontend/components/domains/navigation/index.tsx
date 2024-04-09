@@ -137,10 +137,21 @@ const StepCodeChecklistPDFViewer = lazy(() =>
   import("../step-code/checklist/pdf-content/viewer").then((module) => ({ default: module.StepCodeChecklistPDFViewer }))
 )
 const SiteConfigurationManagementScreen = lazy(() =>
-  import("../super-admin/site-configuration-management-screen.tsx").then((module) => ({
+  import("../super-admin/site-configuration-management").then((module) => ({
     default: module.SiteConfigurationManagementScreen,
   }))
 )
+const SitewideMessageScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/sitewide-message-screen").then((module) => ({
+    default: module.SitewideMessageScreen,
+  }))
+)
+const AdminUserIndexScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/users-screen").then((module) => ({
+    default: module.AdminUserIndexScreen,
+  }))
+)
+
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -222,6 +233,8 @@ const AppRoutes = observer(() => {
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
+      <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
+      <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
     </>
   )
 

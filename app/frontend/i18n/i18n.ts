@@ -846,6 +846,7 @@ const options = {
         },
         home: {
           jurisdictionsTitle: "Jurisdictions",
+          siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
           permitTemplateCatalogueDescription:
@@ -1086,10 +1087,18 @@ const options = {
         },
         siteConfiguration: {
           title: "Site configuration management",
-          enableSitewideMessage: "Show",
-          sitewideMessageLabel: "Site-wide message",
-          sitewideMessageHint: "This message will appear at the top of each page for all users.",
-          sitewideMessageSettings: "Site-wide message settings",
+          adminUserIndex: {
+            title: "Users",
+            description: "View and manage administrative users",
+          },
+          sitewideMessage: {
+            title: "Site-wide message",
+            description: "Enable and configure a site-wide message",
+            enable: "Show",
+            label: "Site-wide message",
+            hint: "This message will appear at the top of each page for all users.",
+            settings: "Site-wide message settings",
+          },
         },
         site: {
           title: "Building Permit Hub",
