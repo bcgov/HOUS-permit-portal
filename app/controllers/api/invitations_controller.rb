@@ -20,6 +20,9 @@ class Api::InvitationsController < Devise::InvitationsController
   def update
     raw_invitation_token = update_resource_params["invitation_token"]
     user = User.find_by_invitation_token(raw_invitation_token, true)
+
+    render_error "user.accept_invite_error" and return unless user.present?
+
     user.update(user_params)
 
     self.resource = accept_resource if user&.errors.empty?
@@ -40,7 +43,6 @@ class Api::InvitationsController < Devise::InvitationsController
       ) and return
     else
       resource.invitation_token = raw_invitation_token
-      # resource.errors.full_messages is full here probably with "Invitation token is invalid", lets just craft our own message for now
       render_error "user.accept_invite_error",
                    message_opts: {
                      error_message: resource.errors.full_messages.join(", "),
