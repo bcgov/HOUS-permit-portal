@@ -40,6 +40,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
+  const [isDirty, setIsDirty] = useState(false)
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
@@ -78,7 +79,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
-    if (formio.pristine) return true
+    if (formio.pristine && !isDirty) return true
 
     const submissionData = formio.data
     try {
@@ -92,6 +93,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         //update file hashes that have been changed
       }
       formio.setPristine(true)
+      setIsDirty(false)
       return response.ok
     } catch (e) {
       return false
@@ -244,6 +246,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
+              setIsDirty={setIsDirty}
               showHelpButton
             />
           </Flex>

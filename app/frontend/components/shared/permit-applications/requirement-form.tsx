@@ -34,6 +34,7 @@ interface IRequirementFormProps {
   onCompletedBlocksChange?: (sections: any) => void
   formRef: any
   triggerSave?: () => void
+  setIsDirty?: (val: boolean) => void
   showHelpButton?: boolean
 }
 
@@ -43,6 +44,7 @@ export const RequirementForm = observer(
     onCompletedBlocksChange,
     formRef,
     triggerSave,
+    setIsDirty,
     showHelpButton = true,
   }: IRequirementFormProps) => {
     const {
@@ -207,8 +209,9 @@ export const RequirementForm = observer(
       }
       if (changedEvent?.changed?.component?.type == "simplefile") {
         //https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
-        //no pristine sets for file upldates, but they are present in outher components, workaround this by dealing with change events
-        changedEvent?.changed?.instance?.root?.setPristine(false)
+        // formio `pristine` is not set for file upldates
+        // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
+        setIsDirty(true)
       }
     }
 
