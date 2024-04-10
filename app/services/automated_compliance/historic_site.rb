@@ -1,29 +1,50 @@
 class AutomatedCompliance::HistoricSite < AutomatedCompliance::Base
   def call(permit_application)
-    return if permit_application.pid.blank?
-    #extraction of parcel data can be done via LTSA base
-
     begin
+      raise Errors::GeometryError if permit_application.pid.blank?
+
+      # extraction of parcel data can be done via LTSA base
       attributes = Integrations::LtsaParcelMapBc.new.historic_site_by_pid(pid: permit_application.pid)
 
+      raise Errors::GeometryError if attributes.nil?
+
       permit_application.with_lock do
+        updated = false
         permit_application
           .automated_compliance_requirements_for_module("HistoricSite")
           .each do |field_id, req|
-            if attributes[req.dig("computedCompliance", "value")] == "Y"
-              permit_application.compliance_data[field_id] = "yes"
+            result =
+              if attributes[req.dig("computedCompliance", "value")] == "Y"
+                "yes"
+              elsif attributes[req.dig("computedCompliance", "value")] == "N"
+                "no"
+              else
+                # set to nil to indicate a valid value was not found
+                nil
+              end
+            if result != permit_application.compliance_data[field_id]
+              updated = true
+              permit_application.compliance_data[field_id] = result
             end
           end
-        permit_application.save!
+        permit_application.save! if updated
       end if attributes
     rescue Errors::GeometryError
-      #geometry not found for this pid, null op
+      # geometry not found for this pid or pid blank, null op
       permit_application.with_lock do
+        updated = false
         permit_application
           .automated_compliance_requirements_for_module("HistoricSite")
-          .each { |field_id, req| permit_application.compliance_data[field_id] = nil }
-        permit_application.save!
-      end if attributes
+          .each do |field_id, req|
+            if !permit_application.compliance_data.has_key?(field_id)
+              updated = true
+              # set to nil if there is no existing value to indicate
+              # a valid value was not found
+              permit_application.compliance_data[field_id] = nil
+            end
+          end
+        permit_application.save! if updated
+      end
     end
   end
 end
