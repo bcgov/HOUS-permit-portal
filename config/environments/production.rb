@@ -92,8 +92,8 @@ Rails.application.configure do
   end
 
   # Change the logger to Multilogger in production so we can write both to a file (compliance) and to STDOUT for openshift
-  # Rotate the logs daily
-  file_logger = Logger.new(Rails.root.join("log", "#{Rails.env}-#{Time.now.strftime("%m-%d-%y")}.log"), "daily")
+  # Rotate the logs daily - ENV["HOSTNAME"] should be injected by openshift and will provide the name of the running pod so that we don't overwrite the same file
+  file_logger = Logger.new(Rails.root.join("log", "#{ENV["HOSTNAME"]}-#{Time.now.strftime("%m-%d-%y")}.log"), "daily")
   stdout_logger = Logger.new(STDOUT)
 
   config.logger = MultiLogger.new(stdout_logger, file_logger)
