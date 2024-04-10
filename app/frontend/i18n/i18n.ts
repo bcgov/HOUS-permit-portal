@@ -164,6 +164,7 @@ const options = {
           toTop: "Go to top",
           confirm: "Confirm",
           searchAddresses: "Search addresses",
+          typeToSearch: "Begin typing to search",
           close: "Close",
           asc: "Ascending",
           desc: "Descending",
