@@ -92,7 +92,7 @@ export function handleScrollToTop() {
   document.body.scrollTop = 0 // For Safari
 }
 
-export function handleScrollToBottom(elementId: string) {
+export function handleScrollToBottom() {
   window.scrollTo(0, document.body.scrollHeight)
 }
 
