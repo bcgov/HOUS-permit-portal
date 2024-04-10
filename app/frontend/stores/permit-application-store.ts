@@ -10,7 +10,7 @@ import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
 import { EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
-import { IUserPushPayload } from "../types/types"
+import { IPermitApplicationUpdate, IUserPushPayload } from "../types/types"
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -166,7 +166,12 @@ export const PermitApplicationStoreModel = types
       //based on the eventType do stuff
       switch (payload.eventType) {
         case ESocketEventTypes.update:
-          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payload.data })
+          const payloadData = payload.data as IPermitApplicationUpdate
+          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payloadData })
+
+          self.permitApplicationMap
+            .get(payloadData?.id)
+            ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
           document.dispatchEvent(event)
           break
         default:
