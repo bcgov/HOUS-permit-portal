@@ -70,7 +70,7 @@ export const JurisdictionSelect = observer(function ({
   }
 
   return (
-    <FormControl w="full">
+    <FormControl w="full" zIndex={1}>
       <FormLabel>{title ?? t("jurisdiction.index.title")}</FormLabel>
       <InputGroup w="full">
         <AsyncSelect<IOption<IJurisdiction>, boolean>

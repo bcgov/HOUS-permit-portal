@@ -65,7 +65,7 @@ export const AddressSelect = observer(function ({
   }
 
   return (
-    <FormControl w="full">
+    <FormControl w="full" zIndex={2}>
       <FormLabel>{t("landing.addressSelectLabel")}</FormLabel>
       <InputGroup w="full">
         <AsyncSelect<IOption, boolean>
