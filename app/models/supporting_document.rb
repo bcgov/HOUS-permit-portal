@@ -5,7 +5,7 @@ class SupportingDocument < ApplicationRecord
   validate :unique_data_key
 
   scope :file_ids_with_regex, ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
-  scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data is NULL") }
+  scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data IS NULL") }
 
   def last_signer
     if compliance_data["result"] &&
@@ -29,7 +29,7 @@ class SupportingDocument < ApplicationRecord
 
       { "id" => file_id, "data_key" => data_key, "message" => "Signers validated: #{signers.join(",")}" }
     else
-      { "id" => file_id, "data_key" => data_key, "message" => compliance_data["error"] }
+      { "id" => file_id, "data_key" => data_key, "message" => compliance_data["error"], "error" => true }
     end
   end
 
@@ -81,6 +81,7 @@ class SupportingDocument < ApplicationRecord
   end
 
   UNIQUE_DATA_KEYS = %i[permit_application_pdf step_code_checklist_pdf]
+
   def unique_data_key
     return unless UNIQUE_DATA_KEYS.include?(data_key)
     return if !permit_application.supporting_documents.not(self).find_by(data_key: data_key)

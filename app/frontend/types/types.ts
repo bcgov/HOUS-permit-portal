@@ -204,6 +204,7 @@ export interface INotification {
 export interface IPermitApplicationUpdate {
   id
   frontEndFromUpdate: Object
+  formattedComplianceData: Object
 }
 
 export interface IUserPushPayload {

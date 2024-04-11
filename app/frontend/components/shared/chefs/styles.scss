@@ -123,6 +123,7 @@
       content: "\f107";
     }
   }
+
   .card-body {
     border-top: 1px solid var(--chakra-colors-border-light);
   }
@@ -295,12 +296,15 @@
   .choices__list {
     vertical-align: middle;
   }
+
   .choices {
     overflow: visible;
+
     &:focus {
       box-shadow: 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
     }
   }
+
   .choices__list--dropdown {
     .choices__item {
       &:not(.is-selected) {
@@ -373,9 +377,11 @@
     min-height: var(--chakra-space-10);
     border-bottom: 0;
   }
+
   .card-title {
     display: flex;
     justify-content: space-between;
+
     i {
       order: 2;
     }
@@ -399,12 +405,15 @@
       // each form field inside a block
       margin-bottom: var(--chakra-space-6);
       max-width: var(--chakra-sizes-container-sm);
+
       a {
         text-decoration: underline;
       }
+
       &:not(.contact-field-set):focus-within label:not(.form-check-label) {
         font-weight: bold;
       }
+
       &.contact-field-set .form-group:focus-within .col-form-label {
         font-weight: bold;
       }
@@ -448,11 +457,13 @@
     margin-top: calc(-1 * var(--chakra-space-1));
     margin-bottom: 6px;
 
+
     span {
       background-color: $bcgov-alert-info !important;
       display: inline-block;
       padding: var(--chakra-space-1);
       position: relative;
+
       &:after {
         content: "";
         display: inline-block;
@@ -462,6 +473,12 @@
         border-top: 6px solid $bcgov-alert-info !important;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
+      }
+    }
+
+    &.compliance-warning {
+      span {
+        background-color: $bcgov-alert-warning !important;
       }
     }
 
@@ -511,16 +528,18 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition:
-        background-color 200ms ease-in-out,
-        border-color 200ms ease-in-out;
+      transition: background-color 200ms ease-in-out,
+      border-color 200ms ease-in-out;
+
       a {
         color: inherit;
       }
+
       &:hover {
         background-color: var(--chakra-colors-semantic-infoLight);
       }
     }
+
     .file {
       border-radius: var(--chakra-radii-sm);
       border: 1px solid var(--chakra-colors-border-light);
@@ -533,6 +552,7 @@
           margin: 0 var(--chakra-space-1);
           padding: 6px;
           border-radius: var(--chakra-radii-full);
+
           &:hover {
             background-color: var(--chakra-colors-semantic-errorLight);
             cursor: pointer;
@@ -670,10 +690,12 @@
       font-weight: 700;
       font-size: var(--chakra-fontSizes-md);
     }
+
     .formio-error-wrapper {
       padding-left: var(--chakra-space-3) !important;
       margin-left: 0 !important;
       width: 100%;
+
       &::before {
         margin-left: calc(-1 * var(--chakra-space-8)) !important;
       }
@@ -767,6 +789,7 @@
     opacity: 1;
     transform: translateX(0);
   }
+
   &.float-off #floating-error-alert-box {
     opacity: 0;
     transform: translateX(200px);

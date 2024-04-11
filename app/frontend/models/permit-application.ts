@@ -227,6 +227,9 @@ export const PermitApplicationModel = types
       })
       self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
     },
+    setFormattedComplianceData(data: Record<string, any>) {
+      self.formattedComplianceData = data
+    },
     update: flow(function* ({ autosave, ...params }) {
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
