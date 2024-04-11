@@ -222,7 +222,7 @@ class RequirementFormJsonService
         end
       )
 
-    {
+    form_json = {
       legend: requirement.label,
       key: key,
       type: "fieldset",
@@ -233,6 +233,10 @@ class RequirementFormJsonService
       tableView: false,
       components: contact_components,
     }
+
+    form_json[:id] = requirement.id if requirement.input_options["can_add_multiple_contacts"].blank?
+
+    form_json
   end
 
   def get_general_contact_field_components(parent_key = nil)
@@ -284,6 +288,7 @@ class RequirementFormJsonService
     key = "#{requirement.key(requirement_block_key)}|multi_contact"
     {
       label: "Multi Contact",
+      id: requirement.id,
       reorder: false,
       addAnother: I18n.t("formio.requirement.contact.add_person_button"),
       addAnotherPosition: "bottom",
