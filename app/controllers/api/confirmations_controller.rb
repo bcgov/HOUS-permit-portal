@@ -19,9 +19,9 @@ class Api::ConfirmationsController < Devise::ConfirmationsController
 
     if resource.errors.empty?
       PermitHubMailer.welcome(@user).deliver_later
-      redirect_to login_url(frontend_flash_message("user.confirmation_success", "success"))
+      redirect_to confirmed_url(frontend_flash_message("user.confirmation_success", "success"))
     else
-      redirect_to login_url(
+      redirect_to home_url(
                     frontend_flash_message(
                       "user.confirmation_error",
                       "error",

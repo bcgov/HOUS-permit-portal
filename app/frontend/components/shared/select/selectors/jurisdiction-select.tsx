@@ -80,10 +80,10 @@ export const JurisdictionSelect = observer(function ({
         <AsyncSelect<IOption<IJurisdiction>, boolean>
           isClearable={true}
           onChange={(option: IOption<IJurisdiction>) => {
-            onChange(option.value)
+            onChange(option?.value)
           }}
           value={selectedOption}
-          defaultValue={null}
+          defaultValue={selectedOption}
           components={{
             Control,
             Option,
@@ -95,6 +95,7 @@ export const JurisdictionSelect = observer(function ({
           closeMenuOnSelect={true}
           isCreatable={false}
           {...rest}
+          placeholder={t("ui.typeToSearch")}
         />
       </InputGroup>
     </FormControl>
@@ -124,7 +125,7 @@ const Control = ({ children, ...props }: ControlProps<IOption<IJurisdiction>>) =
 const Input = ({ children, style, ...props }: InputProps) => {
   const { t } = useTranslation()
   return (
-    <components.Input {...props} placeholder={t("ui.typeToSearch")} aria-label="type here to search jurisdictions">
+    <components.Input {...props} aria-label="type here to search jurisdictions" placeholder={t("ui.typeToSearch")}>
       {children}
     </components.Input>
   )

@@ -161,17 +161,20 @@ export const JurisdictionScreen = observer(() => {
                   />
 
                   <Can action="jurisdiction:manage" data={{ jurisdiction: currentJurisdiction }}>
-                    <Button
-                      variant={"link"}
-                      aria-label={"edit contacts"}
-                      onClick={() => {
-                        setIsEditingContacts((current) => !current)
-                      }}
-                    >
-                      {isEditingContacts
-                        ? t("jurisdiction.edit.clickToShowContacts")
-                        : t("jurisdiction.edit.clickToEditContacts")}
-                    </Button>
+                    <Flex direction="column">
+                      <Button
+                        variant={"link"}
+                        aria-label={"edit contacts"}
+                        onClick={() => {
+                          setIsEditingContacts((current) => !current)
+                        }}
+                      >
+                        {isEditingContacts
+                          ? t("jurisdiction.edit.clickToShowContacts")
+                          : t("jurisdiction.edit.clickToEditContacts")}
+                      </Button>
+                      <Text>{t("jurisdiction.edit.firstContact")}</Text>
+                    </Flex>
                   </Can>
                   <ContactGrid isEditing={isEditingContacts} />
                 </Flex>

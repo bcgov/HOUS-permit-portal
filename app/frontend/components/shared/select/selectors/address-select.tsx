@@ -63,7 +63,6 @@ export const AddressSelect = observer(function ({
     }),
     // Add other custom styles as needed
   }
-
   return (
     <FormControl w="full" zIndex={2}>
       <FormLabel>{t("landing.addressSelectLabel")}</FormLabel>
