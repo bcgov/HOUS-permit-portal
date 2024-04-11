@@ -66,11 +66,15 @@ export const JurisdictionSelect = observer(function ({
       width: "100%", // Ensure the menu matches the width of the control/container
       background: "var(--chakra-colors-greys-grey10)",
     }),
+    input: (provided) => ({
+      ...provided,
+      display: "flex",
+    }),
     // Add other custom styles as needed
   }
 
   return (
-    <FormControl w="full">
+    <FormControl w="full" zIndex={1}>
       <FormLabel>{title ?? t("jurisdiction.index.title")}</FormLabel>
       <InputGroup w="full">
         <AsyncSelect<IOption<IJurisdiction>, boolean>
@@ -78,7 +82,6 @@ export const JurisdictionSelect = observer(function ({
           onChange={(option: IOption<IJurisdiction>) => {
             onChange(option.value)
           }}
-          placeholder={t("ui.search")}
           value={selectedOption}
           defaultValue={null}
           components={{
@@ -118,9 +121,10 @@ const Control = ({ children, ...props }: ControlProps<IOption<IJurisdiction>>) =
   )
 }
 
-const Input = ({ children, ...props }: InputProps) => {
+const Input = ({ children, style, ...props }: InputProps) => {
+  const { t } = useTranslation()
   return (
-    <components.Input {...props} aria-label="type here to search jurisdictions">
+    <components.Input {...props} placeholder={t("ui.typeToSearch")} aria-label="type here to search jurisdictions">
       {children}
     </components.Input>
   )

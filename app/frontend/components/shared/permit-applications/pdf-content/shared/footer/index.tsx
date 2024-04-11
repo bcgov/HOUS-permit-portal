@@ -12,7 +12,7 @@ export const Footer = ({ permitApplication }: { permitApplication: IPermitApplic
       fixed
       render={({ pageNumber, totalPages }) => (
         <>
-          <Field label={t("permitApplication.pdf.id")} value={permitApplication.id} />
+          <Field label={t("permitApplication.pdf.id")} value={permitApplication.number} />
           <Field
             label={t("permitApplication.pdf.submissionDate")}
             value={format(permitApplication.submittedAt, "yyyy-MM-dd")}

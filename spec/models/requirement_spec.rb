@@ -163,6 +163,22 @@ types" do
       expect(select_requirement.value_options).to eq(camel_select_options)
     end
 
+    it "removes spaces from values on input types" do
+      select_options = [{ "label" => "test", "value" => "needs trim" }]
+      select_requirement =
+        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+      formatted_select_options = [{ "label" => "test", "value" => "needsTrim" }]
+      expect(select_requirement.value_options).to eq(formatted_select_options)
+    end
+
+    it "removes spaces and camelizes values on input types" do
+      select_options = [{ "label" => "test", "value" => "new option_2" }]
+      select_requirement =
+        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+      formatted_select_options = [{ "label" => "test", "value" => "newOption2" }]
+      expect(select_requirement.value_options).to eq(formatted_select_options)
+    end
+
     it "returns the number unit for number input with a unit" do
       number_unit = "m"
       number_requirement_with_unit =

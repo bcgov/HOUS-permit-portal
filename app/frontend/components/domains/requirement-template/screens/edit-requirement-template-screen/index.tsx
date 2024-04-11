@@ -124,7 +124,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
         <EditableBuilderHeader requirementTemplate={requirementTemplate} />
-        <Box borderTop={"1px solid"} borderColor={"border.base"} position="relative">
+        <Box
+          id="sidebar-and-form-container"
+          borderTop={"1px solid"}
+          borderColor={"border.base"}
+          position="relative"
+          sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}
+        >
           {isReorderMode ? (
             <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
           ) : (
@@ -137,8 +143,8 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
           )}
           <Box
             id="editing-permit-requirements-form"
-            width="var(--app-sidebar-remaining-width)"
-            display="inline-block"
+            display="flex"
+            flexDirection="column"
             bg={hasNoSections ? "greys.grey03" : undefined}
             ref={rightContainerRef}
           >
@@ -148,14 +154,14 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
             />
-            <FloatingHelpDrawer />
+            <FloatingHelpDrawer top="100px" />
             {hasNoSections ? (
               <Flex
                 justifyContent={hasNoSections ? "center" : undefined}
                 alignItems={hasNoSections ? "flex-start" : undefined}
                 flex={1}
                 w={"full"}
-                h="100vh"
+                minH="100vh"
               >
                 <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"} mt="20%">
                   {t("requirementTemplate.edit.emptyTemplateSectionText")}

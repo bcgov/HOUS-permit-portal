@@ -9,6 +9,7 @@ import {
   Heading,
   InputGroup,
   Select,
+  Text,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -93,10 +94,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
             </Box>
-            <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
+            <Flex direction="column" as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
+              <Text>{t("auth.passwordRequirements")}</Text>
               <PasswordFormControl label={t("user.oldPassword")} fieldName="currentPassword" required={false} />
               <PasswordFormControl label={t("user.newPassword")} fieldName="password" required={false} validate />
-            </Box>
+            </Flex>
             <Flex as="section" gap={4} mt={4}>
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("ui.save")}

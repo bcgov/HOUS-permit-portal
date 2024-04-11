@@ -61,8 +61,8 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
           bg={hasNoSections ? "greys.grey03" : undefined}
           ref={rightContainerRef}
           position={"relative"}
-          width="var(--app-sidebar-remaining-width)"
-          display="inline-block"
+          display="flex"
+          flexDirection="column"
         >
           <Flex
             position="sticky"
@@ -73,7 +73,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             px="6"
             py="4"
             bg="greys.grey03"
-            w="full"
+            w="var(--app-sidebar-remaining-width)"
             justifyContent={"flex-end"}
             boxShadow={"elevations.elevation02"}
           >

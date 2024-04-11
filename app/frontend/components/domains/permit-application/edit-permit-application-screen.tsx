@@ -40,6 +40,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
+  const [isDirty, setIsDirty] = useState(false)
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
@@ -74,23 +75,25 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const handleSave = async () => {
+  const handleSave = async ({ autosave }: { autosave?: boolean } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
-    if (formio.pristine) return
+    if (formio.pristine && !isDirty) return true
 
     const submissionData = formio.data
     try {
       const response = await currentPermitApplication.update({
         submissionData: { data: submissionData },
         nickname: nicknameWatch,
+        autosave,
       })
       if (response.ok && response.data.data.frontEndFormUpdate) {
         updateFormIoValues(formio, response.data.data.frontEndFormUpdate)
         //update file hashes that have been changed
       }
       formio.setPristine(true)
+      setIsDirty(false)
       return response.ok
     } catch (e) {
       return false
@@ -136,7 +139,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     }
   }
 
-  useInterval(handleSave, 60000) // save progress every minute
+  useInterval(() => handleSave({ autosave: true }), 60000) // save progress every minute
 
   useEffect(() => {
     // sets the defaults subject to application load
@@ -147,7 +150,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const scrollToBottom = () => {
-    handleScrollToBottom("permitApplicationFieldsContainer")
+    handleScrollToBottom()
   }
 
   const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
@@ -165,6 +168,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         position="sticky"
         top="0"
         zIndex="11"
+        flexDirection={{ base: "column", md: "row" }}
       >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
@@ -207,7 +211,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               </Tooltip>
             </form>
 
-            <Text>{permitTypeAndActivity}</Text>
+            <Text noOfLines={1}>{permitTypeAndActivity}</Text>
             <CopyableValue value={number} label={t("permitApplication.fields.number")} />
           </Flex>
         </HStack>
@@ -231,17 +235,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Button>
           </HStack>
         )}
-        <FloatingHelpDrawer top="130px" position="absolute" />
+        <FloatingHelpDrawer top={{ base: "145px", md: "130px" }} position="absolute" />
       </Flex>
-      <Box id="permitApplicationFieldsContainer">
+      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"}>
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
+              setIsDirty={setIsDirty}
               showHelpButton
             />
           </Flex>

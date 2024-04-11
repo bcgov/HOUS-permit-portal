@@ -164,6 +164,7 @@ const options = {
           toTop: "Go to top",
           confirm: "Confirm",
           searchAddresses: "Search addresses",
+          typeToSearch: "Begin typing to search",
           close: "Close",
           asc: "Ascending",
           desc: "Descending",
@@ -198,7 +199,8 @@ const options = {
             addLookOut: 'Click to add a "Look Out" section',
             displayContactSummaryLabel: "Contact Summary Section (public)",
             addContactSummary: "Click to add a Contact Summary section",
-            clickToEditContacts: "Click to edit contacts",
+            clickToEditContacts:
+              "Click to edit contacts. The first contact will be displayed upon successful permit application submission.",
             clickToShowContacts: "Click to show contacts as they will be seen",
             clickToEditMap: "Click to edit map",
             clickToSeeMap: "Click to see map",
@@ -575,6 +577,9 @@ const options = {
           },
         },
         stepCodeChecklist: {
+          pdf: {
+            for: "Step code pre-construction checklist for",
+          },
           edit: {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
             notice: "Relevant data fields below has been filled in for you by Auto-Compliance.",
@@ -977,6 +982,17 @@ const options = {
             reviewer: "reviewer",
             super_admin: "super admin",
           },
+          rolesExplanation: {
+            submitter:
+              "The Submitter is typically an external user, such as a contractor, homeowner, or architect," +
+              " who initiates the building permit application process. They are responsible for providing all necessary documentation and information required for the permit application. Submitters need to ensure their submissions are complete, accurate, and comply with local regulations.",
+            review_manager:
+              "The Review Manager supervises the Reviewers and the entire building permit review operation. In addition to possessing all the permissions of a Reviewer, Review Managers are tasked with administrative oversight. Their responsibilities include the distribution of work among Reviewers, maintaining efficiency and consistency in the review processes, and ensuring that the quality of service meets established standards. Moreover, Review Managers have extended privileges to modify local government-specific configurations within the building permit application system, such as updating Step Code requirements, managing content on the 'About' page, and other application settings pertinent to their jurisdictional needs.",
+            reviewer:
+              "A Reviewer is typically an employee within the local government or a designated authority responsible for examining building permit applications submitted by the Submitter. Reviewers assess the documentation for compliance with building codes, zoning laws, and other regulatory requirements. They may request additional information, approve, reject, or provide comments on the applications.",
+            super_admin:
+              "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
+          },
         },
         requirementTemplate: {
           edit: {
@@ -1191,7 +1207,7 @@ const options = {
         automatedCompliance: {
           baseMessage: `This field has Auto-Compliance capability`,
           defaultValueMessage: `Auto-Compliance found the default value to be "{{defaultValue}}".`,
-          failedValueMessage: `Auto-Compliance could not find a value for this parameter.`,
+          failedValueMessage: `Auto-Compliance was unable fill this field, please check with your local jurisdiction if this is required.`,
         },
       },
     },

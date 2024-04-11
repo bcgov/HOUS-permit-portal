@@ -166,7 +166,7 @@ const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({
 
 export const Navigation = observer(() => {
   const { sessionStore, siteConfigurationStore } = useMst()
-  const { loggedIn } = sessionStore
+  const { isLoggingOut } = sessionStore
   const { displaySitewideMessage, sitewideMessage } = siteConfigurationStore
   const { validateToken, isValidating } = sessionStore
   const { t } = useTranslation()
@@ -174,6 +174,8 @@ export const Navigation = observer(() => {
   useEffect(() => {
     validateToken()
   }, [])
+
+  if (isLoggingOut) return <LoadingScreen />
 
   return (
     <BrowserRouter>

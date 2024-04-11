@@ -3,6 +3,7 @@ import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
+import { generateUUID } from "../../../../../utils/utility-functions"
 import { Footer } from "../shared/footer"
 import { styles } from "./styles"
 
@@ -97,15 +98,15 @@ const FormComponent = function ApplicationPDFFormComponent({
         <View>
           <View wrap={firstChildFields.length > 6}>
             <ContainerHeader component={component} />
+            <FormComponent component={firstChild} dataPath={dataPath} permitApplication={permitApplication} />
+          </View>
+          {additionalChildren.map((child) => (
             <FormComponent
-              key={firstChild.id}
-              component={firstChild}
+              key={generateUUID()}
+              component={child}
               dataPath={dataPath}
               permitApplication={permitApplication}
             />
-          </View>
-          {additionalChildren.map((child) => (
-            <FormComponent key={child.id} component={child} dataPath={dataPath} permitApplication={permitApplication} />
           ))}
         </View>
       )
@@ -119,7 +120,7 @@ const FormComponent = function ApplicationPDFFormComponent({
             <View style={styles.panelBodyContainer}>
               {component.components.map((child) => (
                 <FormComponent
-                  key={child.id}
+                  key={generateUUID()}
                   component={child}
                   dataPath={dataPath}
                   permitApplication={permitApplication}
@@ -136,7 +137,7 @@ const FormComponent = function ApplicationPDFFormComponent({
           {component.components &&
             component.components.map((child) => (
               <FormComponent
-                key={child.id}
+                key={generateUUID()}
                 component={child}
                 dataPath={[...dataPath, component.key, 0]}
                 permitApplication={permitApplication}
@@ -153,7 +154,7 @@ const FormComponent = function ApplicationPDFFormComponent({
           <View style={styles.grid}>
             {component.components.map((child) => (
               <FormComponent
-                key={child.id}
+                key={generateUUID()}
                 component={child}
                 dataPath={dataPath}
                 permitApplication={permitApplication}
@@ -167,20 +168,17 @@ const FormComponent = function ApplicationPDFFormComponent({
         <>
           {component.columns && (
             <View style={styles.row}>
-              {component.columns.map((column, index) => {
-                return column.components.map((child) => {
-                  return (
-                    <View style={styles.item}>
-                      <FormComponent
-                        key={child.id}
-                        component={child}
-                        dataPath={dataPath}
-                        permitApplication={permitApplication}
-                      />
-                    </View>
-                  )
+              {component.columns
+                .map((column, index) => {
+                  return column.components.map((child) => {
+                    return (
+                      <View key={generateUUID()} style={styles.item}>
+                        <FormComponent component={child} dataPath={dataPath} permitApplication={permitApplication} />
+                      </View>
+                    )
+                  })
                 })
-              })}
+                .flat()}
             </View>
           )}
         </>

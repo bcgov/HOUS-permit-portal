@@ -2,7 +2,7 @@ import { Box, Button, HStack, Stack } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React from "react"
+import React, { useEffect } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
@@ -74,6 +74,12 @@ const SectionDisplay = observer(
     )
 
     const watchedSectionName = watch(`requirementTemplateSectionsAttributes.${sectionIndex}.name`)
+    const [editableSectionName, setEditableSectionName] = React.useState<string>(watchedSectionName ?? "")
+
+    useEffect(() => {
+      setEditableSectionName(watchedSectionName)
+    }, [watchedSectionName])
+
     return (
       <Box
         ref={(el) => setSectionRef(el, section.id)}
@@ -95,15 +101,15 @@ const SectionDisplay = observer(
             fontSize={"2xl"}
             className="edit-template-yellowBarHeader"
             initialHint={t("ui.clickToEdit")}
-            value={watchedSectionName || ""}
-            editableInputProps={{
-              ...register(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, { required: true }),
-              "aria-label": "Edit Section Name",
+            value={editableSectionName}
+            onChange={setEditableSectionName}
+            onSubmit={(nextValue) => {
+              setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, nextValue)
             }}
-            color={R.isEmpty(watchedSectionName) ? "text.link" : undefined}
+            color={R.isEmpty(editableSectionName) ? "text.link" : undefined}
             aria-label={"Edit Section Name"}
             onCancel={(previousValue) => {
-              setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
+              setEditableSectionName(previousValue)
             }}
           />
 

@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,64}\z/
+  PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}\z/
   searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
 
   scope :review_managers, -> { where(role: User.roles[:review_manager]) }

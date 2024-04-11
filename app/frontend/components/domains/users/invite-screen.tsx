@@ -13,7 +13,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { CustomToast } from "../../shared/base/flash-message"
 import { UserInput } from "../../shared/base/inputs/user-input"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { RouterLink } from "../../shared/navigation/router-link"
+import { UserRolesExplanationModal } from "../../shared/user-roles-explanation-modal"
 
 interface IInviteScreenProps {}
 
@@ -74,7 +74,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
         <Flex direction="column">
           <Heading as="h1">{t("user.inviteTitle")}</Heading>
           <Text>
-            {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
+            {t("user.inviteInstructions")} <UserRolesExplanationModal />
           </Text>
         </Flex>
         <Heading as="h2">{currentJurisdiction.name}</Heading>

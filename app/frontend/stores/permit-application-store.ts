@@ -10,7 +10,7 @@ import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
 import { EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
-import { IUserPushPayload } from "../types/types"
+import { IPermitApplicationUpdate, IUserPushPayload } from "../types/types"
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -115,16 +115,18 @@ export const PermitApplicationStoreModel = types
         self.resetPages()
       }
 
-      const response = yield self.environment.api.fetchPermitApplications(
-        self.rootStore?.jurisdictionStore?.currentJurisdiction?.id,
-        {
-          query: self.query,
-          sort: self.sort,
-          page: opts?.page ?? self.currentPage,
-          perPage: opts?.countPerPage ?? self.countPerPage,
-          statusFilter: self.statusFilter,
-        }
-      )
+      const searchParams = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        statusFilter: self.statusFilter,
+      }
+      const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
+
+      const response = currentJurisdictionId
+        ? yield self.environment.api.fetchJurisdictionPermitApplications(currentJurisdictionId, searchParams)
+        : yield self.environment.api.fetchPermitApplications(searchParams)
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "permitApplicationMap")
@@ -153,14 +155,23 @@ export const PermitApplicationStoreModel = types
     }),
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication?.stepCode &&
+      self.currentPermitApplication &&
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
+    },
+    resetCurrentPermitApplication() {
+      self.currentPermitApplication = null
+      self.rootStore.stepCodeStore.setCurrentStepCode(null)
     },
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
       //based on the eventType do stuff
       switch (payload.eventType) {
         case ESocketEventTypes.update:
-          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payload.data })
+          const payloadData = payload.data as IPermitApplicationUpdate
+          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payloadData })
+
+          self.permitApplicationMap
+            .get(payloadData?.id)
+            ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
           document.dispatchEvent(event)
           break
         default:

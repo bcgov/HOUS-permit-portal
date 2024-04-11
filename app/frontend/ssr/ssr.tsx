@@ -2,6 +2,7 @@ import ReactPDF from "@react-pdf/renderer"
 import React from "react"
 import { PDFContent as StepCodeChecklistPDFContent } from "../components/domains/step-code/checklist/pdf-content"
 import { PDFContent as PermitApplicationPDFContent } from "../components/shared/permit-applications/pdf-content"
+import "../i18n/i18n"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 
 const args = process.argv.slice(2)
@@ -43,7 +44,11 @@ const generatePdfs = async (pdfJsonData) => {
       const stepCodeChecklistPDFPath = pdfData.meta.generationPaths.stepCodeChecklist
       stepCodeChecklistPDFPath &&
         (await ReactPDF.renderToFile(
-          <StepCodeChecklistPDFContent permitApplication={pdfData.permitApplication} checklist={pdfData.checklist} />,
+          <StepCodeChecklistPDFContent
+            permitApplication={pdfData.permitApplication}
+            checklist={pdfData.checklist}
+            assetDirectoryPath={assetDirectoryPath}
+          />,
           stepCodeChecklistPDFPath
         ))
     }
