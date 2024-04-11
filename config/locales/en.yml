@@ -127,7 +127,7 @@ en:
         message: "%{error_message}"
       accept_invite_error:
         title: Error
-        message: The invitation link is invalid or has expired. Please ask your administrator to re-invite you to the workspace.
+        message: We are sorry the invite link you have clicked on has expired. Please reach out to the person who sent you the invite for further assistance.
       create_invite_error:
         title: Error
         message: "Something went wrong inviting users"

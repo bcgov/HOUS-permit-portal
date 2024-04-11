@@ -197,12 +197,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                           message: t("ui.invalidInput"),
                         },
                       }),
-                      onBlur: handleSave,
+
+                      onBlur: () => {
+                        handleSave()
+                      },
                       "aria-label": "Edit Nickname",
                     }}
                     editablePreviewProps={{
                       fontWeight: 700,
                       fontSize: "xl",
+                    }}
+                    onEdit={() => {
+                      setIsDirty(true)
                     }}
                     aria-label={"Edit Nickname"}
                     onCancel={(previousValue) => setValue("nickname", previousValue)}

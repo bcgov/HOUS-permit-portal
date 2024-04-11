@@ -33,6 +33,7 @@ export const JurisdictionStoreModel = types
       if (!isUUID(id)) {
         Array.from(self.jurisdictionMap.values()).find((j) => j.slug == id)
       }
+
       return self.jurisdictionMap.get(id)
     },
     // View to get all jurisdictions as an array
