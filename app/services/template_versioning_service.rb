@@ -79,12 +79,24 @@ class TemplateVersioningService
           Rails.logger.error("Error copying customizations to new template version: #{e.message}")
         end
       end
+
+      #  updates draft permits with the new template version
+      update_draft_permits_with_new_template_version(previous_version, template_version)
     end
 
     return template_version
   end
 
   private
+
+  def self.update_draft_permits_with_new_template_version(previous_template_version, new_template_version)
+    return if new_template_version.status != "published"
+
+    previous_template_version
+      .permit_applications
+      .where(status: "draft")
+      .update_all(template_version_id: new_template_version.id)
+  end
 
   def self.previous_version(template_version)
     template_version
