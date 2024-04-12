@@ -33,8 +33,8 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
       )}
       {templateVersions.map((templateVersion) => {
         return (
-          <SectionBox>
-            <Flex key={templateVersion.id} w="full" as="section">
+          <SectionBox key={templateVersion.id}>
+            <Flex w="full" as="section">
               <Stack spacing={3} flex={1}>
                 <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
                   {`${templateVersion.denormalizedTemplateJson?.permitType?.name} | ${templateVersion.denormalizedTemplateJson?.activity?.name}`}
