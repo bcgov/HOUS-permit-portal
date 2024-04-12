@@ -1,7 +1,7 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Input, Select, Tag, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, FormControl, FormLabel, HStack, Input, Select, Tag, TagProps, Text } from "@chakra-ui/react"
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { ReactNode } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
@@ -58,28 +58,25 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
           ) : (
             <>
               {reinvited && (
-                <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2} noOfLines={1}>
-                  <HStack color="semantic.success">
-                    <CheckCircle size={20} />
-                    <Text>{t("user.reinviteSuccess")}</Text>
-                  </HStack>
-                </Tag>
+                <IInviteResultTag
+                  bg="semantic.successLight"
+                  text={t("user.reinviteSuccess")}
+                  icon={<CheckCircle size={20} />}
+                />
               )}
               {invited && (
-                <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2} noOfLines={1}>
-                  <HStack color="semantic.success">
-                    <CheckCircle size={20} />
-                    <Text>{t("user.inviteSuccess")}</Text>
-                  </HStack>
-                </Tag>
+                <IInviteResultTag
+                  bg="semantic.successLight"
+                  text={t("user.inviteSuccess")}
+                  icon={<CheckCircle size={20} />}
+                />
               )}
               {taken && (
-                <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" mb={2} noOfLines={1}>
-                  <HStack color="semantic.error">
-                    <WarningCircle size={20} />
-                    <Text>{t("user.inviteError")}</Text>
-                  </HStack>
-                </Tag>
+                <IInviteResultTag
+                  bg="semantic.errorLight"
+                  text={t("user.inviteError")}
+                  icon={<WarningCircle size={20} />}
+                />
               )}
             </>
           )}
@@ -93,3 +90,21 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
     </Flex>
   )
 })
+
+interface IInviteResultTagProps extends TagProps {
+  icon: ReactNode
+  text: string
+}
+
+const IInviteResultTag = ({ bg, icon, text, ...rest }: IInviteResultTagProps) => {
+  const color = (bg as string).replace(/Light/g, "")
+
+  return (
+    <Tag border="1px solid" borderColor={color} mb={2} noOfLines={1} bg={bg} {...rest}>
+      <HStack color={color}>
+        {icon}
+        <Text>{text}</Text>
+      </HStack>
+    </Tag>
+  )
+}

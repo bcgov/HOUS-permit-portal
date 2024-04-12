@@ -2,7 +2,7 @@ class Api::InvitationsController < Devise::InvitationsController
   include BaseControllerMethods
   respond_to :json
   before_action :authenticate_user!
-  before_action :find_invited_user, only: %i[remove resend]
+  before_action :find_invited_user, only: %i[remove]
 
   def create
     inviter = Jurisdiction::UserInviter.new(inviter: current_user, users_params: users_params).call
