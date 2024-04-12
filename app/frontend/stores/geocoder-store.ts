@@ -31,9 +31,9 @@ export const GeocoderStoreModel = types
       self.fetchingPids = false
       return response.ok
     }),
-    fetchGeocodedJurisdiction: flow(function* (siteId: string) {
+    fetchGeocodedJurisdiction: flow(function* (siteId: string, pid: string = null) {
       self.fetchingJurisdiction = true
-      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId)
+      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId, pid)
       let responseData = response?.data?.data
       self.fetchingJurisdiction = false
       if (response.ok) {

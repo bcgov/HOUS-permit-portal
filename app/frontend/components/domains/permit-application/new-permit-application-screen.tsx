@@ -85,16 +85,16 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const jurisdictionWatch = watch("jurisdiction")
 
   useEffect(() => {
-    if (R.isNil(siteWatch?.value)) return
+    if (R.isNil(siteWatch?.value) && !pidWatch) return
 
-    if (siteWatch.value == "") {
+    if (siteWatch?.value == "") {
       setPinMode(true)
       setValue("jurisdiction", null)
       return
     }
 
     ;(async () => {
-      const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value)
+      const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value, pidWatch)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
         setValue("jurisdiction", jurisdiction)
@@ -103,7 +103,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
         setValue("jurisdiction", null)
       }
     })()
-  }, [siteWatch?.value])
+  }, [siteWatch?.value, pidWatch])
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">

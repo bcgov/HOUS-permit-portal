@@ -277,6 +277,7 @@ const options = {
             contactInfo: "Contact information",
             applicantInfo: "Applicant contact details",
           },
+          usePid: "Use '{{ inputValue }}' as PID",
           indexTitle: "My active permits",
           start: "Start a permit application",
           drafts: "Draft Permits",

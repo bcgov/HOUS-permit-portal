@@ -38,14 +38,16 @@ class Api::GeocoderController < Api::ApplicationController
     authorize :geocoder, :jurisdiction?
     begin
       wrapper = Wrappers::Geocoder.new
-      pids = wrapper.pids(geocoder_params[:site_id])
-      first_pid = pids.first
-      raise StandardError unless first_pid.present?
-
-      attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: first_pid)
+      if geocoder_params[:site_id].present?
+        pids = wrapper.pids(geocoder_params[:site_id])
+        pid = pids.first
+      elsif geocoder_params[:pid].present?
+        pid = geocoder_params[:pid]
+      end
+      raise StandardError unless pid.present?
+      attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
       jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?
-
       render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint }
     rescue StandardError => e
       render_error "geocoder.jurisdiction_error", {}, e and return
