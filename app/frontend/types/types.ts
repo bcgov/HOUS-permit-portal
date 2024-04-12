@@ -203,7 +203,7 @@ export interface INotification {
 
 export interface IPermitApplicationUpdate {
   id
-  frontEndFromUpdate: Object
+  frontEndFormUpdate: Object
   formattedComplianceData: Object
 }
 

@@ -9,7 +9,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
-import { EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
+import { ECustomEvents, EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
 import { IPermitApplicationUpdate, IUserPushPayload } from "../types/types"
 
 export const PermitApplicationStoreModel = types
@@ -167,7 +167,7 @@ export const PermitApplicationStoreModel = types
       switch (payload.eventType) {
         case ESocketEventTypes.update:
           const payloadData = payload.data as IPermitApplicationUpdate
-          const event = new CustomEvent("handlePermitApplicationUpdate", { detail: payloadData })
+          const event = new CustomEvent(ECustomEvents.handlePermitApplicationUpdate, { detail: payloadData })
 
           self.permitApplicationMap
             .get(payloadData?.id)
