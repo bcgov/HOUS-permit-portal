@@ -18,7 +18,7 @@ export const UserStoreModel = types
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
       eula: types.maybeNull(types.frozen<IEULA>()),
     }),
-    createSearchModel<EUserSortFields>("searchUsers", Object.values(EUserSortFields))
+    createSearchModel<EUserSortFields>("searchUsers")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -27,6 +27,9 @@ export const UserStoreModel = types
     get users(): IUser[] {
       //@ts-ignore
       return values(self.usersMap) as IUser[]
+    },
+    get reinvitedEmails(): string[] {
+      return self.invitationResponse?.data?.reinvited?.map((user) => user.email) || []
     },
     get invitedEmails(): string[] {
       return self.invitationResponse?.data?.invited?.map((user) => user.email) || []

@@ -24,14 +24,15 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
   const emailWatch = watch(`users.${index}.email`)
 
   const { userStore } = useMst()
-  const { invitedEmails, takenEmails } = userStore
+  const { reinvitedEmails, invitedEmails, takenEmails } = userStore
+  const reinvited = reinvitedEmails?.includes(emailWatch)
   const invited = invitedEmails?.includes(emailWatch)
   const taken = takenEmails?.includes(emailWatch)
 
   return (
     <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
       <Input hidden {...register(`users.${index}.jurisdictionId`)} value={jurisdictionId} />
-      <HStack spacing={4}>
+      <HStack spacing={4} w="full">
         <FormControl>
           <FormLabel>{t("auth.role")}</FormLabel>
           <Controller
@@ -51,25 +52,38 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
         <EmailFormControl fieldName={`users.${index}.email`} validate required />
         <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} required />
         <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} required />
-        <Box alignSelf="flex-end">
-          {isSubmitting && <SharedSpinner />}
-          {invited && !taken && (
-            <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success">
-              <HStack color="semantic.success">
-                <CheckCircle size={20} />
-                <Text>{t("user.inviteSuccess")}</Text>
-              </HStack>
-            </Tag>
+        <Box alignSelf="flex-end" minW={150}>
+          {isSubmitting ? (
+            <SharedSpinner position="relative" top={4} left={5} minW="fit-content" />
+          ) : (
+            <>
+              {reinvited && (
+                <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2} noOfLines={1}>
+                  <HStack color="semantic.success">
+                    <CheckCircle size={20} />
+                    <Text>{t("user.reinviteSuccess")}</Text>
+                  </HStack>
+                </Tag>
+              )}
+              {invited && (
+                <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" mb={2} noOfLines={1}>
+                  <HStack color="semantic.success">
+                    <CheckCircle size={20} />
+                    <Text>{t("user.inviteSuccess")}</Text>
+                  </HStack>
+                </Tag>
+              )}
+              {taken && (
+                <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" mb={2} noOfLines={1}>
+                  <HStack color="semantic.error">
+                    <WarningCircle size={20} />
+                    <Text>{t("user.inviteError")}</Text>
+                  </HStack>
+                </Tag>
+              )}
+            </>
           )}
-          {taken && (
-            <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error">
-              <HStack color="semantic.error">
-                <WarningCircle size={20} />
-                <Text>{t("user.inviteError")}</Text>
-              </HStack>
-            </Tag>
-          )}
-          {!invited && !taken && remove && !isSubmitting && (
+          {!invited && !taken && !reinvited && remove && !isSubmitting && (
             <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />}>
               {t("ui.remove")}
             </Button>

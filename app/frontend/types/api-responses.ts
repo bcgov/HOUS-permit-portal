@@ -32,6 +32,7 @@ export interface IResetPasswordResponse extends IApiResponse<{}, { redirectUrl: 
 
 export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUrl: string }> {}
 
-export interface IInvitationResponse extends IApiResponse<{ invited: IUser[]; emailTaken: IUser[] }, {}> {}
+export interface IInvitationResponse
+  extends IApiResponse<{ invited: IUser[]; reinvited: IUser[]; emailTaken: IUser[] }, {}> {}
 
 export interface IOptionResponse<T = string> extends IApiResponse<IOption<T>[], IPageMeta> {}

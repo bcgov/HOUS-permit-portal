@@ -963,6 +963,7 @@ const options = {
           myProfile: "My profile",
           inviteTitle: "Invite users",
           inviteSuccess: "Invite sent!",
+          reinviteSuccess: "Invite re-sent!",
           inviteError: "Email taken",
           takenErrorTitle: "Some of these emails already belong to existing users",
           takenErrorDescription:

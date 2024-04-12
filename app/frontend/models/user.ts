@@ -17,6 +17,7 @@ export const UserModel = types
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     createdAt: types.Date,
+    confirmedAt: types.maybeNull(types.Date),
     discardedAt: types.maybeNull(types.Date),
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
