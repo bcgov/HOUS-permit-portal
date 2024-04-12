@@ -53,7 +53,7 @@ class PermitHubMailer < ApplicationMailer
   end
 
   def send_user_mail(*args, **kwargs)
-    return if @user.discared || !@user.confirmed?
+    return if @user.discarded? || !@user.confirmed?
     send_mail(*args, **kwargs)
   end
 end
