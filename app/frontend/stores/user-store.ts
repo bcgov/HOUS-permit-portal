@@ -85,6 +85,9 @@ export const UserStoreModel = types
         return true
       }
     }),
+    getUserById(id: string) {
+      return self.usersMap.get(id)
+    },
   }))
   .actions((self) => ({
     searchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {

@@ -45,7 +45,6 @@ Rails.application.routes.draw do
     devise_scope :user do
       get "/validate_token" => "sessions#validate_token"
       delete "/invitation/remove" => "invitations#remove"
-      put "/invitation/resend" => "invitations#resend"
       get "/validate_invitation_token" => "invitations#validate_invitation_token"
     end
 

@@ -50,14 +50,6 @@ class Api::InvitationsController < Devise::InvitationsController
     end
   end
 
-  def resend
-    if @user.invite!
-      render_success({}, "user.send_invitation_success")
-    else
-      render_error "user.resend_invite_error" and return
-    end
-  end
-
   def remove
     if @user.destroy
       render_success(@user, "user.invitation_removed_success")

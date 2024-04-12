@@ -46,6 +46,9 @@ export const UserModel = types
     get isDiscarded() {
       return self.discardedAt !== null
     },
+    get isUnconfirmed() {
+      return self.confirmedAt == null
+    },
     get name() {
       return `${self.firstName} ${self.lastName}`
     },
