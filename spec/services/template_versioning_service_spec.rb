@@ -146,6 +146,38 @@ RSpec.describe TemplateVersioningService, type: :service do
           expect(template_version_4.status).to eq("scheduled")
         end
       end
+
+      it "updates draft permits with the new template version" do
+        template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
+        permit_application = create(:permit_application, template_version: template_version)
+        permit_application_2 = create(:permit_application, template_version: template_version)
+
+        Timecop.freeze(Date.tomorrow) do
+          published_template_version = TemplateVersioningService.publish_version!(template_version)
+
+          permit_application.reload
+          permit_application_2.reload
+
+          expect(permit_application.template_version_id).to eq(published_template_version.id)
+          expect(permit_application_2.template_version_id).to eq(published_template_version.id)
+        end
+
+        new_template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow + 1)
+
+        new_permit_application = create(:permit_application, template_version: new_template_version)
+
+        Timecop.freeze(Date.tomorrow + 1) do
+          published_new_template_version = TemplateVersioningService.publish_version!(new_template_version)
+
+          permit_application.reload
+          permit_application_2.reload
+          new_permit_application.reload
+
+          expect(permit_application.template_version_id).to eq(published_new_template_version.id)
+          expect(permit_application_2.template_version_id).to eq(published_new_template_version.id)
+          expect(new_permit_application.template_version_id).to eq(published_new_template_version.id)
+        end
+      end
     end
   end
   context "get_versions_publishable_now" do
