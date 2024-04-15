@@ -1019,6 +1019,7 @@ const options = {
               "Once you publish, local jurisdictions and submitters will be able to see and use this new version of the form.",
             scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
+            forcePublishNow: "Force publish!",
             errorsBox: {
               title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",

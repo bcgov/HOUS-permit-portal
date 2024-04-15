@@ -1,0 +1,2 @@
+class TemplateVersionForcePublishNowError < StandardError
+end

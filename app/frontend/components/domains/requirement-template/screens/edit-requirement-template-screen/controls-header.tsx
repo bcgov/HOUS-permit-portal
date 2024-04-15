@@ -11,6 +11,7 @@ import { PublishScheduleModal } from "./publish-schedule-modal"
 
 interface IProps {
   onScheduleDate?: (date: Date) => void
+  onForcePublishNow?: () => void
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
@@ -21,6 +22,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   onScheduleDate,
   onSaveDraft,
   onAddSection,
+  onForcePublishNow,
 }: IProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -57,6 +59,7 @@ export const ControlsHeader = observer(function ControlsHeader({
         <PublishScheduleModal
           minDate={requirementTemplate.nextAvailableScheduleDate}
           onScheduleConfirm={onScheduleDate}
+          onForcePublishNow={onForcePublishNow}
           triggerButtonProps={{
             isDisabled: isSubmitDisabled,
           }}

@@ -46,9 +46,7 @@ export const RequirementTemplateStoreModel = types
       }
 
       if (requirementTemplate.templateVersions?.length > 0) {
-        requirementTemplate.templateVersions.forEach((templateVersion) =>
-          self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
-        )
+        self.rootStore.templateVersionStore.mergeUpdateAll(requirementTemplate.templateVersions, "templateVersionMap")
       }
 
       return requirementTemplate
@@ -109,6 +107,7 @@ export const RequirementTemplateStoreModel = types
       if (response.ok) {
         const templateData = response.data.data
         templateData.isFullyLoaded = true
+
         self.mergeUpdate(templateData, "requirementTemplateMap")
 
         return self.requirementTemplateMap.get(templateData.id)
@@ -126,6 +125,24 @@ export const RequirementTemplateStoreModel = types
           requirementTemplate: requirementParams,
           versionDate: format(scheduleDate, datefnsAppDateFormat),
         })
+      )
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
+    }),
+    forcePublishRequirementTemplate: flow(function* (
+      templateId: string,
+      requirementParams: IRequirementTemplateUpdateParams
+    ) {
+      const response = yield* toGenerator(
+        self.environment.api.forcePublishRequirementTemplate(templateId, requirementParams)
       )
 
       if (response.ok) {

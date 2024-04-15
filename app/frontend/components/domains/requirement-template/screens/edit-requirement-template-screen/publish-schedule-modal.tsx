@@ -23,10 +23,11 @@ import { DatePicker } from "../../../../shared/date-picker"
 interface IProps {
   minDate: Date
   onScheduleConfirm: (date: Date) => void
+  onForcePublishNow?: () => void
   triggerButtonProps?: Partial<ButtonProps>
 }
 
-export function PublishScheduleModal({ minDate, onScheduleConfirm, triggerButtonProps }: IProps) {
+export function PublishScheduleModal({ minDate, onScheduleConfirm, triggerButtonProps, onForcePublishNow }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [scheduleDate, setScheduleDate] = React.useState(null)
@@ -53,7 +54,7 @@ export function PublishScheduleModal({ minDate, onScheduleConfirm, triggerButton
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} autoFocus={false}>
         <ModalOverlay />
-        <ModalContent w={"436px"}>
+        <ModalContent w={onForcePublishNow ? "container.sm" : "436px"}>
           <ModalHeader fontSize={"2xl"} mt={2}>
             {t("requirementTemplate.edit.scheduleModalTitle")}
           </ModalHeader>
@@ -75,6 +76,11 @@ export function PublishScheduleModal({ minDate, onScheduleConfirm, triggerButton
               <Button variant={"secondary"} onClick={onCancel}>
                 {t("ui.neverMind")}
               </Button>
+              {onForcePublishNow && (
+                <Button variant={"secondary"} color={"error"} borderColor={"error"} onClick={onForcePublishNow}>
+                  {t("requirementTemplate.edit.forcePublishNow")}
+                </Button>
+              )}
             </ButtonGroup>
           </ModalFooter>
         </ModalContent>

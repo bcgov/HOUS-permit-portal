@@ -262,6 +262,15 @@ export class Api {
     })
   }
 
+  async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/force_publish_now`,
+      {
+        requirementTemplate,
+      }
+    )
+  }
+
   async fetchSiteOptions(address: string, pid: string = null) {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
   }

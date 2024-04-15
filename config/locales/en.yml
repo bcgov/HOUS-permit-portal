@@ -205,6 +205,9 @@ en:
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
+      force_publish_now_success:
+        title: ""
+        message: "Permit has been published."
       create_error:
         title: Error
         message: "%{error_message}"
@@ -219,6 +222,9 @@ en:
         message: "%{error_message}"
       schedule_error:
         title: Error
+        message: "%{error_message}"
+      force_publish_now_error:
+        title: Error force publishing template
         message: "%{error_message}"
       delete_error:
         title: Error

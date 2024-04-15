@@ -33,7 +33,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         version_date = Date.yesterday
 
         expect { TemplateVersioningService.schedule!(requirement_template, version_date) }.to raise_error(
-          StandardError,
+          TemplateVersionScheduleError,
           "Version date must be in the future and after latest scheduled version date",
         )
       end
@@ -43,7 +43,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
 
         expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
-          StandardError,
+          TemplateVersionScheduleError,
           "Version date must be in the future and after latest scheduled version date",
         )
       end
@@ -53,7 +53,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
 
         expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
-          StandardError,
+          TemplateVersionScheduleError,
           "Version date must be in the future and after latest scheduled version date",
         )
       end
@@ -101,7 +101,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
 
         expect { TemplateVersioningService.publish_version!(template_version) }.to raise_error(
-          StandardError,
+          TemplateVersionPublishError,
           "Version cannot be published before it's scheduled date",
         )
       end
