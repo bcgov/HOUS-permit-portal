@@ -21,7 +21,7 @@ class PdfGenerationJob
     end
 
     application_filename = "permit_application_#{permit_application_id}.pdf"
-    step_code_filename = "step_code_checklist_#{checklist.id}.pdf"
+    step_code_filename = "step_code_checklist_#{permit_application_id}.pdf"
 
     # Convert data to JSON string
     pdf_json_data = {
