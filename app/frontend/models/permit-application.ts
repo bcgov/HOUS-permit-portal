@@ -3,6 +3,7 @@ import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
 import { EPermitApplicationStatus, ERequirementType } from "../types/enums"
 import {
   IContact,
@@ -271,8 +272,7 @@ export const PermitApplicationModel = types
     updateContactInSubmissionSection: (requirementKey: string, contact: IContact) => {
       const sectionKey = requirementKey.split("|")[0].slice(21, 64)
       const newSectionFields = {}
-      Object.keys(contact).forEach((contactField) => {
-        if (contactField == "id") return
+      INPUT_CONTACT_KEYS.forEach((contactField) => {
         newSectionFields[`${requirementKey}|${contactField}`] = contact[contactField]
       })
 
@@ -296,7 +296,7 @@ export const PermitApplicationModel = types
       const newContactElement = {
         ...self.submissionData.data[sectionKey][requirementKey][index],
       }
-      Object.keys(contact).forEach((contactField) => {
+      INPUT_CONTACT_KEYS.forEach((contactField) => {
         newContactElement[`${requirementKey}|${contactType}|${contactField}`] = contact[contactField]
       })
 

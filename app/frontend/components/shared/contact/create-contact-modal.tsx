@@ -91,20 +91,27 @@ export const CreateContactModal = ({ isOpen, onClose, onCreate }: IContactModalP
                   <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
                   <TextFormControl label={t("contact.fields.lastName")} fieldName={`lastName`} required />
                 </Flex>
-                <EmailFormControl validate fieldName={`email`} required />
-                <TextFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
-                <TextFormControl label={t("contact.fields.title")} fieldName={`title`} />
-                <TextFormControl label={t("contact.fields.address")} fieldName={`address`} />
-                <TextFormControl label={t("contact.fields.department")} fieldName={`department`} />
-                <TextFormControl label={t("contact.fields.organization")} fieldName={`organization`} />
-                <TextFormControl label={t("contact.fields.businessName")} fieldName={`businessName`} />
-                <TextFormControl
-                  label={t("contact.fields.professionalAssociation")}
-                  fieldName={`professionalAssociation`}
-                />
-                <TextFormControl label={t("contact.fields.professionalNumber")} fieldName={`professionalNumber`} />
+                <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                  <EmailFormControl validate fieldName={`email`} />
+                  <TextFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
+                </Flex>
                 <TextFormControl label={t("contact.fields.extension")} fieldName={`extension`} />
                 <TextFormControl label={t("contact.fields.cell")} fieldName={`cell`} />
+                <TextFormControl label={t("contact.fields.title")} fieldName={`title`} />
+                <TextFormControl label={t("contact.fields.address")} fieldName={`address`} />
+
+                <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                  <TextFormControl label={t("contact.fields.organization")} fieldName={`organization`} />
+                  <TextFormControl label={t("contact.fields.department")} fieldName={`department`} />
+                </Flex>
+                <TextFormControl label={t("contact.fields.businessName")} fieldName={`businessName`} />
+                <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                  <TextFormControl
+                    label={t("contact.fields.professionalAssociation")}
+                    fieldName={`professionalAssociation`}
+                  />
+                  <TextFormControl label={t("contact.fields.professionalNumber")} fieldName={`professionalNumber`} />
+                </Flex>
                 <Button
                   variant="primary"
                   type="submit"

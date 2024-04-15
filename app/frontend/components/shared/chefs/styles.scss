@@ -457,7 +457,6 @@
     margin-top: calc(-1 * var(--chakra-space-1));
     margin-bottom: 6px;
 
-
     span {
       background-color: $bcgov-alert-info !important;
       display: inline-block;
@@ -528,8 +527,9 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition: background-color 200ms ease-in-out,
-      border-color 200ms ease-in-out;
+      transition:
+        background-color 200ms ease-in-out,
+        border-color 200ms ease-in-out;
 
       a {
         color: inherit;
@@ -698,6 +698,24 @@
 
       &::before {
         margin-left: calc(-1 * var(--chakra-space-8)) !important;
+      }
+    }
+
+    .btn.autofill-button {
+      text-transform: capitalize;
+      position: relative;
+      padding-left: 35px; // Adjust padding to make space for the icon
+
+      &::before {
+        content: "\f2ba"; // This is the content code for a specific icon, example here
+        font-family: "FontAwesome"; // Ensure you are using the correct font-family
+        position: absolute;
+        font-weight: 200;
+        left: 10px; // Adjust based on padding and size
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px; // Icon size
+        color: inherit; // Icon color
       }
     }
   }

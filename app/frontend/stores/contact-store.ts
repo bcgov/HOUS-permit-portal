@@ -28,4 +28,23 @@ export const ContactStoreModel = types
     }),
   }))
 
+type ContactKeys = keyof IContact
+
+// If you need to manipulate or use these keys as a constant array in runtime code
+export const INPUT_CONTACT_KEYS: ContactKeys[] = [
+  "firstName",
+  "lastName",
+  "title",
+  "department",
+  "email",
+  "phone",
+  "cell",
+  "address",
+  "organization",
+  "businessName",
+  "businessLicense",
+  "professionalAssociation",
+  "professionalNumber",
+]
+
 export interface IContactStore extends Instance<typeof ContactStoreModel> {}

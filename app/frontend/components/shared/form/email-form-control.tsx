@@ -1,16 +1,18 @@
 import {
+  Box,
   Flex,
   FormControl,
   FormControlProps,
   FormErrorMessage,
   FormLabel,
+  HStack,
   IconButton,
   Input,
   InputGroup,
   InputLeftElement,
   InputProps,
 } from "@chakra-ui/react"
-import { Envelope, X } from "@phosphor-icons/react"
+import { AsteriskSimple, Envelope, X } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -47,7 +49,14 @@ export const EmailFormControl = ({
 
   return (
     <FormControl isInvalid={errorMessage && !inputProps?.isDisabled} {...rest}>
-      {!hideLabel && <FormLabel>{label || t("auth.emailLabel")}</FormLabel>}
+      <HStack gap={0}>
+        {!hideLabel && <FormLabel>{label || t("auth.emailLabel")}</FormLabel>}
+        {required && (
+          <Box color="semantic.error" ml={-2} mb={2}>
+            <AsteriskSimple />
+          </Box>
+        )}
+      </HStack>
       <Flex>
         <InputGroup pos="relative">
           {showIcon && (

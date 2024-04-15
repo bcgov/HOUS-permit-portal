@@ -3,12 +3,18 @@ class Api::ContactsController < Api::ApplicationController
 
   def contact_options
     contacts =
-      Contact.search(contact_search_params[:query], match: :word_start, where: { contactable_id: current_user.id })
+      Contact.search(
+        contact_search_params[:query] || "*",
+        match: :word_start,
+        where: {
+          contactable_id: current_user.id,
+        },
+        limit: 10,
+      )
 
     apply_search_authorization(contacts)
     render_success contacts.map { |c| { label: c.name, value: c } }, nil, { blueprint: ContactOptionBlueprint }
   rescue StandardError => e
-    binding.pry
     render_error "contact.options_error", {}, e and return
   end
 

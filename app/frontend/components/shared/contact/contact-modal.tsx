@@ -1,4 +1,13 @@
-import { Flex, Modal, ModalBody, ModalContent, ModalOverlay, useDisclosure } from "@chakra-ui/react"
+import {
+  Flex,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
+} from "@chakra-ui/react"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -36,7 +45,10 @@ export const ContactModal = ({ isOpen, onOpen, onClose, permitApplication, autof
     <Modal onClose={onClose} isOpen={isOpen} size="xl">
       <ModalOverlay />
 
-      <ModalContent>
+      <ModalContent mt={48}>
+        <ModalHeader>
+          <ModalCloseButton fontSize="11px" />
+        </ModalHeader>
         <ModalBody py={6}>
           <Flex w="full" gap={2}>
             <ContactSelect onChange={onChange} selectedOption={selectedOption} />

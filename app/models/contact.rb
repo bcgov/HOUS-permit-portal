@@ -2,7 +2,7 @@ class Contact < ApplicationRecord
   searchkick searchable: %i[first_name last_name email organization department professional_association],
              word_start: %i[first_name last_name email organization department professional_association]
 
-  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
   validates :phone, phone: true, allow_blank: true
   validates :cell, phone: true, allow_blank: true
   before_validation :normalize_phone

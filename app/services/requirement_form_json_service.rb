@@ -233,7 +233,7 @@ class RequirementFormJsonService
       hideLabel: true,
       input: false,
       tableView: false,
-      components: contact_components << get_autofill_contact_button_form_json(key, is_multi),
+      components: contact_components.unshift(get_autofill_contact_button_form_json(key, is_multi)),
     }
 
     form_json[:id] = requirement.id if requirement.input_options["can_add_multiple_contacts"].blank?
@@ -288,6 +288,7 @@ class RequirementFormJsonService
     {
       type: "button",
       action: "custom",
+      custom_class: "autofill-button",
       title: I18n.t("formio.requirement_template.autofill_contact"),
       label: I18n.t("formio.requirement_template.autofill_contact"),
       custom:

@@ -23,12 +23,21 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
       dir.up do
         Contact.find_each do |contact|
           names = contact.name.split(" ")
-          # Set last_name to the last element of the split name
-          last_name = names.pop
-          # Set first_name to all elements except the last, joined by a space
-          first_name = names.join(" ")
-
-          contact.update(first_name: first_name, last_name: last_name || "")
+          if names.length > 1
+            contact.update(
+              first_name: names[0],
+              last_name: names[1..].join(" "),
+              contactable_id: contact.jurisdiction_id,
+              contactable_type: "Jurisdiction",
+            )
+          else
+            contact.update(
+              first_name: names[0],
+              last_name: "",
+              contactable_id: contact.jurisdiction_id,
+              contactable_type: "Jurisdiction",
+            )
+          end
         end
       end
     end
@@ -38,7 +47,7 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
     change_column_null :contacts, :organization, true
 
     # Finally, remove columns and constraints no longer needed
-    remove_column :contacts, :name
-    remove_column :contacts, :jurisdiction_id # Make sure to handle foreign key constraints appropriately
+    remove_column :contacts, :name, :string
+    remove_column :contacts, :jurisdiction_id, :uuid # Make sure to handle foreign key constraints appropriately
   end
 end

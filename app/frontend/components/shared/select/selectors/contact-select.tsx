@@ -1,10 +1,10 @@
 import { Button, Heading, Text, useDisclosure } from "@chakra-ui/react"
-import { Plus } from "@phosphor-icons/react"
+import { MagnifyingGlass, Plus } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
-import React, { useCallback } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ControlProps, OptionProps, components } from "react-select"
+import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IContact, IOption } from "../../../../types/types"
 import { CreateContactModal } from "../../contact/create-contact-modal"
@@ -34,6 +34,14 @@ export const ContactSelect = observer(({ onChange, selectedOption, stylesToMerge
     []
   )
 
+  const [defaultOptions, setDefaultOptions] = useState<IOption<IContact>[]>([])
+
+  useEffect(() => {
+    fetchContactOptions(null, (result) => {
+      setDefaultOptions(result)
+    })
+  }, [])
+
   return (
     <>
       <AsyncSelect<IOption<IContact>, false>
@@ -41,10 +49,10 @@ export const ContactSelect = observer(({ onChange, selectedOption, stylesToMerge
         onChange={(option: IOption<IContact> | null) => onChange(option)} // Updated to handle single selection
         placeholder={t("ui.typeToSearch")}
         value={selectedOption}
-        components={{ Control, Option }}
+        components={{ Control, Option, Input }}
         stylesToMerge={{
           container: {
-            width: "75%",
+            width: "72%",
             paddingTop: "2px",
           },
           control: {
@@ -59,13 +67,15 @@ export const ContactSelect = observer(({ onChange, selectedOption, stylesToMerge
           ...stylesToMerge,
         }}
         loadOptions={fetchContactOptions}
+        defaultOptions={defaultOptions}
         closeMenuOnSelect={true} // Set true for closing menu after selection
         isCreatable={true}
+        menuIsOpen={true}
         onCreateOption={handleCreate} // Handle new option creation
         formatCreateLabel={(inputValue: string) => t("contact.createButton")} // Always hide the "Create" option
         {...rest}
       />
-      <Button onClick={handleCreate} leftIcon={<Plus />} variant="primary" w="25%">
+      <Button onClick={handleCreate} leftIcon={<Plus />} variant="primary" w="28%" px={2}>
         {t("contact.create")}
       </Button>
       <CreateContactModal
@@ -93,5 +103,19 @@ const Option = (props: OptionProps<IOption<IContact>>) => {
 }
 
 const Control = ({ children, ...props }: ControlProps<IOption<IContact>>) => {
-  return <components.Control {...props}>{children}</components.Control>
+  return (
+    <components.Control {...props}>
+      <MagnifyingGlass size={"16.7px"} />
+      {children}
+    </components.Control>
+  )
+}
+
+const Input = ({ children, style, ...props }: InputProps) => {
+  const { t } = useTranslation()
+  return (
+    <components.Input {...props} autoFocus aria-label="type here to search contacts" placeholder={t("ui.typeToSearch")}>
+      {children}
+    </components.Input>
+  )
 }

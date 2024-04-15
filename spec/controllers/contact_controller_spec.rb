@@ -30,7 +30,7 @@ RSpec.describe Api::ContactsController, type: :controller do
   describe "POST #create" do
     context "It only returns the created contact only to the correct user" do
       it "returns a successful response with the correct data structure" do
-        post :create, params: { contact: { first_name: "searchme", last_name: "totest", email: "required@email.com" } }
+        post :create, params: { contact: { first_name: "searchme", last_name: "totest" } }
         expect(response).to have_http_status(:success)
         expect(json_response).to include("meta", "data")
         expect(json_response["data"]["first_name"]).to eq("searchme")

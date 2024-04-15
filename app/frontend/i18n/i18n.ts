@@ -181,7 +181,7 @@ const options = {
         },
         contact: {
           create: "New contact",
-          createButton: "Create new",
+          createButton: "Save to my contacts",
           fields: {
             firstName: "First name",
             lastName: "Last name",
