@@ -34,6 +34,8 @@ jobs:
             app=test-hous-permit-portal
             git-sha=${{ github.sha }}
           containerfiles: ./devops/docker/app/Dockerfile
+        build-args: |
+          VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${{ vars.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH }}
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:
