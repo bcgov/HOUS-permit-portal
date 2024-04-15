@@ -20,8 +20,8 @@ class PdfGenerationJob
       puts "Directory created: #{generation_directory_path}"
     end
 
-    application_filename = "permit_application.pdf"
-    step_code_filename = "step_code_checklist.pdf"
+    application_filename = "permit_application_#{permit_application_id}.pdf"
+    step_code_filename = "step_code_checklist_#{checklist.id}.pdf"
 
     # Convert data to JSON string
     pdf_json_data = {
@@ -37,13 +37,16 @@ class PdfGenerationJob
       },
     }.to_json
 
+    json_filename = "#{generation_directory_path}/pdf_json_data_#{permit_application_id}.json"
+    File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
+
     # Run Node.js script as a child process, passing JSON data as an argument
     stdout, stderr, status =
       Open3.popen3(
         "npm",
         "run",
         NodeScripts::GENERATE_PDF_SCRIPT_NAME,
-        pdf_json_data,
+        json_filename,
         chdir: Rails.root.to_s,
       ) do |stdin, stdout, stderr, wait_thr|
         # Read and print the standard output continuously until the process exits
@@ -53,6 +56,8 @@ class PdfGenerationJob
 
         # Wait for the process to exit and get the exit status
         exit_status = wait_thr.value
+
+        File.delete(json_filename)
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
