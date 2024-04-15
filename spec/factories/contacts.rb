@@ -6,6 +6,6 @@ FactoryBot.define do
     department { Faker::Commerce.department }
     email { "#{name.underscore.parameterize}@example.com" }
     phone { "604-456-7890" }
-    association :jurisdiction
+    association :contactable
   end
 end

@@ -8,6 +8,7 @@ class Api::ContactsController < Api::ApplicationController
     apply_search_authorization(contacts)
     render_success contacts.map { |c| { label: c.name, value: c } }, nil, { blueprint: ContactOptionBlueprint }
   rescue StandardError => e
+    binding.pry
     render_error "contact.options_error", {}, e and return
   end
 
@@ -38,9 +39,9 @@ class Api::ContactsController < Api::ApplicationController
       :cell,
       :organization,
       :address,
-      :businessName,
-      :professionalAssociation,
-      :professionalNumber,
+      :business_name,
+      :professional_association,
+      :professional_number,
     )
   end
 

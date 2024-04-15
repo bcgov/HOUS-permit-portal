@@ -91,7 +91,7 @@ export const CreateContactModal = ({ isOpen, onClose, onCreate }: IContactModalP
                   <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
                   <TextFormControl label={t("contact.fields.lastName")} fieldName={`lastName`} required />
                 </Flex>
-                <EmailFormControl validate fieldName={`email`} />
+                <EmailFormControl validate fieldName={`email`} required />
                 <TextFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
                 <TextFormControl label={t("contact.fields.title")} fieldName={`title`} />
                 <TextFormControl label={t("contact.fields.address")} fieldName={`address`} />

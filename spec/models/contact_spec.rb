@@ -6,7 +6,7 @@ RSpec.describe Contact, type: :model do
   let(:invalid_phone) { { email: "test@example.com", phone: "invalid_phone" } }
 
   describe "associations" do
-    it { should belong_to(:jurisdiction) }
+    it { should belong_to(:contactable) }
   end
 
   describe "formats" do
