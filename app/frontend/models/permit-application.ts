@@ -293,14 +293,12 @@ export const PermitApplicationModel = types
       const requirementKey = parts.slice(0, -1).join("|")
       const sectionKey = requirementKey.split("|")[0].slice(21, 64)
 
-      const newContactElement = {
-        ...self.submissionData.data[sectionKey][requirementKey][index],
-      }
+      const newContactElement = {}
       INPUT_CONTACT_KEYS.forEach((contactField) => {
         newContactElement[`${requirementKey}|${contactType}|${contactField}`] = contact[contactField]
       })
 
-      const clonedArray = R.clone(self.submissionData.data[sectionKey][requirementKey])
+      const clonedArray = R.clone(self.submissionData.data?.[sectionKey]?.[requirementKey] ?? [])
       clonedArray[index] = newContactElement
       const newSectionFields = {
         [requirementKey]: clonedArray,
