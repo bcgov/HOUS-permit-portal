@@ -238,10 +238,9 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
               {manualMode && (
                 <JurisdictionSelect
                   onChange={(value) => {
-                    addJurisdiction(value)
+                    if (value) addJurisdiction(value)
                     setJurisdiction(value)
                   }}
-                  placeholder={undefined}
                   selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
                   menuPortalTarget={document.body}
                 />
@@ -273,7 +272,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
             justifyContent="center"
           >
             <Text textTransform={"uppercase"} fontWeight="light" fontSize="sm">
-              {t("landing.localJurisdiction")}
+              {jurisdiction.qualifier}
             </Text>
             <HStack gap={2}>
               <Text fontSize="2xl" fontWeight="bold" textAlign="center">

@@ -75,9 +75,15 @@ export const combineComplianceHints = (
       if (blocksLookups[panelComponent.id]?.tip) {
         panelComponent["tip"] = blocksLookups[panelComponent.id].tip
       }
-      if (blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]) {
+      const enabledElectiveIds = blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]
+
+      if (enabledElectiveIds) {
         panelComponent.components.forEach((subComp) => {
-          if (subComp.elective && subComp.customConditional.endsWith(";show = false")) {
+          if (
+            enabledElectiveIds?.includes(subComp?.id) &&
+            subComp.elective &&
+            subComp.customConditional.endsWith(";show =" + " false")
+          ) {
             //remove the ;show = false at the end of the conditional
             subComp.customConditional = subComp.customConditional.slice(0, -13)
           }

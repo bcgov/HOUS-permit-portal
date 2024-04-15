@@ -74,7 +74,7 @@ export const TemplateVersionModel = types
       const customization = response.data.data
 
       if (customization) {
-        self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
+        self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customization)
       }
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
