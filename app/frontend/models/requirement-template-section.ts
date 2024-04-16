@@ -22,7 +22,7 @@ export const RequirementTemplateSectionModel = types.snapshotProcessor(
       id: types.identifier,
       name: types.maybeNull(types.string),
       templateSectionBlockMap: types.map(TemplateSectionBlockModel),
-      sortedTemplateSectionBlocks: types.array(types.safeReference(TemplateSectionBlockModel)),
+      sortedTemplateSectionBlocks: types.array(types.reference(TemplateSectionBlockModel)),
     })
     .views((self) => ({
       hasTemplateSectionBlock(id: string) {
