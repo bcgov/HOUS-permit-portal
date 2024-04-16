@@ -21,7 +21,10 @@ Devise.setup do |config|
   end
 
   config.jwt_cookie do |jwt_cookie|
-    jwt_cookie.domain = ".#{ENV["APP_DOMAIN"]}" # set this to .<DOMAIN>.com so that cookies can be read on the subdomain
+    if Rails.env.production?
+      jwt_cookie.domain = ".#{ENV["APP_DOMAIN"]}" # set this to .<DOMAIN>.com so that cookies can be read on the subdomain
+    end
+
     jwt_cookie.secure = ENV["SECURE_JWT_COOKIE"] == "true" || false
   end
 
