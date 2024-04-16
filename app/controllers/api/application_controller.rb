@@ -3,6 +3,7 @@ class Api::ApplicationController < ActionController::API
   include Pundit::Authorization
 
   before_action :authenticate_user!
+  before_action :check_for_archived_user
   before_action :store_currents
   before_action :configure_permitted_parameters, if: :devise_controller?
 
@@ -18,6 +19,10 @@ class Api::ApplicationController < ActionController::API
   end
 
   protected
+
+  def check_for_archived_user
+    render_error("misc.user_not_authorized_error", {}, nil) and return if current_user&.discarded?
+  end
 
   def apply_search_authorization(results, policy_action = action_name)
     results.select { |result| policy(result).send("#{policy_action}?".to_sym) }
