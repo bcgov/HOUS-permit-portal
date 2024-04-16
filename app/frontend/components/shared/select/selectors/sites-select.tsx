@@ -6,7 +6,8 @@ import * as R from "ramda"
 import React, { useCallback, useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
+import { ControlProps, InputProps, OptionProps, components } from "react-select"
+import CreatableSelect from "react-select/creatable"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
@@ -112,18 +113,24 @@ export const SitesSelect = observer(function ({
               }}
               render={({ field: { onChange, value } }) => {
                 return (
-                  <Select
+                  <CreatableSelect
+                    // @ts-ignore
                     options={pidOptions}
                     ref={pidSelectRef}
-                    value={
-                      pidOptions.find((option) => option.value === value) ?? {
-                        label: null,
-                        value: null,
-                      }
-                    }
+                    value={{
+                      label: value,
+                      value: value,
+                    }}
                     onChange={(option) => {
                       onChange(option.value)
                     }}
+                    onCreateOption={(inputValue: string) => {
+                      const newValue = { label: inputValue, value: inputValue }
+                      onChange(newValue.value)
+                    }}
+                    formatCreateLabel={(inputValue: string) => t("permitApplication.usePid", { inputValue })}
+                    isClearable
+                    isSearchable
                   />
                 )
               }}
