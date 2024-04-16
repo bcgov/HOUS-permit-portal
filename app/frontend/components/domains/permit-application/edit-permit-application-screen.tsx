@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { requirementTypeToFomionType } from "../../../constants"
+import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { ICustomEventMap } from "../../../types/dom"
@@ -43,7 +43,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
-  const [isDirty, setIsDirty] = useState(false)
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
@@ -81,11 +80,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const handleSave = async ({ autosave, skipDirtyCheck }: { autosave?: boolean; skipDirtyCheck?: boolean } = {}) => {
+  const handleSave = async ({
+    autosave,
+    skipPristineCheck,
+  }: {
+    autosave?: boolean
+    skipPristineCheck?: boolean
+  } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
-    if (formio.pristine && !isDirty && !skipDirtyCheck) return true
+
+    if (formio.pristine && !skipPristineCheck) return true
 
     const submissionData = formio.data
     try {
@@ -99,7 +105,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         //update file hashes that have been changed
       }
       formio.setPristine(true)
-      setIsDirty(false)
       return response.ok
     } catch (e) {
       return false
@@ -151,7 +156,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     if (
       !componentToSet ||
       componentToSet?.component?.type === "file" ||
-      componentToSet?.component?.type === requirementTypeToFomionType[ERequirementType.file]
+      componentToSet?.component?.type === requirementTypeToFormioType[ERequirementType.file]
     ) {
       return
     }
@@ -278,7 +283,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
-              setIsDirty={setIsDirty}
               showHelpButton
             />
           </Flex>

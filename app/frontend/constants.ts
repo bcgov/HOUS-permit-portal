@@ -28,7 +28,7 @@ export const getUnitOptionLabel = (unit?: ENumberUnit) => {
   return unit === undefined ? t("requirementsLibrary.unitLabels.option.noUnit") : unitToLabel[unit]
 }
 
-export const requirementTypeToFomionType = {
+export const requirementTypeToFormioType = {
   [ERequirementType.file]: "simplefile",
 } as const
 
