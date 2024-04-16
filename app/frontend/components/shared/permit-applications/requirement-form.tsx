@@ -33,8 +33,7 @@ interface IRequirementFormProps {
   permitApplication?: IPermitApplication
   onCompletedBlocksChange?: (sections: any) => void
   formRef: any
-  triggerSave?: () => void
-  setIsDirty?: (val: boolean) => void
+  triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
   showHelpButton?: boolean
 }
 
@@ -44,7 +43,6 @@ export const RequirementForm = observer(
     onCompletedBlocksChange,
     formRef,
     triggerSave,
-    setIsDirty,
     showHelpButton = true,
   }: IRequirementFormProps) => {
     const {
@@ -211,7 +209,8 @@ export const RequirementForm = observer(
         //https://github.com/formio/formio.js/blob/4.19.x/src/components/file/File.unit.js
         // formio `pristine` is not set for file upldates
         // using `setPristine(false)` causes the entire form to validate so instead, we use a separate dirty state
-        setIsDirty(true)
+        // trigger save to rerun compliance and save file
+        triggerSave?.({ autosave: true, skipPristineCheck: true })
       }
     }
 
@@ -301,7 +300,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be
-                                     mutated*/
+                                                                                                                                                                                                                         mutated*/
             submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}

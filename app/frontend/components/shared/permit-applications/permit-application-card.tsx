@@ -31,7 +31,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>
             <Box p={2}>
               <Image
-                src="images/permit_classifications/low_residential.png"
+                src="/images/permit_classifications/low_residential.png"
                 alt={`thumbnail for ${nickname}`}
                 w="200px"
                 h="110px"
@@ -47,7 +47,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
         <Show below="md">
           <Flex justify="space-between" alignItems="center">
             <Image
-              src="images/permit_classifications/low_residential.png"
+              src="/images/permit_classifications/low_residential.png"
               alt={`thumbnail for ${nickname}`}
               w="150px"
               h="80px"

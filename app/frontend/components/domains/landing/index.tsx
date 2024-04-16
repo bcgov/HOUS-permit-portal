@@ -50,7 +50,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       <Flex
         align="center"
         h="364px"
-        bgImage="images/header-background.jpeg"
+        bgImage="/images/header-background.jpeg"
         bgPosition="center 60%"
         bgRepeat="no-repeat"
         bgSize="cover"
@@ -133,7 +133,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             </VStack>
           </Flex>
           <Flex gap={10} direction={{ base: "column-reverse", md: "row" }}>
-            <Image src="images/digital-permit-tools.png" borderRadius="md" w="2xs" alt="Digital permit tools" />
+            <Image src="/images/digital-permit-tools.png" borderRadius="md" w="2xs" alt="Digital permit tools" />
             <Flex as="section" direction="column" gap={4}>
               <Heading as="h3">{t("landing.whyUseTitle")}</Heading>
               <Text>{t("landing.whyUse")}</Text>
@@ -285,7 +285,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
             <RouterLinkButton
               variant="ghost"
               color="greys.white"
-              to={`/jurisdictions/${jurisdiction.id}`}
+              to={`/jurisdictions/${jurisdiction.slug}`}
               icon={<CaretRight size={16} />}
               textDecoration={"underline"}
               _hover={{

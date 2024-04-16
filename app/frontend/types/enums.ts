@@ -282,3 +282,7 @@ export enum EEnabledElectiveFieldReason {
   zoning = "zoning",
   policy = "policy",
 }
+
+export enum ECustomEvents {
+  handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+}

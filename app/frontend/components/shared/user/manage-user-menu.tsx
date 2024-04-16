@@ -1,8 +1,9 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Archive, ArrowsLeftRight, ClockClockwise } from "@phosphor-icons/react"
+import { Archive, ArrowsLeftRight, ClockClockwise, PaperPlaneTilt } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { ISearch } from "../../../lib/create-search-model"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
@@ -30,7 +31,12 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
     if (await user.changeRole()) searchModel?.search()
   }
 
+  const handleReinvite = async () => {
+    navigate(`invite?userId=${user.id}`)
+  }
+
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const {
     jurisdictionStore: { currentJurisdiction },
@@ -54,6 +60,11 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
           >
             {t("user.changeRole")}
           </ManageMenuItemButton>
+          {(user.isUnconfirmed || user.isDiscarded) && (
+            <ManageMenuItemButton color="text.primary" onClick={handleReinvite} leftIcon={<PaperPlaneTilt size={16} />}>
+              {t("user.reinvite")}
+            </ManageMenuItemButton>
+          )}
           {user.isDiscarded ? (
             <ManageMenuItemButton
               color="semantic.success"

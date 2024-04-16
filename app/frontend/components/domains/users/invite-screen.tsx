@@ -2,11 +2,12 @@ import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
 import { PaperPlaneTilt, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
+import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -25,14 +26,20 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
   const {
-    userStore: { invite, takenEmails },
+    userStore: { invite, takenEmails, getUserById },
   } = useMst()
 
+  const query = useQuery()
+  const userId = query.get("userId")
+
+  const [prepopulatedUser, setPrepopulatedUser] = useState(getUserById(userId))
+
   const defaultUserValues = {
-    role: null,
+    role: prepopulatedUser?.role,
+    email: prepopulatedUser?.email,
     jurisdictionId: currentJurisdiction?.id,
-    firstName: null,
-    lastName: null,
+    firstName: prepopulatedUser?.firstName,
+    lastName: prepopulatedUser?.lastName,
   }
 
   const formMethods = useForm<TInviteFormData>({

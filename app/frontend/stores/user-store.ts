@@ -31,6 +31,9 @@ export const UserStoreModel = types
       //@ts-ignore
       return values(self.usersMap) as IUser[]
     },
+    get reinvitedEmails(): string[] {
+      return self.invitationResponse?.data?.reinvited?.map((user) => user.email) || []
+    },
     get invitedEmails(): string[] {
       return self.invitationResponse?.data?.invited?.map((user) => user.email) || []
     },
@@ -92,6 +95,9 @@ export const UserStoreModel = types
         return true
       }
     }),
+    getUserById(id: string) {
+      return self.usersMap.get(id)
+    },
   }))
   .actions((self) => ({
     searchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {

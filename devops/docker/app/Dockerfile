@@ -10,7 +10,8 @@ ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
-    PATH="/usr/local/node/bin:$PATH"
+    PATH="/usr/local/node/bin:$PATH" \
+    npm_config_cache="/app/.npm"
 
 # Install packages needed for both building and running the application
 RUN apt-get update -qq && \

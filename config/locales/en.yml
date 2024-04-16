@@ -134,9 +134,6 @@ en:
       remove_invite_error:
         title: Error
         message: "Something went wrong canceling the invite"
-      resend_invite_error:
-        title: Error
-        message: "Something went wrong re-sending the invite"
       authorization_error:
         title: Not authorized.
         message: User is not authorized to perform this aciton.

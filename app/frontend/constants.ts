@@ -28,6 +28,10 @@ export const getUnitOptionLabel = (unit?: ENumberUnit) => {
   return unit === undefined ? t("requirementsLibrary.unitLabels.option.noUnit") : unitToLabel[unit]
 }
 
+export const requirementTypeToFormioType = {
+  [ERequirementType.file]: "simplefile",
+} as const
+
 export const getUnitDisplayLabel = (unit?: ENumberUnit) => {
   const unitToLabel = {
     mm: t("requirementsLibrary.unitLabels.display.mm"),

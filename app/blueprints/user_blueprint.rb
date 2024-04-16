@@ -9,6 +9,7 @@ class UserBlueprint < Blueprinter::Base
          :certified,
          :organization,
          :created_at,
+         :confirmed_at,
          :discarded_at,
          :last_sign_in_at
 
