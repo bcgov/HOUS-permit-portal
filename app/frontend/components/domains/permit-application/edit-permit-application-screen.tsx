@@ -6,8 +6,11 @@ import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
+import { ICustomEventMap } from "../../../types/dom"
+import { ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -40,13 +43,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
-  const [isDirty, setIsDirty] = useState(false)
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
 
-  const handlePermitApplicationUpdate = (_event: CustomEvent) => {
+  const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
       if (_event.detail && _event.detail.id == currentPermitApplication?.id) {
         import.meta.env.DEV && console.log("[DEV] setting formio data", _event.detail)
@@ -66,20 +68,30 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   }, [formRef.current, processEventOnLoad])
 
   useEffect(() => {
-    document.addEventListener("handlePermitApplicationUpdate", handlePermitApplicationUpdate)
+    document.addEventListener<ECustomEvents.handlePermitApplicationUpdate>(
+      ECustomEvents.handlePermitApplicationUpdate,
+      handlePermitApplicationUpdate
+    )
     return () => {
-      document.removeEventListener("handlePermitApplicationUpdate", handlePermitApplicationUpdate)
+      document.removeEventListener(ECustomEvents.handlePermitApplicationUpdate, handlePermitApplicationUpdate)
     }
-  })
+  }, [currentPermitApplication?.id])
 
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const handleSave = async ({ autosave }: { autosave?: boolean } = {}) => {
+  const handleSave = async ({
+    autosave,
+    skipPristineCheck,
+  }: {
+    autosave?: boolean
+    skipPristineCheck?: boolean
+  } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
 
     const formio = formRef.current
-    if (formio.pristine && !isDirty) return true
+
+    if (formio.pristine && !skipPristineCheck) return true
 
     const submissionData = formio.data
     try {
@@ -93,7 +105,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         //update file hashes that have been changed
       }
       formio.setPristine(true)
-      setIsDirty(false)
       return response.ok
     } catch (e) {
       return false
@@ -110,25 +121,51 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   const updateFormIoValues = (formio, frontEndFormUpdate) => {
     for (const [key, value] of Object.entries(frontEndFormUpdate)) {
+      const componentToSet = formio.getComponent(key)
       if (!R.isNil(value)) {
-        let componentToSet = formio.getComponent(key)
         if (!R.isNil(componentToSet)) {
           componentSetValue(componentToSet, value)
         }
       }
+
+      // need to update the computed compliance result
+      // even if value is null, as that indicates autocompliance ran
+      // but result wasn't found
+      updateComputedComplianceResult(componentToSet, value)
+    }
+  }
+
+  const updateComputedComplianceResult = (componentToSet, newValue) => {
+    if (!componentToSet) {
+      return
+    }
+
+    const originalComputedComplianceResult = componentToSet?.component?.computedComplianceResult
+
+    // trigger a redraw to update auto compliance if result changed
+    if (componentToSet.component && !R.equals(originalComputedComplianceResult, newValue)) {
+      componentToSet.component.computedComplianceResult = newValue
+      componentToSet?.triggerRedraw()
     }
   }
 
   //guard happens before this call to optimize code
   const componentSetValue = (componentToSet, newValue) => {
-    if (componentToSet?.component?.type == "file") {
-      //all file types use S3, always set to what is returned.  No values would ever be set via the formUpdateChange, ignore any values
-    } else {
-      //if it is a computed compliance
-      if (componentToSet?.getValue && (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue()))) {
-        import.meta.env.DEV && console.log("[DEV] setting computed compliance value", componentToSet, newValue)
-        componentToSet.setValue(newValue)
-      }
+    // file value setting is handled by s3 so no need to set value for files
+
+    if (
+      !componentToSet ||
+      componentToSet?.component?.type === "file" ||
+      componentToSet?.component?.type === requirementTypeToFormioType[ERequirementType.file]
+    ) {
+      return
+    }
+
+    //if it is a computed compliance
+    if (componentToSet?.getValue && (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue()))) {
+      import.meta.env.DEV && console.log("[DEV] setting computed compliance value", componentToSet, newValue)
+      componentToSet.setValue(newValue)
+      componentToSet?.triggerRedraw()
     }
   }
 
@@ -260,7 +297,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
-              setIsDirty={setIsDirty}
               showHelpButton
             />
           </Flex>
