@@ -2,11 +2,11 @@ class Api::InvitationsController < Devise::InvitationsController
   include BaseControllerMethods
   respond_to :json
   before_action :authenticate_user!
-  before_action :find_invited_user, only: %i[remove resend]
+  before_action :find_invited_user, only: %i[remove]
 
   def create
     inviter = Jurisdiction::UserInviter.new(inviter: current_user, users_params: users_params).call
-    if (inviter.results[:invited] + inviter.results[:email_taken]).any?
+    if (inviter.results[:invited] + inviter.results[:reinvited] + inviter.results[:email_taken]).any?
       render_success(inviter.results, nil, { blueprint: InvitationBlueprint })
     else
       render_error "user.create_invite_error" and return
@@ -47,14 +47,6 @@ class Api::InvitationsController < Devise::InvitationsController
                    message_opts: {
                      error_message: resource.errors.full_messages.join(", "),
                    } and return
-    end
-  end
-
-  def resend
-    if @user.invite!
-      render_success({}, "user.send_invitation_success")
-    else
-      render_error "user.resend_invite_error" and return
     end
   end
 

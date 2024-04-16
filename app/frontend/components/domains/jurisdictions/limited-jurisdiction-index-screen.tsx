@@ -54,7 +54,7 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
               return (
                 <Box key={j.id} className={"jurisdiction-index-grid-row"} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight={700}>
-                    <RouterLink to={`/jurisdictions/${j.id}`}>{j.reverseQualifiedName}</RouterLink>
+                    <RouterLink to={`/jurisdictions/${j.slug}`}>{j.reverseQualifiedName}</RouterLink>
                   </SearchGridItem>
                   <SearchGridItem>{j.regionalDistrictName}</SearchGridItem>
                 </Box>

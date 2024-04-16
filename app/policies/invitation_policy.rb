@@ -3,10 +3,6 @@ class InvitationPolicy < ApplicationPolicy
     user.super_admin? || user.review_manager?
   end
 
-  def resend?
-    create
-  end
-
   def remove?
     user.super_admin?
   end

@@ -285,7 +285,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
             <RouterLinkButton
               variant="ghost"
               color="greys.white"
-              to={`/jurisdictions/${jurisdiction.id}`}
+              to={`/jurisdictions/${jurisdiction.slug}`}
               icon={<CaretRight size={16} />}
               textDecoration={"underline"}
               _hover={{
