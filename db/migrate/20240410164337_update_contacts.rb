@@ -2,7 +2,6 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
   def change
     # Step 1: Rename and modify existing columns
     rename_column :contacts, :phone_number, :phone
-    # The extension, jurisdiction_id, and other fields not needed can be removed later
 
     # Step 2: Add new columns
     add_column :contacts, :first_name, :string, null: false, default: ""
@@ -13,7 +12,6 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
     add_column :contacts, :business_license, :string, null: true
     add_column :contacts, :professional_association, :string, null: true
     add_column :contacts, :professional_number, :string, null: true
-    # Note: user_id can be added if it doesn't exist, or it's handled as part of the polymorphic setup
 
     # Step 3: Polymorphic Association
     add_reference :contacts, :contactable, polymorphic: true, type: :uuid
@@ -48,6 +46,6 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
 
     # Finally, remove columns and constraints no longer needed
     remove_column :contacts, :name, :string
-    remove_column :contacts, :jurisdiction_id, :uuid # Make sure to handle foreign key constraints appropriately
+    remove_column :contacts, :jurisdiction_id, :uuid
   end
 end
