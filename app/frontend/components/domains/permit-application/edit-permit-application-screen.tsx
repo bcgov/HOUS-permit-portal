@@ -218,7 +218,15 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </form>
 
             <Text noOfLines={1}>{permitTypeAndActivity}</Text>
-            <CopyableValue value={number} label={t("permitApplication.fields.number")} />
+            <HStack>
+              <CopyableValue value={number} label={t("permitApplication.fields.number")} />
+              {currentPermitApplication.referenceNumber && (
+                <CopyableValue
+                  value={currentPermitApplication.referenceNumber}
+                  label={t("permitApplication.referenceNumber")}
+                />
+              )}
+            </HStack>
           </Flex>
         </HStack>
         {isSubmitted ? (

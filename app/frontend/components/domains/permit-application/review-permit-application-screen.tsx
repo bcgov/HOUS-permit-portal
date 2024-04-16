@@ -83,7 +83,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <Heading fontSize="xl" as="h3">
               {currentPermitApplication.nickname}
             </Heading>
-            <Text>{permitTypeAndActivity}</Text>
+            <Text noOfLines={1}>{permitTypeAndActivity}</Text>
             <HStack>
               <CopyableValue textTransform={"uppercase"} value={number} label={t("permitApplication.fields.number")} />
               <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
