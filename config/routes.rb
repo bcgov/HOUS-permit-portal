@@ -60,6 +60,7 @@ Rails.application.routes.draw do
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
       post "schedule", to: "requirement_templates#schedule", on: :member
+      post "force_publish_now", to: "requirement_templates#force_publish_now", on: :member
       patch "restore", on: :member
     end
 

@@ -83,7 +83,9 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   }, [watchedSectionsAttributes])
 
   useEffect(() => {
-    reset(formFormDefaults(requirementTemplate))
+    if (requirementTemplate?.isFullyLoaded) {
+      reset(formFormDefaults(requirementTemplate))
+    }
   }, [requirementTemplate?.isFullyLoaded])
 
   if (error) return <ErrorScreen error={error} />
@@ -92,7 +94,12 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const onSaveDraft = handleSubmit(async (templateFormData) => {
     const formattedSubmitData = formatSubmitData(templateFormData)
 
-    return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
+    const updatedTemplate = await requirementTemplateStore.updateRequirementTemplate(
+      requirementTemplate.id,
+      formattedSubmitData
+    )
+
+    updatedTemplate && formFormDefaults(updatedTemplate as IRequirementTemplate)
   })
 
   const onSchedule = async (date: Date) => {
@@ -117,6 +124,28 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       }
     })()
   }
+
+  const onForcePublishNow =
+    import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
+      ? async () => {
+          await handleSubmit(async (templateFormData) => {
+            const formattedSubmitData = formatSubmitData(templateFormData)
+
+            const updatedRequirementTemplate = await requirementTemplateStore.forcePublishRequirementTemplate(
+              requirementTemplate.id,
+              formattedSubmitData
+            )
+
+            if (updatedRequirementTemplate) {
+              const publishedTemplateVersion = updatedRequirementTemplate.publishedTemplateVersion
+
+              publishedTemplateVersion
+                ? navigate(`/template-versions/${publishedTemplateVersion.id}`)
+                : navigate("/requirement-templates")
+            }
+          })()
+        }
+      : undefined
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
@@ -151,6 +180,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             <ControlsHeader
               onSaveDraft={onSaveDraft}
               onScheduleDate={onSchedule}
+              onForcePublishNow={onForcePublishNow}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
             />
