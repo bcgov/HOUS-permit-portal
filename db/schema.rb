@@ -79,18 +79,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.string "api_key", limit: 510, null: false
+    t.string "token", limit: 510, null: false
     t.datetime "expiration_date"
     t.string "name", null: false
     t.string "webhook_url"
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["api_key"],
-            name: "index_external_api_keys_on_api_key",
-            unique: true
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
+    t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
   create_table "jurisdiction_template_version_customizations",
