@@ -75,6 +75,24 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
     t.integer "variant"
   end
 
+  create_table "external_api_keys",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.string "api_key", limit: 510, null: false
+    t.datetime "expiration_date"
+    t.string "name", null: false
+    t.string "webhook_url"
+    t.uuid "jurisdiction_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_key"],
+            name: "index_external_api_keys_on_api_key",
+            unique: true
+    t.index ["jurisdiction_id"],
+            name: "index_external_api_keys_on_jurisdiction_id"
+  end
+
   create_table "jurisdiction_template_version_customizations",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -604,6 +622,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",
