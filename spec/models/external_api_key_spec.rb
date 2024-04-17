@@ -6,6 +6,11 @@ RSpec.describe ExternalApiKey, type: :model do
     it { should belong_to(:jurisdiction) }
   end
 
+  it "has an encrypted token property" do
+    external_api_key = create(:external_api_key)
+    expect(external_api_key.encrypted_attribute?(:token)).to be(true)
+  end
+
   describe "validations" do
     context "name" do
       it "enforces name is required" do
@@ -29,24 +34,18 @@ RSpec.describe ExternalApiKey, type: :model do
     end
 
     context "token" do
-      it "enforces token is auto set when not provided" do
-        token = "test_key"
+      it "enforces token is auto set on create" do
         external_api_key_without_key_provided = create(:external_api_key)
-        external_api_key_with_key_provided = create(:external_api_key, token: token)
 
         expect(external_api_key_without_key_provided.token).to be_present
-        expect(external_api_key_with_key_provided.token).to be_present
-        expect(external_api_key_with_key_provided.token).to eq(token)
       end
 
-      it "enforces token is unique" do
+      it "enforces token starts with a fixed name space" do
         token = "test_key"
-        valid_external_api_key = create(:external_api_key, token: token)
-        invalid_external_api_key = build(:external_api_key, token: token)
+        external_api_key = create(:external_api_key, token: token)
 
-        expect(valid_external_api_key.valid?).to eq(true)
-        expect(invalid_external_api_key.valid?).to eq(false)
-        expect(invalid_external_api_key.errors[:token]).to include("has already been taken")
+        expect(external_api_key.valid?).to eq(true)
+        expect(external_api_key.token).to start_with(ExternalApiKey::TOKEN_NAMESPACE)
       end
     end
   end
