@@ -1,4 +1,4 @@
-import { AbsoluteCenter, Box, Button, Divider, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -38,8 +38,8 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
     <CenterContainer>
       <Flex direction="column" gap={6} w="full" p={10} border="solid 1px" borderColor="border.light" bg="greys.white">
         <Heading as="h1">{t("auth.login")}</Heading>
-        <form action="/api/auth/keycloak" method="post">
-          {/* @ts-ignore */}
+        {/* Disabling BCeID login pending IDIM approval */}
+        {/* <form action="/api/auth/keycloak" method="post">
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
             {t("auth.bceid_login")}
@@ -50,10 +50,10 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
           <AbsoluteCenter bg="white" px="4" textTransform="uppercase" fontSize="sm" fontWeight="medium">
             {t("auth.or")}
           </AbsoluteCenter>
-        </Box>
+        </Box> */}
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <VStack spacing={4}>
+            <VStack spacing={4} align="start">
               <Text>{t("auth.loginInstructions")}</Text>{" "}
               <Box w="full">
                 <UsernameFormControl autoFocus />
