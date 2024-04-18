@@ -73,4 +73,49 @@ RSpec.describe ExternalApiKey, type: :model do
       end
     end
   end
+
+  describe "methods" do
+    context "expired?" do
+      it "returns true if expired_at is in the past" do
+        external_api_key = create(:external_api_key, expired_at: Time.now - 1.day)
+
+        expect(external_api_key.expired?).to eq(true)
+      end
+
+      it "returns true if expired_at is the current time" do
+        external_api_key = create(:external_api_key, expired_at: Time.now)
+
+        expect(external_api_key.expired?).to eq(true)
+      end
+
+      it "returns false if expired_at is in the future" do
+        external_api_key = create(:external_api_key, expired_at: Time.now + 1.day)
+
+        expect(external_api_key.expired?).to eq(false)
+      end
+
+      it "returns false if expired_at is nil" do
+        external_api_key = create(:external_api_key, expired_at: nil)
+
+        expect(external_api_key.expired?).to eq(false)
+      end
+    end
+
+    context "revoked?" do
+      it "returns true if revoked_at is any non nil value" do
+        external_api_key_1 = create(:external_api_key, revoked_at: Time.now - 1.day)
+        external_api_key_2 = create(:external_api_key, revoked_at: Time.now + 1.day) # should still be considered
+        # revoked is timestamp is in the future. The timestamp is just for logging purposes
+
+        expect(external_api_key_1.revoked?).to eq(true)
+        expect(external_api_key_2.revoked?).to eq(true)
+      end
+
+      it "returns false if revoked_at is nil" do
+        external_api_key = create(:external_api_key, revoked_at: nil)
+
+        expect(external_api_key.revoked?).to eq(false)
+      end
+    end
+  end
 end

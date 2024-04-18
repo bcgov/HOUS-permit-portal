@@ -305,6 +305,12 @@ en:
       user_not_authorized_error:
         title: "Unauthorized"
         message: "The user is not authorized to do this action"
+      external_api_key_forbidden_error:
+        title: "Forbidden"
+        message: "The external api key is not authorized to do this action"
+      external_api_key_unauthorized_error:
+        title: "Unauthorized"
+        message: "%{error_message}"
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found
