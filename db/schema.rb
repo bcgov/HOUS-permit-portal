@@ -80,7 +80,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.string "token", limit: 510, null: false
-    t.datetime "expiration_date"
+    t.datetime "expired_at"
+    t.datetime "revoked_at"
     t.string "name", null: false
     t.string "webhook_url"
     t.uuid "jurisdiction_id", null: false
