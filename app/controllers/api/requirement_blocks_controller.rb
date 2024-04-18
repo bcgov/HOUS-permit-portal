@@ -29,7 +29,6 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
   def create
     @requirement_block = RequirementBlock.build(requirement_block_params)
-
     authorize @requirement_block
 
     if @requirement_block.save
@@ -92,7 +91,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :required_for_multiple_owners,
         :elective,
         :_destroy,
-        input_options: [:number_unit, :can_add_multiple_contacts, value_options: [%i[value label]]],
+        input_options: [:number_unit, :can_add_multiple_contacts, value_options: [%i[value label]], conditional: {}],
       ],
     )
   end

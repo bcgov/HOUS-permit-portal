@@ -1,6 +1,7 @@
 import { Button, HStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { IFormConditional } from "../../../../types/api-request"
 import { ERequirementType } from "../../../../types/enums"
 import { ElectiveTag } from "../../../shared/elective-tag"
 import { HasConditionalTag } from "../../../shared/has-conditional-tag"
@@ -13,7 +14,8 @@ interface IProps {
   requirementType: ERequirementType
   onRemove: () => void
   elective?: boolean
-  conditional?: Object
+  conditional?: IFormConditional
+  index: number
 }
 
 export function FieldControlsHeader({
@@ -23,6 +25,7 @@ export function FieldControlsHeader({
   conditional,
   requirementType,
   onRemove,
+  index,
 }: IProps) {
   const { t } = useTranslation()
 
@@ -34,7 +37,7 @@ export function FieldControlsHeader({
             size: "sm",
           }}
           onRemove={onRemove}
-          conditional={conditional}
+          index={index}
         />
       )}
       <HStack className={"requirement-edit-controls-container"}>

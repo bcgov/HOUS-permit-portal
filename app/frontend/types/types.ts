@@ -73,7 +73,7 @@ export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
   canAddMultipleContacts?: boolean
-  conditional?: Object
+  conditional?: TConditional
   dataValidation?: Object
 }
 
@@ -239,3 +239,14 @@ export interface IContact {
   professionalAssociation?: string
   professionalNumber?: string
 }
+
+export type Comparison = "eq" | "lt" | "gt" | "ne" | "le" | "ge"
+
+interface IConditionalBase {
+  show: boolean
+  when: string
+}
+
+export type TConditional = {
+  [K in Comparison]?: string
+} & IConditionalBase

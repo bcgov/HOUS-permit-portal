@@ -1,18 +1,25 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
 import { IOption } from "./types"
 
+export interface IFormConditional {
+  when: string
+  comparison: string
+  operand: string
+  then: string
+}
 export interface IRequirementAttributes {
   id?: string
   label?: string
   inputType?: ERequirementType
   hint?: string
   required?: boolean
+  requirementCode: string
   elective?: boolean
   inputOptions?: {
     valueOptions?: IOption[]
     numberUnit?: ENumberUnit
     canAddMultipleContacts?: boolean
-    conditional?: Object
+    conditional?: IFormConditional
   }
 }
 

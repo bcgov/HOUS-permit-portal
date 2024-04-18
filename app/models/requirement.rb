@@ -29,6 +29,7 @@ class Requirement < ApplicationRecord
 
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
+  before_validation :check_file_suffix
   before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
@@ -39,6 +40,12 @@ class Requirement < ApplicationRecord
                       if: Proc.new { |req| req.input_type == "file" },
                       message: "must contain _file for file type"
 
+  validates :label, presence: true
+  validates :label,
+            uniqueness: {
+              scope: :requirement_block_id,
+              message: "should be unique within the same requirement block",
+            }
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
@@ -81,20 +88,41 @@ class Requirement < ApplicationRecord
 
   private
 
+  def using_dummied_requirement_code
+    uuid_regex = /^dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    uuid_regex.match?(self.requirement_code)
+  end
+
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code
-    self.requirement_code ||=
+    using_dummy = self.using_dummied_requirement_code
+    blank = self.requirement_code.blank?
+    needs_file_suffix = input_type == "file" && !requirement_code&.end_with?("_file")
+    return unless using_dummy || blank || needs_file_suffix
+
+    new_requirement_code =
       (
-        if label.present?
-          label.parameterize.underscore.camelize(:lower)
+        if (using_dummy || blank)
+          label.present? ? label.parameterize.underscore.camelize(:lower) : SecureRandom.uuid
         else
-          SecureRandom.uuid
+          requirement_code
         end
       )
 
-    return unless input_type == "file" && !requirement_code.end_with?("_file")
+    new_requirement_code = new_requirement_code + (needs_file_suffix ? "_file" : "")
 
-    self.requirement_code += "_file"
+    if using_dummy
+      self.requirement_block.requirements.each do |req|
+        if req.input_options.dig("conditional", "when") == self.requirement_code
+          req.input_options["conditional"]["when"] = new_requirement_code
+        end
+      end
+    end
+
+    self.requirement_code = new_requirement_code
+  end
+
+  def check_file_suffix
   end
 
   def formio_type_options

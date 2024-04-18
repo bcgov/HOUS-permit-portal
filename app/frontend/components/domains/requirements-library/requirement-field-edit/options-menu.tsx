@@ -14,22 +14,16 @@ import { CaretDown, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { IRequirementAttributes } from "../../../../types/api-request"
 import { ConditionalSetupModal } from "./conditional-setup-modal"
 
 interface IProps {
   menuButtonProps?: Partial<ButtonProps>
   onRemove?: () => void
   emitOpenState?: (isOpen: boolean) => void
-  conditional: IRequirementAttributes["inputOptions"]["conditional"]
+  index: number
 }
 
-export const OptionsMenu = observer(function UnitSelect({
-  conditional,
-  menuButtonProps,
-  onRemove,
-  emitOpenState,
-}: IProps) {
+export const OptionsMenu = observer(function UnitSelect({ menuButtonProps, onRemove, emitOpenState, index }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -63,7 +57,7 @@ export const OptionsMenu = observer(function UnitSelect({
             <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
           </HStack>
         </MenuItem>
-        <ConditionalSetupModal conditional={conditional} />
+        <ConditionalSetupModal index={index} />
 
         <MenuDivider />
         <MenuItem color={"semantic.error"} onClick={onRemove}>

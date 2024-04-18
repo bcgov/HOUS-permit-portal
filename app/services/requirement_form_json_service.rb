@@ -130,7 +130,7 @@ class RequirementFormJsonService
 
     if requirement.input_options["conditional"].present?
       # assumption that conditional is only within the same requirement block for now
-      conditional = requirement.input_options["conditional"]
+      conditional = requirement.input_options["conditional"].clone
       section = PermitApplication.section_from_key(requirement_block_key)
       if conditional["when"].present?
         conditional.merge!("when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}")
