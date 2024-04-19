@@ -125,9 +125,12 @@ en:
       registration_error:
         title: Account could not be created.
         message: "%{error_message}"
-      accept_invite_error:
+      invalid_invitation_error:
         title: Error
-        message: We are sorry the invite link you have clicked on has expired. Please reach out to the person who sent you the invite for further assistance.
+        message: We are sorry the invite link you have clicked on is not valid. Please reach out to the person who sent you the invite for further assistance.
+      accept_invite_error:
+        title: Error accepting invite
+        message: "%{error_message}"
       create_invite_error:
         title: Error
         message: "Something went wrong inviting users"

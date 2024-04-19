@@ -21,12 +21,11 @@ class Api::InvitationsController < Devise::InvitationsController
     raw_invitation_token = update_resource_params["invitation_token"]
     user = User.find_by_invitation_token(raw_invitation_token, true)
 
-    render_error "user.accept_invite_error" and return unless user.present?
+    render_error "user.invalid_invitation_error" and return unless user.present?
+    render_accept_invite_error(user) and return unless user.update(user_params)
 
-    user.update(user_params)
-
-    self.resource = accept_resource if user&.errors.empty?
-    invitation_accepted = resource.errors.empty?
+    self.resource = accept_resource
+    invitation_accepted = resource&.errors&.empty?
 
     yield resource if block_given?
 
@@ -43,10 +42,7 @@ class Api::InvitationsController < Devise::InvitationsController
       ) and return
     else
       resource.invitation_token = raw_invitation_token
-      render_error "user.accept_invite_error",
-                   message_opts: {
-                     error_message: resource.errors.full_messages.join(", "),
-                   } and return
+      render_accept_invite_error(resource) and return
     end
   end
 
@@ -68,5 +64,10 @@ class Api::InvitationsController < Devise::InvitationsController
 
   def user_params
     params.require(:user).permit(:username, :password, :first_name, :last_name)
+  end
+
+  def render_accept_invite_error(resource)
+    render_error "user.accept_invite_error",
+                 { message_opts: { error_message: resource.errors.full_messages.join(", ") } }
   end
 end
