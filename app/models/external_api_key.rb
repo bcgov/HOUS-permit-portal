@@ -23,6 +23,10 @@ class ExternalApiKey < ApplicationRecord
     revoked_at.present?
   end
 
+  def revoke
+    update(revoked_at: Time.now)
+  end
+
   private
 
   def generate_token

@@ -122,6 +122,10 @@ Rails.application.routes.draw do
       get :show, on: :collection
       put :update, on: :collection
     end
+
+    resources :external_api_keys do
+      post "revoke", on: :member
+    end
   end
 
   root to: "home#index"
