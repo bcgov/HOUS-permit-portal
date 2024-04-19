@@ -46,6 +46,9 @@ spec:
         - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
           imagePullPolicy: Always
           name: "{{ $.Values.appName }}-{{ .process }}"
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/log
           ports:
             - containerPort: 3000
               protocol: TCP
@@ -62,20 +65,6 @@ spec:
           - '-c'
           args: {{ .spec.containers.args }}
           {{- end }}
-        {{- if eq .process "web" }}
-        - name: log-sidecar
-          image: busybox
-          env:
-          - name: POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
-          command: ["/bin/sh"]
-          args: ["-c", "tail -n+1 -f /var/log/app/$POD_NAME.log"]
-          volumeMounts:
-          - name: log-volume
-            mountPath: /var/log/app
-        {{- end }}
       {{- if eq .process "web" }}
       volumes:
         - name: log-volume
