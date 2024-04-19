@@ -1,4 +1,8 @@
 class ExternalApiKey < ApplicationRecord
+  include ValidateUrlAttributes
+
+  url_validatable :webhook_url
+
   scope :active, -> { where("expired_at IS NULL OR expired_at > ?", Time.now).where(revoked_at: nil) }
   # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning
   # https://docs.github.com/en/code-security/secret-scanning/secret-scanning-partner-program
@@ -28,6 +32,13 @@ class ExternalApiKey < ApplicationRecord
   end
 
   private
+
+  def valid_url_format
+    return if url.blank? || URI.parse(url).is_a?(URI::HTTP) || URI.parse(url).is_a?(URI::HTTPS)
+    errors.add(:url, "must be a valid URL")
+  rescue URI::InvalidURIError
+    errors.add(:url, "must be a valid URL")
+  end
 
   def generate_token
     self.token = "#{TOKEN_NAMESPACE}_#{SecureRandom.urlsafe_base64(64)}"
