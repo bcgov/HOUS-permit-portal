@@ -18,13 +18,6 @@
 # in spec/support/ and its subdirectories.
 Dir[File.expand_path(File.join(File.dirname(__FILE__), "support", "**", "*.rb"))].each { |f| require f }
 
-# set up mock routes needed to test external api base controller
-Rails.application.routes.draw do
-  get "mock_protected_action", to: "mock_external_api#protected_action"
-  get "mock_protected_action_with_authorization_pass", to: "mock_external_api#protected_action_with_authorization_pass"
-  get "mock_protected_action_with_authorization_fail", to: "mock_external_api#protected_action_with_authorization_fail"
-end
-
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
