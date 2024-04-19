@@ -18,12 +18,12 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
       border="1px solid"
       borderColor="border.light"
       h="fit-content"
-      minH="195px"
+      minH="175px"
       p={4}
       {...rest}
     >
       <Heading as="h3" mb="1">
-        {contact.name}
+        {contact.firstName} {contact.lastName}
       </Heading>
       {contact.department && `${contact.department} - `}
       {contact.title}
@@ -34,10 +34,10 @@ export const ContactCard = ({ contact, ...rest }: IContactCardProps) => {
           </Box>
           <Flex direction="column" flex={1}>
             <Heading as="h4" fontSize="md" mb="0">
-              {t("contact.fields.phoneNumber")}
+              {t("contact.fields.phone")}
             </Heading>
-            <Link href={`tel:+${contact.phoneNumber}`} isExternal>
-              {contact.phoneNumber}
+            <Link href={`tel:+${contact.phone}`} isExternal>
+              {contact.phone}
             </Link>
           </Flex>
         </Flex>

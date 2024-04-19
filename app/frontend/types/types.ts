@@ -24,12 +24,21 @@ export type TLatLngTuple = [number, number]
 
 export interface IContact {
   id: string
-  name: string
-  department: string
+  firstName: string
+  lastName: string
   title?: string
-  phoneNumber?: string
+  department?: string
   email?: string
+  phone?: string
+  cell?: string
+  address?: string
+  organization?: string
+  businessName?: string
+  businessLicense?: string
+  professionalAssociation?: string
+  professionalNumber?: string
   createdAt?: number | string // has to allow string to stop errors with useFieldArray
+  updatedAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
 export interface IPermitTypeSubmissionContact {
@@ -215,4 +224,18 @@ export interface IUserPushPayload {
 
 export interface ISiteConfiguration {
   displaySitewideMessage: boolean
+}
+
+export interface IContact {
+  firstName: string
+  lastName: string
+  email?: string
+  phone?: string
+  cell?: string
+  address?: string
+  organization?: string
+  businessName?: string
+  businessLicense?: string
+  professionalAssociation?: string
+  professionalNumber?: string
 }

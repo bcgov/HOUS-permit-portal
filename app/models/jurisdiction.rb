@@ -11,7 +11,7 @@ class Jurisdiction < ApplicationRecord
 
   # Associations
   has_many :permit_applications
-  has_many :contacts, dependent: :destroy
+  has_many :contacts, as: :contactable, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_template_version_customizations

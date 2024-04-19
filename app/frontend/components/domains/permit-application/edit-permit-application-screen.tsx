@@ -43,7 +43,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   })
 
   const [completedBlocks, setCompletedBlocks] = useState({})
-
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
@@ -88,10 +87,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     skipPristineCheck?: boolean
   } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
-
     const formio = formRef.current
-
-    if (formio.pristine && !skipPristineCheck) return true
+    if (formio.pristine && !skipPristineCheck && !isDirty) return true
 
     const submissionData = formio.data
     try {
@@ -104,6 +101,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         updateFormIoValues(formio, response.data.data.frontEndFormUpdate)
         //update file hashes that have been changed
       }
+      setIsDirty(false)
       formio.setPristine(true)
       return response.ok
     } catch (e) {
@@ -190,7 +188,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     handleScrollToBottom()
   }
 
-  const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
+  const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty } = currentPermitApplication
 
   return (
     <Box as="main" id="submitter-view-permit">

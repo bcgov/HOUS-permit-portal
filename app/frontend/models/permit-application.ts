@@ -1,10 +1,18 @@
 import { t } from "i18next"
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
 import { EPermitApplicationStatus, ERequirementType } from "../types/enums"
-import { IDownloadableFile, IFormIOBlock, IFormJson, ISubmissionData, ITemplateCustomization } from "../types/types"
+import {
+  IContact,
+  IDownloadableFile,
+  IFormIOBlock,
+  IFormJson,
+  ISubmissionData,
+  ITemplateCustomization,
+} from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
@@ -40,6 +48,7 @@ export const PermitApplicationModel = types
     zipfileUrl: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
     isFullyLoaded: types.optional(types.boolean, false),
+    isDirty: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -76,6 +85,12 @@ export const PermitApplicationModel = types
     },
     get isViewed() {
       return self.viewedAt !== null
+    },
+  }))
+  .actions((self) => ({
+    setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
+      self.submissionData = newData
+      self.isDirty = true
     },
   }))
   .views((self) => ({
@@ -252,6 +267,53 @@ export const PermitApplicationModel = types
 
     setSelectedTabIndex: (index: number) => {
       self.selectedTabIndex = index
+    },
+
+    updateContactInSubmissionSection: (requirementKey: string, contact: IContact) => {
+      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
+      const newSectionFields = {}
+      INPUT_CONTACT_KEYS.forEach((contactField) => {
+        newSectionFields[`${requirementKey}|${contactField}`] = contact[contactField]
+      })
+
+      const newData = {
+        data: {
+          ...self.submissionData.data,
+          [sectionKey]: {
+            ...self.submissionData.data[sectionKey],
+            ...newSectionFields,
+          },
+        },
+      }
+      self.setSubmissionData(newData)
+    },
+    updateContactInSubmissionDatagrid: (requirementPrefix: string, index: number, contact: IContact) => {
+      const parts = requirementPrefix.split("|")
+      const contactType = parts[parts.length - 1]
+      const requirementKey = parts.slice(0, -1).join("|")
+      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
+
+      const newContactElement = {}
+      INPUT_CONTACT_KEYS.forEach((contactField) => {
+        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = contact[contactField]
+      })
+
+      const clonedArray = R.clone(self.submissionData.data?.[sectionKey]?.[requirementKey] ?? [])
+      clonedArray[index] = newContactElement
+      const newSectionFields = {
+        [requirementKey]: clonedArray,
+      }
+
+      const newData = {
+        data: {
+          ...self.submissionData.data,
+          [sectionKey]: {
+            ...self.submissionData.data[sectionKey],
+            ...newSectionFields,
+          },
+        },
+      }
+      self.setSubmissionData(newData)
     },
   }))
 

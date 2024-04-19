@@ -1,6 +1,7 @@
 import { IStateTreeNode, types } from "mobx-state-tree"
 import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
+import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
@@ -29,6 +30,7 @@ export const RootStoreModel = types
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
+    contactStore: types.optional(ContactStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -59,6 +61,7 @@ export interface IRootStore extends IStateTreeNode {
   geocoderStore: IGeocoderStore
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
+  contactStore: IContactStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
 }

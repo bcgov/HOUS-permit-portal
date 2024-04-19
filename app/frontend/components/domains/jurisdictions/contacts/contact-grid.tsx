@@ -31,11 +31,12 @@ export const ContactGrid = observer(({ isEditing }: IContactGridProps) => {
   }
 
   const defaultContactValues = {
-    name: "",
+    firstName: "",
+    lastName: "",
     title: "",
     department: "",
     email: "",
-    phoneNumber: "",
+    phone: "",
     extension: "",
     editing: true,
   }
@@ -82,6 +83,7 @@ export type TContactFieldsValues = {
   department: string
   email: string
   phone: string
+  cell: string
   extension: string
 }
 
@@ -93,7 +95,16 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
       <Flex justify="flex-end">
         <IconButton variant="tertiary" icon={<X />} aria-label={"remove contact"} onClick={() => remove(index)} />
       </Flex>
-      <TextFormControl label={t("contact.fields.name")} fieldName={`contactsAttributes.${index}.name`} required />
+      <TextFormControl
+        label={t("contact.fields.firstName")}
+        fieldName={`contactsAttributes.${index}.firstName`}
+        required
+      />
+      <TextFormControl
+        label={t("contact.fields.lastName")}
+        fieldName={`contactsAttributes.${index}.lastName`}
+        required
+      />
       <TextFormControl label={t("contact.fields.title")} fieldName={`contactsAttributes.${index}.title`} required />
       <TextFormControl
         label={t("contact.fields.department")}
@@ -101,7 +112,7 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
         required
       />
       <EmailFormControl validate fieldName={`contactsAttributes.${index}.email`} />
-      <TextFormControl label={t("contact.fields.phoneNumber")} fieldName={`contactsAttributes.${index}.phoneNumber`} />
+      <TextFormControl label={t("contact.fields.phone")} fieldName={`contactsAttributes.${index}.phone`} />
       <TextFormControl label={t("contact.fields.extension")} fieldName={`contactsAttributes.${index}.extension`} />
     </Flex>
   )

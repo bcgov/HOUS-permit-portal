@@ -28,6 +28,7 @@ import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomToast } from "../base/flash-message"
 import { Form, defaultOptions } from "../chefs"
+import { ContactModal } from "../contact/contact-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -54,6 +55,7 @@ export const RequirementForm = observer(
       blockClasses,
       formattedFormJson,
       isDraft,
+      setIsDirty,
     } = permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
@@ -63,15 +65,17 @@ export const RequirementForm = observer(
     const boxRef = useRef<HTMLDivElement>(null)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
-    const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) //an array of Labels and links to the component
-    const [allCollapsed, setAllCollapsed] = useState(false)
+    const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
     const [imminentSubmission, setImminentSubmission] = useState(null)
     const [floatErrorBox, setFloatErrorBox] = useState(false)
     const [hasErrors, setHasErrors] = useState(false)
+    const [autofillContactKey, setAutofillContactKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
     const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
+
+    const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -142,6 +146,17 @@ export const RequirementForm = observer(
       document.addEventListener("openStepCode", handleOpenStepCode)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCode)
+      }
+    }, [])
+
+    useEffect(() => {
+      const handleOpenContactAutofill = async (_event) => {
+        setAutofillContactKey(_event.detail.key)
+        onContactsOpen()
+      }
+      document.addEventListener("openAutofillContact", handleOpenContactAutofill)
+      return () => {
+        document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
       }
     }, [])
 
@@ -346,6 +361,15 @@ export const RequirementForm = observer(
               </ModalBody>
             </ModalContent>
           </Modal>
+        )}
+        {isContactsOpen && (
+          <ContactModal
+            isOpen={isContactsOpen}
+            onOpen={onContactsOpen}
+            onClose={onContactsClose}
+            autofillContactKey={autofillContactKey}
+            permitApplication={permitApplication}
+          />
         )}
       </>
     )
