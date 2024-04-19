@@ -46,9 +46,11 @@ spec:
         - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
           imagePullPolicy: Always
           name: "{{ $.Values.appName }}-{{ .process }}"
+          {{- if eq .process "web" }}
           volumeMounts:
             - name: log-volume
               mountPath: /app/log
+          {{- end }}
           ports:
             - containerPort: 3000
               protocol: TCP
