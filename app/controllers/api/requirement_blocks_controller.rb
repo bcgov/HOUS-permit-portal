@@ -33,6 +33,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.save
+      RequirementBlock.search_index.refresh
       render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
       render_error "requirement_block.create_error",
