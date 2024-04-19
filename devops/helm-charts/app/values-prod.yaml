@@ -6,6 +6,12 @@ route:
 
 vaultNamespace: "bb18ab-prod"
 
+pvc:
+  spec:
+    resources:
+      requests:
+        storage: 1Gi
+
 # unfortunately since we are looping through these in an array redefining the object in the array overwrites the original one values.yaml so we have to specify all the keys rather than just the differences...
 deployments:
   - process: web
