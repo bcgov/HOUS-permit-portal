@@ -55,6 +55,22 @@ RSpec.describe MockExternalApiController, type: :controller do
       expect(response).to have_http_status(401)
     end
 
+    it "returns 401 unauthorized with revoked token" do
+      revoked_external_api_key = create(:external_api_key, revoked_at: Time.now)
+
+      request.headers["Authorization"] = "Bearer #{revoked_external_api_key.token}"
+      get :protected_action
+      expect(response).to have_http_status(401)
+    end
+
+    it "returns 401 unauthorized with expired token" do
+      expired_external_api_key = create(:external_api_key, revoked_at: Time.now)
+
+      request.headers["Authorization"] = "Bearer #{expired_external_api_key.token}"
+      get :protected_action
+      expect(response).to have_http_status(401)
+    end
+
     it "returns 200 OK with valid token" do
       external_api_key = create(:external_api_key)
       request.headers["Authorization"] = "Bearer #{external_api_key.token}"
