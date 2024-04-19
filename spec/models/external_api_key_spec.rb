@@ -57,6 +57,21 @@ RSpec.describe ExternalApiKey, type: :model do
       end
     end
 
+    context "webhook_url" do
+      it "enforces webhook_url is a valid url when set to a non blank value" do
+        valid_external_api_key = build(:external_api_key, webhook_url: "https://www.example.com") # with valid url
+        valid_external_api_key_2 = build(:external_api_key, webhook_url: "") # with blank url
+        valid_external_api_key_3 = build(:external_api_key, webhook_url: nil) # with nil url
+        invalid_external_api_key = build(:external_api_key, webhook_url: "invalid") # with invalid url
+
+        expect(invalid_external_api_key.valid?).to eq(false)
+        expect(invalid_external_api_key.errors[:webhook_url]).to include("must be a valid URL")
+        expect(valid_external_api_key.valid?).to eq(true)
+        expect(valid_external_api_key_2.valid?).to eq(true)
+        expect(valid_external_api_key_3.valid?).to eq(true)
+      end
+    end
+
     context "token" do
       it "enforces token is auto set on create" do
         external_api_key_without_key_provided = create(:external_api_key)
