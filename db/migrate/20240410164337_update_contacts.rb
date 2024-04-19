@@ -23,17 +23,17 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
           names = contact.name.split(" ")
           if names.length > 1
             contact.update(
-              first_name: names[0],
-              last_name: names[1..].join(" "),
+              first_name: names[0] || "",
+              last_name: names[1..].join(" ") || "",
               contactable_id: contact.jurisdiction_id,
-              contactable_type: "Jurisdiction",
+              contactable_type: "Jurisdiction"
             )
           else
             contact.update(
-              first_name: names[0],
+              first_name: names[0] || "",
               last_name: "",
               contactable_id: contact.jurisdiction_id,
-              contactable_type: "Jurisdiction",
+              contactable_type: "Jurisdiction"
             )
           end
         end
