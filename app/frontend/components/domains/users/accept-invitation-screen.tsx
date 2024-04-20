@@ -1,4 +1,4 @@
-import { AbsoluteCenter, Box, Button, Divider, Flex, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { Button, Flex, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import React, { useRef } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -50,19 +50,20 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
         <Heading as="h1">
           {t("user.acceptInvitation")} {jurisdictionName}
         </Heading>
-        <form action={`/api/auth/keycloak`} method="post">
+        {/* Disabling BCeID login pending IDIM approval */}
+        {/* <form action={`/api/auth/keycloak`} method="post">
           <Input hidden={true} name="invitation_token" value={invitationToken} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
             {t("auth.accept_invite_with_bceid")}
           </Button>
-        </form>
+        </form> 
         <Box position="relative" py={2}>
           <Divider borderBottomWidth={2} />
           <AbsoluteCenter bg="white" px="4" textTransform="uppercase" fontSize="sm" fontWeight="medium">
             {t("auth.or")}
           </AbsoluteCenter>
-        </Box>
+        </Box> */}
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }} ref={formRef}>
             <VStack spacing={4}>
