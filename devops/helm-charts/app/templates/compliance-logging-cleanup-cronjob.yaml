@@ -4,6 +4,7 @@ metadata:
   name: purge-old-compliance-logfiles
 spec:
   schedule: "0 0 * * *"
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
@@ -12,10 +13,10 @@ spec:
             - name: 90-day-log-purger
               image: alpine:latest
               command: ["/bin/sh"]
-              args: ["-c", "find /app/log -type f -mtime +1 -exec rm -f {} +"]
+              args: ["-c", "find /app/log -type f -mtime +90 -exec rm -f {} +"]
               volumeMounts:
                 - name: compliance-log-pvc
-                  mountPath: /log
+                  mountPath: /app/log
               resources:
                 requests:
                   memory: "64Mi"
