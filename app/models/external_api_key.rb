@@ -3,7 +3,14 @@ class ExternalApiKey < ApplicationRecord
 
   url_validatable :webhook_url
 
-  scope :active, -> { where("expired_at IS NULL OR expired_at > ?", Time.now).where(revoked_at: nil) }
+  scope :active,
+        -> do
+          joins(:jurisdiction).where(
+            "jurisdictions.external_api_enabled = TRUE AND (expired_at IS NULL OR expired_at > ?) AND revoked_at IS
+NULL",
+            Time.now,
+          )
+        end
   # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning
   # https://docs.github.com/en/code-security/secret-scanning/secret-scanning-partner-program
   TOKEN_NAMESPACE = "bphh"
@@ -11,7 +18,7 @@ class ExternalApiKey < ApplicationRecord
   belongs_to :jurisdiction
 
   validates :token, uniqueness: true
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
 
   before_create :generate_token
 

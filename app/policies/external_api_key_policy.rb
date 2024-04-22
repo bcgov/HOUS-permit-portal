@@ -4,7 +4,11 @@ class ExternalApiKeyPolicy < ApplicationPolicy
   end
 
   def show?
-    user.super_admin? || (user.review_manager? && user.jurisdiction_id == record.jurisdiction_id)
+    user.super_admin? ||
+      (
+        user.review_manager? && record.jurisdiction.external_api_enabled? &&
+          user.jurisdiction_id == record.jurisdiction_id
+      )
   end
 
   def create?

@@ -33,6 +33,42 @@ RSpec.describe ExternalApiKey, type: :model do
 
       expect(ExternalApiKey.active).to match_array(active_external_api_keys)
     end
+
+    it "returns only external api key's enabled by jurisdictions" do
+      active_external_api_keys = [
+        create(:external_api_key),
+        create(:external_api_key),
+        create(:external_api_key, expired_at: Time.now + 1.day),
+        create(:external_api_key, expired_at: Time.now + 10.minute),
+      ]
+      revoked_external_api_keys = [
+        create(:external_api_key, revoked_at: Time.now + 1.day),
+        create(:external_api_key, revoked_at: Time.now - 1.day),
+        create(:external_api_key, revoked_at: Time.now),
+      ] # any non nil revoked_at value should be considered as immediately revoked
+
+      expired_external_api_keys = [
+        create(:external_api_key, revoked_at: Time.now - 1.day),
+        create(:external_api_key, revoked_at: Time.now - 10.minute),
+        create(:external_api_key, revoked_at: Time.now),
+      ]
+      jurisdiction_disabled_external_api_keys = [
+        create(:external_api_key, jurisdiction: create(:sub_district, external_api_enabled: false)),
+        create(
+          :external_api_key,
+          jurisdiction: create(:sub_district, external_api_enabled: false),
+          revoked_at: Time.now - 1.day,
+        ),
+        create(
+          :external_api_key,
+          jurisdiction: create(:sub_district, external_api_enabled: false),
+          expired_at: Time.now - 1.day,
+        ),
+        create(:external_api_key, jurisdiction: create(:sub_district, external_api_enabled: false)),
+      ]
+
+      expect(ExternalApiKey.active).to match_array(active_external_api_keys)
+    end
   end
 
   describe "validations" do
@@ -46,12 +82,15 @@ RSpec.describe ExternalApiKey, type: :model do
         expect(valid_external_api_key.valid?).to eq(true)
       end
 
-      it "enforces name is unique" do
+      it "enforces name is unique per jurisdiction" do
         name = "test_name"
-        valid_external_api_key = create(:external_api_key, name: name)
-        invalid_external_api_key = build(:external_api_key, name: name)
+        jurisdiction = create(:sub_district)
+        valid_external_api_key = create(:external_api_key, name: name, jurisdiction: jurisdiction)
+        invalid_external_api_key = build(:external_api_key, name: name, jurisdiction: jurisdiction)
+        valid_external_api_key_2 = build(:external_api_key, name: name)
 
         expect(valid_external_api_key.valid?).to eq(true)
+        expect(valid_external_api_key_2.valid?).to eq(true)
         expect(invalid_external_api_key.valid?).to eq(false)
         expect(invalid_external_api_key.errors[:name]).to include("has already been taken")
       end
