@@ -10,7 +10,7 @@ class Api::ContactsController < Api::ApplicationController
           contactable_id: current_user.id,
         },
         limit: 10,
-      )
+      ) || []
 
     apply_search_authorization(contacts)
     render_success contacts.map { |c| { label: c.name, value: c } }, nil, { blueprint: ContactOptionBlueprint }
