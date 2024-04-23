@@ -1,5 +1,5 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Info, Users } from "@phosphor-icons/react"
+import { Info, Key, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -30,6 +30,9 @@ export const ManageJurisdictionMenu = observer(function ManageJurisdictionMenu<T
           </ManageMenuItem>
           <ManageMenuItem icon={<Users size={16} />} to={`${jurisdiction.slug}/users`}>
             {t("jurisdiction.index.users")}
+          </ManageMenuItem>
+          <ManageMenuItem icon={<Key size={16} />} to={`${jurisdiction.slug}/external-api-keys`}>
+            {t("jurisdiction.index.externalApiKeys")}
           </ManageMenuItem>
         </MenuList>
       </Menu>

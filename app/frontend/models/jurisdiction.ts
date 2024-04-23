@@ -1,8 +1,10 @@
 import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 
 export const JurisdictionModel = types
@@ -25,6 +27,7 @@ export const JurisdictionModel = types
     contactSummaryHtml: types.maybeNull(types.string),
     contacts: types.array(types.frozen<IContact>()),
     permitTypeSubmissionContacts: types.array(types.frozen<IPermitTypeSubmissionContact>()),
+    externalApiKeysMap: types.map(ExternalApiKeyModel),
     createdAt: types.Date,
     updatedAt: types.Date,
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
@@ -36,7 +39,11 @@ export const JurisdictionModel = types
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
+    get externalApiKeys() {
+      return Array.from(self.externalApiKeysMap.values()).sort((a, b) => (b.createdAt as any) - (a.createdAt as any))
+    },
     get primaryContact() {
       if (self.contacts.length === 0) return null
       if (self.contacts.length === 1) return self.contacts[0]
@@ -71,6 +78,15 @@ export const JurisdictionModel = types
         applySnapshot(self, response.data)
       }
       return ok
+    }),
+    fetchExternalApiKeys: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchExternalApiKeys(self.id))
+
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "externalApiKeysMap")
+      }
+
+      return response.ok
     }),
   }))
 

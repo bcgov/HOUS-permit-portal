@@ -3,6 +3,7 @@ import { TCreatePermitApplicationFormData } from "../../components/domains/permi
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TCreateContactFormData } from "../../components/shared/contact/create-contact-modal"
+import { IExternalApiKey } from "../../models/external-api-key"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -343,6 +344,10 @@ export class Api {
 
   async fetchSiteConfiguration() {
     return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+  }
+
+  async fetchExternalApiKeys(jurisdictionId: string) {
+    return this.client.get<ApiResponse<IExternalApiKey[]>>(`/external_api_keys/`, { jurisdictionId })
   }
 
   async updateSiteConfiguration(siteConfiguration) {

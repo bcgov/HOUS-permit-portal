@@ -18,6 +18,7 @@ class Jurisdiction < ApplicationRecord
   has_many :template_versions, through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
   has_many :permit_type_submission_contacts
+  has_many :external_api_keys, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true

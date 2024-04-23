@@ -241,6 +241,7 @@ const options = {
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
+            externalApiKeys: "External API keys",
             about: "About",
           },
           fields: {
@@ -923,6 +924,10 @@ const options = {
                 },
               },
             },
+            externalApiKeys: {
+              title: "Manage external API keys",
+              description: "Manage external API keys for the Building Permit Hub.",
+            },
           },
           superAdminTitle: "Admin home",
           submissionsInboxTitle: "Submissions inbox",
@@ -1131,6 +1136,25 @@ const options = {
             settings: "Site-wide message settings",
           },
         },
+        externalApiKey: {
+          index: {
+            createExternalApiKey: "Create new API key",
+            table: {
+              heading: "External API keys",
+              columnHeaders: {
+                name: "Name",
+                revokedAt: "Revoked at",
+                expiredAt: "Expired at",
+                createdAt: "Created at",
+                status: "Status",
+              },
+            },
+          },
+          status: {
+            active: "Active",
+            notActive: "Not-Active",
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",
@@ -1217,6 +1241,7 @@ const options = {
             confirmed: "E-mail confirmed",
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
+            externalApiKeys: "External API keys",
           },
           questionSupport: "Question support",
         },
