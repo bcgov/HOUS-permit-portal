@@ -35,6 +35,7 @@ Devise.setup do |config|
                     site: ENV["KEYCLOAK_AUTH_URL"],
                     realm: "standard",
                   },
+                  authorize_options: [:kc_idp_hint],
                   name: :keycloak,
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
 
