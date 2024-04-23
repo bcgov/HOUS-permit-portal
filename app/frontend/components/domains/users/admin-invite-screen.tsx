@@ -1,4 +1,4 @@
-import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
+import { Button, Container, Flex, Heading } from "@chakra-ui/react"
 import { PaperPlaneTilt, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -6,25 +6,20 @@ import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
-import { ErrorScreen } from "../../shared/base/error-screen"
 import { CustomToast } from "../../shared/base/flash-message"
 import { UserInput } from "../../shared/base/inputs/user-input"
-import { LoadingScreen } from "../../shared/base/loading-screen"
-import { UserRolesExplanationModal } from "../../shared/user-roles-explanation-modal"
 
-interface IInviteScreenProps {}
+interface IAdminInviteScreenProps {}
 
-type TInviteFormData = {
-  users: { firstName?: string; lastName?: string; email?: string; role: EUserRoles; jurisdictionId: string }[]
+type TAdminInviteFormData = {
+  users: { firstName?: string; lastName?: string; email?: string; role: EUserRoles }[]
 }
 
-export const InviteScreen = observer(({}: IInviteScreenProps) => {
+export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
   const { t } = useTranslation()
-  const { currentJurisdiction, error } = useJurisdiction()
   const {
     userStore: { invite, takenEmails, getUserById, resetInvitationResponse },
   } = useMst()
@@ -35,21 +30,20 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const [prepopulatedUser, setPrepopulatedUser] = useState(getUserById(userId))
 
   const defaultUserValues = {
-    role: prepopulatedUser?.role,
+    role: EUserRoles.superAdmin,
     email: prepopulatedUser?.email,
-    jurisdictionId: currentJurisdiction?.id,
     firstName: prepopulatedUser?.firstName,
     lastName: prepopulatedUser?.lastName,
   }
 
-  const formMethods = useForm<TInviteFormData>({
+  const formMethods = useForm<TAdminInviteFormData>({
     mode: "onChange",
     defaultValues: {
       users: [defaultUserValues],
     },
   })
 
-  const { handleSubmit, formState, control, reset } = formMethods
+  const { handleSubmit, formState, control, reset, setValue } = formMethods
 
   // Update the form's default values when currentJurisdiction.id changes
   // This happens when navigating from the jurisdiciton creation
@@ -57,10 +51,6 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
     reset({
       users: [defaultUserValues],
     })
-  }, [currentJurisdiction?.id])
-
-  useEffect(() => {
-    resetInvitationResponse()
   }, [])
 
   const { fields, append, remove } = useFieldArray({
@@ -74,27 +64,24 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
     await invite(formData)
   }
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    resetInvitationResponse()
+  }, [])
 
-  if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction) return <LoadingScreen />
+  const navigate = useNavigate()
 
   return (
     <Container maxW="container.lg" p={8} as="main">
       <Flex direction="column" gap={8}>
         <Flex direction="column">
-          <Heading as="h1">{t("user.inviteTitle")}</Heading>
-          <Text>
-            {t("user.inviteInstructions")} <UserRolesExplanationModal />
-          </Text>
+          <Heading as="h1">{t("user.adminInviteTitle")}</Heading>
         </Flex>
-        <Heading as="h2">{currentJurisdiction.name}</Heading>
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap={6}>
               <Flex direction="column" gap={4}>
                 {fields.map((field, index) => (
-                  <UserInput key={field.id} index={index} remove={remove} jurisdictionId={currentJurisdiction.id} />
+                  <UserInput key={field.id} index={index} remove={remove} adminOnly />
                 ))}
                 <Button
                   type="button"

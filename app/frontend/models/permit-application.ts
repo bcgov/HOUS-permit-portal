@@ -92,6 +92,9 @@ export const PermitApplicationModel = types
       self.submissionData = newData
       self.isDirty = true
     },
+    setIsDirty(isDirty: boolean) {
+      self.isDirty = true
+    },
   }))
   .views((self) => ({
     get statusTagText() {

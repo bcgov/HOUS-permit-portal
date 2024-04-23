@@ -25,7 +25,7 @@ class Jurisdiction::UserInviter
         user =
           User.invite!(email: user_params[:email]) do |u|
             u.skip_confirmation_notification!
-            u.role = user_params[:role] if User.invitable_roles.include?(user_params[:role])
+            u.role = user_params[:role] if inviter.invitable_roles.include?(user_params[:role])
             u.email = user_params[:email]
             u.username = user_params[:email]
             u.first_name = user_params[:first_name]

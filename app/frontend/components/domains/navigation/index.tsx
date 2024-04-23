@@ -8,6 +8,7 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAModal } from "../../shared/eula-modal"
+import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 
 const NotFoundScreen = lazy(() =>
@@ -237,6 +238,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
+      <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
     </>
   )
 
