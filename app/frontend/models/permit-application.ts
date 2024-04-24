@@ -276,9 +276,12 @@ export const PermitApplicationModel = types
       const sectionKey = requirementKey.split("|")[0].slice(21, 64)
       const newSectionFields = {}
       INPUT_CONTACT_KEYS.forEach((contactField) => {
-        newSectionFields[`${requirementKey}|${contactField}`] = contact[contactField]
+        let newValue = ["cell", "phone"].includes(contactField)
+          ? // The normalized phone number starts with +1... (country code)
+            (contact[contactField] as string)?.slice(2)
+          : contact[contactField] || ""
+        newSectionFields[`${requirementKey}|${contactField}`] = newValue
       })
-
       const newData = {
         data: {
           ...self.submissionData.data,
@@ -298,9 +301,12 @@ export const PermitApplicationModel = types
 
       const newContactElement = {}
       INPUT_CONTACT_KEYS.forEach((contactField) => {
-        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = contact[contactField]
+        // The normalized phone number starts with +1... (country code)
+        let newValue = ["cell", "phone"].includes(contactField)
+          ? (contact[contactField] as string)?.slice(2)
+          : contact[contactField]
+        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
       })
-
       const clonedArray = R.clone(self.submissionData.data?.[sectionKey]?.[requirementKey] ?? [])
       clonedArray[index] = newContactElement
       const newSectionFields = {

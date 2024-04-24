@@ -34,7 +34,6 @@ export const ContactModal: React.FC<IContactModalProps> = ({
 
   const onChange = (option) => {
     setSelectedOption(option)
-
     if (onContactChange) {
       onContactChange(option)
     } else if (autofillContactKey && permitApplication) {

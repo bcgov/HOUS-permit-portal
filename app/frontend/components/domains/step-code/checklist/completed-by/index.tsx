@@ -1,5 +1,5 @@
 import { Button, Checkbox, FormControl, FormLabel, HStack, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { AddressBook, Envelope, MapPin, Phone } from "@phosphor-icons/react"
+import { AddressBook, Envelope, MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -8,7 +8,7 @@ import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { IContact, IOption } from "../../../../../types/types"
 import { ContactModal } from "../../../../shared/contact/contact-modal"
 import { DatePicker } from "../../../../shared/date-picker"
-import { TextFormControl } from "../../../../shared/form/input-form-control"
+import { PhoneFormControl, TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { i18nPrefix } from "./i18n-prefix"
 
@@ -25,6 +25,7 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
     setValue("completedBy", `${contact.firstName} ${contact.lastName}`)
     setValue("completedByCompany", contact.businessName)
     setValue("completedByEmail", contact.email)
+    setValue("completedByPhone", contact.phone?.slice(2))
     setValue("completedByAddress", contact.address)
     setValue("energyAdvisorId", contact.professionalNumber)
   }
@@ -38,7 +39,6 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
           <Button variant="primary" leftIcon={<AddressBook size={20} />} onClick={onContactsOpen}>
             {t("ui.autofill")}
           </Button>
-
           <HStack w="full">
             <TextFormControl label={t(`${i18nPrefix}.name`)} fieldName="completedBy" />
             <TextFormControl label={t(`${i18nPrefix}.company`)} fieldName="completedByCompany" />
@@ -46,7 +46,7 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
 
           <HStack w="full">
             <TextFormControl leftElement={<Envelope />} label={t(`${i18nPrefix}.email`)} fieldName="completedByEmail" />
-            <TextFormControl leftElement={<Phone />} label={t(`${i18nPrefix}.phone`)} fieldName="completedByPhone" />
+            <PhoneFormControl label={t(`${i18nPrefix}.phone`)} fieldName="completedByPhone" />
           </HStack>
 
           {/* TODO: Address picker */}

@@ -15,7 +15,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { EmailFormControl } from "../form/email-form-control"
-import { TextFormControl } from "../form/input-form-control"
+import { PhoneFormControl, TextFormControl } from "../form/input-form-control"
 
 export type TCreateContactFormData = {
   firstName: string
@@ -92,10 +92,10 @@ export const CreateContactModal = ({ isOpen, onClose, onCreate }: IContactModalP
               </Flex>
               <Flex direction={{ base: "column", md: "row" }} gap={2}>
                 <EmailFormControl validate fieldName={`email`} />
-                <TextFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
+                <PhoneFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
               </Flex>
               <TextFormControl label={t("contact.fields.extension")} fieldName={`extension`} />
-              <TextFormControl label={t("contact.fields.cell")} fieldName={`cell`} />
+              <PhoneFormControl label={t("contact.fields.cell")} fieldName={`cell`} />
               <TextFormControl label={t("contact.fields.title")} fieldName={`title`} />
               <TextFormControl label={t("contact.fields.address")} fieldName={`address`} />
 
