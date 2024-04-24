@@ -33,7 +33,7 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
   }
 
   const handleReinvite = async () => {
-    navigate(`invite?userId=${user.id}`)
+    navigate(`invite?role=${user.role}&email=${user.email}&firstName=${user.firstName}&lastName=${user.lastName}`)
   }
 
   const { t } = useTranslation()

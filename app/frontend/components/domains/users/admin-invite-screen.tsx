@@ -21,19 +21,19 @@ type TAdminInviteFormData = {
 export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
   const { t } = useTranslation()
   const {
-    userStore: { invite, takenEmails, getUserById, resetInvitationResponse },
+    userStore: { invite, takenEmails, resetInvitationResponse },
   } = useMst()
 
   const query = useQuery()
-  const userId = query.get("userId")
-
-  const prepopulatedUser = getUserById(userId)
+  const prepopulatedEmail = query.get("email")
+  const prepopulatedFirstName = query.get("firstName")
+  const prepopulatedLastName = query.get("lastName")
 
   const defaultUserValues = {
     role: EUserRoles.superAdmin,
-    email: prepopulatedUser?.email,
-    firstName: prepopulatedUser?.firstName,
-    lastName: prepopulatedUser?.lastName,
+    email: prepopulatedEmail,
+    firstName: prepopulatedFirstName,
+    lastName: prepopulatedLastName,
   }
 
   const formMethods = useForm<TAdminInviteFormData>({

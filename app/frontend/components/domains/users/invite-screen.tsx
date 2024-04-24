@@ -26,20 +26,21 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
   const {
-    userStore: { invite, takenEmails, getUserById, resetInvitationResponse },
+    userStore: { invite, takenEmails, resetInvitationResponse },
   } = useMst()
 
   const query = useQuery()
-  const userId = query.get("userId")
-
-  const prepopulatedUser = getUserById(userId)
+  const prepopulatedRole = query.get("role") as EUserRoles
+  const prepopulatedEmail = query.get("email")
+  const prepopulatedFirstName = query.get("firstName")
+  const prepopulatedLastName = query.get("lastName")
 
   const defaultUserValues = {
-    role: prepopulatedUser?.role,
-    email: prepopulatedUser?.email,
+    role: prepopulatedRole,
+    email: prepopulatedEmail,
+    firstName: prepopulatedFirstName,
+    lastName: prepopulatedLastName,
     jurisdictionId: currentJurisdiction?.id,
-    firstName: prepopulatedUser?.firstName,
-    lastName: prepopulatedUser?.lastName,
   }
 
   const formMethods = useForm<TInviteFormData>({
