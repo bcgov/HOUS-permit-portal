@@ -1,10 +1,11 @@
 import { Image, Page, Text, View } from "@react-pdf/renderer"
 import { format } from "date-fns"
 import { t } from "i18next"
-import * as R from "ramda"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
-import { styles } from "./styles"
+import { theme } from "../../../../../styles/theme"
+import { Divider } from "../../../../domains/step-code/checklist/pdf-content/shared/divider"
+import { page } from "../shared/styles/page"
 
 interface IProps {
   permitApplication: IPermitApplication
@@ -19,43 +20,78 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
 }: IProps) {
   const logoUrl = `${import.meta.env.SSR ? assetDirectoryPath : ""}/images/logo.png`
   return (
-    <Page size="LETTER" style={styles.page}>
-      <View style={styles.outerContainer}>
-        <View style={styles.titleContainer}>
-          {/* TOOD: fix image (and font) loading when downloading via SSR */}
-          <Image src={logoUrl} style={styles.logo} />
-          <Text style={styles.title}>{t("site.title")}</Text>
+    <Page size="LETTER" style={page}>
+      <View style={{ alignItems: "stretch", gap: 42, width: "100%" }}>
+        <View style={{ alignItems: "center", gap: 6 }}>
+          <Image src={logoUrl} style={{ width: 109.2, height: 42 }} />
+          <Text style={{ fontWeight: 700, fontSize: 13.5 }}>{t("site.title")}</Text>
         </View>
-        <Text style={styles.subTitle}>{subTitle}</Text>
-        <View style={styles.calloutBoxOuter}>
-          <View style={styles.calloutBoxInner}>
-            <View style={styles.calloutBoxContent}>
-              <Text style={styles.calloutBoxTitle}>{permitApplication.fullAddress}</Text>
-              <Text style={styles.calloutBoxDescription}>{permitApplication.jurisdiction.name}</Text>
+        <Text style={{ fontWeight: 700, fontSize: 12, textAlign: "center" }}>{subTitle}</Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: theme.colors.greys.grey01,
+            borderRadius: 6,
+          }}
+        >
+          <View
+            style={{
+              borderLeftWidth: 6,
+              borderColor: theme.colors.theme.yellow,
+              padding: 24,
+              borderTopLeftRadius: 6,
+              borderBottomLeftRadius: 6,
+            }}
+          >
+            <View style={{ gap: 6, fontSize: 12 }}>
+              <Text style={{ fontWeight: 700 }}>{permitApplication.fullAddress}</Text>
+              <Text>{permitApplication.jurisdiction.name}</Text>
             </View>
           </View>
         </View>
-        <View style={styles.applicationDetailsContainer}>
-          <View style={styles.applicationDetailsRow}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.id")}</Text>
-            <Text style={styles.applicationDetailsValue}>{permitApplication.number}</Text>
-          </View>
-          <View style={styles.applicationDetailsRow}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.submissionDate")}</Text>
-            <Text style={styles.applicationDetailsValue}>{format(permitApplication.submittedAt, "yyyy-MM-dd")}</Text>
-          </View>
-          <View style={styles.applicationDetailsRow}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.applicant")}</Text>
-            <Text style={styles.applicationDetailsValue}>{permitApplication.submitter.name}</Text>
-          </View>
-          <View style={R.mergeRight(styles.applicationDetailsRow, { borderBottomWidth: "0pt" })}>
-            <Text style={styles.applicationDetailsLabel}>{t("permitApplication.pdf.permitType")}</Text>
-            <Text
-              style={styles.applicationDetailsValue}
-            >{`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}</Text>
-          </View>
+        <View
+          style={{
+            alignItems: "stretch",
+            gap: 7.5,
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: theme.colors.greys.grey01,
+            fontSize: 8.25,
+            paddingTop: 7.5,
+            paddingBottom: 7.5,
+          }}
+        >
+          <Row label={t("permitApplication.pdf.id")} value={permitApplication.number} />
+          <Row
+            label={t("permitApplication.pdf.submissionDate")}
+            value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
+          />
+          <Row label={t("permitApplication.pdf.applicant")} value={permitApplication.submitter.name} />
+          <Row
+            label={t("permitApplication.pdf.permitType")}
+            value={`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}
+            isLast
+          />
         </View>
       </View>
     </Page>
+  )
+}
+
+function Row({ label, value, isLast = false }) {
+  return (
+    <>
+      <View
+        style={{
+          gap: 6,
+          paddingLeft: 12,
+          paddingRight: 12,
+        }}
+      >
+        <Text style={{ fontWeight: 700, textTransform: "uppercase" }}>{label}</Text>
+        <Text>{value}</Text>
+      </View>
+      {!isLast && <Divider style={{ borderColor: theme.colors.greys.grey01, marginTop: 0, marginBottom: 0 }} />}
+    </>
   )
 }

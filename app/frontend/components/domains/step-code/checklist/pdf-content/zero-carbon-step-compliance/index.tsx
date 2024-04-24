@@ -1,9 +1,8 @@
-import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
 import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { i18nPrefix } from "../../zero-carbon-step-code-compliance/i18n-prefix"
-import { styles } from "../styles"
+import { Panel } from "../shared/panel"
 import { ZeroCarbonComplianceGrid } from "./compliance-grid"
 
 interface IProps {
@@ -12,13 +11,8 @@ interface IProps {
 
 export const ZeroCarbonStepCompliance = function StepCodeChecklistPDFZeroCarbonStepCompliance({ checklist }: IProps) {
   return (
-    <View style={styles.panelContainer} break>
-      <View style={styles.panelHeader}>
-        <Text style={styles.panelHeaderText}>{t(`${i18nPrefix}.heading`)}</Text>
-      </View>
-      <View style={styles.panelBody}>
-        <ZeroCarbonComplianceGrid checklist={checklist} />
-      </View>
-    </View>
+    <Panel heading={t(`${i18nPrefix}.heading`)} break>
+      <ZeroCarbonComplianceGrid checklist={checklist} />
+    </Panel>
   )
 }

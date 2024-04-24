@@ -3,12 +3,20 @@ import { format } from "date-fns"
 import { t } from "i18next"
 import React from "react"
 import { IPermitApplication } from "../../../../../../models/permit-application"
-import { styles } from "./styles"
+import { theme } from "../../../../../../styles/theme"
 
 export const Footer = ({ permitApplication }: { permitApplication: IPermitApplication }) => {
   return (
     <View
-      style={styles.container}
+      style={{
+        flexDirection: "row",
+        marginTop: "auto",
+        gap: 16,
+        paddingTop: 12,
+        paddingBottom: 20,
+        borderTopWidth: 1,
+        borderColor: theme.colors.text.secondary,
+      }}
       fixed
       render={({ pageNumber, totalPages }) => (
         <>
@@ -30,8 +38,8 @@ export const Footer = ({ permitApplication }: { permitApplication: IPermitApplic
 }
 
 const Field = ({ label, value }) => (
-  <View style={styles.field}>
-    <Text style={styles.label}>{label}</Text>
-    <Text style={styles.value}>{value}</Text>
+  <View style={{ gap: 2 }}>
+    <Text style={{ fontSize: 7, textTransform: "uppercase", color: theme.colors.text.secondary }}>{label}</Text>
+    <Text style={{ fontSize: 8, fontWeight: 700, color: theme.colors.text.secondary }}>{value}</Text>
   </View>
 )
