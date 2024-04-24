@@ -38,11 +38,9 @@ export const RequirementBlockModel = types
 
         const { conditional } = requirement
 
-        const possibleComparisons = ["eq"]
         const possibleThens = ["show", "hide", "require"]
         const when = conditional.when
-        const comparison = possibleComparisons.find((comp) => Object.keys(conditional).includes(comp))
-        const operand = conditional[comparison]
+        const operand = conditional.eq
         const then = possibleThens.find((t) => Object.keys(conditional).includes(t))
 
         return {
@@ -51,7 +49,6 @@ export const RequirementBlockModel = types
             ...requirement.inputOptions,
             conditional: {
               when,
-              comparison,
               operand,
               then,
             },

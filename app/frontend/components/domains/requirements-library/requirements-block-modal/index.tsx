@@ -85,14 +85,13 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         } as any,
       }
 
-      const shouldAppendConditional =
-        conditional?.when && conditional?.comparison && conditional?.operand && conditional?.then
+      const shouldAppendConditional = conditional?.when && conditional?.operand && conditional?.then
 
       if (shouldAppendConditional) {
         const cond = ra.inputOptions.conditional
         returnValue.inputOptions.conditional = {
           when: cond.when,
-          [cond.comparison]: cond.operand,
+          eq: cond.operand,
           [cond.then]: true,
         }
       }

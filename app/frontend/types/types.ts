@@ -240,13 +240,8 @@ export interface IContact {
   professionalNumber?: string
 }
 
-export type Comparison = "eq" | "lt" | "gt" | "ne" | "le" | "ge"
-
-interface IConditionalBase {
+export type TConditional = {
   show: boolean
   when: string
+  eq: string
 }
-
-export type TConditional = {
-  [K in Comparison]?: string
-} & IConditionalBase

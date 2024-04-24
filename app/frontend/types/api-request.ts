@@ -3,7 +3,6 @@ import { IOption } from "./types"
 
 export interface IFormConditional {
   when: string
-  comparison: string
   operand: string
   then: string
 }

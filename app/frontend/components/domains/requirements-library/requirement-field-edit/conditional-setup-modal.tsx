@@ -14,9 +14,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Radio,
-  RadioGroup,
-  Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -48,10 +45,9 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
   const watchedLabel = watch(`requirementsAttributes.${index}.label`)
 
   const watchedWhen = watch(`requirementsAttributes.${index}.inputOptions.conditional.when`)
-  const watchedComparison = watch(`requirementsAttributes.${index}.inputOptions.conditional.comparison`)
   const watchedOperand = watch(`requirementsAttributes.${index}.inputOptions.conditional.operand`)
   const watchedThen = watch(`requirementsAttributes.${index}.inputOptions.conditional.then`)
-  const allFieldsProvided = watchedWhen && watchedComparison && watchedOperand && watchedThen
+  const allFieldsProvided = watchedWhen && watchedOperand && watchedThen
 
   const watchedRequirements = watch(`requirementsAttributes`)
   const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
@@ -66,7 +62,6 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
   const onReset = () => {
     setValue(`requirementsAttributes.${index}.inputOptions.conditional.when`, null)
     setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
-    setValue(`requirementsAttributes.${index}.inputOptions.conditional.comparison`, null)
     setValue(`requirementsAttributes.${index}.inputOptions.conditional.then`, null)
   }
 
@@ -196,16 +191,6 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                     {t("requirementsLibrary.modals.conditionalSetup.satisfies")}
                   </FormLabel>
                   <Flex px={4} gap={4} align="center">
-                    {/* Only "eq" available for now */}
-                    <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.conditional.comparison`}
-                      control={control}
-                      defaultValue="eq"
-                      render={({ field: { onChange, value } }) => (
-                        <ComparisonRadioGroup value={"eq"} onChange={onChange} possibleValues={["eq"]} />
-                      )}
-                    />
-
                     {getOperandSelectFormControl(
                       `requirementsAttributes.${index}.inputOptions.conditional.operand` as keyof IRequirementBlockForm
                     )}
@@ -260,29 +245,6 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     </>
   )
 })
-
-interface IComparisonRadioGroupProps {
-  value: string
-  possibleValues: string[]
-  onChange: (any) => void
-}
-
-const ComparisonRadioGroup: React.FC<IComparisonRadioGroupProps> = ({ value, onChange, possibleValues }) => {
-  const { t } = useTranslation()
-
-  return (
-    <RadioGroup onChange={onChange} value={value} minW={32}>
-      <Stack direction="column">
-        {possibleValues.map((value) => (
-          <Radio key={value} value={value}>
-            {/* @ts-ignore */}
-            {t(`requirementsLibrary.modals.conditionalSetup.${value}`)}
-          </Radio>
-        ))}
-      </Stack>
-    </RadioGroup>
-  )
-}
 
 interface IOperandSelectProps {
   selectedOption: IOption
