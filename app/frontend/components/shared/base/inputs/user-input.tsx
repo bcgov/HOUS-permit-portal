@@ -14,10 +14,11 @@ interface IUserInputProps {
   index: number
   remove?: (index: number) => any
   jurisdictionId?: string
+  adminOnly?: boolean
 }
 
-export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInputProps) => {
-  const { register, formState, control, watch } = useFormContext()
+export const UserInput = observer(({ index, remove, jurisdictionId, adminOnly }: IUserInputProps) => {
+  const { register, formState, control, watch, setValue } = useFormContext()
   const { isSubmitting } = formState
   const { t } = useTranslation()
 
@@ -35,18 +36,27 @@ export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInput
       <HStack spacing={4} w="full">
         <FormControl>
           <FormLabel>{t("auth.role")}</FormLabel>
+
           <Controller
             name={`users.${index}.role`}
             control={control}
             rules={{ required: true }} // Inline validation rule
-            render={({ field }) => (
-              <>
-                <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
-                  <option value="review_manager">{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
-                  <option value="reviewer">{t(`user.roles.${EUserRoles.reviewer}`)}</option>
-                </Select>
-              </>
-            )}
+            render={({ field }) => {
+              return (
+                <>
+                  <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
+                    {adminOnly ? (
+                      <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
+                    ) : (
+                      <>
+                        <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
+                        <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
+                      </>
+                    )}
+                  </Select>
+                </>
+              )
+            }}
           />
         </FormControl>
         <EmailFormControl fieldName={`users.${index}.email`} validate required />

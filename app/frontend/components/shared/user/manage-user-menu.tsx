@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { ISearch } from "../../../lib/create-search-model"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
 import { ManageMenuItemButton } from "../base/manage-menu-item"
 import { Can } from "./can"
 
@@ -32,7 +33,7 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
   }
 
   const handleReinvite = async () => {
-    navigate(`invite?userId=${user.id}`)
+    navigate(`invite?role=${user.role}&email=${user.email}&firstName=${user.firstName}&lastName=${user.lastName}`)
   }
 
   const { t } = useTranslation()
@@ -52,14 +53,16 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
           {t("ui.manage")}
         </MenuButton>
         <MenuList>
-          <ManageMenuItemButton
-            color={isCurrentUser ? "greys.grey01" : "text.primary"}
-            leftIcon={<ArrowsLeftRight />}
-            onClick={handleChangeRole}
-            isDisabled={isCurrentUser}
-          >
-            {t("user.changeRole")}
-          </ManageMenuItemButton>
+          {user.role != EUserRoles.superAdmin && (
+            <ManageMenuItemButton
+              color={isCurrentUser ? "greys.grey01" : "text.primary"}
+              leftIcon={<ArrowsLeftRight />}
+              onClick={handleChangeRole}
+              isDisabled={isCurrentUser}
+            >
+              {t("user.changeRole")}
+            </ManageMenuItemButton>
+          )}
           {(user.isUnconfirmed || user.isDiscarded) && (
             <ManageMenuItemButton color="text.primary" onClick={handleReinvite} leftIcon={<PaperPlaneTilt size={16} />}>
               {t("user.reinvite")}
