@@ -46,9 +46,7 @@ export const UserInput = observer(({ index, remove, jurisdictionId, adminOnly }:
                 <>
                   <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
                     {adminOnly ? (
-                      <>
-                        <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
-                      </>
+                      <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
                     ) : (
                       <>
                         <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>

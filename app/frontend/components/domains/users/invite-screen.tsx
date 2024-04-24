@@ -2,7 +2,7 @@ import { Button, Container, Flex, Heading, Text } from "@chakra-ui/react"
 import { PaperPlaneTilt, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -32,7 +32,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const query = useQuery()
   const userId = query.get("userId")
 
-  const [prepopulatedUser, setPrepopulatedUser] = useState(getUserById(userId))
+  const prepopulatedUser = getUserById(userId)
 
   const defaultUserValues = {
     role: prepopulatedUser?.role,

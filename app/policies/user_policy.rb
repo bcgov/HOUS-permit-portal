@@ -29,11 +29,11 @@ class UserPolicy < ApplicationPolicy
   end
 
   def destroy?
-    search_jurisdiction_users?
+    search_jurisdiction_users? || user.super_admin?
   end
 
   def restore?
-    search_jurisdiction_users?
+    destroy?
   end
 
   def accept_eula?
