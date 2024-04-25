@@ -13,7 +13,12 @@ import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
-import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
+import {
+  IExternalApiKeyParams,
+  IRequirementBlockParams,
+  IRequirementTemplateUpdateParams,
+  ITagSearchParams,
+} from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IApiResponse,
@@ -348,6 +353,18 @@ export class Api {
 
   async fetchExternalApiKeys(jurisdictionId: string) {
     return this.client.get<ApiResponse<IExternalApiKey[]>>(`/external_api_keys/`, { jurisdictionId })
+  }
+
+  async fetchExternalApiKey(externalApiKeyId: string) {
+    return this.client.get<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`)
+  }
+
+  async createExternalApiKey(externalApiKey: IExternalApiKeyParams) {
+    return this.client.post<ApiResponse<IExternalApiKey>>(`/external_api_keys/`, { externalApiKey })
+  }
+
+  async updateExternalApiKey(externalApiKeyId: string, externalApiKey: IExternalApiKeyParams) {
+    return this.client.patch<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`, { externalApiKey })
   }
 
   async updateSiteConfiguration(siteConfiguration) {

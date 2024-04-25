@@ -7,13 +7,14 @@ export const ExternalApiKeyModel = types
   .props({
     id: types.identifier,
     name: types.string,
+    webhookUrl: types.maybeNull(types.string),
     expiredAt: types.maybeNull(types.Date),
     revokedAt: types.maybeNull(types.Date),
     createdAt: types.Date,
   })
   .views((self) => ({
     get isExpired() {
-      return self.expiredAt !== null && isFuture(self.expiredAt)
+      return self.expiredAt !== null && !isFuture(self.expiredAt)
     },
     get isRevoked() {
       // any revokedAt date is considered revoked, time is for logging purposes

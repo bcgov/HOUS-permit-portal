@@ -3,6 +3,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
+import { IExternalApiKeyParams } from "../types/api-request"
 import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
@@ -67,6 +68,9 @@ export const JurisdictionModel = types
 
       return hasValidContactForAllPermitTypes
     },
+    getExternalApiKey(externalApiKeyId: string) {
+      return self.externalApiKeysMap.get(externalApiKeyId)
+    },
   }))
   .actions((self) => ({
     setTablePermitApplications: (permitApplications) => {
@@ -84,6 +88,45 @@ export const JurisdictionModel = types
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "externalApiKeysMap")
+      }
+
+      return response.ok
+    }),
+    fetchExternalApiKey: flow(function* (externalApiKeyId: string) {
+      const response = yield* toGenerator(self.environment.api.fetchExternalApiKey(externalApiKeyId))
+
+      if (response.ok) {
+        const data = response.data.data
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return data
+      }
+
+      return response.ok
+    }),
+    createExternalApiKey: flow(function* (params: IExternalApiKeyParams) {
+      params.jurisdictionId = self.id
+      const response = yield* toGenerator(self.environment.api.createExternalApiKey(params))
+
+      if (response.ok) {
+        const data = response.data.data
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return self.getExternalApiKey(data.id)
+      }
+
+      return response.ok
+    }),
+    updateExternalApiKey: flow(function* (externalApiKeyId: string, params: IExternalApiKeyParams) {
+      params.jurisdictionId = self.id
+      const response = yield* toGenerator(self.environment.api.updateExternalApiKey(externalApiKeyId, params))
+
+      if (response.ok) {
+        const data = response.data.data
+
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return self.getExternalApiKey(data.id)
       }
 
       return response.ok

@@ -3,6 +3,7 @@ import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { Outlet } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -40,12 +41,13 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
+      <Outlet />
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
           <Box>
             <Heading as="h1">{currentJurisdiction?.qualifiedName}</Heading>
           </Box>
-          <RouterLinkButton alignSelf="flex-end" to={"invite"}>
+          <RouterLinkButton alignSelf={"flex-end"} variant={"primary"} to={"create"}>
             {t("externalApiKey.index.createExternalApiKey")}
           </RouterLinkButton>
         </Flex>
@@ -77,7 +79,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                   </SearchGridItem>
 
                   <SearchGridItem justifyContent={"center"}>
-                    <RouterLinkButton to={`/external-api-keys/${externalApiKey.id}/edit`} variant={"link"}>
+                    <RouterLinkButton variant={"link"} to={`${externalApiKey.id}/edit`}>
                       {t("ui.manage")}
                     </RouterLinkButton>
                   </SearchGridItem>

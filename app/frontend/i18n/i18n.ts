@@ -1141,14 +1141,20 @@ const options = {
             createExternalApiKey: "Create new API key",
             table: {
               heading: "External API keys",
-              columnHeaders: {
-                name: "Name",
-                revokedAt: "Revoked at",
-                expiredAt: "Expired at",
-                createdAt: "Created at",
-                status: "Status",
-              },
             },
+          },
+          modal: {
+            createTitle: "Create external API key",
+            editTitle: "Edit external API key",
+          },
+          fieldLabels: {
+            name: "Name",
+            revokedAt: "Revoked at",
+            webhookUrl: "Webhook URL",
+            expiredAt: "Expired at",
+            createdAt: "Created at",
+            token: "Token",
+            status: "Status",
           },
           status: {
             active: "Active",
@@ -1242,6 +1248,7 @@ const options = {
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
             externalApiKeys: "External API keys",
+            create: "Create",
           },
           questionSupport: "Question support",
         },

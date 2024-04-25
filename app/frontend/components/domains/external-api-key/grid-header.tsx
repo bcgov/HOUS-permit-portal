@@ -7,11 +7,11 @@ import { GridHeader } from "../../shared/grid/grid-header"
 export const GridHeaders = observer(function GridHeaders() {
   const { t } = useTranslation()
   const columnHeaders: string[] = [
-    t("externalApiKey.index.table.columnHeaders.name"),
-    t("externalApiKey.index.table.columnHeaders.status"),
-    t("externalApiKey.index.table.columnHeaders.createdAt"),
-    t("externalApiKey.index.table.columnHeaders.expiredAt"),
-    t("externalApiKey.index.table.columnHeaders.revokedAt"),
+    t("externalApiKey.fieldLabels.name"),
+    t("externalApiKey.fieldLabels.status"),
+    t("externalApiKey.fieldLabels.createdAt"),
+    t("externalApiKey.fieldLabels.expiredAt"),
+    t("externalApiKey.fieldLabels.revokedAt"),
   ]
 
   return (
