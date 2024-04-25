@@ -113,6 +113,8 @@ const options = {
           browseList: "Browse list of jurisdictions",
         },
         ui: {
+          revoke: "Revoke",
+          create: "Create",
           tip: "Tip",
           manage: "Manage",
           preview: "Preview",
@@ -1145,7 +1147,11 @@ const options = {
           },
           modal: {
             createTitle: "Create external API key",
-            editTitle: "Edit external API key",
+            manageTitle: "Manage external API key",
+            removeConfirmationModal: {
+              title: "Are you sure you want to revoke this API key?",
+              body: "Any applications using this token will be unable to access the API.",
+            },
           },
           fieldLabels: {
             name: "Name",

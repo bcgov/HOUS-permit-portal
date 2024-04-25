@@ -367,6 +367,10 @@ export class Api {
     return this.client.patch<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`, { externalApiKey })
   }
 
+  async revokeExternalApiKey(externalApiKeyId: string) {
+    return this.client.post<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}/revoke`)
+  }
+
   async updateSiteConfiguration(siteConfiguration) {
     return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
   }

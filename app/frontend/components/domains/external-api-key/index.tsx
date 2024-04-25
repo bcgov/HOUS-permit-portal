@@ -77,7 +77,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                   </SearchGridItem>
 
                   <SearchGridItem justifyContent={"center"}>
-                    <RouterLinkButton variant={"link"} to={`${externalApiKey.id}/edit`}>
+                    <RouterLinkButton variant={"link"} to={`${externalApiKey.id}/manage`}>
                       {t("ui.manage")}
                     </RouterLinkButton>
                   </SearchGridItem>

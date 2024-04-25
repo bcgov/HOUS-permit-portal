@@ -257,7 +257,7 @@ const AppRoutes = observer(() => {
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/external-api-keys" element={<ExternalApiKeysIndexScreen />}>
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
-        <Route path=":externalApiKeyId/edit" element={<ExternalApiKeyModalSubRoute />} />
+        <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
       </Route>
     </>
   )

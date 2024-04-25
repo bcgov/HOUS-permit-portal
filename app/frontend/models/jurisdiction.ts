@@ -131,6 +131,19 @@ export const JurisdictionModel = types
 
       return response.ok
     }),
+    revokeExternalApiKey: flow(function* (externalApiKeyId: string) {
+      const response = yield* toGenerator(self.environment.api.revokeExternalApiKey(externalApiKeyId))
+
+      if (response.ok) {
+        const data = response.data.data
+
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return self.getExternalApiKey(data.id)
+      }
+
+      return response.ok
+    }),
   }))
 
 export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}
