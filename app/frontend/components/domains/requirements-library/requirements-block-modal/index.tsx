@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IRequirementBlockParams } from "../../../../types/api-request"
+import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
 import { FieldsSetup } from "./fields-setup"
@@ -29,7 +30,7 @@ export interface IRequirementBlockForm extends IRequirementBlockParams {
 }
 
 interface IRequirementsBlockProps {
-  requirementBlock?: IRequirementBlock
+  requirementBlock?: IRequirementBlock | IDenormalizedRequirementBlock
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
 }
@@ -50,8 +51,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
           displayDescription: requirementBlock.displayDescription,
-          sku: requirementBlock.sku,
-          associationList: requirementBlock.associations,
+          sku: (requirementBlock as IRequirementBlock).sku,
+          associationList: (requirementBlock as IRequirementBlock).associations,
           requirementsAttributes: requirementBlock.requirements,
         }
       : {
@@ -70,16 +71,16 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
   const onSubmit = async (data: IRequirementBlockForm) => {
     let isSuccess = false
-
     if (requirementBlock) {
       const removedRequirementAttributes = requirementBlock.requirements
         .filter((requirement) => !data.requirementsAttributes.find((attribute) => attribute.id === requirement.id))
         .map((requirement) => ({ id: requirement.id, _destroy: true }))
 
-      isSuccess = await requirementBlock.update({
+      isSuccess = await (requirementBlock as IRequirementBlock).update?.({
         ...data,
         requirementsAttributes: [...data.requirementsAttributes, ...removedRequirementAttributes],
       })
+      requirementBlockStore.fetchRequirementBlocks()
     } else {
       isSuccess = await requirementBlockStore.createRequirementBlock(data)
     }

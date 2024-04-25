@@ -35,7 +35,7 @@ interface IInputFormControlProps extends FormControlProps {
 export const TextFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
-      {...R.mergeDeepRight(
+      {...(R.mergeDeepRight(
         {
           inputProps: { type: "text" },
           validate: {
@@ -44,13 +44,17 @@ export const TextFormControl = (props: IInputFormControlProps) => {
           },
         },
         props
-      )}
+      ) as IInputFormControlProps)}
     />
   )
 }
 
 export const NumberFormControl = (props: IInputFormControlProps) => {
-  return <InputFormControl {...R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props)} />
+  return (
+    <InputFormControl
+      {...(R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props) as IInputFormControlProps)}
+    />
+  )
 }
 
 export const PhoneFormControl = (props: IInputFormControlProps) => {
@@ -63,7 +67,7 @@ export const PhoneFormControl = (props: IInputFormControlProps) => {
 }
 
 export const FileFormControl = (props: IInputFormControlProps) => {
-  return <InputFormControl {...R.mergeDeepRight({ inputProps: { type: "file" } }, props)} />
+  return <InputFormControl {...(R.mergeDeepRight({ inputProps: { type: "file" } }, props) as IInputFormControlProps)} />
 }
 
 const InputFormControl = ({

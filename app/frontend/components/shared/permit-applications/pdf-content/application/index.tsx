@@ -3,8 +3,8 @@ import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
 import { IPermitApplication } from "../../../../../models/permit-application"
-import { generateUUID } from "../../../../../utils/utility-functions"
 import { theme } from "../../../../../styles/theme"
+import { generateUUID } from "../../../../../utils/utility-functions"
 import { Footer } from "../shared/footer"
 import { page } from "../shared/styles/page"
 
@@ -199,19 +199,21 @@ const FormComponent = function ApplicationPDFFormComponent({
           {component.columns && (
             <View style={{ flexDirection: "row", gap: 20, width: "100%" }}>
               {component.columns.map((column, index) => {
-                return column.components.map((child) => {
-                  return (
-                    <View key={generateUUID()} style={{ flex: 1 }}>
-                      <FormComponent
-                        key={child.id}
-                        component={child}
-                        dataPath={dataPath}
-                        permitApplication={permitApplication}
-                      />
-                    </View>
-                  )
-                })
-                .flat()}
+                return column.components
+                  .map((child) => {
+                    return (
+                      <View key={generateUUID()} style={{ flex: 1 }}>
+                        <FormComponent
+                          key={child.id}
+                          component={child}
+                          dataPath={dataPath}
+                          permitApplication={permitApplication}
+                        />
+                      </View>
+                    )
+                  })
+                  .flat()
+              })}
             </View>
           )}
         </>
@@ -325,7 +327,7 @@ function Checkbox({ isChecked, label }) {
   )
 }
 
-const InputField = function ApplicationPDFInputField({ value, label }) {
+const InputField = function ApplicationPDFInputField({ value, label, type }) {
   return <RequirementField label={label} value={value} />
 }
 

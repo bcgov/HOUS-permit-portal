@@ -39,14 +39,9 @@ export const RequirementBlockModel = types
 
       if (response.ok) {
         applySnapshot(self, response.data.data)
-
-        // Get latest data for current page, sort and filters
-        yield self.rootStore.requirementBlockStore.fetchRequirementBlocks()
-
-        return true
       }
 
-      return false
+      return response.ok
     }),
   }))
 
