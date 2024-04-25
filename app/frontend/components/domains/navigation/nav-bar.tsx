@@ -120,7 +120,7 @@ export const NavBar = observer(() => {
               {!loggedIn && <HelpDrawer />}
               {/* todo: navbar search? */}
               {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
-              {currentUser?.isSubmitter && (
+              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
                 </RouterLinkButton>
@@ -235,7 +235,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
 
       <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
         <MenuList zIndex={99} boxShadow="2xl">
-          {loggedIn ? (
+          {loggedIn && !currentUser.isUnconfirmed ? (
             <>
               <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
                 {t("site.loggedInWelcome")}
@@ -259,13 +259,15 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
             </>
           ) : (
             <>
-              <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
-                <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                <NavMenuItemCTA label={t("auth.register")} to="/register" />
-              </MenuList>
+              {!loggedIn && (
+                <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
+                  <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                </MenuList>
+              )}
               <MenuDivider />
               <NavMenuItem label={t("site.home")} to="/" />
               <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+              {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
             </>
           )}
 

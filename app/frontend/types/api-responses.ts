@@ -28,8 +28,6 @@ export interface IUsersResponse extends IApiResponse<IUser[], IPageMeta> {}
 
 export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPermitApplication[], IPageMeta> {}
 
-export interface IResetPasswordResponse extends IApiResponse<{}, { redirectUrl: string }> {}
-
 export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUrl: string }> {}
 
 export interface IInvitationResponse

@@ -3,6 +3,8 @@ class Api::UsersController < Api::ApplicationController
 
   before_action :find_user, only: %i[destroy restore accept_eula update]
   skip_after_action :verify_policy_scoped, only: %i[index]
+  skip_before_action :require_confirmation, only: %i[profile]
+  skip_before_action :require_confirmation, only: %i[accept_eula]
 
   def index
     authorize :user, :index?
@@ -35,27 +37,24 @@ class Api::UsersController < Api::ApplicationController
   def profile
     # Currently a user can only update themself
     @user = current_user
-    authorize @user
+    authorize current_user
 
-    ActiveRecord::Base.transaction do
-      if password_params[:password].present?
-        if @user.update_with_password(password_params)
-          CustomDeviseMailer.new.password_change(@user).deliver
-        else
-          raise ActiveRecord::RecordInvalid
-        end
-      end
-
-      raise ActiveRecord::RecordInvalid unless @user.update(profile_params)
+    if current_user.update(profile_params)
+      current_user.send_confirmation_instructions if @user.confirmed_at.blank?
+      render_success(
+        current_user,
+        (
+          if email_changed? || @user.confirmed_at.blank?
+            "user.confirmation_sent"
+          else
+            "user.update_success"
+          end
+        ),
+      )
+    else
+      render_error "user.update_error",
+                   { message_opts: { error_message: current_user.errors.full_messages.join(", ") } }
     end
-
-    render_success(@user, email_changed? ? "user.confirmation_sent" : "user.update_success")
-  rescue ActiveRecord::RecordInvalid => e
-    # Handle any ActiveRecord exceptions here
-    if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
-      render_error "user.update_password_error", {}, e and return
-    end
-    render_error "user.update_error", {}, e
   end
 
   def destroy
@@ -104,6 +103,6 @@ class Api::UsersController < Api::ApplicationController
   end
 
   def profile_params
-    params.require(:user).permit(:email, :first_name, :last_name, :organization, :certified)
+    params.require(:user).permit(:email, :nickname, :first_name, :last_name, :organization, :certified)
   end
 end

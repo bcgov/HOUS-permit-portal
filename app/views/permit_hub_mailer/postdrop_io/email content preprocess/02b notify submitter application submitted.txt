@@ -77,7 +77,7 @@
                           You can log into the Building Permit Hub at any time to view a history of the applications you have submitted.
                         </p>
                         <ol>
-                          <li>Please visit the <a href="<%= root_url %>">Building Permit Hub</a> and log in using your username and password.</li>
+                          <li>Please visit the <a href="<%= root_url %>">Building Permit Hub</a> and log in using your BCeID.</li>
                           <li>Once logged in, you'll have access to your personalized dashboard where you can review and download existing permit applications.</li>
                         </ol>
                         
