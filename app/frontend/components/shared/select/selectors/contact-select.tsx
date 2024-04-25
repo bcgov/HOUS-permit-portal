@@ -69,10 +69,8 @@ export const ContactSelect = observer(({ onChange, selectedOption, stylesToMerge
         loadOptions={fetchContactOptions}
         defaultOptions={defaultOptions}
         closeMenuOnSelect={true} // Set true for closing menu after selection
-        isCreatable
         menuIsOpen
-        onCreateOption={handleCreate} // Handle new option creation
-        formatCreateLabel={(inputValue: string) => t("contact.createButton")} // Always hide the "Create" option
+        isCreatable={false}
         {...rest}
       />
       <Button onClick={handleCreate} leftIcon={<Plus />} variant="primary" w="28%" px={2}>

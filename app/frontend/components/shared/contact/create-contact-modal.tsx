@@ -15,7 +15,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { EmailFormControl } from "../form/email-form-control"
-import { TextFormControl } from "../form/input-form-control"
+import { PhoneFormControl, TextFormControl } from "../form/input-form-control"
 
 export type TCreateContactFormData = {
   firstName: string
@@ -85,44 +85,42 @@ export const CreateContactModal = ({ isOpen, onClose, onCreate }: IContactModalP
         </ModalHeader>
         <ModalBody py={6}>
           <FormProvider {...formMethods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
-                <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                  <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
-                  <TextFormControl label={t("contact.fields.lastName")} fieldName={`lastName`} required />
-                </Flex>
-                <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                  <EmailFormControl validate fieldName={`email`} />
-                  <TextFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
-                </Flex>
-                <TextFormControl label={t("contact.fields.extension")} fieldName={`extension`} />
-                <TextFormControl label={t("contact.fields.cell")} fieldName={`cell`} />
-                <TextFormControl label={t("contact.fields.title")} fieldName={`title`} />
-                <TextFormControl label={t("contact.fields.address")} fieldName={`address`} />
-
-                <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                  <TextFormControl label={t("contact.fields.organization")} fieldName={`organization`} />
-                  <TextFormControl label={t("contact.fields.department")} fieldName={`department`} />
-                </Flex>
-                <TextFormControl label={t("contact.fields.businessName")} fieldName={`businessName`} />
-                <Flex direction={{ base: "column", md: "row" }} gap={2}>
-                  <TextFormControl
-                    label={t("contact.fields.professionalAssociation")}
-                    fieldName={`professionalAssociation`}
-                  />
-                  <TextFormControl label={t("contact.fields.professionalNumber")} fieldName={`professionalNumber`} />
-                </Flex>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  isDisabled={!isValid || isSubmitting}
-                  isLoading={isSubmitting}
-                  loadingText={t("ui.loading")}
-                >
-                  {t("contact.createButton")}
-                </Button>
+            <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4}>
+              <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
+                <TextFormControl label={t("contact.fields.lastName")} fieldName={`lastName`} required />
               </Flex>
-            </form>
+              <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                <EmailFormControl validate fieldName={`email`} />
+                <PhoneFormControl label={t("contact.fields.phone")} fieldName={`phone`} />
+              </Flex>
+              <TextFormControl label={t("contact.fields.extension")} fieldName={`extension`} />
+              <PhoneFormControl label={t("contact.fields.cell")} fieldName={`cell`} />
+              <TextFormControl label={t("contact.fields.title")} fieldName={`title`} />
+              <TextFormControl label={t("contact.fields.address")} fieldName={`address`} />
+
+              <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                <TextFormControl label={t("contact.fields.organization")} fieldName={`organization`} />
+                <TextFormControl label={t("contact.fields.department")} fieldName={`department`} />
+              </Flex>
+              <TextFormControl label={t("contact.fields.businessName")} fieldName={`businessName`} />
+              <Flex direction={{ base: "column", md: "row" }} gap={2}>
+                <TextFormControl
+                  label={t("contact.fields.professionalAssociation")}
+                  fieldName={`professionalAssociation`}
+                />
+                <TextFormControl label={t("contact.fields.professionalNumber")} fieldName={`professionalNumber`} />
+              </Flex>
+              <Button
+                variant="primary"
+                onClick={handleSubmit(onSubmit)}
+                isDisabled={!isValid || isSubmitting}
+                isLoading={isSubmitting}
+                loadingText={t("ui.loading")}
+              >
+                {t("contact.createButton")}
+              </Button>
+            </Flex>
           </FormProvider>
         </ModalBody>
       </ModalContent>

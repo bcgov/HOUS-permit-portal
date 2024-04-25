@@ -11,7 +11,7 @@ import {
   InputLeftElement,
   InputRightElement,
 } from "@chakra-ui/react"
-import { AsteriskSimple } from "@phosphor-icons/react"
+import { AsteriskSimple, Phone } from "@phosphor-icons/react"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
@@ -24,6 +24,7 @@ interface IInputFormControlProps extends FormControlProps {
   fieldName?: string
   required?: boolean
   validate?: any
+  maxLength?: number
   hint?: string[]
   leftElement?: JSX.Element
   rightElement?: JSX.Element
@@ -50,6 +51,15 @@ export const TextFormControl = (props: IInputFormControlProps) => {
 
 export const NumberFormControl = (props: IInputFormControlProps) => {
   return <InputFormControl {...R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props)} />
+}
+
+export const PhoneFormControl = (props: IInputFormControlProps) => {
+  return (
+    <InputFormControl
+      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 10 } }, props)}
+      leftElement={<Phone />}
+    />
+  )
 }
 
 export const FileFormControl = (props: IInputFormControlProps) => {

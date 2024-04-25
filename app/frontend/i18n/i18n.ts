@@ -172,6 +172,7 @@ const options = {
           copied: "Copied!",
           failedToCopy: "Something went wrong while trying to copy",
           reset: "Reset",
+          autofill: "Autofill",
           help: "Help",
           pleaseSelect: "please select",
         },

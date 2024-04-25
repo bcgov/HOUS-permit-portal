@@ -14,30 +14,43 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { IContact, IOption } from "../../../types/types"
 import { ContactSelect } from "../select/selectors/contact-select"
 
-export interface IContactModalProps extends ReturnType<typeof useDisclosure> {
-  permitApplication: IPermitApplication
+export interface IContactModalProps extends Partial<ReturnType<typeof useDisclosure>> {
+  permitApplication?: IPermitApplication
+  autofillContactKey?: string
+  onContactChange?: (option: IOption<IContact>) => void
 }
 
-export const ContactModal = ({ isOpen, onOpen, onClose, permitApplication, autofillContactKey }) => {
+export const ContactModal: React.FC<IContactModalProps> = ({
+  isOpen,
+  onOpen,
+  onClose,
+  permitApplication,
+  autofillContactKey,
+  onContactChange,
+}) => {
   const { t } = useTranslation()
-  const { updateContactInSubmissionSection, updateContactInSubmissionDatagrid } = permitApplication
 
   const [selectedOption, setSelectedOption] = useState<IOption<IContact>>(null)
 
   const onChange = (option) => {
     setSelectedOption(option)
+    if (onContactChange) {
+      onContactChange(option)
+    } else if (autofillContactKey && permitApplication) {
+      const { updateContactInSubmissionSection, updateContactInSubmissionDatagrid } = permitApplication
+      const parts = autofillContactKey.split("|")
+      const position = parts.slice(-1)[0]
 
-    const parts = autofillContactKey.split("|")
-    const position = parts.slice(-1)[0]
-
-    if (position === "in_section") {
-      const requirementKey = parts.slice(0, -1).join("|")
-      updateContactInSubmissionSection(requirementKey, option.value)
-    } else {
-      const requirementPrefix = parts.slice(0, -1).join("|")
-      const index = parseInt(position)
-      updateContactInSubmissionDatagrid(requirementPrefix, index, option.value)
+      if (position === "in_section") {
+        const requirementKey = parts.slice(0, -1).join("|")
+        updateContactInSubmissionSection(requirementKey, option.value)
+      } else {
+        const requirementPrefix = parts.slice(0, -1).join("|")
+        const index = parseInt(position)
+        updateContactInSubmissionDatagrid(requirementPrefix, index, option.value)
+      }
     }
+
     onClose()
   }
 
