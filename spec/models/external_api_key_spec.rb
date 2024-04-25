@@ -96,6 +96,28 @@ RSpec.describe ExternalApiKey, type: :model do
       end
     end
 
+    context "expired_at" do
+      it "enforces expired_at is required" do
+        valid_external_api_key = build(:external_api_key) # factory defaults to Time.now + 1.day
+        invalid_external_api_key = build(:external_api_key, expired_at: nil)
+
+        expect(invalid_external_api_key.valid?).to eq(false)
+        expect(invalid_external_api_key.errors[:expired_at]).to include("can't be blank")
+        expect(valid_external_api_key.valid?).to eq(true)
+      end
+    end
+
+    context "connecting_application" do
+      it "enforces connecting_application is required" do
+        valid_external_api_key = build(:external_api_key) # factory defaults connecting_application using Faker
+        invalid_external_api_key = build(:external_api_key, connecting_application: nil)
+
+        expect(invalid_external_api_key.valid?).to eq(false)
+        expect(invalid_external_api_key.errors[:connecting_application]).to include("can't be blank")
+        expect(valid_external_api_key.valid?).to eq(true)
+      end
+    end
+
     context "webhook_url" do
       it "enforces webhook_url is a valid url when set to a non blank value" do
         valid_external_api_key = build(:external_api_key, webhook_url: "https://www.example.com") # with valid url
@@ -144,12 +166,6 @@ RSpec.describe ExternalApiKey, type: :model do
 
       it "returns false if expired_at is in the future" do
         external_api_key = create(:external_api_key, expired_at: Time.now + 1.day)
-
-        expect(external_api_key.expired?).to eq(false)
-      end
-
-      it "returns false if expired_at is nil" do
-        external_api_key = create(:external_api_key, expired_at: nil)
 
         expect(external_api_key.expired?).to eq(false)
       end
