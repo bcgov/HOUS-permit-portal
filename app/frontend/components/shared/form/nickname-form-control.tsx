@@ -3,7 +3,7 @@ import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-interface IUsernameFormControlProps extends FormControlProps {
+interface INicknameFormControlProps extends FormControlProps {
   validate?: boolean
   autoFocus?: boolean
   autoComplete?: string
@@ -11,37 +11,37 @@ interface IUsernameFormControlProps extends FormControlProps {
   required?: boolean
 }
 
-export const UsernameFormControl = ({
+export const NicknameFormControl = ({
   validate,
   autoFocus,
   autoComplete,
   defaultValue,
   required,
   ...rest
-}: IUsernameFormControlProps) => {
+}: INicknameFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
 
   return (
-    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.username} {...rest}>
-      <FormLabel>{t("auth.usernameLabel")}</FormLabel>
+    <FormControl mb={4} isInvalid={validate && !!formState?.errors?.nickname} {...rest}>
+      <FormLabel>{t("auth.nicknameLabel")}</FormLabel>
       <InputGroup>
         <Flex w="full" direction="column">
           <Input
-            {...register("username", {
-              required: required && t("ui.isRequired", { field: t("auth.usernameLabel") }),
+            {...register("nickname", {
+              required: required && t("ui.isRequired", { field: t("auth.nicknameLabel") }),
               validate: {
                 satisfiesUsernameRegex: (str) =>
                   !validate || (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
               },
             })}
             type={"text"}
-            autoComplete={autoComplete || "username"}
+            autoComplete={autoComplete || "nickname"}
             autoFocus={autoFocus}
             defaultValue={defaultValue}
           />
-          {formState?.errors?.username && (
-            <FormErrorMessage>{formState?.errors?.username.message as string}</FormErrorMessage>
+          {formState?.errors?.nickname && (
+            <FormErrorMessage>{formState?.errors?.nickname.message as string}</FormErrorMessage>
           )}
         </Flex>
       </InputGroup>

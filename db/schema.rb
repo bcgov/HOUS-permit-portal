@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_24_210724) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -552,7 +552,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.string "email", null: false
-    t.string "username"
+    t.string "nickname"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -583,6 +583,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string "unconfirmed_email"
+    t.string "bceid_email"
+    t.string "bceid_username"
     t.index ["confirmation_token"],
             name: "index_users_on_confirmation_token",
             unique: true
@@ -594,13 +596,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true
     t.index %w[provider uid],
             name: "index_users_on_provider_and_uid",
             unique: true
     t.index ["reset_password_token"],
             name: "index_users_on_reset_password_token",
             unique: true
-    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade

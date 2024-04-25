@@ -9,29 +9,34 @@ import { BackButton } from "../../shared/buttons/back-button"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { TextFormControl } from "../../shared/form/input-form-control"
-import { PasswordFormControl } from "../../shared/form/password-form-control"
-import { UsernameFormControl } from "../../shared/form/username-form-control"
-import { RouterLink } from "../../shared/navigation/router-link"
+import { NicknameFormControl } from "../../shared/form/nickname-form-control"
 
 interface IRegisterScreenProps {}
 
 export const RegisterScreen = ({}: IRegisterScreenProps) => {
   const { t } = useTranslation()
   const {
-    userStore: { signUp },
+    userStore: { updateProfile, currentUser },
   } = useMst()
   const formMethods = useForm({
     mode: "onSubmit",
-    defaultValues: { organization: "", certified: false, username: "", password: "", email: "" },
+    defaultValues: {
+      organization: "",
+      certified: false,
+      nickname: currentUser.nickname,
+      email: currentUser.email,
+      firstName: currentUser.firstName,
+      lastName: currentUser.lastName,
+    },
   })
-  const { register, handleSubmit, formState, control } = formMethods
+  const { handleSubmit, formState, control } = formMethods
 
   const [submitted, setSubmitted] = useState(false)
 
   const { isSubmitting } = formState
 
   const onSubmit = async (formData) => {
-    if (await signUp(formData)) {
+    if (await updateProfile(formData)) {
       setSubmitted(true)
       handleScrollToTop()
     }
@@ -39,7 +44,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
 
   return (
     <CenterContainer>
-      {submitted ? (
+      {submitted || currentUser.confirmationSentAt ? (
         <Box bg="greys.white" border="1px solid" borderColor="border.light" p={10} my="20vh" textAlign="center">
           <Icon boxSize="14" color="theme.blueAlt" as={Envelope} />
           <Heading mt="6">{t("auth.completeAccountActiviation")}</Heading>
@@ -62,7 +67,7 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                 <Text>{t("auth.registerInstructions")}</Text>
               </Flex>
               <Box border="1px solid" borderColor="border.light" padding={6}>
-                <UsernameFormControl validate autoFocus />
+                <NicknameFormControl validate autoFocus />
                 <EmailFormControl mb={4} validate required />
                 <TextFormControl label={t("auth.userFirstNameLabel")} fieldName="firstName" mb={4} required />
                 <TextFormControl label={t("auth.userLastNameLabel")} fieldName="lastName" mb={4} required />
@@ -81,29 +86,12 @@ export const RegisterScreen = ({}: IRegisterScreenProps) => {
                   />
                 </FormControl>
               </Box>
-              <Box border="1px solid" borderColor="border.light" padding={6}>
-                <Flex gap={4} direction="column">
-                  <Heading as="h2">{t("auth.passwordTitle")}</Heading>
-                  <Text>{t("auth.passwordRequirements")}</Text>
-                  <PasswordFormControl validate mb={0} />
-                </Flex>
-              </Box>
               <HStack gap={4}>
                 <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                   {t("auth.registerButton")}
                 </Button>
                 <BackButton isDisabled={isSubmitting} />
               </HStack>
-              <Box bg="greys.grey03" p={4}>
-                <Flex gap={4} direction="column">
-                  <HStack>
-                    <Text fontSize="lg" fontWeight="bold">
-                      {t("auth.alreadyHaveAccount")}
-                    </Text>{" "}
-                    <RouterLink to="/login">{t("auth.login")}</RouterLink>
-                  </HStack>
-                </Flex>
-              </Box>
             </Flex>
           </form>
         </FormProvider>

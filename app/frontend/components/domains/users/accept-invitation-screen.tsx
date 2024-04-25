@@ -1,14 +1,11 @@
-import { Button, Flex, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { Button, Flex, Heading, Input } from "@chakra-ui/react"
 import React, { useRef } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useQuickSubmit } from "../../../hooks/use-quick-submit"
 import { useMst } from "../../../setup/root"
 import { CenterContainer } from "../../shared/containers/center-container"
-import { TextFormControl } from "../../shared/form/input-form-control"
-import { PasswordFormControl } from "../../shared/form/password-form-control"
-import { UsernameFormControl } from "../../shared/form/username-form-control"
 
 interface IAcceptInvitationScreenProps {}
 
@@ -29,7 +26,7 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
     },
   })
 
-  const { handleSubmit, register, formState } = formMethods
+  const { handleSubmit, formState } = formMethods
   const { userStore } = useMst()
   const { isValid, isSubmitting } = formState
   const formRef = useRef(null)
@@ -50,38 +47,13 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
         <Heading as="h1">
           {t("user.acceptInvitation")} {jurisdictionName}
         </Heading>
-        {/* Disabling BCeID login pending IDIM approval */}
-        {/* <form action={`/api/auth/keycloak`} method="post">
+        <form action={`/api/auth/keycloak`} method="post">
           <Input hidden={true} name="invitation_token" value={invitationToken} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
             {t("auth.accept_invite_with_bceid")}
           </Button>
-        </form> 
-        <Box position="relative" py={2}>
-          <Divider borderBottomWidth={2} />
-          <AbsoluteCenter bg="white" px="4" textTransform="uppercase" fontSize="sm" fontWeight="medium">
-            {t("auth.or")}
-          </AbsoluteCenter>
-        </Box> */}
-        <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }} ref={formRef}>
-            <VStack spacing={4}>
-              <Text>{t("user.acceptInstructions")}</Text>
-              <Input hidden={true} {...register("invitationToken")} />
-              <UsernameFormControl validate autoComplete="off" mb={0} />
-              <Flex gap={4} w="full">
-                <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
-                <TextFormControl label={t("user.lastName")} fieldName="lastName" required />
-              </Flex>
-              <PasswordFormControl validate mb={0} />
-              <Text>{t("auth.passwordRequirements")}</Text>
-              <Button variant="primary" w="full" isDisabled={isSubmitting} type="submit" isLoading={isSubmitting}>
-                {t("auth.submit")}
-              </Button>
-            </VStack>
-          </form>
-        </FormProvider>
+        </form>
       </Flex>
     </CenterContainer>
   )

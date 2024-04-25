@@ -14,7 +14,7 @@ namespace :db do
     # Will acquire 3 jurisdictions because Nanaimo is 2
     jurisdictions = Jurisdiction.where(name: %w[Nanaimo Vancouver])
     CSV.foreach(csv_file_path, headers: true) do |row|
-      # first_name,last_name,email,username,role,password
+      # first_name,last_name,bceid_email,bceid_username,role,bceid_uid
       if row["role"] == "reviewer" || row["role"] == "review_manager"
         j = jurisdictions[i % 3]
         i += 1
@@ -22,11 +22,15 @@ namespace :db do
       User.create!(
         first_name: row["first_name"],
         last_name: row["last_name"],
-        email: row["email"],
-        username: row["username"],
+        email: row["bceid_email"],
+        nickname: row["bceid_username"],
         role: row["role"],
-        password: row["password"],
+        password: Devise.friendly_token[0, 20],
         jurisdiction: j
+        uid: row["bceid_uid"],
+        provider: "keycloak",
+        bceid_email: row["bceid_email"],
+        bceid_username: row["bceid_username"]
       ).confirm
     rescue ActiveRecord::RecordInvalid => e
       puts "Skipping invalid user record: #{e.message}"

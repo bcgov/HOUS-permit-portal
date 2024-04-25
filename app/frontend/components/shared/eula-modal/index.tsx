@@ -32,7 +32,7 @@ export const EULAModal = observer(function EULAModel() {
   }
 
   useEffect(() => {
-    loggedIn && !currentUser.isSuperAdmin && !currentUser.eulaAccepted && onOpen()
+    loggedIn && !currentUser.isSuperAdmin && !currentUser.isUnconfirmed && !currentUser.eulaAccepted && onOpen()
   }, [loggedIn, currentUser?.eulaAccepted])
 
   useEffect(() => {

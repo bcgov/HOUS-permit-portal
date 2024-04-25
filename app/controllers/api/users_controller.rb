@@ -3,11 +3,13 @@ class Api::UsersController < Api::ApplicationController
 
   before_action :find_user, only: %i[destroy restore accept_eula update]
   skip_after_action :verify_policy_scoped, only: %i[index]
+  skip_before_action :require_confirmation, only: %i[profile]
 
   def index
     authorize :user, :index?
     perform_user_search
-    authorized_results = apply_search_authorization(@user_search.results, "search_admin_users")
+    authorized_results =
+      apply_search_authorization(@user_search.results, "search_admin_users")
 
     render_success authorized_results,
                    nil,
@@ -15,15 +17,17 @@ class Api::UsersController < Api::ApplicationController
                      meta: {
                        total_pages: @user_search.total_pages,
                        total_count: @user_search.total_count,
-                       current_page: @user_search.current_page,
+                       current_page: @user_search.current_page
                      },
-                     blueprint: UserBlueprint,
+                     blueprint: UserBlueprint
                    }
   end
 
   def update
     authorize @user
-    return render_error "misc.user_not_authorized_error" unless %w[reviewer review_manager].include?(user_params[:role])
+    unless %w[reviewer review_manager].include?(user_params[:role])
+      return render_error "misc.user_not_authorized_error"
+    end
 
     if @user.update(user_params)
       render_success @user, "user.update_success"
@@ -35,27 +39,29 @@ class Api::UsersController < Api::ApplicationController
   def profile
     # Currently a user can only update themself
     @user = current_user
-    authorize @user
+    authorize current_user
 
-    ActiveRecord::Base.transaction do
-      if password_params[:password].present?
-        if @user.update_with_password(password_params)
-          CustomDeviseMailer.new.password_change(@user).deliver
-        else
-          raise ActiveRecord::RecordInvalid
-        end
-      end
-
-      raise ActiveRecord::RecordInvalid unless @user.update(profile_params)
+    if current_user.update(profile_params)
+      current_user.send_confirmation_instructions if @user.confirmed_at.blank?
+      render_success(
+        current_user,
+        (
+          if email_changed? || @user.confirmed_at.blank?
+            "user.confirmation_sent"
+          else
+            "user.update_success"
+          end
+        )
+      )
+    else
+      render_error "user.update_error",
+                   {
+                     message_opts: {
+                       error_message:
+                         current_user.errors.full_messages.join(", ")
+                     }
+                   }
     end
-
-    render_success(@user, email_changed? ? "user.confirmation_sent" : "user.update_success")
-  rescue ActiveRecord::RecordInvalid => e
-    # Handle any ActiveRecord exceptions here
-    if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
-      render_error "user.update_password_error", {}, e and return
-    end
-    render_error "user.update_error", {}, e
   end
 
   def destroy
@@ -80,9 +86,11 @@ class Api::UsersController < Api::ApplicationController
     authorize @user
     @user.license_agreements.create!(
       accepted_at: Time.current,
-      agreement: EndUserLicenseAgreement.active_agreement(@user.eula_variant),
+      agreement: EndUserLicenseAgreement.active_agreement(@user.eula_variant)
     )
-    render_success @user, "user.eula_accepted", { blueprint_opts: { view: :current_user } }
+    render_success @user,
+                   "user.eula_accepted",
+                   { blueprint_opts: { view: :current_user } }
   end
 
   private
@@ -104,6 +112,13 @@ class Api::UsersController < Api::ApplicationController
   end
 
   def profile_params
-    params.require(:user).permit(:email, :first_name, :last_name, :organization, :certified)
+    params.require(:user).permit(
+      :email,
+      :nickname,
+      :first_name,
+      :last_name,
+      :organization,
+      :certified
+    )
   end
 end

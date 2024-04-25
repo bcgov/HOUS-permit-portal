@@ -2,7 +2,7 @@ class UserBlueprint < Blueprinter::Base
   identifier :id
 
   fields :email,
-         :username,
+         :nickname,
          :role,
          :first_name,
          :last_name,
@@ -10,6 +10,7 @@ class UserBlueprint < Blueprinter::Base
          :organization,
          :created_at,
          :confirmed_at,
+         :confirmation_sent_at,
          :discarded_at,
          :last_sign_in_at
 

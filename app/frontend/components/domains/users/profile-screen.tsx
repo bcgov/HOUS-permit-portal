@@ -9,7 +9,6 @@ import {
   Heading,
   InputGroup,
   Select,
-  Text,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -20,8 +19,7 @@ import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { TextFormControl } from "../../shared/form/input-form-control"
-import { PasswordFormControl } from "../../shared/form/password-form-control"
-import { UsernameFormControl } from "../../shared/form/username-form-control"
+import { NicknameFormControl } from "../../shared/form/nickname-form-control"
 
 interface IProfileScreenProps {}
 
@@ -30,14 +28,14 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
 
   const { userStore } = useMst()
   const { currentUser, updateProfile } = userStore
-  const { email, role, firstName, lastName, username, certified, organization } = currentUser
+  const { email, role, firstName, lastName, nickname, certified, organization } = currentUser
 
   const formMethods = useForm({
     mode: "onSubmit",
     defaultValues: {
       firstName,
       lastName,
-      username,
+      nickname,
       email,
       role,
       certified,
@@ -69,7 +67,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               </Flex>
             </InputGroup>
             <Box as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
-              <UsernameFormControl isDisabled />
+              <NicknameFormControl isDisabled />
               <EmailFormControl required mb={4} />
               <Flex gap={{ base: 4, md: 6 }} mb={4} direction={{ base: "column", md: "row" }}>
                 <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
@@ -94,11 +92,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </>
               )}
             </Box>
-            <Flex direction="column" as="section" gap={6} w="full" p={6} border="solid 1px" borderColor="border.light">
-              <Text>{t("auth.passwordRequirements")}</Text>
-              <PasswordFormControl label={t("user.oldPassword")} fieldName="currentPassword" required={false} />
-              <PasswordFormControl label={t("user.newPassword")} fieldName="password" required={false} validate />
-            </Flex>
             <Flex as="section" gap={4} mt={4}>
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>
                 {t("ui.save")}

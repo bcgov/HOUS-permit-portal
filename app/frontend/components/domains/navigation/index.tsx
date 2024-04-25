@@ -24,17 +24,11 @@ const PermitApplicationPDFViewer = lazy(() =>
 const EmailConfirmedScreen = lazy(() =>
   import("../authentication/email-confirmed-screen").then((module) => ({ default: module.EmailConfirmedScreen }))
 )
-const ForgotPasswordScreen = lazy(() =>
-  import("../authentication/forgot-password-screen").then((module) => ({ default: module.ForgotPasswordScreen }))
-)
 const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
 )
 const RegisterScreen = lazy(() =>
   import("../authentication/register-screen").then((module) => ({ default: module.RegisterScreen }))
-)
-const ResetPasswordScreen = lazy(() =>
-  import("../authentication/reset-password-screen").then((module) => ({ default: module.ResetPasswordScreen }))
 )
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 const ConfigurationManagementScreen = lazy(() =>
@@ -313,7 +307,7 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
-        {loggedIn ? (
+        {loggedIn && !currentUser.isUnconfirmed ? (
           <>
             <Route path="/" element={<HomeScreen />} />
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
@@ -326,14 +320,15 @@ const AppRoutes = observer(() => {
             {currentUser?.isSubmitter && submitterOnlyRoutes}
             {currentUser?.isReviewManager && reviewManagerOnlyRoutes}
           </>
+        ) : loggedIn ? (
+          <>
+            <Route path="/" element={<RegisterScreen />} />
+          </>
         ) : (
           <>
             <Route path="/" element={<RedirectScreen path="/welcome" />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-            <Route path="/reset-password" element={<ResetPasswordScreen />} />
-            <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
-            <Route path="/register" element={<RegisterScreen />} />
           </>
         )}
         <Route path="/contact" element={<ContactScreen />} />
