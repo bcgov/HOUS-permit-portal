@@ -53,6 +53,7 @@ export interface ITagSearchParams {
 
 export interface IExternalApiKeyParams {
   name?: string
+  connectingApplication?: string
   webhookUrl?: string
   expiredAt?: Date
   jurisdictionId?: string

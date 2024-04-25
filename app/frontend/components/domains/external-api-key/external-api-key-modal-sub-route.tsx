@@ -17,6 +17,7 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react"
 import { Key } from "@phosphor-icons/react"
+import { addYears } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -37,7 +38,8 @@ interface IExternalApiKeyForm extends IExternalApiKeyParams {
 const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKeyForm => {
   return {
     name: externalApiKey?.name || "",
-    expiredAt: externalApiKey?.expiredAt,
+    connectingApplication: externalApiKey?.connectingApplication || "",
+    expiredAt: externalApiKey?.expiredAt ?? addYears(new Date(), 1),
     webhookUrl: externalApiKey?.webhookUrl,
     revokedAt: externalApiKey?.revokedAt,
   }
@@ -99,13 +101,18 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                 <TextFormControl label={t("externalApiKey.fieldLabels.name")} fieldName={"name"} required />
               </GridItem>
               <GridItem>
-                <UrlFormControl label={t("externalApiKey.fieldLabels.webhookUrl")} fieldName={"webhookUrl"} validate />
+                <TextFormControl
+                  label={t("externalApiKey.fieldLabels.connectingApplication")}
+                  fieldName={"connectingApplication"}
+                  required
+                />
               </GridItem>
+
               <GridItem>
                 <DatePickerFormControl
-                  inputProps={{ isClearable: true }}
                   label={t("externalApiKey.fieldLabels.expiredAt")}
                   fieldName={"expiredAt"}
+                  required
                 />
               </GridItem>
               <GridItem>
@@ -115,6 +122,9 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   inputProps={{ readOnly: true }}
                   isReadOnly
                 />
+              </GridItem>
+              <GridItem colSpan={2}>
+                <UrlFormControl label={t("externalApiKey.fieldLabels.webhookUrl")} fieldName={"webhookUrl"} validate />
               </GridItem>
               <GridItem colSpan={2}>
                 <FormControl isReadOnly>

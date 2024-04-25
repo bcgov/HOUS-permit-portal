@@ -1149,9 +1149,10 @@ const options = {
           },
           fieldLabels: {
             name: "Name",
+            connectingApplication: "Application connecting to",
             revokedAt: "Revoked at",
             webhookUrl: "Webhook URL",
-            expiredAt: "Expired at",
+            expiredAt: "Expires on",
             createdAt: "Created at",
             token: "Token",
             status: "Status",

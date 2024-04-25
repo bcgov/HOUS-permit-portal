@@ -7,8 +7,9 @@ export const ExternalApiKeyModel = types
   .props({
     id: types.identifier,
     name: types.string,
+    connectingApplication: types.string,
     webhookUrl: types.maybeNull(types.string),
-    expiredAt: types.maybeNull(types.Date),
+    expiredAt: types.Date,
     revokedAt: types.maybeNull(types.Date),
     createdAt: types.Date,
   })

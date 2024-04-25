@@ -93,6 +93,12 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   end
 
   def external_api_key_params
-    params.require(:external_api_key).permit(:name, :expired_at, :jurisdiction_id, :webhook_url)
+    params.require(:external_api_key).permit(
+      :name,
+      :expired_at,
+      :connecting_application,
+      :jurisdiction_id,
+      :webhook_url,
+    )
   end
 end

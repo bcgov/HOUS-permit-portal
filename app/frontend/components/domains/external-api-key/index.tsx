@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Heading, HStack, StackProps, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, StackProps, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -41,6 +41,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
+      {/*This outlet will render the create/edit modal*/}
       <Outlet />
       <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
         <Flex justifyContent={"space-between"} w={"full"} alignItems={"flex-end"}>
@@ -51,7 +52,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
             {t("externalApiKey.index.createExternalApiKey")}
           </RouterLinkButton>
         </Flex>
-        <SearchGrid templateColumns="1fr max(200px) repeat(3, 1fr) 85px" pos={"relative"}>
+        <SearchGrid templateColumns="repeat(6, 1fr) 85px" pos={"relative"}>
           <GridHeaders />
 
           {isFetching ? (
@@ -62,13 +63,10 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
             externalApiKeys.map((externalApiKey) => {
               return (
                 <Box key={externalApiKey.id} role={"row"} display={"contents"}>
-                  <SearchGridItem fontWeight={700} minW="250px">
-                    {externalApiKey.name}
-                  </SearchGridItem>
-                  <SearchGridItem maxW="200px">
-                    <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
-                      <ExternalApiKeyStatusTag status={externalApiKey.status} />
-                    </HStack>
+                  <SearchGridItem fontWeight={700}>{externalApiKey.name}</SearchGridItem>
+                  <SearchGridItem>{externalApiKey.connectingApplication}</SearchGridItem>
+                  <SearchGridItem>
+                    <ExternalApiKeyStatusTag status={externalApiKey.status} />
                   </SearchGridItem>
                   <SearchGridItem>{format(externalApiKey.createdAt, datefnsTableDateFormat)}</SearchGridItem>
                   <SearchGridItem>
