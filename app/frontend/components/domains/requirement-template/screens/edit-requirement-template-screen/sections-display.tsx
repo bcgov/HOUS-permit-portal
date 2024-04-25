@@ -150,7 +150,6 @@ const SectionDisplay = observer(
             defaultButtonProps={{ alignSelf: "center" }}
             onUse={(requirementBlock, closeDrawer) => {
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
-              closeDrawer()
             }}
             disableUseForBlockIds={new Set(watchedSectionBlocks.map((sectionBlock) => sectionBlock.requirementBlockId))}
           />
