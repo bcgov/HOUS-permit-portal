@@ -32,6 +32,7 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   rightElement?: JSX.Element
   inputProps?: TInputProps
   key?: string
+  LabelInfo?: () => JSX.Element
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
@@ -159,6 +160,7 @@ const InputFormControl = ({
   rightElement,
   inputProps = {},
   key = fieldName,
+  LabelInfo,
   ...rest
 }: IInputFormControlProps) => {
   const { register, formState } = useFormContext()
@@ -179,6 +181,7 @@ const InputFormControl = ({
               <AsteriskSimple />
             </Box>
           )}
+          {LabelInfo && <LabelInfo />}
         </HStack>
       )}
 

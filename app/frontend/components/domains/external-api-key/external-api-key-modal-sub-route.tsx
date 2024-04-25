@@ -5,9 +5,11 @@ import {
   Grid,
   GridItem,
   HStack,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
+  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,7 +18,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react"
-import { Key, Prohibit } from "@phosphor-icons/react"
+import { Info, Key, Prohibit } from "@phosphor-icons/react"
 import { addYears } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -159,6 +161,19 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                 <UrlFormControl
                   label={t("externalApiKey.fieldLabels.webhookUrl")}
                   fieldName={"webhookUrl"}
+                  LabelInfo={() => (
+                    <IconButton
+                      as={Link}
+                      // TODO: Placeholder generic help link for now. Replace with actual link when available
+                      href={`https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE`}
+                      target={"_blank"}
+                      mb={1}
+                      minW={6}
+                      variant={"tertiary"}
+                      aria-label={"Webhook Url info link"}
+                      icon={<Info />}
+                    />
+                  )}
                   inputProps={{ placeholder: t("externalApiKey.fieldPlaceholders.webhookUrl") }}
                   validate
                 />
