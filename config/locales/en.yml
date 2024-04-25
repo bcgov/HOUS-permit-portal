@@ -92,9 +92,6 @@ en:
       failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
-      unavailable:
-        title: Sorry! BCeID login is not supported for new accounts
-        message: Please create an account and login with username and password
     geocoder:
       site_options_error:
         title: Error
@@ -123,9 +120,6 @@ en:
         title: Oops
         message: "%{error_message}"
     user:
-      login_error:
-        title: Failed to login.
-        message: Invalid username or password.
       not_confirmed_error:
         title: Failed to login.
         message: Please confirm your registration by activating the link in the email you received. If you have not received the email please check your spam folder.
@@ -175,8 +169,8 @@ en:
         title: ""
         message: The user was updated successfully
       update_error:
-        title: Error
-        message: "There was an error updating the user"
+        title: There was an error updating the user
+        message: "%{error_message}"
       update_password_error:
         title: Error
         message: "The provided current password is incorrect"

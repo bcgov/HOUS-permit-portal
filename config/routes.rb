@@ -31,13 +31,9 @@ Rails.application.routes.draw do
                path_names: {
                  sign_in: "login",
                  sign_out: "logout",
-                 registration: "signup",
                },
                controllers: {
                  sessions: "api/sessions",
-                 registrations: "api/registrations",
-                 confirmations: "api/confirmations",
-                 passwords: "api/passwords",
                  invitations: "api/invitations",
                  omniauth_callbacks: "api/omniauth_callbacks",
                }

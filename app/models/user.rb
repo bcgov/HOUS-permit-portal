@@ -1,23 +1,17 @@
 class User < ApplicationRecord
   PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}\z/
-  searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name username email]
+  searchkick searchable: %i[first_name last_name nickname email], word_start: %i[first_name last_name nickname email]
 
   scope :review_managers, -> { where(role: User.roles[:review_manager]) }
   scope :reviewers, -> { where(role: User.roles[:reviewer]) }
 
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
 
   devise :invitable,
          :database_authenticatable,
          :confirmable,
-         :registerable,
-         :recoverable,
          :rememberable,
-         :validatable,
          :timeoutable,
          :jwt_cookie_authenticatable,
          :jwt_authenticatable,
@@ -28,8 +22,6 @@ class User < ApplicationRecord
 
   enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3 }, _default: 0
 
-  validate :validate_password_complexity
-
   # https://github.com/waiting-for-dev/devise-jwt
   self.skip_session_storage = %i[http_auth params_auth]
 
@@ -37,15 +29,13 @@ class User < ApplicationRecord
   belongs_to :jurisdiction, optional: true
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
-  has_many :license_agreements, class_name: "UserLicenseAgreement"
+  has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
   validate :unique_bceid
-  validates :email, presence: true
-  validates :username, uniqueness: true
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
@@ -53,10 +43,8 @@ class User < ApplicationRecord
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
 
-  def validate_password_complexity
-    return if password.blank? || password =~ PASSWORD_REGEX
-
-    errors.add :password, I18n.t("activerecord.errors.models.user.attributes.password.password_format")
+  def confirmation_required?
+    false
   end
 
   def eula_variant
@@ -74,7 +62,7 @@ class User < ApplicationRecord
       role: role,
       first_name: first_name,
       last_name: last_name,
-      username: username,
+      nickname: nickname,
       email: email,
       jurisdiction_id: jurisdiction_id,
       discarded: discarded_at.present?,
@@ -94,11 +82,31 @@ class User < ApplicationRecord
   end
 
   def self.from_omniauth(auth)
-    find_by(provider: auth.provider, uid: auth.uid)
+    find_or_create_by(
+      auth_provider: auth.extra.raw_info.identity_provider,
+      bceid_user_guid: auth.extra.raw_info.bceid_user_guid,
+    ) do |user|
+      user.password = Devise.friendly_token[0, 20]
+      # BCeID readonly info
+      user.bceid_email = auth.info.email
+      user.bceid_username = auth.extra.raw_info.bceid_username
+
+      # TMP to allow for registration (to be removed when onboarding flow is added)
+      user.email = auth.info.email
+
+      # skip confirmation until user has a chance to add/verify their profile info
+      user.skip_confirmation_notification!
+    end
   end
 
   def accept_invitation_with_omniauth(auth)
-    update(password: Devise.friendly_token[0, 20], provider: auth.provider, uid: auth.uid)
+    update(
+      password: Devise.friendly_token[0, 20],
+      auth_provider: auth.extra.raw_info.identity_provider,
+      bceid_user_guid: auth.extra.raw_info.bceid_user_guid,
+      bceid_email: auth.info.email,
+      bceid_username: auth.extra.raw_info.bceid_username,
+    )
     accept_invitation! if valid?
   end
 
@@ -127,9 +135,9 @@ class User < ApplicationRecord
   end
 
   def confirmed_user_has_fields
-    errors.add(:user, "Confirmed user must have username") unless !confirmed? || username.present?
     errors.add(:user, "Confirmed user must have first_name") unless !confirmed? || first_name.present?
     errors.add(:user, "Confirmed user must have last_name") unless !confirmed? || last_name.present?
+    errors.add(:user, "Confirmed user must have email") unless !confirmed? || email.present?
   end
 
   def jurisdiction_must_belong_to_correct_roles
@@ -139,8 +147,11 @@ class User < ApplicationRecord
   end
 
   def unique_bceid
-    return unless uid.present?
-    existing_user = User.where.not(uid: nil).find_by(uid: uid, provider: provider)
-    errors.add(:uid, :taken, jurisdiction: existing_user.jurisdiction.name) if existing_user && existing_user != self
+    return unless bceid_user_guid.present?
+    existing_user =
+      User.where.not(bceid_user_guid: nil).find_by(bceid_user_guid: bceid_user_guid, auth_provider: auth_provider)
+    if existing_user && existing_user != self
+      errors.add(:bceid_user_guid, :taken, jurisdiction: existing_user.jurisdiction.name)
+    end
   end
 end

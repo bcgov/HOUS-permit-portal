@@ -69,10 +69,6 @@ export const UserStoreModel = types
     unsetCurrentUser() {
       self.currentUser = null
     },
-    signUp: flow(function* (formData) {
-      const response = yield self.environment.api.signUp(formData)
-      return response.ok
-    }),
     invite: flow(function* (formData) {
       const response = yield self.environment.api.invite(formData)
       self.invitationResponse = response.data
@@ -89,7 +85,7 @@ export const UserStoreModel = types
       if (ok) {
         self.mergeUpdate(response.data, "usersMap")
       }
-      return response.ok
+      return ok
     }),
     fetchEULA: flow(function* () {
       const response = yield self.environment.api.getEULA()
