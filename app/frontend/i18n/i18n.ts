@@ -1157,6 +1157,9 @@ const options = {
             token: "Token",
             status: "Status",
           },
+          fieldPlaceholders: {
+            webhookUrl: "https://example.com/webhook",
+          },
           status: {
             active: "Active",
             notActive: "Not-Active",

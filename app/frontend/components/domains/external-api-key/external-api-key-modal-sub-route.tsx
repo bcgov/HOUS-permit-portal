@@ -39,7 +39,7 @@ const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKe
   return {
     name: externalApiKey?.name || "",
     connectingApplication: externalApiKey?.connectingApplication || "",
-    expiredAt: externalApiKey?.expiredAt ?? addYears(new Date(), 1),
+    expiredAt: externalApiKey?.expiredAt ?? addYears(new Date(), 2),
     webhookUrl: externalApiKey?.webhookUrl,
     revokedAt: externalApiKey?.revokedAt,
   }
@@ -124,7 +124,12 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                 />
               </GridItem>
               <GridItem colSpan={2}>
-                <UrlFormControl label={t("externalApiKey.fieldLabels.webhookUrl")} fieldName={"webhookUrl"} validate />
+                <UrlFormControl
+                  label={t("externalApiKey.fieldLabels.webhookUrl")}
+                  fieldName={"webhookUrl"}
+                  inputProps={{ placeholder: t("externalApiKey.fieldPlaceholders.webhookUrl") }}
+                  validate
+                />
               </GridItem>
               <GridItem colSpan={2}>
                 <FormControl isReadOnly>
