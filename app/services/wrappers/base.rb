@@ -13,19 +13,61 @@ class Wrappers::Base
     @client ||= Faraday.new(url: base_url, headers: default_headers)
   end
 
-  def get(path, params = {})
-    JSON.parse(client.get(path, params).env.response_body)
+  def handle_response(response)
+    if response.success?
+      return(response.body.is_a?(Hash) ? response.body : JSON.parse(response.body))
+    else
+      handle_error(response)
+    end
   end
 
-  def post(path, payload = {})
-    JSON.parse(client.post(path, payload.to_json).env.response_body)
+  def get(path, params = {}, skip_handle_response = false)
+    response = client.get(path, params)
+    skip_handle_response ? response : handle_response(response)
+  rescue Faraday::Error => e
+    handle_faraday_error(e)
   end
 
-  def put(path, payload = {})
-    JSON.parse(client.put(path, payload.to_json).env.response_body)
+  def post(path, payload = {}, skip_handle_response = false)
+    response = client.post(path, payload)
+    skip_handle_response ? response : handle_response(response)
+  rescue Faraday::Error => e
+    handle_faraday_error(e)
   end
 
-  def delete(path)
-    JSON.parse(client.delete(path).env.response_body)
+  def put(path, payload = {}, skip_handle_response = false)
+    response = client.put(path, payload)
+    skip_handle_response ? response : handle_response(response)
+  rescue Faraday::Error => e
+    handle_faraday_error(e)
+  end
+
+  def delete(path, skip_handle_response = false)
+    response = client.delete(path)
+    skip_handle_response ? response : handle_response(response)
+  rescue Faraday::Error => e
+    handle_faraday_error(e)
+  end
+
+  def handle_error(response)
+    case response.status
+    when 400..499
+      raise WrapperClientError.new(
+              "Wrapper client error: #{response.status}. Details: #{response.body}",
+              response.status,
+            )
+    when 500..599
+      raise WrapperServerError.new(
+              "Wrapper server error: #{response.status}. Details: #{response.body}",
+              response.status,
+            )
+    else
+      raise "HTTP error: #{response.status}"
+    end
+  end
+
+  def handle_faraday_error(error)
+    Rails.logger.error error.message
+    raise Faraday::Error, "Faraday error: #{error.message}"
   end
 end

@@ -13,7 +13,7 @@ class Api::GeocoderController < Api::ApplicationController
         options = wrapper.site_options(geocoder_params[:address])
         render_success options, nil, { blueprint: OptionBlueprint }
       elsif geocoder_params[:pid].present?
-        coordinates = Integrations::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+        coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
         wrapper = Wrappers::Geocoder.new
         options = wrapper.site_options(nil, coordinates)
         render_success options, nil, { blueprint: OptionBlueprint }
@@ -45,7 +45,7 @@ class Api::GeocoderController < Api::ApplicationController
         pid = geocoder_params[:pid]
       end
       raise StandardError unless pid.present?
-      attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
+      attributes = Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
       jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?
       render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint }

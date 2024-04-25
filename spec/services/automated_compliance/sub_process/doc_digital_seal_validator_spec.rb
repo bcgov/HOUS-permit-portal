@@ -10,7 +10,7 @@ RSpec.describe AutomatedCompliance::SubProcess::DocDigitalSealValidator do
 
     context "the integration call has an error" do
       it "updates the status of the supporting document with failure" do
-        allow_any_instance_of(Integrations::DigitalSealValidator).to receive(:call).and_return(
+        allow_any_instance_of(Wrappers::DigitalSealValidator).to receive(:call).and_return(
           OpenStruct.new(success: false, error: "test error", signatures: []),
         )
         AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(supporting_document)
@@ -20,7 +20,7 @@ RSpec.describe AutomatedCompliance::SubProcess::DocDigitalSealValidator do
 
     context "the integration call succeeds" do
       it "updates the document to have successful information" do
-        allow_any_instance_of(Integrations::DigitalSealValidator).to receive(:call).and_return(
+        allow_any_instance_of(Wrappers::DigitalSealValidator).to receive(:call).and_return(
           OpenStruct.new(success: true, signatures: [{ test: "payload" }]),
         )
         AutomatedCompliance::SubProcess::DocDigitalSealValidator.new.call(supporting_document)
