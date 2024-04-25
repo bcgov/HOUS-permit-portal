@@ -121,7 +121,14 @@ export const SubmissionDownloadModal = observer(
 const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size }) {
   return (
     <Flex w="full" align="center" justify="space-between">
-      <Button as={Link} href={url} download={name} variant="link" leftIcon={<FileArrowDown size={16} />}>
+      <Button
+        as={Link}
+        href={url}
+        download={name}
+        variant="link"
+        leftIcon={<FileArrowDown size={16} />}
+        whiteSpace="normal"
+      >
         {name}
       </Button>
       <Text color="greys.grey01" textAlign="right" fontSize="xs">
