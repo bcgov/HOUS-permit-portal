@@ -23,6 +23,10 @@ class JurisdictionPolicy < ApplicationPolicy
     user.super_admin? || (user.staff? && user.jurisdiction_id == record.id)
   end
 
+  def update_external_api_enabled?
+    user.super_admin?
+  end
+
   def search_users?
     update?
   end

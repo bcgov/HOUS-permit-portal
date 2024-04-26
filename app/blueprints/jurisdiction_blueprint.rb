@@ -19,8 +19,10 @@ class JurisdictionBlueprint < Blueprinter::Base
          :zero_carbon_step_required,
          :regional_district_name,
          :created_at,
-         :updated_at
+         :updated_at,
+         :external_api_enabled
 
   association :contacts, blueprint: ContactBlueprint
-  association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
+  association :permit_type_submission_contacts,
+              blueprint: PermitTypeSubmissionContactBlueprint
 end

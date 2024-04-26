@@ -54,6 +54,7 @@ export const unitGroups: { [key: string]: ENumberUnit[] } = {
 }
 
 export const datefnsAppDateFormat = "yyyy/MM/dd"
+export const datefnsTableDateFormat = "yyyy-MM-dd"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 

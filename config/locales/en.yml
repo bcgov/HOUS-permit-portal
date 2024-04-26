@@ -205,6 +205,31 @@ en:
       delete_error:
         title: Error
         message: "Something went wrong deleting the requirement block"
+    external_api_key:
+      create_error:
+        title: Create Error
+        message: "%{error_message}"
+      update_error:
+        title: Update Error
+        message: "%{error_message}"
+      revoke_error:
+        title: Revoke Error
+        message: "%{error_message}"
+      delete_error:
+        title: Delete Error
+        message: "%{error_message}"
+      create_success:
+        title: Success
+        message: "New external api key created successfully!"
+      update_success:
+        title: Success
+        message: "External api key updated successfully!"
+      delete_success:
+        title: Success
+        message: "External api key deleted successfully!"
+      revoke_success:
+        title: Success
+        message: "External api key revoked successfully!"
     requirement_template:
       create_success:
         title: ""
@@ -258,6 +283,15 @@ en:
       update_success:
         title: ""
         message: "Jurisdiction successfully updated!"
+      external_api_enabled_success:
+        title: ""
+        message: "Jurisdiction external api successfully enabled!"
+      update_external_api_enabled_error:
+        title: Error
+        message: "%{error_message}"
+      external_api_disabled_success:
+        title: ""
+        message: "Jurisdiction external api successfully disabled!"
     permit_application:
       create_error:
         title: Error
@@ -305,6 +339,12 @@ en:
       user_not_authorized_error:
         title: "Unauthorized"
         message: "The user is not authorized to do this action"
+      external_api_key_forbidden_error:
+        title: "Forbidden"
+        message: "The external api key is not authorized to do this action"
+      external_api_key_unauthorized_error:
+        title: "Unauthorized"
+        message: "%{error_message}"
       not_found_error:
         title: "Error"
         message: 404 - The requested resource could not be found

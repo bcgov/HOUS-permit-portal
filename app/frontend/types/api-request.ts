@@ -56,3 +56,11 @@ export interface ITagSearchParams {
   query?: string
   taggableTypes?: Array<ETagType>
 }
+
+export interface IExternalApiKeyParams {
+  name?: string
+  connectingApplication?: string
+  webhookUrl?: string
+  expiredAt?: Date
+  jurisdictionId?: string
+}

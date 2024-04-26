@@ -1,4 +1,4 @@
-import { HStack, IconButton, StackProps, Text } from "@chakra-ui/react"
+import { HStack, IconButton, IconButtonProps, StackProps, Text } from "@chakra-ui/react"
 import { Copy } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -7,10 +7,18 @@ import { EFlashMessageStatus } from "../../../types/enums"
 
 interface ICopyableNumberProps extends StackProps {
   value: string
-  label: string
+  label?: string
+  CustomDisplay?: ({ value }: { value: string; label?: string }) => JSX.Element
+  iconButtonProps?: Partial<IconButtonProps>
 }
 
-export const CopyableValue = ({ value, label, ...containerProps }: ICopyableNumberProps) => {
+export const CopyableValue = ({
+  value,
+  label,
+  CustomDisplay,
+  iconButtonProps,
+  ...containerProps
+}: ICopyableNumberProps) => {
   const { t } = useTranslation()
   const { uiStore } = useMst()
 
@@ -25,12 +33,16 @@ export const CopyableValue = ({ value, label, ...containerProps }: ICopyableNumb
 
   return (
     <HStack gap={1} {...containerProps}>
-      <Text mt={1}>
-        {label}:{" "}
-        <Text as="span" fontWeight={700}>
-          {value}
+      {CustomDisplay ? (
+        <CustomDisplay value={value} label={label} />
+      ) : (
+        <Text mt={1}>
+          {label}:{" "}
+          <Text as="span" fontWeight={700}>
+            {value}
+          </Text>
         </Text>
-      </Text>
+      )}
       <IconButton
         aria-label={"copy value"}
         icon={<Copy />}
@@ -38,6 +50,7 @@ export const CopyableValue = ({ value, label, ...containerProps }: ICopyableNumb
         variant="ghost"
         color="theme.yellow"
         size="sm"
+        {...iconButtonProps}
       />
     </HStack>
   )

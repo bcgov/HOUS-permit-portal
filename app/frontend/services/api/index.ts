@@ -3,6 +3,7 @@ import { TCreatePermitApplicationFormData } from "../../components/domains/permi
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TCreateContactFormData } from "../../components/shared/contact/create-contact-modal"
+import { IExternalApiKey } from "../../models/external-api-key"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -12,7 +13,12 @@ import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
-import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
+import {
+  IExternalApiKeyParams,
+  IRequirementBlockParams,
+  IRequirementTemplateUpdateParams,
+  ITagSearchParams,
+} from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IApiResponse,
@@ -157,6 +163,12 @@ export class Api {
 
   async updateJurisdiction(id, params) {
     return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`, { jurisdiction: params })
+  }
+
+  async updateJurisdictionExternalApiEnabled(id: string, externalApiEnabled: boolean) {
+    return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}/update_external_api_enabled`, {
+      externalApiEnabled: externalApiEnabled,
+    })
   }
 
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
@@ -343,6 +355,26 @@ export class Api {
 
   async fetchSiteConfiguration() {
     return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+  }
+
+  async fetchExternalApiKeys(jurisdictionId: string) {
+    return this.client.get<ApiResponse<IExternalApiKey[]>>(`/external_api_keys/`, { jurisdictionId })
+  }
+
+  async fetchExternalApiKey(externalApiKeyId: string) {
+    return this.client.get<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`)
+  }
+
+  async createExternalApiKey(externalApiKey: IExternalApiKeyParams) {
+    return this.client.post<ApiResponse<IExternalApiKey>>(`/external_api_keys/`, { externalApiKey })
+  }
+
+  async updateExternalApiKey(externalApiKeyId: string, externalApiKey: IExternalApiKeyParams) {
+    return this.client.patch<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`, { externalApiKey })
+  }
+
+  async revokeExternalApiKey(externalApiKeyId: string) {
+    return this.client.post<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}/revoke`)
   }
 
   async updateSiteConfiguration(siteConfiguration) {

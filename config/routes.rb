@@ -74,6 +74,7 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
       post "permit_applications/search", on: :member, to: "jurisdictions#search_permit_applications"
+      patch "update_external_api_enabled", on: :member, to: "jurisdictions#update_external_api_enabled"
       get "locality_type_options", on: :collection
       get "jurisdiction_options", on: :collection
     end
@@ -121,6 +122,10 @@ Rails.application.routes.draw do
     resources :site_configuration, only: [] do
       get :show, on: :collection
       put :update, on: :collection
+    end
+
+    resources :external_api_keys do
+      post "revoke", on: :member
     end
   end
 
