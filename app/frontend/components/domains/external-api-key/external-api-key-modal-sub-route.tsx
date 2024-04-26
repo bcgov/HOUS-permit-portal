@@ -48,7 +48,7 @@ const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKe
   }
 }
 
-export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModalSubRoute({}: IProps) {
+export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModalSubRoute() {
   const { t } = useTranslation()
   const { externalApiKeyId } = useParams()
   const navigate = useNavigate()

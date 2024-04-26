@@ -113,6 +113,7 @@ const options = {
           browseList: "Browse list of jurisdictions",
         },
         ui: {
+          disable: "Disable",
           revoke: "Revoke",
           create: "Create",
           tip: "Tip",
@@ -1141,8 +1142,18 @@ const options = {
         externalApiKey: {
           index: {
             createExternalApiKey: "Create new API key",
+            enabled: "Enabled",
+            disabled: "Disabled",
             table: {
               heading: "External API keys",
+            },
+            disabledWarningTitle:
+              "External API keys for this jurisdiction have not been enabled. To enable them, please contact" +
+              " us at",
+            disabledTooltipLabel: "User is not authorized to make this change",
+            disableConfirmationModal: {
+              title: "Are you sure you want to disable API keys for this jurisdiction?",
+              body: "All active API keys will be disabled",
             },
           },
           modal: {

@@ -1,10 +1,15 @@
-import { Box, Flex, GridItem, Text } from "@chakra-ui/react"
+import { Box, Flex, FormControl, FormLabel, GridItem, Switch, Text, Tooltip } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import { GridHeader } from "../../shared/grid/grid-header"
+import { RemoveConfirmationModal } from "../../shared/remove-confirmation-modal"
 
 export const GridHeaders = observer(function GridHeaders() {
+  const { jurisdictionStore, userStore } = useMst()
+  const { currentUser } = userStore
+
   const { t } = useTranslation()
   const columnHeaders: string[] = [
     t("externalApiKey.fieldLabels.name"),
@@ -27,6 +32,16 @@ export const GridHeaders = observer(function GridHeaders() {
           align="center"
         >
           <Text role={"heading"}>{t("externalApiKey.index.table.heading")}</Text>
+
+          {currentUser.isReviewManager ? (
+            <Tooltip label={t("externalApiKey.index.disabledTooltipLabel")}>
+              <Box>
+                <ExternalApiEnabledSwitchWithConfirmation />
+              </Box>
+            </Tooltip>
+          ) : (
+            <ExternalApiEnabledSwitchWithConfirmation />
+          )}
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>
@@ -51,3 +66,63 @@ export const GridHeaders = observer(function GridHeaders() {
     </Box>
   )
 })
+
+const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
+  const { jurisdictionStore, userStore } = useMst()
+  const { currentJurisdiction } = jurisdictionStore
+  const { currentUser } = userStore
+  const { t } = useTranslation()
+
+  const isDisabled = currentUser.isReviewManager
+  const shouldUseDisableConfirmationModal =
+    !isDisabled && currentJurisdiction.externalApiEnabled && currentJurisdiction.externalApiKeysMap.size > 0
+
+  return shouldUseDisableConfirmationModal ? (
+    <RemoveConfirmationModal
+      renderTriggerButton={({ onClick }) => (
+        <ExternalApiEnabledSwitch
+          externalApiEnabled={currentJurisdiction.externalApiEnabled}
+          isDisabled={isDisabled}
+          // @ts-ignore
+          onChange={onClick}
+        />
+      )}
+      triggerText={t("ui.disable")}
+      title={t("externalApiKey.index.disableConfirmationModal.title")}
+      body={t("externalApiKey.index.disableConfirmationModal.body")}
+      onRemove={currentJurisdiction.toggleExternalApiEnabled}
+    />
+  ) : (
+    <ExternalApiEnabledSwitch
+      externalApiEnabled={currentJurisdiction.externalApiEnabled}
+      isDisabled={isDisabled}
+      onChange={currentJurisdiction.toggleExternalApiEnabled}
+    />
+  )
+})
+
+const ExternalApiEnabledSwitch = observer(
+  ({
+    externalApiEnabled,
+    isDisabled = false,
+    onChange,
+  }: {
+    isDisabled?: boolean
+    externalApiEnabled: boolean
+    onChange?: (isChecked?: boolean) => void
+  }) => {
+    const { t } = useTranslation()
+
+    return (
+      <FormControl display="flex" alignItems="center" w="fit-content" gap={2} isDisabled={isDisabled}>
+        <Switch id="enableJurisdictionExternalApiKey" isChecked={externalApiEnabled} onChange={onChange} />
+        <FormLabel
+          htmlFor="enableJurisdictionExternalApiKey"
+          _hover={{ cursor: isDisabled ? "not-allowed" : undefined }}
+        >
+          {externalApiEnabled ? t("externalApiKey.index.enabled") : t("externalApiKey.index.disabled")}
+        </FormLabel>
+      </FormControl>
+    )
+  }
+)

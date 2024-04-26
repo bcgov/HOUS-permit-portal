@@ -165,6 +165,12 @@ export class Api {
     return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`, { jurisdiction: params })
   }
 
+  async updateJurisdictionExternalApiEnabled(id: string, externalApiEnabled: boolean) {
+    return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}/update_external_api_enabled`, {
+      externalApiEnabled: externalApiEnabled,
+    })
+  }
+
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }

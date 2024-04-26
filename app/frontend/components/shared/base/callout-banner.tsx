@@ -4,14 +4,17 @@ import React from "react"
 
 interface IProps {
   type: "warning" | "error" | "success" | "info"
-  title: string
-  body?: string
+  title: string | JSX.Element
+  body?: string | JSX.Element
 }
 
 const iconProps = {
   size: 16,
+  flexShrink: 0,
   style: {
     marginTop: "var(--chakra-space-1)",
+    minWidth: "16px",
+    minH: "16px",
   },
 }
 

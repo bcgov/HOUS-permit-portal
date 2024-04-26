@@ -283,6 +283,15 @@ en:
       update_success:
         title: ""
         message: "Jurisdiction successfully updated!"
+      external_api_enabled_success:
+        title: ""
+        message: "Jurisdiction external api successfully enabled!"
+      update_external_api_enabled_error:
+        title: Error
+        message: "%{error_message}"
+      external_api_disabled_success:
+        title: ""
+        message: "Jurisdiction external api successfully disabled!"
     permit_application:
       create_error:
         title: Error

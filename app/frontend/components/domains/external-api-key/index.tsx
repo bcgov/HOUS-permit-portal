@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Heading, StackProps, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, Link, StackProps, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next"
 import { Outlet } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
+import { useMst } from "../../../setup/root"
+import { CalloutBanner } from "../../shared/base/callout-banner"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -18,6 +20,8 @@ import { GridHeaders } from "./grid-header"
 interface IProps extends Partial<StackProps> {}
 
 export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndexScreen({ ...containerProps }: IProps) {
+  const { userStore } = useMst()
+  const { currentUser } = userStore
   const { currentJurisdiction, error } = useJurisdiction()
   const [isFetching, setIsFetching] = useState(false)
   const { t } = useTranslation()
@@ -35,9 +39,11 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
   }, [currentJurisdiction])
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction) return <LoadingScreen />
+  if (!currentUser || !currentJurisdiction) return <LoadingScreen />
 
   const externalApiKeys = currentJurisdiction.externalApiKeys
+  const externalApiEnabled = currentJurisdiction.externalApiEnabled
+  const disableLinkClick = (e) => !externalApiEnabled && e.preventDefault()
 
   return (
     <Container maxW="container.lg" p={8} as={"main"} h={"full"} w={"full"} {...containerProps}>
@@ -48,10 +54,29 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           <Box>
             <Heading as="h1">{currentJurisdiction?.qualifiedName}</Heading>
           </Box>
-          <RouterLinkButton alignSelf={"flex-end"} variant={"primary"} to={"create"}>
+          <RouterLinkButton
+            alignSelf={"flex-end"}
+            variant={"primary"}
+            to={"create"}
+            isDisabled={!externalApiEnabled}
+            onClick={disableLinkClick}
+          >
             {t("externalApiKey.index.createExternalApiKey")}
           </RouterLinkButton>
         </Flex>
+        {!externalApiEnabled && currentUser.isReviewManager && (
+          <CalloutBanner
+            type={"warning"}
+            title={
+              <>
+                {t("externalApiKey.index.disabledWarningTitle")}{" "}
+                <Link href={"mailto:" + t("site.contactEmail")} isExternal>
+                  {t("site.contactEmail")}
+                </Link>
+              </>
+            }
+          />
+        )}
         <SearchGrid templateColumns="repeat(6, 1fr) 85px" pos={"relative"}>
           <GridHeaders />
 
@@ -77,7 +102,12 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                   </SearchGridItem>
 
                   <SearchGridItem justifyContent={"center"}>
-                    <RouterLinkButton variant={"link"} to={`${externalApiKey.id}/manage`}>
+                    <RouterLinkButton
+                      variant={"link"}
+                      to={`${externalApiKey.id}/manage`}
+                      isDisabled={!externalApiEnabled}
+                      onClick={disableLinkClick}
+                    >
                       {t("ui.manage")}
                     </RouterLinkButton>
                   </SearchGridItem>

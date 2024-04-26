@@ -37,6 +37,7 @@ export const JurisdictionModel = types
     mapZoom: types.maybeNull(types.number),
     energyStepRequired: types.maybeNull(types.number),
     zeroCarbonStepRequired: types.maybeNull(types.number),
+    externalApiEnabled: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -142,6 +143,18 @@ export const JurisdictionModel = types
         return self.getExternalApiKey(data.id)
       }
 
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    toggleExternalApiEnabled: flow(function* () {
+      const response = yield* toGenerator(
+        self.environment.api.updateJurisdictionExternalApiEnabled(self.id, !self.externalApiEnabled)
+      )
+
+      if (response.ok) {
+        self.externalApiEnabled = !!response.data?.data?.externalApiEnabled
+      }
       return response.ok
     }),
   }))

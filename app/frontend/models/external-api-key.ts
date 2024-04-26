@@ -1,5 +1,5 @@
 import { isFuture } from "date-fns"
-import { Instance, types } from "mobx-state-tree"
+import { getParent, Instance, types } from "mobx-state-tree"
 import { ExternalApiKeyStatus } from "../types/enums"
 
 export const ExternalApiKeyModel = types
@@ -21,10 +21,21 @@ export const ExternalApiKeyModel = types
       // any revokedAt date is considered revoked, time is for logging purposes
       return self.revokedAt !== null
     },
+    get jurisdiction() {
+      return getParent(self, 2)
+    },
   }))
   .views((self) => ({
     get status() {
-      return self.isRevoked || self.isExpired ? ExternalApiKeyStatus.notActive : ExternalApiKeyStatus.active
+      return !(
+        self.jurisdiction as {
+          externalApiEnabled: boolean
+        }
+      )?.externalApiEnabled ||
+        self.isRevoked ||
+        self.isExpired
+        ? ExternalApiKeyStatus.notActive
+        : ExternalApiKeyStatus.active
     },
   }))
 
