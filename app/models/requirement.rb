@@ -29,11 +29,11 @@ class Requirement < ApplicationRecord
 
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
-  before_validation :check_file_suffix
   before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
+  validate :validate_conditional
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code,
                       with: /_file\z/,
@@ -122,9 +122,6 @@ class Requirement < ApplicationRecord
     self.requirement_code = new_requirement_code
   end
 
-  def check_file_suffix
-  end
-
   def formio_type_options
     form_json_service = RequirementFormJsonService.new(self)
 
@@ -138,6 +135,18 @@ class Requirement < ApplicationRecord
              (option.key?("value") && option["value"].is_a?(String))
          }
       errors.add(:input_options, "must have value options defined")
+    end
+  end
+
+  def validate_conditional
+    return unless self.input_options["conditional"].present?
+
+    conditional = self.input_options["conditional"]
+    if [conditional["when"], conditional["eq"], conditional["show"]].any?(&:blank?)
+      errors.add(:input_options, "conditional must have when, eq, and show")
+    end
+    if requirement_block.requirements.find_by_requirement_code(conditional["when"]).blank?
+      errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
     end
   end
 

@@ -78,10 +78,21 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     return []
   }
 
+  const textInputTypes = ["text", "textarea", "phone", "email", "address", "bcaddress"]
+  const optionInputTypes = ["select", "radio", "multi_option_select", "checkbox"]
+  const numberInputType = "number"
+  const supportedInputTypes = [...textInputTypes, ...optionInputTypes, numberInputType]
+  const isSupportedInputType = (type) => {
+    return supportedInputTypes.includes(type)
+  }
+
   const getRequirementOptions = () => {
     return watchedRequirements
-      .map((requirement) => ({ label: requirement.label, value: requirement.requirementCode }))
-      .filter((opt) => opt.value !== watchedRequirementCode)
+      .filter((requirement) => requirement.requirementCode !== watchedRequirementCode)
+      .map((requirement) => ({
+        label: requirement.label + (!isSupportedInputType(requirement.inputType) ? ` (${t("ui.notSupported")})` : ""),
+        value: requirement.requirementCode,
+      }))
   }
 
   useEffect(() => {
@@ -91,20 +102,21 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
     }
   }, [watchedWhen])
 
-  const effectOptions = ["show", "hide"].map((value) => ({
+  const effectOptions = (["show", "hide"] as const).map((value) => ({
     value,
-    // @ts-ignore
     label: t(`requirementsLibrary.modals.conditionalSetup.${value}`),
   }))
 
+  const inputType = watchedRequirements?.find((req) => req.requirementCode === watchedWhen)?.inputType
+
   const getOperandSelectFormControl = (fieldName: keyof IRequirementBlockForm) => {
     if (!watchedWhen) return <></>
-    const inputType = watchedRequirements.find((req) => req.requirementCode === watchedWhen).inputType
-    if (["text", "textarea", "phone", "email", "address", "bcaddress"].includes(inputType)) {
+
+    if (textInputTypes.includes(inputType)) {
       return <TextFormControl fieldName={fieldName} />
-    } else if (inputType === "number") {
+    } else if (inputType === numberInputType) {
       return <NumberFormControl fieldName={fieldName} />
-    } else if (["select", "radio", "multi_option_select", "checkbox"].includes(inputType)) {
+    } else if (optionInputTypes.includes(inputType)) {
       return (
         <Controller
           name={fieldName}
@@ -176,7 +188,10 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
                     control={control}
                     render={({ field: { onChange, value } }) => (
                       <RequirementSelect
-                        onChange={(opt) => onChange(opt.value)}
+                        onChange={(opt) => {
+                          setValue(`requirementsAttributes.${index}.inputOptions.conditional.operand`, null)
+                          onChange(opt.value)
+                        }}
                         options={requirementOptions}
                         selectedOption={value && requirementOptions?.find((option) => option.value === value)}
                       />
@@ -235,7 +250,11 @@ export const ConditionalSetupModal = observer(({ triggerButtonProps, renderTrigg
               <Button variant={"secondary"} onClick={onReset}>
                 {t("ui.reset")}
               </Button>
-              <Button variant={"primary"} onClick={onClose} isDisabled={!allFieldsProvided}>
+              <Button
+                variant={"primary"}
+                onClick={onClose}
+                isDisabled={!allFieldsProvided || !isSupportedInputType(inputType)}
+              >
                 {t("ui.done")}
               </Button>
             </ButtonGroup>

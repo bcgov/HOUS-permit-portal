@@ -155,6 +155,7 @@ const options = {
           select: "Select",
           notAvailable: "Not available yet",
           isRequired: "{{field}} is required",
+          notSupported: "Not supported",
           use: "Use",
           publish: "Publish",
           neverMind: "Never mind",
