@@ -200,6 +200,10 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
       />
       <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
+      <NavMenuItem
+        label={t("site.breadcrumb.externalApiKeys")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/external-api-keys`}
+      />
       <MenuDivider />
     </MenuGroup>
   )

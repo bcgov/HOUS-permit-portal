@@ -19,6 +19,8 @@ NULL",
 
   validates :token, uniqueness: true
   validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
+  validates :connecting_application, presence: true
+  validates :expired_at, presence: true
 
   before_create :generate_token
 

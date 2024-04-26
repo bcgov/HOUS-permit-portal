@@ -32,6 +32,11 @@ export enum ETemplateVersionStatus {
   draft = "draft",
 }
 
+export enum ExternalApiKeyStatus {
+  active = "active",
+  notActive = "notActive",
+}
+
 export enum EUserRoles {
   submitter = "submitter",
   reviewManager = "review_manager",

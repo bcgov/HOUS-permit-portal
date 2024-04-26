@@ -3,7 +3,8 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionUsers
   include Api::Concerns::Search::PermitApplications
 
-  before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
+  before_action :set_jurisdiction,
+                only: %i[show update search_users search_permit_applications update_external_api_enabled]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
   skip_before_action :authenticate_user!, only: %i[show index jurisdiction_options]
 
@@ -37,6 +38,27 @@ class Api::JurisdictionsController < Api::ApplicationController
       render_success @jurisdiction, "jurisdiction.update_success", { blueprint: JurisdictionBlueprint }
     else
       render_error "jurisdiction.update_error",
+                   message_opts: {
+                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def update_external_api_enabled
+    authorize @jurisdiction, :update_external_api_enabled?
+
+    if @jurisdiction.update(external_api_enabled: update_external_api_enabled_params)
+      render_success @jurisdiction,
+                     (
+                       if @jurisdiction.external_api_enabled?
+                         "jurisdiction.external_api_enabled_success"
+                       else
+                         "jurisdiction.external_api_disabled_success"
+                       end
+                     ),
+                     { blueprint: JurisdictionBlueprint }
+    else
+      render_error "jurisdiction.update_external_api_enabled_error",
                    message_opts: {
                      error_message: @jurisdiction.errors.full_messages.join(", "),
                    }
@@ -140,12 +162,15 @@ class Api::JurisdictionsController < Api::ApplicationController
       :energy_step_required,
       :zero_carbon_step_required,
       :map_zoom,
-      :external_api_enabled,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[id first_name last_name department title phone cell email],
       permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
     )
+  end
+
+  def update_external_api_enabled_params
+    params.require(:external_api_enabled)
   end
 
   def set_jurisdiction

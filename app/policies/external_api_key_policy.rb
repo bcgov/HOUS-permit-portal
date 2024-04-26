@@ -29,7 +29,7 @@ class ExternalApiKeyPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      return [] unless user.super_admin? || user.review_manager?
+      raise Pundit::NotAuthorizedError unless user.super_admin? || user.review_manager?
 
       user.super_admin? ? ExternalApiKey.all : ExternalApiKey.where(jurisdiction_id: user.jurisdiction_id)
     end

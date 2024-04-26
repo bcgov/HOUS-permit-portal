@@ -11,6 +11,15 @@ import { EULAModal } from "../../shared/eula-modal"
 import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 
+const ExternalApiKeysIndexScreen = lazy(() =>
+  import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
+)
+const ExternalApiKeyModalSubRoute = lazy(() =>
+  import("../external-api-key/external-api-key-modal-sub-route").then((module) => ({
+    default: module.ExternalApiKeyModalSubRoute,
+  }))
+)
+
 const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
 )
@@ -246,6 +255,10 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/external-api-keys" element={<ExternalApiKeysIndexScreen />}>
+        <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
+        <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
+      </Route>
     </>
   )
 

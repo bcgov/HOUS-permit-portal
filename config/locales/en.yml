@@ -223,10 +223,13 @@ en:
         message: "New external api key created successfully!"
       update_success:
         title: Success
-        message: "New external api key updated successfully!"
+        message: "External api key updated successfully!"
+      delete_success:
+        title: Success
+        message: "External api key deleted successfully!"
       revoke_success:
         title: Success
-        message: "New external api key revoked successfully!"
+        message: "External api key revoked successfully!"
     requirement_template:
       create_success:
         title: ""
@@ -280,6 +283,15 @@ en:
       update_success:
         title: ""
         message: "Jurisdiction successfully updated!"
+      external_api_enabled_success:
+        title: ""
+        message: "Jurisdiction external api successfully enabled!"
+      update_external_api_enabled_error:
+        title: Error
+        message: "%{error_message}"
+      external_api_disabled_success:
+        title: ""
+        message: "Jurisdiction external api successfully disabled!"
     permit_application:
       create_error:
         title: Error

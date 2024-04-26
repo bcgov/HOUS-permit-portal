@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next"
 
 interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
+  triggerText?: string
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   title?: string
   body?: string
@@ -27,6 +28,7 @@ interface IProps {
 export const RemoveConfirmationModal = observer(function RemoveConfirmationModal({
   triggerButtonProps,
   renderTriggerButton,
+  triggerText,
   title,
   body,
   onRemove,
@@ -39,7 +41,7 @@ export const RemoveConfirmationModal = observer(function RemoveConfirmationModal
         renderTriggerButton({ onClick: onOpen })
       ) : (
         <Button leftIcon={<X />} variant={"ghost"} color={"error"} onClick={onOpen} {...triggerButtonProps}>
-          {t("ui.remove")}
+          {triggerText ?? t("ui.remove")}
         </Button>
       )}
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -56,7 +58,7 @@ export const RemoveConfirmationModal = observer(function RemoveConfirmationModal
           <ModalFooter justifyContent={"flex-start"}>
             <ButtonGroup spacing={4}>
               <Button variant={"primary"} onClick={() => onRemove(onClose)}>
-                {t("ui.remove")}
+                {triggerText ?? t("ui.remove")}
               </Button>
               <Button variant={"secondary"} onClick={onClose}>
                 {t("ui.neverMind")}

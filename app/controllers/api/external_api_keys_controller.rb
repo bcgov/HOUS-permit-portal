@@ -2,7 +2,20 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   before_action :set_external_api_key, except: %i[index create]
 
   def index
-    @external_api_key = policy_scope(ExternalApiKey)
+    # Only authoris\zed to query own jurisdiction for review managers
+    if current_user.review_manager? && params[:jurisdiction_id].present? &&
+         current_user.jurisdiction_id != params[:jurisdiction_id]
+      raise Pundit::NotAuthorizedError
+    end
+
+    @external_api_key =
+      (
+        if params[:jurisdiction_id].present? && current_user.super_admin?
+          policy_scope(ExternalApiKey).where(jurisdiction_id: params[:jurisdiction_id])
+        else
+          policy_scope(ExternalApiKey)
+        end
+      )
 
     render_success @external_api_key, nil, { blueprint: ExternalApiKeyBlueprint }
   end
@@ -80,6 +93,12 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   end
 
   def external_api_key_params
-    params.require(:external_api_key).permit(:name, :expired_at, :jurisdiction_id, :webhook_url)
+    params.require(:external_api_key).permit(
+      :name,
+      :expired_at,
+      :connecting_application,
+      :jurisdiction_id,
+      :webhook_url,
+    )
   end
 end

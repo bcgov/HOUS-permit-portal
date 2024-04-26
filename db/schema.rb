@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_25_172912) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -87,6 +87,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_23_203202) do
     t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "connecting_application", null: false
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true

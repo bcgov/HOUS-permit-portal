@@ -113,6 +113,9 @@ const options = {
           browseList: "Browse list of jurisdictions",
         },
         ui: {
+          disable: "Disable",
+          revoke: "Revoke",
+          create: "Create",
           tip: "Tip",
           manage: "Manage",
           preview: "Preview",
@@ -241,6 +244,7 @@ const options = {
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
+            externalApiKeys: "External API keys",
             about: "About",
           },
           fields: {
@@ -923,6 +927,10 @@ const options = {
                 },
               },
             },
+            externalApiKeys: {
+              title: "Manage external API keys",
+              description: "Manage external API keys for the Building Permit Hub.",
+            },
           },
           superAdminTitle: "Admin home",
           submissionsInboxTitle: "Submissions inbox",
@@ -1131,6 +1139,49 @@ const options = {
             settings: "Site-wide message settings",
           },
         },
+        externalApiKey: {
+          index: {
+            createExternalApiKey: "Create new API key",
+            enabled: "Enabled",
+            disabled: "Disabled",
+            table: {
+              heading: "External API keys",
+            },
+            disabledWarningTitle:
+              "External API keys for this jurisdiction have not been enabled. To enable them, please contact" +
+              " us at",
+            disabledTooltipLabel: "User is not authorized to make this change",
+            disableConfirmationModal: {
+              title: "Are you sure you want to disable API keys for this jurisdiction?",
+              body: "All active API keys will be disabled",
+            },
+          },
+          modal: {
+            createTitle: "Create external API key",
+            manageTitle: "Manage external API key",
+            removeConfirmationModal: {
+              title: "Are you sure you want to revoke this API key?",
+              body: "Any applications using this token will be unable to access the API.",
+            },
+          },
+          fieldLabels: {
+            name: "Name",
+            connectingApplication: "Application connecting to",
+            revokedAt: "Revoked at",
+            webhookUrl: "Webhook URL",
+            expiredAt: "Expires on",
+            createdAt: "Created at",
+            token: "Token",
+            status: "Status",
+          },
+          fieldPlaceholders: {
+            webhookUrl: "https://example.com/webhook",
+          },
+          status: {
+            active: "Active",
+            notActive: "Not-Active",
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",
@@ -1217,6 +1268,8 @@ const options = {
             confirmed: "E-mail confirmed",
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
+            externalApiKeys: "External API keys",
+            create: "Create",
           },
           questionSupport: "Question support",
         },
