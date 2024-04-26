@@ -72,7 +72,7 @@ gem "exception_notification", "~> 4.5.0"
 gem "nokogiri", ">= 1.15.6"
 gem "rdoc", ">= 6.6.3.1"
 gem "rack", ">= 3.0.9.1"
-gem 'uppy-s3_multipart', '~> 1.2'
+gem "uppy-s3_multipart", "~> 1.2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -83,6 +83,7 @@ group :development, :test do
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "vcr", "~> 6.2"
+  gem "bullet", "~> 7.1.6"
 end
 
 group :test do
