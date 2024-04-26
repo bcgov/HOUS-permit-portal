@@ -20,45 +20,57 @@ jurisdictions = Jurisdiction.all
 north_van = Jurisdiction.find_by(name: "North Vancouver")
 
 puts "Seeding users..."
-5.times do |n|
-  suffix = n == 0 ? "" : n
-  User.find_or_create_by(username: "super_admin#{suffix}") do |user|
-    user.role = :super_admin
-    user.first_name = "SuperAdmin#{suffix}"
-    user.last_name = "McUser"
-    user.email = "super_admin#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "super_admin") do |user|
+  user.role = :super_admin
+  user.first_name = "SuperAdmin"
+  user.last_name = "McUser"
+  user.email = "super_admin@example.com"
+  user.password = "P@ssword1"
+  user.confirmed_at = Time.now
+  user.uid = "a41927c69d6549b8a396fca748f53502@bceidboth"
+  user.provider = "keycloak"
+  user.bceid_email = "super_admin@example.com"
+  user.bceid_username = "super_admin"
+end
 
-  User.find_or_create_by(username: "review_manager#{suffix}") do |user|
-    user.role = :review_manager
-    user.first_name = "ReviewManager#{suffix}"
-    user.last_name = "McUser"
-    user.email = "review_manager#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.jurisdiction = north_van
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "review_manager") do |user|
+  user.role = :review_manager
+  user.first_name = "ReviewManager"
+  user.last_name = "McUser"
+  user.email = "review_manager@example.com"
+  user.password = "P@ssword1"
+  user.jurisdiction = north_van
+  user.confirmed_at = Time.now
+  user.uid = "85eec5b6f05a4db7bb5bb97fbc6985b1@bceidboth"
+  user.provider = "keycloak"
+  user.bceid_email = "review_manager@example.com"
+  user.bceid_username = "review_manager"
+end
 
-  User.find_or_create_by(username: "reviewer#{suffix}") do |user|
-    user.role = :reviewer
-    user.first_name = "Reviewer#{suffix}"
-    user.last_name = "McUser"
-    user.email = "reviewer#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.jurisdiction = north_van
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "reviewer") do |user|
+  user.role = :reviewer
+  user.first_name = "Reviewer"
+  user.last_name = "McUser"
+  user.email = "reviewer@example.com"
+  user.password = "P@ssword1"
+  user.jurisdiction = north_van
+  user.confirmed_at = Time.now
+  user.uid = "8505910fbd594495ac899bc6653f3544@bceidboth"
+  user.provider = "keycloak"
+  user.bceid_email = "reviewer@example.com"
+  user.bceid_username = "reivewer"
+end
 
-  User.find_or_create_by(username: "submitter#{suffix}") do |user|
-    user.role = :submitter
-    user.first_name = "Submitter#{suffix}"
-    user.last_name = "McUser"
-    user.email = "submitter#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "submitter") do |user|
+  user.role = :submitter
+  user.first_name = "Submitter"
+  user.last_name = "McUser"
+  user.email = "submitter@example.com"
+  user.password = "P@ssword1"
+  user.confirmed_at = Time.now
+  user.uid = user.provider = "keycloak"
+  user.bceid_email = "submitter@example.com"
+  user.bceid_username = "submitter"
 end
 
 User.reindex
