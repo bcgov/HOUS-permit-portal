@@ -383,5 +383,7 @@ en:
     performance_type:
       error: "%{field_name} performance type must be one of %{accepted_values}"
   model_validation:
+    template_section_block:
+      requirement_block_on_template_exits: ": \"%{requirement_block_name}\" already exists on this template"
     jurisdiction_template_version_customization:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"

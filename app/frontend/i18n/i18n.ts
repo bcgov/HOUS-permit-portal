@@ -1065,6 +1065,7 @@ const options = {
               title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",
             },
+            duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
           },
           fields: {
             status: "Status",
