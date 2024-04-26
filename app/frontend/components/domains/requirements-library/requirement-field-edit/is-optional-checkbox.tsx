@@ -15,10 +15,10 @@ export function IsOptionalCheckbox<TFieldValues extends FieldValues>({
     field: { value, onChange, ...restField },
   } = useController(controlProps)
   const { t } = useTranslation()
-
   return (
     //   This is checked inverse of the boolean value. This is because the db field is for "required", instead of
     //   optional, and by default it should be required
+
     <Checkbox
       {...checkboxProps}
       isChecked={value === undefined ? value : !value}

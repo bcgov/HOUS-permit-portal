@@ -83,7 +83,7 @@ group :development, :test do
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "vcr", "~> 6.2"
-  gem "bullet", '~> 7.1.6'
+  gem "bullet", "~> 7.1.6"
 end
 
 group :test do
