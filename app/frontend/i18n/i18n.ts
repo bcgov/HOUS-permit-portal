@@ -18,6 +18,30 @@ const options = {
       translation: {
         auth: {
           login: "Login",
+          prompt:
+            "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
+          loginHelp: "Having trouble logging in? ",
+          bceidInfo: {
+            heading: "Which BCeID should I use?",
+            basic: {
+              title: "Basic BCeID",
+              description:
+                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              homeownerAgent: "homeowner, agent",
+              architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
+              register: "Register for Basic BCeID",
+            },
+            business: {
+              title: "Business BCeID",
+              description: "Use when representing a legal entity, such as a:",
+              localGov: "Local government(s) or local jurisdiction(s)",
+              company: "Company or partnership or sole proprietorship",
+              nonProfit: "Not-for-profit or charitable organization",
+              education: "Educational institution like a university or college",
+              seeMore: "See more details",
+              register: "Register for Business BCeID",
+            },
+          },
           logout: "Logout",
           submit: "Submit",
           or: "or",
