@@ -19,7 +19,7 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { IRequirementBlockParams } from "../../../../types/api-request"
+import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
@@ -41,8 +41,9 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   triggerButtonProps,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
-  const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
+  const { createRequirementBlock } = requirementBlockStore
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
@@ -53,7 +54,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           displayDescription: requirementBlock.displayDescription,
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
-          requirementsAttributes: requirementBlock.requirements,
+          requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
         }
       : {
           associationList: [],
@@ -65,12 +66,39 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   })
   const {
     handleSubmit,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting, isValid, errors },
     reset,
   } = formProps
 
   const onSubmit = async (data: IRequirementBlockForm) => {
     let isSuccess = false
+
+    const mappedRequirementAttributes = data.requirementsAttributes.map((ra) => {
+      if (!ra?.inputOptions) return ra
+
+      const { conditional, ...restOfInputOptions } = ra?.inputOptions
+
+      const returnValue = {
+        ...ra,
+        inputOptions: {
+          ...restOfInputOptions,
+        } as any,
+      }
+
+      const shouldAppendConditional = conditional?.when && conditional?.operand && conditional?.then
+
+      if (shouldAppendConditional) {
+        const cond = ra.inputOptions.conditional
+        returnValue.inputOptions.conditional = {
+          when: cond.when,
+          eq: cond.operand,
+          [cond.then]: true,
+        }
+      }
+
+      return returnValue
+    })
+
     if (requirementBlock) {
       const removedRequirementAttributes = requirementBlock.requirements
         .filter((requirement) => !data.requirementsAttributes.find((attribute) => attribute.id === requirement.id))
@@ -78,11 +106,11 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       isSuccess = await (requirementBlock as IRequirementBlock).update?.({
         ...data,
-        requirementsAttributes: [...data.requirementsAttributes, ...removedRequirementAttributes],
+        requirementsAttributes: [...mappedRequirementAttributes, ...removedRequirementAttributes] as IRequirementAttributes[],
       })
       requirementBlockStore.fetchRequirementBlocks()
     } else {
-      isSuccess = await requirementBlockStore.createRequirementBlock(data)
+      isSuccess = await createRequirementBlock({ ...data, requirementsAttributes: [...mappedRequirementAttributes] })
     }
 
     isSuccess && onClose()

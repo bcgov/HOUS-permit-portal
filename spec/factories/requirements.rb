@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :requirement do
-    label { Faker::Lorem.words(number: 2).join(" ") }
+    label { Faker::Lorem.words(number: 4).join(" ") }
     input_type { 0 }
     input_options { {} }
     hint { nil }

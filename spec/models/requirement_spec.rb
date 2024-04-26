@@ -392,9 +392,19 @@ types" do
         end
 
         it "merges the show condition for an elective with other conditional logic" do
+          requirement_block = create(:requirement_block)
+          create(
+            :requirement,
+            requirement_block: requirement_block,
+            requirement_code: "test",
+            label: "Test",
+            input_type: "text",
+          )
+
           requirement =
             create(
               :requirement,
+              requirement_block: requirement_block,
               requirement_code: "text_requirement",
               label: "Text Requirement",
               input_type: "text",

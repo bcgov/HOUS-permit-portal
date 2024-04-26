@@ -1,7 +1,7 @@
 import { applySnapshot, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { IRequirementBlockParams } from "../types/api-request"
+import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -31,6 +31,33 @@ export const RequirementBlockModel = types
     },
     get hasAnyDataValidation() {
       return self.requirements.some((requirement) => !!requirement.dataValidation)
+    },
+    get requirementFormDefaults(): IRequirementAttributes[] {
+      return self.requirements.map((requirement) => {
+        if (!requirement.conditional) return requirement as unknown as IRequirementAttributes
+
+        const { conditional } = requirement
+
+        const possibleThens = ["show", "hide", "require"]
+        const when = conditional.when
+        const operand = conditional.eq
+        const then = possibleThens.find((t) => Object.keys(conditional).includes(t))
+
+        return {
+          ...requirement,
+          inputOptions: {
+            ...requirement.inputOptions,
+            conditional: {
+              when,
+              operand,
+              then,
+            },
+          },
+        }
+      })
+    },
+    getRequirementOptions() {
+      return self.requirements.map((requirement) => ({ label: requirement.label, value: requirement }))
     },
   }))
   .actions((self) => ({

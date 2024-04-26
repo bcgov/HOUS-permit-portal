@@ -4,6 +4,7 @@ import * as R from "ramda"
 import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { v4 as uuidv4 } from "uuid"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import { ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
@@ -24,6 +25,7 @@ const fieldContainerSharedProps = {
   },
   mt: 7,
 }
+
 export const FieldsSetup = observer(function FieldsSetup() {
   const { t } = useTranslation()
   const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
@@ -47,6 +49,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
 
   const onUseRequirement = (requirementType: ERequirementType) => {
     append({
+      requirementCode: `dummy-${uuidv4()}`,
       inputType: requirementType,
       label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
         ? t("requirementsLibrary.modals.defaultContactLabel")
@@ -276,6 +279,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     elective={watchedElective}
                     conditional={watchedConditional}
                     requirementType={requirementType}
+                    index={index}
                   />
                 </Box>
               )

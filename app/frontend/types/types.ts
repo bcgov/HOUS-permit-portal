@@ -73,7 +73,7 @@ export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
   canAddMultipleContacts?: boolean
-  conditional?: Object
+  conditional?: TConditional
   dataValidation?: Object
 }
 
@@ -238,4 +238,10 @@ export interface IContact {
   businessLicense?: string
   professionalAssociation?: string
   professionalNumber?: string
+}
+
+export type TConditional = {
+  show: boolean
+  when: string
+  eq: string
 }

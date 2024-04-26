@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :requirement_block do
-    name { Faker::Lorem.unique.words(number: 2).join(" ") }
+    name { Faker::Lorem.unique.words(number: 4).join(" ") }
     display_name { Faker::Lorem.unique.words(number: 2).join(" ") }
     sign_off_role { 0 }
     reviewer_role { 0 }
