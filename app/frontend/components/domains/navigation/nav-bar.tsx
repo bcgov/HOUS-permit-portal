@@ -327,6 +327,7 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
   return (
     <MenuItem
       as={Button}
+      flex={1}
       variant={variant || "primary"}
       size="sm"
       onClick={handleClick}
@@ -341,9 +342,7 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
         boxShadow: "none",
       }}
     >
-      <Text textAlign="left" w="full">
-        {label}
-      </Text>
+      {label}
     </MenuItem>
   )
 }
