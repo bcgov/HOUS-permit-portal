@@ -143,20 +143,58 @@ class PermitApplication < ApplicationRecord
   end
 
   def formatted_submission_data_for_external_use
-    return unless submission_data.present?
+    return unless submission_data.present? && submission_data["data"].present?
+
+    cloned_submission_data = submission_data["data"].deep_dup
+
+    cloned_submission_data.each do |section_key, section_value|
+      contact_submissions_to_merge = {}
+
+      section_value.each do |submitted_field_key, submitted_value|
+        unless !submitted_field_key.ends_with?("multi_contact") &&
+                 (
+                   submitted_field_key.include?("general_contact") ||
+                     submitted_field_key.include?("professional_contact")
+                 )
+          next
+        end
+
+        # create a new key and value pair, to collect non multi_contact contact field values
+        # into a single array of contact objects, similar to multi_contact contacts.
+        # This will enable us to have a consistent data structure for all contact submissions, making
+        # it easier to format the data
+        split_submitted_field_key = submitted_field_key.split("|")
+
+        contact_property_key = split_submitted_field_key.pop
+
+        formatted_requirement_key = split_submitted_field_key.join("|")
+
+        contact_submissions_to_merge[formatted_requirement_key] = [{}] unless contact_submissions_to_merge[
+          formatted_requirement_key
+        ].present?
+
+        contact_submissions_to_merge[formatted_requirement_key].first[contact_property_key] = submitted_value
+
+        cloned_submission_data[section_key].delete(submitted_field_key)
+      end
+
+      cloned_submission_data[section_key].merge!(contact_submissions_to_merge)
+    end
 
     formatted_submission_data = {}
 
     # first level key is the section_key, which we can ignore
     # second level is the actual submitted values
-    submission_data["data"].each do |section_key, section_value|
+    cloned_submission_data.each do |section_key, section_value|
       section_value.each do |submitted_field_key, submitted_value|
         # key is in the format "formSubmissionDataRSTsection6736da0b-860e-43e6-9823-86c7d6562f1e|RBc2683830-8fe1-4979
         # -bd54-d6c993f3148c|building_project_value"
         # The requirement_block_id is in the format |RB{id}|, so the id in the example is c2683830-8fe1-4979-bd54-d6c993f3148c
-        requirement_block_id = submitted_field_key.to_s.split("|RB").last.split("|").first
+        submitted_field_key_split = submitted_field_key.split("|RB")
 
-        next unless requirement_block_id.present?
+        next unless submitted_field_key_split.length > 1
+
+        requirement_block_id = submitted_field_key_split.last.split("|").first
 
         requirement_block = get_requirement_block_json(requirement_block_id)
 
@@ -172,10 +210,6 @@ class PermitApplication < ApplicationRecord
           }
         end
 
-        if submitted_field_key.to_s.include?("multi_contact") || submitted_field_key.to_s.include?("general_contact")
-          next
-        end
-
         requirement =
           requirement_block["requirements"].find do |req|
             req.dig("form_json", "key").ends_with?(submitted_field_key.split("|RB").last)
@@ -183,16 +217,33 @@ class PermitApplication < ApplicationRecord
 
         next unless requirement.present?
 
+        formatted_value =
+          if submitted_field_key.to_s.ends_with?("multi_contact")
+            submitted_value.map do |contact_value|
+              formatted_contact_value = {}
+
+              contact_value.each do |contact_field_key, contact_field_value|
+                contact_field_key_split = contact_field_key.split("|")
+
+                next unless contact_field_key_split.length > 1
+
+                formatted_key = contact_field_key_split.last
+
+                formatted_contact_value[formatted_key] = contact_field_value
+              end
+
+              formatted_contact_value
+            end
+          else
+            submitted_value
+          end
+
         formatted_submission_data[requirement_block["sku"]][:requirements] << {
           id: requirement["id"],
           name: requirement["label"],
-          # requirement_code is the last part of the submitted_field_key. However relying on this can be error prone.
-          # Going forward, the requirement_code should be included in the requirement JSON.
-          # The 'OR' clause is for backwards compatibility with old template versions which do not have the
-          # requirement code.
-          requirement_code: requirement["requirement_code"] || submitted_field_key.split("|").last,
+          requirement_code: requirement["requirement_code"],
           type: requirement["input_type"],
-          value: submitted_value,
+          value: formatted_value,
         }
       end
     end
