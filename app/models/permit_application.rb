@@ -98,7 +98,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def collaborators
-    #eventually will add editors.  For compliance related items (it is before submit, it should target collaborators)
+    # eventually will add editors.  For compliance related items (it is before submit, it should target collaborators)
     [submitter]
   end
 
@@ -140,6 +140,68 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
     jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
+  end
+
+  def formatted_submission_data_for_external_use
+    return unless submission_data.present?
+
+    formatted_submission_data = {}
+
+    # first level key is the section_key, which we can ignore
+    # second level is the actual submitted values
+    submission_data["data"].each do |section_key, section_value|
+      section_value.each do |submitted_field_key, submitted_value|
+        # key is in the format "formSubmissionDataRSTsection6736da0b-860e-43e6-9823-86c7d6562f1e|RBc2683830-8fe1-4979
+        # -bd54-d6c993f3148c|building_project_value"
+        # The requirement_block_id is in the format |RB{id}|, so the id in the example is c2683830-8fe1-4979-bd54-d6c993f3148c
+        requirement_block_id = submitted_field_key.to_s.split("|RB").last.split("|").first
+
+        next unless requirement_block_id.present?
+
+        requirement_block = get_requirement_block_json(requirement_block_id)
+
+        next unless requirement_block.present?
+
+        if !formatted_submission_data.key?(requirement_block["sku"])
+          formatted_submission_data[requirement_block["sku"]] = {
+            id: requirement_block["id"],
+            requirement_block_code: requirement_block["sku"],
+            name: requirement_block["name"],
+            description: requirement_block["description"],
+            requirements: [],
+          }
+        end
+
+        if submitted_field_key.to_s.include?("multi_contact") || submitted_field_key.to_s.include?("general_contact")
+          next
+        end
+
+        requirement =
+          requirement_block["requirements"].find do |req|
+            req.dig("form_json", "key").ends_with?(submitted_field_key.split("|RB").last)
+          end
+
+        next unless requirement.present?
+
+        formatted_submission_data[requirement_block["sku"]][:requirements] << {
+          id: requirement["id"],
+          name: requirement["label"],
+          # requirement_code is the last part of the submitted_field_key. However relying on this can be error prone.
+          # Going forward, the requirement_code should be included in the requirement JSON.
+          # The 'OR' clause is for backwards compatibility with old template versions which do not have the
+          # requirement code.
+          requirement_code: requirement["requirement_code"] || submitted_field_key.split("|").last,
+          type: requirement["input_type"],
+          value: submitted_value,
+        }
+      end
+    end
+
+    formatted_submission_data
+  end
+
+  def get_requirement_block_json(requirement_block_id)
+    self.template_version.requirement_blocks_json[requirement_block_id]
   end
 
   private

@@ -8,6 +8,7 @@ class RequirementBlueprint < Blueprinter::Base
          :input_options,
          :hint,
          :required,
+         :requirement_code,
          :related_content,
          :required_for_in_person_hint,
          :required_for_multiple_owners,
