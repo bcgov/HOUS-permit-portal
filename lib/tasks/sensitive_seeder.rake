@@ -26,7 +26,7 @@ namespace :db do
         nickname: row["bceid_username"],
         role: row["role"],
         password: Devise.friendly_token[0, 20],
-        jurisdiction: j
+        jurisdiction: j,
         uid: row["bceid_uid"],
         provider: "keycloak",
         bceid_email: row["bceid_email"],
