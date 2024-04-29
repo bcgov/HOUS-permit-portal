@@ -525,7 +525,7 @@ DEPENDENCIES
   aws-sdk-s3 (~> 1.141.0)
   blueprinter (~> 1.0.2)
   bootsnap
-  bullet
+  bullet (~> 7.1.6)
   debug
   devise (= 4.9.3)
   devise-jwt (= 0.8.1)
