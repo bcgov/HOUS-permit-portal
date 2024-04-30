@@ -91,7 +91,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   description={t(`${i18nPrefix}.externalApiKeys.description`)}
                   linkText={t("ui.edit")}
                   icon={<Users size={24} />}
-                  href={`/jurisdictions/${currentJurisdiction.slug}/external-api-keys`}
+                  href={`/jurisdictions/${currentJurisdiction.slug}/api-settings`}
                   h="full"
                 />
               </GridItem>

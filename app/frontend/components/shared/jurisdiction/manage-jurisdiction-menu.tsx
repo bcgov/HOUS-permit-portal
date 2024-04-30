@@ -31,7 +31,7 @@ export const ManageJurisdictionMenu = observer(function ManageJurisdictionMenu<T
           <ManageMenuItem icon={<Users size={16} />} to={`${jurisdiction.slug}/users`}>
             {t("jurisdiction.index.users")}
           </ManageMenuItem>
-          <ManageMenuItem icon={<Key size={16} />} to={`${jurisdiction.slug}/external-api-keys`}>
+          <ManageMenuItem icon={<Key size={16} />} to={`${jurisdiction.slug}/api-settings`}>
             {t("jurisdiction.index.externalApiKeys")}
           </ManageMenuItem>
         </MenuList>

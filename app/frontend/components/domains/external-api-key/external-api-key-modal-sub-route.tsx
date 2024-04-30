@@ -64,7 +64,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
   const [token, setToken] = useState("")
 
   const onClose = () => {
-    navigate(`/jurisdictions/${currentJurisdiction?.id}/external-api-keys`)
+    navigate(`/jurisdictions/${currentJurisdiction?.id}/api-settings`)
   }
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
     if (updatedExternalApiKey) {
       externalApiKey
         ? onClose()
-        : navigate(`/jurisdictions/${currentJurisdiction?.id}/external-api-keys/${updatedExternalApiKey.id}/manage`)
+        : navigate(`/jurisdictions/${currentJurisdiction?.id}/api-settings/${updatedExternalApiKey.id}/manage`)
     }
   })
 
