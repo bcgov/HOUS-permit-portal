@@ -5,6 +5,21 @@ class ExternalPermitApplicationService
     self.permit_application = permit_application
   end
 
+  # This method will format the submission data for external use, such as by third party integrators.
+  # The expected return schema will be as follows:
+  # Record<string (requirement_block_sku), {
+  #   id: string,
+  #   requirement_block_code: string (requirement_sku),
+  #   name: string,
+  #   description?: string,
+  #   requirements: Array<Record<requirement_sku, {
+  #                     id: string,
+  #                     name: string,
+  #                     requirement_code: string,
+  #                     type: string e.g. text, textarea, number, multi_contact, etc..,
+  #                     value: richtext | string | Array<{name, email, etc..}> | etc.., // the formatted value submitted
+  #                 }>>
+  #   }>
   def formatted_submission_data_for_external_use
     unless self.permit_application.submission_data.present? && self.permit_application.submission_data["data"].present?
       return {}
@@ -12,49 +27,19 @@ class ExternalPermitApplicationService
 
     cloned_submission_data = self.permit_application.submission_data["data"].deep_dup
 
-    cloned_submission_data.each do |section_key, section_value|
-      contact_submissions_to_merge = {}
-
-      section_value.each do |submitted_field_key, submitted_value|
-        unless !submitted_field_key.ends_with?("multi_contact") &&
-                 (
-                   submitted_field_key.include?("general_contact") ||
-                     submitted_field_key.include?("professional_contact")
-                 )
-          next
-        end
-
-        # create a new key and value pair, to collect non multi_contact contact field values
-        # into a single array of contact objects, similar to multi_contact contacts.
-        # This will enable us to have a consistent data structure for all contact submissions, making
-        # it easier to format the data
-        split_submitted_field_key = submitted_field_key.split("|")
-
-        contact_property_key = split_submitted_field_key.pop
-
-        formatted_requirement_key = split_submitted_field_key.join("|")
-
-        contact_submissions_to_merge[formatted_requirement_key] = [{}] unless contact_submissions_to_merge[
-          formatted_requirement_key
-        ].present?
-
-        contact_submissions_to_merge[formatted_requirement_key].first[contact_property_key] = submitted_value
-
-        cloned_submission_data[section_key].delete(submitted_field_key)
-      end
-
-      cloned_submission_data[section_key].merge!(contact_submissions_to_merge)
-    end
+    # formats single_contact submissions into array of contact objects, similar to the multi_contact submissions
+    process_single_contact_submission_data_to_common_format!(cloned_submission_data)
 
     formatted_submission_data = {}
 
     # first level key is the section_key, which we can ignore
-    # second level is the actual submitted values
-    cloned_submission_data.each do |section_key, section_value|
+    cloned_submission_data.each do |_section_key, section_value|
+      # second level includes the actual submitted values
       section_value.each do |submitted_field_key, submitted_value|
         # key is in the format "formSubmissionDataRSTsection6736da0b-860e-43e6-9823-86c7d6562f1e|RBc2683830-8fe1-4979
-        # -bd54-d6c993f3148c|building_project_value"
-        # The requirement_block_id is in the format |RB{id}|, so the id in the example is c2683830-8fe1-4979-bd54-d6c993f3148c
+        # -bd54-d6c993f3148c|building_project_value".
+        # The requirement_block_id is in the format {dynamic_prefix}|RB{id}|{dynamic_suffix}.
+        # So the requirement block id in the example is c2683830-8fe1-4979-bd54-d6c993f3148c, in the example above.
         submitted_field_key_split = submitted_field_key.split("|RB")
 
         next unless submitted_field_key_split.length > 1
@@ -65,6 +50,7 @@ class ExternalPermitApplicationService
 
         next unless requirement_block.present?
 
+        # set up the formatted requirement block data, with the key being the requirement sku
         if !formatted_submission_data.key?(requirement_block["sku"])
           formatted_submission_data[requirement_block["sku"]] = {
             id: requirement_block["id"],
@@ -77,32 +63,30 @@ class ExternalPermitApplicationService
 
         requirement =
           requirement_block["requirements"].find do |req|
-            req.dig("form_json", "key").ends_with?(submitted_field_key.split("|RB").last)
+            # The submission key format is
+            # `formSubmissionData{section_specific_prefix}|RB{requirement_block_id}|{requirement_ending_key}
+            # The section_specific_prefix for the key is dynamic based on template sections etc.
+            # So, the submission key will not be the same as the requirement form_json key.
+            # However, the end (|RB{requirement_block_id}|{ending_key}) of the submission key
+            # will be the same as the end of requirement form_json key
+            # So, we get the requirement using the ending_key.
+            common_ending_key = submitted_field_key.split("|RB").last
+
+            req.dig("form_json", "key").ends_with?(common_ending_key)
           end
 
         next unless requirement.present?
 
+        # Formatted submitted value by the submitter
         formatted_value =
           if submitted_field_key.to_s.ends_with?("multi_contact")
-            submitted_value.map do |contact_value|
-              formatted_contact_value = {}
-
-              contact_value.each do |contact_field_key, contact_field_value|
-                contact_field_key_split = contact_field_key.split("|")
-
-                next unless contact_field_key_split.length > 1
-
-                formatted_key = contact_field_key_split.last
-
-                formatted_contact_value[formatted_key] = contact_field_value
-              end
-
-              formatted_contact_value
-            end
+            get_formatted_multi_contact_submission_value(submitted_value)
           else
             submitted_value
           end
 
+        # add the requirement data and formatted submitted value to the requirement_block -> requirements array in the
+        # formatted_submission_data
         formatted_submission_data[requirement_block["sku"]][:requirements] << {
           id: requirement["id"],
           name: requirement["label"],
@@ -121,4 +105,80 @@ class ExternalPermitApplicationService
   end
 
   private
+
+  # single_contact submissions are not formatted in the same way as multi_contact submissions.
+  # The original submission data store's each single_contact properties as separate key value pairs.
+  # i.e ${prefix}|email, ${prefix}|phone, ${prefix}|name, etc. This makes it difficult to format the data.
+  # multi_contact submissions store all contact properties in a single object, making it easier to format the data.
+  # This method will format single_contact submissions similar to the multi_contact submissions, into array of contact
+  # objects. This will also delete the original single contact key value pairs from the submission data.
+  def process_single_contact_submission_data_to_common_format!(submission_data)
+    # first level key is the section_key, which we can ignore
+    submission_data.each do |section_key, section_value|
+      contact_submissions_to_merge = {}
+
+      # second level contains the actual submitted values with they keys being the formIo compatible keys.
+      # e.g. key format :"formSubmissionDataRSTsection6736da0b-860e-43e6-9823-86c7d6562f1e|RBc2683830-8fe1-4979-bd54-d6c993f3148c|building_project_value"
+      section_value.each do |submitted_field_key, submitted_value|
+        # skip unless the key is a contact field key and not a multi_contact field key.
+        unless !submitted_field_key.ends_with?("multi_contact") &&
+                 (
+                   submitted_field_key.include?("general_contact") ||
+                     submitted_field_key.include?("professional_contact")
+                 )
+          next
+        end
+
+        split_submitted_field_key = submitted_field_key.split("|")
+
+        # since submitted_field_key is in the format {prefix}|{contact_property_key}, we need to pop the last element
+        # to get the contact_property_key, e.g. email from {prefix}|email
+        # We also need to snake_case the contact_property_key as it is camelized in the submission data.
+        contact_property_key = split_submitted_field_key.pop.underscore
+
+        # the formatted key will be the prefix, which is the requirement key, e.g. {prefix} from {prefix}|email
+        formatted_requirement_key = split_submitted_field_key.join("|")
+
+        # create a new key and value pair, to collect the fragmented single_contact field values into a single array,
+        # with one contact object.
+
+        contact_submissions_to_merge[formatted_requirement_key] = [{}] unless contact_submissions_to_merge[
+          formatted_requirement_key
+        ].present?
+
+        contact_submissions_to_merge[formatted_requirement_key].first[contact_property_key] = submitted_value
+
+        # delete the original single_contact key value pair from the submission data
+        submission_data[section_key].delete(submitted_field_key)
+      end
+
+      # merge the single_contact formatted data with the original submission data
+      submission_data[section_key].merge!(contact_submissions_to_merge)
+    end
+  end
+
+  # The raw contact_array is an array of contact objects. However, the key of the contact object
+  # has a prefix that is not needed and prop is camelized. This method will remove the prefix from
+  # the key of each contact object and snake_case them.
+  # e.g [ { "{prefix}|email": val, "{prefix}|firstName": val ] to  [ { "email": val, "first_name": val ]
+  def get_formatted_multi_contact_submission_value(contact_array)
+    contact_array.map do |contact_value|
+      formatted_contact_value = {}
+
+      contact_value.each do |contact_field_key, contact_field_value|
+        contact_field_key_split = contact_field_key.split("|")
+
+        next unless contact_field_key_split.length > 1
+
+        # since contact_field_key is in the format {prefix}|{contact_property_key}, we need to pop the last element
+        # to get the contact_property_key, e.g. email from {prefix}|email
+        # We also need to snake_case the contact_property_key as it is camelized in the submission data.
+        formatted_key = contact_field_key_split.last.underscore
+
+        formatted_contact_value[formatted_key] = contact_field_value
+      end
+
+      formatted_contact_value
+    end
+  end
 end
