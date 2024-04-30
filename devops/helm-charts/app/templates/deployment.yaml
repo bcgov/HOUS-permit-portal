@@ -46,6 +46,11 @@ spec:
         - image: "image-registry.openshift-image-registry.svc:5000/{{ $.Values.OPENSHIFT_NAMESPACE }}-{{ $.Values.STAGE }}/{{ $.Values.STAGE }}-{{ $.Values.appName }}:latest"
           imagePullPolicy: Always
           name: "{{ $.Values.appName }}-{{ .process }}"
+          {{- if eq .process "web" }}
+          volumeMounts:
+            - name: log-volume
+              mountPath: /app/log
+          {{- end }}
           ports:
             - containerPort: 3000
               protocol: TCP
@@ -62,6 +67,12 @@ spec:
           - '-c'
           args: {{ .spec.containers.args }}
           {{- end }}
+      {{- if eq .process "web" }}
+      volumes:
+        - name: log-volume
+          persistentVolumeClaim:
+            claimName: compliance-log-pvc
+      {{- end }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
