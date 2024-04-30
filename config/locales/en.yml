@@ -150,6 +150,9 @@ en:
       confirmation_sent:
         title: Success
         message: You need to confirm your new email address. Please check your new email inbox.
+      reconfirmation_sent:
+        title: Confirmation email sent
+        message: Please click the link in your email inbox.
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed

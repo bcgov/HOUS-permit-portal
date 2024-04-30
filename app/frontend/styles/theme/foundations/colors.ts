@@ -14,6 +14,9 @@ export const colors = {
     blueShadedLight: "rgba(1, 51, 102, 0.40)",
     yellow: "#FCBA19",
     yellowLight: "#FEF2D6",
+    green: {
+      100: "#F5FFF8",
+    },
   },
   greys: {
     white: "#FFFFFF",

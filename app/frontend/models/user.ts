@@ -9,7 +9,10 @@ export const UserModel = types
   .props({
     id: types.identifier,
     email: types.maybeNull(types.string),
+    unconfirmedEmail: types.maybeNull(types.string),
     role: types.enumeration(Object.values(EUserRoles)),
+    bceidEmail: types.string,
+    bceidUsername: types.string,
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
     nickname: types.maybeNull(types.string),
@@ -81,6 +84,16 @@ export const UserModel = types
     }),
     acceptEULA: flow(function* () {
       const response = yield self.environment.api.acceptEULA(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
+      return response.ok
+    }),
+    resendConfirmation: flow(function* () {
+      const response = yield self.environment.api.resendConfirmation(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
       return response.ok
     }),
   }))
