@@ -8,6 +8,7 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAModal } from "../../shared/eula-modal"
+import { ExportTemplatesScreen } from "../jurisdictions/exports/export-templates-screen"
 import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 
@@ -256,6 +257,7 @@ const AppRoutes = observer(() => {
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
+      <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
         <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
       </Route>

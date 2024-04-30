@@ -291,3 +291,8 @@ export enum EEnabledElectiveFieldReason {
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
 }
+
+export enum EExportFormat {
+  csv = "csv",
+  json = "json",
+}

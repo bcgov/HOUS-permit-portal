@@ -2,7 +2,7 @@ import { flow } from "mobx"
 import { Instance, toGenerator, types } from "mobx-state-tree"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { withEnvironment } from "../lib/with-environment"
-import { ETemplateVersionStatus } from "../types/enums"
+import { EExportFormat, ETemplateVersionStatus } from "../types/enums"
 import { IDenormalizedTemplate } from "../types/types"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
@@ -12,6 +12,7 @@ export const TemplateVersionModel = types
     id: types.identifier,
     status: types.enumeration(Object.values(ETemplateVersionStatus)),
     versionDate: types.Date,
+    label: types.string,
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
@@ -78,6 +79,39 @@ export const TemplateVersionModel = types
       }
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
+    }),
+    downloadTemplateVersionExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
+      const mimeTypes = {
+        [EExportFormat.csv]: "text/csv",
+        [EExportFormat.json]: "text/plain",
+      }
+
+      const apiMethodNames = {
+        [EExportFormat.csv]: "downloadTemplateVersionCsv",
+        [EExportFormat.json]: "downloadTemplateVersionJson",
+      }
+
+      try {
+        const response = yield* toGenerator(self.environment.api[apiMethodNames[format]](self.id, jurisdictionId))
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = format === EExportFormat.json ? JSON.stringify(response.data, null, 2) : response.data
+        const blob = new Blob([blobData], { type: mimeTypes[format] })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `${self.label}.${format}`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+
+        return response
+      } catch (error) {
+        console.error(`Failed to download template version ${format}:`, error)
+        throw error
+      }
     }),
   }))
 

@@ -388,4 +388,12 @@ export class Api {
   async createContact(params: TCreateContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }
+
+  async downloadTemplateVersionJson(templateId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(`/template_versions/${templateId}/jurisdictions/${jurisdictionId}/download_json`)
+  }
+
+  async downloadTemplateVersionCsv(templateId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(`/template_versions/${templateId}/jurisdictions/${jurisdictionId}/download_csv`)
+  }
 }

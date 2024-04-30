@@ -250,6 +250,7 @@ const options = {
             tableHeading: "Local governments",
             users: "Users",
             externalApiKeys: "API settings",
+            exportTemplates: "Export templates",
             about: "About",
           },
           fields: {
@@ -1111,6 +1112,10 @@ const options = {
             },
             lastUpdated: "Last updated",
           },
+          export: {
+            downloadCsv: "Download CSV",
+            downloadJson: "Download JSON",
+          },
         },
         digitalBuildingPermits: {
           index: {
@@ -1289,6 +1294,7 @@ const options = {
             sitewideMessage: "Site-Wide Message",
             apiSettings: "API settings",
             create: "Create",
+            exportTemplates: "Export templates",
           },
           questionSupport: "Question support",
         },
