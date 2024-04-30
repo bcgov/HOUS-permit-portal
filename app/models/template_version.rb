@@ -11,6 +11,10 @@ class TemplateVersion < ApplicationRecord
 
   after_save :reindex_requirement_template_if_published, if: :status_changed?
 
+  def label
+    "#{permit_type.name} | #{activity.name} (#{version_date.to_s})"
+  end
+
   def lookup_props
     #form_json starts at root template
     flatten_requirements_from_form_hash(form_json)

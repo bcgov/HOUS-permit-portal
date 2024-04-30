@@ -11,6 +11,14 @@ class TemplateVersionPolicy < ApplicationPolicy
     true
   end
 
+  def download_csv?
+    show?
+  end
+
+  def download_json?
+    show?
+  end
+
   def create_or_update_jurisdiction_template_version_cutomization?
     user.review_manager? && record.jurisdiction_id == user.jurisdiction_id
   end
