@@ -3,8 +3,22 @@ class PermitApplication < ApplicationRecord
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
-  searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
-             word_start: %i[number nickname full_address permit_classifications submitter status]
+  searchkick searchable: %i[
+               number
+               nickname
+               full_address
+               permit_classifications
+               submitter
+               status
+             ],
+             word_start: %i[
+               number
+               nickname
+               full_address
+               permit_classifications
+               submitter
+               status
+             ]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
@@ -45,16 +59,21 @@ class PermitApplication < ApplicationRecord
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
-  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+  after_commit :zip_and_upload_supporting_documents,
+               if: :saved_change_to_status?
 
-  scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
+  scope :unviewed,
+        -> do
+          where(status: :submitted, viewed_at: nil).order(submitted_at: :asc)
+        end
 
   def force_update_published_template_version
     return unless Rails.env.development?
     # for development purposes only
 
     current_published_template_version.update(
-      form_json: current_published_template_version.requirement_template.to_form_json,
+      form_json:
+        current_published_template_version.requirement_template.to_form_json
     )
   end
 
@@ -69,13 +88,20 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
-      created_at: created_at,
+      created_at: created_at
     }
+  end
+
+  def formatted_permit_classifications
+    "#{permit_type.name} - #{activity.name}"
   end
 
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    RequirementTemplate.published_requirement_template_version(activity, permit_type)
+    RequirementTemplate.published_requirement_template_version(
+      activity,
+      permit_type
+    )
   end
 
   def form_customizations
@@ -138,127 +164,29 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
-    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
+    PermitHubMailer.notify_submitter_application_submitted(
+      submitter,
+      self
+    ).deliver_later
+    jurisdiction.users.each do |user|
+      PermitHubMailer.notify_reviewer_application_received(
+        user,
+        self
+      ).deliver_later
+    end
   end
 
   def formatted_submission_data_for_external_use
-    return unless submission_data.present? && submission_data["data"].present?
-
-    cloned_submission_data = submission_data["data"].deep_dup
-
-    cloned_submission_data.each do |section_key, section_value|
-      contact_submissions_to_merge = {}
-
-      section_value.each do |submitted_field_key, submitted_value|
-        unless !submitted_field_key.ends_with?("multi_contact") &&
-                 (
-                   submitted_field_key.include?("general_contact") ||
-                     submitted_field_key.include?("professional_contact")
-                 )
-          next
-        end
-
-        # create a new key and value pair, to collect non multi_contact contact field values
-        # into a single array of contact objects, similar to multi_contact contacts.
-        # This will enable us to have a consistent data structure for all contact submissions, making
-        # it easier to format the data
-        split_submitted_field_key = submitted_field_key.split("|")
-
-        contact_property_key = split_submitted_field_key.pop
-
-        formatted_requirement_key = split_submitted_field_key.join("|")
-
-        contact_submissions_to_merge[formatted_requirement_key] = [{}] unless contact_submissions_to_merge[
-          formatted_requirement_key
-        ].present?
-
-        contact_submissions_to_merge[formatted_requirement_key].first[contact_property_key] = submitted_value
-
-        cloned_submission_data[section_key].delete(submitted_field_key)
-      end
-
-      cloned_submission_data[section_key].merge!(contact_submissions_to_merge)
-    end
-
-    formatted_submission_data = {}
-
-    # first level key is the section_key, which we can ignore
-    # second level is the actual submitted values
-    cloned_submission_data.each do |section_key, section_value|
-      section_value.each do |submitted_field_key, submitted_value|
-        # key is in the format "formSubmissionDataRSTsection6736da0b-860e-43e6-9823-86c7d6562f1e|RBc2683830-8fe1-4979
-        # -bd54-d6c993f3148c|building_project_value"
-        # The requirement_block_id is in the format |RB{id}|, so the id in the example is c2683830-8fe1-4979-bd54-d6c993f3148c
-        submitted_field_key_split = submitted_field_key.split("|RB")
-
-        next unless submitted_field_key_split.length > 1
-
-        requirement_block_id = submitted_field_key_split.last.split("|").first
-
-        requirement_block = get_requirement_block_json(requirement_block_id)
-
-        next unless requirement_block.present?
-
-        if !formatted_submission_data.key?(requirement_block["sku"])
-          formatted_submission_data[requirement_block["sku"]] = {
-            id: requirement_block["id"],
-            requirement_block_code: requirement_block["sku"],
-            name: requirement_block["name"],
-            description: requirement_block["description"],
-            requirements: [],
-          }
-        end
-
-        requirement =
-          requirement_block["requirements"].find do |req|
-            req.dig("form_json", "key").ends_with?(submitted_field_key.split("|RB").last)
-          end
-
-        next unless requirement.present?
-
-        formatted_value =
-          if submitted_field_key.to_s.ends_with?("multi_contact")
-            submitted_value.map do |contact_value|
-              formatted_contact_value = {}
-
-              contact_value.each do |contact_field_key, contact_field_value|
-                contact_field_key_split = contact_field_key.split("|")
-
-                next unless contact_field_key_split.length > 1
-
-                formatted_key = contact_field_key_split.last
-
-                formatted_contact_value[formatted_key] = contact_field_value
-              end
-
-              formatted_contact_value
-            end
-          else
-            submitted_value
-          end
-
-        formatted_submission_data[requirement_block["sku"]][:requirements] << {
-          id: requirement["id"],
-          name: requirement["label"],
-          requirement_code: requirement["requirement_code"],
-          type: requirement["input_type"],
-          value: formatted_value,
-        }
-      end
-    end
-
-    formatted_submission_data
-  end
-
-  def get_requirement_block_json(requirement_block_id)
-    self.template_version.requirement_blocks_json[requirement_block_id]
+    ExternalPermitApplicationService.new(
+      self
+    ).formatted_submission_data_for_external_use
   end
 
   private
 
   def assign_default_nickname
-    self.nickname = "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+    self.nickname =
+      "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number
@@ -297,7 +225,7 @@ class PermitApplication < ApplicationRecord
           number_prefix,
           new_integer / 1_000_000 % 1000,
           new_integer / 1000 % 1000,
-          new_integer % 1000,
+          new_integer % 1000
         )
     else
       # Start with the initial number if there are no previous numbers
@@ -327,7 +255,8 @@ class PermitApplication < ApplicationRecord
     return if new_record?
     viewed_at_change = previous_changes.dig("viewed_at")
     # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
-    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
+    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) ||
+         saved_change_to_reference_number?
       PermitHubMailer.notify_application_updated(submitter, self).deliver_later
     end
   end
@@ -346,23 +275,39 @@ class PermitApplication < ApplicationRecord
 
   def submitter_must_have_role
     unless submitter&.submitter?
-      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+      errors.add(
+        :submitter,
+        I18n.t(
+          "errors.models.permit_application.attributes.submitter.incorrect_role"
+        )
+      )
     end
   end
 
   def jurisdiction_has_matching_submission_contact
-    matching_contacts = PermitTypeSubmissionContact.where(jurisdiction: jurisdiction, permit_type: permit_type)
+    matching_contacts =
+      PermitTypeSubmissionContact.where(
+        jurisdiction: jurisdiction,
+        permit_type: permit_type
+      )
     if matching_contacts.empty?
       errors.add(
         :jurisdiction,
-        I18n.t("activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"),
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
+        )
       )
     end
   end
 
   def pid_or_pin_presence
     if pin.blank? && pid.blank?
-      errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
+      errors.add(
+        :base,
+        I18n.t(
+          "activerecord.errors.models.permit_application.attributes.pid_or_pin"
+        )
+      )
     end
   end
 end
