@@ -28,7 +28,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
-    fields :form_json, :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
+    fields :form_json,
+           :submission_data,
+           :formatted_compliance_data,
+           :front_end_form_update,
+           :form_customizations
 
     field :is_fully_loaded do |pa, options|
       true
@@ -43,5 +47,31 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :compliance_update do
     identifier :id
     fields :formatted_compliance_data, :front_end_form_update
+  end
+
+  view :external_api do
+    identifier :id
+    fields :nickname,
+           :status,
+           :number,
+           :full_address,
+           :pid,
+           :pin,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
+           :reference_number,
+           :submitted_at
+
+    field :submission_data do |pa, _options|
+      pa.formatted_submission_data_for_external_use
+    end
+
+    field :permit_classifications do |pa, _options|
+      pa.formatted_permit_classifications
+    end
+
+    association :permit_type, blueprint: PermitClassificationBlueprint
+    association :activity, blueprint: PermitClassificationBlueprint
   end
 end
