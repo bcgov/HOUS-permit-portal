@@ -21,7 +21,6 @@ import {
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
-  IUserResponse,
   IUsersResponse,
 } from "../../types/api-responses"
 import {
@@ -63,8 +62,8 @@ export class Api {
     this.client.addMonitor(monitor)
   }
 
-  async signUp(formData) {
-    return this.client.post<IUserResponse>("/signup", { user: formData })
+  async resendConfirmation(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
   async logout() {

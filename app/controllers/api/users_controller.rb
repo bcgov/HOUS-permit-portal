@@ -4,7 +4,7 @@ class Api::UsersController < Api::ApplicationController
   before_action :find_user, only: %i[destroy restore accept_eula update]
   skip_after_action :verify_policy_scoped, only: %i[index]
   skip_before_action :require_confirmation, only: %i[profile]
-  skip_before_action :require_confirmation, only: %i[accept_eula]
+  skip_before_action :require_confirmation, only: %i[accept_eula resend_confirmation]
 
   def index
     authorize :user, :index?
@@ -39,12 +39,17 @@ class Api::UsersController < Api::ApplicationController
     @user = current_user
     authorize current_user
 
+    # allow user to change back to original confirmed email
+    # https://github.com/heartcombo/devise/issues/5470
+    current_user.unconfirmed_email = nil if profile_params[:email] == current_user.email
+
     if current_user.update(profile_params)
-      current_user.send_confirmation_instructions if @user.confirmed_at.blank?
+      should_send_confirmation = @user.confirmed_at.blank? && @user.confirmation_sent_at.blank?
+      current_user.send_confirmation_instructions if should_send_confirmation
       render_success(
         current_user,
         (
-          if email_changed? || @user.confirmed_at.blank?
+          if email_changed? || should_send_confirmation
             "user.confirmation_sent"
           else
             "user.update_success"
@@ -82,6 +87,12 @@ class Api::UsersController < Api::ApplicationController
       agreement: EndUserLicenseAgreement.active_agreement(@user.eula_variant),
     )
     render_success @user, "user.eula_accepted", { blueprint_opts: { view: :current_user } }
+  end
+
+  def resend_confirmation
+    authorize current_user
+    current_user.resend_confirmation_instructions
+    render_success(current_user, "user.reconfirmation_sent")
   end
 
   private

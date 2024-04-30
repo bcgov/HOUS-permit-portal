@@ -117,6 +117,8 @@ const options = {
           browseList: "Browse list of jurisdictions",
         },
         ui: {
+          verified: "Verified",
+          unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
           preview: "Preview",
@@ -184,6 +186,7 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
+          emailPlaceholder: "email@example.com",
         },
         eula: {
           title: "End-User License Agreement",
@@ -989,8 +992,20 @@ const options = {
             inviteButton: "Invite users",
           },
           changeRole: "Change role",
+          newEmail: "New notification email address",
+          changeEmail: "Change email",
           addUser: "Add more emails",
           invite: "Invite",
+          bceid: "BCeID",
+          bceidEmail: "BCeID email address",
+          changeBceid: "If you want to change your BCeID information, please go to ",
+          changeBceidLinkText: "bceid.ca",
+          confirmationRequiredWithEmail:
+            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn’t receive it? <1>Resend email</1>)",
+          confirmationRequired:
+            "Action required: please click the link in the verification email that was sent to you. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
+          receiveNotifications: "Receive notifications",
+          notificationsEmail: "Notification email address",
           firstName: "First name",
           lastName: "Last name",
           myProfile: "My profile",

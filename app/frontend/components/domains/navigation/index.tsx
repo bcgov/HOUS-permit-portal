@@ -7,7 +7,7 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { EULAModal } from "../../shared/eula-modal"
+import { EULAScreen } from "../onboarding/eula"
 import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 
@@ -26,9 +26,6 @@ const EmailConfirmedScreen = lazy(() =>
 )
 const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
-)
-const RegisterScreen = lazy(() =>
-  import("../authentication/register-screen").then((module) => ({ default: module.RegisterScreen }))
 )
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 const ConfigurationManagementScreen = lazy(() =>
@@ -185,7 +182,6 @@ export const Navigation = observer(() => {
         </Center>
       )}
       <NavBar />
-      <EULAModal />
 
       {isValidating ? (
         <LoadingScreen />
@@ -307,7 +303,16 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
-        {loggedIn && !currentUser.isUnconfirmed ? (
+        {loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin ? (
+          // Onboarding step 1: EULA
+          <Route path="/" element={<EULAScreen />} />
+        ) : loggedIn && currentUser.isUnconfirmed ? (
+          // Onboarding step 2: confirm email
+          <>
+            <Route path="/" element={<ProfileScreen />} />
+          </>
+        ) : loggedIn ? (
+          // Onboarding complete
           <>
             <Route path="/" element={<HomeScreen />} />
             <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
@@ -320,17 +325,15 @@ const AppRoutes = observer(() => {
             {currentUser?.isSubmitter && submitterOnlyRoutes}
             {currentUser?.isReviewManager && reviewManagerOnlyRoutes}
           </>
-        ) : loggedIn ? (
-          <>
-            <Route path="/" element={<RegisterScreen />} />
-          </>
         ) : (
+          // Logged out
           <>
             <Route path="/" element={<RedirectScreen path="/welcome" />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           </>
         )}
+        {/* Public Routes */}
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />

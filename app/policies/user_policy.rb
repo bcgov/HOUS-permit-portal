@@ -40,6 +40,10 @@ class UserPolicy < ApplicationPolicy
     profile?
   end
 
+  def resend_confirmation?
+    profile?
+  end
+
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     # def resolve

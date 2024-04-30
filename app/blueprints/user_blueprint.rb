@@ -2,8 +2,11 @@ class UserBlueprint < Blueprinter::Base
   identifier :id
 
   fields :email,
+         :unconfirmed_email,
          :nickname,
          :role,
+         :bceid_username,
+         :bceid_email,
          :first_name,
          :last_name,
          :certified,
