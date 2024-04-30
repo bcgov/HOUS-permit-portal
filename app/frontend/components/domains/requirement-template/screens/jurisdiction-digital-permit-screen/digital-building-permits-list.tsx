@@ -1,20 +1,28 @@
-import { Box, Button, Center, Flex, Link, Stack, Text } from "@chakra-ui/react"
+import { Button, Flex, HStack, Stack, Text } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { useTemplateVersions } from "../../../../../hooks/resources/use-template-versions"
+import { ITemplateVersion } from "../../../../../models/template-version"
+import { ETemplateVersionStatus } from "../../../../../types/enums"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { RouterLink } from "../../../../shared/navigation/router-link"
+import { TemplateStatusTag } from "../../../../shared/requirement-template/template-status-tag"
+import { Can } from "../../../../shared/user/can"
 import { VersionTag } from "../../../../shared/version-tag"
 import { SectionBox } from "../../../home/section-box"
 
 interface IProps {
   activityId?: string
+  renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
 }
 
-export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({ activityId }: IProps) {
+export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({
+  activityId,
+  renderButton,
+}: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, hasLoaded } = useTemplateVersions({
     activityId,
@@ -48,34 +56,38 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                   </Text>
                   {format(templateVersion.updatedAt, "MMM d, yyyy")}
                 </Text>
-                <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
+                <HStack gap={4} align="center">
+                  <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
+                  <Can action="requirementTemplate:manage">
+                    <TemplateStatusTag
+                      status={templateVersion.status}
+                      scheduledFor={
+                        templateVersion.status === ETemplateVersionStatus.scheduled && templateVersion.versionDate
+                          ? templateVersion.versionDate
+                          : undefined
+                      }
+                    />
+                  </Can>
+                </HStack>
               </Stack>
 
-              <Button
-                to={`/digital-building-permits/${templateVersion.id}/edit`}
-                as={RouterLink}
-                variant={"primary"}
-                ml={4}
-                alignSelf={"center"}
-              >
-                {t("ui.manage")}
-              </Button>
+              {renderButton ? (
+                renderButton(templateVersion)
+              ) : (
+                <Button
+                  to={`/digital-building-permits/${templateVersion.id}/edit`}
+                  as={RouterLink}
+                  variant={"primary"}
+                  ml={4}
+                  alignSelf={"center"}
+                >
+                  {t("ui.manage")}
+                </Button>
+              )}
             </Flex>
           </SectionBox>
         )
       })}
-      <Center>
-        <Box bg="greys.grey03" p={4} w="75%" mt={24}>
-          <Trans
-            i18nKey="digitalBuildingPermits.index.requestNewPromptWithLink"
-            components={{
-              // This is the component that replaces the <1></1> in your i18n string.
-              // It's an array where each index corresponds to the placeholder number.
-              1: <Link href={`mailto:digital.codes.permits@gov.bc.ca?subject=New%20permit%20type%20requested`}></Link>,
-            }}
-          />
-        </Box>
-      </Center>
     </Stack>
   )
 })

@@ -118,6 +118,7 @@ const options = {
           create: "Create",
           tip: "Tip",
           manage: "Manage",
+          export: "Export",
           preview: "Preview",
           back: "Back",
           backHome: "Back to home",
@@ -1113,6 +1114,7 @@ const options = {
             lastUpdated: "Last updated",
           },
           export: {
+            title: "Export Templates",
             downloadCsv: "Download CSV",
             downloadJson: "Download JSON",
           },
