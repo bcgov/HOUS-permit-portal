@@ -2,6 +2,7 @@ import { flow } from "mobx"
 import { Instance, toGenerator, types } from "mobx-state-tree"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { withEnvironment } from "../lib/with-environment"
+import { withRootStore } from "../lib/with-root-store"
 import { EExportFormat, ETemplateVersionStatus } from "../types/enums"
 import { IDenormalizedTemplate } from "../types/types"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
@@ -19,6 +20,7 @@ export const TemplateVersionModel = types
     isFullyLoaded: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
+  .extend(withRootStore())
   .views((self) => ({
     get isPublished() {
       return self.status === ETemplateVersionStatus.published
@@ -81,6 +83,7 @@ export const TemplateVersionModel = types
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
     }),
     downloadTemplateVersionExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
+      const jurisdiction = self.rootStore.jurisdictionStore.getJurisdictionById(jurisdictionId)
       const mimeTypes = {
         [EExportFormat.csv]: "text/csv",
         [EExportFormat.json]: "text/plain",
@@ -102,7 +105,7 @@ export const TemplateVersionModel = types
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = `${self.label}.${format}`
+        a.download = `${jurisdiction.qualifiedName} - ${self.label}.${format}`
         document.body.appendChild(a)
         a.click()
         a.remove()

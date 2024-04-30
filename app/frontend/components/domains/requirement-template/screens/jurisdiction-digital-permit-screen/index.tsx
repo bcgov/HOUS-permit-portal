@@ -1,7 +1,20 @@
-import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, TabProps, Tabs, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Center,
+  Container,
+  Heading,
+  Link,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  TabProps,
+  Tabs,
+  Text,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../../hooks/resources/use-activity-options"
 import { useMst } from "../../../../../setup/root"
@@ -98,6 +111,22 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
             {enabledActivityOptions.map((activityOption) => (
               <TabPanel key={activityOption.value.id} w="100%" pt={0}>
                 <DigitalBuildingPermitsList activityId={activityOption.value.id} />
+                <Center>
+                  <Box bg="greys.grey03" p={4} w="75%" mt={24}>
+                    <Trans
+                      i18nKey="digitalBuildingPermits.index.requestNewPromptWithLink"
+                      components={{
+                        // This is the component that replaces the <1></1> in your i18n string.
+                        // It's an array where each index corresponds to the placeholder number.
+                        1: (
+                          <Link
+                            href={`mailto:digital.codes.permits@gov.bc.ca?subject=New%20permit%20type%20requested`}
+                          ></Link>
+                        ),
+                      }}
+                    />
+                  </Box>
+                </Center>
               </TabPanel>
             ))}
           </TabPanels>

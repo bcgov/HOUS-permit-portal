@@ -57,25 +57,17 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def download_csv
-    authorize @template_version, :show?
+    authorize @template_version
 
-    return head :not_found if @jurisdiction_template_version_customization.blank?
-
-    authorize @jurisdiction_template_version_customization, policy_class: TemplateVersionPolicy
-
-    csv_data = @jurisdiction_template_version_customization.to_csv
-    send_data csv_data, filename: "#{@jurisdiction_template_version_customization.label}.csv", type: "text/csv"
+    csv_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_csv
+    send_data csv_data, type: "text/csv"
   end
 
   def download_json
-    authorize @template_version, :show?
+    authorize @template_version
 
-    return head :not_found if @jurisdiction_template_version_customization.blank?
-
-    authorize @jurisdiction_template_version_customization, policy_class: TemplateVersionPolicy
-
-    json_data = @jurisdiction_template_version_customization.to_json
-    send_data json_data, filename: "#{@jurisdiction_template_version_customization.label}.json", type: "text/plain"
+    json_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_json
+    send_data json_data, type: "text/plain"
   end
 
   private
