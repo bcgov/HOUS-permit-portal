@@ -20,7 +20,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -158,6 +158,15 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               {t("landing.whenNotNecessaryQ")}
             </Heading>
             <Text>{t("landing.whenNotNecessaryA")}</Text>
+
+            <Text>
+              <Trans
+                i18nKey="landing.permitConnect"
+                components={{
+                  1: <Link href={"https://permitconnectbc.gov.bc.ca/"}></Link>,
+                }}
+              />
+            </Text>
           </VStack>
         </Container>
       </Box>
