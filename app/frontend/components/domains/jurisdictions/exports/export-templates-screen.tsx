@@ -8,12 +8,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  Tab,
-  TabList,
   TabPanel,
-  TabPanels,
-  TabProps,
-  Tabs,
   Text,
 } from "@chakra-ui/react"
 import { BracketsCurly, Export, FileCsv } from "@phosphor-icons/react"
@@ -23,43 +18,14 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
-import { useMst } from "../../../../setup/root"
 import { EExportFormat } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { DigitalBuildingPermitsList } from "../../requirement-template/screens/jurisdiction-digital-permit-screen/digital-building-permits-list"
-
-const sharedTabTextStyles = {
-  fontSize: "md",
-  px: 6,
-  py: 2,
-  w: "full",
-}
-
-const selectedTabStyles = {
-  color: "text.link",
-  bg: "theme.blueLight",
-  borderLeft: "4px solid",
-  borderColor: "theme.blue",
-  fontWeight: 700,
-}
-
-const tabStyles: TabProps = {
-  ...sharedTabTextStyles,
-  borderLeft: "none",
-  justifyContent: "flex-start",
-  _active: {
-    ...selectedTabStyles,
-  },
-  _selected: {
-    ...selectedTabStyles,
-  },
-}
+import { ActivityTabSwitcher } from "../../requirement-template/activity-tab-switcher"
+import { DigitalBuildingPermitsList } from "../../requirement-template/digital-building-permits-list"
 
 export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
-  const { templateVersionStore } = useMst()
-  const { templateVersions, fetchTemplateVersions } = templateVersionStore
   const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
     customErrorMessage: t("errors.fetchWorkTypeOptions"),
   })
@@ -81,14 +47,10 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
     navigateToActivityTab(firstActivityId, true)
   }, [activityId, enabledActivityOptions, activityOptionsError])
 
-  const { currentJurisdiction, error } = useJurisdiction()
-
-  useEffect(() => {
-    fetchTemplateVersions()
-  }, [])
+  const { currentJurisdiction, error: jurisdictionError } = useJurisdiction()
 
   if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
-  if (error) return <ErrorScreen error={error} />
+  if (jurisdictionError) return <ErrorScreen error={jurisdictionError} />
   if (!currentJurisdiction || !enabledActivityOptions || (enabledActivityOptions && !activityId))
     return <LoadingScreen />
 
@@ -107,60 +69,45 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
         <Text color="text.secondary" my={6}>
           {t("digitalBuildingPermits.index.selectPermit")}
         </Text>
-        <Tabs orientation="vertical" as="article" index={selectedTabIndex} isLazy>
-          <TabList borderLeft="none" w="200px">
-            <Text as="h2" {...sharedTabTextStyles} fontWeight={700}>
-              {t("digitalBuildingPermits.index.workType")}
-            </Text>
-            {enabledActivityOptions.map((activityOption) => (
-              <Tab
-                key={activityOption.value.id}
-                onClick={() => navigateToActivityTab(activityOption.value.id)}
-                {...tabStyles}
-              >
-                {activityOption.label}
-              </Tab>
-            ))}
-          </TabList>
-          <TabPanels flex={1}>
-            {enabledActivityOptions.map((activityOption) => (
-              <TabPanel key={activityOption.value.id} w="100%" pt={0}>
-                <DigitalBuildingPermitsList
-                  activityId={activityOption.value.id}
-                  renderButton={(templateVersion) => (
-                    <Menu>
-                      <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
-                        {t("ui.export")}
-                      </MenuButton>
-                      <MenuList>
-                        <MenuItem
-                          onClick={() =>
-                            templateVersion.downloadTemplateVersionExport(currentJurisdiction.id, EExportFormat.csv)
-                          }
-                        >
-                          <HStack spacing={2} fontSize={"sm"}>
-                            <FileCsv size={24} />
-                            <Text as={"span"}>{t("requirementTemplate.export.downloadCsv")}</Text>
-                          </HStack>
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() =>
-                            templateVersion.downloadTemplateVersionExport(currentJurisdiction.id, EExportFormat.json)
-                          }
-                        >
-                          <HStack spacing={2} fontSize={"sm"}>
-                            <BracketsCurly size={24} />
-                            <Text as={"span"}>{t("requirementTemplate.export.downloadJson")}</Text>
-                          </HStack>
-                        </MenuItem>
-                      </MenuList>
-                    </Menu>
-                  )}
-                />
-              </TabPanel>
-            ))}
-          </TabPanels>
-        </Tabs>
+
+        <ActivityTabSwitcher
+          selectedTabIndex={selectedTabIndex}
+          navigateToActivityTab={navigateToActivityTab}
+          enabledActivityOptions={enabledActivityOptions}
+        >
+          {enabledActivityOptions.map((activityOption) => (
+            <TabPanel key={activityOption.value.id} w="100%" pt={0}>
+              <DigitalBuildingPermitsList
+                activityId={activityOption.value.id}
+                renderButton={(templateVersion) => (
+                  <Menu>
+                    <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
+                      {t("ui.export")}
+                    </MenuButton>
+                    <MenuList>
+                      <MenuItem
+                        onClick={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.csv)}
+                      >
+                        <HStack spacing={2} fontSize={"sm"}>
+                          <FileCsv size={24} />
+                          <Text as={"span"}>{t("requirementTemplate.export.downloadCsv")}</Text>
+                        </HStack>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.json)}
+                      >
+                        <HStack spacing={2} fontSize={"sm"}>
+                          <BracketsCurly size={24} />
+                          <Text as={"span"}>{t("requirementTemplate.export.downloadJson")}</Text>
+                        </HStack>
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                )}
+              />
+            </TabPanel>
+          ))}
+        </ActivityTabSwitcher>
       </Box>
     </Container>
   )

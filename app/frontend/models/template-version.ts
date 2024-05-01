@@ -82,7 +82,7 @@ export const TemplateVersionModel = types
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
     }),
-    downloadTemplateVersionExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
+    downloadExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
       const jurisdiction = self.rootStore.jurisdictionStore.getJurisdictionById(jurisdictionId)
       const mimeTypes = {
         [EExportFormat.csv]: "text/csv",
