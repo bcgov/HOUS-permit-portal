@@ -1,7 +1,8 @@
-import { Button, Divider, Flex, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
-import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
+import { Button, Divider, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { BasicBCeIDInfo } from "../../shared/bceid/basic"
+import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
 
@@ -47,53 +48,9 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
           {t("auth.bceidInfo.heading")}
         </Heading>
 
-        <Flex direction="column" gap={2} p={6} rounded="sm" borderWidth={1} borderColor="border.light">
-          <Heading as="h3" m={0}>
-            {t("auth.bceidInfo.basic.title")}
-          </Heading>
-          <Text fontSize="sm">{t("auth.bceidInfo.basic.description")}</Text>
-          <UnorderedList fontSize="sm" pl={2}>
-            <ListItem>{t("auth.bceidInfo.basic.homeownerAgent")}</ListItem>
-            <ListItem>{t("auth.bceidInfo.basic.architectContractor")}</ListItem>
-          </UnorderedList>
-          <Button
-            as={Link}
-            href={import.meta.env.VITE_BASIC_BCEID_REGISTRATION_URL}
-            isExternal
-            variant="secondary"
-            rightIcon={<ArrowSquareOut />}
-            mt={2}
-          >
-            {t("auth.bceidInfo.basic.register")}
-          </Button>
-        </Flex>
+        <BasicBCeIDInfo />
+        <BusinessBCeIDInfo />
 
-        <Flex direction="column" gap={2} p={6} rounded="sm" borderWidth={1} borderColor="border.light">
-          <Heading as="h3" m={0}>
-            {t("auth.bceidInfo.business.title")}
-          </Heading>
-          <Text fontSize="sm">{t("auth.bceidInfo.business.description")}</Text>
-          <UnorderedList fontSize="sm" pl={2}>
-            <ListItem>{t("auth.bceidInfo.business.localGov")}</ListItem>
-            <ListItem>{t("auth.bceidInfo.business.company")}</ListItem>
-            <ListItem>{t("auth.bceidInfo.business.nonProfit")}</ListItem>
-            <ListItem>{t("auth.bceidInfo.business.education")}</ListItem>
-          </UnorderedList>
-          {/* TODO: link to CMS Page */}
-          <Button variant="link" as={Link} href="" rightIcon={<CaretRight />}>
-            {t("auth.bceidInfo.business.seeMore")}
-          </Button>
-          <Button
-            as={Link}
-            href={import.meta.env.VITE_BUSINESS_BCEID_REGISTRATION_URL}
-            isExternal
-            variant="secondary"
-            rightIcon={<ArrowSquareOut />}
-            mt={2}
-          >
-            {t("auth.bceidInfo.business.register")}
-          </Button>
-        </Flex>
         <HelpDrawer
           renderTriggerButton={({ onClick }) => (
             <Button variant="link" onClick={onClick}>
