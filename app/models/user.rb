@@ -81,35 +81,6 @@ class User < ApplicationRecord
     end
   end
 
-  def self.from_omniauth(auth)
-    find_or_create_by(
-      auth_provider: auth.extra.raw_info.identity_provider,
-      bceid_user_guid: auth.extra.raw_info.bceid_user_guid,
-    ) do |user|
-      user.password = Devise.friendly_token[0, 20]
-      # BCeID readonly info
-      user.bceid_email = auth.info.email
-      user.bceid_username = auth.extra.raw_info.bceid_username
-
-      # TMP to allow for registration (to be removed when onboarding flow is added)
-      user.email = auth.info.email
-
-      # skip confirmation until user has a chance to add/verify their profile info
-      user.skip_confirmation_notification!
-    end
-  end
-
-  def accept_invitation_with_omniauth(auth)
-    update(
-      password: Devise.friendly_token[0, 20],
-      auth_provider: auth.extra.raw_info.identity_provider,
-      bceid_user_guid: auth.extra.raw_info.bceid_user_guid,
-      bceid_email: auth.info.email,
-      bceid_username: auth.extra.raw_info.bceid_username,
-    )
-    accept_invitation! if valid?
-  end
-
   def staff?
     reviewer? || review_manager? || super_admin?
   end
