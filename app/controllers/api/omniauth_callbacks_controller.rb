@@ -32,6 +32,6 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     return @invited_user if @invited_user
     origin_query = Rack::Utils.parse_nested_query(URI(request.env["omniauth.origin"]).query)
     return unless origin_query["invitation_token"].present?
-    @invited_user = User.find(JSON.parse(origin_query["user"])["id"])
+    @invited_user = User.find_by_invitation_token(origin_query["invitation_token"], true)
   end
 end

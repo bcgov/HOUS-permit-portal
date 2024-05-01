@@ -46,7 +46,6 @@ const options = {
           submit: "Submit",
           or: "or",
           bceid_login: "Login with BCeID",
-          accept_invite_with_bceid: "Connect with BCeID",
           role: "Role",
           nicknameLabel: "Nickname",
           emailLabel: "Email address",
@@ -996,6 +995,11 @@ const options = {
           changeEmail: "Change email",
           addUser: "Add more emails",
           invite: "Invite",
+          invitedBy: "<strong>{{email}}</strong> has invited you to join:",
+          invitedAs: "as a",
+          invitationIntent:
+            "This invitation is intended for <strong>{{email}}</strong>, if this is incorrect please contact the sender above.",
+          createAccount: "Create your account",
           bceid: "BCeID",
           bceidEmail: "BCeID email address",
           changeBceid: "If you want to change your BCeID information, please go to ",
@@ -1019,7 +1023,7 @@ const options = {
           takenErrorDescription:
             "One or more of the requested users have an existing account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
           sendInvites: "Send invites",
-          acceptInvitation: "Accept invitation to",
+          acceptInvitation: "Accept invitation",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
