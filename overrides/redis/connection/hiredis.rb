@@ -1,4 +1,3 @@
-# lib/redis/connection/hiredis.rb
 class Redis::Connection::Hiredis
   # This class intentionally left blank to shadow the actual 'hiredis' gem
 
