@@ -73,6 +73,7 @@ gem "nokogiri", ">= 1.15.6"
 gem "rdoc", ">= 6.6.3.1"
 gem "rack", ">= 3.0.9.1"
 gem "uppy-s3_multipart", "~> 1.2"
+gem "simple-feed", "~> 3.1.2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
