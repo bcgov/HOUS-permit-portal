@@ -10,7 +10,7 @@ class TemplateSectionBlock < ApplicationRecord
   private
 
   def validate_block_uniqueness_on_template
-    return unless duplicate_requirement_block_on_template_exits?
+    return unless duplicate_requirement_block_on_template_exists?
 
     errors.add(
       :requirement_block,
@@ -22,7 +22,7 @@ class TemplateSectionBlock < ApplicationRecord
     )
   end
 
-  def duplicate_requirement_block_on_template_exits?
+  def duplicate_requirement_block_on_template_exists?
     requirement_template
       .requirement_template_sections
       .joins(:template_section_blocks)
