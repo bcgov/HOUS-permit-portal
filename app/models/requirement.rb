@@ -120,6 +120,47 @@ class Requirement < ApplicationRecord
     key.split("|").second
   end
 
+  def aggregate_values_from_submissions
+    # Initialize a hash to store all values for this requirement across PermitApplications from the past year
+    values = []
+
+    # Fetch only PermitApplications created within the last year
+    PermitApplication
+      .where("created_at >= ?", 1.year.ago)
+      .find_each do |permit_application|
+        # Iterate over each section to dive deeper into submission keys
+        permit_application.submission_data["data"].each do |section, data|
+          # Extract all keys from this section's data that contain this requirement's ID
+          matching_keys =
+            data.keys.select do |key|
+              requirement_id_from_key = self.class.extract_requirement_id_from_submission_key(key)
+              requirement_id_from_key == self.id.to_s
+            end
+
+          # Collect values for the matching keys
+          matching_keys.each do |key|
+            value = data[key]
+            values << value unless value.nil?
+          end
+        end
+      end
+
+    # Determine the result based on the type of the values collected
+    return nil if values.empty?
+
+    # Check the data types of the values collected
+    if values.all? { |v| v.is_a?(String) }
+      # Return the most common string
+      values.group_by(&:itself).max_by { |_k, v| v.size }.first
+    elsif values.all? { |v| v.is_a?(Numeric) }
+      # Calculate the average of numbers
+      values.sum(0.0) / values.size
+    else
+      # Return nil for mixed or unprocessable types
+      nil
+    end
+  end
+
   private
 
   def using_dummied_requirement_code
