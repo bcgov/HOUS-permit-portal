@@ -2,6 +2,8 @@ class Requirement < ApplicationRecord
   include HtmlSanitizeAttributes
   sanitizable :hint
 
+  scope :electives, -> { where(elective: true) }
+
   belongs_to :requirement_block, touch: true
 
   acts_as_list scope: :requirement_block, top_of_list: 0
@@ -84,6 +86,38 @@ class Requirement < ApplicationRecord
     # TODO: false for now, but will be implemented in the future when
     # custom data validation is added
     false
+  end
+
+  def count_of_jurisdictions_using
+    JurisdictionTemplateVersionCustomization
+      .joins(:template_version)
+      .where(template_versions: { status: "published" })
+      .where(
+        "customizations -> 'requirement_block_changes' -> :requirement_id -> 'enabled_elective_field_ids' @> :id",
+        requirement_id: id.to_s,
+        id: "[\"#{id}\"]",
+      )
+      .count
+  end
+
+  def count_by_reason(reason)
+    return 0 unless JurisdictionTemplateVersionCustomization::ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.include?(reason)
+
+    JurisdictionTemplateVersionCustomization
+      .joins(:template_version)
+      .where(template_versions: { status: "published" })
+      .select do |jtvc|
+        jtvc
+          .customizations
+          .dig("requirement_block_changes", id.to_s, "enabled_elective_field_reasons")
+          &.values
+          &.include?(reason)
+      end
+      .count
+  end
+
+  def self.extract_requirement_id_from_submission_key(key)
+    key.split("|").second
   end
 
   private

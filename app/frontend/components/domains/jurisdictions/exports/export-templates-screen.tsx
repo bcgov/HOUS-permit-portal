@@ -90,7 +90,7 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
                       >
                         <HStack spacing={2} fontSize={"sm"}>
                           <FileCsv size={24} />
-                          <Text as={"span"}>{t("requirementTemplate.export.downloadCsv")}</Text>
+                          <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationCsv")}</Text>
                         </HStack>
                       </MenuItem>
                       <MenuItem
@@ -98,7 +98,7 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
                       >
                         <HStack spacing={2} fontSize={"sm"}>
                           <BracketsCurly size={24} />
-                          <Text as={"span"}>{t("requirementTemplate.export.downloadJson")}</Text>
+                          <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationJson")}</Text>
                         </HStack>
                       </MenuItem>
                     </MenuList>

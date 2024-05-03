@@ -39,7 +39,6 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
     customizations["requirement_block_changes"].each do |key, value|
       next if value["tip"].blank?
-
       customizations["requirement_block_changes"][key]["tip"] = ActionController::Base.helpers.sanitize(value["tip"])
     end
   end
@@ -64,8 +63,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         errors.add(
           :customizations,
           I18n.t(
-            "model_validation.jurisdiction_template_version_customization
-.enabled_elective_field_reason_incorrect",
+            "model_validation.jurisdiction_template_version_customization.enabled_elective_field_reason_incorrect",
             accepted_reasons: ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.join(", "),
           ),
         )

@@ -1,9 +1,27 @@
 class TemplateExportService
   attr_accessor :template_version, :customizations
 
-  def initialize(template_version, jurisdiction_template_version_customizations)
+  def initialize(template_version, jurisdiction_template_version_customizations = nil)
     self.template_version = template_version
     self.customizations = jurisdiction_template_version_customizations&.customizations
+  end
+
+  def summary_csv
+    CSV.generate(headers: true) do |csv|
+      csv << I18n.t("export.requirement_summary_csv_headers").split(",")
+      requirements = template_version.requirements
+      requirements.each do |req|
+        jurisdictions_count = Jurisdiction.count
+
+        label = req.label
+        count_of_jurisdictions_using = req.elective ? req.count_of_jurisdictions_using : jurisdictions_count
+        reason_bylaw_count = req.count_by_reason("bylaw")
+        reason_policy_count = req.count_by_reason("policy")
+        reason_zoning_count = req.count_by_reason("zoning")
+
+        csv << [label, count_of_jurisdictions_using, reason_bylaw_count, reason_policy_count, reason_zoning_count]
+      end
+    end
   end
 
   def to_json

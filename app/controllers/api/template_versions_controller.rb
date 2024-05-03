@@ -2,7 +2,11 @@ class Api::TemplateVersionsController < Api::ApplicationController
   before_action :set_template_version, except: :index
 
   before_action :set_jurisdiction_template_version_customization,
-                only: %i[show_jurisdiction_template_version_cutomization download_csv download_json]
+                only: %i[
+                  show_jurisdiction_template_version_cutomization
+                  download_customization_csv
+                  download_customization_json
+                ]
 
   def index
     @template_versions =
@@ -56,14 +60,21 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
-  def download_csv
+  def download_summary_csv
+    authorize @template_version
+
+    csv_data = TemplateExportService.new(@template_version).summary_csv
+    send_data csv_data, type: "text/csv"
+  end
+
+  def download_customization_csv
     authorize @template_version
 
     csv_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_csv
     send_data csv_data, type: "text/csv"
   end
 
-  def download_json
+  def download_customization_json
     authorize @template_version
 
     json_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_json

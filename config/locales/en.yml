@@ -389,3 +389,4 @@ en:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Required,Is elective,Elective enabled,Elective reason"
+    requirement_summary_csv_headers: "Field Name,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count,Most Common Submitter Response"

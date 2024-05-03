@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { flow } from "mobx"
 import { Instance, toGenerator, types } from "mobx-state-tree"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
@@ -5,6 +6,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EExportFormat, ETemplateVersionStatus } from "../types/enums"
 import { IDenormalizedTemplate } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
 export const TemplateVersionModel = types
@@ -90,8 +92,8 @@ export const TemplateVersionModel = types
       }
 
       const apiMethodNames = {
-        [EExportFormat.csv]: "downloadTemplateVersionCsv",
-        [EExportFormat.json]: "downloadTemplateVersionJson",
+        [EExportFormat.csv]: "downloadCustomizationCsv",
+        [EExportFormat.json]: "downloadCustomizationJson",
       }
 
       try {
@@ -100,19 +102,31 @@ export const TemplateVersionModel = types
           return response.ok
         }
 
+        const mimeType = mimeTypes[format]
+        const fileName = `${jurisdiction.qualifiedName} - ${self.label}.${format}`
         const blobData = format === EExportFormat.json ? JSON.stringify(response.data, null, 2) : response.data
-        const blob = new Blob([blobData], { type: mimeTypes[format] })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `${jurisdiction.qualifiedName} - ${self.label}.${format}`
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-
+        startBlobDownload(blobData, mimeType, fileName)
         return response
       } catch (error) {
         console.error(`Failed to download template version ${format}:`, error)
+        throw error
+      }
+    }),
+    downloadRequirementSummary: flow(function* () {
+      try {
+        const response = yield* toGenerator(self.environment.api.downloadRequirementSummaryCsv(self.id))
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = response.data
+        const fileName = `${t("requirementTemplate.export.templateSummaryFilename")}.csv`
+        const mimeType = "text/csv"
+        startBlobDownload(blobData, mimeType, fileName)
+
+        return response
+      } catch (error) {
+        console.error(`Failed to download requirement summary:`, error)
         throw error
       }
     }),
