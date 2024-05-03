@@ -25,7 +25,6 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def update
     authorize @jurisdiction
-
     if jurisdiction_params[:contacts_attributes]
       # Get current contact ids from the params
       payload_contact_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }

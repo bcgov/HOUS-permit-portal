@@ -5,21 +5,23 @@ import { RequirementFieldDisplay, TRequirementFieldDisplayProps } from "./index"
 
 interface IContactFieldItemDisplayProps {
   contactFieldItemType: ERequirementContactFieldItemType
+  required?: boolean
 }
 
-export function ContactFieldItemDisplay({ contactFieldItemType }: IContactFieldItemDisplayProps) {
+export function ContactFieldItemDisplay({ contactFieldItemType, required }: IContactFieldItemDisplayProps) {
   const defaultProps: Partial<TRequirementFieldDisplayProps> = {
     label: getRequirementContactFieldItemLabel(contactFieldItemType),
     requirementType: ERequirementType.text,
-    required: true,
   }
-  const required = [
-    ERequirementContactFieldItemType.firstName,
-    ERequirementContactFieldItemType.lastName,
-    ERequirementContactFieldItemType.email,
-    ERequirementContactFieldItemType.phone,
-    ERequirementContactFieldItemType.address,
-  ].includes(contactFieldItemType)
+  const isRequiredItem =
+    required &&
+    [
+      ERequirementContactFieldItemType.firstName,
+      ERequirementContactFieldItemType.lastName,
+      ERequirementContactFieldItemType.email,
+      ERequirementContactFieldItemType.phone,
+      ERequirementContactFieldItemType.address,
+    ].includes(contactFieldItemType)
 
   const propsByType = {
     [ERequirementContactFieldItemType.email]: {
@@ -35,5 +37,5 @@ export function ContactFieldItemDisplay({ contactFieldItemType }: IContactFieldI
       labelProps: { maxW: "full" },
     },
   }
-  return <RequirementFieldDisplay {...defaultProps} {...propsByType[contactFieldItemType]} required={required} />
+  return <RequirementFieldDisplay {...defaultProps} {...propsByType[contactFieldItemType]} required={isRequiredItem} />
 }

@@ -1,13 +1,14 @@
 import { Box, BoxProps, Button, FormControl, FormLabel, Heading, HeadingProps, Switch } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import React from "react"
+import { FieldValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { getRequirementTypeLabel } from "../../../../constants"
 import { ERequirementContactFieldItemType } from "../../../../types/enums"
 import { ContactFieldItemDisplay } from "./contact-field-item-display"
 import { TRequirementFieldDisplayProps } from "./index"
 
-export type TGenericContactDisplayProps = {
+export type TGenericContactDisplayProps<TFieldValues extends FieldValues> = {
   contactFieldItems: Array<{
     type: ERequirementContactFieldItemType
     containerProps?: BoxProps
@@ -16,7 +17,7 @@ export type TGenericContactDisplayProps = {
   renderHeading?: () => JSX.Element
 } & TRequirementFieldDisplayProps
 
-export function GenericContactDisplay({
+export function GenericContactDisplay<TFieldValues>({
   contactFieldItems,
   label,
   labelProps,
@@ -26,10 +27,11 @@ export function GenericContactDisplay({
   renderHeading,
   addMultipleContactProps,
   showAddPersonButton,
-}: TGenericContactDisplayProps) {
+  required,
+}: TGenericContactDisplayProps<TFieldValues>) {
   const { t } = useTranslation()
   return (
-    <>
+    <Box>
       <Box
         w={"full"}
         as={"section"}
@@ -70,7 +72,7 @@ export function GenericContactDisplay({
               }}
               {...containerProps}
             >
-              <ContactFieldItemDisplay contactFieldItemType={type} />
+              <ContactFieldItemDisplay required={required} contactFieldItemType={type} />
             </Box>
           ))}
         </Box>
@@ -126,6 +128,6 @@ export function GenericContactDisplay({
           {t("requirementsLibrary.addAnotherPerson")}
         </Button>
       )}
-    </>
+    </Box>
   )
 }

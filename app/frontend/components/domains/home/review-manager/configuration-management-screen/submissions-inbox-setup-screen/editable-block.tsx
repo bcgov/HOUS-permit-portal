@@ -147,7 +147,6 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
         )}
       </VStack>
       <Box alignSelf="start">
-        <FormLabel visibility="hidden">PLACEHOLDER</FormLabel>
         {isEditing ? (
           <HStack>
             <Button
