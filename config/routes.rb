@@ -69,8 +69,11 @@ Rails.application.routes.draw do
           "template_versions#show_jurisdiction_template_version_cutomization"
     post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
            "template_versions#create_or_update_jurisdiction_template_version_cutomization"
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_csv" => "template_versions#download_csv"
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_json" => "template_versions#download_json"
+    get "template_versions/:id/download_requirement_summary_csv" => "template_versions#download_summary_csv"
+    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_csv" =>
+          "template_versions#download_customization_csv"
+    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_json" =>
+          "template_versions#download_customization_json"
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"

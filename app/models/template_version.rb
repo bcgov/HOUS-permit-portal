@@ -6,6 +6,7 @@ class TemplateVersion < ApplicationRecord
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
+  delegate :requirements, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
 

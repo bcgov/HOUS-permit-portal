@@ -11,10 +11,15 @@ import {
   Flex,
   FlexProps,
   HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
+import { Export, FileCsv } from "@phosphor-icons/react"
 import { Pencil } from "@phosphor-icons/react/dist/ssr"
 import { format } from "date-fns"
 import { t } from "i18next"
@@ -35,6 +40,7 @@ interface IProps {
 export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar({ requirementTemplate }: IProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
+
   return (
     <>
       <Button size="sm" variant={"primary"} onClick={onOpen}>
@@ -83,6 +89,22 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
                 type={ETemplateVersionStatus.scheduled}
                 templateVersions={requirementTemplate.scheduledTemplateVersions}
               />
+              {requirementTemplate.publishedTemplateVersion && (
+                <Menu>
+                  <MenuButton as={Button} aria-label="Options" variant="secondary" rightIcon={<Export />} px={2}>
+                    {t("ui.export")}
+                  </MenuButton>
+
+                  <MenuList>
+                    <MenuItem onClick={requirementTemplate.publishedTemplateVersion.downloadRequirementSummary}>
+                      <HStack spacing={2} fontSize={"sm"}>
+                        <FileCsv size={24} />
+                        <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
+                      </HStack>
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              )}
             </Stack>
           </DrawerBody>
         </DrawerContent>

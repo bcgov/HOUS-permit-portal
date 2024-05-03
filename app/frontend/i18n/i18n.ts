@@ -1114,8 +1114,10 @@ const options = {
           },
           export: {
             title: "Export Templates",
-            downloadCsv: "Download CSV",
-            downloadJson: "Download JSON",
+            downloadSummaryCsv: "Download Summary CSV",
+            templateSummaryFilename: "Template Summary",
+            downloadCustomizationCsv: "Download Customizations CSV",
+            downloadCustomizationJson: "Download Customizations JSON",
           },
         },
         digitalBuildingPermits: {

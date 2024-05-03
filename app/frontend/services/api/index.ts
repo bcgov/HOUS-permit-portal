@@ -389,11 +389,19 @@ export class Api {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }
 
-  async downloadTemplateVersionJson(templateId: string, jurisdictionId: string) {
-    return this.client.get<BlobPart>(`/template_versions/${templateId}/jurisdictions/${jurisdictionId}/download_json`)
+  async downloadCustomizationJson(templateVersionId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_json`
+    )
   }
 
-  async downloadTemplateVersionCsv(templateId: string, jurisdictionId: string) {
-    return this.client.get<BlobPart>(`/template_versions/${templateId}/jurisdictions/${jurisdictionId}/download_csv`)
+  async downloadCustomizationCsv(templateVersionId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_csv`
+    )
+  }
+
+  async downloadRequirementSummaryCsv(templateVersionId: string) {
+    return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
   }
 }
