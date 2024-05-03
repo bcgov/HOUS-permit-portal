@@ -5,6 +5,7 @@ require "sidekiq-unique-jobs"
 if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation in the docker build stage
   redis_cfg = {
     name: ENV["REDIS_SENTINEL_MASTER_SET_NAME"],
+    driver: :ruby,
     sentinels:
       Resolv
         .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
