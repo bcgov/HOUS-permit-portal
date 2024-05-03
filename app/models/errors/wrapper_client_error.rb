@@ -1,4 +1,4 @@
-class WrapperClientError < StandardError
+class Errors::WrapperClientError < StandardError
   attr_reader :status
 
   def initialize(message, status)

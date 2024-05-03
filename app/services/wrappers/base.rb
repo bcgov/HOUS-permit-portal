@@ -52,12 +52,12 @@ class Wrappers::Base
   def handle_error(response)
     case response.status
     when 400..499
-      raise WrapperClientError.new(
+      raise Errors::WrapperClientError.new(
               "Wrapper client error: #{response.status}. Details: #{response.body}",
               response.status,
             )
     when 500..599
-      raise WrapperServerError.new(
+      raise Errors::WrapperServerError.new(
               "Wrapper server error: #{response.status}. Details: #{response.body}",
               response.status,
             )
