@@ -17,6 +17,7 @@ export const UserStoreModel = types
     types.model("UserStoreModel").props({
       usersMap: types.map(UserModel),
       currentUser: types.maybeNull(types.safeReference(UserModel)),
+      invitedUser: types.maybeNull(types.safeReference(UserModel)),
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
       eula: types.maybeNull(types.frozen<IEULA>()),
       tableUsers: types.array(types.reference(UserModel)),
@@ -46,6 +47,13 @@ export const UserStoreModel = types
     },
   }))
   .actions((self) => ({
+    __beforeMergeUpdate(user) {
+      if (user.jurisdiction) {
+        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
+        user.jurisdiction = user.jurisdiction.id
+      }
+      return user
+    },
     resetInvitationResponse: () => {
       self.invitationResponse = null
     },
@@ -59,11 +67,7 @@ export const UserStoreModel = types
       self.usersMap.delete(removedUser.id)
     },
     setCurrentUser(user) {
-      if (user.jurisdiction) {
-        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
-        user.jurisdiction = user.jurisdiction.id
-      }
-      self.usersMap.put(user)
+      self.mergeUpdate(user, "usersMap")
       self.currentUser = user.id
     },
     unsetCurrentUser() {
@@ -79,6 +83,14 @@ export const UserStoreModel = types
       if (ok) {
         window.location.replace(response.meta.redirectUrl)
       }
+    }),
+    fetchInvitedUser: flow(function* (token: string) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.fetchInvitedUser(token))
+      if (ok) {
+        self.mergeUpdate(response.data, "usersMap")
+        self.invitedUser = response.data.id
+      }
+      return ok
     }),
     updateProfile: flow(function* (formData) {
       const { ok, data: response } = yield self.environment.api.updateProfile(formData)

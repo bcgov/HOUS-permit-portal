@@ -20,6 +20,9 @@ class Api::UsersController < Api::ApplicationController
                        current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -28,7 +31,7 @@ class Api::UsersController < Api::ApplicationController
     return render_error "misc.user_not_authorized_error" unless %w[reviewer review_manager].include?(user_params[:role])
 
     if @user.update(user_params)
-      render_success @user, "user.update_success"
+      render_success @user, "user.update_success", blueprint_opts: { view: :base }
     else
       render_error "user.update_error"
     end
@@ -65,7 +68,7 @@ class Api::UsersController < Api::ApplicationController
   def destroy
     authorize @user
     if @user.discard
-      render_success(@user, "user.destroy_success")
+      render_success(@user, "user.destroy_success", { blueprint_opts: { view: :base } })
     else
       render_error "user.destroy_error", {}
     end
@@ -74,7 +77,7 @@ class Api::UsersController < Api::ApplicationController
   def restore
     authorize @user
     if @user.update(discarded_at: nil)
-      render_success(@user, "user.restore_success")
+      render_success(@user, "user.restore_success", blueprint_opts: { view: :base })
     else
       render_error "user.restore_error", {}
     end
@@ -92,7 +95,7 @@ class Api::UsersController < Api::ApplicationController
   def resend_confirmation
     authorize current_user
     current_user.resend_confirmation_instructions
-    render_success(current_user, "user.reconfirmation_sent")
+    render_success(current_user, "user.reconfirmation_sent", { blueprint_opts: { view: :current_user } })
   end
 
   private

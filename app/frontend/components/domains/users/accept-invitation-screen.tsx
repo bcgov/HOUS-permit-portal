@@ -1,21 +1,46 @@
-import { Button, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import React from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { Button, Container, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { t } from "i18next"
+import { observer } from "mobx-react-lite"
+import React, { Suspense, useEffect, useState } from "react"
+import { Trans } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
+import { IUser } from "../../../models/user"
+import { useMst } from "../../../setup/root"
+import { LoadingScreen } from "../../shared/base/loading-screen"
 import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
+import { RouterLink } from "../../shared/navigation/router-link"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
-interface IAcceptInvitationScreenProps {}
-
-export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
-  const { t } = useTranslation()
+export const AcceptInvitationScreen = observer(() => {
+  const { userStore } = useMst()
+  const { invitedUser, fetchInvitedUser } = userStore
+  const [invalidToken, setInvalidToken] = useState(false)
 
   const [searchParams] = useSearchParams()
-  const user = JSON.parse(decodeURIComponent(searchParams.get("user")))
-  const jurisdictionName = searchParams.get("jurisdiction_name")
-  const invitedByEmail = searchParams.get("invited_by_email")
-  const role = searchParams.get("role")
+  const invitationToken = searchParams.get("invitation_token")
+
+  useEffect(() => {
+    const fetch = async () => {
+      const result = await fetchInvitedUser(invitationToken)
+      if (!result) setInvalidToken(true)
+    }
+    fetch()
+  }, [])
+
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      {invitedUser ? <Content invitedUser={invitedUser} /> : invalidToken && <InvalidTokenMessage />}
+    </Suspense>
+  )
+})
+
+interface IProps {
+  invitedUser: IUser
+}
+function Content({ invitedUser }: Readonly<IProps>) {
+  const { invitedByEmail, jurisdiction, role, email } = invitedUser
 
   return (
     <CenterContainer>
@@ -34,14 +59,14 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
         </Text>
         <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm">
           <Heading as="h2" m={0}>
-            {jurisdictionName}
+            {jurisdiction.qualifiedName}
           </Heading>
           <Text>{t("user.invitedAs")}</Text>
-          <Text fontWeight="bold">{role}</Text>
+          <Text fontWeight="bold">{t(`user.roles.${role}`)}</Text>
         </VStack>
 
         <Text fontStyle="italic" fontSize="sm" textAlign="center">
-          <Trans i18nKey="user.invitationIntent" values={{ email: user.email }} />
+          <Trans i18nKey="user.invitationIntent" values={{ email }} />
         </Text>
 
         <Divider my={4} />
@@ -70,5 +95,24 @@ export const AcceptInvitationScreen = ({}: IAcceptInvitationScreenProps) => {
         />
       </Flex>
     </CenterContainer>
+  )
+}
+
+function InvalidTokenMessage() {
+  return (
+    <Container maxW="container.lg">
+      <VStack gap={12} my="20" mb="40">
+        <VStack>
+          <Heading as="h1" mb={0}>
+            {t("user.invalidInvitationToken.title")}
+          </Heading>
+          <Text>{t("user.invalidInvitationToken.message")}</Text>
+        </VStack>
+        <RouterLinkButton to="/">{t("site.pageNotFoundCTA")}</RouterLinkButton>
+        <Text>
+          {t("site.pageNotFoundContactInstructions")} <RouterLink to="/contact">{t("site.contact")}</RouterLink>
+        </Text>
+      </VStack>
+    </Container>
   )
 }

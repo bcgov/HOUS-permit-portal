@@ -22,7 +22,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :jurisdiction_review_inbox do
     include_view :base
 
-    association :submitter, blueprint: UserBlueprint
+    association :submitter, blueprint: UserBlueprint, view: :base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
   end
 
@@ -34,9 +34,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
       true
     end
 
-    association :submitter, blueprint: UserBlueprint
+    association :submitter, blueprint: UserBlueprint, view: :base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
-    association :jurisdiction, blueprint: JurisdictionBlueprint
+    association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
   end
 
