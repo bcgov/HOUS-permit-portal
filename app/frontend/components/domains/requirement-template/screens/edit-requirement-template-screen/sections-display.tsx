@@ -69,6 +69,7 @@ const SectionDisplay = observer(
       control,
     })
 
+    const watchedSections = watch(`requirementTemplateSectionsAttributes`)
     const watchedSectionBlocks = watch(
       `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`
     )
@@ -80,6 +81,14 @@ const SectionDisplay = observer(
       setEditableSectionName(watchedSectionName)
     }, [watchedSectionName])
 
+    // only one instance of any requirement block can be used on a template
+    const disabledUseForBlockIds = new Set(
+      watchedSections
+        .map((sections) =>
+          (sections?.templateSectionBlocksAttributes ?? []).map((sectionBlock) => sectionBlock.requirementBlockId)
+        )
+        .flat()
+    )
     return (
       <Box
         ref={(el) => setSectionRef(el, section.id)}
@@ -151,7 +160,8 @@ const SectionDisplay = observer(
             onUse={(requirementBlock, closeDrawer) => {
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
             }}
-            disableUseForBlockIds={new Set(watchedSectionBlocks.map((sectionBlock) => sectionBlock.requirementBlockId))}
+            disableUseForBlockIds={disabledUseForBlockIds}
+            disabledReason={t("requirementTemplate.edit.duplicateRequirementBlockDisabledReason")}
           />
         </Stack>
       </Box>

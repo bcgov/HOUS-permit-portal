@@ -109,3 +109,5 @@ group :development do
 end
 
 gem "faraday-multipart", "~> 1.0"
+
+gem "rack-attack", "~> 6.7"

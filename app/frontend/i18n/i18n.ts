@@ -249,7 +249,7 @@ const options = {
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
-            externalApiKeys: "External API keys",
+            externalApiKeys: "API settings",
             about: "About",
           },
           fields: {
@@ -947,8 +947,8 @@ const options = {
               },
             },
             externalApiKeys: {
-              title: "Manage external API keys",
-              description: "Manage external API keys for the Building Permit Hub.",
+              title: "API settings",
+              description: "Manage API keys for the Building Permit Hub.",
             },
           },
           superAdminTitle: "Admin home",
@@ -1065,6 +1065,7 @@ const options = {
               title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",
             },
+            duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
           },
           fields: {
             status: "Status",
@@ -1164,11 +1165,10 @@ const options = {
             enabled: "Enabled",
             disabled: "Disabled",
             table: {
-              heading: "External API keys",
+              heading: "API keys",
             },
             disabledWarningTitle:
-              "External API keys for this jurisdiction have not been enabled. To enable them, please contact" +
-              " us at",
+              "API keys for this jurisdiction have not been enabled. To enable them, please contact" + " us at",
             disabledTooltipLabel: "User is not authorized to make this change",
             disableConfirmationModal: {
               title: "Are you sure you want to disable API keys for this jurisdiction?",
@@ -1176,8 +1176,8 @@ const options = {
             },
           },
           modal: {
-            createTitle: "Create external API key",
-            manageTitle: "Manage external API key",
+            createTitle: "Create API key",
+            manageTitle: "Manage API key",
             removeConfirmationModal: {
               title: "Are you sure you want to revoke this API key?",
               body: "Any applications using this token will be unable to access the API.",
@@ -1287,7 +1287,7 @@ const options = {
             confirmed: "E-mail confirmed",
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
-            externalApiKeys: "External API keys",
+            apiSettings: "API settings",
             create: "Create",
           },
           questionSupport: "Question support",
