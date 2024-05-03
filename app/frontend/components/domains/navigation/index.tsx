@@ -8,13 +8,16 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAModal } from "../../shared/eula-modal"
-import { ExportTemplatesScreen } from "../jurisdictions/exports/export-templates-screen"
-import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
 )
+
+const AdminInviteScreen = lazy(() =>
+  import("../users/admin-invite-screen").then((module) => ({ default: module.AdminInviteScreen }))
+)
+
 const ExternalApiKeyModalSubRoute = lazy(() =>
   import("../external-api-key/external-api-key-modal-sub-route").then((module) => ({
     default: module.ExternalApiKeyModalSubRoute,
@@ -140,6 +143,13 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+
+const ExportTemplatesScreen = lazy(() =>
+  import("../jurisdictions/exports/export-templates-screen").then((module) => ({
+    default: module.ExportTemplatesScreen,
+  }))
+)
+
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
@@ -256,8 +266,8 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
-      <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
       <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
         <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
       </Route>
