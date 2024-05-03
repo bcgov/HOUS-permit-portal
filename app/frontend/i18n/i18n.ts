@@ -999,6 +999,10 @@ const options = {
           invitedAs: "as a",
           invitationIntent:
             "This invitation is intended for <strong>{{email}}</strong>, if this is incorrect please contact the sender above.",
+          invalidInvitationToken: {
+            title: "Invalid invite",
+            message: "Please contact your jurisdiction to request a new invitation link.",
+          },
           createAccount: "Create your account",
           bceid: "BCeID",
           bceidEmail: "BCeID email address",

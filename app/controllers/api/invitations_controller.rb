@@ -2,7 +2,8 @@ class Api::InvitationsController < Devise::InvitationsController
   include BaseControllerMethods
   respond_to :json
   before_action :authenticate_user!
-  before_action :find_invited_user, only: %i[remove]
+  before_action :find_invited_user, only: %i[show]
+  skip_before_action :authenticate_user!, only: %i[show]
 
   def create
     inviter = Jurisdiction::UserInviter.new(inviter: current_user, users_params: users_params).call
@@ -13,8 +14,12 @@ class Api::InvitationsController < Devise::InvitationsController
     end
   end
 
-  def remove
-    render_success(@user, "user.invitation_removed_success") if @user.destroy
+  def show
+    if @invited_user
+      render_success @invited_user, nil, { blueprint: UserBlueprint, blueprint_opts: { view: :invited_user } }
+    else
+      render json: { error: :invalid_token }, status: :not_found
+    end
   end
 
   def update
@@ -46,14 +51,6 @@ class Api::InvitationsController < Devise::InvitationsController
     end
   end
 
-  def remove
-    if @user.destroy
-      render_success(@user, "user.invitation_removed_success")
-    else
-      render_error "user.remove_invite_error" and return
-    end
-  end
-
   private
 
   def users_params
@@ -69,5 +66,9 @@ class Api::InvitationsController < Devise::InvitationsController
   def render_accept_invite_error(resource)
     render_error "user.accept_invite_error",
                  { message_opts: { error_message: resource.errors.full_messages.join(", ") } }
+  end
+
+  def find_invited_user
+    @invited_user = User.find_by_invitation_token(params[:invitation_token], true)
   end
 end

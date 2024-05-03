@@ -16,15 +16,16 @@ export const UserModel = types
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
     nickname: types.maybeNull(types.string),
-    certified: types.boolean,
+    certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    createdAt: types.Date,
+    createdAt: types.maybeNull(types.Date),
     confirmationSentAt: types.maybeNull(types.Date),
     confirmedAt: types.maybeNull(types.Date),
     discardedAt: types.maybeNull(types.Date),
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
+    invitedByEmail: types.maybeNull(types.string),
   })
   .extend(withRootStore())
   .extend(withEnvironment())

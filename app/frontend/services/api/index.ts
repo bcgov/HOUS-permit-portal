@@ -82,6 +82,10 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
+  async fetchInvitedUser(token: string) {
+    return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
+  }
+
   async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
