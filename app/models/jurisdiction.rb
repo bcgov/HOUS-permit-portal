@@ -135,6 +135,10 @@ class Jurisdiction < ApplicationRecord
     end
   end
 
+  def active_external_api_keys
+    external_api_keys.active
+  end
+
   private
 
   def sanitize_html_fields
