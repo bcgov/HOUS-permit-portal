@@ -296,3 +296,9 @@ export enum EExportFormat {
   csv = "csv",
   json = "json",
 }
+
+export enum EReportingColumns {
+  name = "name",
+  description = "description",
+  href = "href",
+}

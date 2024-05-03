@@ -173,6 +173,16 @@ const AdminUserIndexScreen = lazy(() =>
   }))
 )
 
+const ReportingScreen = lazy(() =>
+  import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
+)
+
+const ExportTemplateSummaryScreen = lazy(() =>
+  import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
+    default: module.ExportTemplateSummaryScreen,
+  }))
+)
+
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -259,6 +269,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
+      <Route path="/reporting" element={<ReportingScreen />} />
+      <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
     </>
   )
 
