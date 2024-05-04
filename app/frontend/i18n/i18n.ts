@@ -18,43 +18,46 @@ const options = {
       translation: {
         auth: {
           login: "Login",
+          prompt:
+            "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
+          loginHelp: "Having trouble logging in? ",
+          bceidInfo: {
+            heading: "Which BCeID should I use?",
+            basic: {
+              title: "Basic BCeID",
+              description:
+                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              homeownerAgent: "homeowner, agent",
+              architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
+              register: "Register for Basic BCeID",
+            },
+            business: {
+              title: "Business BCeID",
+              description: "Use when representing a legal entity, such as a:",
+              localGov: "Local government(s) or local jurisdiction(s)",
+              company: "Company or partnership or sole proprietorship",
+              nonProfit: "Not-for-profit or charitable organization",
+              education: "Educational institution like a university or college",
+              seeMore: "See more details",
+              register: "Register for Business BCeID",
+            },
+          },
           logout: "Logout",
           submit: "Submit",
           or: "or",
           bceid_login: "Login with BCeID",
-          accept_invite_with_bceid: "Connect with BCeID",
           role: "Role",
-          loginInstructions: "Enter the username for your Digital Building Permit account below.",
-          usernameLabel: "Username",
+          nicknameLabel: "Nickname",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
           userLastNameLabel: "Last name",
           organizationLabel: "Organization (optional)",
           organizationHelpText: "(if applicable)",
-          passwordLabel: "Password",
-          forgotPassword: "Forgot password?",
-          passwordTooWeak: "Password too weak",
-          passwordInvalidFormat: "Password does not meet the required format",
-          passwordChecklist: {
-            title: "Password must include:",
-            length: "8-64 characters",
-            uppercase: "At least one uppercase letter",
-            lowercase: "At least one lowercase letter",
-            specialChar: "At least one special character",
-            number: "At least one number",
-          },
           register: "Register for account",
           registerButton: "Register",
-          forgotPasswordInstructions:
-            "Please fill in your username and we'll send instructions on how to reset your password to the email address associated to your account.",
-          resetPassword: "Reset password",
           registerInstructions:
             "Please fill out the following registration form to create your account. Ensure all information is accurate and up-to-date.",
           certifiedProfessional: "I am a certified professional",
-          passwordTitle: "Set a password",
-          passwordRequirements:
-            "Must be between 8 - 64 characters long, at least one uppercase, one lowercase, one special character, and one number.",
-          alreadyHaveAccount: "Already have an account?",
           completeAccountActiviation: "Please confirm your account",
           checkYourEmail:
             "Check your email inbox for a confirmation email to finish activating your new Building Permit Hub account.",
@@ -113,6 +116,8 @@ const options = {
           browseList: "Browse list of jurisdictions",
         },
         ui: {
+          verified: "Verified",
+          unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
           preview: "Preview",
@@ -180,6 +185,7 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
+          emailPlaceholder: "email@example.com",
         },
         eula: {
           title: "End-User License Agreement",
@@ -985,12 +991,31 @@ const options = {
             inviteButton: "Invite users",
           },
           changeRole: "Change role",
+          newEmail: "New notification email address",
+          changeEmail: "Change email",
           addUser: "Add more emails",
           invite: "Invite",
+          invitedBy: "<strong>{{email}}</strong> has invited you to join:",
+          invitedAs: "as a",
+          invitationIntent:
+            "This invitation is intended for <strong>{{email}}</strong>, if this is incorrect please contact the sender above.",
+          invalidInvitationToken: {
+            title: "Invalid invite",
+            message: "Please contact your jurisdiction to request a new invitation link.",
+          },
+          createAccount: "Create your account",
+          bceid: "BCeID",
+          bceidEmail: "BCeID email address",
+          changeBceid: "If you want to change your BCeID information, please go to ",
+          changeBceidLinkText: "bceid.ca",
+          confirmationRequiredWithEmail:
+            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn’t receive it? <1>Resend email</1>)",
+          confirmationRequired:
+            "Action required: please click the link in the verification email that was sent to you. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
+          receiveNotifications: "Receive notifications",
+          notificationsEmail: "Notification email address",
           firstName: "First name",
           lastName: "Last name",
-          oldPassword: "Old password",
-          newPassword: "New password",
           myProfile: "My profile",
           inviteTitle: "Invite users",
           adminInviteTitle: "Invite super admins",
@@ -1002,7 +1027,7 @@ const options = {
           takenErrorDescription:
             "One or more of the requested users have an existing account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
           sendInvites: "Send invites",
-          acceptInvitation: "Accept invitation to",
+          acceptInvitation: "Accept invitation",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:

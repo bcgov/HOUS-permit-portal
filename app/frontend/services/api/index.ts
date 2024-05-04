@@ -21,8 +21,6 @@ import {
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
-  IResetPasswordResponse,
-  IUserResponse,
   IUsersResponse,
 } from "../../types/api-responses"
 import {
@@ -64,28 +62,12 @@ export class Api {
     this.client.addMonitor(monitor)
   }
 
-  async login(username, password) {
-    return this.client.post<IUserResponse>("/login", { user: { username, password } })
-  }
-
-  async signUp(formData) {
-    return this.client.post<IUserResponse>("/signup", { user: formData })
+  async resendConfirmation(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
   async logout() {
     return this.client.delete("/logout")
-  }
-
-  async changePassword(params) {
-    return this.client.patch<IUserResponse>(`/users/change_password`, params)
-  }
-
-  async requestPasswordReset(params) {
-    return this.client.post("/password", { user: params })
-  }
-
-  async resetPassword(params) {
-    return this.client.put<IResetPasswordResponse>("/password", { user: params })
   }
 
   async validateToken() {
@@ -98,6 +80,10 @@ export class Api {
 
   async acceptInvitation(params) {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
+  }
+
+  async fetchInvitedUser(token: string) {
+    return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
   }
 
   async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {

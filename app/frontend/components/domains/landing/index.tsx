@@ -106,14 +106,9 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                     {t("site.goTo")} {currentUser?.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
                   </RouterLinkButton>
                 ) : (
-                  <>
-                    <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.login")}
-                    </RouterLinkButton>
-                    <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.register")}
-                    </RouterLinkButton>
-                  </>
+                  <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
+                    {t("auth.login")}
+                  </RouterLinkButton>
                 )}
               </Flex>
             </Flex>
