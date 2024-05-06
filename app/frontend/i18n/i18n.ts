@@ -71,8 +71,7 @@ const options = {
           bestPractices: "Standardized requirements across participating jurisdictions",
           easyToFollow: "Easy to follow instructions to help you submit a building permit application",
           accessMyPermits: "Access my building permits",
-          accessExplanation:
-            "You can use either your BCeID account or the Building Permit Hub login to log in to the Building Permit Hub. You can also link your BCeID account to your Building Permit Hub account later on.",
+          accessExplanation: "Use your BCeID account to log or register for the Building Permit Hub.",
           whoForTitle: "Who is this for?",
           whoFor: [
             "I want to build housing",
