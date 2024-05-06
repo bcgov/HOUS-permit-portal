@@ -22,10 +22,8 @@ class TemplateVersion < ApplicationRecord
 
   def form_json_requirements
     requirement_ids = []
-    form_json["components"].each do |section|
-      section["components"].each do |requirement_block|
-        requirement_block["components"].each { |requirement| requirement_ids.push(requirement["id"]) }
-      end
+    requirement_blocks_json.each_pair do |_block_id, block_json|
+      block_json["requirements"].each { |requirement| requirement_ids.push(requirement["id"]) }
     end
 
     Requirement.find(requirement_ids)
