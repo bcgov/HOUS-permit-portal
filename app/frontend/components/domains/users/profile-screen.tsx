@@ -273,6 +273,14 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </Button>
               )}
             </Flex>
+            <Text fontSize="xs">
+              <Trans
+                i18nKey={"user.deleteAccount"}
+                components={{
+                  1: <Link href={`mailto:digital.codes.permits@gov.bc.ca`}></Link>,
+                }}
+              />
+            </Text>
           </Flex>
         </form>
       </FormProvider>
