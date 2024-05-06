@@ -3,7 +3,7 @@ import { IPermitApplication } from "../models/permit-application"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
-import { IOption } from "./types"
+import { INotification, IOption } from "./types"
 
 export interface IApiResponse<TData, TMeta> {
   data: TData
@@ -36,3 +36,8 @@ export interface IInvitationResponse
   extends IApiResponse<{ invited: IUser[]; reinvited: IUser[]; emailTaken: IUser[] }, {}> {}
 
 export interface IOptionResponse<T = string> extends IApiResponse<IOption<T>[], IPageMeta> {}
+
+export interface INotificationResponse {
+  data: INotification[]
+  meta: { unreadCount: number; totalPages: number }
+}

@@ -36,6 +36,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
   types
     .model("RequirementTemplateModel", {
       id: types.identifier,
+      label: types.string,
       description: types.maybeNull(types.string),
       jurisdictionsSize: types.optional(types.number, 0),
       publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),

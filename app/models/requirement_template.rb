@@ -28,6 +28,10 @@ class RequirementTemplate < ApplicationRecord
 
   validate :unique_permit_and_activity_for_undiscarded, on: :create
 
+  def label
+    "#{permit_type.name} | #{activity.name}"
+  end
+
   def key
     "requirementtemplate#{id}"
   end

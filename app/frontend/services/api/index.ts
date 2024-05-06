@@ -24,6 +24,7 @@ import {
   IApiResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
+  INotificationResponse,
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
@@ -387,5 +388,13 @@ export class Api {
 
   async createContact(params: TCreateContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
+  }
+
+  async fetchNotifications(page: number) {
+    return this.client.get<INotificationResponse>(`/notifications`, { page })
+  }
+
+  async resetLastReadNotifications() {
+    return this.client.post(`/notifications/reset_last_read`)
   }
 }

@@ -10,8 +10,8 @@ import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
-import { CustomToast } from "../../shared/base/flash-message"
 import { UserInput } from "../../shared/base/inputs/user-input"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { UserRolesExplanationModal } from "../../shared/user-roles-explanation-modal"
@@ -107,7 +107,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                 </Button>
               </Flex>
               {!R.isEmpty(takenEmails) && (
-                <CustomToast
+                <CustomMessageBox
                   status="error"
                   title={t("user.takenErrorTitle")}
                   description={t("user.takenErrorDescription")}

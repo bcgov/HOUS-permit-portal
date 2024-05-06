@@ -185,6 +185,12 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
+          showOlder: "Show older",
+          go: "Go",
+        },
+        notification: {
+          title: "Notifications",
+          nUnread: "{{ n }} new",
         },
         eula: {
           title: "End-User License Agreement",

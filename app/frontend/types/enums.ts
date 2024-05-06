@@ -280,6 +280,7 @@ export enum ESocketDomainTypes {
 
 export enum ESocketEventTypes {
   update = "update",
+  newTemplateVersionPublish = "new_template_version_publish",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -290,4 +291,8 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+}
+
+export enum EFollowableTypes {
+  permitTemplate = "PermitTemplate",
 }

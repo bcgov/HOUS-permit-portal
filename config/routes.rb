@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   end
 
   mount Sidekiq::Web => "/sidekiq"
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", :as => :rails_health_check
@@ -54,6 +55,10 @@ Rails.application.routes.draw do
 
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
+    end
+
+    resources :notifications, only: %i[index] do
+      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
     end
 
     resources :requirement_templates, only: %i[show create destroy update] do

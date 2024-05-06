@@ -6,6 +6,7 @@ class TemplateVersion < ApplicationRecord
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
+  delegate :label, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
 
@@ -14,6 +15,14 @@ class TemplateVersion < ApplicationRecord
   def lookup_props
     #form_json starts at root template
     flatten_requirements_from_form_hash(form_json)
+  end
+
+  def publish_event_notification_data
+    {
+      "action" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
+      # TODO - include diff data
+      "href" => "/digital-building-permits/#{id}/edit",
+    }
   end
 
   private

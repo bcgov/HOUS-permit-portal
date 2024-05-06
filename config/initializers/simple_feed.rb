@@ -14,7 +14,7 @@ def redis_sentinel_config
 end
 
 # Configure SimpleFeed
-SimpleFeed.define(:template_update_feed) do |f|
+SimpleFeed.define(:user_feed) do |f|
   if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank?
     f.provider =
       SimpleFeed.provider(
@@ -32,7 +32,7 @@ SimpleFeed.define(:template_update_feed) do |f|
       )
   end
 
-  f.per_page = 100
-  f.batch_size = 100
+  f.per_page = SETTINGS["notification_feed_per_page"]
+  f.batch_size = SETTINGS["notification_feed_per_page"] * 3
   f.max_size = 100
 end
