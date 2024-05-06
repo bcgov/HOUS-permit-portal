@@ -55,7 +55,7 @@ export const UserModel = types
       return self.confirmedAt == null
     },
     get name() {
-      return `${self.firstName} ${self.lastName}`
+      return self.firstName && self.lastName && `${self.firstName} ${self.lastName}`
     },
   }))
   .actions((self) => ({
