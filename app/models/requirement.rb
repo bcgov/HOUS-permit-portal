@@ -88,9 +88,9 @@ class Requirement < ApplicationRecord
 
   private
 
-  def using_dummied_requirement_code
+  def using_dummied_requirement_code(code = self.requirement_code)
     uuid_regex = /^dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    uuid_regex.match?(self.requirement_code)
+    uuid_regex.match?(code)
   end
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
@@ -142,11 +142,16 @@ class Requirement < ApplicationRecord
     return unless self.input_options["conditional"].present?
 
     conditional = self.input_options["conditional"]
-    if [conditional["when"], conditional["eq"], conditional["show"]].any?(&:blank?)
-      errors.add(:input_options, "conditional must have when, eq, and show")
+    if [conditional["when"], conditional["eq"]].any?(&:blank?)
+      errors.add(:input_options, "conditional must have when, and eq")
     end
-    if requirement_block.requirements.find_by_requirement_code(conditional["when"]).blank?
-      errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
+    if [conditional["show"], conditional["hide"]].all?(&:blank?)
+      errors.add(:input_options, "conditional must either hide or show")
+    end
+
+    if !using_dummied_requirement_code(conditional["when"]) &&
+         requirement_block.requirements.find_by_requirement_code(conditional["when"]).blank? &&
+         errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
     end
   end
 
