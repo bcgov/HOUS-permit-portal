@@ -84,7 +84,7 @@ export const TemplateVersionModel = types
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
     }),
-    downloadTemplateVersionExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
+    downloadExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
       const jurisdiction = self.rootStore.jurisdictionStore.getJurisdictionById(jurisdictionId)
       const mimeTypes = {
         [EExportFormat.csv]: "text/csv",
@@ -122,7 +122,7 @@ export const TemplateVersionModel = types
         }
 
         const blobData = response.data
-        const fileName = `${t("requirementTemplate.export.templateSummaryFilename")}.csv`
+        const fileName = `${self.label} ${t("requirementTemplate.export.templateSummaryFilename")}.csv`
         const mimeType = "text/csv"
         startBlobDownload(blobData, mimeType, fileName)
 
