@@ -25,6 +25,39 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
     "#{jurisdiction.name} #{template_version.label}"
   end
 
+  def self.requirement_count_by_reason(requirement_block_id, requirement_id, reason)
+    return 0 unless ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.include?(reason)
+
+    JurisdictionTemplateVersionCustomization
+      .joins(:template_version)
+      .where(template_versions: { status: "published" })
+      .where(
+        "customizations -> 'requirement_block_changes' -> :requirement_block_id -> 'enabled_elective_field_ids' @> :id",
+        requirement_block_id: requirement_block_id,
+        id: "[\"#{requirement_id}\"]",
+      )
+      .select do |jtvc|
+        jtvc
+          .customizations
+          .dig("requirement_block_changes", requirement_block_id, "enabled_elective_field_reasons")
+          &.values
+          &.include?(reason)
+      end
+      .count
+  end
+
+  def self.count_of_jurisdictions_using_requirement(requirement_block_id, requirement_id)
+    JurisdictionTemplateVersionCustomization
+      .joins(:template_version)
+      .where(template_versions: { status: "published" })
+      .where(
+        "customizations -> 'requirement_block_changes' -> :requirement_block_id -> 'enabled_elective_field_ids' @> :id",
+        requirement_block_id: requirement_block_id,
+        id: "[\"#{requirement_id}\"]",
+      )
+      .count
+  end
+
   private
 
   def reindex_jurisdiction_templates_used_size

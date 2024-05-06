@@ -5,7 +5,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
   let(:jurisdiction) { create(:sub_district) }
   let(:published_template_version) { create(:template_version, status: "published") }
   let(:scheduled_template_version) { create(:template_version, status: "scheduled") }
-  describe "#count_of_jurisdictions_using" do
+  describe "#count_of_jurisdictions_using_requirement" do
     context "when no customizations reference the requirement" do
       it "returns 0 for published templates" do
         create(
@@ -13,7 +13,12 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           jurisdiction: jurisdiction,
           template_version: published_template_version,
         )
-        expect(requirement.count_of_jurisdictions_using).to eq(0)
+        expect(
+          JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
+            requirement.requirement_block_id,
+            requirement.id,
+          ),
+        ).to eq(0)
       end
 
       it "returns 0 for scheduled templates" do
@@ -22,7 +27,12 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           jurisdiction: jurisdiction,
           template_version: scheduled_template_version,
         )
-        expect(requirement.count_of_jurisdictions_using).to eq(0)
+        expect(
+          JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
+            requirement.requirement_block_id,
+            requirement.id,
+          ),
+        ).to eq(0)
       end
     end
 
@@ -32,7 +42,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           :jurisdiction_template_version_customization,
           customizations: {
             "requirement_block_changes" => {
-              requirement.id.to_s => {
+              requirement.requirement_block_id.to_s => {
                 "enabled_elective_field_ids" => [requirement.id.to_s],
               },
             },
@@ -45,7 +55,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           :jurisdiction_template_version_customization,
           customizations: {
             "requirement_block_changes" => {
-              requirement.id.to_s => {
+              requirement.requirement_block_id.to_s => {
                 "enabled_elective_field_ids" => [requirement.id.to_s],
               },
             },
@@ -56,7 +66,12 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
       end
 
       it "counts only customizations linked to published templates" do
-        expect(requirement.count_of_jurisdictions_using).to eq(1)
+        expect(
+          JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
+            requirement.requirement_block_id,
+            requirement.id,
+          ),
+        ).to eq(1)
       end
     end
   end
@@ -167,7 +182,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           :jurisdiction_template_version_customization,
           customizations: {
             "requirement_block_changes" => {
-              requirement.id.to_s => {
+              requirement.requirement_block_id.to_s => {
                 "enabled_elective_field_ids" => [requirement.id.to_s],
                 "enabled_elective_field_reasons" => {
                   requirement.id.to_s => "bylaw",
@@ -185,7 +200,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           :jurisdiction_template_version_customization,
           customizations: {
             "requirement_block_changes" => {
-              requirement.id.to_s => {
+              requirement.requirement_block_id.to_s => {
                 "enabled_elective_field_ids" => [requirement.id.to_s],
                 "enabled_elective_field_reasons" => {
                   requirement.id.to_s => "policy",
@@ -199,9 +214,27 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
       end
 
       it "counts only occurrences with the specified reason and published template version" do
-        expect(requirement.count_by_reason("bylaw")).to eq(1)
-        expect(requirement.count_by_reason("policy")).to eq(0) # Because template version is unpublished
-        expect(requirement.count_by_reason("zoning")).to eq(0)
+        expect(
+          JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
+            requirement.requirement_block_id,
+            requirement.id,
+            "bylaw",
+          ),
+        ).to eq(1)
+        expect(
+          JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
+            requirement.requirement_block_id,
+            requirement.id,
+            "policy",
+          ),
+        ).to eq(0) # Because template version is unpublished
+        expect(
+          JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
+            requirement.requirement_block_id,
+            requirement.id,
+            "zoning",
+          ),
+        ).to eq(0)
       end
     end
   end

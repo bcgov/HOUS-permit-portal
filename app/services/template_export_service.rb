@@ -9,15 +9,40 @@ class TemplateExportService
   def summary_csv
     CSV.generate(headers: true) do |csv|
       csv << I18n.t("export.requirement_summary_csv_headers").split(",")
-      requirements = template_version.form_json_requirements
-      requirements.each do |req|
+      json_requirements = template_version.form_json_requirements
+      json_requirements.each do |req|
         jurisdictions_count = Jurisdiction.count
 
-        label = req.label
-        count_of_jurisdictions_using = req.elective ? req.count_of_jurisdictions_using : jurisdictions_count
-        reason_bylaw_count = req.count_by_reason("bylaw")
-        reason_policy_count = req.count_by_reason("policy")
-        reason_zoning_count = req.count_by_reason("zoning")
+        label = req["label"]
+        count_of_jurisdictions_using =
+          (
+            if req["elective"]
+              JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
+                req["requirement_block_id"],
+                req["id"],
+              )
+            else
+              jurisdictions_count
+            end
+          )
+        reason_bylaw_count =
+          JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
+            req["requirement_block_id"],
+            req["id"],
+            "bylaw",
+          )
+        reason_policy_count =
+          JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
+            req["requirement_block_id"],
+            req["id"],
+            "policy",
+          )
+        reason_zoning_count =
+          JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
+            req["requirement_block_id"],
+            req["id"],
+            "zoning",
+          )
 
         csv << [label, count_of_jurisdictions_using, reason_bylaw_count, reason_policy_count, reason_zoning_count]
       end
