@@ -217,22 +217,27 @@ export interface IEULA {
   content: string
 }
 
-export interface INotification {
-  title: string
-  description: string
-  at: string
-}
-
 export interface IPermitApplicationUpdate {
   id
   frontEndFormUpdate: Object
   formattedComplianceData: Object
 }
 
+export interface INotification {
+  id: string
+  action: string
+  href?: string
+}
+
 export interface IUserPushPayload {
+  data: INotification
   domain: ESocketDomainTypes
   eventType: ESocketEventTypes
-  data: INotification | IPermitApplicationUpdate
+  meta: {
+    lastReadAt: number
+    totalPages: number
+    unreadCount: number
+  }
 }
 
 export interface ISiteConfiguration {

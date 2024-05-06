@@ -208,6 +208,12 @@ const options = {
           hideAdvanced: "Hide advanced",
           emailPlaceholder: "email@example.com",
           urlPlaceholder: "https://",
+          showOlder: "Show older",
+          go: "Go",
+        },
+        notification: {
+          title: "Notifications",
+          nUnread: "{{ n }} new",
         },
         eula: {
           title: "End-User License Agreement",

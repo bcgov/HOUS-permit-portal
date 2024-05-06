@@ -33,6 +33,10 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
 
+  def label
+    "#{permit_type.name} | #{activity.name}"
+  end
+
   def key
     "requirementtemplate#{id}"
   end

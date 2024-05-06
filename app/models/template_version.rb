@@ -8,6 +8,7 @@ class TemplateVersion < ApplicationRecord
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
+  delegate :label, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
   enum deprecation_reason: { new_publish: 0, unscheduled: 1 }, _prefix: true
@@ -41,6 +42,14 @@ class TemplateVersion < ApplicationRecord
     end
 
     json_requirements
+  end
+
+  def publish_event_notification_data
+    {
+      "action" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
+      # TODO - include diff data
+      "href" => "/digital-building-permits/#{id}/edit",
+    }
   end
 
   private

@@ -1,0 +1,4 @@
+development:
+  notification_feed_per_page: 5
+production:
+  notification_feed_per_page: 5

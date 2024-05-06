@@ -24,6 +24,7 @@ import {
   IApiResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
+  INotificationResponse,
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
@@ -410,5 +411,13 @@ export class Api {
 
   async downloadRequirementSummaryCsv(templateVersionId: string) {
     return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
+  }
+  
+  async fetchNotifications(page: number) {
+    return this.client.get<INotificationResponse>(`/notifications`, { page })
+  }
+
+  async resetLastReadNotifications() {
+    return this.client.post(`/notifications/reset_last_read`)
   }
 }

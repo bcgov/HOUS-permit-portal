@@ -26,7 +26,7 @@ import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
-import { CustomToast } from "../base/flash-message"
+import { CustomMessageBox } from "../base/custom-message-box"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 
@@ -289,7 +289,7 @@ export const RequirementForm = observer(
           <ErrorsBox errorBox={errorBoxData} />
 
           {permitApplication?.isSubmitted ? (
-            <CustomToast
+            <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
                 jurisdictionName: jurisdiction.qualifiedName,
@@ -297,7 +297,7 @@ export const RequirementForm = observer(
               status="info"
             />
           ) : (
-            <CustomToast
+            <CustomMessageBox
               description={t("permitApplication.show.submittingTo", { jurisdictionName: jurisdiction.qualifiedName })}
               status="info"
             />

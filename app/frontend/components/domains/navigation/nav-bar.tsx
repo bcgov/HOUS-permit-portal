@@ -31,6 +31,7 @@ import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
+import { NotificationsPopover } from "../home/notifications/notifications-popover"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -155,6 +156,7 @@ export const NavBar = observer(() => {
                   {t("home.jurisdictionsTitle")}
                 </RouterLinkButton>
               )}
+              {loggedIn && <NotificationsPopover />}
               <NavBarMenu />
             </HStack>
           </Flex>
