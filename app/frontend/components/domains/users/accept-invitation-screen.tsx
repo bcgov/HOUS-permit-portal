@@ -6,6 +6,7 @@ import { Trans } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
@@ -41,6 +42,7 @@ interface IProps {
 }
 function Content({ invitedUser }: Readonly<IProps>) {
   const { invitedByEmail, jurisdiction, role, email } = invitedUser
+  const isAdmin = role == EUserRoles.superAdmin
 
   return (
     <CenterContainer>
@@ -54,16 +56,27 @@ function Content({ invitedUser }: Readonly<IProps>) {
         bg="greys.white"
       >
         <Heading as="h1">{t("user.acceptInvitation")}</Heading>
-        <Text>
-          <Trans i18nKey="user.invitedBy" values={{ email: invitedByEmail }} />
-        </Text>
-        <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm">
-          <Heading as="h2" m={0}>
-            {jurisdiction.qualifiedName}
-          </Heading>
-          <Text>{t("user.invitedAs")}</Text>
-          <Text fontWeight="bold">{t(`user.roles.${role}`)}</Text>
-        </VStack>
+        {invitedByEmail && jurisdiction ? (
+          <>
+            <Text>
+              <Trans i18nKey="user.invitedBy" values={{ email: invitedByEmail }} />
+            </Text>
+
+            <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm">
+              <Heading as="h2" m={0}>
+                {jurisdiction.qualifiedName}
+              </Heading>
+              <Text>{t("user.invitedAs")}</Text>
+              <Text fontWeight="bold">{t(`user.roles.${role}`)}</Text>
+            </VStack>
+          </>
+        ) : (
+          isAdmin && (
+            <Text>
+              <Trans i18nKey="user.invitedAsAdmin" values={{ email: invitedByEmail }} />
+            </Text>
+          )
+        )}
 
         <Text fontStyle="italic" fontSize="sm" textAlign="center">
           <Trans i18nKey="user.invitationIntent" values={{ email }} />
@@ -75,24 +88,27 @@ function Content({ invitedUser }: Readonly<IProps>) {
           {t("user.createAccount")}
         </Heading>
         <form action={`/api/auth/keycloak`} method="post">
-          <input type="hidden" name="kc_idp_hint" value="bceidboth" />
+          <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
-            {t("auth.bceid_login")}
+            {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
           </Button>
         </form>
 
-        <Divider my={4} />
+        {!isAdmin && (
+          <>
+            <Divider my={4} />
+            <BusinessBCeIDInfo />
 
-        <BusinessBCeIDInfo />
-
-        <HelpDrawer
-          renderTriggerButton={({ onClick }) => (
-            <Button variant="link" onClick={onClick}>
-              {t("ui.help")}
-            </Button>
-          )}
-        />
+            <HelpDrawer
+              renderTriggerButton={({ onClick }) => (
+                <Button variant="link" onClick={onClick}>
+                  {t("ui.help")}
+                </Button>
+              )}
+            />
+          </>
+        )}
       </Flex>
     </CenterContainer>
   )

@@ -6,18 +6,21 @@ import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
 
-interface ILoginScreenProps {}
+interface ILoginScreenProps {
+  isAdmin?: boolean
+}
 
-export const LoginScreen = ({}: ILoginScreenProps) => {
+export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
   const { t } = useTranslation()
 
   return (
-    <CenterContainer>
+    <CenterContainer h="full">
       <Flex
         direction="column"
         maxW="500px"
         gap={6}
         w="full"
+        flex={1}
         p={10}
         border="solid 1px"
         borderColor="border.light"
@@ -25,39 +28,45 @@ export const LoginScreen = ({}: ILoginScreenProps) => {
       >
         <VStack spacing={2} align="start">
           <Heading as="h1" mb={0}>
-            {t("auth.login")}
+            {isAdmin ? t("auth.adminLogin") : t("auth.login")}
           </Heading>
-          <Text fontSize="md">{t("auth.prompt")}</Text>
+          {!isAdmin && <Text fontSize="md">{t("auth.prompt")}</Text>}
         </VStack>
         <form action="/api/auth/keycloak" method="post">
           {/* @ts-ignore */}
-          <input type="hidden" name="kc_idp_hint" value="bceidboth" />
+          <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
-            {t("auth.bceid_login")}
+            {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
           </Button>
         </form>
-        <Text>
-          {t("auth.loginHelp")}
-          <Link href="https://www.bceid.ca/clp/account_recovery.aspx" isExternal>
-            {t("ui.clickHere")}
-          </Link>
-        </Text>
-        <Divider my={4} />
-        <Heading as="h2" m={0}>
-          {t("auth.bceidInfo.heading")}
-        </Heading>
+        {isAdmin ? (
+          <Text>{t("auth.adminAccountAccess")}</Text>
+        ) : (
+          <>
+            <Text>
+              {t("auth.loginHelp")}
+              <Link href="https://www.bceid.ca/clp/account_recovery.aspx" isExternal>
+                {t("ui.clickHere")}
+              </Link>
+            </Text>
+            <Divider my={4} />
+            <Heading as="h2" m={0}>
+              {t("auth.bceidInfo.heading")}
+            </Heading>
 
-        <BasicBCeIDInfo />
-        <BusinessBCeIDInfo />
+            <BasicBCeIDInfo />
+            <BusinessBCeIDInfo />
 
-        <HelpDrawer
-          renderTriggerButton={({ onClick }) => (
-            <Button variant="link" onClick={onClick}>
-              {t("ui.help")}
-            </Button>
-          )}
-        />
+            <HelpDrawer
+              renderTriggerButton={({ onClick }) => (
+                <Button variant="link" onClick={onClick}>
+                  {t("ui.help")}
+                </Button>
+              )}
+            />
+          </>
+        )}
       </Flex>
     </CenterContainer>
   )

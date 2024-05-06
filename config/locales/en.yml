@@ -30,8 +30,6 @@
 en:
   activerecord:
     attributes:
-      user:
-        uid: BCeID
     errors:
       models:
         permit_application:
@@ -49,8 +47,9 @@ en:
               duplicate: "file already exists for this permit application"
         user:
           attributes:
-            uid:
-              taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+            base:
+              bceid_taken: BCeID is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+              idir_taken: IDIR is associated with an existing account. To use this IDIR with a different account, contact your administrator to deactivate the existing account.
             password:
               password_format: "Password does no meet the required format"
   application_mailer:
@@ -87,11 +86,17 @@ en:
         message: "Your password has been changed successfully"
     omniauth:
       failure:
-        title: BCeID login failed
+        title: Login failed
         message: Please try again or contact your adminstrator for support
-      failure_with_message:
+      bceid_failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
+      idir_failure_with_message:
+        title: IDIR login failed
+        message: "%{error_message}"
+      unavailable:
+        title: Account not found
+        message: Administrator accounts are not available for self-registration. Please contact your administrator to gain access.
     geocoder:
       site_options_error:
         title: Error
