@@ -88,38 +88,6 @@ class Requirement < ApplicationRecord
     false
   end
 
-  def count_of_jurisdictions_using
-    JurisdictionTemplateVersionCustomization
-      .joins(:template_version)
-      .where(template_versions: { status: "published" })
-      .where(
-        "customizations -> 'requirement_block_changes' -> :requirement_id -> 'enabled_elective_field_ids' @> :id",
-        requirement_id: id.to_s,
-        id: "[\"#{id}\"]",
-      )
-      .count
-  end
-
-  def count_by_reason(reason)
-    return 0 unless JurisdictionTemplateVersionCustomization::ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.include?(reason)
-    JurisdictionTemplateVersionCustomization
-      .joins(:template_version)
-      .where(template_versions: { status: "published" })
-      .where(
-        "customizations -> 'requirement_block_changes' -> :requirement_id -> 'enabled_elective_field_ids' @> :id",
-        requirement_id: id.to_s,
-        id: "[\"#{id}\"]",
-      )
-      .select do |jtvc|
-        jtvc
-          .customizations
-          .dig("requirement_block_changes", id.to_s, "enabled_elective_field_reasons")
-          &.values
-          &.include?(reason)
-      end
-      .count
-  end
-
   def self.extract_requirement_id_from_submission_key(key)
     key.split("|").second
   end
