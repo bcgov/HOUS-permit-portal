@@ -6,7 +6,6 @@ class TemplateVersion < ApplicationRecord
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
-  delegate :requirements, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
 
@@ -19,6 +18,17 @@ class TemplateVersion < ApplicationRecord
   def lookup_props
     #form_json starts at root template
     flatten_requirements_from_form_hash(form_json)
+  end
+
+  def form_json_requirements
+    requirement_ids = []
+    form_json["components"].each do |section|
+      section["components"].each do |requirement_block|
+        requirement_block["components"].each { |requirement| requirement_ids.push(requirement["id"]) }
+      end
+    end
+
+    Requirement.find(requirement_ids)
   end
 
   private

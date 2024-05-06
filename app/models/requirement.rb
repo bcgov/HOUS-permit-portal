@@ -102,10 +102,14 @@ class Requirement < ApplicationRecord
 
   def count_by_reason(reason)
     return 0 unless JurisdictionTemplateVersionCustomization::ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.include?(reason)
-
     JurisdictionTemplateVersionCustomization
       .joins(:template_version)
       .where(template_versions: { status: "published" })
+      .where(
+        "customizations -> 'requirement_block_changes' -> :requirement_id -> 'enabled_elective_field_ids' @> :id",
+        requirement_id: id.to_s,
+        id: "[\"#{id}\"]",
+      )
       .select do |jtvc|
         jtvc
           .customizations

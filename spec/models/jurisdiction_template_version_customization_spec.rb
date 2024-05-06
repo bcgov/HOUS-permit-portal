@@ -162,7 +162,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
 
   describe "Count by reason" do
     context "when electives are enabled with reasons" do
-      let(:bylaw_customization) do
+      let!(:bylaw_customization) do
         create(
           :jurisdiction_template_version_customization,
           customizations: {
@@ -176,11 +176,11 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
             },
           },
           template_version: published_template_version,
-          jurisdiction: jurisidiction,
+          jurisdiction: jurisdiction,
         )
       end
 
-      let(:policy_customization) do
+      let!(:policy_customization) do
         create(
           :jurisdiction_template_version_customization,
           customizations: {
@@ -194,7 +194,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
             },
           },
           template_version: scheduled_template_version,
-          jurisdiction: jurisidiction,
+          jurisdiction: jurisdiction,
         )
       end
 

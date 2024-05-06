@@ -9,7 +9,7 @@ class TemplateExportService
   def summary_csv
     CSV.generate(headers: true) do |csv|
       csv << I18n.t("export.requirement_summary_csv_headers").split(",")
-      requirements = template_version.requirements
+      requirements = template_version.form_json_requirements
       requirements.each do |req|
         jurisdictions_count = Jurisdiction.count
 
@@ -31,43 +31,40 @@ class TemplateExportService
   def to_csv
     CSV.generate(headers: true) do |csv|
       csv << I18n.t("export.template_version_csv_headers").split(",")
-      template_version.form_json["components"].each do |section|
-        section["components"].each do |requirement_block|
-          tip = customizations&.dig("requirement_block_changes", requirement_block["id"], "tip")
-          block_id = requirement_block["id"]
-          csv << [requirement_block["title"], tip, nil, nil, nil, nil, nil, nil]
-          requirement_block["components"].each do |requirement|
-            is_multi_contact = requirement["key"].ends_with?("multi_contact")
-            component = is_multi_contact ? requirement["components"].first : requirement
+      template_version.requirement_blocks_json.each_pair do |block_id, requirement_block|
+        tip = customizations&.dig("requirement_block_changes", block_id, "tip")
+        csv << [requirement_block["name"], tip, nil, nil, nil, nil, nil, nil]
+        requirement_block["requirements"].each do |requirement|
+          question = requirement["label"]
+          requirement_code = requirement["requirement_code"]
+          input_type = requirement["input_type"]
+          optional = !(requirement["required"] || false)
+          is_elective = requirement["elective"] || false
 
-            question = component["label"]
-            requirement_code = component["key"].split("|")[is_multi_contact ? -3 : -1]
-            input_type = component["type"]
-            required = component.dig("validate", "required") || false
-            is_elective = component["elective"] || false
-            elective_enabled =
-              customizations&.dig("requirement_block_changes", block_id, "enabled_elective_field_ids")&.include?(
-                component["id"],
-              ) || false
-            elective_reason =
-              customizations&.dig(
-                "requirement_block_changes",
-                block_id,
-                "enabled_elective_field_reasons",
-                component["id"],
-              )
-            csv << [
-              nil,
-              nil,
-              question,
-              requirement_code,
-              input_type,
-              required,
-              is_elective,
-              elective_enabled,
-              elective_reason,
-            ]
-          end
+          elective_enabled =
+            customizations&.dig("requirement_block_changes", block_id, "enabled_elective_field_ids")&.include?(
+              requirement["id"],
+            ) || false
+
+          elective_reason =
+            customizations&.dig(
+              "requirement_block_changes",
+              block_id,
+              "enabled_elective_field_reasons",
+              requirement["id"],
+            )
+
+          csv << [
+            nil,
+            nil,
+            question,
+            requirement_code,
+            input_type,
+            optional,
+            is_elective,
+            elective_enabled,
+            elective_reason,
+          ]
         end
       end
     end
