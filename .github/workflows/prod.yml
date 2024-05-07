@@ -34,6 +34,10 @@ jobs:
             app=prod-hous-permit-portal
             git-sha=${{ github.sha }}
           containerfiles: ./devops/docker/app/Dockerfile
+          build-args: |
+            VITE_BASIC_BCEID_REGISTRATION_URL=${{ vars.VITE_BASIC_BCEID_REGISTRATION_URL }}
+            VITE_BUSINESS_BCEID_REGISTRATION_URL=${{ vars.VITE_BUSINESS_BCEID_REGISTRATION_URL }}
+            VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
       - name: Push to Openshift Registry using Service Account
         uses: redhat-actions/push-to-registry@v2.7
         with:
