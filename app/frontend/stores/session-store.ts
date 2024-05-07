@@ -9,6 +9,7 @@ export const SessionStoreModel = types
     tokenExpired: types.optional(types.boolean, false),
     isValidating: types.optional(types.boolean, true),
     isLoggingOut: types.optional(types.boolean, false),
+    afterLoginPath: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -20,6 +21,9 @@ export const SessionStoreModel = types
       self.rootStore.userStore.unsetCurrentUser()
       self.rootStore.disconnectUserChannel()
     }),
+    setAfterLoginPath(path: string | null) {
+      self.afterLoginPath = path
+    },
   }))
   .actions((self) => ({
     handleLogin(response, opts = { redirectToRoot: false }) {

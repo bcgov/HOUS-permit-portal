@@ -10,6 +10,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
 import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
+import { ProtectedRoute } from "./protected-route"
 
 const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
@@ -197,24 +198,33 @@ export const Navigation = observer(() => {
 })
 
 const AppRoutes = observer(() => {
-  const { sessionStore, uiStore } = useMst()
+  const rootStore = useMst()
+  const { sessionStore, userStore, uiStore } = rootStore
   const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
 
-  const { userStore } = useMst()
   const { currentUser } = userStore
+  const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
 
   const navigate = useNavigate()
   const { t } = useTranslation()
 
   useEffect(() => {
     if (tokenExpired) {
-      sessionStore.resetAuth()
+      resetAuth()
+      setAfterLoginPath(location.pathname)
       navigate("/login")
       uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
     }
   }, [tokenExpired])
+
+  useEffect(() => {
+    if (loggedIn && afterLoginPath) {
+      navigate(afterLoginPath)
+      setAfterLoginPath(null)
+    }
+  }, [afterLoginPath, loggedIn])
 
   const superAdminOnlyRoutes = (
     <>
@@ -303,37 +313,79 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
-        {loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin ? (
+        {loggedIn && !currentUser.eulaAccepted && (
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
-        ) : loggedIn && currentUser.isUnconfirmed ? (
-          // Onboarding step 2: confirm email
-          <>
-            <Route path="/" element={<ProfileScreen />} />
-          </>
-        ) : loggedIn ? (
-          // Onboarding complete
-          <>
-            <Route path="/" element={<HomeScreen />} />
-            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-
-            {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
-            {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
-            {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
-            {currentUser?.isSubmitter && submitterOnlyRoutes}
-            {currentUser?.isReviewManager && reviewManagerOnlyRoutes}
-          </>
-        ) : (
-          // Logged out
-          <>
-            <Route path="/" element={<RedirectScreen path="/welcome" />} />
-            <Route path="/login" element={<LoginScreen />} />
-            <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-            <Route path="/admin" element={<LoginScreen isAdmin />} />
-          </>
         )}
+        {loggedIn && currentUser.eulaAccepted && currentUser.isUnconfirmed && (
+          // Onboarding step 2: confirm email
+          <Route path="/" element={<ProfileScreen />} />
+        )}
+        {loggedIn ? (
+          <Route path="/" element={<HomeScreen />} />
+        ) : (
+          <Route path="/" element={<RedirectScreen path="/welcome" />} />
+        )}
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isReviewer)}
+              redirectPath={loggedIn && "/not-found"}
+            />
+          }
+        >
+          {adminOrManagerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute isAllowed={loggedIn && currentUser.isSuperAdmin} redirectPath={loggedIn && "/not-found"} />
+          }
+        >
+          {superAdminOnlyRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && (currentUser.isSuperAdmin || currentUser.isReviewManager)}
+              redirectPath={loggedIn && "/not-found"}
+            />
+          }
+        >
+          {managerOrReviewerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute isAllowed={loggedIn && currentUser.isSubmitter} redirectPath={loggedIn && "/not-found"} />
+          }
+        >
+          {submitterOnlyRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && currentUser.isReviewManager}
+              redirectPath={loggedIn && "/not-found"}
+            />
+          }
+        >
+          {reviewManagerOnlyRoutes}
+        </Route>
+
+        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/not-found" />}>
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+          <Route path="/admin" element={<LoginScreen isAdmin />} />
+        </Route>
         {/* Public Routes */}
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
