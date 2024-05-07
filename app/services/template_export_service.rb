@@ -14,6 +14,7 @@ class TemplateExportService
         jurisdictions_count = Jurisdiction.count
 
         label = req["label"]
+        is_elective = req["elective"]
         count_of_jurisdictions_using =
           (
             if req["elective"]
@@ -44,7 +45,14 @@ class TemplateExportService
             "zoning",
           )
 
-        csv << [label, count_of_jurisdictions_using, reason_bylaw_count, reason_policy_count, reason_zoning_count]
+        csv << [
+          label,
+          is_elective,
+          count_of_jurisdictions_using,
+          reason_bylaw_count,
+          reason_policy_count,
+          reason_zoning_count,
+        ]
       end
     end
   end

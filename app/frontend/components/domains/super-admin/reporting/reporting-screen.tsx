@@ -75,7 +75,7 @@ export const ReportingScreen = observer(() => {
                 <SearchGridItem>
                   {
                     <Menu>
-                      <MenuButton as={Button} aria-label="Options" variant="secondary" px={2}>
+                      <MenuButton as={Button} aria-label="manage" variant="link">
                         {t("ui.manage")}
                       </MenuButton>
                       <MenuList>
