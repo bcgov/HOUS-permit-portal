@@ -122,3 +122,13 @@ export function renameKeys(keysMap, obj) {
     {}
   )
 }
+
+export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName: string) {
+  const blob = new Blob([blobData], { type: mimeType })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = fileName
+  a.click()
+  window.URL.revokeObjectURL(url)
+}

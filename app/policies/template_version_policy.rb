@@ -11,12 +11,16 @@ class TemplateVersionPolicy < ApplicationPolicy
     true
   end
 
-  def download_csv?
-    show?
+  def download_summary_csv?
+    user.super_admin?
   end
 
-  def download_json?
-    show?
+  def download_customization_csv?
+    download_summary_csv?
+  end
+
+  def download_customization_json?
+    download_summary_csv?
   end
 
   def create_or_update_jurisdiction_template_version_cutomization?

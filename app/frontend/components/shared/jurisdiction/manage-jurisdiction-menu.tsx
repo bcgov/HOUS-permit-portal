@@ -21,7 +21,7 @@ export const ManageJurisdictionMenu = observer(function ManageJurisdictionMenu<T
   return (
     <Can action="jurisdiction:manage" data={{ jurisdiction }}>
       <Menu>
-        <MenuButton as={Button} variant="link">
+        <MenuButton as={Button} aria-label="manage" variant="link">
           {t("ui.manage")}
         </MenuButton>
         <MenuList boxShadow="elevations.elevation04">

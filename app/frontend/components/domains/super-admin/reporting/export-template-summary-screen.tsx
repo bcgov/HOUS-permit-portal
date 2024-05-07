@@ -11,20 +11,18 @@ import {
   TabPanel,
   Text,
 } from "@chakra-ui/react"
-import { BracketsCurly, Export, FileCsv } from "@phosphor-icons/react"
+import { Export, FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
-import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
-import { EExportFormat } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ActivityTabSwitcher } from "../../requirement-template/activity-tab-switcher"
 import { DigitalBuildingPermitsList } from "../../requirement-template/digital-building-permits-list"
 
-export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInbox() {
+export const ExportTemplateSummaryScreen = observer(function JurisdictionSubmissionInbox() {
   const { t } = useTranslation()
   const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
     customErrorMessage: t("errors.fetchWorkTypeOptions"),
@@ -47,12 +45,8 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
     navigateToActivityTab(firstActivityId, true)
   }, [activityId, enabledActivityOptions, activityOptionsError])
 
-  const { currentJurisdiction, error: jurisdictionError } = useJurisdiction()
-
   if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
-  if (jurisdictionError) return <ErrorScreen error={jurisdictionError} />
-  if (!currentJurisdiction || !enabledActivityOptions || (enabledActivityOptions && !activityId))
-    return <LoadingScreen />
+  if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
 
   const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
 
@@ -64,7 +58,7 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
     <Container maxW="container.lg" w="full" p={8} as="main">
       <Box w="full" px={8}>
         <Heading as="h1" size="2xl">
-          {t("requirementTemplate.export.title")}
+          {t("reporting.exportTemplateSummary.title")}
         </Heading>
         <Text color="text.secondary" my={6}>
           {t("digitalBuildingPermits.index.selectPermit")}
@@ -85,20 +79,10 @@ export const ExportTemplatesScreen = observer(function JurisdictionSubmissionInb
                       {t("ui.export")}
                     </MenuButton>
                     <MenuList>
-                      <MenuItem
-                        onClick={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.csv)}
-                      >
+                      <MenuItem onClick={templateVersion.downloadRequirementSummary}>
                         <HStack spacing={2} fontSize={"sm"}>
                           <FileCsv size={24} />
-                          <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationCsv")}</Text>
-                        </HStack>
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => templateVersion.downloadExport(currentJurisdiction.id, EExportFormat.json)}
-                      >
-                        <HStack spacing={2} fontSize={"sm"}>
-                          <BracketsCurly size={24} />
-                          <Text as={"span"}>{t("requirementTemplate.export.downloadCustomizationJson")}</Text>
+                          <Text as={"span"}>{t("requirementTemplate.export.downloadSummaryCsv")}</Text>
                         </HStack>
                       </MenuItem>
                     </MenuList>

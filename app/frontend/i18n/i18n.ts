@@ -890,6 +890,9 @@ const options = {
           siteConfigurationTitle: "Configuration management",
           jurisdictionsDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
+          reportingTitle: "Reporting",
+          reportingDescription:
+            "Explore reports and analytics to gain insights and make informed decisions about your permit applications",
           permitTemplateCatalogueDescription:
             "Create and manage permit templates for each permit type that a local jurisdiction can use as a standardized base.",
           requirementsLibraryTitle: "Requirements library",
@@ -1115,8 +1118,10 @@ const options = {
           },
           export: {
             title: "Export Templates",
-            downloadCsv: "Download CSV",
-            downloadJson: "Download JSON",
+            downloadSummaryCsv: "Download Summary CSV",
+            templateSummaryFilename: "Template Summary",
+            downloadCustomizationCsv: "Download Customizations CSV",
+            downloadCustomizationJson: "Download Customizations JSON",
           },
         },
         digitalBuildingPermits: {
@@ -1164,6 +1169,21 @@ const options = {
             label: "Site-wide message",
             hint: "This message will appear at the top of each page for all users.",
             settings: "Site-wide message settings",
+          },
+        },
+        reporting: {
+          title: "Reporting",
+          tableHeading: "Available reports",
+          open: "Open",
+          filterPlaceholder: "Filter reports by name",
+          templateSummaryName: "Template summary",
+          templateSummaryDescription: "A summary of template usage by jurisdictions",
+          exportTemplateSummary: {
+            title: "Export Template Summary",
+          },
+          columnHeaders: {
+            name: "Name",
+            description: "Description",
           },
         },
         externalApiKey: {
@@ -1297,6 +1317,8 @@ const options = {
             apiSettings: "API settings",
             create: "Create",
             exportTemplates: "Export templates",
+            reporting: "Reporting",
+            exportTemplateSummary: "Export template summary",
           },
           questionSupport: "Question support",
         },

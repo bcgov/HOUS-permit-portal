@@ -40,6 +40,7 @@ export const RootStoreModel = types
   .actions((self) => ({
     subscribeToUserChannel() {
       if (!self.userChannelConsumer && self.userStore.currentUser) {
+        // @ts-ignore
         self.userChannelConsumer = createUserChannelConsumer(self.userStore.currentUser.id, self)
       }
     },
