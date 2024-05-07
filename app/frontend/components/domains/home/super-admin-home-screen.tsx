@@ -35,7 +35,7 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
           />
           <HomeScreenBox
             title={t("home.reportingTitle")}
-            description={t("home.requirementsLibraryDescription")}
+            description={t("home.reportingDescription")}
             icon={<ChartBar size={24} />}
             href="/reporting"
           />
