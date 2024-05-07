@@ -92,7 +92,12 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
             )}
 
             <Section>
-              <Avatar size="xl" name={currentUser.name} bg="semantic.warningLight" color="text.primary" />
+              <Avatar
+                size="xl"
+                name={currentUser.name}
+                bg={currentUser.name ? "semantic.warningLight" : "greys.grey02"}
+                color="text.primary"
+              />
               <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
                 <TextFormControl label={t("user.firstName")} fieldName="firstName" required />
                 <TextFormControl label={t("user.lastName")} fieldName="lastName" required />
