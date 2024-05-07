@@ -992,6 +992,7 @@ const options = {
           changeRole: "Change role",
           newEmail: "New notification email address",
           changeEmail: "Change email",
+          deleteAccount: "To delete your account, please contact <1>digital.codes.permits@gov.bc.ca</1>.",
           addUser: "Add more emails",
           invite: "Invite",
           invitedBy: "<strong>{{email}}</strong> has invited you to join:",
