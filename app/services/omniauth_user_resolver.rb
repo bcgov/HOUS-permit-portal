@@ -29,7 +29,7 @@ class OmniauthUserResolver
 
   def should_promote_user?
     return unless existing_user&.submitter? && invited_user.present?
-    exisiting_user.id != invited_user.id
+    existing_user.id != invited_user.id
   end
 
   def create_user
