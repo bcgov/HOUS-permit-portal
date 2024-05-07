@@ -27,10 +27,10 @@ namespace :db do
         role: row["role"],
         password: Devise.friendly_token[0, 20],
         jurisdiction: j,
-        uid: row["bceid_uid"],
-        provider: "keycloak",
-        bceid_email: row["bceid_email"],
-        bceid_username: row["bceid_username"]
+        omniauth_uid: row["bceid_uid"],
+        omniauth_provider: "bceidboth",
+        omniauth_email: row["bceid_email"],
+        omniauth_username: row["bceid_username"]
       ).confirm
     rescue ActiveRecord::RecordInvalid => e
       puts "Skipping invalid user record: #{e.message}"

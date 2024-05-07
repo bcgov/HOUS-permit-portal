@@ -27,10 +27,10 @@ User.find_or_create_by(nickname: "super_admin") do |user|
   user.email = "super_admin@example.com"
   user.password = "P@ssword1"
   user.confirmed_at = Time.now
-  user.bceid_user_guid = "A41927C69D6549B8A396FCA748F53502"
-  user.auth_provider = "bceidboth"
-  user.bceid_email = "super_admin@example.com"
-  user.bceid_username = "super_admin"
+  user.omniauth_uid = "A41927C69D6549B8A396FCA748F53502"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "super_admin@example.com"
+  user.omniauth_username = "super_admin"
 end
 
 User.find_or_create_by(nickname: "review_manager") do |user|
@@ -41,10 +41,10 @@ User.find_or_create_by(nickname: "review_manager") do |user|
   user.password = "P@ssword1"
   user.jurisdiction = north_van
   user.confirmed_at = Time.now
-  user.bceid_user_guid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
-  user.auth_provider = "bceidboth"
-  user.bceid_email = "review_manager@example.com"
-  user.bceid_username = "review_manager"
+  user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "review_manager@example.com"
+  user.omniauth_username = "review_manager"
 end
 
 User.find_or_create_by(nickname: "reviewer") do |user|
@@ -55,10 +55,10 @@ User.find_or_create_by(nickname: "reviewer") do |user|
   user.password = "P@ssword1"
   user.jurisdiction = north_van
   user.confirmed_at = Time.now
-  user.bceid_user_guid = "8505910FBD594495AC899BC6653F3544"
-  user.auth_provider = "bceidboth"
-  user.bceid_email = "reviewer@example.com"
-  user.bceid_username = "reivewer"
+  user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "reviewer@example.com"
+  user.omniauth_username = "reivewer"
 end
 
 User.find_or_create_by(nickname: "submitter") do |user|
@@ -68,10 +68,10 @@ User.find_or_create_by(nickname: "submitter") do |user|
   user.email = "submitter@example.com"
   user.password = "P@ssword1"
   user.confirmed_at = Time.now
-  user.bceid_user_guid = "C2E3AA0067514FFEB587C11038E437E2"
-  user.auth_provider = "bceidboth"
-  user.bceid_email = "submitter@example.com"
-  user.bceid_username = "submitter"
+  user.omniauth_uid = "C2E3AA0067514FFEB587C11038E437E2"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "submitter@example.com"
+  user.omniauth_username = "submitter"
 end
 
 User.reindex

@@ -122,29 +122,31 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               )}
               <Divider my={1} />
               <TextFormControl
-                label={t("user.bceid")}
-                hint={currentUser.bceidEmail}
-                inputProps={{ value: currentUser.bceidUsername }}
+                label={currentUser.isSuperAdmin ? t("user.idir") : t("user.bceid")}
+                hint={currentUser.omniauthEmail}
+                inputProps={{ value: currentUser.omniauthUsername }}
                 isDisabled
               />
-              <Alert
-                status="info"
-                borderRadius="sm"
-                gap={1.5}
-                borderWidth={1}
-                borderColor="semantic.info"
-                px={2}
-                py={1.5}
-                fontSize="sm"
-              >
-                <Info color="var(--chakra-colors-semantic-info)" />
-                <Text>
-                  {t("user.changeBceid")}
-                  <Link href={import.meta.env.VITE_BCEID_URL} isExternal>
-                    {t("user.changeBceidLinkText")}
-                  </Link>
-                </Text>
-              </Alert>
+              {!currentUser.isSuperAdmin && (
+                <Alert
+                  status="info"
+                  borderRadius="sm"
+                  gap={1.5}
+                  borderWidth={1}
+                  borderColor="semantic.info"
+                  px={2}
+                  py={1.5}
+                  fontSize="sm"
+                >
+                  <Info color="var(--chakra-colors-semantic-info)" />
+                  <Text>
+                    {t("user.changeBceid")}
+                    <Link href={import.meta.env.VITE_BCEID_URL} isExternal>
+                      {t("user.changeBceidLinkText")}
+                    </Link>
+                  </Text>
+                </Alert>
+              )}
             </Section>
 
             <Section>

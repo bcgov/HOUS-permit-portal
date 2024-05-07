@@ -35,7 +35,7 @@ class User < ApplicationRecord
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
-  validate :unique_bceid
+  validate :unique_omniauth_uid
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
@@ -117,12 +117,14 @@ class User < ApplicationRecord
     end
   end
 
-  def unique_bceid
-    return unless bceid_user_guid.present?
-    existing_user =
-      User.where.not(bceid_user_guid: nil).find_by(bceid_user_guid: bceid_user_guid, auth_provider: auth_provider)
-    if existing_user && existing_user != self
-      errors.add(:bceid_user_guid, :taken, jurisdiction: existing_user.jurisdiction.name)
+  def unique_omniauth_uid
+    return unless omniauth_uid.present?
+    existing_user = User.where.not(omniauth_uid: nil).find_by(omniauth_uid:, omniauth_provider:)
+    return unless existing_user && existing_user != self
+    if !super_admin?
+      errors.add(:base, :bceid_taken, jurisdiction: existing_user.jurisdiction&.name)
+    elsif super_admin?
+      errors.add(:base, :idir_taken)
     end
   end
 end

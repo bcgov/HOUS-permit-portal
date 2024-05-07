@@ -6,8 +6,8 @@ class UserBlueprint < Blueprinter::Base
            :unconfirmed_email,
            :nickname,
            :role,
-           :bceid_username,
-           :bceid_email,
+           :omniauth_username,
+           :omniauth_email,
            :first_name,
            :last_name,
            :certified,
@@ -38,7 +38,7 @@ class UserBlueprint < Blueprinter::Base
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :minimal
 
     field :invited_by_email do |user, _options|
-      user.invited_by.email
+      user.invited_by&.email
     end
   end
 end

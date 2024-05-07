@@ -331,6 +331,7 @@ const AppRoutes = observer(() => {
             <Route path="/" element={<RedirectScreen path="/welcome" />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+            <Route path="/admin" element={<LoginScreen isAdmin />} />
           </>
         )}
         {/* Public Routes */}

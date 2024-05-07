@@ -18,6 +18,8 @@ const options = {
       translation: {
         auth: {
           login: "Login",
+          adminLogin: "Admin login",
+          adminAccountAccess: "If you cannot login with your IDIR, please contact your administrator to gain access.",
           prompt:
             "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
           loginHelp: "Having trouble logging in? ",
@@ -46,6 +48,7 @@ const options = {
           submit: "Submit",
           or: "or",
           bceid_login: "Login with BCeID",
+          idir_login: "Login with IDIR",
           role: "Role",
           nicknameLabel: "Nickname",
           emailLabel: "Email address",
@@ -996,6 +999,8 @@ const options = {
           addUser: "Add more emails",
           invite: "Invite",
           invitedBy: "<strong>{{email}}</strong> has invited you to join:",
+          invitedAsAdmin:
+            "<strong>{{email}}</strong> has invited you to join BC Building Permit Hub as an administrator",
           invitedAs: "as a",
           invitationIntent:
             "This invitation is intended for <strong>{{email}}</strong>, if this is incorrect please contact the sender above.",
@@ -1003,9 +1008,9 @@ const options = {
             title: "Invalid invite",
             message: "Please contact your jurisdiction to request a new invitation link.",
           },
-          createAccount: "Create your account",
+          createAccount: "Proceed with your account creation",
           bceid: "BCeID",
-          bceidEmail: "BCeID email address",
+          idir: "IDIR",
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
           confirmationRequiredWithEmail:
