@@ -888,16 +888,18 @@ const options = {
         home: {
           jurisdictionsTitle: "Jurisdictions",
           siteConfigurationTitle: "Configuration management",
-          jurisdictionsDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
+          jurisdictionsDescription:
+            "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
           permitTemplateCatalogueDescription:
-            "Create and manage permit templates for each permit type that a local jurisdiction can use as a standardized base.",
+            "Develop and publish a collection of permit templates that provide a standardized foundation for building permits across local jurisdictions. These templates include requirement blocks to establish a structured flow for the building permit template.",
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
-            "Create and manage requirement blocks that can be used inside of permit templates.",
+            "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
           configurationManagement: {
             title: "Configuration management",
-            description: "Customize content in one centralized place.",
+            description:
+              "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             editPermission: "Only Review Managers are able to edit.",
             jurisdictionNameLabel: "Name of local jurisdiction",
