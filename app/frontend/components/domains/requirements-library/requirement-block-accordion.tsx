@@ -74,11 +74,13 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   return (
     <Accordion
       as={"section"}
+      id={requirementBlock.formJson.key}
       w={"full"}
       border={"1px solid"}
       borderColor={"border.light"}
       borderRadius={"lg"}
       bg="greys.grey04"
+      _focus={{ bg: "semantic.warningLight", borderColor: "semantic.warning" }}
       allowMultiple
       index={isOpen ? 0 : null}
       {...accordionProps}
@@ -193,6 +195,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 const requirementType = requirement.inputType
                 return (
                   <Box
+                    id={requirement.formJson.key}
                     key={requirement.id}
                     w={"full"}
                     borderRadius={"sm"}

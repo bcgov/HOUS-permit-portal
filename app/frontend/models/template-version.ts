@@ -60,6 +60,12 @@ export const TemplateVersionModel = types
 
       return response
     }),
+    fetchTemplateVersionCompare: flow(function* (previousVersionId?: string) {
+      const response = yield* toGenerator(self.environment.api.fetchTemplateVersionCompare(self.id, previousVersionId))
+      if (response.ok) {
+        return response.data
+      }
+    }),
     createOrUpdateJurisdictionTemplateVersionCustomization: flow(function* (
       jurisdictionId: string,
       params: IJurisdictionTemplateVersionCustomizationForm

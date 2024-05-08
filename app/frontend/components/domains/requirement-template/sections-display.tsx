@@ -75,7 +75,7 @@ const SectionDisplay = observer(
             <RequirementBlockAccordion
               as={"section"}
               hideElectiveField={hideElectiveField}
-              id={formScrollToId(sectionBlock.id)}
+              id={formScrollToId(sectionBlock.requirementBlock.id)}
               key={sectionBlock.id}
               requirementBlock={sectionBlock.requirementBlock}
               isCollapsedAll={isCollapsedAll}

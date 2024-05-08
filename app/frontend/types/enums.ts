@@ -296,3 +296,9 @@ export enum ECustomEvents {
 export enum EFollowableTypes {
   permitTemplate = "PermitTemplate",
 }
+
+export enum ERequirementChangeAction {
+  added = "added",
+  changed = "changed",
+  removed = "removed",
+}
