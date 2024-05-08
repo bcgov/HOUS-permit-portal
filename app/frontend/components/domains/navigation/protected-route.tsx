@@ -14,7 +14,7 @@ export const ProtectedRoute = observer(({ isAllowed, redirectPath = "/login", ch
   const { setAfterLoginPath } = sessionStore
 
   if (!isAllowed) {
-    setAfterLoginPath(location.pathname)
+    if (!sessionStore.loggedIn) setAfterLoginPath(location.pathname)
     return <Navigate to={redirectPath || "/login"} replace />
   }
 

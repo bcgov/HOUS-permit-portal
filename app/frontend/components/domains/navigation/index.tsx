@@ -221,8 +221,8 @@ const AppRoutes = observer(() => {
 
   useEffect(() => {
     if (loggedIn && afterLoginPath) {
-      navigate(afterLoginPath)
       setAfterLoginPath(null)
+      navigate(afterLoginPath)
     }
   }, [afterLoginPath, loggedIn])
 
