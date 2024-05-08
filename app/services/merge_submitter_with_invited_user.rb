@@ -29,7 +29,12 @@ class MergeSubmitterWithInvitedUser
           invitations_count
         ],
       )
-    submitter.update!(invited_user_params)
-    invited_user.destroy!
+    submitter.assign_attributes(invited_user_params)
+    if submitter.valid?
+      ActiveRecord::Base.transaction do
+        invited_user.destroy!
+        submitter.save!
+      end
+    end
   end
 end
