@@ -27,6 +27,7 @@ class RequirementTemplate < ApplicationRecord
   accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
 
   validate :unique_permit_and_activity_for_undiscarded, on: :create
+  validate :validate_uniqueness_of_blocks
 
   def key
     "requirementtemplate#{id}"
@@ -119,6 +120,19 @@ class RequirementTemplate < ApplicationRecord
   end
 
   private
+
+  def validate_uniqueness_of_blocks
+    # Track duplicates across all sections within the same template
+    duplicates = requirement_blocks.unscope(:order).group(:id).having("COUNT(*) > 1").pluck(:id)
+
+    duplicates.each do |duplicate_block_id|
+      block_name = RequirementBlock.find(duplicate_block_id).name
+      errors.add(
+        :base,
+        I18n.t("model_validation.requirement_template.duplicate_block_in_template", requirement_block_name: block_name),
+      )
+    end
+  end
 
   def unique_permit_and_activity_for_undiscarded
     existing_record =
