@@ -18,6 +18,8 @@ class RequirementBlock < ApplicationRecord
   validates :sku, uniqueness: true, presence: true
   validates :name, uniqueness: true, presence: true
   validates :display_name, presence: true
+  validate :validate_step_code_dependencies
+
   before_validation :set_sku
 
   acts_as_taggable_on :associations
@@ -76,6 +78,21 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def validate_step_code_dependencies
+    has_energy_step_code = requirements.any? { |req| req.input_type_energy_step_code? }
+
+    return unless has_energy_step_code
+
+    has_all_dependencies =
+      Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.all? do |dependency_code|
+        requirements.count { |req| req.requirement_code == dependency_code } == 1
+      end
+
+    return if has_all_dependencies
+
+    errors.add(:requirements, :incorrect_energy_step_code_dependencies)
+  end
 
   def configurations_search_list
     configurations = []

@@ -39,6 +39,15 @@ en:
             jurisdiction:
               no_contact: "not available."
             pid_or_pin: "must have a pid or pin."
+        requirement_block:
+          attributes:
+            requirements:
+              incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
+        requirement:
+          incorrect_energy_requirement_schema: "Incorrect schema for %{requirement_code}"
+          attributes:
+            requirement_code:
+              incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
         supporting_document:
           attributes:
             file:

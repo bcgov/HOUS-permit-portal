@@ -46,9 +46,62 @@ class Requirement < ApplicationRecord
               scope: :requirement_block_id,
               message: "should be unique within the same requirement block",
             }
+  validate :validate_energy_step_code_requirement_code
+  validate :validate_energy_step_code_related_requirements_schema
+
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
+
+  ENERGY_STEP_CODE_REQUIREMENT_CODE = "energy_step_code_tool_part_9".freeze
+
+  ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA = {
+    energy_step_code_method: {
+      "requirement_code" => "energy_step_code_method",
+      "input_type" => "select",
+      "input_options" => {
+        "value_options" => [
+          { "label" => "Utilizing the digital step code tool", "value" => "tool" },
+          { "label" => "By file upload", "value" => "file" },
+        ],
+      },
+    },
+    energy_step_code_tool_part_9: {
+      "requirement_code" => "energy_step_code_tool_part_9",
+      "input_type" => "energy_step_code",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "tool",
+          "show" => true,
+          "when" => "energy_step_code_method",
+        },
+        "energy_step_code" => "part_9",
+      },
+    },
+    energy_step_code_report_file: {
+      "requirement_code" => "energy_step_code_report_file",
+      "input_type" => "file",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "file",
+          "show" => true,
+          "when" => "energy_step_code_method",
+        },
+      },
+    },
+    energy_step_code_h2000_file: {
+      "requirement_code" => "energy_step_code_h2000_file",
+      "input_type" => "file",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "file",
+          "show" => true,
+          "when" => "energy_step_code_method",
+        },
+      },
+    },
+  }
+  ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES = ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s).freeze
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -93,6 +146,11 @@ class Requirement < ApplicationRecord
     uuid_regex.match?(self.requirement_code)
   end
 
+  def using_dummied_energy_requirement_code
+    uuid_regex = /^energy-dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    uuid_regex.match?(self.requirement_code)
+  end
+
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code
     using_dummy = self.using_dummied_requirement_code
@@ -103,7 +161,9 @@ class Requirement < ApplicationRecord
     new_requirement_code =
       (
         if (using_dummy || blank)
-          label.present? ? label.parameterize.underscore.camelize(:lower) : SecureRandom.uuid
+          return ENERGY_STEP_CODE_REQUIREMENT_CODE if input_type_energy_step_code?
+
+          label.blank? ? ENERGY_STEP_CODE_REQUIREMENT_CODE : label.parameterize(separator: "_")
         else
           requirement_code
         end
@@ -124,7 +184,6 @@ class Requirement < ApplicationRecord
 
   def formio_type_options
     form_json_service = RequirementFormJsonService.new(self)
-
     form_json_service.formio_type_options
   end
 
@@ -190,6 +249,29 @@ class Requirement < ApplicationRecord
            input_options["can_add_multiple_contacts"].is_a?(FalseClass)
        )
       errors.add(:input_options, "can_add_multiple_contacts must be a boolean")
+    end
+  end
+
+  def validate_energy_step_code_requirement_code
+    unless input_type_energy_step_code? && requirement_code != ENERGY_STEP_CODE_REQUIREMENT_CODE &&
+             !using_dummied_requirement_code
+      return
+    end
+
+    errors.add(
+      :requirement_code,
+      :incorrect_energy_requirement_code,
+      correct_requirement_code: ENERGY_STEP_CODE_REQUIREMENT_CODE,
+      incorrect_requirement_code: requirement_code,
+    )
+  end
+
+  def validate_energy_step_code_related_requirements_schema
+    return unless ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.include?(requirement_code)
+
+    unless ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[requirement_code.to_sym] ==
+             self.attributes.slice("requirement_code", "input_type", "input_options")
+      errors.add(:base, :incorrect_energy_requirement_schema, requirement_code: requirement_code)
     end
   end
 end
