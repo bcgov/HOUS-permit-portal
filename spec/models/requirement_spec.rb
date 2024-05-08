@@ -74,6 +74,166 @@ RSpec.describe Requirement, type: :model do
           expect(valid_requirement).to be_valid
         end
       end
+
+      context "energy step code related requirements" do
+        it "ensures the requirement_code for an energy_step_code input_type is 'energy_step_code_tool_part_9'" do
+          valid_requirement = build(:energy_step_code_tool_part_9_requirement)
+          invalid_requirement =
+            build(:requirement, input_type: "energy_step_code", requirement_code: "energy_step_code_tool_part_8")
+
+          allow(valid_requirement).to receive(:validate_conditional)
+          allow(invalid_requirement).to receive(:validate_conditional)
+
+          expect(valid_requirement).to be_valid
+          expect(invalid_requirement).to_not be_valid
+          expect(invalid_requirement.errors[:requirement_code]).to include(
+            I18n.t(
+              "activerecord.errors.models.requirement.attributes.requirement_code.incorrect_energy_requirement_code",
+              correct_requirement_code: Requirement::ENERGY_STEP_CODE_REQUIREMENT_CODE,
+              incorrect_requirement_code: "energy_step_code_tool_part_8",
+            ),
+          )
+        end
+
+        it "ensures energy_step_code_tool_part_9 has correct required schema" do
+          valid_requirement = build(:energy_step_code_tool_part_9_requirement)
+          invalid_requirements = [
+            build(:requirement, input_type: "energy_step_code", requirement_code: "energy_step_code_tool_part_9"),
+            build(
+              :requirement,
+              input_type: "energy_step_code",
+              requirement_code: "energy_step_code_tool_part_9",
+              input_options: {
+                "conditional" => {
+                  "eq" => "tool",
+                  "show" => true,
+                  "when" => "energy_step_code_method_wrong",
+                },
+                "energy_step_code" => "part_9",
+              },
+            ),
+            build(
+              :requirement,
+              input_type: "energy_step_code",
+              requirement_code: "energy_step_code_tool_part_9",
+              input_options: {
+                "conditional" => {
+                  "eq" => "tool",
+                  "show" => true,
+                  "when" => "energy_step_code_method",
+                },
+              },
+            ),
+          ]
+
+          allow(valid_requirement).to receive(:validate_conditional)
+          invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
+
+          expect(valid_requirement).to be_valid
+          invalid_requirements.each do |requirement|
+            expect(requirement).to_not be_valid
+            expect(requirement.errors[:base]).to include(
+              I18n.t(
+                "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+                requirement_code: requirement.requirement_code,
+              ),
+            )
+          end
+        end
+      end
+
+      it "ensures energy_step_code_method has correct required schema" do
+        valid_requirement = build(:energy_step_code_method_requirement)
+        invalid_requirements = [
+          build(:requirement, requirement_code: "energy_step_code_tool_part_9"),
+          build(:requirement, input_type: "select", requirement_code: "energy_step_code_tool_part_9"),
+          build(
+            :requirement,
+            input_type: "select",
+            requirement_code: "energy_step_code_tool_part_9",
+            input_options: {
+              "value_options" => [{ "label" => "Utilizing the digital step code tool", "value" => "tool" }],
+            },
+          ),
+        ]
+
+        allow(valid_requirement).to receive(:validate_conditional)
+        invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
+
+        expect(valid_requirement).to be_valid
+        invalid_requirements.each do |requirement|
+          expect(requirement).to_not be_valid
+          expect(requirement.errors[:base]).to include(
+            I18n.t(
+              "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+              requirement_code: requirement.requirement_code,
+            ),
+          )
+        end
+      end
+
+      it "ensures energy_step_code_report_file has correct required schema" do
+        valid_requirement = build(:energy_step_code_report_file_requirement)
+        invalid_requirements = [
+          build(:requirement, requirement_code: "energy_step_code_report_file"),
+          build(:requirement, input_type: "file", requirement_code: "energy_step_code_report_file"),
+          build(
+            :requirement,
+            input_type: "file",
+            requirement_code: "energy_step_code_report_file",
+            input_options: {
+              "value_options" => [{ "label" => "Utilizing the digital step code tool", "value" => "tool" }],
+            },
+          ),
+        ]
+
+        allow(valid_requirement).to receive(:validate_conditional)
+        invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
+
+        expect(valid_requirement).to be_valid
+        invalid_requirements.each do |requirement|
+          expect(requirement).to_not be_valid
+          expect(requirement.errors[:base]).to include(
+            I18n.t(
+              "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+              requirement_code: requirement.requirement_code,
+            ),
+          )
+        end
+      end
+
+      it "ensures energy_step_code_h2000_file has correct required schema" do
+        valid_requirement = build(:energy_step_code_h2000_file_requirement)
+        invalid_requirements = [
+          build(:requirement, requirement_code: "energy_step_code_h2000_file"),
+          build(:requirement, input_type: "file", requirement_code: "energy_step_code_h2000_file"),
+          build(
+            :requirement,
+            input_type: "file",
+            requirement_code: "energy_step_code_h2000_file",
+            input_options: {
+              "conditional" => {
+                "eq" => "file",
+                "show" => true,
+              },
+            },
+          ),
+        ]
+
+        allow(valid_requirement).to receive(:validate_conditional)
+        invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
+
+        expect(valid_requirement).to be_valid
+        invalid_requirements.each do |requirement|
+          expect(requirement).to_not be_valid
+          expect(requirement.errors[:base]).to include(
+            I18n.t(
+              "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
+              requirement_code: requirement.requirement_code,
+            ),
+          )
+        end
+      end
     end
 
     context "positions of requirements" do
@@ -212,7 +372,7 @@ types" do
         requirement = create(:requirement, label: "Number Requirement", input_type: "number")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|numberRequirement",
+          key: "#{requirement.requirement_block.key}|number_requirement",
           type: "number",
           delimiter: true,
           input: true,
@@ -233,7 +393,7 @@ types" do
         requirement = create(:requirement, label: "Checkbox Requirement", input_type: "checkbox")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|checkboxRequirement",
+          key: "#{requirement.requirement_block.key}|checkbox_requirement",
           type: "checkbox",
           input: true,
           label: "Checkbox Requirement",
@@ -250,7 +410,7 @@ types" do
         requirement = create(:requirement, label: "Date  Requirement", input_type: "date")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|dateRequirement",
+          key: "#{requirement.requirement_block.key}|date_requirement",
           type: "datetime",
           tableView: false,
           input: true,
@@ -299,7 +459,7 @@ types" do
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|selectRequirement",
+          key: "#{requirement.requirement_block.key}|select_requirement",
           type: "select",
           input: true,
           label: "select Requirement",
@@ -330,7 +490,7 @@ types" do
         expected_form_json = {
           input: true,
           inputType: "checkbox",
-          key: "#{requirement.requirement_block.key}|multiOptionSelectRequirement",
+          key: "#{requirement.requirement_block.key}|multi_option_select_requirement",
           label: "Multi option select Requirement",
           optionsLabelPosition: "right",
           requirementInputType: "multi_option_select",
@@ -350,7 +510,7 @@ types" do
         requirement = create(:requirement, label: "File Requirement", input_type: "file")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|fileRequirement_file",
+          key: "#{requirement.requirement_block.key}|file_requirement_file",
           storage: "s3custom",
           type: "simplefile",
           custom_class: "formio-component-file",
