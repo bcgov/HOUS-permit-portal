@@ -27,6 +27,10 @@ class TemplateVersionPolicy < ApplicationPolicy
     (user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id)
   end
 
+  def compare_requirements?
+    show?
+  end
+
   class Scope < Scope
     def resolve
       [] unless user.super_admin?

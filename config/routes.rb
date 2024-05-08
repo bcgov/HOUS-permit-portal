@@ -69,7 +69,9 @@ Rails.application.routes.draw do
       post "template_versions/:id/unschedule", on: :collection, to: "requirement_templates#unschedule_template_version"
     end
 
-    resources :template_versions, only: %i[index show]
+    resources :template_versions, only: %i[index show] do
+      get "compare_requirements", to: "template_versions#compare_requirements", on: :member
+    end
 
     get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
           "template_versions#show_jurisdiction_template_version_cutomization"

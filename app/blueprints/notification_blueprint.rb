@@ -1,3 +1,3 @@
 class NotificationBlueprint < Blueprinter::Base
-  fields :action, :href
+  fields :id, :action, :href
 end

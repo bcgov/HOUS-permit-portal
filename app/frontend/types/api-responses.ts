@@ -3,7 +3,7 @@ import { IPermitApplication } from "../models/permit-application"
 import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
-import { INotification, IOption } from "./types"
+import { INotification, IOption, ITemplateVersionDiff } from "./types"
 
 export interface IApiResponse<TData, TMeta> {
   data: TData
@@ -38,4 +38,8 @@ export interface IOptionResponse<T = string> extends IApiResponse<IOption<T>[], 
 export interface INotificationResponse {
   data: INotification[]
   meta: { unreadCount: number; totalPages: number }
+}
+
+export interface ITemplateVersionDiffResponse {
+  data: ITemplateVersionDiff
 }

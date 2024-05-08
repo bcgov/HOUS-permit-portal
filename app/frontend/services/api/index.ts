@@ -314,6 +314,15 @@ export class Api {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId })
   }
 
+  async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
+    const params = previousVersionId ? { previous_version_id: previousVersionId } : {}
+
+    return this.client.get<ApiResponse<ITemplateVersionDiff>>(
+      `/template_versions/${templateVersionId}/compare_requirements`,
+      params
+    )
+  }
+
   async fetchTemplateVersion(id: string) {
     return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
   }
@@ -412,7 +421,7 @@ export class Api {
   async downloadRequirementSummaryCsv(templateVersionId: string) {
     return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
   }
-  
+
   async fetchNotifications(page: number) {
     return this.client.get<INotificationResponse>(`/notifications`, { page })
   }

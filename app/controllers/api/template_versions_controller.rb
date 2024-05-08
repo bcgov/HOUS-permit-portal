@@ -81,7 +81,18 @@ class Api::TemplateVersionsController < Api::ApplicationController
     send_data json_data, type: "text/plain"
   end
 
+  def compare_requirements
+    authorize @template_version
+    render_success @template_version.compare_requirements(compare_requirements_params[:previous_version_id]),
+                   nil,
+                   { blueprint: CompareRequirementsBlueprint }
+  end
+
   private
+
+  def compare_requirements_params
+    params.permit(:previous_version_id)
+  end
 
   def set_template_version
     @template_version = TemplateVersion.find(params[:id])

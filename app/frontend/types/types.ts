@@ -1,5 +1,6 @@
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
+import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
@@ -137,6 +138,7 @@ export interface IDenormalizedRequirement {
   label: string
   inputType: ERequirementType
   inputOptions: IRequirementOptions
+  formJson?: IFormIORequirement
   hint?: string | null
   elective?: boolean
   required?: boolean
@@ -145,6 +147,7 @@ export interface IDenormalizedRequirement {
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  formJson?: IFormIOBlock
   description?: string
   displayName: string
   displayDescription?: string
@@ -168,6 +171,11 @@ export interface IDenormalizedTemplate {
   permitType: IPermitType
   activity: IActivity
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
+}
+
+export interface ICompareRequirementsBoxData {
+  id: string
+  label: string
 }
 
 export interface IErrorsBoxData {
@@ -337,4 +345,10 @@ export interface IJurisdictionFilters {
   name?: string
   type?: EJurisdictionTypes
   userId?: string
+}
+
+export interface ITemplateVersionDiff {
+  added: IRequirement[]
+  removed: IRequirement[]
+  changed: IRequirement[]
 }

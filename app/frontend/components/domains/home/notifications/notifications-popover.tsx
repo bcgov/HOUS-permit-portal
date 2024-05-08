@@ -13,6 +13,7 @@ import {
   PopoverFooter,
   PopoverHeader,
   PopoverTrigger,
+  Portal,
 } from "@chakra-ui/react"
 import { Bell, BellRinging, CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -66,38 +67,40 @@ export const NotificationsPopover: React.FC = observer(() => {
           )}
         </Box>
       </PopoverTrigger>
-      <PopoverContent color="black" w={500}>
-        <PopoverArrow />
-        <PopoverCloseButton mt={1} />
-        <PopoverHeader>
-          <HStack gap={4}>
-            <Heading as="h3" mb={0}>
-              {t("notification.title")}
-            </Heading>
-            {numberJustRead > 0 && (
-              <Badge fontWeight="normal" textTransform="lowercase">
-                {t("notification.nUnread", { n: numberJustRead })}
-              </Badge>
-            )}
-          </HStack>
-        </PopoverHeader>
-        <PopoverBody p={4} maxH="50vh" overflow="auto">
-          <Flex direction="column" gap={4}>
-            {notifications.map((n) => (
-              <CustomMessageBox status="info" description={n.action}>
-                <RouterLinkButton variant="link" rightIcon={<CaretRight />} to={n.href} color="text.primary">
-                  {t("ui.go")}
-                </RouterLinkButton>
-              </CustomMessageBox>
-            ))}
-          </Flex>
-        </PopoverBody>
-        <PopoverFooter border={0} padding={2}>
-          <Button variant="ghost" leftIcon={<CaretDown />} onClick={fetchNotifications}>
-            {t("ui.showOlder")}
-          </Button>
-        </PopoverFooter>
-      </PopoverContent>
+      <Portal>
+        <PopoverContent color="black" w={500}>
+          <PopoverArrow />
+          <PopoverCloseButton mt={1} />
+          <PopoverHeader>
+            <HStack gap={4}>
+              <Heading as="h3" fontSize="lg" mb={0}>
+                {t("notification.title")}
+              </Heading>
+              {numberJustRead > 0 && (
+                <Badge fontWeight="normal" textTransform="lowercase">
+                  {t("notification.nUnread", { n: numberJustRead })}
+                </Badge>
+              )}
+            </HStack>
+          </PopoverHeader>
+          <PopoverBody p={4} maxH="50vh" overflow="auto">
+            <Flex direction="column" gap={4}>
+              {notifications.map((n) => (
+                <CustomMessageBox status="info" description={n.action} key={n.id}>
+                  <RouterLinkButton variant="link" rightIcon={<CaretRight />} to={n.href} color="text.primary">
+                    {t("ui.go")}
+                  </RouterLinkButton>
+                </CustomMessageBox>
+              ))}
+            </Flex>
+          </PopoverBody>
+          <PopoverFooter border={0} padding={2}>
+            <Button variant="ghost" leftIcon={<CaretDown />} onClick={fetchNotifications}>
+              {t("ui.showOlder")}
+            </Button>
+          </PopoverFooter>
+        </PopoverContent>
+      </Portal>
     </Popover>
   )
 })

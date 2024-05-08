@@ -342,3 +342,9 @@ export enum EDeprecationReason {
 export enum EFollowableTypes {
   permitTemplate = "PermitTemplate",
 }
+
+export enum ERequirementChangeAction {
+  added = "added",
+  changed = "changed",
+  removed = "removed",
+}
