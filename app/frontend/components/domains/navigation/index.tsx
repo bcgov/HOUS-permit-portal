@@ -313,7 +313,7 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
-        {loggedIn && !currentUser.eulaAccepted && (
+        {loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin && (
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
         )}
@@ -335,7 +335,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isReviewer)}
+              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isSuperAdmin)}
               redirectPath={loggedIn && "/not-found"}
             />
           }
@@ -354,7 +354,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isSuperAdmin || currentUser.isReviewManager)}
+              isAllowed={loggedIn && (currentUser.isReviewer || currentUser.isReviewManager)}
               redirectPath={loggedIn && "/not-found"}
             />
           }
