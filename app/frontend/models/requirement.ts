@@ -1,6 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
 import { ENumberUnit, ERequirementType } from "../types/enums"
-import { IOption, IRequirementOptions, TConditional } from "../types/types"
+import { IFormIORequirement, IOption, IRequirementOptions, TConditional } from "../types/types"
 
 export const RequirementModel = types
   .model("RequirementModel", {
@@ -8,6 +8,7 @@ export const RequirementModel = types
     label: types.string,
     requirementCode: types.string,
     hint: types.maybeNull(types.string),
+    formJson: types.maybeNull(types.frozen<IFormIORequirement>()),
     inputType: types.enumeration<ERequirementType[]>(Object.values(ERequirementType)),
     inputOptions: types.frozen<IRequirementOptions>({}),
     elective: types.boolean,

@@ -286,7 +286,7 @@ export const RequirementForm = observer(
             },
           }}
         >
-          <ErrorsBox errorBox={errorBoxData} />
+          <ErrorsBox data={errorBoxData} />
 
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
@@ -314,8 +314,8 @@ export const RequirementForm = observer(
           <Form
             form={formattedFormJson}
             formReady={formReady}
-            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be
-                                                                                                                                                                                                                         mutated*/
+            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
+            can't be mutated*/
             submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}

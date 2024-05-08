@@ -116,6 +116,8 @@ const options = {
         },
         ui: {
           disable: "Disable",
+          ok: "OK",
+          dismiss: "Dismiss",
           revoke: "Revoke",
           create: "Create",
           tip: "Tip",
@@ -1044,6 +1046,10 @@ const options = {
           },
         },
         requirementTemplate: {
+          compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
+          changed: "changed",
+          added: "added",
+          removed: "removed",
           edit: {
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
@@ -1069,9 +1075,14 @@ const options = {
             scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish!",
+            pleaseReview: "Please review the following:",
             errorsBox: {
               title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",
+            },
+            diffBox: {
+              title: "Template changes",
+              instructions: "Please review the following:",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
           },

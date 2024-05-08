@@ -139,6 +139,7 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )

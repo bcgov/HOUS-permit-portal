@@ -5,15 +5,14 @@ import React from "react"
 interface ICustomMessageBoxProps extends ToastProps {
   children?: React.ReactNode
 }
+const iconMap = {
+  success: <CheckCircle size={24} aria-label={"success icon"} />,
+  warning: <Warning size={24} aria-label={"warning icon"} />,
+  error: <WarningCircle size={24} aria-label={"error icon"} />,
+  info: <Info size={24} aria-label={"info icon"} />,
+}
 
 export const CustomMessageBox = ({ title, description, status, children }: ICustomMessageBoxProps) => {
-  const iconMap = {
-    success: <CheckCircle size={24} />,
-    warning: <Warning size={24} />,
-    error: <WarningCircle size={24} />,
-    info: <Info size={24} />,
-  }
-
   return (
     <Flex
       direction="column"

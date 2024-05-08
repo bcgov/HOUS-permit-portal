@@ -7,7 +7,7 @@ class NotificationService
   end
 
   def self.total_page_count(total_count)
-    (total_count.to_f / SETTINGS["notification_feed_per_page"].to_f).ceil
+    (total_count.to_f / (ENV["NOTIFICATION_FEED_PER_PAGE"] || 5).to_f || 5).ceil
   end
 
   def self.user_feed_for(user_id, page)

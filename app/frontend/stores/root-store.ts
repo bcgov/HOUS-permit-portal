@@ -42,7 +42,10 @@ export const RootStoreModel = types
   .actions((self) => ({
     subscribeToUserChannel() {
       if (!self.userChannelConsumer && self.userStore.currentUser) {
-        self.userChannelConsumer = createUserChannelConsumer(self.userStore.currentUser.id, self)
+        self.userChannelConsumer = createUserChannelConsumer(
+          self.userStore.currentUser.id,
+          self as unknown as IRootStore
+        )
       }
     },
     disconnectUserChannel() {

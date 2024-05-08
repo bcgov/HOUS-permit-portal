@@ -97,7 +97,7 @@ class TemplateVersioningService
 
       raise TemplateVersionPublishError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
 
-      previous_version = previous_version(template_version)
+      previous_version = template_version.previous_version
 
       return template_version if previous_version.blank?
 
@@ -110,6 +110,9 @@ class TemplateVersioningService
           Rails.logger.error("Error copying customizations to new template version: #{e.message}")
         end
       end
+
+      # Publish the notification
+      NotificationService.publish_new_template_version_publish_event(template_version)
 
       #  updates draft permits with the new template version
       update_draft_permits_with_new_template_version(previous_version, template_version)
@@ -127,16 +130,6 @@ class TemplateVersioningService
       .permit_applications
       .where(status: "draft")
       .update_all(template_version_id: new_template_version.id)
-  end
-
-  def self.previous_version(template_version)
-    template_version
-      .requirement_template
-      .template_versions
-      .where("version_date <=?", template_version.version_date)
-      .where.not(id: template_version.id)
-      .order(version_date: :desc, created_at: :desc)
-      .first
   end
 
   def self.copy_jurisdiction_customizations_to_template_version(
