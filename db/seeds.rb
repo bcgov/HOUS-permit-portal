@@ -58,7 +58,7 @@ User.find_or_create_by(nickname: "reviewer") do |user|
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidboth"
   user.omniauth_email = "reviewer@example.com"
-  user.omniauth_username = "reivewer"
+  user.omniauth_username = "reviewer"
 end
 
 User.find_or_create_by(nickname: "submitter") do |user|
