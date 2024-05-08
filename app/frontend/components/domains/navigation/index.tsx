@@ -284,18 +284,6 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const submitterOnlyRoutes = (
-    <>
-      <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
-        <Route path="step-code" element={<StepCodeForm />} />
-      </Route>
-      <Route
-        path="/permit-applications/:permitApplicationId/sucessful-submission"
-        element={<SuccessfulSubmissionScreen />}
-      />
-    </>
-  )
-
   const reviewManagerOnlyRoutes = (
     <>
       <Route
@@ -330,6 +318,13 @@ const AppRoutes = observer(() => {
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
+            <Route path="step-code" element={<StepCodeForm />} />
+          </Route>
+          <Route
+            path="/permit-applications/:permitApplicationId/sucessful-submission"
+            element={<SuccessfulSubmissionScreen />}
+          />
         </Route>
 
         <Route
@@ -360,14 +355,6 @@ const AppRoutes = observer(() => {
           }
         >
           {managerOrReviewerRoutes}
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute isAllowed={loggedIn && currentUser.isSubmitter} redirectPath={loggedIn && "/not-found"} />
-          }
-        >
-          {submitterOnlyRoutes}
         </Route>
 
         <Route

@@ -1,12 +1,10 @@
 class PermitApplicationPolicy < ApplicationPolicy
   # All user types can use the search permit application
   def index?
-    if user.super_admin?
+    if user.super_admin? || record.submitter == user
       true
     elsif user.review_manager? || user.reviewer?
       record.jurisdiction.id == user.jurisdiction_id
-    elsif user.submitter?
-      record.submitter_id == user.id
     end
   end
 
@@ -15,7 +13,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def create?
-    user.submitter?
+    true
+  end
+
+  def mark_as_viewed?
+    user.review_manager? || user.reviewer?
   end
 
   def update?

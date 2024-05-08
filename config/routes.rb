@@ -91,6 +91,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
+      post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
     end
 

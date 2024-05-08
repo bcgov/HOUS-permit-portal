@@ -11,6 +11,7 @@ import {
   MenuDivider,
   MenuGroup,
   MenuItem,
+  MenuItemProps,
   MenuList,
   Portal,
   Show,
@@ -171,6 +172,7 @@ interface INavBarMenuProps {}
 
 const NavBarMenu = observer(({}: INavBarMenuProps) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { sessionStore, userStore } = useMst()
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
@@ -185,7 +187,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
-      <MenuDivider />
+      <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
 
@@ -201,7 +203,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
       />
       <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
-      <MenuDivider />
+      <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
 
@@ -213,7 +215,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
         label={t("site.breadcrumb.submissionInbox")}
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
       />
-      <MenuDivider />
+      <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
 
@@ -243,7 +245,7 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                   {t("site.loggedInWelcome")}
                 </Text>
                 <MenuGroup title={currentUser.name} noOfLines={1}>
-                  <MenuDivider />
+                  <MenuDivider my={0} borderColor="border.light" />
                   {!currentUser.isReviewStaff && (
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                   )}
@@ -252,6 +254,17 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                   {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
+                  {!currentUser?.isSubmitter && (
+                    <>
+                      <MenuItem bg="greys.grey03">
+                        <Button variant="primary" onClick={(e) => navigate("/permit-applications/new")}>
+                          {t("site.newApplication")}
+                        </Button>
+                      </MenuItem>
+                      <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
+                      <MenuDivider my={0} borderColor="border.light" />
+                    </>
+                  )}
                   <HelpDrawer
                     renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
                   />
@@ -275,14 +288,14 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                     <NavMenuItemCTA label={t("auth.login")} to="/login" />
                   </MenuList>
                 )}
-                <MenuDivider />
+                <MenuDivider my={0} borderColor="border.light" />
                 <NavMenuItem label={t("site.home")} to="/" />
                 <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                 {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
               </>
             )}
 
-            <MenuDivider />
+            <MenuDivider my={0} borderColor="border.light" />
             <MenuItem>
               <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
@@ -296,14 +309,14 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
 })
 
 // Looks complicated but this is jsut how you make it so that either to or onClick must be given, but not necessarily both
-interface INavMenuItemProps {
+interface INavMenuItemProps extends MenuItemProps {
   label: string
   to?: string
   variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItem = ({ label, to, variant, onClick }: INavMenuItemProps) => {
+const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -312,7 +325,7 @@ const NavMenuItem = ({ label, to, variant, onClick }: INavMenuItemProps) => {
   }
 
   return (
-    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick}>
+    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick} {...rest}>
       <Text textAlign="left" w="full">
         {label}
       </Text>

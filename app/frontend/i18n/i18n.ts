@@ -1229,6 +1229,7 @@ const options = {
           metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",
+          newApplication: "New permit application",
           activePermits: "Active permits",
           approvedPermits: "Approved permits",
           myAccount: "My Account",

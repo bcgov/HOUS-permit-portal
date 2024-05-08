@@ -98,6 +98,10 @@ export class Api {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
   }
 
+  async viewPermitApplication(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
