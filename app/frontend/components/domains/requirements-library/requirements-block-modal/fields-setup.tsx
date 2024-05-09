@@ -40,6 +40,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
     name: "displayName",
     rules: { required: true },
   })
+  const watchedRequirements = watch("requirementsAttributes")
 
   const [requirementIdsToEdit, setRequirementIdsToEdit] = useState<Record<string, boolean>>({})
 
@@ -80,6 +81,36 @@ export const FieldsSetup = observer(function FieldsSetup() {
 
   function isRequirementInEditMode(id: string) {
     return !!requirementIdsToEdit[id]
+  }
+
+  const onRemoveRequirement = (index: number) => {
+    const requirement = watchedRequirements[index]
+
+    if (!requirement) {
+      return
+    }
+
+    const isEnergyStepCodeRequirement = requirement.inputType === ERequirementType.energyStepCode
+
+    if (!isEnergyStepCodeRequirement) {
+      remove(index)
+
+      return
+    }
+
+    const stepCodeDependencyIndexes = watchedRequirements.reduce((acc, req, idx) => {
+      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+        req.requirementCode as EEnergyStepCodeDependencyRequirementCode
+      )
+
+      if (isEnergyStepCodeDependency) {
+        acc.push(idx)
+      }
+
+      return acc
+    }, [])
+
+    remove(stepCodeDependencyIndexes)
   }
 
   return (
@@ -145,7 +176,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
               const disabledMenuOptions: ("remove" | "conditional")[] =
                 watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9 &&
                 Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-                  watchedRequirementCode as (typeof EEnergyStepCodeDependencyRequirementCode)[keyof typeof EEnergyStepCodeDependencyRequirementCode]
+                  watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
                 )
                   ? ["remove", "conditional"]
                   : []
@@ -290,7 +321,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                   <FieldControlsHeader
                     isRequirementInEditMode={isRequirementInEditMode(field.id)}
                     toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
-                    onRemove={() => remove(index)}
+                    onRemove={() => onRemoveRequirement(index)}
                     elective={watchedElective}
                     conditional={watchedConditional}
                     requirementType={requirementType}
