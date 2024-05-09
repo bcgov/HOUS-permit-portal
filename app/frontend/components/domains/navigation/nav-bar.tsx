@@ -12,6 +12,7 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
+  Portal,
   Show,
   Spacer,
   Text,
@@ -233,52 +234,63 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
         {t("site.menu")}
       </MenuButton>
 
-      <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
-        <MenuList zIndex={99} boxShadow="2xl">
-          {loggedIn && !currentUser.isUnconfirmed ? (
-            <>
-              <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
-                {t("site.loggedInWelcome")}
-              </Text>
-              <MenuGroup title={currentUser.name} noOfLines={1}>
-                <MenuDivider />
-                {!currentUser.isReviewStaff && (
-                  <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+      <Portal>
+        <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
+          <MenuList zIndex={99} boxShadow="2xl">
+            {loggedIn && !currentUser.isUnconfirmed ? (
+              <>
+                <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
+                  {t("site.loggedInWelcome")}
+                </Text>
+                <MenuGroup title={currentUser.name} noOfLines={1}>
+                  <MenuDivider />
+                  {!currentUser.isReviewStaff && (
+                    <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                  )}
+                  {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                  {currentUser?.isReviewManager && reviewManagerOnlyItems}
+                  {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                  {currentUser?.isReviewer && reviwerOnlyItems}
+                  {currentUser?.isSubmitter && submitterOnlyItems}
+                  <HelpDrawer
+                    renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
+                  />
+                  <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
+                  <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
+                </MenuGroup>
+              </>
+            ) : (
+              <>
+                {!loggedIn && (
+                  <MenuList
+                    display="flex"
+                    flexWrap="wrap"
+                    px={2}
+                    py={0}
+                    gap={2}
+                    border="0"
+                    boxShadow="none"
+                    maxW="300px"
+                  >
+                    <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                  </MenuList>
                 )}
-                {currentUser?.isSuperAdmin && superAdminOnlyItems}
-                {currentUser?.isReviewManager && reviewManagerOnlyItems}
-                {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
-                {currentUser?.isReviewer && reviwerOnlyItems}
-                {currentUser?.isSubmitter && submitterOnlyItems}
-                <HelpDrawer
-                  renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
-                />
-                <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
-                <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
-              </MenuGroup>
-            </>
-          ) : (
-            <>
-              {!loggedIn && (
-                <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
-                  <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                </MenuList>
-              )}
-              <MenuDivider />
-              <NavMenuItem label={t("site.home")} to="/" />
-              <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
-              {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
-            </>
-          )}
+                <MenuDivider />
+                <NavMenuItem label={t("site.home")} to="/" />
+                <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
+              </>
+            )}
 
-          <MenuDivider />
-          <MenuItem>
-            <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
-              {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
-            </Link>
-          </MenuItem>
-        </MenuList>
-      </Box>
+            <MenuDivider />
+            <MenuItem>
+              <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
+                {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
+              </Link>
+            </MenuItem>
+          </MenuList>
+        </Box>
+      </Portal>
     </Menu>
   )
 })
