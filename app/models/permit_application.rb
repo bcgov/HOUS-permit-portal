@@ -19,7 +19,6 @@ class PermitApplication < ApplicationRecord
 
   # Custom validation
 
-  validate :submitter_must_have_role
   validate :jurisdiction_has_matching_submission_contact
   validate :pid_or_pin_presence
   validates :nickname, presence: true
@@ -229,12 +228,6 @@ class PermitApplication < ApplicationRecord
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
     self.submitted_at = Time.current if submitted? && submitted_at.nil?
-  end
-
-  def submitter_must_have_role
-    unless submitter&.submitter?
-      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
-    end
   end
 
   def jurisdiction_has_matching_submission_contact
