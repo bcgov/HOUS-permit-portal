@@ -17,7 +17,7 @@ class Jurisdiction::UserInviter
 
   def invite_users
     users_params.each do |user_params|
-      user = User.find_by(email: user_params[:email].strip)
+      user = User.where.not(role: :submitter).find_by(email: user_params[:email].strip)
       if user.present? && !user.discarded? && user.confirmed?
         self.results[:email_taken] << user
       else
