@@ -228,7 +228,6 @@ const AppRoutes = observer(() => {
 
   const superAdminOnlyRoutes = (
     <>
-      <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
@@ -377,7 +376,10 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
-        <Route path="/jurisdictions" element={<LimitedJurisdictionIndexScreen />} />
+        <Route
+          path="/jurisdictions"
+          element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
+        />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
