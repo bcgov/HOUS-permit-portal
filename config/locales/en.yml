@@ -345,5 +345,7 @@ en:
     performance_type:
       error: "%{field_name} performance type must be one of %{accepted_values}"
   model_validation:
+    requirement_template:
+      duplicate_block_in_template: "Requirement block %{requirement_block_name} is already used in another section of this template."
     jurisdiction_template_version_customization:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"
