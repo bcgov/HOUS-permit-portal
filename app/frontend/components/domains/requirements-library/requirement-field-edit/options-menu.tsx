@@ -67,7 +67,7 @@ export const OptionsMenu = observer(function OptionsMenu({
         <ConditionalSetupModal
           index={index}
           triggerButtonProps={{
-            isDisabled: disabledOptions.includes("remove"),
+            isDisabled: disabledOptions.includes("conditional"),
           }}
         />
 

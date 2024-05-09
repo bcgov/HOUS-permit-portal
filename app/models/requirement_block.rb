@@ -19,6 +19,7 @@ class RequirementBlock < ApplicationRecord
   validates :name, uniqueness: true, presence: true
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
+  validate :validate_requirements_conditional
 
   before_validation :set_sku
 
@@ -78,6 +79,24 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def validate_requirements_conditional
+    requirements.each do |requirement|
+      conditional = requirement.input_options["conditional"]
+
+      next unless conditional.present?
+
+      if [conditional["when"], conditional["eq"], conditional["show"]].any?(&:blank?)
+        errors.add(:input_options, "conditional must have when, eq, and show")
+        break
+      end
+
+      if requirements.find { |r| r.requirement_code == conditional["when"] }.blank?
+        errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
+        break
+      end
+    end
+  end
 
   def validate_step_code_dependencies
     has_energy_step_code = requirements.any? { |req| req.input_type_energy_step_code? }

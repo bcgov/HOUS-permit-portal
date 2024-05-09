@@ -33,16 +33,18 @@ export function FieldControlsHeader({
 
   return (
     <HStack pos={"absolute"} right={0} top={0} spacing={4}>
-      {isRequirementInEditMode && (
-        <OptionsMenu
-          menuButtonProps={{
-            size: "sm",
-          }}
-          onRemove={onRemove}
-          disabledOptions={disabledMenuOptions}
-          index={index}
-        />
-      )}
+      {/*right now there is only two menu options,so if both are disabled we just hide the options menu*/}
+      {isRequirementInEditMode &&
+        !(disabledMenuOptions.includes("remove") && disabledMenuOptions.includes("conditional")) && (
+          <OptionsMenu
+            menuButtonProps={{
+              size: "sm",
+            }}
+            onRemove={onRemove}
+            disabledOptions={disabledMenuOptions}
+            index={index}
+          />
+        )}
       <HStack className={"requirement-edit-controls-container"}>
         {elective && !isRequirementInEditMode && <ElectiveTag display={isRequirementInEditMode ? "none" : "flex"} />}
         {conditional && !isRequirementInEditMode && (

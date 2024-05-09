@@ -1,6 +1,8 @@
 import { t } from "i18next"
+import { IRequirementAttributes } from "./types/api-request"
 import {
   EEnabledElectiveFieldReason,
+  EEnergyStepCodeDependencyRequirementCode,
   EGovFeedbackResponseNoReason,
   ENumberUnit,
   ERequirementContactFieldItemType,
@@ -89,4 +91,70 @@ export function getEnabledElectiveReasonOptions(): IOption<EEnabledElectiveField
       value: reason,
     }
   })
+}
+
+export function getEnergyStepCodeRequirementRequiredSchema(
+  energyRequirementCode: EEnergyStepCodeDependencyRequirementCode
+) {
+  const requirementCodeToSchema: Record<EEnergyStepCodeDependencyRequirementCode, IRequirementAttributes> = {
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+      inputType: ERequirementType.select,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.label"),
+      inputOptions: {
+        valueOptions: [
+          {
+            label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.tool"),
+            value: "tool",
+          },
+          {
+            label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.file"),
+            value: "file",
+          },
+        ],
+      },
+    },
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9,
+      inputType: ERequirementType.energyStepCode,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "tool",
+          show: true,
+          when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+        energyStepCode: "part_9",
+      },
+    },
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeReportFile]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeReportFile,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeReportFile.label"),
+      inputType: ERequirementType.file,
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "file",
+          show: true,
+          when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+      },
+    },
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeH2000File]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeH2000File,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeH2000File.label"),
+      inputType: ERequirementType.file,
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "file",
+          show: true,
+          when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+      },
+    },
+  }
+
+  return requirementCodeToSchema[energyRequirementCode]
 }

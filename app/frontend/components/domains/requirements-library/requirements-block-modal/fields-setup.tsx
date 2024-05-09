@@ -5,8 +5,11 @@ import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
+import { getEnergyStepCodeRequirementRequiredSchema } from "../../../../constants"
+import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
@@ -26,9 +29,13 @@ const fieldContainerSharedProps = {
   mt: 7,
 }
 
-export const FieldsSetup = observer(function FieldsSetup() {
+export const FieldsSetup = observer(function FieldsSetup({
+  requirementBlock,
+}: {
+  requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock
+}) {
   const { t } = useTranslation()
-  const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
+  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
   const { fields, append, remove } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementsAttributes",
@@ -49,27 +56,51 @@ export const FieldsSetup = observer(function FieldsSetup() {
   }
 
   const onUseRequirement = (requirementType: ERequirementType) => {
-    append({
-      requirementCode: `dummy-${uuidv4()}`,
-      inputType: requirementType,
-      label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
-        ? t("requirementsLibrary.modals.defaultContactLabel")
-        : undefined,
-      ...(isMultiOptionRequirement(requirementType)
-        ? {
-            inputOptions: {
-              valueOptions: [
-                { value: "Option 1", label: "Option 1" },
-                {
-                  value: "Option 2",
-                  label: "Option 2",
-                },
-                { value: "Option 3", label: "Option 3" },
-              ],
-            },
-          }
-        : {}),
-    })
+    if (requirementType !== ERequirementType.energyStepCode) {
+      const defaults = {
+        requirementCode: `dummy-${uuidv4()}`,
+        inputType: requirementType,
+        label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
+          ? t("requirementsLibrary.modals.defaultContactLabel")
+          : undefined,
+        ...(isMultiOptionRequirement(requirementType)
+          ? {
+              inputOptions: {
+                valueOptions: [
+                  { value: "Option 1", label: "Option 1" },
+                  {
+                    value: "Option 2",
+                    label: "Option 2",
+                  },
+                  { value: "Option 3", label: "Option 3" },
+                ],
+              },
+            }
+          : {}),
+      }
+      append(defaults)
+
+      return
+    }
+
+    // handle energy_step_code requirement as it's a special case where we have to add multiple other requirements
+    // with additional defaults
+    const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
+      .map((code) => getEnergyStepCodeRequirementRequiredSchema(code))
+      .map((requirement) => {
+        const energyRequirementInOriginalBlock = requirementBlock.requirements.find(
+          (r) => requirement.requirementCode === r.requirementCode
+        )
+
+        // we reuse the id of the original energy requirement dependency if it exists
+        // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
+        if (energyRequirementInOriginalBlock) {
+          requirement.id = energyRequirementInOriginalBlock.id
+        }
+        return requirement
+      })
+
+    append(energyStepCodeDependencyDefaults)
   }
 
   const hasFields = fields.length > 0
@@ -173,13 +204,20 @@ export const FieldsSetup = observer(function FieldsSetup() {
               const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
               const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
               // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
-              const disabledMenuOptions: ("remove" | "conditional")[] =
-                watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9 &&
-                Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-                  watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
-                )
-                  ? ["remove", "conditional"]
-                  : []
+              const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+                watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
+              )
+              const disabledMenuOptions: ("remove" | "conditional")[] = isStepCodeDependency ? ["conditional"] : []
+
+              // for step code dependency only the step_code requirement is removable and the other
+              // dependencies rely on it for removal
+              if (
+                isStepCodeDependency &&
+                watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9
+              ) {
+                disabledMenuOptions.push("remove")
+              }
+
               return (
                 <Box
                   key={field.id}

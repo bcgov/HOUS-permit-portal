@@ -472,9 +472,22 @@ const options = {
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
-            stepCodeMethodDefault: {
-              tool: "Utilizing the digital step code tool",
-              file: "By file upload",
+            stepCodeDependencies: {
+              energyStepCodeMethod: {
+                tool: "Utilizing the digital step code tool",
+                file: "By file upload",
+                label: "Which method do you want to do use for the energy step code",
+              },
+              energyStepCodeToolPart9: {
+                label:
+                  "Please use this tool to do your fill in your step code details and it will populate onto the application.",
+              },
+              energyStepCodeReportFile: {
+                label: "BC Energy Step Code Compliance Report",
+              },
+              energyStepCodeH2000File: {
+                label: "Pre construction Hot2000 model details, Hot2000 report",
+              },
             },
           },
           fields: {

@@ -33,7 +33,6 @@ class Requirement < ApplicationRecord
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
-  validate :validate_conditional
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code,
                       with: /_file\z/,
@@ -197,18 +196,6 @@ class Requirement < ApplicationRecord
     end
   end
 
-  def validate_conditional
-    return unless self.input_options["conditional"].present?
-
-    conditional = self.input_options["conditional"]
-    if [conditional["when"], conditional["eq"], conditional["show"]].any?(&:blank?)
-      errors.add(:input_options, "conditional must have when, eq, and show")
-    end
-    if requirement_block.requirements.find_by_requirement_code(conditional["when"]).blank?
-      errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
-    end
-  end
-
   def validate_unit_for_number_inputs
     return unless (input_options.present? && input_options["number_unit"].present?)
 
@@ -277,7 +264,7 @@ class Requirement < ApplicationRecord
     # if it is an empty hash as we don't care about it. if it as it will have no effect to conditionals.
     # Note we don't want to remove the key if it has other conditionals, as we want the validation below
     # to catch that, as it is an invalid schema. Also the key is only removed from the duplicated attributes.
-    if requirement_code == ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[:energy_step_code_method][:requirement_code] &&
+    if requirement_code == ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[:energy_step_code_method]["requirement_code"] &&
          (
            current_attributes_of_interest.dig("input_options", "conditional").present? &&
              current_attributes_of_interest.dig("input_options", "conditional").empty?
