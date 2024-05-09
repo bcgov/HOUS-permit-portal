@@ -2,18 +2,18 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
-    app: "permit-portal-routing"
+    app: "{{ $.Values.appName }}-web"
   name: "permit-portal-route"
 spec:
   host: "{{ .Values.route.spec.host }}"
   port:
-    targetPort: http
+    targetPort: 3000-tcp
   # manage certs manually for now
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
   to:
     kind: Service
-    name: "nginx"
+    name: "{{ $.Values.appName }}-web"
     weight: 100
   wildcardPolicy: None

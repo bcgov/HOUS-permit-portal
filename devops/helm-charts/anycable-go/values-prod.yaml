@@ -1,3 +1,7 @@
+route:
+  spec:
+    host: "websockets.buildingpermit.gov.bc.ca"
+
 anycable-go:
   replicas: 2
   resources:
