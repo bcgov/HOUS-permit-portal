@@ -269,8 +269,23 @@ class Requirement < ApplicationRecord
   def validate_energy_step_code_related_requirements_schema
     return unless ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.include?(requirement_code)
 
-    unless ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[requirement_code.to_sym] ==
-             self.attributes.slice("requirement_code", "input_type", "input_options")
+    current_attributes_of_interest = self.attributes.slice("requirement_code", "input_type", "input_options").deep_dup
+
+    # The front-end sends the conditional as an empty object due to the form setup when conditionals are not added.
+    # Since the energy_step_code_method does not have any conditionals, the schema wouldn't match.
+    # The easiest way to handle this is to remove the conditional key for energy_step_code_method
+    # if it is an empty hash as we don't care about it. if it as it will have no effect to conditionals.
+    # Note we don't want to remove the key if it has other conditionals, as we want the validation below
+    # to catch that, as it is an invalid schema. Also the key is only removed from the duplicated attributes.
+    if requirement_code == ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[:energy_step_code_method][:requirement_code] &&
+         (
+           current_attributes_of_interest.dig("input_options", "conditional").present? &&
+             current_attributes_of_interest.dig("input_options", "conditional").empty?
+         )
+      current_attributes_of_interest["input_options"].delete("conditional")
+    end
+
+    unless ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[requirement_code.to_sym] == current_attributes_of_interest
       errors.add(:base, :incorrect_energy_requirement_schema, requirement_code: requirement_code)
     end
   end

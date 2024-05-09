@@ -6,19 +6,21 @@ import { ERequirementType } from "../../../../types/enums"
 import { ElectiveTag } from "../../../shared/elective-tag"
 import { HasConditionalTag } from "../../../shared/has-conditional-tag"
 import { RequirementTypeTag } from "../../../shared/requirement-type-tag"
-import { OptionsMenu } from "../requirement-field-edit/options-menu"
+import { IRequirementOptionsMenu, OptionsMenu } from "../requirement-field-edit/options-menu"
 
 interface IProps {
   isRequirementInEditMode: boolean
   toggleRequirementToEdit: () => void
   requirementType: ERequirementType
-  onRemove: () => void
+  onRemove: IRequirementOptionsMenu["onRemove"]
+  disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   elective?: boolean
   conditional?: IFormConditional
   index: number
 }
 
 export function FieldControlsHeader({
+  disabledMenuOptions,
   isRequirementInEditMode,
   toggleRequirementToEdit,
   elective,
@@ -37,6 +39,7 @@ export function FieldControlsHeader({
             size: "sm",
           }}
           onRemove={onRemove}
+          disabledOptions={disabledMenuOptions}
           index={index}
         />
       )}

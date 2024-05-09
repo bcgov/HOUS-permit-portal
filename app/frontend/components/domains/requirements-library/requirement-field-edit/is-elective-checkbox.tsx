@@ -9,14 +9,15 @@ export type TIsElectiveCheckboxProps<TFieldValues extends FieldValues> = IContro
 
 export function IsElectiveCheckbox<TFieldValues extends FieldValues>({
   controlProps,
+  isDisabled,
   ...checkboxProps
 }: TIsElectiveCheckboxProps<TFieldValues>) {
   const {
     field: { value, ...restField },
-  } = useController(controlProps)
+  } = useController({ ...controlProps, disabled: isDisabled })
   const { t } = useTranslation()
   return (
-    <Checkbox {...checkboxProps} isChecked={value} {...restField}>
+    <Checkbox {...checkboxProps} isDisabled={isDisabled} isChecked={value} {...restField}>
       {t("requirementsLibrary.modals.isAnElectiveField")}
     </Checkbox>
   )

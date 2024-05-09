@@ -52,6 +52,7 @@ export const RequirementBlockModel = types
               operand,
               then,
             },
+            energyStepCode: requirement.inputOptions?.energyStepCode,
           },
         }
       })

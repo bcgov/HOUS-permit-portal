@@ -472,6 +472,10 @@ const options = {
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
+            stepCodeMethodDefault: {
+              tool: "Utilizing the digital step code tool",
+              file: "By file upload",
+            },
           },
           fields: {
             name: "Name",

@@ -6,7 +6,7 @@ import { Controller, useController, useFieldArray, useFormContext } from "react-
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
 import { IRequirementAttributes } from "../../../../types/api-request"
-import { ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
@@ -73,6 +73,11 @@ export const FieldsSetup = observer(function FieldsSetup() {
 
   const hasFields = fields.length > 0
 
+  const hasEnergyStepCodeRequirement = watch("requirementsAttributes").some(
+    (field) => (field as IRequirementAttributes).inputType === ERequirementType.energyStepCode
+  )
+  const disabledRequirementTypes = hasEnergyStepCodeRequirement ? [ERequirementType.energyStepCode] : []
+
   function isRequirementInEditMode(id: string) {
     return !!requirementIdsToEdit[id]
   }
@@ -125,7 +130,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
           {!hasFields && (
             <Flex w={"full"} justifyContent={"space-between"} px={6}>
               <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-              <FieldsSetupDrawer onUse={onUseRequirement} />
+              <FieldsSetupDrawer disabledRequirementTypes={disabledRequirementTypes} onUse={onUseRequirement} />
             </Flex>
           )}
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
@@ -135,6 +140,15 @@ export const FieldsSetup = observer(function FieldsSetup() {
               const requirementType = (field as IRequirementAttributes).inputType
               const watchedElective = watch(`requirementsAttributes.${index}.elective`)
               const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
+              const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
+              // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
+              const disabledMenuOptions: ("remove" | "conditional")[] =
+                watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9 &&
+                Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+                  watchedRequirementCode as (typeof EEnergyStepCodeDependencyRequirementCode)[keyof typeof EEnergyStepCodeDependencyRequirementCode]
+                )
+                  ? ["remove", "conditional"]
+                  : []
               return (
                 <Box
                   key={field.id}
@@ -239,6 +253,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             }
                           : undefined
                       }
+                      requirementCode={watchedRequirementCode}
                     />
                   </Box>
                   <Box
@@ -280,12 +295,14 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     conditional={watchedConditional}
                     requirementType={requirementType}
                     index={index}
+                    disabledMenuOptions={disabledMenuOptions}
                   />
                 </Box>
               )
             })}
             {hasFields && (
               <FieldsSetupDrawer
+                disabledRequirementTypes={disabledRequirementTypes}
                 onUse={onUseRequirement}
                 defaultButtonProps={{
                   alignSelf: "flex-end",

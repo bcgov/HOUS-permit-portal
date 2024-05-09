@@ -91,7 +91,14 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :required_for_multiple_owners,
         :elective,
         :_destroy,
-        input_options: [:number_unit, :can_add_multiple_contacts, value_options: [%i[value label]], conditional: {}],
+        input_options: [
+          :number_unit,
+          :can_add_multiple_contacts,
+          :energy_step_code,
+          value_options: [%i[value label]],
+          conditional: {
+          },
+        ],
       ],
     )
   end

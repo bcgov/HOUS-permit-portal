@@ -24,6 +24,7 @@ interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
   onUse?: (requirementType: ERequirementType, closeDrawer?: () => void) => void
+  disabledRequirementTypes?: ERequirementType[]
 }
 
 // TODO: remove when backend for these types is implemented
@@ -33,10 +34,12 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   defaultButtonProps,
   renderTriggerButton,
   onUse,
+  disabledRequirementTypes = [],
 }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef<HTMLButtonElement>()
+  const disabledTypes = [...DISABLED_TYPES, ...disabledRequirementTypes]
 
   return (
     <>
@@ -98,7 +101,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                     <Button
                       variant={"primary"}
                       rightIcon={<CaretRight />}
-                      isDisabled={DISABLED_TYPES.includes(requirementType)}
+                      isDisabled={disabledTypes.includes(requirementType)}
                       onClick={() => onUse?.(requirementType, onClose)}
                     >
                       {t("requirementsLibrary.fieldsDrawer.useButton")}
