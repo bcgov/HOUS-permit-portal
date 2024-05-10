@@ -1,8 +1,9 @@
 import { applySnapshot, flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode } from "../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../types/enums"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -21,6 +22,12 @@ export const RequirementBlockModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    get blocksWithEnergyStepCode() {
+      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCode)
+    },
+    get blocksWithStepCodePackageFile() {
+      return self.requirements?.some((r) => r.requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)
+    },
     hasRequirement(id: string) {
       return self.requirements.findIndex((requirement) => requirement.id === id) !== -1
     },

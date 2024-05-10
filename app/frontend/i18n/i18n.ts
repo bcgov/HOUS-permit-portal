@@ -1097,6 +1097,16 @@ const options = {
               body: "Any requirements inside this section will also be removed along with it.",
             },
             emptyTemplateSectionText: "Start by clicking the Add Section button",
+            stepCodeWarnings: {
+              stepCodePackageRequired:
+                "Warning: Energy step code is required to have the Design package energy step code file.",
+              energyStepCodeRequired:
+                "Warning: Design package energy step code file is present in the template, but there is no Energy step code requirement.",
+              duplicateEnergyStepCode:
+                "Warning: Multiple energy step code requirements found. Please ensure there is only one Energy Step code requirement in the template.",
+              duplicateStepCodePackage:
+                "Warning: Multiple design package energy step code files found. Please ensure there is only one design package energy step code file.",
+            },
             goToTop: "Go to top",
             collapseAll: "Collapse all",
             scheduleModalTitle: "Publish permit?",

@@ -1,8 +1,8 @@
-import { HStack, Stack, Text } from "@chakra-ui/react"
+import { HStack, Stack, StackProps, Text } from "@chakra-ui/react"
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 
-interface IProps {
+interface IProps extends Partial<StackProps> {
   type: "warning" | "error" | "success" | "info"
   title: string
   body?: string
@@ -46,7 +46,7 @@ function getTypeSpecificProps(type: IProps["type"]) {
   }
 }
 
-export function CalloutBanner({ type, title, body }: IProps) {
+export function CalloutBanner({ type, title, body, ...rest }: IProps) {
   const typeSpecificProps = getTypeSpecificProps(type)
   return (
     <HStack
@@ -59,6 +59,7 @@ export function CalloutBanner({ type, title, body }: IProps) {
       borderColor={typeSpecificProps.mainColor}
       bg={typeSpecificProps.backgroundColor}
       borderRadius={"lg"}
+      {...rest}
     >
       {typeSpecificProps.icon}
       {title && body ? (
