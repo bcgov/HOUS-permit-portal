@@ -21,7 +21,7 @@ class RequirementBlock < ApplicationRecord
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
 
-  before_validation :set_sku
+  before_validation :set_sku, on: :create
 
   acts_as_taggable_on :associations
 
@@ -126,8 +126,25 @@ class RequirementBlock < ApplicationRecord
     configurations
   end
 
-  # sku should be auto generated. Use uuid if not provided
+  # sku should be auto generated, readable and unique.
   def set_sku
-    self.sku ||= SecureRandom.uuid
+    return unless sku.blank?
+
+    parameterized_name = name.parameterize(separator: "_")
+
+    self.sku = parameterized_name
+
+    retry_count = 0
+
+    # Ensure uniqueness by appending a number/id if necessary, but shouldn't
+    # be needed apart from some edge cases as name is unique.
+    # If we have to retry more than 3 times, use a UUID to ensure uniqueness.
+    # With UUIDs it shouldn't be needed, but have a max retry count
+    # to be safe. This is to prevent infinite loops in case of a bug.
+    while RequirementBlock.exists?(sku: self.sku) && retry_count < 5
+      self.sku = "#{parameterized_name}_#{retry_count > 3 ? SecureRandom.uuid : SecureRandom.hex(3)}"
+
+      retry_count += 1
+    end
   end
 end
