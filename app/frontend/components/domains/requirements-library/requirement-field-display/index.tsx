@@ -25,6 +25,7 @@ import { GenericContactDisplay } from "./generic-contact-display"
 import { GenericFieldDisplay } from "./generic-field-display"
 
 export type TRequirementFieldDisplayProps = {
+  matchesStepCodePackageRequirementCode?: boolean
   labelProps?: Partial<FormLabelProps | HeadingProps>
   label?: string
   options?: string[]

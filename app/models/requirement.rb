@@ -30,10 +30,10 @@ class Requirement < ApplicationRecord
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
   before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
+  before_save :set_digital_seal_validator_to_step_code_package_file
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
-  validate :validate_conditional
   validates_format_of :requirement_code, without: /\||\.|\=|\>/, message: "must not contain | or . or = or >"
   validates_format_of :requirement_code,
                       with: /_file\z/,
@@ -46,9 +46,68 @@ class Requirement < ApplicationRecord
               scope: :requirement_block_id,
               message: "should be unique within the same requirement block",
             }
+  validates :requirement_code,
+            uniqueness: {
+              scope: :requirement_block_id,
+              message: "should be unique within the same requirement block",
+            }
+  validate :validate_energy_step_code_requirement_code
+  validate :validate_energy_step_code_related_requirements_schema
+
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
+
+  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file".freeze
+  ENERGY_STEP_CODE_REQUIREMENT_CODE = "energy_step_code_tool_part_9".freeze
+
+  ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA = {
+    energy_step_code_method: {
+      "requirement_code" => "energy_step_code_method",
+      "input_type" => "select",
+      "input_options" => {
+        "value_options" => [
+          { "label" => "Utilizing the digital step code tool", "value" => "tool" },
+          { "label" => "By file upload", "value" => "file" },
+        ],
+      },
+    },
+    energy_step_code_tool_part_9: {
+      "requirement_code" => "energy_step_code_tool_part_9",
+      "input_type" => "energy_step_code",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "tool",
+          "show" => true,
+          "when" => "energy_step_code_method",
+        },
+        "energy_step_code" => "part_9",
+      },
+    },
+    energy_step_code_report_file: {
+      "requirement_code" => "energy_step_code_report_file",
+      "input_type" => "file",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "file",
+          "show" => true,
+          "when" => "energy_step_code_method",
+        },
+      },
+    },
+    energy_step_code_h2000_file: {
+      "requirement_code" => "energy_step_code_h2000_file",
+      "input_type" => "file",
+      "input_options" => {
+        "conditional" => {
+          "eq" => "file",
+          "show" => true,
+          "when" => "energy_step_code_method",
+        },
+      },
+    },
+  }
+  ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES = ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA.keys.map(&:to_s).freeze
 
   def value_options
     return nil if input_options.blank? || input_options["value_options"].blank?
@@ -86,7 +145,37 @@ class Requirement < ApplicationRecord
     false
   end
 
+  def step_code_package_file?
+    requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+  end
+
   private
+
+  def validate_step_code_package_file
+    return unless step_code_package_file?
+
+    matches_package_file_required_schema =
+      attributes.slice("input_type", "required", "elective") !=
+        { "input_type" => "file", "required" => true, "elective" => false }
+
+    return unless matches_package_file_required_schema
+
+    errors.add(:requirement_code, :incorrect_step_code_package_file_attributes)
+  end
+
+  def set_digital_seal_validator_to_step_code_package_file
+    return unless step_code_package_file?
+
+    required_computed_compliance = {
+      "module" => "DigitalSealValidator",
+      "trigger" => "on_save",
+      "value_on" => "compliance_data",
+    }
+
+    return unless required_computed_compliance != input_options["computed_compliance"]
+
+    self.input_options["computed_compliance"] = required_computed_compliance
+  end
 
   def using_dummied_requirement_code
     uuid_regex = /^dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -97,19 +186,35 @@ class Requirement < ApplicationRecord
   def set_requirement_code
     using_dummy = self.using_dummied_requirement_code
     blank = self.requirement_code.blank?
-    needs_file_suffix = input_type == "file" && !requirement_code&.end_with?("_file")
+    needs_file_suffix = input_type_file? && !requirement_code&.end_with?("_file")
     return unless using_dummy || blank || needs_file_suffix
 
     new_requirement_code =
       (
         if (using_dummy || blank)
-          label.present? ? label.parameterize.underscore.camelize(:lower) : SecureRandom.uuid
+          return ENERGY_STEP_CODE_REQUIREMENT_CODE if input_type_energy_step_code?
+
+          label.blank? ? ENERGY_STEP_CODE_REQUIREMENT_CODE : label.parameterize(separator: "_")
         else
           requirement_code
         end
       )
 
-    new_requirement_code = new_requirement_code + (needs_file_suffix ? "_file" : "")
+    # this happens when the label is "Architectural Drawing File" as the generated requirement code
+    # will clash with the step code package file requirement code. This needs to be handled only
+    # when the requirement code is generated from the label, because if it was intended to be used
+    # as a step code package file requirement code, it would have been set as such from the front-end.
+    new_code_clashes_with_step_code_package =
+      using_dummy && new_requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+
+    # new_requirement_code =
+    new_requirement_code = new_requirement_code + "_not_step_code_package" if new_code_clashes_with_step_code_package
+    new_requirement_code = new_requirement_code + "_file" if needs_file_suffix
+
+    # remove file suffix if it is not a file input, as we use the suffix to differentiate between file and non-file inputs
+    # in formio
+    new_requirement_code = new_requirement_code + "_label" if new_requirement_code.end_with?("_file") &&
+      !input_type_file?
 
     if using_dummy
       self.requirement_block.requirements.each do |req|
@@ -124,7 +229,6 @@ class Requirement < ApplicationRecord
 
   def formio_type_options
     form_json_service = RequirementFormJsonService.new(self)
-
     form_json_service.formio_type_options
   end
 
@@ -135,18 +239,6 @@ class Requirement < ApplicationRecord
              (option.key?("value") && option["value"].is_a?(String))
          }
       errors.add(:input_options, "must have value options defined")
-    end
-  end
-
-  def validate_conditional
-    return unless self.input_options["conditional"].present?
-
-    conditional = self.input_options["conditional"]
-    if [conditional["when"], conditional["eq"], conditional["show"]].any?(&:blank?)
-      errors.add(:input_options, "conditional must have when, eq, and show")
-    end
-    if requirement_block.requirements.find_by_requirement_code(conditional["when"]).blank?
-      errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
     end
   end
 
@@ -190,6 +282,44 @@ class Requirement < ApplicationRecord
            input_options["can_add_multiple_contacts"].is_a?(FalseClass)
        )
       errors.add(:input_options, "can_add_multiple_contacts must be a boolean")
+    end
+  end
+
+  def validate_energy_step_code_requirement_code
+    unless input_type_energy_step_code? && requirement_code != ENERGY_STEP_CODE_REQUIREMENT_CODE &&
+             !using_dummied_requirement_code
+      return
+    end
+
+    errors.add(
+      :requirement_code,
+      :incorrect_energy_requirement_code,
+      correct_requirement_code: ENERGY_STEP_CODE_REQUIREMENT_CODE,
+      incorrect_requirement_code: requirement_code,
+    )
+  end
+
+  def validate_energy_step_code_related_requirements_schema
+    return unless ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.include?(requirement_code)
+
+    current_attributes_of_interest = self.attributes.slice("requirement_code", "input_type", "input_options").deep_dup
+
+    # The front-end sends the conditional as an empty object due to the form setup when conditionals are not added.
+    # Since the energy_step_code_method does not have any conditionals, the schema wouldn't match.
+    # The easiest way to handle this is to remove the conditional key for energy_step_code_method
+    # if it is an empty hash as we don't care about it. if it as it will have no effect to conditionals.
+    # Note we don't want to remove the key if it has other conditionals, as we want the validation below
+    # to catch that, as it is an invalid schema. Also the key is only removed from the duplicated attributes.
+    if requirement_code == ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[:energy_step_code_method]["requirement_code"] &&
+         (
+           current_attributes_of_interest.dig("input_options", "conditional").present? &&
+             current_attributes_of_interest.dig("input_options", "conditional").empty?
+         )
+      current_attributes_of_interest["input_options"].delete("conditional")
+    end
+
+    unless ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA[requirement_code.to_sym] == current_attributes_of_interest
+      errors.add(:base, :incorrect_energy_requirement_schema, requirement_code: requirement_code)
     end
   end
 end

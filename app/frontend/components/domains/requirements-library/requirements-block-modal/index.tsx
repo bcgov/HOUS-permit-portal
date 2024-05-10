@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
+import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
@@ -87,7 +88,15 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       const shouldAppendConditional = conditional?.when && conditional?.operand && conditional?.then
 
-      if (shouldAppendConditional) {
+      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+        ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
+      )
+
+      // energy step code dependency conditionals is not possible to edit from the front-end and has default values
+      // and follows a slightly different structure so we make sure not to remove them or alter them
+      if (isEnergyStepCodeDependency) {
+        returnValue.inputOptions.conditional = conditional
+      } else if (shouldAppendConditional) {
         const cond = ra.inputOptions.conditional
         returnValue.inputOptions.conditional = {
           when: cond.when,
@@ -106,11 +115,17 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       isSuccess = await (requirementBlock as IRequirementBlock).update?.({
         ...data,
-        requirementsAttributes: [...mappedRequirementAttributes, ...removedRequirementAttributes] as IRequirementAttributes[],
+        requirementsAttributes: [
+          ...mappedRequirementAttributes,
+          ...removedRequirementAttributes,
+        ] as IRequirementAttributes[],
       })
       requirementBlockStore.fetchRequirementBlocks()
     } else {
-      isSuccess = await createRequirementBlock({ ...data, requirementsAttributes: [...mappedRequirementAttributes] })
+      isSuccess = await createRequirementBlock({
+        ...data,
+        requirementsAttributes: [...mappedRequirementAttributes],
+      })
     }
 
     isSuccess && onClose()
@@ -178,7 +193,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup />
-                  <FieldsSetup />
+                  <FieldsSetup requirementBlock={requirementBlock} />
                 </HStack>
               </ModalBody>
             </ModalContent>

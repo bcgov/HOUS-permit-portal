@@ -472,6 +472,23 @@ const options = {
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
+            stepCodeDependencies: {
+              energyStepCodeMethod: {
+                tool: "Utilizing the digital step code tool",
+                file: "By file upload",
+                label: "Which method do you want to do use for the energy step code",
+              },
+              energyStepCodeToolPart9: {
+                label:
+                  "Please use this tool to do your fill in your step code details and it will populate onto the application.",
+              },
+              energyStepCodeReportFile: {
+                label: "BC Energy Step Code Compliance Report",
+              },
+              energyStepCodeH2000File: {
+                label: "Pre construction Hot2000 model details, Hot2000 report",
+              },
+            },
           },
           fields: {
             name: "Name",
@@ -505,6 +522,7 @@ const options = {
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
+            stepCodePackageFile: "Design package file for energy step code",
           },
           contactFieldItemLabels: {
             firstName: "First name",
@@ -1079,6 +1097,21 @@ const options = {
               body: "Any requirements inside this section will also be removed along with it.",
             },
             emptyTemplateSectionText: "Start by clicking the Add Section button",
+            stepCodeWarnings: {
+              energyStepCodeRecommended:
+                'Warning:"Design package energy step code file" is present in the template, but there is no "Energy step code" requirement.',
+
+              duplicateStepCodePackage:
+                'Warning: Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file".',
+            },
+            stepCodeErrors: {
+              duplicateEnergyStepCode:
+                'Warning: Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" in the template.',
+              stepCodePackageRequired:
+                'Warning: "Energy step code" is required to have the "Design package energy step code file".',
+              duplicateStepCodePackage:
+                'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement',
+            },
             goToTop: "Go to top",
             collapseAll: "Collapse all",
             scheduleModalTitle: "Publish permit?",
