@@ -14,6 +14,7 @@ import {
   ITemplateCustomization,
 } from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
+import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { StepCodeModel } from "./step-code"
@@ -287,7 +288,7 @@ export const PermitApplicationModel = types
       INPUT_CONTACT_KEYS.forEach((contactField) => {
         let newValue = ["cell", "phone"].includes(contactField)
           ? // The normalized phone number starts with +1... (country code)
-            (contact[contactField] as string)?.slice(2)
+            convertPhoneNumberToFormioFormat(contact[contactField] as string)
           : contact[contactField] || ""
         newSectionFields[`${requirementKey}|${contactField}`] = newValue
       })
@@ -312,7 +313,7 @@ export const PermitApplicationModel = types
       INPUT_CONTACT_KEYS.forEach((contactField) => {
         // The normalized phone number starts with +1... (country code)
         let newValue = ["cell", "phone"].includes(contactField)
-          ? (contact[contactField] as string)?.slice(2)
+          ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
           : contact[contactField]
         newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
       })
