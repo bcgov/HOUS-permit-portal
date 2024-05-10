@@ -182,11 +182,6 @@ class Requirement < ApplicationRecord
     uuid_regex.match?(self.requirement_code)
   end
 
-  def using_dummied_energy_requirement_code
-    uuid_regex = /^energy-dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    uuid_regex.match?(self.requirement_code)
-  end
-
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided
   def set_requirement_code
     using_dummy = self.using_dummied_requirement_code
