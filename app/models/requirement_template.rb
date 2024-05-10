@@ -123,63 +123,54 @@ class RequirementTemplate < ApplicationRecord
     }
   end
 
-  def energy_step_code_requirements
-    if requirement_template_sections_attributes_copy.blank? ||
-         !requirement_template_sections_attributes_copy.is_a?(Array)
-      return []
-    end
-
-    # have to manually loop instead of using association because
-    # when using deeply nested attributes to save, the queries go against the database
-    # which will have stale data
-    requirement_template_sections_attributes_copy
-      .flat_map do |rtsa|
-        next [] if rtsa["_destroy"] == true
-        rtsa["template_section_blocks_attributes"].flat_map do |tsba|
-          next [] if tsba["_destroy"] == true
-          requirement_block_id = tsba["requirement_block_id"]
-          requirement_block = RequirementBlock.find_by(id: requirement_block_id)
-
-          if requirement_block.present? && requirement_block.requirements.count.positive?
-            requirement_block.requirements.where(input_type: "energy_step_code")
-          else
-            []
-          end
-        end
-      end
-      .compact
-  end
-
-  def step_code_package_file_requirements
-    # have to manually loop instead of using association because
-    # when using deeply nested attributes to save, the queries go against the database
-    # which will have stale data
-
-    if requirement_template_sections_attributes_copy.blank? ||
-         !requirement_template_sections_attributes_copy.is_a?(Array)
-      return []
-    end
-
-    requirement_template_sections_attributes_copy
-      .flat_map do |rtsa|
-        next [] if rtsa["_destroy"] == true
-
-        rtsa["template_section_blocks_attributes"].flat_map do |tsba|
-          next [] if tsba["_destroy"] == true
-          requirement_block_id = tsba["requirement_block_id"]
-          requirement_block = RequirementBlock.find_by(id: requirement_block_id)
-
-          if requirement_block.present? && requirement_block.requirements.count.positive?
-            requirement_block.requirements.where(requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)
-          else
-            []
-          end
-        end
-      end
-      .compact
-  end
-
   private
+
+  def requirement_block_ids_from_nested_attributes_copy
+    # have to manually loop instead of using association because
+    # when using deeply nested attributes to save, the queries go against the database
+    # which will have stale data e.g. records trying to delete currently
+
+    if requirement_template_sections_attributes_copy.blank? ||
+         !requirement_template_sections_attributes_copy.is_a?(Array)
+      return []
+    end
+
+    ids = []
+
+    requirement_template_sections_attributes_copy.each do |rtsa|
+      next if rtsa["_destroy"] == true
+      rtsa["template_section_blocks_attributes"].each do |tsba|
+        next if tsba["_destroy"] == true
+        requirement_block_id = tsba["requirement_block_id"]
+
+        ids << requirement_block_id if requirement_block_id.present?
+      end
+    end
+
+    ids
+  end
+
+  def energy_step_code_requirements_from_nest_attributes_copy
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+
+    return unless requirement_block_ids.length.positive?
+
+    Requirement.where(
+      requirement_block_id: requirement_block_ids,
+      input_type: Requirement.input_types[:energy_step_code],
+    )
+  end
+
+  def step_code_package_file_requirements_from_nest_attributes_copy
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+
+    return unless requirement_block_ids.length.positive?
+
+    Requirement.where(
+      requirement_block_id: requirement_block_ids,
+      requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
+    )
+  end
 
   def validate_uniqueness_of_blocks
     # Track duplicates across all sections within the same template
@@ -197,8 +188,8 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def validate_step_code_related_dependencies
-    energy_step_code_requirements_count = energy_step_code_requirements.count
-    step_code_package_file_requirements_count = step_code_package_file_requirements.count
+    energy_step_code_requirements_count = energy_step_code_requirements_from_nest_attributes_copy.count
+    step_code_package_file_requirements_count = step_code_package_file_requirements_from_nest_attributes_copy.count
 
     has_any_step_code_requirements = energy_step_code_requirements_count > 0
     has_any_step_code_package_file_requirements = step_code_package_file_requirements_count > 0
