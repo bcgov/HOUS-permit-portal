@@ -81,9 +81,6 @@ RSpec.describe Requirement, type: :model do
           invalid_requirement =
             build(:requirement, input_type: "energy_step_code", requirement_code: "energy_step_code_tool_part_8")
 
-          allow(valid_requirement).to receive(:validate_conditional)
-          allow(invalid_requirement).to receive(:validate_conditional)
-
           expect(valid_requirement).to be_valid
           expect(invalid_requirement).to_not be_valid
           expect(invalid_requirement.errors[:requirement_code]).to include(
@@ -126,9 +123,6 @@ RSpec.describe Requirement, type: :model do
             ),
           ]
 
-          allow(valid_requirement).to receive(:validate_conditional)
-          invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
-
           expect(valid_requirement).to be_valid
           invalid_requirements.each do |requirement|
             expect(requirement).to_not be_valid
@@ -157,9 +151,6 @@ RSpec.describe Requirement, type: :model do
           ),
         ]
 
-        allow(valid_requirement).to receive(:validate_conditional)
-        invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
-
         expect(valid_requirement).to be_valid
         invalid_requirements.each do |requirement|
           expect(requirement).to_not be_valid
@@ -186,9 +177,6 @@ RSpec.describe Requirement, type: :model do
             },
           ),
         ]
-
-        allow(valid_requirement).to receive(:validate_conditional)
-        invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
 
         expect(valid_requirement).to be_valid
         invalid_requirements.each do |requirement|
@@ -219,9 +207,6 @@ RSpec.describe Requirement, type: :model do
             },
           ),
         ]
-
-        allow(valid_requirement).to receive(:validate_conditional)
-        invalid_requirements.each { |requirement| allow(requirement).to receive(:validate_conditional) }
 
         expect(valid_requirement).to be_valid
         invalid_requirements.each do |requirement|
