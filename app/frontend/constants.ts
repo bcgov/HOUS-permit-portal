@@ -59,14 +59,21 @@ export const datefnsAppDateFormat = "yyyy/MM/dd"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 
-export function getRequirementTypeLabel(requirementType: ERequirementType) {
-  let derivedTranslationKey: keyof typeof ERequirementType
+export function getRequirementTypeLabel(
+  requirementType: ERequirementType,
+  matchesStepCodePackageRequirementCode?: boolean
+) {
+  let derivedTranslationKey: keyof typeof ERequirementType | "stepCodePackageFile"
 
-  Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
-    if (value === requirementType) {
-      derivedTranslationKey = key
-    }
-  })
+  if (requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode) {
+    derivedTranslationKey = "stepCodePackageFile"
+  } else {
+    Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
+      if (value === requirementType) {
+        derivedTranslationKey = key
+      }
+    })
+  }
 
   return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
 }
@@ -158,3 +165,5 @@ export function getEnergyStepCodeRequirementRequiredSchema(
 
   return requirementCodeToSchema[energyRequirementCode]
 }
+
+export const STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file" as const

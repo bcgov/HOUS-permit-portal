@@ -30,6 +30,7 @@ class Requirement < ApplicationRecord
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
   before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
+  before_save :set_digital_seal_validator_to_step_code_package_file
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
   validate :validate_can_add_multiple_contacts
@@ -52,6 +53,7 @@ class Requirement < ApplicationRecord
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
 
+  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file".freeze
   ENERGY_STEP_CODE_REQUIREMENT_CODE = "energy_step_code_tool_part_9".freeze
 
   ENERGY_STEP_CODE_DEPENDENCY_REQUIRED_SCHEMA = {
@@ -140,6 +142,32 @@ class Requirement < ApplicationRecord
 
   private
 
+  def validate_step_code_package_file
+    return unless requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+
+    matches_package_file_required_schema =
+      attributes.slice("input_type", "required", "elective") !=
+        { "input_type" => "file", "required" => true, "elective" => false }
+
+    return unless matches_package_file_required_schema
+
+    errors.add(:requirement_code, :incorrect_step_code_package_file_attributes)
+  end
+
+  def set_digital_seal_validator_to_step_code_package_file
+    return unless requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+
+    required_computed_compliance = {
+      "module" => "DigitalSealValidator",
+      "trigger" => "on_save",
+      "value_on" => "compliance_data",
+    }
+
+    return unless required_computed_compliance != input_options["computed_compliance"]
+
+    self.input_options["computed_compliance"] = required_computed_compliance
+  end
+
   def using_dummied_requirement_code
     uuid_regex = /^dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     uuid_regex.match?(self.requirement_code)
@@ -154,7 +182,7 @@ class Requirement < ApplicationRecord
   def set_requirement_code
     using_dummy = self.using_dummied_requirement_code
     blank = self.requirement_code.blank?
-    needs_file_suffix = input_type == "file" && !requirement_code&.end_with?("_file")
+    needs_file_suffix = input_type_file? && !requirement_code&.end_with?("_file")
     return unless using_dummy || blank || needs_file_suffix
 
     new_requirement_code =
@@ -168,7 +196,21 @@ class Requirement < ApplicationRecord
         end
       )
 
-    new_requirement_code = new_requirement_code + (needs_file_suffix ? "_file" : "")
+    # this happens when the label is "Architectural Drawing File" as the generated requirement code
+    # will clash with the step code package file requirement code. This needs to be handled only
+    # when the requirement code is generated from the label, because if it was intended to be used
+    # as a step code package file requirement code, it would have been set as such from the front-end.
+    new_code_clashes_with_step_code_package =
+      using_dummy && new_requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+
+    # new_requirement_code =
+    new_requirement_code = new_requirement_code + "_not_step_code_package" if new_code_clashes_with_step_code_package
+    new_requirement_code = new_requirement_code + "_file" if needs_file_suffix
+
+    # remove file suffix if it is not a file input, as we use the suffix to differentiate between file and non-file inputs
+    # in formio
+    new_requirement_code = new_requirement_code + "_label" if new_requirement_code.end_with?("_file") &&
+      !input_type_file?
 
     if using_dummy
       self.requirement_block.requirements.each do |req|

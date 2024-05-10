@@ -23,6 +23,7 @@ const helperTextStyles = {
 }
 
 export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
+  matchesStepCodePackageRequirementCode,
   inputDisplay,
   label,
   labelProps,
@@ -44,7 +45,7 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
         {label ??
           (showAddLabelIndicator
             ? `${t("requirementsLibrary.modals.addLabel")} *`
-            : getRequirementTypeLabel(requirementType))}
+            : getRequirementTypeLabel(requirementType, matchesStepCodePackageRequirementCode))}
       </FormLabel>
       {inputDisplay}
       {!isQuillEmpty(helperText) && (

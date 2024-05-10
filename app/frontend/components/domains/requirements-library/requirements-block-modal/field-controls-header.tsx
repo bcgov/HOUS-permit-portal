@@ -3,6 +3,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IFormConditional } from "../../../../types/api-request"
 import { ERequirementType } from "../../../../types/enums"
+import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
 import { ElectiveTag } from "../../../shared/elective-tag"
 import { HasConditionalTag } from "../../../shared/has-conditional-tag"
 import { RequirementTypeTag } from "../../../shared/requirement-type-tag"
@@ -12,6 +13,7 @@ interface IProps {
   isRequirementInEditMode: boolean
   toggleRequirementToEdit: () => void
   requirementType: ERequirementType
+  requirementCode: string
   onRemove: IRequirementOptionsMenu["onRemove"]
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   elective?: boolean
@@ -28,6 +30,7 @@ export function FieldControlsHeader({
   requirementType,
   onRemove,
   index,
+  requirementCode,
 }: IProps) {
   const { t } = useTranslation()
 
@@ -51,7 +54,12 @@ export function FieldControlsHeader({
           <HasConditionalTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
         {!isRequirementInEditMode && (
-          <RequirementTypeTag type={requirementType} className={"requirement-edit-controls"} display={"none"} />
+          <RequirementTypeTag
+            type={requirementType}
+            matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(requirementCode)}
+            className={"requirement-edit-controls"}
+            display={"none"}
+          />
         )}
         <Button
           variant={"primary"}

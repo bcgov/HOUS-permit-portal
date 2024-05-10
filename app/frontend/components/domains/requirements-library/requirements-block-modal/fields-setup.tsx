@@ -5,12 +5,19 @@ import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
-import { getEnergyStepCodeRequirementRequiredSchema } from "../../../../constants"
+import {
+  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
+  getEnergyStepCodeRequirementRequiredSchema,
+} from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IRequirementAttributes } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
-import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
+import {
+  isContactRequirement,
+  isMultiOptionRequirement,
+  isStepCodePackageFileRequirementCode,
+} from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
@@ -55,10 +62,15 @@ export const FieldsSetup = observer(function FieldsSetup({
     setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
   }
 
-  const onUseRequirement = (requirementType: ERequirementType) => {
+  const onUseRequirement = (
+    requirementType: ERequirementType,
+    _callBack: any,
+    matchesStepCodePackageRequirementCode?: boolean
+  ) => {
     if (requirementType !== ERequirementType.energyStepCode) {
+      const isStepCodePackageFile = requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode
       const defaults = {
-        requirementCode: `dummy-${uuidv4()}`,
+        requirementCode: isStepCodePackageFile ? STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE : `dummy-${uuidv4()}`,
         inputType: requirementType,
         label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
           ? t("requirementsLibrary.modals.defaultContactLabel")
@@ -88,7 +100,7 @@ export const FieldsSetup = observer(function FieldsSetup({
     const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
       .map((code) => getEnergyStepCodeRequirementRequiredSchema(code))
       .map((requirement) => {
-        const energyRequirementInOriginalBlock = requirementBlock.requirements.find(
+        const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
           (r) => requirement.requirementCode === r.requirementCode
         )
 
@@ -105,10 +117,28 @@ export const FieldsSetup = observer(function FieldsSetup({
 
   const hasFields = fields.length > 0
 
-  const hasEnergyStepCodeRequirement = watch("requirementsAttributes").some(
-    (field) => (field as IRequirementAttributes).inputType === ERequirementType.energyStepCode
-  )
-  const disabledRequirementTypes = hasEnergyStepCodeRequirement ? [ERequirementType.energyStepCode] : []
+  const disabledRequirementTypeOptions = (() => {
+    const hasEnergyStepCodeRequirement = watchedRequirements.some(
+      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCode
+    )
+    const hasStepCodePackageFileRequirement = watchedRequirements.some((r) =>
+      isStepCodePackageFileRequirementCode(r.requirementCode)
+    )
+
+    const disabledTypes: Array<{
+      requirementType: ERequirementType
+      isStepCodePackageFileRequirement?: boolean
+    }> = []
+
+    if (hasEnergyStepCodeRequirement) {
+      disabledTypes.push({ requirementType: ERequirementType.energyStepCode })
+    }
+
+    if (hasStepCodePackageFileRequirement) {
+      disabledTypes.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
+    }
+    return disabledTypes
+  })()
 
   function isRequirementInEditMode(id: string) {
     return !!requirementIdsToEdit[id]
@@ -192,7 +222,10 @@ export const FieldsSetup = observer(function FieldsSetup({
           {!hasFields && (
             <Flex w={"full"} justifyContent={"space-between"} px={6}>
               <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-              <FieldsSetupDrawer disabledRequirementTypes={disabledRequirementTypes} onUse={onUseRequirement} />
+              <FieldsSetupDrawer
+                disabledRequirementTypeOptions={disabledRequirementTypeOptions}
+                onUse={onUseRequirement}
+              />
             </Flex>
           )}
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
@@ -207,7 +240,10 @@ export const FieldsSetup = observer(function FieldsSetup({
               const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
                 watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
               )
-              const disabledMenuOptions: ("remove" | "conditional")[] = isStepCodeDependency ? ["conditional"] : []
+              const disabledMenuOptions: ("remove" | "conditional")[] =
+                isStepCodeDependency || isStepCodePackageFileRequirementCode(watchedRequirementCode)
+                  ? ["conditional"]
+                  : []
 
               // for step code dependency only the step_code requirement is removable and the other
               // dependencies rely on it for removal
@@ -331,6 +367,9 @@ export const FieldsSetup = observer(function FieldsSetup({
                     {...fieldContainerSharedProps}
                   >
                     <RequirementFieldDisplay
+                      matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
+                        watchedRequirementCode
+                      )}
                       requirementType={requirementType}
                       label={watch(`requirementsAttributes.${index}.label`)}
                       helperText={watchedHint}
@@ -357,6 +396,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                     />
                   </Box>
                   <FieldControlsHeader
+                    requirementCode={watchedRequirementCode}
                     isRequirementInEditMode={isRequirementInEditMode(field.id)}
                     toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
                     onRemove={() => onRemoveRequirement(index)}
@@ -371,7 +411,7 @@ export const FieldsSetup = observer(function FieldsSetup({
             })}
             {hasFields && (
               <FieldsSetupDrawer
-                disabledRequirementTypes={disabledRequirementTypes}
+                disabledRequirementTypeOptions={disabledRequirementTypeOptions}
                 onUse={onUseRequirement}
                 defaultButtonProps={{
                   alignSelf: "flex-end",

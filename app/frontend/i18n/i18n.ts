@@ -522,6 +522,7 @@ const options = {
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
+            stepCodePackageFile: "Design package file for energy step code",
           },
           contactFieldItemLabels: {
             firstName: "First name",

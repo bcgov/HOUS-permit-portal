@@ -2,6 +2,7 @@ import { Stack, StackProps } from "@chakra-ui/react"
 import React from "react"
 import { FieldValues } from "react-hook-form"
 import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
+import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
 import { IsElectiveCheckbox, TIsElectiveCheckboxProps } from "./is-elective-checkbox"
@@ -27,9 +28,11 @@ export function EditableGroup<TFieldValues>({
   requirementCode,
   ...containerProps
 }: TEditableGroupProps<TFieldValues>) {
-  const isEditLimited = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-    requirementCode as EEnergyStepCodeDependencyRequirementCode
-  )
+  const isEditLimited =
+    isStepCodePackageFileRequirementCode(requirementCode) ||
+    Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+      requirementCode as EEnergyStepCodeDependencyRequirementCode
+    )
   return (
     <Stack spacing={4} {...containerProps}>
       <EditableLabel {...editableLabelProps} />

@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
-import { vancouverTimeZone } from "../constants"
+import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE, vancouverTimeZone } from "../constants"
 import { ERequirementType } from "../types/enums"
 import { TDebouncedFunction } from "../types/types"
 
@@ -121,4 +121,8 @@ export function renameKeys(keysMap, obj) {
     }),
     {}
   )
+}
+
+export function isStepCodePackageFileRequirementCode(requirementCode: string) {
+  return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
 }
