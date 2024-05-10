@@ -16,7 +16,12 @@ import React from "react"
 import { Controller, FieldValues, useFieldArray } from "react-hook-form"
 import { UseFieldArrayProps } from "react-hook-form/dist/types"
 import { useTranslation } from "react-i18next"
-import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
+import {
+  EEnergyStepCodeDependencyRequirementCode,
+  ENumberUnit,
+  ERequirementContactFieldItemType,
+  ERequirementType,
+} from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
@@ -239,7 +244,7 @@ const requirementsComponentMap = {
 
     const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
 
-    const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+    const { fields, append, remove } = useFieldArray<TFieldValues>({ ...useFieldArrayProps })
 
     return (
       <EditableGroup
@@ -292,10 +297,12 @@ const requirementsComponentMap = {
       import.meta.env.DEV && console.error("multiOptionProps is required for select requirement edit")
       return null
     }
-
     const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
+
+    const isEnergyStepCodeDependency =
+      editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
       <EditableGroup
@@ -309,18 +316,25 @@ const requirementsComponentMap = {
                   value={getOptionValue(idx).label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
+                  isDisabled={isEnergyStepCodeDependency}
                 />
                 <IconButton
                   aria-label={"remove option"}
                   variant={"unstyled"}
                   icon={<X />}
                   onClick={() => remove(idx)}
+                  isDisabled={isEnergyStepCodeDependency}
                 />
               </HStack>
             ))}
 
-            {/*  @ts-ignore*/}
-            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            <Button
+              variant={"link"}
+              textDecoration={"underline"}
+              //  @ts-ignore
+              onClick={() => append({ value: "", label: "" })}
+              isDisabled={isEnergyStepCodeDependency}
+            >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
           </>

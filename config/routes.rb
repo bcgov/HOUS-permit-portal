@@ -31,13 +31,9 @@ Rails.application.routes.draw do
                path_names: {
                  sign_in: "login",
                  sign_out: "logout",
-                 registration: "signup",
                },
                controllers: {
                  sessions: "api/sessions",
-                 registrations: "api/registrations",
-                 confirmations: "api/confirmations",
-                 passwords: "api/passwords",
                  invitations: "api/invitations",
                  omniauth_callbacks: "api/omniauth_callbacks",
                }
@@ -45,7 +41,7 @@ Rails.application.routes.draw do
     devise_scope :user do
       get "/validate_token" => "sessions#validate_token"
       delete "/invitation/remove" => "invitations#remove"
-      get "/validate_invitation_token" => "invitations#validate_invitation_token"
+      get "/invitations/:invitation_token" => "invitations#show"
     end
 
     get "/permit_type_submission_contacts/confirm",
@@ -96,6 +92,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
+      post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
     end
 
@@ -104,6 +101,7 @@ Rails.application.routes.draw do
       patch "restore", on: :member
       patch "accept_eula", on: :member
       post "search", on: :collection, to: "users#index"
+      post "resend_confirmation", on: :member
     end
 
     resources :end_user_license_agreement, only: %i[index]

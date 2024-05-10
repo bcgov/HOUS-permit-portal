@@ -4,6 +4,7 @@ import { FormLabel } from "./components/form-label"
 import { Heading } from "./components/heading"
 import { Input } from "./components/input"
 import { Link } from "./components/link"
+import { Select } from "./components/select"
 import { Table } from "./components/table"
 import { Text } from "./components/text"
 import { radii } from "./foundations/border-radii"
@@ -83,7 +84,7 @@ const styles = {
     },
   },
 }
-const components = { Button, FormLabel, Heading, Input, Link, Text, Table }
+const components = { Button, FormLabel, Heading, Input, Link, Select, Text, Table }
 const overrides = { styles, colors, fonts, fontSizes, sizes, radii, space, shadows, components }
 
 export const theme = extendTheme(overrides)

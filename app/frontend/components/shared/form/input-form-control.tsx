@@ -188,7 +188,11 @@ const InputFormControl = ({
       <InputGroup w="full" display="flex" flexDirection="column">
         <Input bg="greys.white" {...registerProps} {...inputProps} />
         {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
-        {hint && <FormHelperText color="border.base">{hint}</FormHelperText>}
+        {hint && (
+          <FormHelperText mt={1} color="border.base">
+            {hint}
+          </FormHelperText>
+        )}
         {leftElement && <InputLeftElement pointerEvents="none">{leftElement}</InputLeftElement>}
         {rightElement && <InputRightElement pointerEvents="none">{rightElement}</InputRightElement>}
       </InputGroup>

@@ -6,6 +6,7 @@ export interface IFormConditional {
   operand: string
   then: string
 }
+
 export interface IRequirementAttributes {
   id?: string
   label?: string
@@ -19,6 +20,7 @@ export interface IRequirementAttributes {
     numberUnit?: ENumberUnit
     canAddMultipleContacts?: boolean
     conditional?: IFormConditional
+    energyStepCode?: string
   }
 }
 

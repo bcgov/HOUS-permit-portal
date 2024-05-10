@@ -5,7 +5,7 @@ class Api::ApplicationController < ActionController::API
   before_action :authenticate_user!
   before_action :check_for_archived_user
   before_action :store_currents
-  before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :require_confirmation
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
@@ -32,16 +32,15 @@ class Api::ApplicationController < ActionController::API
     devise_controller?
   end
 
-  def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_in, keys: [:username])
-    # Also add :username to sign_up and account_update if needed
-  end
-
   def user_not_authorized(exception)
     render_error(
       "misc.user_not_authorized_error",
       { message_opts: { error_message: exception.message }, status: 403 },
       exception,
     ) and return
+  end
+
+  def require_confirmation
+    redirect_to root_path if current_user && !current_user.confirmed?
   end
 end

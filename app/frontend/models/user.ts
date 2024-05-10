@@ -8,19 +8,24 @@ export const UserModel = types
   .model("UserModel")
   .props({
     id: types.identifier,
-    email: types.string,
+    email: types.maybeNull(types.string),
+    unconfirmedEmail: types.maybeNull(types.string),
     role: types.enumeration(Object.values(EUserRoles)),
-    firstName: types.string,
-    lastName: types.string,
-    username: types.string,
-    certified: types.boolean,
+    omniauthEmail: types.maybeNull(types.string),
+    omniauthUsername: types.maybeNull(types.string),
+    firstName: types.maybeNull(types.string),
+    lastName: types.maybeNull(types.string),
+    nickname: types.maybeNull(types.string),
+    certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    createdAt: types.Date,
+    createdAt: types.maybeNull(types.Date),
+    confirmationSentAt: types.maybeNull(types.Date),
     confirmedAt: types.maybeNull(types.Date),
     discardedAt: types.maybeNull(types.Date),
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
+    invitedByEmail: types.maybeNull(types.string),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -50,7 +55,7 @@ export const UserModel = types
       return self.confirmedAt == null
     },
     get name() {
-      return `${self.firstName} ${self.lastName}`
+      return self.firstName && self.lastName && `${self.firstName} ${self.lastName}`
     },
   }))
   .actions((self) => ({
@@ -80,6 +85,16 @@ export const UserModel = types
     }),
     acceptEULA: flow(function* () {
       const response = yield self.environment.api.acceptEULA(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
+      return response.ok
+    }),
+    resendConfirmation: flow(function* () {
+      const response = yield self.environment.api.resendConfirmation(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
       return response.ok
     }),
   }))

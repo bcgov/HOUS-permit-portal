@@ -3,6 +3,8 @@ class Api::UsersController < Api::ApplicationController
 
   before_action :find_user, only: %i[destroy restore accept_eula update]
   skip_after_action :verify_policy_scoped, only: %i[index]
+  skip_before_action :require_confirmation, only: %i[profile]
+  skip_before_action :require_confirmation, only: %i[accept_eula resend_confirmation]
 
   def index
     authorize :user, :index?
@@ -18,6 +20,9 @@ class Api::UsersController < Api::ApplicationController
                        current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -26,7 +31,7 @@ class Api::UsersController < Api::ApplicationController
     return render_error "misc.user_not_authorized_error" unless %w[reviewer review_manager].include?(user_params[:role])
 
     if @user.update(user_params)
-      render_success @user, "user.update_success"
+      render_success @user, "user.update_success", blueprint_opts: { view: :base }
     else
       render_error "user.update_error"
     end
@@ -35,33 +40,38 @@ class Api::UsersController < Api::ApplicationController
   def profile
     # Currently a user can only update themself
     @user = current_user
-    authorize @user
+    authorize current_user
 
-    ActiveRecord::Base.transaction do
-      if password_params[:password].present?
-        if @user.update_with_password(password_params)
-          CustomDeviseMailer.new.password_change(@user).deliver
-        else
-          raise ActiveRecord::RecordInvalid
-        end
-      end
+    # allow user to change back to original confirmed email
+    # https://github.com/heartcombo/devise/issues/5470
+    current_user.unconfirmed_email = nil if profile_params[:email] == current_user.email
 
-      raise ActiveRecord::RecordInvalid unless @user.update(profile_params)
+    if current_user.update(profile_params)
+      should_send_confirmation = @user.confirmed_at.blank? && @user.confirmation_sent_at.blank?
+      current_user.send_confirmation_instructions if should_send_confirmation
+      render_success(
+        current_user,
+        (
+          if email_changed? || should_send_confirmation
+            "user.confirmation_sent"
+          else
+            "user.update_success"
+          end
+        ),
+        blueprint_opts: {
+          view: :base,
+        },
+      )
+    else
+      render_error "user.update_error",
+                   { message_opts: { error_message: current_user.errors.full_messages.join(", ") } }
     end
-
-    render_success(@user, email_changed? ? "user.confirmation_sent" : "user.update_success")
-  rescue ActiveRecord::RecordInvalid => e
-    # Handle any ActiveRecord exceptions here
-    if password_params[:password].present? && !@user.valid_password?(password_params[:current_password])
-      render_error "user.update_password_error", {}, e and return
-    end
-    render_error "user.update_error", {}, e
   end
 
   def destroy
     authorize @user
     if @user.discard
-      render_success(@user, "user.destroy_success")
+      render_success(@user, "user.destroy_success", { blueprint_opts: { view: :base } })
     else
       render_error "user.destroy_error", {}
     end
@@ -70,7 +80,7 @@ class Api::UsersController < Api::ApplicationController
   def restore
     authorize @user
     if @user.update(discarded_at: nil)
-      render_success(@user, "user.restore_success")
+      render_success(@user, "user.restore_success", blueprint_opts: { view: :base })
     else
       render_error "user.restore_error", {}
     end
@@ -83,6 +93,12 @@ class Api::UsersController < Api::ApplicationController
       agreement: EndUserLicenseAgreement.active_agreement(@user.eula_variant),
     )
     render_success @user, "user.eula_accepted", { blueprint_opts: { view: :current_user } }
+  end
+
+  def resend_confirmation
+    authorize current_user
+    current_user.resend_confirmation_instructions
+    render_success(current_user, "user.reconfirmation_sent", { blueprint_opts: { view: :current_user } })
   end
 
   private
@@ -104,6 +120,6 @@ class Api::UsersController < Api::ApplicationController
   end
 
   def profile_params
-    params.require(:user).permit(:email, :first_name, :last_name, :organization, :certified)
+    params.require(:user).permit(:email, :nickname, :first_name, :last_name, :organization, :certified)
   end
 end

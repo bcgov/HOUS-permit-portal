@@ -18,43 +18,49 @@ const options = {
       translation: {
         auth: {
           login: "Login",
+          adminLogin: "Admin login",
+          adminAccountAccess: "If you cannot login with your IDIR, please contact your administrator to gain access.",
+          prompt:
+            "You must have a BCeID account to use this system. If you don’t have one yet, please register for one based on your use case.",
+          loginHelp: "Having trouble logging in? ",
+          bceidInfo: {
+            heading: "Which BCeID should I use?",
+            basic: {
+              title: "Basic BCeID",
+              description:
+                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              homeownerAgent: "homeowner, agent",
+              architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
+              register: "Register for Basic BCeID",
+            },
+            business: {
+              title: "Business BCeID",
+              description: "Use when representing a legal entity, such as a:",
+              localGov: "Local government(s) or local jurisdiction(s)",
+              company: "Company or partnership or sole proprietorship",
+              nonProfit: "Not-for-profit or charitable organization",
+              education: "Educational institution like a university or college",
+              seeMore: "See more details",
+              register: "Register for Business BCeID",
+            },
+          },
           logout: "Logout",
           submit: "Submit",
           or: "or",
           bceid_login: "Login with BCeID",
-          accept_invite_with_bceid: "Connect with BCeID",
+          idir_login: "Login with IDIR",
           role: "Role",
-          loginInstructions: "Enter the username for your Digital Building Permit account below.",
-          usernameLabel: "Username",
+          nicknameLabel: "Nickname",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
           userLastNameLabel: "Last name",
           organizationLabel: "Organization (optional)",
           organizationHelpText: "(if applicable)",
-          passwordLabel: "Password",
-          forgotPassword: "Forgot password?",
-          passwordTooWeak: "Password too weak",
-          passwordInvalidFormat: "Password does not meet the required format",
-          passwordChecklist: {
-            title: "Password must include:",
-            length: "8-64 characters",
-            uppercase: "At least one uppercase letter",
-            lowercase: "At least one lowercase letter",
-            specialChar: "At least one special character",
-            number: "At least one number",
-          },
           register: "Register for account",
           registerButton: "Register",
-          forgotPasswordInstructions:
-            "Please fill in your username and we'll send instructions on how to reset your password to the email address associated to your account.",
-          resetPassword: "Reset password",
           registerInstructions:
             "Please fill out the following registration form to create your account. Ensure all information is accurate and up-to-date.",
           certifiedProfessional: "I am a certified professional",
-          passwordTitle: "Set a password",
-          passwordRequirements:
-            "Must be between 8 - 64 characters long, at least one uppercase, one lowercase, one special character, and one number.",
-          alreadyHaveAccount: "Already have an account?",
           completeAccountActiviation: "Please confirm your account",
           checkYourEmail:
             "Check your email inbox for a confirmation email to finish activating your new Building Permit Hub account.",
@@ -68,8 +74,7 @@ const options = {
           bestPractices: "Standardized requirements across participating jurisdictions",
           easyToFollow: "Easy to follow instructions to help you submit a building permit application",
           accessMyPermits: "Access my building permits",
-          accessExplanation:
-            "You can use either your BCeID account or the Building Permit Hub login to log in to the Building Permit Hub. You can also link your BCeID account to your Building Permit Hub account later on.",
+          accessExplanation: "Use your BCeID account to log or register for the Building Permit Hub.",
           whoForTitle: "Who is this for?",
           whoFor: [
             "I want to build housing",
@@ -118,6 +123,8 @@ const options = {
           disable: "Disable",
           revoke: "Revoke",
           create: "Create",
+          verified: "Verified",
+          unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
           preview: "Preview",
@@ -185,6 +192,7 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
+          emailPlaceholder: "email@example.com",
         },
         eula: {
           title: "End-User License Agreement",
@@ -196,7 +204,7 @@ const options = {
           fields: {
             firstName: "First name",
             lastName: "Last name",
-            title: "Title",
+            title: "Role/Position",
             department: "Department",
             email: "Email",
             phone: "Phone no.",
@@ -470,6 +478,23 @@ const options = {
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
+            stepCodeDependencies: {
+              energyStepCodeMethod: {
+                tool: "Utilizing the digital step code tool",
+                file: "By file upload",
+                label: "Which method do you want to do use for the energy step code",
+              },
+              energyStepCodeToolPart9: {
+                label:
+                  "Please use this tool to do your fill in your step code details and it will populate onto the application.",
+              },
+              energyStepCodeReportFile: {
+                label: "BC Energy Step Code Compliance Report",
+              },
+              energyStepCodeH2000File: {
+                label: "Pre construction Hot2000 model details, Hot2000 report",
+              },
+            },
           },
           fields: {
             name: "Name",
@@ -503,11 +528,13 @@ const options = {
             phone: "Phone",
             email: "E-mail",
             energyStepCode: "Energy Step Code",
+            stepCodePackageFile: "Design package file for energy step code",
           },
           contactFieldItemLabels: {
             firstName: "First name",
             lastName: "Last name",
             email: "Email",
+            title: "Role/Position",
             phone: "Phone",
             address: "Address",
             organization: "Organization",
@@ -888,16 +915,20 @@ const options = {
         home: {
           jurisdictionsTitle: "Jurisdictions",
           siteConfigurationTitle: "Configuration management",
-          jurisdictionsDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
+          jurisdictionsDescription:
+            "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
           permitTemplateCatalogueDescription:
-            "Create and manage permit templates for each permit type that a local jurisdiction can use as a standardized base.",
+            "Develop and publish a collection of permit templates that provide a standardized foundation for building permits across local jurisdictions. These templates include requirement blocks to establish a structured flow for the building permit template.",
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
-            "Create and manage requirement blocks that can be used inside of permit templates.",
+            "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
           configurationManagement: {
             title: "Configuration management",
-            description: "Customize content in one centralized place.",
+            reviewManagerDescription:
+              "Configure your jurisdiction's operational setup within the Building Permit Hub. Set up your submission inbox, define energy step codes, and edit the 'About' page to reflect specific local information.",
+            adminDescription:
+              "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
             editPermission: "Only Review Managers are able to edit.",
             jurisdictionNameLabel: "Name of local jurisdiction",
@@ -958,7 +989,7 @@ const options = {
           submissionsInboxDescription: "View all submitted building permit applications.",
           permitsTitle: "Digital building permits",
           permitsDescription:
-            "Manage what permit types you want available for submitters to apply with on the Building Permit Hub.",
+            "Enhance building permits application process within your local jurisdiction by setting up helpful tips for submitters and selecting elective questions based on your local needs.",
           userManagementTitle: "User management",
           userManagementDescription: "Invite or remove Review Managers or Reviewers in the Building Permit Hub.",
           auditLogTitle: "Audit log",
@@ -995,12 +1026,34 @@ const options = {
             inviteButton: "Invite users",
           },
           changeRole: "Change role",
+          newEmail: "New notification email address",
+          changeEmail: "Change email",
+          deleteAccount: "To delete your account, please contact <1>digital.codes.permits@gov.bc.ca</1>.",
           addUser: "Add more emails",
           invite: "Invite",
+          invitedBy: "<strong>{{email}}</strong> has invited you to join:",
+          invitedAsAdmin:
+            "<strong>{{email}}</strong> has invited you to join BC Building Permit Hub as an administrator",
+          invitedAs: "as a",
+          invitationIntent:
+            "This invitation is intended for <strong>{{email}}</strong>, if this is incorrect please contact the sender above.",
+          invalidInvitationToken: {
+            title: "Invalid invite",
+            message: "Please contact your jurisdiction to request a new invitation link.",
+          },
+          createAccount: "Proceed with your account creation",
+          bceid: "BCeID",
+          idir: "IDIR",
+          changeBceid: "If you want to change your BCeID information, please go to ",
+          changeBceidLinkText: "bceid.ca",
+          confirmationRequiredWithEmail:
+            "Action required: please click the link in the verification email that was sent to you. You will continue to receive emails at <strong>{{email}}</strong> until your new email is confirmed. <br/><br/>(Didn’t receive it? <1>Resend email</1>)",
+          confirmationRequired:
+            "Action required: please click the link in the verification email that was sent to you. <br/><br/>(Didn't receive it? <1>Resend email</1>)",
+          receiveNotifications: "Receive notifications",
+          notificationsEmail: "Notification email address",
           firstName: "First name",
           lastName: "Last name",
-          oldPassword: "Old password",
-          newPassword: "New password",
           myProfile: "My profile",
           inviteTitle: "Invite users",
           adminInviteTitle: "Invite super admins",
@@ -1012,7 +1065,7 @@ const options = {
           takenErrorDescription:
             "One or more of the requested users have an existing account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
           sendInvites: "Send invites",
-          acceptInvitation: "Accept invitation to",
+          acceptInvitation: "Accept invitation",
           acceptInstructions: "Enter your login and other user info below to finalize your account creation.",
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
@@ -1055,6 +1108,21 @@ const options = {
               body: "Any requirements inside this section will also be removed along with it.",
             },
             emptyTemplateSectionText: "Start by clicking the Add Section button",
+            stepCodeWarnings: {
+              energyStepCodeRecommended:
+                'Warning:"Design package energy step code file" is present in the template, but there is no "Energy step code" requirement.',
+
+              duplicateStepCodePackage:
+                'Warning: Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file".',
+            },
+            stepCodeErrors: {
+              duplicateEnergyStepCode:
+                'Warning: Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" in the template.',
+              stepCodePackageRequired:
+                'Warning: "Energy step code" is required to have the "Design package energy step code file".',
+              duplicateStepCodePackage:
+                'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement',
+            },
             goToTop: "Go to top",
             collapseAll: "Collapse all",
             scheduleModalTitle: "Publish permit?",
@@ -1248,6 +1316,7 @@ const options = {
           metaKeywords: "BC, british columba, permit, portal, hub, permitting, permit application",
           loggedInWelcome: "Welcome back!",
           myPermits: "My permits",
+          newApplication: "New permit application",
           activePermits: "Active permits",
           approvedPermits: "Approved permits",
           myAccount: "My Account",
@@ -1292,7 +1361,6 @@ const options = {
             apiSettings: "API settings",
             create: "Create",
           },
-          questionSupport: "Question support",
         },
         automatedCompliance: {
           baseMessage: `This field has Auto-Compliance capability`,

@@ -1,4 +1,4 @@
-import { flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { flow, Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 
@@ -9,6 +9,7 @@ export const SessionStoreModel = types
     tokenExpired: types.optional(types.boolean, false),
     isValidating: types.optional(types.boolean, true),
     isLoggingOut: types.optional(types.boolean, false),
+    afterLoginPath: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -20,6 +21,9 @@ export const SessionStoreModel = types
       self.rootStore.userStore.unsetCurrentUser()
       self.rootStore.disconnectUserChannel()
     }),
+    setAfterLoginPath(path: string | null) {
+      self.afterLoginPath = path
+    },
   }))
   .actions((self) => ({
     handleLogin(response, opts = { redirectToRoot: false }) {
@@ -34,12 +38,6 @@ export const SessionStoreModel = types
       }
       return false
     },
-    handleForgotPasswordRequest: flow(function* (params) {
-      const response = yield self.environment.api.requestPasswordReset(params)
-      if (response.ok) {
-        return true
-      }
-    }),
   }))
   .actions((self) => ({
     validateToken: flow(function* () {
@@ -47,10 +45,6 @@ export const SessionStoreModel = types
       const response: any = yield self.environment.api.validateToken() // now try to validate this with the server
       self.handleLogin(response)
       self.isValidating = false
-    }),
-    login: flow(function* (username, password) {
-      const response: any = yield self.environment.api.login(username, password)
-      return self.handleLogin(response)
     }),
     logout: flow(function* () {
       self.isLoggingOut = true
@@ -60,16 +54,6 @@ export const SessionStoreModel = types
       }
       // Do a full browser refresh to enhance security
       window.location.href = "/"
-    }),
-    requestPasswordReset: flow(function* (params) {
-      const response = yield self.environment.api.requestPasswordReset(params)
-      return response.ok
-    }),
-    resetPassword: flow(function* (params) {
-      const { ok, data: response } = yield* toGenerator(self.environment.api.resetPassword(params))
-      if (ok) {
-        window.location.replace(response.meta.redirectUrl)
-      }
     }),
     setTokenExpired(isExpired: boolean) {
       self.tokenExpired = isExpired

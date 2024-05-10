@@ -82,7 +82,7 @@ export enum ERequirementTemplateSortFields {
 }
 
 export enum EContactSortFields {
-  title = "title",
+  title = "role/position",
   name = "name",
   email = "email",
   phone = "phone",
@@ -258,6 +258,7 @@ export enum ERequirementContactFieldItemType {
   lastName = "lastName",
   email = "email",
   phone = "phone",
+  title = "title",
   address = "address",
   organization = "organization",
   businessName = "businessName",
@@ -290,4 +291,11 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+}
+
+export enum EEnergyStepCodeDependencyRequirementCode {
+  energyStepCodeMethod = "energy_step_code_method",
+  energyStepCodeToolPart9 = "energy_step_code_tool_part_9",
+  energyStepCodeReportFile = "energy_step_code_report_file",
+  energyStepCodeH2000File = "energy_step_code_h2000_file",
 }

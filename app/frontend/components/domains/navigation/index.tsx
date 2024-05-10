@@ -7,9 +7,10 @@ import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { EULAModal } from "../../shared/eula-modal"
+import { EULAScreen } from "../onboarding/eula"
 import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
+import { ProtectedRoute } from "./protected-route"
 
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
@@ -33,17 +34,8 @@ const PermitApplicationPDFViewer = lazy(() =>
 const EmailConfirmedScreen = lazy(() =>
   import("../authentication/email-confirmed-screen").then((module) => ({ default: module.EmailConfirmedScreen }))
 )
-const ForgotPasswordScreen = lazy(() =>
-  import("../authentication/forgot-password-screen").then((module) => ({ default: module.ForgotPasswordScreen }))
-)
 const LoginScreen = lazy(() =>
   import("../authentication/login-screen").then((module) => ({ default: module.LoginScreen }))
-)
-const RegisterScreen = lazy(() =>
-  import("../authentication/register-screen").then((module) => ({ default: module.RegisterScreen }))
-)
-const ResetPasswordScreen = lazy(() =>
-  import("../authentication/reset-password-screen").then((module) => ({ default: module.ResetPasswordScreen }))
 )
 const HomeScreen = lazy(() => import("../home").then((module) => ({ default: module.HomeScreen })))
 const ConfigurationManagementScreen = lazy(() =>
@@ -200,7 +192,6 @@ export const Navigation = observer(() => {
         </Center>
       )}
       <NavBar />
-      <EULAModal />
 
       {isValidating ? (
         <LoadingScreen />
@@ -216,28 +207,36 @@ export const Navigation = observer(() => {
 })
 
 const AppRoutes = observer(() => {
-  const { sessionStore, uiStore } = useMst()
+  const rootStore = useMst()
+  const { sessionStore, userStore, uiStore } = rootStore
   const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
 
-  const { userStore } = useMst()
   const { currentUser } = userStore
+  const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
 
   const navigate = useNavigate()
   const { t } = useTranslation()
 
   useEffect(() => {
     if (tokenExpired) {
-      sessionStore.resetAuth()
+      resetAuth()
+      setAfterLoginPath(location.pathname)
       navigate("/login")
       uiStore.flashMessage.show(EFlashMessageStatus.warning, t("auth.tokenExpired"), null)
     }
   }, [tokenExpired])
 
+  useEffect(() => {
+    if (loggedIn && afterLoginPath) {
+      setAfterLoginPath(null)
+      navigate(afterLoginPath)
+    }
+  }, [afterLoginPath, loggedIn])
+
   const superAdminOnlyRoutes = (
     <>
-      <Route path="/jurisdictions" element={<JurisdictionIndexScreen />} />
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
@@ -297,18 +296,6 @@ const AppRoutes = observer(() => {
     </>
   )
 
-  const submitterOnlyRoutes = (
-    <>
-      <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
-        <Route path="step-code" element={<StepCodeForm />} />
-      </Route>
-      <Route
-        path="/permit-applications/:permitApplicationId/sucessful-submission"
-        element={<SuccessfulSubmissionScreen />}
-      />
-    </>
-  )
-
   const reviewManagerOnlyRoutes = (
     <>
       <Route
@@ -326,33 +313,86 @@ const AppRoutes = observer(() => {
   return (
     <>
       <Routes location={background || location}>
-        {loggedIn ? (
-          <>
-            <Route path="/" element={<HomeScreen />} />
-            <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
-            <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-
-            {(currentUser?.isReviewManager || currentUser?.isReviewer) && managerOrReviewerRoutes}
-            {currentUser?.isSuperAdmin && superAdminOnlyRoutes}
-            {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerRoutes}
-            {currentUser?.isSubmitter && submitterOnlyRoutes}
-            {currentUser?.isReviewManager && reviewManagerOnlyRoutes}
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<RedirectScreen path="/welcome" />} />
-            <Route path="/login" element={<LoginScreen />} />
-            <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
-            <Route path="/reset-password" element={<ResetPasswordScreen />} />
-            <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
-            <Route path="/register" element={<RegisterScreen />} />
-          </>
+        {loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin && (
+          // Onboarding step 1: EULA
+          <Route path="/" element={<EULAScreen />} />
         )}
+        {loggedIn && currentUser.eulaAccepted && currentUser.isUnconfirmed && (
+          // Onboarding step 2: confirm email
+          <Route path="/" element={<ProfileScreen />} />
+        )}
+        {loggedIn ? (
+          <Route path="/" element={<HomeScreen />} />
+        ) : (
+          <Route path="/" element={<RedirectScreen path="/welcome" />} />
+        )}
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
+          <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
+            <Route path="step-code" element={<StepCodeForm />} />
+          </Route>
+          <Route
+            path="/permit-applications/:permitApplicationId/sucessful-submission"
+            element={<SuccessfulSubmissionScreen />}
+          />
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isSuperAdmin)}
+              redirectPath={loggedIn && "/not-found"}
+            />
+          }
+        >
+          {adminOrManagerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute isAllowed={loggedIn && currentUser.isSuperAdmin} redirectPath={loggedIn && "/not-found"} />
+          }
+        >
+          {superAdminOnlyRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && (currentUser.isReviewer || currentUser.isReviewManager)}
+              redirectPath={loggedIn && "/not-found"}
+            />
+          }
+        >
+          {managerOrReviewerRoutes}
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              isAllowed={loggedIn && currentUser.isReviewManager}
+              redirectPath={loggedIn && "/not-found"}
+            />
+          }
+        >
+          {reviewManagerOnlyRoutes}
+        </Route>
+
+        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/not-found" />}>
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+          <Route path="/admin" element={<LoginScreen isAdmin />} />
+        </Route>
+        {/* Public Routes */}
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
-        <Route path="/jurisdictions" element={<LimitedJurisdictionIndexScreen />} />
+        <Route
+          path="/jurisdictions"
+          element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
+        />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>

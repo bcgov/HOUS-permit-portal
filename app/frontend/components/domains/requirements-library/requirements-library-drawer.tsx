@@ -19,7 +19,7 @@ interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
   onUse?: (requirementBlock: IRequirementBlock, closeDrawer?: () => void) => void
-  disableUseForBlockIds?: Set<string>
+  disabledUseForBlockIds?: Set<string>
   disabledReason?: string
 }
 
@@ -27,7 +27,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
   defaultButtonProps,
   renderTriggerButton,
   onUse,
-  disableUseForBlockIds,
+  disabledUseForBlockIds,
   disabledReason,
 }: IProps) {
   const { t } = useTranslation()
@@ -56,7 +56,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
             flex={1}
             p={8}
             renderActionButton={({ requirementBlock }) => {
-              const isDisabled = disableUseForBlockIds.has(requirementBlock.id)
+              const isDisabled = disabledUseForBlockIds.has(requirementBlock.id)
               const shouldShowDisabledReason = isDisabled && disabledReason
 
               const buttonProps = {

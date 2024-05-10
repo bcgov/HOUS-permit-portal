@@ -3,16 +3,32 @@
   <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
       <tr>
-        <!-- START CONTENT ROW -->
+      <!-- START CONTENT ROW -->
         <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Notification email preference</h1>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              You are receiving this email because you have recently created or updated your notification preferences in the Building Permit Hub. Please review the changes below:
+          </p>
 
-					<h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">New account created</h1>
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Notification email details:</h2>
 
-          <p><strong>Welcome to the Building Permit Hub!</strong></p>
+            <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;"> 
+                  
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;"><%= @change_type %></dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @email %></dd>
 
-          <p>Please confirm your account for (<%= @email %>) by clicking the button below:</p>
+                </dl>
+              </td>
+            </tr>
+          </table>
 
-					<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;"">Please confirm your account for <%= @email %> by clicking the button below:</p>
+
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
             <tbody>
               <tr>
                 <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
@@ -31,12 +47,21 @@
             </tbody>
           </table>
 
-          <p>–––</p>
-          <p><a href="<%= @root_url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: bold;">The Building Permit Hub Team</a></p>
+          
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              If you have received this email in error please ignore and no other action is needed.
+          </p>
+
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Thank you,  <br><br>
+            The Building Permit Hub Team 
+          </p>
         </td>
         <!-- END OF CONTENT ROW -->
       </tr>
     </table>
   </td>
 </tr>
+
 <!-- END MAIN CONTENT AREA -->

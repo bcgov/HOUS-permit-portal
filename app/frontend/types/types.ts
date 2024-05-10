@@ -74,6 +74,7 @@ export interface IRequirementOptions {
   numberUnit?: ENumberUnit
   canAddMultipleContacts?: boolean
   conditional?: TConditional
+  energyStepCode?: string
   dataValidation?: Object
 }
 

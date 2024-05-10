@@ -11,11 +11,11 @@ const baseStyle = definePartsStyle({
     paddingInlineEnd: 3,
     _disabled: {
       bg: "greys.grey04",
-      borderColor: "greys.grey04",
-      color: "text.primary",
+      borderColor: "border.light",
+      color: "greys.grey01",
       opacity: 1,
       _hover: {
-        borderColor: "greys.grey04",
+        borderColor: "border.light",
         cursor: "auto",
       },
     },

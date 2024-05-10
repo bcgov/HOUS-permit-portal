@@ -101,20 +101,14 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                {loggedIn ? (
-                  <RouterLinkButton to="/" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                    {t("site.goTo")} {currentUser?.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
-                  </RouterLinkButton>
-                ) : (
-                  <>
-                    <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.login")}
-                    </RouterLinkButton>
-                    <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.register")}
-                    </RouterLinkButton>
-                  </>
-                )}
+                <RouterLinkButton
+                  to={currentUser ? "/" : "/login"}
+                  variant="primaryInverse"
+                  icon={<CaretRight size={16} />}
+                >
+                  {t("site.goTo")}{" "}
+                  {!currentUser || currentUser.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
+                </RouterLinkButton>
               </Flex>
             </Flex>
             <VStack as="section" align="flex-start" spacing={4}>

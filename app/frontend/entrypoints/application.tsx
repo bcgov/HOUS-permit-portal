@@ -1,5 +1,5 @@
 import "@bcgov/bc-sans/css/BC_Sans.css"
-import { Box, ChakraProvider } from "@chakra-ui/react"
+import { ChakraProvider, Flex } from "@chakra-ui/react"
 import { Global } from "@emotion/react"
 import React from "react"
 import { createRoot } from "react-dom/client"
@@ -35,9 +35,9 @@ const renderApp = (rootStore) => {
             <meta property="og:description" content={t("site.metaDescription")} />
             <meta property="og:image" content="/images/logo.svg" />
           </Helmet>
-          <Box>
+          <Flex direction="column" minH="100vh">
             <Navigation />
-          </Box>
+          </Flex>
         </Provider>
       </ChakraProvider>
     )

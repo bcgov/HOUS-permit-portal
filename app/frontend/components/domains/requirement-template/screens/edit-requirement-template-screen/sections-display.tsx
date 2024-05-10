@@ -22,6 +22,9 @@ interface IProps {
 export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) {
   const { watch } = useFormContext<IRequirementTemplateForm>()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
+  const usedRequirementBlockIds = watchedSections.flatMap((section) =>
+    section.templateSectionBlocksAttributes.map((sectionBlock) => sectionBlock.requirementBlockId)
+  )
 
   return (
     <Stack
@@ -37,7 +40,13 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
       maxWidth="container.lg"
     >
       {watchedSections.map((section, index) => (
-        <SectionDisplay key={section.id} section={section} sectionIndex={index} {...props} />
+        <SectionDisplay
+          key={section.id}
+          section={section}
+          sectionIndex={index}
+          disabledUseForBlockIds={usedRequirementBlockIds}
+          {...props}
+        />
       ))}
     </Stack>
   )
@@ -49,11 +58,13 @@ const SectionDisplay = observer(
     sectionIndex,
     isCollapsedAll,
     setSectionRef,
+    disabledUseForBlockIds = [],
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
     isCollapsedAll?: boolean
     setSectionRef: (el: HTMLElement, id: string) => void
+    disabledUseForBlockIds?: string[]
   }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -75,6 +86,7 @@ const SectionDisplay = observer(
     )
 
     const watchedSectionName = watch(`requirementTemplateSectionsAttributes.${sectionIndex}.name`)
+
     const [editableSectionName, setEditableSectionName] = React.useState<string>(watchedSectionName ?? "")
 
     useEffect(() => {
@@ -160,7 +172,7 @@ const SectionDisplay = observer(
             onUse={(requirementBlock, closeDrawer) => {
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
             }}
-            disableUseForBlockIds={disabledUseForBlockIds}
+            disabledUseForBlockIds={disabledUseForBlockIds}
             disabledReason={t("requirementTemplate.edit.duplicateRequirementBlockDisabledReason")}
           />
         </Stack>

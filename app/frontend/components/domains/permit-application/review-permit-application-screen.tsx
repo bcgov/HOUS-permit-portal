@@ -44,6 +44,12 @@ export const ReviewPermitApplicationScreen = observer(() => {
     reset({ referenceNumber: currentPermitApplication?.referenceNumber || "" })
   }, [currentPermitApplication?.referenceNumber])
 
+  useEffect(() => {
+    if (currentPermitApplication && !currentPermitApplication.isViewed) {
+      currentPermitApplication.markAsViewed()
+    }
+  }, [currentPermitApplication])
+
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 

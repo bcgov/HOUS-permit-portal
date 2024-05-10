@@ -38,7 +38,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
           />
           <HomeScreenBox
             title={t("home.configurationManagement.title")}
-            description={t("home.configurationManagement.description")}
+            description={t("home.configurationManagement.reviewManagerDescription")}
             icon={<Pencil size={24} />}
             href={`jurisdictions/${jurisdiction.slug}/configuration-management`}
           />
