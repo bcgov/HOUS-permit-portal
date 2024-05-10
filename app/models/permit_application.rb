@@ -136,9 +136,13 @@ class PermitApplication < ApplicationRecord
     "#{activity.name} - #{permit_type.name}".strip
   end
 
+  def permit_type_submission_contact
+    jurisdiction.permit_type_submission_contacts.find_by(permit_type: permit_type)
+  end
+
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
-    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
+    PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
   end
 
   private
