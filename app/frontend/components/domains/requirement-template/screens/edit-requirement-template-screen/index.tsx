@@ -154,6 +154,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     (section) => section.templateSectionBlocksAttributes
   )
 
+  const stepCodeRelatedWarningBannerErrors = getStepCodeRelatedWarningBannerErrors()
   return (
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
@@ -188,6 +189,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               onForcePublishNow={onForcePublishNow}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
+              hasStepCodeDependencyError={stepCodeRelatedWarningBannerErrors.length > 0}
             />
             <FloatingHelpDrawer top="100px" />
             {hasNoSections ? (
@@ -205,7 +207,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
             ) : (
               <>
                 <Box w="full" px={6}>
-                  {getStepCodeRelatedWarningBannerErrors().map((error) => (
+                  {stepCodeRelatedWarningBannerErrors.map((error) => (
                     <CalloutBanner key={error.title} type={error.type} title={error.title} />
                   ))}
                 </Box>
