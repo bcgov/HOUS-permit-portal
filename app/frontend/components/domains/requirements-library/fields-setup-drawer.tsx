@@ -110,7 +110,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
             <Flex flexDir={"column"} w={"full"}>
               {requirementTypeOptions
                 .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
-                .map(({ requirementType, isStepCodePackageFileRequirement }) => (
+                .map(({ requirementType, isStepCodePackageFileRequirement = false }) => (
                   <HStack
                     key={requirementType}
                     alignItems={"flex-end"}
