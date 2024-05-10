@@ -44,7 +44,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
           key={section.id}
           section={section}
           sectionIndex={index}
-          disableUseForBlockIds={usedRequirementBlockIds}
+          disabledUseForBlockIds={usedRequirementBlockIds}
           {...props}
         />
       ))}
@@ -58,13 +58,13 @@ const SectionDisplay = observer(
     sectionIndex,
     isCollapsedAll,
     setSectionRef,
-    disableUseForBlockIds = [],
+    disabledUseForBlockIds = [],
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
     isCollapsedAll?: boolean
     setSectionRef: (el: HTMLElement, id: string) => void
-    disableUseForBlockIds?: string[]
+    disabledUseForBlockIds?: string[]
   }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -163,7 +163,7 @@ const SectionDisplay = observer(
             onUse={(requirementBlock, closeDrawer) => {
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
             }}
-            disableUseForBlockIds={new Set(disableUseForBlockIds)}
+            disabledUseForBlockIds={new Set(disabledUseForBlockIds)}
           />
         </Stack>
       </Box>
