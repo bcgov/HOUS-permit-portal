@@ -145,10 +145,14 @@ class Requirement < ApplicationRecord
     false
   end
 
+  def step_code_package_file?
+    requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+  end
+
   private
 
   def validate_step_code_package_file
-    return unless requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+    return unless step_code_package_file?
 
     matches_package_file_required_schema =
       attributes.slice("input_type", "required", "elective") !=
@@ -160,7 +164,7 @@ class Requirement < ApplicationRecord
   end
 
   def set_digital_seal_validator_to_step_code_package_file
-    return unless requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+    return unless step_code_package_file?
 
     required_computed_compliance = {
       "module" => "DigitalSealValidator",

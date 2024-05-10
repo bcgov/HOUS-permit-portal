@@ -39,6 +39,13 @@ en:
             jurisdiction:
               no_contact: "not available."
             pid_or_pin: "must have a pid or pin."
+        requirement_template:
+          step_code_package_required: "Energy Step code is required to have the Design package energy step code file"
+          energy_step_code_required: "Design package energy step code file is present in the template, but there is no Energy Step code requirement"
+          duplicate_energy_step_code:
+            "Multiple Energy Step code requirements found. Please ensure there is only one Energy Step code requirement in the template"
+          duplicate_step_code_package:
+            "Multiple Design package energy step code files found. Please ensure there is only one Design package energy step code file"
         requirement_block:
           attributes:
             requirements:

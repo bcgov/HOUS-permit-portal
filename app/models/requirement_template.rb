@@ -26,8 +26,12 @@ class RequirementTemplate < ApplicationRecord
 
   accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
 
+  # This is a workaround needed to validate step code related errors
+  attr_accessor :requirement_template_sections_attributes_copy
+
   validate :unique_permit_and_activity_for_undiscarded, on: :create
   validate :validate_uniqueness_of_blocks
+  validate :validate_step_code_related_dependencies
 
   def key
     "requirementtemplate#{id}"
@@ -119,6 +123,62 @@ class RequirementTemplate < ApplicationRecord
     }
   end
 
+  def energy_step_code_requirements
+    if requirement_template_sections_attributes_copy.blank? ||
+         !requirement_template_sections_attributes_copy.is_a?(Array)
+      return []
+    end
+
+    # have to manually loop instead of using association because
+    # when using deeply nested attributes to save, the queries go against the database
+    # which will have stale data
+    requirement_template_sections_attributes_copy
+      .flat_map do |rtsa|
+        next [] if rtsa["_destroy"] == true
+        rtsa["template_section_blocks_attributes"].flat_map do |tsba|
+          next [] if tsba["_destroy"] == true
+          requirement_block_id = tsba["requirement_block_id"]
+          requirement_block = RequirementBlock.find_by(id: requirement_block_id)
+
+          if requirement_block.present? && requirement_block.requirements.count.positive?
+            requirement_block.requirements.where(input_type: "energy_step_code")
+          else
+            []
+          end
+        end
+      end
+      .compact
+  end
+
+  def step_code_package_file_requirements
+    # have to manually loop instead of using association because
+    # when using deeply nested attributes to save, the queries go against the database
+    # which will have stale data
+
+    if requirement_template_sections_attributes_copy.blank? ||
+         !requirement_template_sections_attributes_copy.is_a?(Array)
+      return []
+    end
+
+    requirement_template_sections_attributes_copy
+      .flat_map do |rtsa|
+        next [] if rtsa["_destroy"] == true
+
+        rtsa["template_section_blocks_attributes"].flat_map do |tsba|
+          next [] if tsba["_destroy"] == true
+          requirement_block_id = tsba["requirement_block_id"]
+          requirement_block = RequirementBlock.find_by(id: requirement_block_id)
+
+          if requirement_block.present? && requirement_block.requirements.count.positive?
+            requirement_block.requirements.where(requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)
+          else
+            []
+          end
+        end
+      end
+      .compact
+  end
+
   private
 
   def validate_uniqueness_of_blocks
@@ -134,6 +194,23 @@ class RequirementTemplate < ApplicationRecord
         ),
       )
     end
+  end
+
+  def validate_step_code_related_dependencies
+    energy_step_code_requirements_count = energy_step_code_requirements.count
+    step_code_package_file_requirements_count = step_code_package_file_requirements.count
+
+    has_any_step_code_requirements = energy_step_code_requirements_count > 0
+    has_any_step_code_package_file_requirements = step_code_package_file_requirements_count > 0
+    has_duplicate_step_code_requirements = energy_step_code_requirements_count > 1
+    has_duplicate_step_code_package_file_requirements = step_code_package_file_requirements_count > 1
+
+    return if !has_any_step_code_requirements && !has_any_step_code_package_file_requirements
+
+    errors.add(:base, :energy_step_code_required) if !has_any_step_code_requirements
+    errors.add(:base, :step_code_package_required) if !has_any_step_code_package_file_requirements
+    errors.add(:base, :duplicate_energy_step_code) if has_duplicate_step_code_requirements
+    errors.add(:base, :duplicate_step_code_package) if has_duplicate_step_code_package_file_requirements
   end
 
   def unique_permit_and_activity_for_undiscarded
