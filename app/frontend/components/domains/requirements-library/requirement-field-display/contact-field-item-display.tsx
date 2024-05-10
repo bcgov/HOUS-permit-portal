@@ -19,6 +19,7 @@ export function ContactFieldItemDisplay({ contactFieldItemType }: IContactFieldI
     ERequirementContactFieldItemType.email,
     ERequirementContactFieldItemType.phone,
     ERequirementContactFieldItemType.address,
+    ERequirementContactFieldItemType.title,
   ].includes(contactFieldItemType)
 
   const propsByType = {
@@ -33,6 +34,9 @@ export function ContactFieldItemDisplay({ contactFieldItemType }: IContactFieldI
     },
     [ERequirementContactFieldItemType.organization]: {
       labelProps: { maxW: "full" },
+    },
+    [ERequirementContactFieldItemType.title]: {
+      requirementType: ERequirementType.text,
     },
   }
   return <RequirementFieldDisplay {...defaultProps} {...propsByType[contactFieldItemType]} required={required} />

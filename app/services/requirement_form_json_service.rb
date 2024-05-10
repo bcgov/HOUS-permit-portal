@@ -252,7 +252,13 @@ class RequirementFormJsonService
         [get_contact_field_form_json(:email, parent_key), get_contact_field_form_json(:phone, parent_key)],
       ),
       get_contact_field_form_json(:address, parent_key),
-      get_columns_form_json("organization_columns", [get_contact_field_form_json(:organization, parent_key, false)]),
+      get_columns_form_json(
+        "organization_columns",
+        [
+          get_contact_field_form_json(:organization, parent_key, false),
+          get_contact_field_form_json(:title, parent_key),
+        ],
+      ),
     ]
   end
 
@@ -267,6 +273,7 @@ class RequirementFormJsonService
         [get_contact_field_form_json(:email, parent_key), get_contact_field_form_json(:phone, parent_key)],
       ),
       get_contact_field_form_json(:address, parent_key),
+      get_contact_field_form_json(:title, parent_key),
       get_columns_form_json(
         "business_columns",
         [

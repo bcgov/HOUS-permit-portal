@@ -77,7 +77,7 @@ export enum ERequirementTemplateSortFields {
 }
 
 export enum EContactSortFields {
-  title = "title",
+  title = "role/position",
   name = "name",
   email = "email",
   phone = "phone",
@@ -253,6 +253,7 @@ export enum ERequirementContactFieldItemType {
   lastName = "lastName",
   email = "email",
   phone = "phone",
+  title = "title",
   address = "address",
   organization = "organization",
   businessName = "businessName",

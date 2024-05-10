@@ -352,6 +352,7 @@ en:
         email: "Email"
         phone: "Phone"
         address: "Address"
+        title: "Role/Position"
         business_name: "Business name"
         business_license: "Business license"
         professional_association: "Professional association/organization"

@@ -199,7 +199,7 @@ const options = {
           fields: {
             firstName: "First name",
             lastName: "Last name",
-            title: "Title",
+            title: "Role/Position",
             department: "Department",
             email: "Email",
             phone: "Phone no.",
@@ -528,6 +528,7 @@ const options = {
             firstName: "First name",
             lastName: "Last name",
             email: "Email",
+            title: "Role/Position",
             phone: "Phone",
             address: "Address",
             organization: "Organization",
