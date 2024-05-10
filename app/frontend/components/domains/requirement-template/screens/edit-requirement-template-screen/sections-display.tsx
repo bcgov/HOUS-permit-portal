@@ -93,14 +93,6 @@ const SectionDisplay = observer(
       setEditableSectionName(watchedSectionName)
     }, [watchedSectionName])
 
-    // only one instance of any requirement block can be used on a template
-    const disabledUseForBlockIds = new Set(
-      watchedSections
-        .map((sections) =>
-          (sections?.templateSectionBlocksAttributes ?? []).map((sectionBlock) => sectionBlock.requirementBlockId)
-        )
-        .flat()
-    )
     return (
       <Box
         ref={(el) => setSectionRef(el, section.id)}
