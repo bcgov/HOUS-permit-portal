@@ -54,13 +54,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
     allow(controller).to receive(:authorize).and_return(true)
     allow(controller).to receive(:permit_application_search_params).and_return(permit_application_search_params)
     allow(controller).to receive(:params).and_return(permit_application_search_params)
-    controller.instance_variable_set(:@jurisdiction, jurisdiction)
     User.reindex
     PermitApplication.reindex
   end
 
   describe "perform_permit_application_search" do
-    context "when searching as submitter" do
+    context "when searching for the users permit applications" do
       let(:cur_user) { submitter }
       let(:permit_application_search_params) { { query: "", page: 1, per_page: 10 } }
 
@@ -72,7 +71,9 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
       end
     end
 
-    context "when searching as reviewer" do
+    context "when searching for the jurisdictions permit applications as a reviewer" do
+      before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
+
       let(:cur_user) { reviewer }
       let(:permit_application_search_params) { { query: "", page: 1, per_page: 10 } }
 
@@ -84,7 +85,9 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
       end
     end
 
-    context "when searching as review manager" do
+    context "when searching for the jurisdictions permit applications as a review manager" do
+      before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
+
       let(:cur_user) { review_manager }
       let(:permit_application_search_params) { { query: "", page: 1, per_page: 10 } }
 
