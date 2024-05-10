@@ -17,7 +17,6 @@ import { observer } from "mobx-react-lite"
 import React, { Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { ERequirementType } from "../../../types/enums"
-import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { RequirementFieldDisplay, hasRequirementFieldDisplayComponent } from "./requirement-field-display"
 
 interface IProps {
@@ -92,20 +91,9 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
 
           <DrawerBody p={0}>
             <Flex w={"full"} px={6} py={4} backgroundColor={"theme.blueLight"}>
-              <Text
-                as={"h3"}
-                color={"text.primary"}
-                fontSize={"sm"}
-                fontWeight={700}
-                borderRight={"1px solid"}
-                borderColor={"text.secondary"}
-                pr={4}
-              >
+              <Text as={"h3"} color={"text.primary"} fontSize={"sm"} fontWeight={700} pr={4}>
                 {t("requirementsLibrary.fieldsDrawer.formFields")}
               </Text>
-              <RouterLinkButton to={"/"} textDecoration={"underline"} variant={"link"} ml={4}>
-                {t("site.questionSupport")}
-              </RouterLinkButton>
             </Flex>
             <Flex flexDir={"column"} w={"full"}>
               {requirementTypeOptions

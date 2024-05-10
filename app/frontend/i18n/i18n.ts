@@ -1305,7 +1305,6 @@ const options = {
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
           },
-          questionSupport: "Question support",
         },
         automatedCompliance: {
           baseMessage: `This field has Auto-Compliance capability`,
