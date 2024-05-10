@@ -129,6 +129,8 @@ export function isStepCodePackageFileRequirementCode(requirementCode: string) {
 
 export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
   // Remove any non-numeric characters, especially the leading '+'
+  if (!phoneNumber) return ""
+
   const digits = phoneNumber.replace(/\D+/g, "")
 
   // Extract the area code, first three digits, and last four digits
