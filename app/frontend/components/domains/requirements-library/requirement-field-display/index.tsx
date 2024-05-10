@@ -256,6 +256,7 @@ const requirementsComponentMap = {
           },
         },
       },
+      { type: ERequirementContactFieldItemType.title },
       { type: ERequirementContactFieldItemType.organization },
     ]
 
@@ -279,6 +280,7 @@ const requirementsComponentMap = {
           },
         },
       },
+      { type: ERequirementContactFieldItemType.title },
       { type: ERequirementContactFieldItemType.businessName },
       { type: ERequirementContactFieldItemType.businessLicense },
       { type: ERequirementContactFieldItemType.professionalAssociation },
