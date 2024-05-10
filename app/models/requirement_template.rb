@@ -173,8 +173,10 @@ class RequirementTemplate < ApplicationRecord
   end
 
   def validate_uniqueness_of_blocks
-    # Track duplicates across all sections within the same template
-    duplicates = requirement_blocks.unscope(:order).group(:id).having("COUNT(*) > 1").pluck(:name)
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+    grouped_ids = requirement_block_ids.group_by { |e| e }
+    duplicate_ids = grouped_ids.select { |k, v| v.length > 1 }.keys
+    duplicates = RequirementBlock.where(id: duplicate_ids).pluck(:name)
 
     duplicates.each do |duplicate_block_name|
       errors.add(
@@ -196,9 +198,8 @@ class RequirementTemplate < ApplicationRecord
     has_duplicate_step_code_requirements = energy_step_code_requirements_count > 1
     has_duplicate_step_code_package_file_requirements = step_code_package_file_requirements_count > 1
 
-    return if !has_any_step_code_requirements && !has_any_step_code_package_file_requirements
+    return unless has_any_step_code_requirements
 
-    errors.add(:base, :energy_step_code_required) if !has_any_step_code_requirements
     errors.add(:base, :step_code_package_required) if !has_any_step_code_package_file_requirements
     errors.add(:base, :duplicate_energy_step_code) if has_duplicate_step_code_requirements
     errors.add(:base, :duplicate_step_code_package) if has_duplicate_step_code_package_file_requirements

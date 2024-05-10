@@ -155,6 +155,8 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   )
 
   const stepCodeRelatedWarningBannerErrors = getStepCodeRelatedWarningBannerErrors()
+
+  const hasStepCodeDependencyError = !!stepCodeRelatedWarningBannerErrors.find((error) => error.type === "error")
   return (
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
@@ -189,7 +191,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               onForcePublishNow={onForcePublishNow}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
-              hasStepCodeDependencyError={stepCodeRelatedWarningBannerErrors.length > 0}
+              hasStepCodeDependencyError={hasStepCodeDependencyError}
             />
             <FloatingHelpDrawer top="100px" />
             {hasNoSections ? (
@@ -244,36 +246,44 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     const hasAnyStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 0
     const hasDuplicateStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 1
 
-    const errors: Array<{ title: string; type: "warning" }> = []
+    const errors: Array<{ title: string; type: "warning" | "error" }> = []
 
     if (!hasAnyEnergyStepCodeBlocks && !hasAnyStepCodePackageFileBlock) {
       return errors
     }
 
-    if (!hasAnyStepCodePackageFileBlock) {
-      errors.push({
-        title: t("requirementTemplate.edit.stepCodeWarnings.stepCodePackageRequired"),
-        type: "warning",
-      })
-    }
-    if (!hasAnyEnergyStepCodeBlocks) {
-      errors.push({
-        title: t("requirementTemplate.edit.stepCodeWarnings.energyStepCodeRequired"),
-        type: "warning",
-      })
+    if (hasAnyEnergyStepCodeBlocks) {
+      if (!hasAnyStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.stepCodePackageRequired"),
+          type: "error",
+        })
+      }
+
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.duplicateStepCodePackage"),
+          type: "error",
+        })
+      }
+    } else if (hasAnyStepCodePackageFileBlock) {
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.duplicateStepCodePackage"),
+          type: "warning",
+        })
+      } else {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.energyStepCodeRecommended"),
+          type: "warning",
+        })
+      }
     }
 
     if (hasDuplicateEnergyStepCodeBlocks) {
       errors.push({
-        title: t("requirementTemplate.edit.stepCodeWarnings.duplicateEnergyStepCode"),
-        type: "warning",
-      })
-    }
-
-    if (hasDuplicateStepCodePackageFileBlock) {
-      errors.push({
-        title: t("requirementTemplate.edit.stepCodeWarnings.duplicateStepCodePackage"),
-        type: "warning",
+        title: t("requirementTemplate.edit.stepCodeErrors.duplicateEnergyStepCode"),
+        type: "error",
       })
     }
 
