@@ -23,7 +23,6 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             <Heading mb={0} fontSize="3xl">
               {t(`${i18nPrefix}.title`)}
             </Heading>
-            <Text fontSize="md">{t(`${i18nPrefix}.editPermission`)}</Text>
 
             <SectionBox>
               <Flex align="flex-end">

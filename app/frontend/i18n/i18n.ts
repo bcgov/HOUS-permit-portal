@@ -924,7 +924,6 @@ const options = {
             adminDescription:
               "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
-            editPermission: "Only Review Managers are able to edit.",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
             jurisdictionAbout: {
