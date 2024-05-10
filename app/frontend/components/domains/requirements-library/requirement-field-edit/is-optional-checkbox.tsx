@@ -9,12 +9,11 @@ export type TIsOptionalCheckboxProps<TFieldValues extends FieldValues> = IContro
 
 export function IsOptionalCheckbox<TFieldValues extends FieldValues>({
   controlProps,
-  isDisabled,
   ...checkboxProps
 }: TIsOptionalCheckboxProps<TFieldValues>) {
   const {
     field: { value, onChange, ...restField },
-  } = useController({ ...controlProps, disabled: isDisabled })
+  } = useController(controlProps)
   const { t } = useTranslation()
 
   return (
@@ -22,7 +21,6 @@ export function IsOptionalCheckbox<TFieldValues extends FieldValues>({
     //   optional, and by default it should be required
     <Checkbox
       {...checkboxProps}
-      isDisabled={isDisabled}
       isChecked={value === undefined ? value : !value}
       onChange={(e) => {
         onChange(!e.target.checked)
