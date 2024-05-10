@@ -272,7 +272,7 @@ export const PermitApplicationModel = types
       const response = yield self.environment.api.viewPermitApplication(self.id)
       if (response.ok) {
         const { data: permitApplication } = response.data
-        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        self.viewedAt = permitApplication.viewedAt
       }
       return response.ok
     }),
