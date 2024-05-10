@@ -46,6 +46,11 @@ class Requirement < ApplicationRecord
               scope: :requirement_block_id,
               message: "should be unique within the same requirement block",
             }
+  validates :requirement_code,
+            uniqueness: {
+              scope: :requirement_block_id,
+              message: "should be unique within the same requirement block",
+            }
   validate :validate_energy_step_code_requirement_code
   validate :validate_energy_step_code_related_requirements_schema
 
