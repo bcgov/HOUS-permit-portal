@@ -153,7 +153,7 @@ class RequirementTemplate < ApplicationRecord
   def energy_step_code_requirements_from_nest_attributes_copy
     requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
 
-    return unless requirement_block_ids.length.positive?
+    return [] unless requirement_block_ids.length.positive?
 
     Requirement.where(
       requirement_block_id: requirement_block_ids,
@@ -164,7 +164,7 @@ class RequirementTemplate < ApplicationRecord
   def step_code_package_file_requirements_from_nest_attributes_copy
     requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
 
-    return unless requirement_block_ids.length.positive?
+    return [] unless requirement_block_ids.length.positive?
 
     Requirement.where(
       requirement_block_id: requirement_block_ids,
