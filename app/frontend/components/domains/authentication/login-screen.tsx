@@ -1,4 +1,5 @@
 import { Button, Divider, Flex, Heading, Link, Text, VStack } from "@chakra-ui/react"
+import { ArrowSquareIn } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { BasicBCeIDInfo } from "../../shared/bceid/basic"
@@ -36,7 +37,7 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
           {/* @ts-ignore */}
           <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
-          <Button variant="primary" w="full" type="submit">
+          <Button variant="primary" w="full" type="submit" rightIcon={<ArrowSquareIn />}>
             {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
           </Button>
         </form>
