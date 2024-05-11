@@ -126,3 +126,18 @@ export function renameKeys(keysMap, obj) {
 export function isStepCodePackageFileRequirementCode(requirementCode: string) {
   return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
 }
+
+export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
+  // Remove any non-numeric characters, especially the leading '+'
+  if (!phoneNumber) return ""
+
+  const digits = phoneNumber.replace(/\D+/g, "")
+
+  // Extract the area code, first three digits, and last four digits
+  const areaCode = digits.substring(1, 4)
+  const firstThree = digits.substring(4, 7)
+  const lastFour = digits.substring(7, 11)
+
+  // Return the formatted phone number
+  return `(${areaCode}) ${firstThree}-${lastFour}`
+}
