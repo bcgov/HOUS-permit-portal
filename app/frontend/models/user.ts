@@ -1,7 +1,7 @@
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EUserRoles } from "../types/enums"
+import { EOmniauthProvider, EUserRoles } from "../types/enums"
 import { JurisdictionModel } from "./jurisdiction"
 
 export const UserModel = types
@@ -13,6 +13,7 @@ export const UserModel = types
     role: types.enumeration(Object.values(EUserRoles)),
     omniauthEmail: types.maybeNull(types.string),
     omniauthUsername: types.maybeNull(types.string),
+    omniauthProvider: types.maybeNull(types.enumeration(Object.values(EOmniauthProvider))),
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
     nickname: types.maybeNull(types.string),
