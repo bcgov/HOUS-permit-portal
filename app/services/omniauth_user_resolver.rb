@@ -35,7 +35,7 @@ class OmniauthUserResolver
   end
 
   def create_user
-    return if omniauth_provider == [:idir]
+    return if omniauth_provider == OMNIAUTH_PROVIDERS[:idir]
     u =
       User.new(
         password: Devise.friendly_token[0, 20],
