@@ -16,6 +16,8 @@ class OmniauthUserResolver
 
   private
 
+  OMNIAUTH_PROVIDERS = { idir: "idir", bceid: "bceidboth", bceid_business: "bceidbusiness", bceid_basic: "bceidbasic" }
+
   def resolve_user
     if should_promote_user?
       result = MergeSubmitterWithInvitedUser.new(submitter: existing_user, invited_user:).call
@@ -33,7 +35,7 @@ class OmniauthUserResolver
   end
 
   def create_user
-    return if omniauth_provider == "idir"
+    return if omniauth_provider == [:idir]
     u =
       User.new(
         password: Devise.friendly_token[0, 20],
@@ -74,7 +76,13 @@ class OmniauthUserResolver
   end
 
   def omniauth_provider
-    @provider ||= raw_info.identity_provider
+    @provider ||=
+      case raw_info.identity_provider
+      when OMNIAUTH_PROVIDERS[:bceid]
+        raw_info.bceid_business_guid ? OMNIAUTH_PROVIDERS[:bceid_business] : OMNIAUTH_PROVIDERS[:bceid_basic]
+      else
+        raw_info.identity_provider
+      end
   end
 
   def omniauth_uid

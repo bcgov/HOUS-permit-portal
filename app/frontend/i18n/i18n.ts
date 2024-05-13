@@ -1031,8 +1031,11 @@ const options = {
             message: "Please contact your jurisdiction to request a new invitation link.",
           },
           createAccount: "Proceed with your account creation",
-          bceid: "BCeID",
-          idir: "IDIR",
+          omniauthProviders: {
+            idir: "IDIR",
+            bceidbasic: "Basic BCeID",
+            bceidbusiness: "Business BCeID",
+          },
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
           confirmationRequiredWithEmail:

@@ -122,7 +122,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               )}
               <Divider my={1} />
               <TextFormControl
-                label={currentUser.isSuperAdmin ? t("user.idir") : t("user.bceid")}
+                label={t(`user.omniauthProviders.${currentUser.omniauthProvider as EOmniauthProvider}`)}
                 hint={currentUser.omniauthEmail}
                 inputProps={{ value: currentUser.omniauthUsername }}
                 isDisabled

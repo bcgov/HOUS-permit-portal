@@ -8,6 +8,7 @@ class UserBlueprint < Blueprinter::Base
            :role,
            :omniauth_username,
            :omniauth_email,
+           :omniauth_provider,
            :first_name,
            :last_name,
            :certified,

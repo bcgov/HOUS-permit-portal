@@ -294,3 +294,9 @@ export enum EEnergyStepCodeDependencyRequirementCode {
   energyStepCodeReportFile = "energy_step_code_report_file",
   energyStepCodeH2000File = "energy_step_code_h2000_file",
 }
+
+export enum EOmniauthProvider {
+  idir = "idir",
+  basicBceid = "bceidbasic",
+  businessBceid = "bceidbusiness",
+}
