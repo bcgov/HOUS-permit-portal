@@ -1,6 +1,4 @@
 class NotificationService
-  NEW_TEMPLATE_VERSION_PUBLISH_EVENT = "new_template_version_publish"
-
   def self.reset_user_feed_last_read(user_id)
     mf = SimpleFeed.user_feed.activity(user_id)
     mf.reset_last_read
@@ -24,7 +22,6 @@ class NotificationService
   end
 
   def self.publish_to_user_feeds(event, notification_data, user_ids_to_publish_to)
-    notification_data["id"] = SecureRandom.uuid
     activity = SimpleFeed.user_feed.activity(user_ids_to_publish_to)
 
     # send this to the redis store
@@ -35,8 +32,8 @@ class NotificationService
     payloads = {}
     user_ids_to_publish_to.each do |user_id|
       payloads[user_id] = {
-        domain: "notification",
-        event_type: event,
+        domain: Constants::SocketTypes::Domain::NOTIFICATION,
+        event_type: Constants::SocketTypes::Event::NEW,
         data: notification_data,
         meta: {
           total_pages:
@@ -53,10 +50,22 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
+    review_manager_ids = User.review_managers.pluck(:id)
+    relevant_submitter_ids =
+      PermitApplication
+        .joins(:template_version)
+        .where(
+          template_versions: {
+            requirement_template_id: template_version.requirement_template_id,
+          },
+          status: "draft",
+        )
+        .pluck(:submitter_id)
+
     NotificationPushJob.perform_async(
-      NEW_TEMPLATE_VERSION_PUBLISH_EVENT,
-      template_version.publish_event_notification_data, # TODO
-      User.review_managers.pluck(:id),
+      Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
+      template_version.publish_event_notification_data,
+      review_manager_ids + relevant_submitter_ids,
     )
   end
 

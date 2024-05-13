@@ -2,6 +2,7 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { ENotificationActionType } from "../types/enums"
 import { INotification, IUserPushPayload } from "../types/types"
 
 export const NotificationStoreModel = types
@@ -25,6 +26,17 @@ export const NotificationStoreModel = types
     },
     get hasMorePages() {
       return self.totalPages > self.page
+    },
+    generateSpecificHref(notification: INotification) {
+      const currentUser = self.rootStore.userStore.currentUser
+      if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
+        if (currentUser.isReviewManager) {
+          return `/digital-building-permits/${notification.objectData.templateVersionId}/edit?compare=true`
+        }
+        if (currentUser.isSubmitter) {
+          return `/`
+        }
+      }
     },
   }))
   .actions((self) => ({
