@@ -385,9 +385,7 @@ const AppRoutes = observer(() => {
       </Routes>
       {background && (
         <Routes>
-          {currentUser?.isSubmitter && (
-            <Route path="/permit-applications/:permitApplicationId/edit/step-code" element={<StepCodeForm />} />
-          )}
+          <Route path="/permit-applications/:permitApplicationId/edit/step-code" element={<StepCodeForm />} />
         </Routes>
       )}
     </>
