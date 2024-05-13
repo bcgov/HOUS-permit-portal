@@ -1,5 +1,4 @@
 import { Button, Container, Divider, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { ArrowSquareIn } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect, useState } from "react"
@@ -91,7 +90,7 @@ function Content({ invitedUser }: Readonly<IProps>) {
         <form action={`/api/auth/keycloak`} method="post">
           <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
-          <Button variant="primary" w="full" type="submit" rightIcon={<ArrowSquareIn />}>
+          <Button variant="primary" w="full" type="submit">
             {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
           </Button>
         </form>
