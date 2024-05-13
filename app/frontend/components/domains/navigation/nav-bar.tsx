@@ -283,7 +283,8 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                     display="flex"
                     flexWrap="wrap"
                     px={2}
-                    py={0}
+                    pt={0}
+                    pb={2}
                     gap={2}
                     border="0"
                     boxShadow="none"
@@ -329,10 +330,8 @@ const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps
   }
 
   return (
-    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick} {...rest}>
-      <Text textAlign="left" w="full">
-        {label}
-      </Text>
+    <MenuItem as={Link} justifyContent="start" href={to} onClick={handleClick} {...rest}>
+      {label}
     </MenuItem>
   )
 }
@@ -355,7 +354,7 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
 
   return (
     <MenuItem
-      as={Button}
+      as={Link}
       flex={1}
       variant={variant || "primary"}
       size="sm"
