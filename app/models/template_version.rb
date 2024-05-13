@@ -19,8 +19,12 @@ class TemplateVersion < ApplicationRecord
 
   def publish_event_notification_data
     {
-      "action" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
-      "href" => "/digital-building-permits/#{id}/edit?compare=true",
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
+      "action_text" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
+      "object_data" => {
+        "template_version_id" => id,
+      },
     }
   end
 

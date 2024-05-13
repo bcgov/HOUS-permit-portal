@@ -14,6 +14,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Portal,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { Bell, BellRinging, CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -26,23 +27,33 @@ import { HStack } from "../../step-code/checklist/pdf-content/shared/h-stack"
 
 export const NotificationsPopover: React.FC = observer(() => {
   const { notificationStore } = useMst()
-  const { notifications, initialFetch, fetchNotifications, anyUnread, unreadNotificationsCount, markAllAsRead } =
-    notificationStore
+  const {
+    notifications,
+    initialFetch,
+    fetchNotifications,
+    anyUnread,
+    unreadNotificationsCount,
+    markAllAsRead,
+    generateSpecificHref,
+  } = notificationStore
 
   const [numberJustRead, setNumberJustRead] = useState<number>()
   useEffect(() => {
     initialFetch()
   }, [])
 
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
   const { t } = useTranslation()
 
   const handleOpen = () => {
+    onOpen()
     setNumberJustRead(unreadNotificationsCount)
     markAllAsRead()
   }
 
   return (
-    <Popover onOpen={handleOpen}>
+    <Popover isOpen={isOpen} onOpen={handleOpen} onClose={onClose}>
       <PopoverTrigger>
         <Box position="relative">
           <IconButton
@@ -86,8 +97,14 @@ export const NotificationsPopover: React.FC = observer(() => {
           <PopoverBody p={4} maxH="50vh" overflow="auto">
             <Flex direction="column" gap={4}>
               {notifications.map((n) => (
-                <CustomMessageBox status="info" description={n.action} key={n.id}>
-                  <RouterLinkButton variant="link" rightIcon={<CaretRight />} to={n.href} color="text.primary">
+                <CustomMessageBox status="info" description={n.actionText} key={n.id}>
+                  <RouterLinkButton
+                    variant="link"
+                    rightIcon={<CaretRight />}
+                    to={generateSpecificHref(n)}
+                    color="text.primary"
+                    onClick={onClose}
+                  >
                     {t("ui.go")}
                   </RouterLinkButton>
                 </CustomMessageBox>

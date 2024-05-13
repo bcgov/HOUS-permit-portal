@@ -7,6 +7,7 @@ import {
   EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
+  ENotificationActionType,
   ENumberUnit,
   ERequirementType,
   ESZeroCarbonStep,
@@ -218,14 +219,22 @@ export interface IPermitApplicationUpdate {
   formattedComplianceData: Object
 }
 
-export interface INotification {
-  id: string
-  action: string
-  href?: string
+export interface INotificationObjectData {
+  templateVersionId?: string
+  // Add future notification data here
 }
 
+export interface INotification {
+  id: string
+  actionType: ENotificationActionType
+  actionText: string
+  objectData?: INotificationObjectData
+}
+
+export type TSocketEventData = IPermitApplication | INotification
+
 export interface IUserPushPayload {
-  data: INotification
+  data: TSocketEventData
   domain: ESocketDomainTypes
   eventType: ESocketEventTypes
   meta: {
