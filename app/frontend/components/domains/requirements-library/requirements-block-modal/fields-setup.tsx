@@ -189,6 +189,13 @@ export const FieldsSetup = observer(function FieldsSetup({
           borderTopRadius="lg"
           borderBottom="1px solid"
           borderBottomColor="border.light"
+          sx={{
+            ":after": {
+              content: "'*'",
+              color: "var(--chakra-colors-red-500)",
+            },
+          }}
+          alignItems={"center"}
         >
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
