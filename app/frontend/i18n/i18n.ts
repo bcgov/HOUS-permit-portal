@@ -318,6 +318,7 @@ const options = {
           view: "View Jurisdiction",
         },
         permitApplication: {
+          updateToNewVersion: "Update my application",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",

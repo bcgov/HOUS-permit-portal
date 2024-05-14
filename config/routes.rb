@@ -111,6 +111,7 @@ Rails.application.routes.draw do
       post "submit", on: :member
       post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
+      patch "update_version", on: :member
     end
 
     patch "profile", to: "users#profile"

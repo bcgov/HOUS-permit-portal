@@ -1,7 +1,7 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
-  before_action :set_permit_application, only: %i[show update submit upload_supporting_document mark_as_viewed]
+  before_action :set_permit_application, only: %i[show update submit upload_supporting_document mark_as_viewed update_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -52,6 +52,21 @@ class Api::PermitApplicationsController < Api::ApplicationController
     elsif @permit_application.submitted? && @permit_application.update(submitted_permit_application_params)
       render_success @permit_application,
                      ("permit_application.save_success"),
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "permit_application.update_error",
+                   message_opts: {
+                     error_message: @permit_application.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def update_version
+    authorize @permit_application
+
+    if TemplateVersioningService.update_draft_permit_with_new_template_version(@permit_application)
+      render_success @permit_application,
+                     ("permit_application.update_version_succes"),
                      { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     else
       render_error "permit_application.update_error",

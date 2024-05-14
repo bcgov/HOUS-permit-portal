@@ -128,6 +128,7 @@ export interface IFormIORequirement {
   validation: { required: boolean }
   label: string
   widget?: any
+  customClass?: string
 }
 
 export interface ISubmissionData {
@@ -175,7 +176,8 @@ export interface IDenormalizedTemplate {
 }
 
 export interface ICompareRequirementsBoxData {
-  id: string
+  id?: string
+  class?: string
   label: string
 }
 

@@ -797,18 +797,18 @@
   }
 
   // the floating error alert box's show/hide
-  #floating-error-alert-box {
+  .floating-side-box {
     transition-property: opacity, transform;
     transition-delay: 300ms;
     transition-duration: 200ms;
   }
 
-  &.float-on #floating-error-alert-box {
+  &.float-on .floating-side-box {
     opacity: 1;
     transform: translateX(0);
   }
 
-  &.float-off #floating-error-alert-box {
+  &.float-off .floating-side-box {
     opacity: 0;
     transform: translateX(200px);
   }

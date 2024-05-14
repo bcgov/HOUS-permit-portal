@@ -9,6 +9,7 @@ class TemplateVersion < ApplicationRecord
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
   delegate :label, to: :requirement_template
+  delegate :published_template_version, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
   enum deprecation_reason: { new_publish: 0, unscheduled: 1 }, _prefix: true
@@ -76,6 +77,10 @@ class TemplateVersion < ApplicationRecord
     before_requirements = before_json&.values&.flat_map { |block| block["requirements"] }
     after_requirements = after_json&.values&.flat_map { |block| block["requirements"] }
 
+    after_requirements_components = after_json&.values&.flat_map { |block| block["form_json"]["components"] }
+
+    before_requirements_components = before_json&.values&.flat_map { |block| block["form_json"]["components"] }
+
     before_ids = before_requirements&.map { |req| req["id"] } || []
     after_ids = after_requirements&.map { |req| req["id"] } || []
 
@@ -92,6 +97,16 @@ class TemplateVersion < ApplicationRecord
     added_requirement_blueprints = after_requirements&.select { |req| added_ids.include?(req["id"]) } || []
     removed_requirement_blueprints = before_requirements&.select { |req| removed_ids.include?(req["id"]) } || []
     changed_requirement_blueprints = after_requirements&.select { |req| changed_ids.include?(req["id"]) } || []
+
+    # Workaround: need to add the fully formed form_json into the requirement blueprint
+    (changed_requirement_blueprints + added_requirement_blueprints + removed_requirement_blueprints).each do |blueprint|
+      matching_component =
+        (after_requirements_components + before_requirements_components).find do |component|
+          component["id"] == blueprint["id"]
+        end
+
+      blueprint["form_json"] = matching_component if matching_component
+    end
 
     {
       added: added_requirement_blueprints,

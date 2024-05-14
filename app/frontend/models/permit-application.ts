@@ -18,6 +18,7 @@ import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { StepCodeModel } from "./step-code"
+import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
 
 export const PermitApplicationModel = types
@@ -33,6 +34,8 @@ export const PermitApplicationModel = types
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+    templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
+    publishedTemplateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     formattedComplianceData: types.maybeNull(types.frozen()),
@@ -50,6 +53,8 @@ export const PermitApplicationModel = types
     referenceNumber: types.maybeNull(types.string),
     isFullyLoaded: types.optional(types.boolean, false),
     isDirty: types.optional(types.boolean, false),
+    isLoading: types.optional(types.boolean, false),
+    showCompareAfter: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -87,6 +92,9 @@ export const PermitApplicationModel = types
     get isViewed() {
       return self.viewedAt !== null
     },
+    get usesPublishedTemplateVersion() {
+      return self.templateVersion.id === self.publishedTemplateVersion.id
+    },
   }))
   .actions((self) => ({
     setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
@@ -110,6 +118,7 @@ export const PermitApplicationModel = types
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)
     },
     getBlockClass(sectionId, blockId) {
+      // 'formio-component-formSubmissionDataRSTsection61ba21b8-dc61-4a4a-9765-901cd4b53b3b|RBdc9d3ab2-fce8-40a0-ba94-14404c0c079b'
       return `formio-component-${blockId === "section-signoff-id" ? "section-signoff-key" : self.blockKey(sectionId, blockId)}`
     },
     get blockClasses() {
@@ -232,6 +241,8 @@ export const PermitApplicationModel = types
     __mergeUpdate: (resourceData) => {
       let jurisdiction = resourceData["jurisdiction"]
       let submitter = resourceData["submitter"]
+      let templateVersion = resourceData["templateVersion"]
+      let publishedTemplateVersion = resourceData["publishedTemplateVersion"]
       if (jurisdiction && typeof jurisdiction !== "string") {
         self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
         jurisdiction = jurisdiction["id"]
@@ -240,9 +251,19 @@ export const PermitApplicationModel = types
         self.rootStore.userStore.mergeUpdate(submitter, "usersMap")
         submitter = submitter["id"]
       }
+      if (templateVersion && typeof templateVersion !== "string") {
+        self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
+        templateVersion = templateVersion["id"]
+      }
+      if (publishedTemplateVersion && typeof publishedTemplateVersion !== "string") {
+        self.rootStore.templateVersionStore.mergeUpdate(publishedTemplateVersion, "templateVersionMap")
+        publishedTemplateVersion = publishedTemplateVersion["id"]
+      }
       const newData = R.mergeRight(resourceData, {
         jurisdiction,
         submitter,
+        templateVersion,
+        publishedTemplateVersion,
       })
       self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
     },
@@ -250,6 +271,7 @@ export const PermitApplicationModel = types
       self.formattedComplianceData = data
     },
     update: flow(function* ({ autosave, ...params }) {
+      self.isLoading = true
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
         const { data: permitApplication } = response.data
@@ -257,9 +279,20 @@ export const PermitApplicationModel = types
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
       }
+      self.isLoading = false
       return response
     }),
-
+    updateVersion: flow(function* () {
+      self.isLoading = true
+      const response = yield self.environment.api.updatePermitApplicationVersion(self.id)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+      }
+      self.isLoading = false
+      self.showCompareAfter = true
+      return response
+    }),
     submit: flow(function* (params) {
       const response = yield self.environment.api.submitPermitApplication(self.id, params)
       if (response.ok) {
@@ -280,6 +313,10 @@ export const PermitApplicationModel = types
 
     setSelectedTabIndex: (index: number) => {
       self.selectedTabIndex = index
+    },
+
+    resetCompareAfter: () => {
+      self.showCompareAfter = false
     },
 
     updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
