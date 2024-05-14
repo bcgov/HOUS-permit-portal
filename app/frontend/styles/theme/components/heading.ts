@@ -2,6 +2,10 @@ export const Heading = {
   baseStyle: {
     lineHeight: "150%",
     marginBottom: "0.5em",
+
+    _before: {
+      content: `""`,
+    },
   },
 
   variants: {

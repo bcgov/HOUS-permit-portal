@@ -18,7 +18,7 @@ import {
   ESpaceHeatingCoolingPerformanceType,
   EWindowsGlazedDoorsPerformanceType,
 } from "../../../../../../types/enums"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 type TPerformanceType =
   | EWindowsGlazedDoorsPerformanceType
@@ -49,7 +49,7 @@ export const PerformanceTypeSelect = ({ onChange, value, options }: IProps) => {
                 rounded="base"
                 shadow="base"
               >
-                {value ? t(`${translationPrefix}.${value}`) : "-"}
+                {value ? t(`${i18nPrefix}.${value}`) : "-"}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -69,7 +69,7 @@ export const PerformanceTypeSelect = ({ onChange, value, options }: IProps) => {
                   cursor="pointer"
                   _hover={{ bg: "hover.blue" }}
                 >
-                  {t(`${translationPrefix}.${value}`)}
+                  {t(`${i18nPrefix}.${value}`)}
                 </Flex>
               ))}
             </VStack>

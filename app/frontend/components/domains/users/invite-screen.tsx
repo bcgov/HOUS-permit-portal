@@ -7,13 +7,14 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
+import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { CustomToast } from "../../shared/base/flash-message"
 import { UserInput } from "../../shared/base/inputs/user-input"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { RouterLink } from "../../shared/navigation/router-link"
+import { UserRolesExplanationModal } from "../../shared/user-roles-explanation-modal"
 
 interface IInviteScreenProps {}
 
@@ -25,14 +26,21 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
   const {
-    userStore: { invite, takenEmails },
+    userStore: { invite, takenEmails, resetInvitationResponse },
   } = useMst()
 
+  const query = useQuery()
+  const prepopulatedRole = query.get("role") as EUserRoles
+  const prepopulatedEmail = query.get("email")
+  const prepopulatedFirstName = query.get("firstName")
+  const prepopulatedLastName = query.get("lastName")
+
   const defaultUserValues = {
-    role: EUserRoles.reviewManager,
+    role: prepopulatedRole,
+    email: prepopulatedEmail,
+    firstName: prepopulatedFirstName,
+    lastName: prepopulatedLastName,
     jurisdictionId: currentJurisdiction?.id,
-    firstName: "",
-    lastName: "",
   }
 
   const formMethods = useForm<TInviteFormData>({
@@ -52,15 +60,19 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
     })
   }, [currentJurisdiction?.id])
 
+  useEffect(() => {
+    resetInvitationResponse()
+  }, [])
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "users",
   })
 
-  const { isSubmitting } = formState
+  const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
-    invite(formData)
+    await invite(formData)
   }
 
   const navigate = useNavigate()
@@ -74,7 +86,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
         <Flex direction="column">
           <Heading as="h1">{t("user.inviteTitle")}</Heading>
           <Text>
-            {t("user.inviteInstructions")} <RouterLink to="#">{t("user.rolesAndPermissions")}</RouterLink>
+            {t("user.inviteInstructions")} <UserRolesExplanationModal />
           </Text>
         </Flex>
         <Heading as="h2">{currentJurisdiction.name}</Heading>
@@ -106,6 +118,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
                   variant="primary"
                   type="submit"
                   isLoading={isSubmitting}
+                  isDisabled={!isValid || isSubmitting}
                   loadingText={t("ui.loading")}
                   rightIcon={<PaperPlaneTilt size={16} />}
                 >

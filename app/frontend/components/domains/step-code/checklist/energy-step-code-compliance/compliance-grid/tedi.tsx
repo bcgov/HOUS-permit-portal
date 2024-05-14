@@ -8,7 +8,7 @@ import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
 import { GridRowHeader } from "../../shared/grid/row-header"
 import { UnitsText } from "../../shared/grid/units-text"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -17,15 +17,15 @@ interface IProps {
 export const TEDI = function TEDI({ checklist }: IProps) {
   return (
     <>
-      <GridRowHeader>{t(`${translationPrefix}.tedi`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.tedi`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.tediRequirement || "-" }}
-          hint={t(`${translationPrefix}.max`)}
+          hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
-              <UnitsText>{t(`${translationPrefix}.tediUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.tediUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.tediUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.tediUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
@@ -35,20 +35,20 @@ export const TEDI = function TEDI({ checklist }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.tedi || "-" }}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
-              <UnitsText>{t(`${translationPrefix}.tediUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.tediUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.tediUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.tediUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
       </GridData>
-      <GridData rowSpan={2}>
+      <GridData rowSpan={2} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.tediPassed} />
       </GridData>
-      <GridRowHeader>{t(`${translationPrefix}.hlr`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.hlr`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.tediHlrPercentRequired || "-" }}
-          hint={t(`${translationPrefix}.min`)}
+          hint={t(`${i18nPrefix}.min`)}
           rightElement={<Percent />}
         />
       </GridData>

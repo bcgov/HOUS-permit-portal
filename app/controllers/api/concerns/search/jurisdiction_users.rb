@@ -4,7 +4,7 @@ module Api::Concerns::Search::JurisdictionUsers
   def perform_user_search
     @user_search =
       User.search(
-        query,
+        user_query,
         where: {
           jurisdiction_id: @jurisdiction&.id,
           discarded: discarded,
@@ -13,12 +13,14 @@ module Api::Concerns::Search::JurisdictionUsers
             (
               if current_user.super_admin?
                 ["review_manager"]
+              elsif current_user.review_manager?
+                %w[review_manager reviewer]
               else
-                (User.roles.keys - %w[super_admin submitter])
+                nil
               end
             ),
         },
-        order: order,
+        order: user_order,
         match: :word_start,
         page: user_search_params[:page],
         per_page:
@@ -38,7 +40,7 @@ module Api::Concerns::Search::JurisdictionUsers
     params.permit(:query, :show_archived, :page, :per_page, sort: %i[field direction])
   end
 
-  def query
+  def user_query
     user_search_params[:query].present? ? user_search_params[:query] : "*"
   end
 
@@ -46,7 +48,7 @@ module Api::Concerns::Search::JurisdictionUsers
     user_search_params[:show_archived].present?
   end
 
-  def order
+  def user_order
     if (sort = user_search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     else

@@ -44,6 +44,12 @@ export enum ERequirementLibrarySortFields {
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
+  configurations = "configurations",
+}
+
+export enum EJurisdictionTypes {
+  subDistrict = "SubDistrict",
+  regionalDistrict = "RegionalDistrict",
 }
 
 export enum EJurisdictionSortFields {
@@ -51,7 +57,7 @@ export enum EJurisdictionSortFields {
   reviewManagersSize = "review_managers_size",
   reviewersSize = "reviewers_size",
   permitApplicationsSize = "permit_applications_size",
-  templatesUsed = "templates_used",
+  regionalDistrict = "regional_district_name",
 }
 
 export enum EUserSortFields {
@@ -59,7 +65,7 @@ export enum EUserSortFields {
   email = "email",
   name = "name",
   createdAt = "created_at",
-  lastSignIn = "last_sign_in",
+  lastSignInAt = "last_sign_in_at",
 }
 
 export enum ERequirementTemplateSortFields {
@@ -71,7 +77,7 @@ export enum ERequirementTemplateSortFields {
 }
 
 export enum EContactSortFields {
-  title = "title",
+  title = "role/position",
   name = "name",
   email = "email",
   phone = "phone",
@@ -120,14 +126,14 @@ export enum ERequirementType {
   multiOptionSelect = "multi_option_select",
   date = "date",
   file = "file",
-  phone = "phone",
-  email = "email",
   radio = "radio",
   address = "address",
   bcaddress = "bcaddress",
   signature = "signature",
   textArea = "textarea",
   energyStepCode = "energy_step_code",
+  phone = "phone",
+  email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
 }
@@ -150,11 +156,21 @@ export enum EStepCodeChecklistStage {
   asBuilt = "as_built",
 }
 
+export enum EStepCodeChecklistStatus {
+  draf = "draft",
+  complete = "complete",
+}
+
 export enum EStepCodeCompliancePath {
   stepCodeERS = "step_code_ers",
   stepCodeNECB = "step_code_necb",
   passiveHouse = "passive_house",
   stepCode = "step_code",
+}
+
+export enum EStepCodePrescriptiveValue {
+  zeroCarbon = "zero_carbon",
+  carbon = "carbon",
 }
 
 export enum EStepCodeAirtightnessValue {
@@ -230,4 +246,57 @@ export enum ESZeroCarbonStep {
   two = "2",
   three = "3",
   four = "4",
+}
+
+export enum ERequirementContactFieldItemType {
+  firstName = "firstName",
+  lastName = "lastName",
+  email = "email",
+  phone = "phone",
+  title = "title",
+  address = "address",
+  organization = "organization",
+  businessName = "businessName",
+  businessLicense = "businessLicense",
+  professionalAssociation = "professionalAssociation",
+  professionalNumber = "professionalNumber",
+}
+
+export enum EGovFeedbackResponseNoReason {
+  unclear = "This information is unclear",
+  missingInfo = "This page is missing the information I need",
+  notRelated = "This page is not related to what I searched for",
+  other = "Other",
+}
+
+export enum ESocketDomainTypes {
+  notification = "notification",
+  permitApplication = "permit_application",
+}
+
+export enum ESocketEventTypes {
+  update = "update",
+}
+
+export enum EEnabledElectiveFieldReason {
+  bylaw = "bylaw",
+  zoning = "zoning",
+  policy = "policy",
+}
+
+export enum ECustomEvents {
+  handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+}
+
+export enum EEnergyStepCodeDependencyRequirementCode {
+  energyStepCodeMethod = "energy_step_code_method",
+  energyStepCodeToolPart9 = "energy_step_code_tool_part_9",
+  energyStepCodeReportFile = "energy_step_code_report_file",
+  energyStepCodeH2000File = "energy_step_code_h2000_file",
+}
+
+export enum EOmniauthProvider {
+  idir = "idir",
+  basicBceid = "bceidbasic",
+  businessBceid = "bceidbusiness",
 }

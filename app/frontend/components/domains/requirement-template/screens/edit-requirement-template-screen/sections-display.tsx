@@ -2,7 +2,7 @@ import { Box, Button, HStack, Stack } from "@chakra-ui/react"
 import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React from "react"
+import React, { useEffect } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
@@ -15,18 +15,38 @@ import { RequirementsLibraryDrawer } from "../../../requirements-library/require
 import { IRequirementTemplateForm, formScrollToId } from "./index"
 
 interface IProps {
-  shouldCollapseAll?: boolean
+  isCollapsedAll?: boolean
   setSectionRef: (el: HTMLElement, id: string) => void
 }
 
 export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) {
   const { watch } = useFormContext<IRequirementTemplateForm>()
   const watchedSections = watch("requirementTemplateSectionsAttributes")
+  const usedRequirementBlockIds = watchedSections.flatMap((section) =>
+    section.templateSectionBlocksAttributes.map((sectionBlock) => sectionBlock.requirementBlockId)
+  )
 
   return (
-    <Stack w={"full"} alignItems={"flex-start"} spacing={16} p={16}>
+    <Stack
+      id="sections-display-form-blocks"
+      w={"full"}
+      alignItems={"flex-start"}
+      spacing={16}
+      mt="8"
+      mb="20"
+      mx="auto"
+      pl="8"
+      pr="var(--app-permit-form-right-white-space)"
+      maxWidth="container.lg"
+    >
       {watchedSections.map((section, index) => (
-        <SectionDisplay key={section.id} section={section} sectionIndex={index} {...props} />
+        <SectionDisplay
+          key={section.id}
+          section={section}
+          sectionIndex={index}
+          disabledUseForBlockIds={usedRequirementBlockIds}
+          {...props}
+        />
       ))}
     </Stack>
   )
@@ -36,13 +56,15 @@ const SectionDisplay = observer(
   ({
     section,
     sectionIndex,
-    shouldCollapseAll,
+    isCollapsedAll,
     setSectionRef,
+    disabledUseForBlockIds = [],
   }: {
     section: IRequirementTemplateSectionAttributes
     sectionIndex: number
-    shouldCollapseAll?: boolean
+    isCollapsedAll?: boolean
     setSectionRef: (el: HTMLElement, id: string) => void
+    disabledUseForBlockIds?: string[]
   }) => {
     const { requirementBlockStore } = useMst()
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
@@ -63,6 +85,13 @@ const SectionDisplay = observer(
     )
 
     const watchedSectionName = watch(`requirementTemplateSectionsAttributes.${sectionIndex}.name`)
+
+    const [editableSectionName, setEditableSectionName] = React.useState<string>(watchedSectionName ?? "")
+
+    useEffect(() => {
+      setEditableSectionName(watchedSectionName)
+    }, [watchedSectionName])
+
     return (
       <Box
         ref={(el) => setSectionRef(el, section.id)}
@@ -71,10 +100,8 @@ const SectionDisplay = observer(
         id={formScrollToId(section.id)}
         data-section-id={section.id}
       >
-        <Box w={"36px"} border={"4px solid"} borderColor={"theme.yellow"} mb={2} />
         <HStack
           w={"full"}
-          maxW={"798px"}
           justifyContent={"space-between"}
           _hover={{ "button:nth-of-type(1)": { visibility: "visible" } }}
         >
@@ -84,16 +111,17 @@ const SectionDisplay = observer(
             w={"fit-content"}
             fontWeight={700}
             fontSize={"2xl"}
+            className="edit-template-yellowBarHeader"
             initialHint={t("ui.clickToEdit")}
-            value={watchedSectionName || ""}
-            editableInputProps={{
-              ...register(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, { required: true }),
-              "aria-label": "Edit Section Name",
+            value={editableSectionName}
+            onChange={setEditableSectionName}
+            onSubmit={(nextValue) => {
+              setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, nextValue)
             }}
-            color={R.isEmpty(watchedSectionName) ? "text.link" : undefined}
+            color={R.isEmpty(editableSectionName) ? "text.link" : undefined}
             aria-label={"Edit Section Name"}
             onCancel={(previousValue) => {
-              setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, previousValue)
+              setEditableSectionName(previousValue)
             }}
           />
 
@@ -116,15 +144,16 @@ const SectionDisplay = observer(
             />
           )}
         </HStack>
-        <Stack w={"full"} maxW={"798px"} spacing={6} pl={0} mt={6}>
+        <Stack w={"full"}>
           {watchedSectionBlocks.map((sectionBlock, index) => (
             <RequirementBlockAccordion
+              mb="6"
               as={"section"}
               id={formScrollToId(sectionBlock.id)}
               key={sectionBlock.id}
               requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
               onRemove={() => removeSectionBlock(index)}
-              triggerForceCollapse={shouldCollapseAll}
+              isCollapsedAll={isCollapsedAll}
               isEditable
               showEditWarning
             />
@@ -133,9 +162,8 @@ const SectionDisplay = observer(
             defaultButtonProps={{ alignSelf: "center" }}
             onUse={(requirementBlock, closeDrawer) => {
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
-              closeDrawer()
             }}
-            disableUseForBlockIds={new Set(watchedSectionBlocks.map((sectionBlock) => sectionBlock.requirementBlockId))}
+            disabledUseForBlockIds={new Set(disabledUseForBlockIds)}
           />
         </Stack>
       </Box>

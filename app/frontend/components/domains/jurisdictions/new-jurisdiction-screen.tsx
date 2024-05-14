@@ -1,25 +1,42 @@
-import { Box, Button, Center, Container, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  FormControl,
+  FormLabel,
+  HStack,
+  Heading,
+  Switch,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionTypes } from "../../../types/enums"
 import { AsyncRadioGroup } from "../../shared/base/inputs/async-radio-group"
 import { TextFormControl } from "../../shared/form/input-form-control"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 
 export type TCreateJurisdictionFormData = {
   name: string
   localityType: string
+  postalAddress: string
+  regionalDistrict: IJurisdiction
 }
 
 export const NewJurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>()
+  const [useCustom, setUseCustom] = useState<boolean>(false)
   const {
-    jurisdictionStore: { createJurisdiction, fetchLocalityTypeOptions },
+    jurisdictionStore: { createJurisdiction, fetchLocalityTypeOptions, regionalDistrictLocalityType },
   } = useMst()
 
   const formMethods = useForm<TCreateJurisdictionFormData>({
@@ -27,20 +44,27 @@ export const NewJurisdictionScreen = observer(() => {
     defaultValues: {
       name: "",
       localityType: "",
+      postalAddress: "",
+      regionalDistrict: null,
     },
   })
 
   const navigate = useNavigate()
-  const { handleSubmit, formState } = formMethods
+  const { handleSubmit, formState, control, watch } = formMethods
+  const localityTypeWatch = watch("localityType")
 
   const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
-    const createdJurisdiction = (await createJurisdiction(formData)) as IJurisdiction
+    const submissionData = { ...formData, regionalDistrictId: formData.regionalDistrict.id }
+    const createdJurisdiction = (await createJurisdiction(submissionData)) as IJurisdiction
     if (createdJurisdiction) {
       setJurisdiction(createdJurisdiction)
     }
   }
+
+  const handleToggleCustom = () => setUseCustom((pastState) => !pastState)
+
   return (
     <Container maxW="container.lg" p={8} as="main">
       <FormProvider {...formMethods}>
@@ -81,15 +105,65 @@ export const NewJurisdictionScreen = observer(() => {
                   borderColor="border.light"
                 >
                   <Flex gap={8}>
-                    <Center w="50%">
-                      <AsyncRadioGroup
-                        label={t("jurisdiction.fields.localityType")}
-                        fetchOptions={fetchLocalityTypeOptions}
-                        fieldName={"localityType"}
-                      />
-                    </Center>
+                    <Flex w="50%">
+                      <Text mr={4} mt={10}>
+                        The
+                      </Text>
+                      {useCustom ? (
+                        <TextFormControl
+                          label={t("jurisdiction.fields.localityType")}
+                          fieldName={"localityType"}
+                          required
+                        />
+                      ) : (
+                        <AsyncRadioGroup
+                          label={t("jurisdiction.fields.localityType")}
+                          fetchOptions={fetchLocalityTypeOptions}
+                          fieldName={"localityType"}
+                        />
+                      )}
+
+                      <Text ml={8} mt={10}>
+                        of
+                      </Text>
+                    </Flex>
                     <Box w="50%">
                       <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
+                    </Box>
+                  </Flex>
+
+                  <FormControl display="flex" alignItems="center">
+                    <FormLabel htmlFor="use-custom" mb="0">
+                      {t("jurisdiction.new.useCustom")}
+                    </FormLabel>
+                    <Switch id="use-custom" isChecked={useCustom} onChange={handleToggleCustom} />
+                  </FormControl>
+                  <Flex gap={8}>
+                    <Box w="50%">
+                      <TextFormControl
+                        label={t("jurisdiction.new.postalAddressLabel")}
+                        fieldName={"postalAddress"}
+                        required
+                      />
+                    </Box>
+
+                    <Box w="50%">
+                      <Controller
+                        name="regionalDistrict"
+                        control={control}
+                        render={({ field: { onChange, value } }) => {
+                          return (
+                            <JurisdictionSelect
+                              title={t("jurisdiction.fields.regionalDistrictName")}
+                              onChange={onChange}
+                              isDisabled={localityTypeWatch == regionalDistrictLocalityType}
+                              jurisdictionType={EJurisdictionTypes.regionalDistrict}
+                              selectedOption={{ label: value?.reverseQualifiedName, value }}
+                              menuPortalTarget={document.body}
+                            />
+                          )
+                        }}
+                      />
                     </Box>
                   </Flex>
                 </Flex>

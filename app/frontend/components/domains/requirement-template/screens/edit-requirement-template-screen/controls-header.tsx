@@ -11,9 +11,11 @@ import { PublishScheduleModal } from "./publish-schedule-modal"
 
 interface IProps {
   onScheduleDate?: (date: Date) => void
+  onForcePublishNow?: () => void
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
+  hasStepCodeDependencyError?: boolean
 }
 
 export const ControlsHeader = observer(function ControlsHeader({
@@ -21,6 +23,8 @@ export const ControlsHeader = observer(function ControlsHeader({
   onScheduleDate,
   onSaveDraft,
   onAddSection,
+  onForcePublishNow,
+  hasStepCodeDependencyError,
 }: IProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -30,16 +34,22 @@ export const ControlsHeader = observer(function ControlsHeader({
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
   }
-  const isSubmitDisabled = !!requirementTemplate.discardedAt || isSubmitting || !isValid
+  const isSubmitDisabled = hasStepCodeDependencyError || !!requirementTemplate.discardedAt || isSubmitting || !isValid
 
   return (
     <HStack
-      px={6}
-      py={4}
-      bg={"greys.grey03"}
-      w={"full"}
-      justifyContent={"space-between"}
-      boxShadow={"elevations.elevation02"}
+      position="sticky"
+      zIndex="1"
+      left="0"
+      right="0"
+      top="0"
+      px="6"
+      py="4"
+      bg="greys.grey03"
+      w="full"
+      h="var(--app-permit-grey-controlbar-height)"
+      justifyContent="space-between"
+      boxShadow="elevations.elevation02"
     >
       <Button variant={"secondary"} isDisabled={isSubmitting} leftIcon={<Plus />} onClick={onAddSection}>
         {t("requirementTemplate.edit.addSectionButton")}
@@ -51,6 +61,7 @@ export const ControlsHeader = observer(function ControlsHeader({
         <PublishScheduleModal
           minDate={requirementTemplate.nextAvailableScheduleDate}
           onScheduleConfirm={onScheduleDate}
+          onForcePublishNow={onForcePublishNow}
           triggerButtonProps={{
             isDisabled: isSubmitDisabled,
           }}

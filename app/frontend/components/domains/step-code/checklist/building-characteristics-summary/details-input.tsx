@@ -3,7 +3,7 @@ import { Plus, XCircle } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React from "react"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 export const DetailsInput = ({ fieldName, isRemovable, isLast, onAdd, onRemove }) => {
   return (
@@ -16,7 +16,7 @@ export const DetailsInput = ({ fieldName, isRemovable, isLast, onAdd, onRemove }
       )}
       {isLast && (
         <Button size="sm" variant="link" leftIcon={<Plus />} onClick={onAdd}>
-          {t(`${translationPrefix}.addLine`)}
+          {t(`${i18nPrefix}.addLine`)}
         </Button>
       )}
     </>

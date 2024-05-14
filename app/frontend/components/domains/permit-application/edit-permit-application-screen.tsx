@@ -6,13 +6,17 @@ import React, { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
+import { ICustomEventMap } from "../../../types/dom"
+import { ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
+import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
@@ -38,33 +42,128 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     defaultValues: getDefaultPermitApplicationMetadataValues(),
   })
 
+  const [completedBlocks, setCompletedBlocks] = useState({})
+  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+
+  const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
+
+  const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
+    if (formRef.current) {
+      if (_event.detail && _event.detail.id == currentPermitApplication?.id) {
+        import.meta.env.DEV && console.log("[DEV] setting formio data", _event.detail)
+        handleAutomatedComplianceUpdate(_event.detail.frontEndFormUpdate)
+      }
+    } else {
+      import.meta.env.DEV && console.log("[DEV] re-enqueue to process later", _event)
+      setProcessEventOnLoad(_event)
+    }
+  }
+
+  useEffect(() => {
+    if (formRef.current && processEventOnLoad) {
+      handlePermitApplicationUpdate(processEventOnLoad)
+      setProcessEventOnLoad(null)
+    }
+  }, [formRef.current, processEventOnLoad])
+
+  useEffect(() => {
+    document.addEventListener<ECustomEvents.handlePermitApplicationUpdate>(
+      ECustomEvents.handlePermitApplicationUpdate,
+      handlePermitApplicationUpdate
+    )
+    return () => {
+      document.removeEventListener(ECustomEvents.handlePermitApplicationUpdate, handlePermitApplicationUpdate)
+    }
+  }, [currentPermitApplication?.id])
+
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
 
-  const [completedBlocks, setCompletedBlocks] = useState({})
-
-  const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
-
-  const handleSave = async () => {
+  const handleSave = async ({
+    autosave,
+    skipPristineCheck,
+  }: {
+    autosave?: boolean
+    skipPristineCheck?: boolean
+  } = {}) => {
     if (currentPermitApplication.isSubmitted || isStepCode || isContactsOpen) return
-
     const formio = formRef.current
+    if (formio.pristine && !skipPristineCheck && !isDirty) return true
+
     const submissionData = formio.data
     try {
       const response = await currentPermitApplication.update({
         submissionData: { data: submissionData },
         nickname: nicknameWatch,
+        autosave,
       })
       if (response.ok && response.data.data.frontEndFormUpdate) {
-        for (const [key, value] of Object.entries(response.data.data.frontEndFormUpdate)) {
-          let componentToSet = formio.getComponent(key)
-          componentToSet.setValue(value)
-        }
+        updateFormIoValues(formio, response.data.data.frontEndFormUpdate)
         //update file hashes that have been changed
       }
+      setIsDirty(false)
+      formio.setPristine(true)
       return response.ok
     } catch (e) {
       return false
+    }
+  }
+
+  const handleAutomatedComplianceUpdate = (frontEndFormUpdate) => {
+    if (R.isNil(frontEndFormUpdate)) {
+      return
+    }
+    const formio = formRef.current
+    updateFormIoValues(formio, frontEndFormUpdate)
+  }
+
+  const updateFormIoValues = (formio, frontEndFormUpdate) => {
+    for (const [key, value] of Object.entries(frontEndFormUpdate)) {
+      const componentToSet = formio.getComponent(key)
+      if (!R.isNil(value)) {
+        if (!R.isNil(componentToSet)) {
+          componentSetValue(componentToSet, value)
+        }
+      }
+
+      // need to update the computed compliance result
+      // even if value is null, as that indicates autocompliance ran
+      // but result wasn't found
+      updateComputedComplianceResult(componentToSet, value)
+    }
+  }
+
+  const updateComputedComplianceResult = (componentToSet, newValue) => {
+    if (!componentToSet) {
+      return
+    }
+
+    const originalComputedComplianceResult = componentToSet?.component?.computedComplianceResult
+
+    // trigger a redraw to update auto compliance if result changed
+    if (componentToSet.component && !R.equals(originalComputedComplianceResult, newValue)) {
+      componentToSet.component.computedComplianceResult = newValue
+      componentToSet?.triggerRedraw()
+    }
+  }
+
+  //guard happens before this call to optimize code
+  const componentSetValue = (componentToSet, newValue) => {
+    // file value setting is handled by s3 so no need to set value for files
+
+    if (
+      !componentToSet ||
+      componentToSet?.component?.type === "file" ||
+      componentToSet?.component?.type === requirementTypeToFormioType[ERequirementType.file]
+    ) {
+      return
+    }
+
+    //if it is a computed compliance
+    if (componentToSet?.getValue && (componentToSet.getValue() == "" || R.isNil(componentToSet.getValue()))) {
+      import.meta.env.DEV && console.log("[DEV] setting computed compliance value", componentToSet, newValue)
+      componentToSet.setValue(newValue)
+      componentToSet?.triggerRedraw()
     }
   }
 
@@ -75,7 +174,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     }
   }
 
-  useInterval(handleSave, 60000) // save progress every minute
+  useInterval(() => handleSave({ autosave: true }), 60000) // save progress every minute
 
   useEffect(() => {
     // sets the defaults subject to application load
@@ -83,27 +182,28 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   }, [currentPermitApplication?.nickname])
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitApplication) return <LoadingScreen />
+  if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const scrollToBottom = () => {
-    handleScrollToBottom("permitApplicationFieldsContainer")
+    handleScrollToBottom()
   }
 
-  const { permitTypeAndActivity, formJson, number, isSubmitted } = currentPermitApplication
+  const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty } = currentPermitApplication
 
   return (
-    <Box as="main" overflow="hidden" h="full">
+    <Box as="main" id="submitter-view-permit">
       <Flex
         id="permitHeader"
-        position="sticky"
-        top={0}
-        zIndex={10}
         w="full"
         px={6}
         py={3}
         bg="theme.blue"
         justify="space-between"
         color="greys.white"
+        position="sticky"
+        top="0"
+        zIndex="11"
+        flexDirection={{ base: "column", md: "row" }}
       >
         <HStack gap={4} flex={1}>
           <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
@@ -132,12 +232,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                           message: t("ui.invalidInput"),
                         },
                       }),
-                      onBlur: handleSave,
+
+                      onBlur: () => {
+                        handleSave()
+                      },
                       "aria-label": "Edit Nickname",
                     }}
                     editablePreviewProps={{
                       fontWeight: 700,
                       fontSize: "xl",
+                    }}
+                    onEdit={() => {
+                      setIsDirty(true)
                     }}
                     aria-label={"Edit Nickname"}
                     onCancel={(previousValue) => setValue("nickname", previousValue)}
@@ -146,8 +252,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               </Tooltip>
             </form>
 
-            <Text>{permitTypeAndActivity}</Text>
-            <CopyableValue value={number} label={t("permitApplication.fields.number")} />
+            <Text noOfLines={1}>{permitTypeAndActivity}</Text>
+            <HStack>
+              <CopyableValue value={number} label={t("permitApplication.fields.number")} />
+              {currentPermitApplication.referenceNumber && (
+                <CopyableValue
+                  value={currentPermitApplication.referenceNumber}
+                  label={t("permitApplication.referenceNumber")}
+                />
+              )}
+            </HStack>
           </Flex>
         </HStack>
         {isSubmitted ? (
@@ -170,20 +284,22 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Button>
           </HStack>
         )}
+        <FloatingHelpDrawer top={{ base: "145px", md: "130px" }} position="absolute" />
       </Flex>
-      <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
+      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={24}>
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
+              showHelpButton
             />
           </Flex>
         )}
-      </Flex>
+      </Box>
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}

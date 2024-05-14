@@ -7,7 +7,7 @@ import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
 import { GridRowHeader } from "../../shared/grid/row-header"
 import { UnitsText } from "../../shared/grid/units-text"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -17,16 +17,16 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
   return (
     <>
       <GridRowHeader>
-        <Text as="span">{t(`${translationPrefix}.ach`)}</Text>
+        <Text as="span">{t(`${i18nPrefix}.ach`)}</Text>
       </GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.achRequirement || "-" }}
-          hint={t(`${translationPrefix}.max`)}
+          hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0}>
-              <UnitsText>{t(`${translationPrefix}.achUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.achUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.achUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.achUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
@@ -36,25 +36,25 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.ach || "-" }}
           rightElement={
             <VStack spacing={0}>
-              <UnitsText>{t(`${translationPrefix}.achUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.achUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.achUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.achUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
       </GridData>
-      <GridData rowSpan={3}>
+      <GridData rowSpan={3} alignItems="center" justifyContent="center">
         <RequirementsMetTag success={checklist.airtightnessPassed} />
       </GridData>
 
-      <GridRowHeader>{t(`${translationPrefix}.nla`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.nla`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nlaRequirement || "-" }}
-          hint={t(`${translationPrefix}.max`)}
+          hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0}>
-              <UnitsText>{t(`${translationPrefix}.nlaUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.nlaUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.nlaUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.nlaUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
@@ -64,25 +64,25 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nla || "-" }}
           rightElement={
             <VStack spacing={0}>
-              <UnitsText>{t(`${translationPrefix}.nlaUnits.numerator`)}</UnitsText>
-              <UnitsText>{t(`${translationPrefix}.nlaUnits.denominator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.nlaUnits.numerator`)}</UnitsText>
+              <UnitsText>{t(`${i18nPrefix}.nlaUnits.denominator`)}</UnitsText>
             </VStack>
           }
         />
       </GridData>
 
-      <GridRowHeader>{t(`${translationPrefix}.nlr`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.nlr`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nlrRequirement || "-" }}
-          hint={t(`${translationPrefix}.max`)}
-          rightElement={<UnitsText>{t(`${translationPrefix}.nlrUnits`)}</UnitsText>}
+          hint={t(`${i18nPrefix}.max`)}
+          rightElement={<UnitsText>{t(`${i18nPrefix}.nlrUnits`)}</UnitsText>}
         />
       </GridData>
       <GridData>
         <TextFormControl
           inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nlr || "-" }}
-          rightElement={<UnitsText>{t(`${translationPrefix}.nlrUnits`)}</UnitsText>}
+          rightElement={<UnitsText>{t(`${i18nPrefix}.nlrUnits`)}</UnitsText>}
         />
       </GridData>
     </>

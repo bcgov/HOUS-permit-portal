@@ -23,6 +23,7 @@ import {
 } from "../../../types/types"
 import { isQuillEmpty } from "../../../utils/utility-functions"
 import { Editor } from "../../shared/editor/editor"
+import { ElectiveTag } from "../../shared/elective-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
@@ -30,7 +31,7 @@ import { RequirementsBlockModal } from "./requirements-block-modal"
 type TProps = {
   requirementBlock: IDenormalizedRequirementBlock
   onRemove?: () => void
-  triggerForceCollapse?: boolean
+  isCollapsedAll?: boolean
   renderEdit?: () => JSX.Element
   requirementBlockCustomization?: IRequirementBlockCustomization
   hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
@@ -49,20 +50,26 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   onRemove,
   isEditable,
   showEditWarning,
-  triggerForceCollapse,
+  isCollapsedAll,
   renderEdit,
   requirementBlockCustomization,
   hideElectiveField,
   ...accordionProps
 }: TProps) {
   const { t } = useTranslation()
-  const { isOpen, onToggle, onClose } = useDisclosure({ defaultIsOpen: true })
+  const { isOpen, onToggle, onClose, onOpen } = useDisclosure({ defaultIsOpen: true })
 
   useEffect(() => {
-    if (triggerForceCollapse) {
+    if (isCollapsedAll) {
       onClose()
+    } else {
+      onOpen()
     }
-  }, [triggerForceCollapse])
+  }, [isCollapsedAll])
+
+  const onClickToggle = () => {
+    onToggle()
+  }
 
   return (
     <Accordion
@@ -71,18 +78,28 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
       border={"1px solid"}
       borderColor={"border.light"}
       borderRadius={"lg"}
-      allowToggle
+      bg="greys.grey04"
+      allowMultiple
       index={isOpen ? 0 : null}
       {...accordionProps}
     >
-      <AccordionItem>
-        <Box as={"h5"} w={"full"} background={"greys.grey04"} m={0}>
-          <AccordionButton py={3} px={6} display={"flex"} justifyContent={"space-between"} onClick={onToggle}>
-            <HStack spacing={0}>
+      <AccordionItem border="0">
+        <Box as={"h5"} w={"full"} m={0} borderTopRadius="radii.lg">
+          <AccordionButton
+            as="div"
+            minH="10"
+            py={0}
+            pl={6}
+            pr={3}
+            display={"flex"}
+            justifyContent={"space-between"}
+            onClick={onClickToggle}
+          >
+            <HStack spacing={1}>
               <Box fontWeight={700} fontSize={"base"}>
                 {requirementBlock.displayName}
               </Box>
-              {onRemove && (
+              {isOpen && onRemove && (
                 <IconButton
                   color={"text.primary"}
                   variant={"ghost"}
@@ -96,7 +113,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               )}
             </HStack>
             <HStack spacing={2}>
-              {isEditable && !renderEdit && (
+              {isOpen && isEditable && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}
                   requirementBlock={requirementBlock}
@@ -110,11 +127,20 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 />
               )}
               {isEditable && renderEdit?.()}
-              <AccordionIcon color={"text.primary"} />
+
+              <IconButton variant="unstyled" aria-label="Collapse or expand accordion">
+                <AccordionIcon color={"text.primary"} />
+              </IconButton>
             </HStack>
           </AccordionButton>
         </Box>
-        <AccordionPanel pb={8}>
+        <AccordionPanel
+          pb={8}
+          borderTop="1px solid"
+          borderTopColor="border.light"
+          bg="greys.white"
+          borderBottomRadius="8px"
+        >
           {!isQuillEmpty(requirementBlock.displayDescription) && (
             <Box
               sx={{
@@ -122,8 +148,13 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   p: 0,
                 },
               }}
-              px={2}
+              px={6}
               my={4}
+              mx="-4"
+              pb={4}
+              className="requirement-block-description"
+              borderBottom="1px solid"
+              borderBottomColor="border.light"
             >
               <Editor htmlValue={requirementBlock.displayDescription} readonly />
             </Box>
@@ -171,9 +202,11 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   >
                     <Box
                       w={"full"}
+                      position="relative"
+                      pr="var(--app-permit-fieldset-right-white-space)"
                       sx={{
                         "& input": {
-                          maxW: "339px",
+                          maxW: "var(--app-permit-input-field-short)",
                         },
                       }}
                     >
@@ -190,7 +223,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         selectProps={{
                           maxW: "339px",
                         }}
+                        showAddPersonButton={!!requirement?.inputOptions?.canAddMultipleContacts}
+                        required={requirement.required}
                       />
+                      {requirement?.elective && <ElectiveTag position="absolute" right="0" top="0" />}
                     </Box>
                   </Box>
                 )

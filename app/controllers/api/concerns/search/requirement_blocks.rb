@@ -33,7 +33,7 @@ module Api::Concerns::Search::RequirementBlocks
     if (sort = search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
     else
-      { created_at: { order: :desc, unmapped_type: "long" } }
+      { updated_at: { order: :desc, unmapped_type: "long" } }
     end
   end
 end

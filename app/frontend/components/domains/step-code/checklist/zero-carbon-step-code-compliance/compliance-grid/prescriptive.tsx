@@ -6,7 +6,7 @@ import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
 import { GridRowHeader } from "../../shared/grid/row-header"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -15,49 +15,79 @@ interface IProps {
 export const Prescriptive = function Prescriptive({ checklist }: IProps) {
   return (
     <>
-      <GridColumnHeader colSpan={4}>{t(`${translationPrefix}.prescriptive.title`)}</GridColumnHeader>
+      <GridColumnHeader colSpan={4}>{t(`${i18nPrefix}.prescriptive.title`)}</GridColumnHeader>
 
-      <GridRowHeader>{t(`${translationPrefix}.prescriptive.heating`)}</GridRowHeader>
-      <GridData>
-        <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.prescriptiveHeatingRequirement || "-" }}
-        />
-      </GridData>
-      <GridData>
-        <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.prescriptiveHeating || "-" }}
-        />
-      </GridData>
-
-      <GridData rowSpan={3}>
-        <RequirementsMetTag success={checklist.prescriptivePassed} />
-      </GridData>
-
-      <GridRowHeader>{t(`${translationPrefix}.prescriptive.hotWater`)}</GridRowHeader>
+      <GridRowHeader>{t(`${i18nPrefix}.prescriptive.heating`)}</GridRowHeader>
       <GridData>
         <TextFormControl
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveHotWaterRequirement || "-",
+            value: checklist.prescriptiveHeatingRequirement
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeatingRequirement}`)
+              : "-",
           }}
         />
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.prescriptiveHotWater || "-" }}
+          inputProps={{
+            isDisabled: true,
+            textAlign: "center",
+            value: checklist.prescriptiveHeating
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeating}`)
+              : "-",
+          }}
         />
       </GridData>
 
-      <GridRowHeader>{t(`${translationPrefix}.prescriptive.other`)}</GridRowHeader>
+      <GridData rowSpan={3} alignItems="center" justifyContent="center">
+        <RequirementsMetTag success={checklist.prescriptivePassed} />
+      </GridData>
+
+      <GridRowHeader>{t(`${i18nPrefix}.prescriptive.hotWater`)}</GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.prescriptiveOtherRequirement || "-" }}
+          inputProps={{
+            isDisabled: true,
+            textAlign: "center",
+            value: checklist.prescriptiveHotWaterRequirement
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWaterRequirement}`)
+              : "-",
+          }}
         />
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.prescriptiveOther || "-" }}
+          inputProps={{
+            isDisabled: true,
+            textAlign: "center",
+            value: checklist.prescriptiveHotWater
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWater}`)
+              : "-",
+          }}
+        />
+      </GridData>
+
+      <GridRowHeader>{t(`${i18nPrefix}.prescriptive.other`)}</GridRowHeader>
+      <GridData>
+        <TextFormControl
+          inputProps={{
+            isDisabled: true,
+            textAlign: "center",
+            value: checklist.prescriptiveOtherRequirement
+              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOtherRequirement}`)
+              : "-",
+          }}
+        />
+      </GridData>
+      <GridData>
+        <TextFormControl
+          inputProps={{
+            isDisabled: true,
+            textAlign: "center",
+            value: checklist.prescriptiveOther ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOther}`) : "-",
+          }}
         />
       </GridData>
     </>

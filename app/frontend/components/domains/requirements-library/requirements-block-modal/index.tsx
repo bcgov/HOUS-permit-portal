@@ -12,7 +12,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { resetForm } from "@formio/react"
-import { Warning } from "@phosphor-icons/react"
 import { autorun } from "mobx"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
@@ -20,7 +19,10 @@ import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { IRequirementBlockParams } from "../../../../types/api-request"
+import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
+import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
+import { IDenormalizedRequirementBlock } from "../../../../types/types"
+import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
 import { FieldsSetup } from "./fields-setup"
 
@@ -29,7 +31,7 @@ export interface IRequirementBlockForm extends IRequirementBlockParams {
 }
 
 interface IRequirementsBlockProps {
-  requirementBlock?: IRequirementBlock
+  requirementBlock?: IRequirementBlock | IDenormalizedRequirementBlock
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
 }
@@ -40,8 +42,9 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   triggerButtonProps,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
-  const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
+  const { createRequirementBlock } = requirementBlockStore
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
@@ -50,9 +53,9 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
           displayDescription: requirementBlock.displayDescription,
-          sku: requirementBlock.sku,
-          associationList: requirementBlock.associations,
-          requirementsAttributes: requirementBlock.requirements,
+          sku: (requirementBlock as IRequirementBlock).sku,
+          associationList: (requirementBlock as IRequirementBlock).associations,
+          requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
         }
       : {
           associationList: [],
@@ -64,24 +67,65 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   })
   const {
     handleSubmit,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting, isValid, errors },
     reset,
   } = formProps
 
   const onSubmit = async (data: IRequirementBlockForm) => {
     let isSuccess = false
 
+    const mappedRequirementAttributes = data.requirementsAttributes.map((ra) => {
+      if (!ra?.inputOptions) return ra
+
+      const { conditional, ...restOfInputOptions } = ra?.inputOptions
+
+      const returnValue = {
+        ...ra,
+        inputOptions: {
+          ...restOfInputOptions,
+        } as any,
+      }
+
+      const shouldAppendConditional = conditional?.when && conditional?.operand && conditional?.then
+
+      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+        ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
+      )
+
+      // energy step code dependency conditionals is not possible to edit from the front-end and has default values
+      // and follows a slightly different structure so we make sure not to remove them or alter them
+      if (isEnergyStepCodeDependency) {
+        returnValue.inputOptions.conditional = conditional
+      } else if (shouldAppendConditional) {
+        const cond = ra.inputOptions.conditional
+        returnValue.inputOptions.conditional = {
+          when: cond.when,
+          eq: cond.operand,
+          [cond.then]: true,
+        }
+      }
+
+      return returnValue
+    })
+
     if (requirementBlock) {
       const removedRequirementAttributes = requirementBlock.requirements
         .filter((requirement) => !data.requirementsAttributes.find((attribute) => attribute.id === requirement.id))
         .map((requirement) => ({ id: requirement.id, _destroy: true }))
 
-      isSuccess = await requirementBlock.update({
+      isSuccess = await (requirementBlock as IRequirementBlock).update?.({
         ...data,
-        requirementsAttributes: [...data.requirementsAttributes, ...removedRequirementAttributes],
+        requirementsAttributes: [
+          ...mappedRequirementAttributes,
+          ...removedRequirementAttributes,
+        ] as IRequirementAttributes[],
       })
+      requirementBlockStore.fetchRequirementBlocks()
     } else {
-      isSuccess = await requirementBlockStore.createRequirementBlock(data)
+      isSuccess = await createRequirementBlock({
+        ...data,
+        requirementsAttributes: [...mappedRequirementAttributes],
+      })
     }
 
     isSuccess && onClose()
@@ -145,23 +189,11 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
                 {showEditWarning && (
-                  <HStack
-                    spacing={2}
-                    w={"full"}
-                    my={8}
-                    p={4}
-                    border={"1px solid"}
-                    borderColor={"semantic.warning"}
-                    bg={"semantic.warningLight"}
-                    borderRadius={"lg"}
-                  >
-                    <Warning aria-label={"Warning icon"} />
-                    <Text>{t("requirementsLibrary.modals.editWarning")}</Text>
-                  </HStack>
+                  <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.editWarning")} />
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup />
-                  <FieldsSetup />
+                  <FieldsSetup requirementBlock={requirementBlock} />
                 </HStack>
               </ModalBody>
             </ModalContent>

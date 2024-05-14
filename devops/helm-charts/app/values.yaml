@@ -4,6 +4,10 @@ appName: "hous-permit-portal"
 
 vaultNamespace: "bb18ab-nonprod"
 
+route:
+  spec:
+    host: "dev.buildingpermit.gov.bc.ca"
+
 deployments:
   - process: web
     replicaCount: 1

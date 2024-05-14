@@ -1,16 +1,18 @@
 import {
+  Box,
   Flex,
   FormControl,
   FormControlProps,
   FormErrorMessage,
   FormLabel,
+  HStack,
   IconButton,
   Input,
   InputGroup,
   InputLeftElement,
   InputProps,
 } from "@chakra-ui/react"
-import { Envelope, X } from "@phosphor-icons/react"
+import { AsteriskSimple, Envelope, X } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -27,45 +29,61 @@ interface IEmailFormControlProps extends FormControlProps {
   isRemovable?: boolean
   handleRemove?: () => void
   inputProps?: InputProps
+  inputRightElement?: JSX.Element
 }
 
 export const EmailFormControl = ({
   validate,
   label,
-  fieldName = "email",
+  fieldName,
   required,
   showIcon,
   hideLabel,
   isRemovable,
   handleRemove,
   inputProps,
+  inputRightElement,
   ...rest
 }: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
   const { t } = useTranslation()
-  const errorMessage = fieldArrayCompatibleErrorMessage(fieldName, formState)
+  const errorMessage = fieldName && fieldArrayCompatibleErrorMessage(fieldName, formState?.errors)
 
   return (
     <FormControl isInvalid={errorMessage && !inputProps?.isDisabled} {...rest}>
-      {!hideLabel && <FormLabel>{label || t("auth.emailLabel")}</FormLabel>}
+      <HStack gap={0}>
+        {!hideLabel && <FormLabel>{label || t("auth.emailLabel")}</FormLabel>}
+        {required && (
+          <Box color="semantic.error" ml={-2} mb={2}>
+            <AsteriskSimple />
+          </Box>
+        )}
+      </HStack>
       <Flex>
         <InputGroup pos="relative">
           {showIcon && (
             <InputLeftElement pointerEvents="none">
-              <Envelope />
+              <Envelope
+                color={
+                  inputProps?.isDisabled ? "var(--chakra-colors-greys-grey01)" : "var(--chakra-colors-text-primary)"
+                }
+              />
             </InputLeftElement>
           )}
           <Input
-            {...register(fieldName, {
-              required: required && t("ui.isRequired", { field: t("auth.emailLabel") }),
-              validate: {
-                matchesEmailRegex: (str) => !validate || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
-              },
-            })}
+            {...(fieldName &&
+              register(fieldName, {
+                required: required && t("ui.isRequired", { field: t("auth.emailLabel") }),
+                validate: {
+                  matchesEmailRegex: (str) => !validate || !required || EMAIL_REGEX.test(str) || t("ui.invalidEmail"),
+                },
+              }))}
             bg="greys.white"
             type={"text"}
+            placeholder={t("ui.emailPlaceholder")}
             {...inputProps}
           />
+          {inputRightElement}
         </InputGroup>
         {isRemovable && (
           <IconButton

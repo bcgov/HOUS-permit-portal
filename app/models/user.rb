@@ -1,22 +1,17 @@
 class User < ApplicationRecord
-  searchkick searchable: %i[first_name last_name username email], word_start: %i[first_name last_name]
+  PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}\z/
+  searchkick searchable: %i[first_name last_name nickname email], word_start: %i[first_name last_name nickname email]
 
   scope :review_managers, -> { where(role: User.roles[:review_manager]) }
   scope :reviewers, -> { where(role: User.roles[:reviewer]) }
 
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :invitable, :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
 
   devise :invitable,
          :database_authenticatable,
          :confirmable,
-         :registerable,
-         :recoverable,
          :rememberable,
-         :validatable,
          :timeoutable,
          :jwt_cookie_authenticatable,
          :jwt_authenticatable,
@@ -34,20 +29,27 @@ class User < ApplicationRecord
   belongs_to :jurisdiction, optional: true
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
-  has_many :license_agreements, class_name: "UserLicenseAgreement"
+  has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
+  has_many :contacts, as: :contactable, dependent: :destroy
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
-  validate :unique_bceid
-  validates :email, presence: true
-  validates :username, uniqueness: true
+  validate :unique_omniauth_uid
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
+
+  def confirmation_required?
+    false
+  end
+
+  def eula_variant
+    { submitter: "open", reviewer: "employee", review_manager: "employee", super_admin: nil }[role.to_sym]
+  end
 
   def name
     "#{first_name} #{last_name}"
@@ -60,28 +62,23 @@ class User < ApplicationRecord
       role: role,
       first_name: first_name,
       last_name: last_name,
-      username: username,
+      nickname: nickname,
       email: email,
       jurisdiction_id: jurisdiction_id,
       discarded: discarded_at.present?,
-      # last_sign_in: "TODO",
+      last_sign_in_at: last_sign_in_at,
     }
   end
 
-  def self.invitable_roles
-    %w[reviewer review_manager]
-  end
-
-  def self.from_omniauth(auth)
-    find_or_create_by(provider: auth.provider, uid: auth.uid) do |user|
-      user.email = auth.info.email
-      user.password = Devise.friendly_token[0, 20]
+  def invitable_roles
+    case role
+    when "super_admin"
+      %w[reviewer review_manager super_admin]
+    when "reviewer", "review_manager"
+      %w[reviewer review_manager]
+    else
+      []
     end
-  end
-
-  def accept_invitation_with_omniauth(auth)
-    update(password: Devise.friendly_token[0, 20], provider: auth.provider, uid: auth.uid)
-    accept_invitation! if valid?
   end
 
   def staff?
@@ -109,9 +106,9 @@ class User < ApplicationRecord
   end
 
   def confirmed_user_has_fields
-    errors.add(:user, "Confirmed user must have username") unless !confirmed? || username.present?
     errors.add(:user, "Confirmed user must have first_name") unless !confirmed? || first_name.present?
     errors.add(:user, "Confirmed user must have last_name") unless !confirmed? || last_name.present?
+    errors.add(:user, "Confirmed user must have email") unless !confirmed? || email.present?
   end
 
   def jurisdiction_must_belong_to_correct_roles
@@ -120,9 +117,14 @@ class User < ApplicationRecord
     end
   end
 
-  def unique_bceid
-    return unless uid.present?
-    existing_user = User.where.not(uid: nil).find_by(uid: uid, provider: provider)
-    errors.add(:uid, :taken, jurisdiction: existing_user.jurisdiction.name) if existing_user && existing_user != self
+  def unique_omniauth_uid
+    return unless omniauth_uid.present?
+    existing_user = User.where.not(omniauth_uid: nil).find_by(omniauth_uid:, omniauth_provider:)
+    return unless existing_user && existing_user != self
+    if !super_admin?
+      errors.add(:base, :bceid_taken, jurisdiction: existing_user.jurisdiction&.name)
+    elsif super_admin?
+      errors.add(:base, :idir_taken)
+    end
   end
 end

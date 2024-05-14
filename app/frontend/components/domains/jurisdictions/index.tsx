@@ -1,9 +1,10 @@
-import { Box, Center, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionSortFields } from "../../../types/enums"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
@@ -43,13 +44,19 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="3fr repeat(4, 1fr) 1fr">
-          <GridHeaders />
+        <SearchGrid templateColumns="3fr repeat(3, 1fr) 1fr">
+          <GridHeaders
+            span={5}
+            includeActionColumn
+            columns={Object.values(EJurisdictionSortFields).filter(
+              (field) => field !== EJurisdictionSortFields.regionalDistrict
+            )}
+          />
 
           {isSearching ? (
-            <Center p={50}>
+            <Flex py={50} gridColumn={"span 5"}>
               <SharedSpinner />
-            </Center>
+            </Flex>
           ) : (
             tableJurisdictions.map((j) => {
               return (
@@ -58,7 +65,6 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
                   <SearchGridItem>{j.reviewManagersSize}</SearchGridItem>
                   <SearchGridItem>{j.reviewersSize}</SearchGridItem>
                   <SearchGridItem>{j.permitApplicationsSize}</SearchGridItem>
-                  <SearchGridItem>{j.templatesUsedSize}</SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="center" w="full" gap={3}>
                       <RouterLink to={`${j.slug}/users/invite`}>{t("user.invite")}</RouterLink>

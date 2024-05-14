@@ -77,7 +77,7 @@
                           You can log into the Building Permit Hub at any time to view a history of the applications you have submitted.
                         </p>
                         <ol>
-                          <li>Please visit the <a href="<%= root_url %>">Building Permit Hub</a> and log in using your username and password.</li>
+                          <li>Please visit the <a href="<%= root_url %>">Building Permit Hub</a> and log in using your BCeID.</li>
                           <li>Once logged in, you'll have access to your personalized dashboard where you can review and download existing permit applications.</li>
                         </ol>
                         
@@ -135,7 +135,7 @@
                     <p>
                       <a href="<%= root_url %>" target="_blank" style="margin-right: 20px">Home</a> 
                       <a href="<%= FrontendUrlHelper.frontend_url("/contact") %>" target="_blank" style="margin-right: 20px">Contact us</a>
-                      <a href="<%= FrontendUrlHelper.frontend_url("/help") %>" target="_blank" style="margin-right: 20px">Help</a>
+                      <a href="https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub" target="_blank" style="margin-right: 20px">Help</a>
                       <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="margin-right: 20px">Login</a>
                     </p>
                     <hr>

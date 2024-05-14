@@ -1,13 +1,13 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
 
-  before_action :set_requirement_template, only: %i[show destroy restore update schedule]
+  before_action :set_requirement_template, only: %i[show destroy restore update schedule force_publish_now]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
     perform_search
     authorized_results = apply_search_authorization(@search.results)
-    render_success @search.results,
+    render_success authorized_results,
                    nil,
                    {
                      meta: {
@@ -78,8 +78,39 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         raise ActiveRecord::Rollback
       end
 
+      # A reload is required, otherwise the new template version is not ordered correctly
+      @requirement_template.reload
+
       render_success @requirement_template,
                      "requirement_template.schedule_success",
+                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+    end
+  end
+
+  def force_publish_now
+    authorize @requirement_template
+
+    ActiveRecord::Base.transaction do
+      unless @requirement_template.update(requirement_template_params)
+        render_error "requirement_template.force_publish_now_error",
+                     message_opts: {
+                       error_message: @requirement_template.errors.full_messages.join(", "),
+                     }
+      end
+
+      begin
+        published_template_version = TemplateVersioningService.force_publish_now!(@requirement_template)
+      rescue StandardError => e
+        # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
+        render_error "requirement_template.force_publish_now_error", message_opts: { error_message: e.message }
+        raise ActiveRecord::Rollback
+      end
+
+      # A reload is required, otherwise the new template version is not ordered correctly
+      @requirement_template.reload
+
+      render_success @requirement_template,
+                     "requirement_template.force_publish_now_success",
                      { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
     end
   end
@@ -109,18 +140,28 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def requirement_template_params
-    params.require(:requirement_template).permit(
-      :description,
-      :activity_id,
-      :permit_type_id,
-      requirement_template_sections_attributes: [
-        :id,
-        :name,
-        :position,
-        :_destroy,
-        template_section_blocks_attributes: %i[id requirement_block_id position _destroy],
-      ],
-    )
+    permitted_params =
+      params.require(:requirement_template).permit(
+        :description,
+        :activity_id,
+        :permit_type_id,
+        requirement_template_sections_attributes: [
+          :id,
+          :name,
+          :position,
+          :_destroy,
+          template_section_blocks_attributes: %i[id requirement_block_id position _destroy],
+        ],
+      )
+
+    # This is a workaround needed to validate step code related errors
+    if permitted_params[:requirement_template_sections_attributes].present?
+      permitted_params[:requirement_template_sections_attributes_copy] = permitted_params[
+        :requirement_template_sections_attributes
+      ].deep_dup
+    end
+
+    permitted_params
   end
 
   def schedule_params

@@ -7,7 +7,9 @@ RSpec.describe StepCode, type: :model do
   let!(:step_code) { build(:step_code, permit_application: permit_application) }
 
   before :each do
-    allow(permit_application).to receive(:step_code_plan_field) { "test" }
+    allow(permit_application).to receive(:step_code_plan_field) {
+      "formSubmissionDataRSTsection422ad829-55d0-4677-b93b-ada73a3d2e0b|RB60d1b79c-02e9-430b-97e0-aaac8a0277e4|test_file"
+    }
   end
 
   context "permit_applications" do
@@ -19,13 +21,20 @@ RSpec.describe StepCode, type: :model do
       let!(:supporting_doc_with_compliance) do
         create(
           :supporting_document,
-          data_key: "test",
+          data_key:
+            "formSubmissionDataRSTsection422ad829-55d0-4677-b93b-ada73a3d2e0b|RB60d1b79c-02e9-430b-97e0-aaac8a0277e4|test_file",
           permit_application: permit_application,
           compliance_data: {
             status: "failed",
             error:
               "Unable to run digital seal validator integration - Failed to open TCP connection to consigno-verifio-notarius-server:80 (No route to host - connect(2) for \"consigno-verifio-notarius-server\" port 80)",
           },
+        )
+      end
+
+      before :each do
+        expect_any_instance_of(PermitApplication).to receive(:active_supporting_documents).and_return(
+          SupportingDocument.all,
         )
       end
 
@@ -41,12 +50,19 @@ RSpec.describe StepCode, type: :model do
       let!(:supporting_doc_with_compliance) do
         create(
           :supporting_document,
-          data_key: "test",
+          data_key:
+            "formSubmissionDataRSTsection422ad829-55d0-4677-b93b-ada73a3d2e0b|RB60d1b79c-02e9-430b-97e0-aaac8a0277e4|test_file",
           permit_application: permit_application,
           compliance_data: {
             status: "success",
             result: SIGNATURE_RESPONSE_STUB,
           },
+        )
+      end
+
+      before :each do
+        expect_any_instance_of(PermitApplication).to receive(:active_supporting_documents).and_return(
+          SupportingDocument.all,
         )
       end
 
@@ -56,7 +72,7 @@ RSpec.describe StepCode, type: :model do
 
       it "sets plan fields" do
         step_code.save
-        expect(step_code.plan_author).to eq("Signature1")
+        expect(step_code.plan_author).to eq("Test - H2 -- Notarius")
       end
     end
   end

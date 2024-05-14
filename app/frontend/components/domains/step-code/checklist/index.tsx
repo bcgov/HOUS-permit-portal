@@ -1,7 +1,8 @@
-import { Accordion, Alert, Center, Container, Heading, VStack } from "@chakra-ui/react"
-import { LightningA } from "@phosphor-icons/react"
+import { Accordion, Alert, Center, Container, HStack, Heading, Tag, VStack } from "@chakra-ui/react"
+import { LightningA, WarningCircle } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { Suspense, useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
@@ -39,7 +40,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
     if (result) navigate(-1)
   }
 
-  const translationPrefix = "stepCodeChecklist.edit"
+  const i18nPrefix = "stepCodeChecklist.edit"
 
   return (
     <Suspense
@@ -52,24 +53,68 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
       {checklist?.isLoaded && (
         <Container my={10} maxW="780px" px={0}>
           <VStack gap={8} align="stretch">
-            <Heading fontSize="2xl" mb={0} color="text.primary">
-              {t(`${translationPrefix}.heading`)}
-            </Heading>
-            <Alert
-              status="info"
-              rounded="lg"
-              borderWidth={1}
-              borderColor="semantic.info"
-              bg="semantic.infoLight"
-              gap={2}
-              color="text.primary"
-            >
-              <LightningA color="var(--chakra-colors-semantic-info)" />
-              {t(`${translationPrefix}.notice`)}
-            </Alert>
+            <HStack spacing={5}>
+              <Heading fontSize="2xl" mb={0} color="text.primary">
+                {t(`${i18nPrefix}.heading`)}
+              </Heading>
+              <Tag
+                p={1}
+                bg={checklist.isComplete ? "theme.blue" : "greys.grey03"}
+                color={checklist.isComplete ? "greys.white" : "text.primary"}
+                fontWeight="bold"
+                border="1px solid"
+                borderColor="border.base"
+                textTransform="uppercase"
+                minW="fit-content"
+              >
+                {checklist.status}
+              </Tag>
+            </HStack>
+            <VStack spacing={2}>
+              {R.isNil(checklist.proposedEnergyStep) && (
+                <Alert
+                  status="error"
+                  rounded="lg"
+                  borderWidth={1}
+                  borderColor="semantic.error"
+                  bg="semantic.errorLight"
+                  gap={2}
+                  color="text.primary"
+                >
+                  <WarningCircle color="var(--chakra-colors-semantic-error)" />
+                  {t(`${i18nPrefix}.energyStepNotMet`)}
+                </Alert>
+              )}
+              {R.isNil(checklist.proposedZeroCarbonStep) && (
+                <Alert
+                  status="error"
+                  rounded="lg"
+                  borderWidth={1}
+                  borderColor="semantic.error"
+                  bg="semantic.errorLight"
+                  gap={2}
+                  color="text.primary"
+                >
+                  <WarningCircle color="var(--chakra-colors-semantic-error)" />
+                  {t(`${i18nPrefix}.zeroCarbonStepNotMet`)}
+                </Alert>
+              )}
+              <Alert
+                status="info"
+                rounded="lg"
+                borderWidth={1}
+                borderColor="semantic.info"
+                bg="semantic.infoLight"
+                gap={2}
+                color="text.primary"
+              >
+                <LightningA color="var(--chakra-colors-semantic-info)" />
+                {t(`${i18nPrefix}.notice`)}
+              </Alert>
+            </VStack>
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
-                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3]}>
+                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]}>
                   {/* <VStack spacing={4} pb={12}> */}
                   <ProjectInfo checklist={checklist} />
                   <ComplianceSummary checklist={checklist} />

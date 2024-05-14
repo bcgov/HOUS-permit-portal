@@ -17,7 +17,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
   const jurisdiction = currentUser.jurisdiction
 
   return (
-    <Container maxW="container.md" py={8} as="main">
+    <Container maxW="container.md" py={16} as="main">
       <Flex direction="column" align="center" w="full">
         <Heading as="h1" mb={8}>
           {jurisdiction.name}
@@ -38,7 +38,7 @@ export const ReviewManagerHomeScreen = observer(({ ...rest }: IHomeScreenProps) 
           />
           <HomeScreenBox
             title={t("home.configurationManagement.title")}
-            description={t("home.configurationManagement.description")}
+            description={t("home.configurationManagement.reviewManagerDescription")}
             icon={<Pencil size={24} />}
             href={`jurisdictions/${jurisdiction.slug}/configuration-management`}
           />

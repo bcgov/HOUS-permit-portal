@@ -3,6 +3,8 @@ class Api::GeocoderController < Api::ApplicationController
   after_action :verify_authorized
   skip_before_action :authenticate_user!, only: %i[site_options jurisdiction]
 
+  rescue_from Errors::FeatureAttributesRetrievalError, with: :handle_ltsa_unavailable
+
   def site_options
     authorize :geocoder, :site_options?
     begin
@@ -36,21 +38,27 @@ class Api::GeocoderController < Api::ApplicationController
     authorize :geocoder, :jurisdiction?
     begin
       wrapper = Wrappers::Geocoder.new
-      pids = wrapper.pids(geocoder_params[:site_id])
-      first_pid = pids.first
-      raise StadardError unless first_pid.present?
-
-      attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: first_pid)
+      if geocoder_params[:site_id].present?
+        pids = wrapper.pids(geocoder_params[:site_id])
+        pid = pids.first
+      elsif geocoder_params[:pid].present?
+        pid = geocoder_params[:pid]
+      end
+      raise StandardError unless pid.present?
+      attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
       jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
-      raise StadardError unless jurisdiction.present?
-
-      render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint }
+      raise StandardError unless jurisdiction.present?
+      render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     rescue StandardError => e
       render_error "geocoder.jurisdiction_error", {}, e and return
     end
   end
 
   private
+
+  def handle_ltsa_unavailable(exception)
+    render_error "geocoder.ltsa_unavailble_error", {}, exception and return
+  end
 
   def geocoder_params
     params.permit(:address, :site_id, :pid)

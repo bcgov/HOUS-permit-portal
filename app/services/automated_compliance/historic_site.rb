@@ -1,21 +1,49 @@
 class AutomatedCompliance::HistoricSite < AutomatedCompliance::Base
   def call(permit_application)
-    return if permit_application.pid.blank?
-    #extraction of parcel data can be done via LTSA base
-    response = Integrations::LtsaParcelMapBc.new.historic_site_by_pid(pid: permit_application.pid)
-    if response.success?
-      attributes = response.body.dig("features", 0, "attributes")
+    begin
+      raise Errors::GeometryError if permit_application.pid.blank?
 
-      if attributes.present?
-        updated_submission_data = permit_application.submission_data || { "data" => {} }
+      # extraction of parcel data can be done via LTSA base
+      attributes = Integrations::LtsaParcelMapBc.new.historic_site_by_pid(pid: permit_application.pid)
+
+      raise Errors::GeometryError if attributes.nil?
+
+      permit_application.with_lock do
+        updated = false
         permit_application
           .automated_compliance_requirements_for_module("HistoricSite")
           .each do |field_id, req|
-            if attributes[req.input_options.dig("computed_compliance", "value")] == "Y"
-              updated_submission_data["data"][field_id] = "Yes"
+            result =
+              if attributes[req.dig("computedCompliance", "value")] == "Y"
+                "yes"
+              elsif attributes[req.dig("computedCompliance", "value")] == "N"
+                "no"
+              else
+                # set to nil to indicate a valid value was not found
+                nil
+              end
+            if result != permit_application.compliance_data[field_id]
+              updated = true
+              permit_application.compliance_data[field_id] = result
             end
           end
-        permit_application.update(submission_data: updated_submission_data)
+        permit_application.save! if updated
+      end if attributes
+    rescue Errors::GeometryError
+      # geometry not found for this pid or pid blank, null op
+      permit_application.with_lock do
+        updated = false
+        permit_application
+          .automated_compliance_requirements_for_module("HistoricSite")
+          .each do |field_id, req|
+            if !permit_application.compliance_data.has_key?(field_id)
+              updated = true
+              # set to nil if there is no existing value to indicate
+              # a valid value was not found
+              permit_application.compliance_data[field_id] = nil
+            end
+          end
+        permit_application.save! if updated
       end
     end
   end

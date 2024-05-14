@@ -37,7 +37,8 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
   }
 
   useEffect(() => {
-    handleChange(statusToIndex(paramStatusFilter))
+    const newIndex = statusToIndex(paramStatusFilter)
+    if (selectedIndex != newIndex) handleChange(statusToIndex(paramStatusFilter))
   }, [])
 
   return (

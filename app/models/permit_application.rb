@@ -17,18 +17,17 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
   has_one :step_code
 
-  has_many :supporting_documents, dependent: :destroy
-  accepts_nested_attributes_for :supporting_documents, allow_destroy: true
-
   # Custom validation
 
-  validate :submitter_must_have_role
+  validate :jurisdiction_has_matching_submission_contact
+  validate :pid_or_pin_presence
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
   enum status: { draft: 0, submitted: 1 }, _default: 0
 
+  delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
@@ -39,12 +38,13 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
+  before_validation :populate_base_form_data, on: :create
   before_save :set_submitted_at, if: :status_changed?
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
-  after_save :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
@@ -72,12 +72,6 @@ class PermitApplication < ApplicationRecord
     }
   end
 
-  def set_template_version
-    return unless template_version.blank?
-
-    self.template_version = current_published_template_version
-  end
-
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
     RequirementTemplate.published_requirement_template_version(activity, permit_type)
@@ -94,16 +88,67 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def update_viewed_at
+    update(viewed_at: Time.current)
+  end
+
   def number_prefix
     jurisdiction.prefix
   end
 
-  def assign_default_nickname
-    self.nickname = "#{jurisdiction_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+  def collaborators
+    #eventually will add editors.  For compliance related items (it is before submit, it should target collaborators)
+    [submitter]
   end
 
-  def update_viewed_at
-    update(viewed_at: Time.current)
+  def set_template_version
+    return unless template_version.blank?
+
+    self.template_version = current_published_template_version
+  end
+
+  def populate_base_form_data
+    self.submission_data = { data: {} }
+  end
+
+  def submitter_frontend_url
+    FrontendUrlHelper.frontend_url("/permit-applications/#{id}/edit")
+  end
+
+  def reviewer_frontend_url
+    FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
+  end
+
+  def days_ago_submitted
+    # Calculate the difference in days between the current date and the submitted_at date
+    (Date.current - submitted_at.to_date).to_i
+  end
+
+  def formatted_submitted_at
+    submitted_at&.strftime("%Y-%m-%d")
+  end
+
+  def formatted_viewed_at
+    viewed_at&.strftime("%Y-%m-%d")
+  end
+
+  def permit_type_and_activity
+    "#{activity.name} - #{permit_type.name}".strip
+  end
+
+  def permit_type_submission_contact
+    jurisdiction.permit_type_submission_contacts.find_by(permit_type: permit_type)
+  end
+
+  def send_submit_notifications
+    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+  end
+
+  private
+
+  def assign_default_nickname
+    self.nickname = "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number
@@ -154,54 +199,6 @@ class PermitApplication < ApplicationRecord
     return new_number
   end
 
-  def zipfile_size
-    zipfile_data&.dig("metadata", "size")
-  end
-
-  def zipfile_name
-    zipfile_data&.dig("metadata", "filename")
-  end
-
-  def zipfile_url
-    zipfile&.url(
-      public: false,
-      expires_in: 3600,
-      response_content_disposition: "attachment; filename=\"#{zipfile.original_filename}\"",
-    )
-  end
-
-  def submitter_frontend_url
-    FrontendUrlHelper.frontend_url("/permit-applications/#{id}/edit")
-  end
-
-  def reviewer_frontend_url
-    FrontendUrlHelper.frontend_url("/permit-applications/#{id}")
-  end
-
-  def days_ago_submitted
-    # Calculate the difference in days between the current date and the submitted_at date
-    (Date.current - submitted_at.to_date).to_i
-  end
-
-  def formatted_submitted_at
-    submitted_at&.strftime("%Y-%m-%d")
-  end
-
-  def formatted_viewed_at
-    viewed_at&.strftime("%Y-%m-%d")
-  end
-
-  def permit_type_and_activity
-    "#{activity.name} - #{permit_type.name}".strip
-  end
-
-  def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
-    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
-  end
-
-  private
-
   def take_form_customizations_snapshot_if_submitted
     return unless status_changed? && submitted?
 
@@ -218,10 +215,11 @@ class PermitApplication < ApplicationRecord
 
   def notify_user_application_updated
     return if new_record?
-
-    return unless saved_change_to_viewed_at? || saved_change_to_reference_number?
-
-    PermitHubMailer.notify_application_updated(submitter, self).deliver_later
+    viewed_at_change = previous_changes.dig("viewed_at")
+    # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
+    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
+      PermitHubMailer.notify_application_updated(submitter, self).deliver_later
+    end
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -231,18 +229,24 @@ class PermitApplication < ApplicationRecord
     jurisdiction.reindex
   end
 
-  def zip_and_upload_supporting_documents
-    return unless submitted? && zipfile_data.blank?
-
-    ZipfileJob.perform_async(id)
-  end
-
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
     self.submitted_at = Time.current if submitted? && submitted_at.nil?
   end
 
-  def submitter_must_have_role
-    errors.add(:submitter, "must have the submitter role") unless submitter&.submitter?
+  def jurisdiction_has_matching_submission_contact
+    matching_contacts = PermitTypeSubmissionContact.where(jurisdiction: jurisdiction, permit_type: permit_type)
+    if matching_contacts.empty?
+      errors.add(
+        :jurisdiction,
+        I18n.t("activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"),
+      )
+    end
+  end
+
+  def pid_or_pin_presence
+    if pin.blank? && pid.blank?
+      errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
+    end
   end
 end

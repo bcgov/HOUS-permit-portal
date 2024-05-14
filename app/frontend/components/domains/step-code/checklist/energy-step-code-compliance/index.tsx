@@ -6,6 +6,7 @@ import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { EnergyComplianceGrid } from "./compliance-grid"
+import { i18nPrefix } from "./i18n-prefix"
 import { OtherData } from "./other-data"
 
 interface IProps {
@@ -13,23 +14,21 @@ interface IProps {
 }
 
 export const EnergyStepCodeCompliance = observer(function EnergyStepCodeCompliance({ checklist }: IProps) {
-  const translationPrefix = "stepCodeChecklist.edit.energyStepCodeCompliance"
-
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)} isAutoFilled>
+    <ChecklistSection heading={t(`${i18nPrefix}.heading`)} isAutoFilled>
       <HStack>
         <VStack>
           <TextFormControl
-            label={t(`${translationPrefix}.proposedConsumption`)}
+            label={t(`${i18nPrefix}.proposedConsumption`)}
             inputProps={{ isDisabled: true, value: checklist.energyTarget || "-" }}
-            hint={t(`${translationPrefix}.consumptionUnit`)}
+            hint={t(`${i18nPrefix}.consumptionUnit`)}
           />
         </VStack>
         <VStack>
           <TextFormControl
-            label={t(`${translationPrefix}.refConsumption`)}
+            label={t(`${i18nPrefix}.refConsumption`)}
             inputProps={{ isDisabled: true, value: checklist.refEnergyTarget || "-" }}
-            hint={t(`${translationPrefix}.consumptionUnit`)}
+            hint={t(`${i18nPrefix}.consumptionUnit`)}
           />
         </VStack>
       </HStack>

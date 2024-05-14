@@ -11,6 +11,10 @@ class JurisdictionPolicy < ApplicationPolicy
     show?
   end
 
+  def jurisdiction_options?
+    index?
+  end
+
   def create?
     user.super_admin?
   end

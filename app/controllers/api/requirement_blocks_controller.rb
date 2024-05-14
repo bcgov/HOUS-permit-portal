@@ -29,10 +29,10 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
   def create
     @requirement_block = RequirementBlock.build(requirement_block_params)
-
     authorize @requirement_block
 
     if @requirement_block.save
+      RequirementBlock.search_index.refresh
       render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
     else
       render_error "requirement_block.create_error",
@@ -91,7 +91,14 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :required_for_multiple_owners,
         :elective,
         :_destroy,
-        input_options: [:number_unit, value_options: [%i[value label]]],
+        input_options: [
+          :number_unit,
+          :can_add_multiple_contacts,
+          :energy_step_code,
+          value_options: [%i[value label]],
+          conditional: {
+          },
+        ],
       ],
     )
   end

@@ -19,6 +19,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def force_publish_now?
+    create? && ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
+  end
+
   def destroy?
     create?
   end

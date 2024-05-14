@@ -1,36 +1,47 @@
 import { t } from "i18next"
-import * as R from "ramda"
 
-const findPanelComponents = (components) => {
-  let panelComponents = []
+const findComponentsByType = (components, type) => {
+  let foundComponents = []
 
   // Function to recursively traverse the components
   function traverseComponents(subComponents) {
-    subComponents.forEach((container) => {
-      // Check if the component type is 'panel'
-      if (container?.component?.type === "panel" || container?.type === "panel") {
-        // If it is a panel, add it to the list
-        panelComponents.push(container)
-      } else if (container.components && container.components.length) {
+    subComponents.forEach((component) => {
+      if (component?.component?.type === type || component?.type === type) {
+        // If the component matches the type, add it to the list
+        foundComponents.push(component)
+      } else if (component.components && component.components.length) {
         // If the component has nested components, traverse them recursively
-        traverseComponents(container.components)
+        traverseComponents(component.components)
       }
     })
   }
 
-  // Start traversing from the top-level components
   traverseComponents(components)
+  return foundComponents
+}
 
-  return panelComponents
+const findPanelComponents = (components) => findComponentsByType(components, "panel")
+const findFileComponents = (components) => findComponentsByType(components, "simplefile")
+
+export const getNestedComponentsIncomplete = (components) => {
+  //only look at visible objects
+  //in a typical object, the dataValue is the actual value selected
+  //in a multi select, this is a hash of key values with true / falses
+  //in a general_contact, this is a layer of nested fields
+
+  return components
+    .filter((comp) => comp._visible)
+    .filter((comp) => {
+      //in the case of general_contacts, a fieldset has the isValid function
+      return comp.error || (comp.component.validate?.required && !comp.isValid(comp.dataValue, true))
+    })
 }
 
 export const getCompletedBlocksFromForm = (rootComponent) => {
   const blocksList = findPanelComponents(rootComponent.components)
   let completedBlocks = {}
   blocksList.forEach((panelComponent) => {
-    const incompleteComponents = panelComponent.components.filter(
-      (comp) => comp.error || (comp.component.validate?.required && (R.isEmpty(comp.dataValue) || !comp.dataValue))
-    )
+    const incompleteComponents = getNestedComponentsIncomplete(panelComponent.components)
 
     const complete = incompleteComponents.length == 0 //if there are any components with errors OR required fields with no value
 
@@ -45,6 +56,17 @@ export const combineComplianceHints = (
   formattedComplianceData
 ) => {
   let updatedJson = formJson
+  //special step - utilize the fileKey variable in simplefile to pass the file through, this is done this way to not modify the underlying chefs simplefile implementation
+  //currently better than doing on on the requirement_json service as we will likley modify items in the long run
+  const fileComponents = findFileComponents(updatedJson.components)
+  fileComponents.forEach((fileComponent) => {
+    if (fileComponent.multiple) {
+      //TODO: For multiple files do something else.  We haven't had a use case or enabled mutiple file uploads yet.
+    } else {
+      fileComponent["fileKey"] = fileComponent.key
+    }
+  })
+
   //jurisdicition-form customizations
   const blocksLookups = templateVersionCustomizationsByJurisdiction?.requirementBlockChanges || {}
   const blocksList = findPanelComponents(updatedJson.components)
@@ -53,9 +75,15 @@ export const combineComplianceHints = (
       if (blocksLookups[panelComponent.id]?.tip) {
         panelComponent["tip"] = blocksLookups[panelComponent.id].tip
       }
-      if (blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]) {
+      const enabledElectiveIds = blocksLookups[panelComponent.id]?.["enabledElectiveFieldIds"]
+
+      if (enabledElectiveIds) {
         panelComponent.components.forEach((subComp) => {
-          if (subComp.elective && subComp.customConditional.endsWith(";show = false")) {
+          if (
+            enabledElectiveIds?.includes(subComp?.id) &&
+            subComp.elective &&
+            subComp.customConditional.endsWith(";show =" + " false")
+          ) {
             //remove the ;show = false at the end of the conditional
             subComp.customConditional = subComp.customConditional.slice(0, -13)
           }
@@ -78,9 +106,13 @@ export const combineComplianceHints = (
       ?.components?.find((c) => c.key === rb)
       ?.components?.find((c) => c.key === key)
 
-    // Update the description if the item is found
+    // Note the result is either a string or a object, to be handled by the renderer
     if (item && item.computedCompliance) {
       item.computedComplianceResult = value
+      if (item.computedCompliance?.module != "DigitalSealValidator") {
+        //there is no default value for a file
+        item.defaultValue = value
+      }
     }
     if (item && item.energyStepCode) {
       item.label = t("formComponents.energyStepCode.edit")

@@ -15,7 +15,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../setup/root"
 import { EStepCodeEPCTestingTargetType } from "../../../../../types/enums"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   onChange: (event: any) => void
@@ -44,8 +44,8 @@ export const EPCTestingTargetTypeSelect = observer(function EPCTestingTargetType
                 shadow="base"
               >
                 {value
-                  ? t(`${translationPrefix}.epcTestingTargetType.options.${value}`)
-                  : t(`${translationPrefix}.epcTestingTargetType.select`)}
+                  ? t(`${i18nPrefix}.epcTestingTargetType.options.${value}`)
+                  : t(`${i18nPrefix}.epcTestingTargetType.select`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -65,7 +65,7 @@ export const EPCTestingTargetTypeSelect = observer(function EPCTestingTargetType
                   cursor="pointer"
                   _hover={{ bg: "hover.blue" }}
                 >
-                  {t(`${translationPrefix}.epcTestingTargetType.options.${value}`)}
+                  {t(`${i18nPrefix}.epcTestingTargetType.options.${value}`)}
                 </Flex>
               ))}
             </VStack>

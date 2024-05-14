@@ -2,12 +2,15 @@ import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
   EDoorsPerformanceType,
+  EEnabledElectiveFieldReason,
   EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
   ENumberUnit,
   ERequirementType,
   ESZeroCarbonStep,
+  ESocketDomainTypes,
+  ESocketEventTypes,
   ESortDirection,
   ESpaceHeatingCoolingPerformanceType,
   EStepCodeAirtightnessValue,
@@ -21,12 +24,21 @@ export type TLatLngTuple = [number, number]
 
 export interface IContact {
   id: string
-  name: string
-  department: string
+  firstName: string
+  lastName: string
   title?: string
-  phoneNumber?: string
+  department?: string
   email?: string
+  phone?: string
+  cell?: string
+  address?: string
+  organization?: string
+  businessName?: string
+  businessLicense?: string
+  professionalAssociation?: string
+  professionalNumber?: string
   createdAt?: number | string // has to allow string to stop errors with useFieldArray
+  updatedAt?: number | string // has to allow string to stop errors with useFieldArray
 }
 
 export interface IPermitTypeSubmissionContact {
@@ -60,6 +72,10 @@ export type TSearchParams<IModelSortFields> = {
 export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
+  canAddMultipleContacts?: boolean
+  conditional?: TConditional
+  energyStepCode?: string
+  dataValidation?: Object
 }
 
 export interface IFormJson {
@@ -111,6 +127,7 @@ export interface IDenormalizedRequirement {
   inputOptions: IRequirementOptions
   hint?: string | null
   elective?: boolean
+  required?: boolean
 }
 
 export interface IDenormalizedRequirementBlock {
@@ -171,6 +188,7 @@ export interface IStepCodeSelectOptions {
 export interface IRequirementBlockCustomization {
   tip?: string
   enabledElectiveFieldIds?: Array<string>
+  enabledElectiveFieldReasons?: Record<string, EEnabledElectiveFieldReason>
 }
 
 export interface ITemplateCustomization {
@@ -185,4 +203,46 @@ export interface IDownloadableFile {
 
 export interface IEULA {
   content: string
+}
+
+export interface INotification {
+  title: string
+  description: string
+  at: string
+}
+
+export interface IPermitApplicationUpdate {
+  id
+  frontEndFormUpdate: Object
+  formattedComplianceData: Object
+}
+
+export interface IUserPushPayload {
+  domain: ESocketDomainTypes
+  eventType: ESocketEventTypes
+  data: INotification | IPermitApplicationUpdate
+}
+
+export interface ISiteConfiguration {
+  displaySitewideMessage: boolean
+}
+
+export interface IContact {
+  firstName: string
+  lastName: string
+  email?: string
+  phone?: string
+  cell?: string
+  address?: string
+  organization?: string
+  businessName?: string
+  businessLicense?: string
+  professionalAssociation?: string
+  professionalNumber?: string
+}
+
+export type TConditional = {
+  show: boolean
+  when: string
+  eq: string
 }

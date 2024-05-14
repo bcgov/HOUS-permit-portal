@@ -5,9 +5,10 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
-import { useParams } from "react-router-dom"
-import { useMst } from "../../../../../../setup/root"
+import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
+import { IPermitTypeSubmissionContact } from "../../../../../../types/types"
 import { generateUUID } from "../../../../../../utils/utility-functions"
+import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { EmailFormControl } from "../../../../../shared/form/email-form-control"
 import { EditableBlockContainer, EditableBlockHeading } from "../shared/editable-block"
 import { i18nPrefix } from "./i18n-prefix"
@@ -20,6 +21,7 @@ interface IProps {
   fieldArrayName: string
   append: any
   remove: any
+  update: any
   getIndex: (field: Record<"id", string>) => number
   reset: () => any
 }
@@ -33,19 +35,15 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
   reset,
   append,
   remove,
+  update,
   getIndex,
 }: IProps) {
   const [isEditing, setIsEditing] = useState(null)
+  const { currentJurisdiction, error } = useJurisdiction()
 
-  const { jurisdictionId } = useParams()
-  const {
-    jurisdictionStore: { getJurisdictionById },
-  } = useMst()
-  const jurisdiction = getJurisdictionById(jurisdictionId)
+  const getPermitTypeSubmissionContact = currentJurisdiction?.getPermitTypeSubmissionContact
 
-  const getPermitTypeSubmissionContact = jurisdiction?.getPermitTypeSubmissionContact
-
-  const { formState, trigger, getValues } = useFormContext()
+  const { formState, trigger, getValues, setValue } = useFormContext()
   const { errors, isSubmitting, isSubmitted } = formState
 
   const isValid = () => {
@@ -69,6 +67,14 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
     append({ permitTypeId, email: null })
   }
 
+  const onRemove = (index: number, contact?: IPermitTypeSubmissionContact) => {
+    if (contact) {
+      update(index, { _destroy: true, id: contact.id })
+    } else {
+      remove(index)
+    }
+  }
+
   useEffect(() => {
     isSubmitted && setIsEditing(false)
   }, [isSubmitted])
@@ -81,7 +87,9 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
     isEditing && trigger()
   }, [isEditing, fields.length])
 
-  return (
+  return error ? (
+    <ErrorScreen error={error} />
+  ) : (
     <EditableBlockContainer>
       <FormControl flexBasis={"280px"} alignSelf="start">
         <FormLabel>{headingLabel}</FormLabel>
@@ -92,7 +100,6 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
           const trueIndex = getIndex(f)
           const contactId = getValues(`${fieldArrayName}.${trueIndex}.id`)
           const contact = contactId && getPermitTypeSubmissionContact && getPermitTypeSubmissionContact(contactId)
-
           return (
             <React.Fragment key={f.id || generateUUID()}>
               <Input type="hidden" name={`${fieldArrayName}.${trueIndex}.id`} value={contactId} />
@@ -105,7 +112,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
                   inputProps={{ isDisabled: !isEditing }}
                   required={isEditing}
                   validate={isEditing}
-                  handleRemove={() => remove(trueIndex)}
+                  handleRemove={() => onRemove(trueIndex, contact)}
                   isRemovable={isEditing && fields.length > 1}
                   hideLabel={index !== 0}
                   showIcon

@@ -1,6 +1,8 @@
-import { IStateTreeNode, types } from "mobx-state-tree"
+import { makePersistable } from "mobx-persist-store"
+import { IStateTreeNode, flow, protect, types, unprotect } from "mobx-state-tree"
 import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
+import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
@@ -8,6 +10,7 @@ import { IPermitClassificationStore, PermitClassificationStoreModel } from "./pe
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
+import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
 import { ITemplateVersionStoreModel, TemplateVersionStoreModel } from "./template-version-store"
 import { IUIStore, UIStoreModel } from "./ui-store"
@@ -27,6 +30,8 @@ export const RootStoreModel = types
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
+    siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
+    contactStore: types.optional(ContactStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -34,13 +39,27 @@ export const RootStoreModel = types
   }))
   .views((self) => ({}))
   .actions((self) => ({
+    loadLocalPersistedData: flow(function* () {
+      unprotect(self)
+      yield makePersistable(self.sessionStore, {
+        name: `${self.userStore.currentUser?.id}-SessionStore`,
+        properties: ["afterLoginPath"],
+        storage: localStorage,
+      })
+      protect(self)
+    }),
     subscribeToUserChannel() {
       if (!self.userChannelConsumer && self.userStore.currentUser) {
         self.userChannelConsumer = createUserChannelConsumer(self.userStore.currentUser.id, self)
       }
     },
     disconnectUserChannel() {
-      self.userChannelConsumer?.consumer.disconnect()
+      self.userChannelConsumer?.consumer?.disconnect()
+    },
+  }))
+  .actions((self) => ({
+    afterCreate() {
+      self.loadLocalPersistedData()
     },
   }))
 
@@ -56,4 +75,9 @@ export interface IRootStore extends IStateTreeNode {
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   stepCodeStore: IStepCodeStore
+  siteConfigurationStore: ISiteConfigurationStore
+  contactStore: IContactStore
+  subscribeToUserChannel: () => void
+  disconnectUserChannel: () => void
+  loadLocalPersistedData: () => void
 }

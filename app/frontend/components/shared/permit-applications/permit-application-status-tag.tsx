@@ -1,5 +1,6 @@
 import { Tag, TagProps } from "@chakra-ui/react"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { EPermitApplicationStatus } from "../../../types/enums"
 
@@ -8,6 +9,8 @@ interface IPermitApplicationStatusTagProps extends TagProps {
 }
 
 export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPermitApplicationStatusTagProps) => {
+  const { t } = useTranslation()
+
   const bgMap = {
     [EPermitApplicationStatus.submitted]: "theme.yellow",
     [EPermitApplicationStatus.draft]: "theme.blueLight",
@@ -30,7 +33,7 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
       minW="fit-content"
       {...rest}
     >
-      {permitApplication.status}
+      {permitApplication.statusTagText}
     </Tag>
   )
 }

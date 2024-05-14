@@ -1,10 +1,16 @@
 import { Box, Container, Heading, Link, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react"
+import { ArrowSquareOut } from "@phosphor-icons/react/dist/ssr"
+import i18next from "i18next"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
 export const ContactScreen = () => {
   const { t } = useTranslation()
   const mailto = "mailto:" + t("site.contactEmail")
+
+  const contactTeamInstructions = i18next.t("site.contactTeamInstructions", {
+    returnObjects: true,
+  }) as string[]
 
   return (
     <Container maxW="container.lg" pt="16" pb="36" px="8">
@@ -41,8 +47,9 @@ export const ContactScreen = () => {
         </Heading>
         <Box px="6" py="4">
           <UnorderedList m="0" pl="4">
-            <ListItem>{t("site.contactTeamInstructions_1")}</ListItem>
-            <ListItem>{t("site.contactTeamInstructions_2")}</ListItem>
+            {contactTeamInstructions.map((inst) => (
+              <ListItem key={inst}>{inst}</ListItem>
+            ))}
           </UnorderedList>
 
           <Text fontWeight="bold" mt="4" mb="2">
@@ -65,7 +72,7 @@ export const ContactScreen = () => {
           isExternal
           ml="1"
         >
-          {t("site.contactNeedHelpCTA")}.
+          {t("site.contactNeedHelpCTA")} <ArrowSquareOut></ArrowSquareOut>
         </Link>
       </Text>
     </Container>

@@ -7,7 +7,7 @@ RSpec.describe PermitApplicationPolicy do
 
   let(:user) { FactoryBot.create(:user) }
   let(:submitter) { FactoryBot.create(:user, :submitter) }
-  let(:jurisdiction) { FactoryBot.create(:jurisdiction) }
+  let(:jurisdiction) { FactoryBot.create(:sub_district) }
   let(:draft_permit_application) do
     FactoryBot.create(:permit_application, submitter: submitter, jurisdiction: jurisdiction)
   end

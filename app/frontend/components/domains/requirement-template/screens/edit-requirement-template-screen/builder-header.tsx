@@ -35,12 +35,12 @@ export const BuilderHeader = observer(function BuilderHeader({
           h={"fit-content"}
           w={"fit-content"}
         />
-        <Text as={"h2"} fontWeight={400} fontSize={"sm"} color={"greys.grey01"}>
+        <Text as={"span"} fontSize={"sm"} color={"greys.grey01"}>
           {t("requirementTemplate.edit.title")}
         </Text>
       </HStack>
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
-        <Heading as="h3" color={"text.primary"}>
+        <Heading as="h1">
           {requirementTemplate.permitType.name} | {requirementTemplate.activity.name}
         </Heading>
         <HStack>

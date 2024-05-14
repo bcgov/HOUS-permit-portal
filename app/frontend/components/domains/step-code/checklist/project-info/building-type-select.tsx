@@ -15,7 +15,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../setup/root"
 import { EStepCodeBuildingType } from "../../../../../types/enums"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   onChange: (event: any) => void
@@ -28,21 +28,22 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
   } = useMst()
 
   return (
-    <Popover placement="bottom-end">
+    <Popover placement="top-end">
       {({ onClose }) => (
         <>
           <PopoverTrigger>
             <InputGroup w={320}>
               <Input
+                as={Flex}
+                align="center"
                 bg="white"
                 cursor="pointer"
                 borderColor="gray.200"
                 borderWidth={1}
                 rounded="base"
                 shadow="base"
-                placeholder={t(`${translationPrefix}.buildingType.placeholder`)}
               >
-                {value && t(`${translationPrefix}.buildingType.options.${value}`)}
+                {value ? t(`${i18nPrefix}.buildingType.options.${value}`) : t(`${i18nPrefix}.buildingType.placeholder`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -62,7 +63,7 @@ export const BuildingTypeSelect = observer(function BuildingTypeSelect({ onChang
                   cursor="pointer"
                   _hover={{ bg: "hover.blue" }}
                 >
-                  {t(`${translationPrefix}.buildingType.options.${value}`)}
+                  {t(`${i18nPrefix}.buildingType.options.${value}`)}
                 </Flex>
               ))}
             </VStack>

@@ -11,6 +11,7 @@ import {
   MenuDivider,
   MenuGroup,
   MenuItem,
+  MenuItemProps,
   MenuList,
   Portal,
   Show,
@@ -20,14 +21,14 @@ import {
 import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { StepCodeNavLinks } from "../step-code/nav-links"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -88,8 +89,6 @@ export const NavBar = observer(() => {
       <Box
         as="nav"
         id="mainNav"
-        position="sticky"
-        top={0}
         w="full"
         bg={currentUser?.isSubmitter || !loggedIn ? "greys.white" : "theme.blue"}
         color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
@@ -100,7 +99,7 @@ export const NavBar = observer(() => {
       >
         <Container maxW="container.lg">
           <Flex align="center" gap={2}>
-            <RouterLink to="/">
+            <RouterLink to="/welcome">
               <Image
                 fit="cover"
                 htmlHeight="64px"
@@ -110,27 +109,24 @@ export const NavBar = observer(() => {
               />
             </RouterLink>
             <Show above="md">
-              {isStepCode ? (
-                <Text fontSize="md" color="text.primary" fontWeight="bold">
-                  {t("stepCode.title")}
-                </Text>
-              ) : (
-                <Text fontSize="2xl" fontWeight="normal" mb="0">
-                  {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
-                </Text>
-              )}
+              <Text fontSize="2xl" fontWeight="normal" mb="0">
+                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+              </Text>
+
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}
               </Text>
             </Show>
             <Spacer />
             <HStack gap={3}>
-              {(!isStepCode && currentUser?.isSubmitter) || (!loggedIn && <NavBarSearch />)}
-              {currentUser?.isSubmitter ? (
+              {!loggedIn && <HelpDrawer />}
+              {/* todo: navbar search? */}
+              {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
+              {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
                 </RouterLinkButton>
-              ) : null}
+              )}
               {currentUser?.jurisdiction && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
@@ -146,12 +142,17 @@ export const NavBar = observer(() => {
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
                 ))}
-              {!isStepCode && <NavBarMenu isAdmin={currentUser?.isAdmin} />}
-              {isStepCode && <StepCodeNavLinks />}
+              {(!loggedIn || currentUser?.isSubmitter) && (
+                <RouterLinkButton variant="tertiary" to="/jurisdictions">
+                  {t("home.jurisdictionsTitle")}
+                </RouterLinkButton>
+              )}
+              <NavBarMenu />
             </HStack>
           </Flex>
         </Container>
       </Box>
+
       {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
     </>
   )
@@ -167,35 +168,61 @@ const NavBarSearch = () => {
   )
 }
 
-interface INavBarMenuProps {
-  isAdmin: boolean
-}
+interface INavBarMenuProps {}
 
-const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
+const NavBarMenu = observer(({}: INavBarMenuProps) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { sessionStore, userStore } = useMst()
   const { currentUser } = userStore
   const { logout, loggedIn } = sessionStore
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleClickLogout = async () => {
     await logout()
   }
 
   const superAdminOnlyItems = (
-    <>
-      <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+    <MenuGroup>
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
-      <MenuDivider />
-    </>
+      <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
+      <MenuDivider my={0} borderColor="border.light" />
+    </MenuGroup>
+  )
+
+  const reviewManagerOnlyItems = (
+    <MenuGroup>
+      <NavMenuItem
+        label={t("site.breadcrumb.submissionInbox")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+      />
+      <NavMenuItem label={t("site.breadcrumb.digitalBuildingPermits")} to={"/digital-building-permits"} />
+      <NavMenuItem
+        label={t("site.breadcrumb.configurationManagement")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
+      />
+      <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
+      <MenuDivider my={0} borderColor="border.light" />
+    </MenuGroup>
   )
 
   const adminOrManagerItems = <></>
 
+  const reviwerOnlyItems = (
+    <MenuGroup>
+      <NavMenuItem
+        label={t("site.breadcrumb.submissionInbox")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/submission-inbox`}
+      />
+      <MenuDivider my={0} borderColor="border.light" />
+    </MenuGroup>
+  )
+
   const submitterOnlyItems = <></>
 
   return (
-    <Menu>
+    <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)} computePositionOnMount>
       <MenuButton
         as={Button}
         borderRadius="lg"
@@ -208,34 +235,67 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
       >
         {t("site.menu")}
       </MenuButton>
+
       <Portal>
-        <Box className="nav-menu-dropdown-background">
-          <MenuList zIndex={10} boxShadow="2xl">
-            {loggedIn ? (
+        <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>
+          <MenuList zIndex={99} boxShadow="2xl">
+            {loggedIn && !currentUser.isUnconfirmed ? (
               <>
                 <Text fontSize="xs" fontStyle="italic" px={3} mb={-1} color="greys.grey01">
                   {t("site.loggedInWelcome")}
                 </Text>
-                <MenuGroup title={currentUser.firstName + " " + currentUser.lastName} noOfLines={1}>
-                  <MenuDivider />
+                <MenuGroup title={currentUser.name} noOfLines={1}>
+                  <MenuDivider my={0} borderColor="border.light" />
+                  {!currentUser.isReviewStaff && (
+                    <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                  )}
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                  {currentUser?.isReviewManager && reviewManagerOnlyItems}
                   {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                  {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
+                  {!currentUser?.isSubmitter && (
+                    <>
+                      <MenuItem bg="greys.grey03">
+                        <Button variant="primary" onClick={(e) => navigate("/permit-applications/new")}>
+                          {t("site.newApplication")}
+                        </Button>
+                      </MenuItem>
+                      <NavMenuItem label={t("site.myPermits")} to="/permit-applications" bg="greys.grey03" />
+                      <MenuDivider my={0} borderColor="border.light" />
+                    </>
+                  )}
+                  <HelpDrawer
+                    renderTriggerButton={({ onClick }) => <NavMenuItem label={t("ui.help")} onClick={onClick} />}
+                  />
                   <NavMenuItem label={t("user.myProfile")} to={"/profile"} />
                   <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />
                 </MenuGroup>
               </>
             ) : (
               <>
-                <MenuList display="flex" flexWrap="wrap" px={2} py={0} gap={2} border="0" boxShadow="none" maxW="300px">
-                  <NavMenuItemCTA label={t("auth.login")} to="/login" />
-                  <NavMenuItemCTA label={t("auth.register")} to="/register" />
-                </MenuList>
-                <MenuDivider />
+                {!loggedIn && (
+                  <MenuList
+                    display="flex"
+                    flexWrap="wrap"
+                    px={2}
+                    py={0}
+                    gap={2}
+                    border="0"
+                    boxShadow="none"
+                    maxW="300px"
+                  >
+                    <NavMenuItemCTA label={t("auth.login")} to="/login" />
+                  </MenuList>
+                )}
+                <MenuDivider my={0} borderColor="border.light" />
                 <NavMenuItem label={t("site.home")} to="/" />
+                <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
+                {loggedIn && <NavMenuItem label={t("auth.logout")} onClick={handleClickLogout} />}
               </>
             )}
-            <MenuDivider />
+
+            <MenuDivider my={0} borderColor="border.light" />
             <MenuItem>
               <Link textDecoration="none" w="full" href={"mailto:" + t("site.contactEmail")} isExternal>
                 {t("site.giveFeedback")} <Envelope size={16} style={{ display: "inline", color: "inherit" }} />
@@ -249,14 +309,14 @@ const NavBarMenu = observer(({ isAdmin }: INavBarMenuProps) => {
 })
 
 // Looks complicated but this is jsut how you make it so that either to or onClick must be given, but not necessarily both
-interface INavMenuItemProps {
+interface INavMenuItemProps extends MenuItemProps {
   label: string
   to?: string
   variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItem = ({ label, to, variant, onClick }: INavMenuItemProps) => {
+const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -265,7 +325,7 @@ const NavMenuItem = ({ label, to, variant, onClick }: INavMenuItemProps) => {
   }
 
   return (
-    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick}>
+    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick} {...rest}>
       <Text textAlign="left" w="full">
         {label}
       </Text>
@@ -292,6 +352,7 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
   return (
     <MenuItem
       as={Button}
+      flex={1}
       variant={variant || "primary"}
       size="sm"
       onClick={handleClick}
@@ -306,9 +367,7 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
         boxShadow: "none",
       }}
     >
-      <Text textAlign="left" w="full">
-        {label}
-      </Text>
+      {label}
     </MenuItem>
   )
 }

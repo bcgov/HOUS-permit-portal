@@ -1,8 +1,9 @@
 /* tslint:disable */
 import { Components } from "formiojs"
-import _ from "lodash"
+import omit from "lodash/omit"
 import { Constants } from "../Common/Constants.js"
 import editForm from "./Component.form.js"
+
 export const AddressComponentMode = {
   Autocomplete: "autocomplete",
   Manual: "manual",
@@ -37,6 +38,7 @@ export default class Component extends ParentComponent {
       ...extend
     )
   }
+
   static get builderInfo() {
     return {
       title: DISPLAY,
@@ -47,10 +49,13 @@ export default class Component extends ParentComponent {
       schema: Component.schema(),
     }
   }
+
   static editForm = editForm
+
   async init() {
     super.init()
   }
+
   async attach(element) {
     super.attach(element)
     try {
@@ -69,10 +74,11 @@ export default class Component extends ParentComponent {
       )
     }
   }
+
   mergeSchema(component = {}) {
     let components = component["components"]
     if (components) {
-      return _.omit(component, "components")
+      return omit(component, "components")
     }
     return component
   }

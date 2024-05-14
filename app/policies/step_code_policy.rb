@@ -1,6 +1,6 @@
 class StepCodePolicy < ApplicationPolicy
   def create?
-    user.submitter?
+    user.present?
   end
 
   def select_options?

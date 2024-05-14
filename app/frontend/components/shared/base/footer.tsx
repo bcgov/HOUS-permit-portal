@@ -1,4 +1,4 @@
-import { Box, Button, Container, Divider, Flex, HStack, Heading, Image, Link, Text } from "@chakra-ui/react"
+import { Box, Container, Divider, Flex, Heading, Image, Link, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -9,21 +9,19 @@ import { RouterLink } from "../navigation/router-link"
 export const Footer = observer(() => {
   const location = useLocation()
   const {
-    userStore,
     sessionStore: { loggedIn },
   } = useMst()
-  const { currentUser } = userStore
   const { t } = useTranslation()
-  const excludeFooterRoutes = [
+  const onlyShowFooterOnRoutes = [
     "/reset-password",
     "/accept-invitation",
     "/login",
     "/forgot-password",
-    "/register",
-    "/permit-applications",
+    "/welcome",
+    "/contact",
   ]
 
-  const shouldShowFooter = !loggedIn || !excludeFooterRoutes.some((route) => location.pathname.startsWith(route))
+  const shouldShowFooter = onlyShowFooterOnRoutes.some((route) => location.pathname.startsWith(route))
 
   return (
     <>
@@ -37,20 +35,6 @@ export const Footer = observer(() => {
           borderColor="border.light"
           zIndex={10}
         >
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            justify="center"
-            gap={4}
-            p={4}
-            align="center"
-            bg="greys.grey04"
-          >
-            <Text>{t("site.didYouFind")}</Text>
-            <HStack gap={3}>
-              <Button variant="secondary">{t("ui.yes")}</Button>
-              <Button variant="secondary">{t("ui.no")}</Button>
-            </HStack>
-          </Flex>
           <Flex py={8} borderY="4px solid" borderColor="theme.yellow" bg="text.primary" color="greys.white">
             <Container maxW="container.lg">
               <Text>{t("site.territorialAcknowledgement")}</Text>
@@ -68,7 +52,7 @@ export const Footer = observer(() => {
                       {t("site.titleLong")}
                     </Heading>
                     <Flex direction={{ base: "column", md: "row" }} flex={1} gap={{ base: 8, md: 0 }}>
-                      <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
+                      <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
                         <RouterLink to="/" color="text.primary">
                           {t("site.home")}
                         </RouterLink>
@@ -76,30 +60,23 @@ export const Footer = observer(() => {
                           {t("site.contact")}
                         </RouterLink>
                         <Link
-                          href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services"
+                          href={
+                            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub"
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           color="text.primary"
                         >
                           {t("site.help")}
                         </Link>
-                      </Flex>
-
-                      <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
-                        {!loggedIn ? (
-                          <>
-                            <RouterLink to="/login" color="text.primary">
-                              {t("auth.login")}
-                            </RouterLink>
-                            <RouterLink to="/register" color="text.primary">
-                              {t("auth.register")}
-                            </RouterLink>
-                          </>
-                        ) : (
-                          <></>
+                        {!loggedIn && (
+                          <RouterLink to="/login" color="text.primary">
+                            {t("auth.login")}
+                          </RouterLink>
                         )}
-                      </Flex>
-                      <Flex direction="column" gap={4} w={{ base: "100%", md: "33%" }}>
+                      </VStack>
+
+                      <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
                         <Link
                           href="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
                           target="_blank"
@@ -132,7 +109,7 @@ export const Footer = observer(() => {
                         >
                           {t("site.copyright")}
                         </Link>
-                      </Flex>
+                      </VStack>
                     </Flex>
                   </Flex>
                 </Flex>
@@ -145,7 +122,7 @@ export const Footer = observer(() => {
                   textDecoration="none"
                   fontSize="sm"
                 >
-                  © {new Date().getFullYear()} {t("site.copyrightHolder")}
+                  &copy; {new Date().getFullYear()} {t("site.copyrightHolder")}
                 </Link>
               </Flex>
             </Container>

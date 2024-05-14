@@ -1,0 +1,71 @@
+@import "global-theme-variables.scss";
+
+/* ======================================
+
+  Styling that cannot be handled by Chakra Theme/Props :
+
+====================================== */
+
+/* Admin Panel's  */
+//  large cards that should behave like a button (eg. have whole box clickable without changing markup)
+.jumbo-buttons {
+  position: relative;
+  overflow: hidden;
+  .chakra-button {
+    position: static;
+    &::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      display: block;
+    }
+  }
+}
+
+/* Typography Issues */
+
+// Reset Chakra's default to so we don't have to set "fontSize prop, only need to use the "as" prop. (This  only affects headings that are inside a <Container>.)
+.chakra-container {
+  h1 {
+    font-size: var(--chakra-fontSizes-4xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h2 {
+    font-size: var(--chakra-fontSizes-2xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h3 {
+    font-size: var(--chakra-fontSizes-xl);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+  h4 {
+    font-size: var(--chakra-fontSizes-lg);
+    &:only-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.edit-template-yellowBarHeader {
+  margin-top: var(--chakra-space-4);
+  @include yellowBarHeader;
+  &::before {
+    position: absolute;
+    margin-top: -8px;
+    z-index: 0;
+  }
+}
+
+// when admin is reordering sections, don't show the requirement templates form on the right (nor make it interactable)
+#sections-sidebar-reordering + #editing-permit-requirements-form {
+  display: none;
+}

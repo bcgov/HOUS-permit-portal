@@ -28,10 +28,10 @@ export const FlashMessage = observer(() => {
 
 export const CustomToast = ({ title, description, status }: ToastProps) => {
   const iconMap = {
-    success: <CheckCircle size={20} />,
-    warning: <Warning size={20} />,
-    error: <WarningCircle size={20} />,
-    info: <Info size={20} />,
+    success: <CheckCircle size={24} />,
+    warning: <Warning size={24} />,
+    error: <WarningCircle size={24} />,
+    info: <Info size={24} />,
   }
 
   return (

@@ -1,6 +1,10 @@
 class UserPolicy < ApplicationPolicy
+  def profile?
+    user.id == record.id
+  end
+
   def update?
-    user == record
+    (user.review_manager? && user.jurisdiction_id == record.jurisdiction_id)
   end
 
   def invite?
@@ -12,24 +16,32 @@ class UserPolicy < ApplicationPolicy
   end
 
   def index?
+    user.super_admin?
+  end
+
+  def search_jurisdiction_users?
     (user.super_admin? && record.review_manager?) ||
       (user.review_manager? && user.jurisdiction_id == record.jurisdiction_id)
   end
 
-  def search_users?
-    index?
+  def search_admin_users?
+    user.super_admin? && record.super_admin?
   end
 
   def destroy?
-    index?
+    search_jurisdiction_users? || user.super_admin?
   end
 
   def restore?
-    index?
+    destroy?
   end
 
   def accept_eula?
-    update?
+    profile?
+  end
+
+  def resend_confirmation?
+    profile?
   end
 
   class Scope < Scope

@@ -20,14 +20,20 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 5"}
+          gridColumn={"span 6"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}
           align="center"
         >
           <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
-          <SearchInput searchModel={requirementBlockStore as ISearch} />
+          <SearchInput
+            inputGroupProps={{
+              position: "sticky",
+              right: 6,
+            }}
+            searchModel={requirementBlockStore as ISearch}
+          />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>

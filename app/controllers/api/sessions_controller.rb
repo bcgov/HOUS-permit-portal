@@ -4,19 +4,6 @@ class Api::SessionsController < Devise::SessionsController
 
   skip_before_action :verify_signed_out_user
 
-  def create
-    # override by manually throwing the error in our format for front end
-    user = warden.authenticate(auth_options)
-    return render_error("user.login_error", status: :unauthorized) unless user
-
-    self.resource = user
-
-    # override this using store: false so that it does not create a warden session
-    sign_in(resource_name, resource, store: false)
-    yield resource if block_given?
-    render_success current_user, nil, { blueprint_opts: { view: :extended } }
-  end
-
   def destroy
     signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
     render_success nil, "user.logout_success"

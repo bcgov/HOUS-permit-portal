@@ -9,7 +9,7 @@ import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { AirtightnessSelect } from "./airtightness-select"
 import { EPCTestingTargetTypeSelect } from "./epc-testing-target-type-select"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   checklist: IStepCodeChecklist
@@ -21,69 +21,69 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
   const watchReferenceConsumptionFields = watch(["refHvacConsumption", "refDhwHeatingConsumption"])
 
   return (
-    <ChecklistSection heading={t(`${translationPrefix}.heading`)}>
+    <ChecklistSection heading={t(`${i18nPrefix}.heading`)}>
       <Text fontWeight="bold" fontSize="md">
-        {t(`${translationPrefix}.proposedHouseEnergyConsumption`)}
+        {t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}
       </Text>
       <HStack>
         <TextFormControl
-          label={t(`${translationPrefix}.hvac`)}
+          label={t(`${i18nPrefix}.hvac`)}
           fieldName={"hvacConsumption"}
-          hint={t(`${translationPrefix}.energyUnit`)}
+          hint={t(`${i18nPrefix}.energyUnit`)}
         />
         <Text fontWeight="bold" fontSize="2xl">
           +
         </Text>
         <TextFormControl
-          label={t(`${translationPrefix}.dwhHeating`)}
+          label={t(`${i18nPrefix}.dwhHeating`)}
           fieldName={"dhwHeatingConsumption"}
-          hint={t(`${translationPrefix}.energyUnit`)}
+          hint={t(`${i18nPrefix}.energyUnit`)}
         />
         <Text fontWeight="bold" fontSize="2xl">
           =
         </Text>
         <TextFormControl
-          label={t(`${translationPrefix}.sum`)}
+          label={t(`${i18nPrefix}.sum`)}
           inputProps={{
             isDisabled: true,
             value: R.sum(R.map((v) => parseInt(v || "0"), watchProposedConsumptionFields)),
           }}
-          hint={t(`${translationPrefix}.energyUnit`)}
+          hint={t(`${i18nPrefix}.energyUnit`)}
         />
       </HStack>
       <Divider />
       <Text fontWeight="bold" fontSize="md">
-        {t(`${translationPrefix}.referenceHouseRatedEnergyTarget`)}
+        {t(`${i18nPrefix}.referenceHouseRatedEnergyTarget`)}
       </Text>
       <HStack>
         <TextFormControl
-          label={t(`${translationPrefix}.hvac`)}
+          label={t(`${i18nPrefix}.hvac`)}
           fieldName={"refHvacConsumption"}
-          hint={t(`${translationPrefix}.energyUnit`)}
+          hint={t(`${i18nPrefix}.energyUnit`)}
         />
         <Text fontWeight="bold" fontSize="2xl">
           +
         </Text>
         <TextFormControl
-          label={t(`${translationPrefix}.dwhHeating`)}
+          label={t(`${i18nPrefix}.dwhHeating`)}
           fieldName={"refDhwHeatingConsumption"}
-          hint={t(`${translationPrefix}.energyUnit`)}
+          hint={t(`${i18nPrefix}.energyUnit`)}
         />
         <Text fontWeight="bold" fontSize="2xl">
           =
         </Text>
         <TextFormControl
-          label={t(`${translationPrefix}.sum`)}
+          label={t(`${i18nPrefix}.sum`)}
           inputProps={{
             isDisabled: true,
             value: R.sum(R.map((v) => parseInt(v || "0"), watchReferenceConsumptionFields)),
           }}
-          hint={t(`${translationPrefix}.energyUnit`)}
+          hint={t(`${i18nPrefix}.energyUnit`)}
         />
       </HStack>
       <Divider />
       <FormControl>
-        <FormLabel>{t(`${translationPrefix}.calculationAirtightness`)}</FormLabel>
+        <FormLabel>{t(`${i18nPrefix}.calculationAirtightness`)}</FormLabel>
         <Controller
           control={control}
           name="epcCalculationAirtightness"
@@ -92,7 +92,7 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
       </FormControl>
       <HStack align="end">
         <TextFormControl
-          label={t(`${translationPrefix}.calculationTestingTarget`)}
+          label={t(`${i18nPrefix}.calculationTestingTarget`)}
           inputProps={{ isDisabled: true, value: checklist.ach }}
         />
         <Controller
@@ -106,7 +106,7 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
         control={control}
         render={({ field: { onChange, value } }) => (
           <Checkbox isChecked={!!value} onChange={onChange}>
-            {t(`${translationPrefix}.compliance`)}
+            {t(`${i18nPrefix}.compliance`)}
           </Checkbox>
         )}
       />

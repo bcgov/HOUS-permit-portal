@@ -11,10 +11,7 @@ class Integrations::LtsaParcelMapBc
     @api_path = parsed_url.path
   end
 
-  def get_details_by_pid(
-    pid:,
-    fields: "PID,PARCEL_STATUS,PARCEL_NAME,PARCEL_CLASS,OWNER_TYPE,MUNICIPALITY,REGIONAL_DISTRICT,WHEN_UPDATED,FEATURE_AREA_SQM"
-  )
+  def get_details_by_pid(pid:, fields: "*")
     query = "returnIdsOnly=false&returnCountOnly=false"
     query += "&where=PID='#{pid}'"
     query += "&returnGeometry=true&spatialRel=esriSpatialRelIntersects"
@@ -22,11 +19,32 @@ class Integrations::LtsaParcelMapBc
     @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
   end
 
+  def get_details_by_pin(pin:, fields: "*")
+    #cannot search PIN directly, Must use PARCEL_NAME
+    query = "returnIdsOnly=false&returnCountOnly=false"
+    query += "&where=PARCEL_NAME='#{pin}'+AND+PIN+IS+NOT+NULL"
+    query += "&returnGeometry=true&spatialRel=esriSpatialRelIntersects"
+    query += "&outFields=#{fields}"
+    @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
+  end
+
+  def search_pin_from_coordinates(coord_array: [], fields: "*")
+    #assume we use SR4326 as geocoder defaults to that as its main coordinate version
+    query = "returnIdsOnly=false&returnCountOnly=false"
+    query += "&where=PIN+IS+NOT+NULL&geometry=#{coord_array.join("%2C")}"
+    query +=
+      "&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=true&spatialRel=esriSpatialRelIntersects"
+    query += "&outFields=#{fields}"
+    response = @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{PARCEL_SERVICE}/query?f=json&#{query}")
+
+    parse_attributes_array_from_response(response)
+  end
+
   def historic_site_by_pid(pid:)
     query = "where=HISTORIC_SITE_IND='Y' AND PARCEL_DESCRIPTION='#{pid}'&returnGeometry=true&outFields=*"
     response = @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{HISTORIC_SERVICE}/query?f=json&#{query}")
     #assuem if there is a parcel description match not to use ltsa geometry matching
-    return response if response.success? && response.body.dig("features").length > 0
+    return parse_attributes_from_response(response) if response.success? && response.body.dig("features").length > 0
 
     #get geometry from pid
     response_for_geometry = get_details_by_pid(pid: pid, fields: "PID")
@@ -35,9 +53,10 @@ class Integrations::LtsaParcelMapBc
       pid_geo = response_for_geometry.body.dig("features", 0, "geometry")
       query =
         "where=HISTORIC_SITE_IND='Y'&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=#{CGI.escape(pid_geo.to_json)}&geometryType=esriGeometryPolygon&outFields=*"
-      @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{HISTORIC_SERVICE}/query?f=json&#{query}")
+      response = @client.get("#{ENV["GEO_LTSA_PARCELMAP_REST_URL"]}#{HISTORIC_SERVICE}/query?f=json&#{query}")
+      return parse_attributes_from_response(response)
     else
-      raise ArgumentError.new("invalid geometry returned")
+      raise Errors::GeometryError
     end
   end
 
@@ -49,14 +68,26 @@ class Integrations::LtsaParcelMapBc
     # https://maps.gov.bc.ca/arcserver/rest/services/mpcm/bcgw/MapServer/dynamicLayer/query?layer=Your_Layer_Definition&f=json&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry={"rings":[[[x1, y1], [x2, y2], [x3, y3], ..., [x1, y1]]],"spatialReference":{"wkid":Spatial_Reference_ID}}&geometryType=esriGeometryPolygon&inSR=Spatial_Reference_ID&outSR=Spatial_Reference_ID
   end
 
-  def get_feature_attributes_by_pid(
-    pid:,
-    fields: "PID,PARCEL_STATUS,PARCEL_NAME,PARCEL_CLASS,OWNER_TYPE,MUNICIPALITY,REGIONAL_DISTRICT,WHEN_UPDATED,FEATURE_AREA_SQM"
-  )
+  def get_feature_attributes_by_pid(pid:, fields: "*")
     response = get_details_by_pid(pid: pid, fields: fields)
     if response.success?
-      #assumes there is one layer to these features at the moment
-      return response.body.dig("features", 0, "attributes")
+      return parse_attributes_from_response(response)
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
+  end
+
+  def get_feature_attributes_by_pid_or_pin(pid:, pin:, fields: "*")
+    raise Errors::FeatureAttributesRetrievalError if pin.blank? && pid.blank?
+    #always prioritize pid over pin
+    response =
+      if pid
+        get_details_by_pid(pid: pid, fields: fields)
+      elsif pin
+        get_details_by_pin(pin: pin, fields: fields)
+      end
+    if response.success?
+      return parse_attributes_from_response(response)
     else
       raise Errors::FeatureAttributesRetrievalError
     end
@@ -67,6 +98,26 @@ class Integrations::LtsaParcelMapBc
     if response.success?
       #assumes there is one layer to these features at the moment
       return response.body.dig("features", 0, "geometry", "rings", 0, 0)
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
+  end
+
+  private
+
+  def parse_attributes_from_response(response)
+    if response.success?
+      #assumes there is one layer to these features at the moment
+      return response.body.dig("features", 0, "attributes")
+    else
+      raise Errors::FeatureAttributesRetrievalError
+    end
+  end
+
+  def parse_attributes_array_from_response(response)
+    if response.success?
+      #assumes there is one layer to these features at the moment
+      return response.body.dig("features")&.map { |f| f["attributes"] } || []
     else
       raise Errors::FeatureAttributesRetrievalError
     end

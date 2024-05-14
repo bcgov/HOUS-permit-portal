@@ -22,7 +22,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
       showArchived: types.optional(types.boolean, false),
-      statusFilter: types.maybeNull(types.enumeration(filterableStatuses)),
+      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
@@ -86,7 +86,6 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         if (self.sort && self.sort.field == sortField && self.sort.direction == ESortDirection.ascending) {
           // return to unsorted state
           self.clearSort()
-          yield self.fetchData(opts)
         } else {
           // apply the next sort state
           const direction =
@@ -94,8 +93,8 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
               ? ESortDirection.ascending
               : ESortDirection.descending
           self.applySort({ field: sortField, direction, ...opts })
-          yield self.fetchData(opts)
         }
+        yield self.fetchData(opts)
       }),
       toggleShowArchived: flow(function* () {
         self.setShowArchived(!self.showArchived)

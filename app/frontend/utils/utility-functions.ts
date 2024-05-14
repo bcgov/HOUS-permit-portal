@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
-import { vancouverTimeZone } from "../constants"
+import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE, vancouverTimeZone } from "../constants"
 import { ERequirementType } from "../types/enums"
 import { TDebouncedFunction } from "../types/types"
 
@@ -15,6 +15,9 @@ export function generateUUID() {
   )
 }
 
+/**
+ * Prevent users from triggering the provided function multiple times within a the specified {delay} time period.
+ */
 export function debounce<T extends (...args: any[]) => any>(func: T, delay: number): TDebouncedFunction<T> {
   let timeoutId: NodeJS.Timeout
 
@@ -59,11 +62,15 @@ export function setQueryParam(key: string, value: string) {
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {
   const multiOptionRequirementFields = [
     ERequirementType.radio,
-    ERequirementType.checkbox,
     ERequirementType.select,
     ERequirementType.multiOptionSelect,
   ]
   return multiOptionRequirementFields.includes(requirementType)
+}
+
+export function isContactRequirement(requirementType: ERequirementType): boolean {
+  const contactRequirementFields = [ERequirementType.generalContact, ERequirementType.professionalContact]
+  return contactRequirementFields.includes(requirementType)
 }
 
 export function isQuillEmpty(value: string) {
@@ -77,19 +84,16 @@ export function parseBoolean(value: string): boolean {
   return value.toLowerCase() === "true"
 }
 
-export function handleScrollToTop(elementId: string) {
-  document.getElementById(elementId).scrollTo({
+export function handleScrollToTop() {
+  document.documentElement.scrollTo({
     top: 0,
     behavior: "instant",
   })
+  document.body.scrollTop = 0 // For Safari
 }
 
-export function handleScrollToBottom(elementId: string) {
-  const outerFlex = document.getElementById(elementId)
-  outerFlex.scrollTo({
-    top: outerFlex.scrollHeight - outerFlex.clientHeight,
-    behavior: "instant",
-  })
+export function handleScrollToBottom() {
+  window.scrollTo(0, document.body.scrollHeight)
 }
 
 export function formatTemplateVersion(versionDate: Date) {
@@ -117,4 +121,23 @@ export function renameKeys(keysMap, obj) {
     }),
     {}
   )
+}
+
+export function isStepCodePackageFileRequirementCode(requirementCode: string) {
+  return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+}
+
+export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
+  // Remove any non-numeric characters, especially the leading '+'
+  if (!phoneNumber) return ""
+
+  const digits = phoneNumber.replace(/\D+/g, "")
+
+  // Extract the area code, first three digits, and last four digits
+  const areaCode = digits.substring(1, 4)
+  const firstThree = digits.substring(4, 7)
+  const lastFour = digits.substring(7, 11)
+
+  // Return the formatted phone number
+  return `(${areaCode}) ${firstThree}-${lastFour}`
 }

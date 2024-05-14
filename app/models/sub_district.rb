@@ -6,5 +6,9 @@ class SubDistrict < Jurisdiction
     Jurisdiction.search(*args, **updated_kwargs)
   end
 
+  def regional_district_name
+    regional_district&.reverse_qualified_name
+  end
+
   private
 end

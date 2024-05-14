@@ -1,4 +1,4 @@
 import { css } from "@emotion/react"
-import "./global-app.scss"
+import "./chakra-overrides.scss"
 
 export const GlobalStyles = css``

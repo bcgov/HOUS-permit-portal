@@ -1,12 +1,26 @@
 import { useEffect } from "react"
+import { useParams } from "react-router-dom"
 import { ISearch, TFilterableStatus } from "../lib/create-search-model"
+import { useMst } from "../setup/root"
 import { ESortDirection } from "../types/enums"
 import { parseBoolean } from "../utils/utility-functions"
 
 export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => {
+  // Reset currents
+  const { jurisdictionId } = useParams()
+  const { permitApplicationId } = useParams()
+  const {
+    jurisdictionStore: { resetCurrentJurisdiction },
+    permitApplicationStore: { resetCurrentPermitApplication },
+  } = useMst()
+
+  useEffect(() => {
+    if (!jurisdictionId) resetCurrentJurisdiction()
+    if (!permitApplicationId) resetCurrentPermitApplication()
+  }, [jurisdictionId, permitApplicationId])
+
   useEffect(() => {
     // This is necessary for preventing failed calls, IE when the currentJursidiction for user search is undefined
-
     if (dependencyArray.some((dep) => dep == null)) return
 
     const queryParams = new URLSearchParams(location.search)

@@ -1,8 +1,6 @@
-# syntax = docker/dockerfile:1
-
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
 ARG RUBY_VERSION=3.2.2-bullseye
-FROM ruby:$RUBY_VERSION as base
+FROM ruby:$RUBY_VERSION
 
 # Rails app lives here
 WORKDIR /app
@@ -11,35 +9,32 @@ WORKDIR /app
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="development" \
+    PATH="/usr/local/node/bin:$PATH" \
+    npm_config_cache="/app/.npm"
 
-
-# Throw-away build stage to reduce size of final image
-FROM base as build
-
-# Install packages needed to build gems and node modules
+# Install packages needed for both building and running the application
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python
+    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python libjemalloc2 postgresql-client netcat && \
+    rm -rf /var/lib/apt/lists/*
 
-# Use jemalloc to improve memory - https://medium.com/code-wild/how-jemalloc-improved-memory-usage-of-our-rails-application-7038d5926d4
-RUN apt-get update && apt-get install libjemalloc2 && rm -rf /var/lib/apt/lists/*
+# Use jemalloc to improve memory management
 ENV LD_PRELOAD="libjemalloc.so.2" \
-    MALLOC_CONF="dirty_decay_ms:1000,narenas:2,background_thread:true,stats_print:true" \
+    MALLOC_CONF="dirty_decay_ms:1000,narenas:2,background_thread:true" \
     RUBY_YJIT_ENABLE="1"
 
-# Install JavaScript dependencies
+# Install Node.js
 ARG NODE_VERSION=20.10.0
-ENV PATH=/usr/local/node/bin:$PATH
 RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
     rm -rf /tmp/node-build-master
 
-# Install application gems
+# Install Ruby gems
 COPY Gemfile Gemfile.lock ./
-RUN gem install bundler:2.5.4
-RUN bundle install
+RUN gem install bundler:2.5.4 && \
+    bundle install
 
-# Install node modules
+# Install npm and node modules
 COPY package.json package-lock.json ./
 RUN npm install
 
@@ -49,27 +44,17 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+# Precompiling assets for production without requiring secret RAILS_MASTER_KEY - also compile SSR
+ARG VITE_ENABLE_TEMPLATE_FORCE_PUBLISH
+ARG VITE_BCEID_URL
+ARG VITE_BUSINESS_BCEID_REGISTRATION_URL
+ARG VITE_BASIC_BCEID_REGISTRATION_URL
 COPY config/database.yml.docker_precompile_dummy /app/config/database.yml
-# Also add a flag ASSET_PRECOMPILATION that we can use to stub Shrine
-RUN SECRET_KEY_BASE_DUMMY=1 SKIP_DEPENDENCY_INITIALIZERS=true ./bin/rails assets:precompile
-# RUN rm /app/config/database.yml
-
-# Final stage for app image
-FROM base
-
-# Install packages needed for deployment
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl netcat libvips postgresql-client && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# Copy built artifacts: gems, application
-COPY --from=build /usr/local/bundle /usr/local/bundle
-COPY --from=build /app /app
+RUN SECRET_KEY_BASE_DUMMY=1 SKIP_DEPENDENCY_INITIALIZERS=true VITE_RUBY_SSR_BUILD_ENABLED=true VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${VITE_ENABLE_TEMPLATE_FORCE_PUBLISH} VITE_BCEID_URL=${VITE_BCEID_URL} VITE_BUSINESS_BCEID_REGISTRATION_URL=${VITE_BUSINESS_BCEID_REGISTRATION_URL} VITE_BASIC_BCEID_REGISTRATION_URL=${VITE_BASIC_BCEID_REGISTRATION_URL} ./bin/rails assets:precompile
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp && \
+    chown -R rails:rails /app && \
     chmod -R 777 log tmp db storage
 
 USER rails:rails
