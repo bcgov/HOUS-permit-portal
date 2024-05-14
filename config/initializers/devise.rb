@@ -36,6 +36,7 @@ Devise.setup do |config|
                     realm: "standard",
                   },
                   authorize_options: [:kc_idp_hint],
+                  scope: "openid",
                   name: :keycloak,
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
 

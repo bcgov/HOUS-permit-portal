@@ -2,6 +2,7 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   include BaseControllerMethods
 
   def keycloak
+    binding.pry
     origin_query = Rack::Utils.parse_nested_query(URI(request.env["omniauth.origin"]).query)
     result =
       OmniauthUserResolver.new(
