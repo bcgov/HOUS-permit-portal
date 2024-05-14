@@ -1,4 +1,4 @@
-export const fieldArrayCompatibleErrorMessage = (fieldName, formState) => {
+export const fieldArrayCompatibleErrorMessage = (fieldName, errors) => {
   // Used to capture different behaviour for errors in basic use of useFieldArray
   // For more deeply nested field arrays, please use a custom component
   const fieldNameSplit = fieldName.split(".")
@@ -9,6 +9,6 @@ export const fieldArrayCompatibleErrorMessage = (fieldName, formState) => {
   const isFieldArray = !!fieldNameSuffix
 
   return isFieldArray
-    ? formState?.errors?.[fieldNameRoot]?.[fieldNameIndex]?.[fieldNameSuffix]?.message
-    : (formState?.errors?.[fieldName]?.message as string)
+    ? errors?.[fieldNameRoot]?.[fieldNameIndex]?.[fieldNameSuffix]?.message
+    : (errors?.[fieldName]?.message as string)
 }

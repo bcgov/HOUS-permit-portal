@@ -8,12 +8,24 @@ require "shrine/storage/s3"
 #   host: ENV['CDN_HOST_URL']
 # }
 
-if Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?
-  Shrine.storages = {
-    cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
-    store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
-  }
-else
+module Constants
+  module Sizes
+    FILE_UPLOAD_MAX_SIZE =
+      (
+        if ENV["VITE_FILE_UPLOAD_MAX_SIZE"].present?
+          ENV["VITE_FILE_UPLOAD_MAX_SIZE"].to_d
+        else
+          100
+        end
+      )
+    FILE_UPLOAD_ZIP_MAX_SIZE = FILE_UPLOAD_MAX_SIZE * 10
+  end
+end
+
+SHRINE_USE_S3 =
+  !(Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?)
+
+if SHRINE_USE_S3
   s3_options = {
     bucket: ENV["BCGOV_OBJECT_STORAGE_BUCKET"],
     endpoint: ENV["BCGOV_OBJECT_STORAGE_ENDPOINT"],
@@ -25,6 +37,11 @@ else
   Shrine.storages = {
     cache: Shrine::Storage::S3.new(public: false, prefix: "cache", **s3_options),
     store: Shrine::Storage::S3.new(public: false, **s3_options),
+  }
+else
+  Shrine.storages = {
+    cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
+    store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store"), # permanent
   }
 end
 
@@ -39,7 +56,7 @@ Shrine.plugin :add_metadata
 # Shrine.plugin :url_options, cache: url_options, store: url_options
 Shrine.plugin :form_assign
 Shrine.plugin :data_uri
-Shrine.plugin :remote_url, max_size: 20 * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
+Shrine.plugin :remote_url, max_size: Constants::Sizes::FILE_UPLOAD_MAX_SIZE * 1024 * 1024 # https://shrinerb.com/docs/plugins/remote_url
 
 Shrine.plugin :presign_endpoint,
               presign_options:
@@ -55,12 +72,21 @@ Shrine.plugin :presign_endpoint,
                     # transfer_encoding: "chunked",
                   }
                 }
+Shrine.plugin :uppy_s3_multipart if SHRINE_USE_S3
 
 class Shrine::Storage::S3
+  #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L105
+  #https://github.com/transloadit/uppy/blob/960362b373666b18a6970f3778ee1440176975af/packages/%40uppy/companion/src/server/controllers/s3.js#L240
+  #https://github.com/janko/uppy-s3_multipart/blob/master/lib/uppy/s3_multipart/client.rb
+  #uppy utilizes functionality to hit the endpoint to create a multi upload request and then allow you to batch sign urls for each part
+  #we want to simulate something similar for form.io, but to simplify it we will use a presign put
+  #one thing to watch out for is that presign_put uses shortly timed urls
+
   def presign_put(id, options)
     obj = object(id)
 
-    signed_urls = [obj.presigned_url(:put, options)]
+    #chunking handled by uppy
+    signed_url = obj.presigned_url(:put, options)
     url = Shrine.storages[:cache].url(id, public: false, expires_in: 3600)
     # When any of these options are specified, the corresponding request
     # headers must be included in the upload request.
@@ -72,7 +98,7 @@ class Shrine::Storage::S3
     headers["Content-Language"] = options[:content_language] if options[:content_language]
     headers["Content-MD5"] = options[:content_md5] if options[:content_md5]
 
-    { method: :put, url: url, signedUrls: signed_urls, headers: headers, key: obj.key }
+    { method: :put, url: url, signed_url: signed_url, headers: headers, key: obj.key }
   end
 
   # ECS S3 copy function does not take as many params, it works when its plain.  You can test in the code below to verify.

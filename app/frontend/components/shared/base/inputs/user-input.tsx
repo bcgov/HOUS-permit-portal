@@ -1,101 +1,120 @@
-import { Button, Flex, FormControl, FormLabel, HStack, Input, InputGroup, Select, Tag, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, FormControl, FormLabel, HStack, Input, Select, Tag, TagProps, Text } from "@chakra-ui/react"
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { ReactNode } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
+import { EUserRoles } from "../../../../types/enums"
 import { EmailFormControl } from "../../form/email-form-control"
+import { TextFormControl } from "../../form/input-form-control"
+import { SharedSpinner } from "../shared-spinner"
 
 interface IUserInputProps {
   index: number
   remove?: (index: number) => any
   jurisdictionId?: string
+  adminOnly?: boolean
 }
 
-export const UserInput = observer(({ index, remove, jurisdictionId }: IUserInputProps) => {
-  const { register, formState, control, watch } = useFormContext()
+export const UserInput = observer(({ index, remove, jurisdictionId, adminOnly }: IUserInputProps) => {
+  const { register, formState, control, watch, setValue } = useFormContext()
+  const { isSubmitting } = formState
   const { t } = useTranslation()
 
   const emailWatch = watch(`users.${index}.email`)
 
   const { userStore } = useMst()
-  const { invitedEmails, takenEmails } = userStore
+  const { reinvitedEmails, invitedEmails, takenEmails } = userStore
+  const reinvited = reinvitedEmails?.includes(emailWatch)
   const invited = invitedEmails?.includes(emailWatch)
   const taken = takenEmails?.includes(emailWatch)
 
   return (
-    <Flex bg="greys.grey03" p={2} borderRadius="md" flexWrap="wrap" minH={114}>
+    <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
       <Input hidden {...register(`users.${index}.jurisdictionId`)} value={jurisdictionId} />
-      <Flex gap={4} align="flex-start">
-        <FormControl flex={2}>
+      <HStack spacing={4} w="full">
+        <FormControl>
           <FormLabel>{t("auth.role")}</FormLabel>
+
           <Controller
             name={`users.${index}.role`}
             control={control}
-            render={({ field }) => (
-              <Select bg="greys.white" {...field}>
-                <option value="review_manager">Review Manager</option>
-                <option value="reviewer">Reviewer</option>
-              </Select>
-            )}
+            rules={{ required: true }} // Inline validation rule
+            render={({ field }) => {
+              return (
+                <>
+                  <Select bg="greys.white" placeholder={t("ui.pleaseSelect")} {...field}>
+                    {adminOnly ? (
+                      <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
+                    ) : (
+                      <>
+                        <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
+                        <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
+                      </>
+                    )}
+                  </Select>
+                </>
+              )
+            }}
           />
         </FormControl>
-        <EmailFormControl fieldName={`users.${index}.email`} flex={3} validate required />
-        <NameFormControl label="First Name (optional)" index={index} subFieldName="firstName" />
-        <NameFormControl label="Last Name (optional)" index={index} subFieldName="lastName" />
-        {invited && (
-          <Tag bg="semantic.successLight" border="1px solid" borderColor="semantic.success" alignSelf="center">
-            <HStack color="semantic.success">
-              <CheckCircle size={20} />
-              <Text>{t("user.inviteSuccess")}</Text>
-            </HStack>
-          </Tag>
-        )}
-        {taken && (
-          <Tag bg="semantic.errorLight" border="1px solid" borderColor="semantic.error" alignSelf="center">
-            <HStack color="semantic.error">
-              <WarningCircle size={20} />
-              <Text>{t("user.inviteError")}</Text>
-            </HStack>
-          </Tag>
-        )}
-        {!invited && !taken && remove && (
-          <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />} alignSelf="center">
-            {t("ui.remove")}
-          </Button>
-        )}
-      </Flex>
+        <EmailFormControl fieldName={`users.${index}.email`} validate required />
+        <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} required />
+        <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} required />
+        <Box alignSelf="flex-end" minW={150}>
+          {isSubmitting ? (
+            <SharedSpinner position="relative" top={4} left={5} minW="fit-content" />
+          ) : (
+            <>
+              {reinvited && (
+                <IInviteResultTag
+                  bg="semantic.successLight"
+                  text={t("user.reinviteSuccess")}
+                  icon={<CheckCircle size={20} />}
+                />
+              )}
+              {invited && (
+                <IInviteResultTag
+                  bg="semantic.successLight"
+                  text={t("user.inviteSuccess")}
+                  icon={<CheckCircle size={20} />}
+                />
+              )}
+              {taken && (
+                <IInviteResultTag
+                  bg="semantic.errorLight"
+                  text={t("user.inviteError")}
+                  icon={<WarningCircle size={20} />}
+                />
+              )}
+            </>
+          )}
+          {!invited && !taken && !reinvited && remove && !isSubmitting && (
+            <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />}>
+              {t("ui.remove")}
+            </Button>
+          )}
+        </Box>
+      </HStack>
     </Flex>
   )
 })
 
-interface INameFormControlProps {
-  label: string
-  index: number
-  subFieldName: string
+interface IInviteResultTagProps extends TagProps {
+  icon: ReactNode
+  text: string
 }
 
-const NameFormControl = ({ label, index, subFieldName }: INameFormControlProps) => {
-  const { register, formState } = useFormContext()
-  const { t } = useTranslation()
+const IInviteResultTag = ({ bg, icon, text, ...rest }: IInviteResultTagProps) => {
+  const color = (bg as string).replace(/Light/g, "")
 
   return (
-    <FormControl isInvalid={!!formState?.errors.users?.[index]?.[subFieldName]} flex={2}>
-      <FormLabel>{label}</FormLabel>
-      <InputGroup>
-        <Flex w="full" direction="column">
-          <Input
-            bg="greys.white"
-            {...register(`users.${index}.${subFieldName}`, {
-              validate: {
-                satisfiesNameLength: (str) => !str || (str.length >= 2 && str.length < 128) || t("ui.invalidInput"),
-              },
-            })}
-            type={"text"}
-          />
-        </Flex>
-      </InputGroup>
-    </FormControl>
+    <Tag border="1px solid" borderColor={color} mb={2} noOfLines={1} bg={bg} {...rest}>
+      <HStack color={color}>
+        {icon}
+        <Text>{text}</Text>
+      </HStack>
+    </Tag>
   )
 }

@@ -1,4 +1,5 @@
 require "sidekiq-cron"
+require "sidekiq-unique-jobs"
 
 # in production mode we use redis-sentinel for HA Redis, locally / test just fallback to default (ENV['REDIS_URL'])
 if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation in the docker build stage
@@ -16,9 +17,19 @@ if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip th
     config.redis = redis_cfg
     config.queues = %w[file_processing default]
     config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
+
+    config.client_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Client }
+
+    config.server_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Server }
+
+    SidekiqUniqueJobs::Server.configure(config)
   end
 
-  Sidekiq.configure_client { |config| config.redis = redis_cfg }
+  Sidekiq.configure_client do |config|
+    config.redis = redis_cfg
+
+    config.client_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Client }
+  end
 
   # # Don't load crons in test and dev mode
   schedule_file = "config/sidekiq_cron_schedule.yml"

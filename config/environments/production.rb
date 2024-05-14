@@ -1,4 +1,5 @@
 require "active_support/core_ext/integer/time"
+require_relative "../../lib/multi_logger"
 
 Rails.application.configure do
   # Specify AnyCable WebSocket server URL to use by JS client
@@ -45,7 +46,9 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # Don't force all traffic to SSL here since we want the liveness probes to be able to hit /up properly without redirecting to an SSL scheme
+  # instead this will be redirected on the route level
+  # config.force_ssl = true
 
   # Log to STDOUT by default
   config.logger =
@@ -89,4 +92,13 @@ Rails.application.configure do
   config.after_initialize do
     Rails.application.routes.default_url_options = Rails.application.config.action_mailer.default_url_options
   end
+
+  # Change the logger to Multilogger in production so we can write both to a file (compliance) and to STDOUT for openshift
+  # Rotate the logs daily
+  file_logger = Logger.new(Rails.root.join("log", "#{ENV["HOSTNAME"]}-#{Time.now.strftime("%m-%d-%y")}.log"), "daily")
+  stdout_logger = Logger.new(STDOUT)
+
+  config.logger = MultiLogger.new(stdout_logger, file_logger)
+  # Ensure ActiveRecord uses the same logger
+  ActiveRecord::Base.logger = config.logger
 end

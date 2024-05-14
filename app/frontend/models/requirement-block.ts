@@ -1,7 +1,9 @@
 import { applySnapshot, flow, Instance, toGenerator, types } from "mobx-state-tree"
+import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { IRequirementBlockParams } from "../types/api-request"
+import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
+import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../types/enums"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -20,8 +22,61 @@ export const RequirementBlockModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    get blocksWithEnergyStepCode() {
+      return self.requirements?.some((r) => r.inputType === ERequirementType.energyStepCode)
+    },
+    get blocksWithStepCodePackageFile() {
+      return self.requirements?.some((r) => r.requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE)
+    },
     hasRequirement(id: string) {
       return self.requirements.findIndex((requirement) => requirement.id === id) !== -1
+    },
+    get hasAnyElective() {
+      return self.requirements.some((requirement) => requirement.elective)
+    },
+    get hasAnyConditional() {
+      return self.requirements.some((requirement) => !!requirement.conditional)
+    },
+    get hasAnyDataValidation() {
+      return self.requirements.some((requirement) => !!requirement.dataValidation)
+    },
+    get requirementFormDefaults(): IRequirementAttributes[] {
+      return self.requirements.map((requirement) => {
+        if (!requirement.conditional) return requirement as unknown as IRequirementAttributes
+
+        const { conditional } = requirement
+
+        const possibleThens = ["show", "hide", "require"]
+        const when = conditional.when
+        const operand = conditional.eq
+        const then = possibleThens.find((t) => Object.keys(conditional).includes(t))
+        const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+          requirement.requirementCode as EEnergyStepCodeDependencyRequirementCode
+        )
+
+        // energy step code dependency conditionals is not possible to edit from the front-end and has default values
+        // which follows a slightly different structure so we make sure not to remove them or alter them
+        return {
+          ...requirement,
+          inputOptions: {
+            ...requirement.inputOptions,
+            conditional: isEnergyStepCodeDependency
+              ? conditional
+              : {
+                  when,
+                  operand,
+                  then,
+                },
+            energyStepCode: requirement.inputOptions?.energyStepCode,
+          },
+        }
+      })
+    },
+    getRequirementOptions() {
+      return self.requirements.map((requirement) => ({ label: requirement.label, value: requirement }))
+    },
+    getRequirementByRequirementCode(requirementCode: string) {
+      return self.requirements.find((requirement) => requirement.requirementCode === requirementCode)
     },
   }))
   .actions((self) => ({
@@ -30,14 +85,9 @@ export const RequirementBlockModel = types
 
       if (response.ok) {
         applySnapshot(self, response.data.data)
-
-        // Get latest data for current page, sort and filters
-        yield self.rootStore.requirementBlockStore.fetchRequirementBlocks()
-
-        return true
       }
 
-      return false
+      return response.ok
     }),
   }))
 

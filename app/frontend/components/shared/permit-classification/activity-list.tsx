@@ -1,19 +1,20 @@
 import { Box, Button, Flex, FlexProps, Heading, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IActivity } from "../../../models/permit-classification"
+import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../base/shared-spinner"
 
 interface IPermitTypeRadioSelect extends FlexProps {
   fetchOptions: () => Promise<IOption<IActivity>[]>
-  isLoading: boolean
   permitTypeId?: string
 }
 
-export const ActivityList = ({ fetchOptions, isLoading, permitTypeId, ...rest }: IPermitTypeRadioSelect) => {
+export const ActivityList = observer(({ fetchOptions, permitTypeId, ...rest }: IPermitTypeRadioSelect) => {
   const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[]>([])
 
   useEffect(() => {
@@ -22,7 +23,10 @@ export const ActivityList = ({ fetchOptions, isLoading, permitTypeId, ...rest }:
     })()
   }, [permitTypeId])
 
-  if (isLoading) return <SharedSpinner />
+  const { permitClassificationStore } = useMst()
+  const { isActivityLoading } = permitClassificationStore
+
+  if (isActivityLoading) return <SharedSpinner />
 
   return (
     <Flex direction="column" gap={4}>
@@ -31,7 +35,7 @@ export const ActivityList = ({ fetchOptions, isLoading, permitTypeId, ...rest }:
       ))}
     </Flex>
   )
-}
+})
 
 interface IActivityBoxProps {
   activity: IActivity
@@ -50,8 +54,8 @@ const ActivityBox = ({ activity }: IActivityBoxProps) => {
       p={6}
       border={activity.enabled ? "1px solid" : "none"}
       borderColor="border.light"
-      w="fit-content"
-      minW={{ base: "full", sm: "473px" }}
+      w="50%"
+      minW={{ base: "50%", sm: "473px" }}
       bg={activity.enabled ? "white" : "greys.grey03"}
     >
       <Flex gap={8}>

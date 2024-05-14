@@ -2,7 +2,7 @@ class ZipfileUploader < Shrine
   plugin :validation_helpers
 
   Attacher.validate do
-    validate_max_size 1000 * 1024 * 1024 #1000 MB to start
+    validate_max_size Constants::Sizes::FILE_UPLOAD_ZIP_MAX_SIZE * 1024 * 1024 #10 times file attachements is 1GB to start
     validate_extension_inclusion %w[zip], message: :not_valid_file_type
   end
 

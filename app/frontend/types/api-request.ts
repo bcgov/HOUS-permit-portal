@@ -1,16 +1,26 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
 import { IOption } from "./types"
 
-export interface IRequirementsAttribute {
+export interface IFormConditional {
+  when: string
+  operand: string
+  then: string
+}
+
+export interface IRequirementAttributes {
   id?: string
   label?: string
   inputType?: ERequirementType
   hint?: string
   required?: boolean
+  requirementCode: string
   elective?: boolean
   inputOptions?: {
     valueOptions?: IOption[]
     numberUnit?: ENumberUnit
+    canAddMultipleContacts?: boolean
+    conditional?: IFormConditional
+    energyStepCode?: string
   }
 }
 
@@ -20,7 +30,7 @@ export interface IRequirementBlockParams {
   displayDescription: string
   description?: string
   associationList?: string[]
-  requirementsAttributes: IRequirementsAttribute[]
+  requirementsAttributes: IRequirementAttributes[]
 }
 
 export interface ITemplateSectionBlockAttributes {

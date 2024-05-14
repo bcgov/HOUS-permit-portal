@@ -1,12 +1,14 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Archive, ArrowsLeftRight, ClockClockwise } from "@phosphor-icons/react"
+import { Archive, ArrowsLeftRight, ClockClockwise, PaperPlaneTilt } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { ISearch } from "../../../lib/create-search-model"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
-import { ManageMenuItem } from "../base/manage-menu-item"
+import { EUserRoles } from "../../../types/enums"
+import { ManageMenuItemButton } from "../base/manage-menu-item"
 import { Can } from "./can"
 
 interface IManageUserMenuProps<TSearchModel extends ISearch> {
@@ -26,7 +28,16 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
     if (await user.restore()) searchModel?.search()
   }
 
+  const handleChangeRole = async () => {
+    if (await user.changeRole()) searchModel?.search()
+  }
+
+  const handleReinvite = async () => {
+    navigate(`invite?role=${user.role}&email=${user.email}&firstName=${user.firstName}&lastName=${user.lastName}`)
+  }
+
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const {
     jurisdictionStore: { currentJurisdiction },
@@ -42,20 +53,38 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
           {t("ui.manage")}
         </MenuButton>
         <MenuList>
-          <ManageMenuItem icon={<ArrowsLeftRight />}>{t("user.changeRole")}</ManageMenuItem>
+          {user.role != EUserRoles.superAdmin && (
+            <ManageMenuItemButton
+              color={isCurrentUser ? "greys.grey01" : "text.primary"}
+              leftIcon={<ArrowsLeftRight />}
+              onClick={handleChangeRole}
+              isDisabled={isCurrentUser}
+            >
+              {t("user.changeRole")}
+            </ManageMenuItemButton>
+          )}
+          {(user.isUnconfirmed || user.isDiscarded) && (
+            <ManageMenuItemButton color="text.primary" onClick={handleReinvite} leftIcon={<PaperPlaneTilt size={16} />}>
+              {t("user.reinvite")}
+            </ManageMenuItemButton>
+          )}
           {user.isDiscarded ? (
-            <ManageMenuItem color="semantic.success" onClick={handleRestore} icon={<ClockClockwise />}>
+            <ManageMenuItemButton
+              color="semantic.success"
+              onClick={handleRestore}
+              leftIcon={<ClockClockwise size={16} />}
+            >
               {t("ui.restore")}
-            </ManageMenuItem>
+            </ManageMenuItemButton>
           ) : (
-            <ManageMenuItem
+            <ManageMenuItemButton
               color={isCurrentUser ? "greys.grey01" : "semantic.error"}
               onClick={handleRemove}
-              icon={<Archive />}
+              leftIcon={<Archive size={16} />}
               isDisabled={isCurrentUser}
             >
               {t("ui.archive")}
-            </ManageMenuItem>
+            </ManageMenuItemButton>
           )}
         </MenuList>
       </Menu>

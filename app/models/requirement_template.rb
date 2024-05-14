@@ -26,7 +26,12 @@ class RequirementTemplate < ApplicationRecord
 
   accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
 
+  # This is a workaround needed to validate step code related errors
+  attr_accessor :requirement_template_sections_attributes_copy
+
   validate :unique_permit_and_activity_for_undiscarded, on: :create
+  validate :validate_uniqueness_of_blocks
+  validate :validate_step_code_related_dependencies
 
   def key
     "requirementtemplate#{id}"
@@ -108,14 +113,6 @@ class RequirementTemplate < ApplicationRecord
     rails.logger.error e.message
   end
 
-  def lookup_props
-    array_of_req_pairs = requirement_template_sections.map(&:lookup_props).flatten
-    array_of_req_pairs.reduce({}) do |obj, pair|
-      key, value = pair.flatten
-      obj.merge({ key => value })
-    end
-  end
-
   def search_data
     {
       description: description,
@@ -127,6 +124,86 @@ class RequirementTemplate < ApplicationRecord
   end
 
   private
+
+  def requirement_block_ids_from_nested_attributes_copy
+    # have to manually loop instead of using association because
+    # when using deeply nested attributes to save, the queries go against the database
+    # which will have stale data e.g. records trying to delete currently
+
+    if requirement_template_sections_attributes_copy.blank? ||
+         !requirement_template_sections_attributes_copy.is_a?(Array)
+      return []
+    end
+
+    ids = []
+
+    requirement_template_sections_attributes_copy.each do |rtsa|
+      next if rtsa["_destroy"] == true
+      rtsa["template_section_blocks_attributes"].each do |tsba|
+        next if tsba["_destroy"] == true
+        requirement_block_id = tsba["requirement_block_id"]
+
+        ids << requirement_block_id if requirement_block_id.present?
+      end
+    end
+
+    ids
+  end
+
+  def energy_step_code_requirements_from_nest_attributes_copy
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+
+    return [] unless requirement_block_ids.length.positive?
+
+    Requirement.where(
+      requirement_block_id: requirement_block_ids,
+      input_type: Requirement.input_types[:energy_step_code],
+    )
+  end
+
+  def step_code_package_file_requirements_from_nest_attributes_copy
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+
+    return [] unless requirement_block_ids.length.positive?
+
+    Requirement.where(
+      requirement_block_id: requirement_block_ids,
+      requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
+    )
+  end
+
+  def validate_uniqueness_of_blocks
+    requirement_block_ids = requirement_block_ids_from_nested_attributes_copy
+    grouped_ids = requirement_block_ids.group_by { |e| e }
+    duplicate_ids = grouped_ids.select { |k, v| v.length > 1 }.keys
+    duplicates = RequirementBlock.where(id: duplicate_ids).pluck(:name)
+
+    duplicates.each do |duplicate_block_name|
+      errors.add(
+        :base,
+        I18n.t(
+          "model_validation.requirement_template.duplicate_block_in_template",
+          requirement_block_name: duplicate_block_name,
+        ),
+      )
+    end
+  end
+
+  def validate_step_code_related_dependencies
+    energy_step_code_requirements_count = energy_step_code_requirements_from_nest_attributes_copy.count
+    step_code_package_file_requirements_count = step_code_package_file_requirements_from_nest_attributes_copy.count
+
+    has_any_step_code_requirements = energy_step_code_requirements_count > 0
+    has_any_step_code_package_file_requirements = step_code_package_file_requirements_count > 0
+    has_duplicate_step_code_requirements = energy_step_code_requirements_count > 1
+    has_duplicate_step_code_package_file_requirements = step_code_package_file_requirements_count > 1
+
+    return unless has_any_step_code_requirements
+
+    errors.add(:base, :step_code_package_required) if !has_any_step_code_package_file_requirements
+    errors.add(:base, :duplicate_energy_step_code) if has_duplicate_step_code_requirements
+    errors.add(:base, :duplicate_step_code_package) if has_duplicate_step_code_package_file_requirements
+  end
 
   def unique_permit_and_activity_for_undiscarded
     existing_record =

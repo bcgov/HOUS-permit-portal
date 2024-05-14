@@ -29,13 +29,13 @@ const renderApp = (rootStore) => {
           <Global styles={GlobalStyles} />
           <Helmet>
             <title>{t("site.title")}</title>
-            <meta name="description" content={t("site.description")} />
-            <meta name="keywords" content={t("site.keywords")} />
+            <meta name="description" content={t("site.metaDescription")} />
+            <meta name="keywords" content={t("site.metaKeywords")} />
             <meta property="og:title" content={t("site.title")} />
-            <meta property="og:description" content={t("site.description")} />
+            <meta property="og:description" content={t("site.metaDescription")} />
             <meta property="og:image" content="/images/logo.svg" />
           </Helmet>
-          <Flex flexDirection="column" h="100vh" w="100vw" bg="greys.white" overflowX="hidden">
+          <Flex direction="column" minH="100vh">
             <Navigation />
           </Flex>
         </Provider>
@@ -46,8 +46,6 @@ const renderApp = (rootStore) => {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.documentElement.style.overflow = "hidden"
-  document.body.style.overflow = "hidden"
   const rootStore = setupRootStore()
   if (import.meta.env.PROD) {
     renderApp(rootStore)

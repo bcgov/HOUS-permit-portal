@@ -1,15 +1,4 @@
-import {
-  Container,
-  FormControl,
-  FormLabel,
-  Grid,
-  GridItem,
-  HStack,
-  Heading,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Container, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import { FileText, Info, Tray } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -34,10 +23,24 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
             <Heading mb={0} fontSize="3xl">
               {t(`${i18nPrefix}.title`)}
             </Heading>
-            <Text fontSize="md">{t(`${i18nPrefix}.editPermission`)}</Text>
 
             <SectionBox>
-              <HStack>
+              <Flex align="flex-end">
+                <Text mb={2} mr={2}>
+                  The
+                </Text>
+                <FormControl>
+                  <FormLabel>{t(`${i18nPrefix}.jurisdictionLocalityTypeLabel`)}</FormLabel>
+                  <Input
+                    bg="greys.white"
+                    value={currentJurisdiction.localityType}
+                    isDisabled
+                    textTransform={"capitalize"}
+                  />
+                </FormControl>
+                <Text mb={2} mx={2}>
+                  of
+                </Text>
                 <FormControl>
                   <FormLabel>{t(`${i18nPrefix}.jurisdictionNameLabel`)}</FormLabel>
                   <Input bg="greys.white" value={currentJurisdiction.name} isDisabled />
@@ -47,7 +50,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
               <FormLabel>{t(`${i18nPrefix}.jurisdictionLocationLabel`)}</FormLabel>
               <Input bg="greys.white" value={jurisdiction.boundryPoints} isDisabled />
             </FormControl> */}
-              </HStack>
+              </Flex>
             </SectionBox>
 
             <Grid templateColumns="repeat(2, 1fr)" gap={6}>

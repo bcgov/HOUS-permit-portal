@@ -10,5 +10,9 @@ class RegionalDistrict < Jurisdiction
     Jurisdiction.search(*args, **updated_kwargs)
   end
 
+  def regional_district_name
+    nil
+  end
+
   private
 end

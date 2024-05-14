@@ -18,14 +18,14 @@ interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
   onUse?: (requirementBlock: IRequirementBlock, closeDrawer?: () => void) => void
-  disableUseForBlockIds?: Set<string>
+  disabledUseForBlockIds?: Set<string>
 }
 
 export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDrawer({
   defaultButtonProps,
   renderTriggerButton,
   onUse,
-  disableUseForBlockIds,
+  disabledUseForBlockIds,
 }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -44,9 +44,9 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
           {t("requirementTemplate.edit.addRequirementButton")}
         </Button>
       )}
-      <Drawer isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
+      <Drawer id="add-requirement-drawer" isOpen={isOpen} onClose={onClose} finalFocusRef={btnRef} placement={"right"}>
         <DrawerOverlay />
-        <DrawerContent display={"flex"} flexDir={"column"} maxW={"900px"} h={"full"}>
+        <DrawerContent display={"flex"} flexDir={"column"} maxW={"80%"} h={"full"}>
           <DrawerCloseButton fontSize={"xs"} />
           <RequirementBlocksTable
             h={"calc(100% - 120px)"}
@@ -57,7 +57,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
                 size={"sm"}
                 variant={"primary"}
                 onClick={() => onUse(requirementBlock, onClose)}
-                isDisabled={disableUseForBlockIds.has(requirementBlock.id)}
+                isDisabled={disabledUseForBlockIds.has(requirementBlock.id)}
               >
                 {t("ui.use")}
               </Button>

@@ -33,7 +33,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         version_date = Date.yesterday
 
         expect { TemplateVersioningService.schedule!(requirement_template, version_date) }.to raise_error(
-          StandardError,
+          TemplateVersionScheduleError,
           "Version date must be in the future and after latest scheduled version date",
         )
       end
@@ -43,7 +43,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
 
         expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
-          StandardError,
+          TemplateVersionScheduleError,
           "Version date must be in the future and after latest scheduled version date",
         )
       end
@@ -53,7 +53,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
 
         expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
-          StandardError,
+          TemplateVersionScheduleError,
           "Version date must be in the future and after latest scheduled version date",
         )
       end
@@ -101,7 +101,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
 
         expect { TemplateVersioningService.publish_version!(template_version) }.to raise_error(
-          StandardError,
+          TemplateVersionPublishError,
           "Version cannot be published before it's scheduled date",
         )
       end
@@ -144,6 +144,38 @@ RSpec.describe TemplateVersioningService, type: :service do
           end
 
           expect(template_version_4.status).to eq("scheduled")
+        end
+      end
+
+      it "updates draft permits with the new template version" do
+        template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
+        permit_application = create(:permit_application, template_version: template_version)
+        permit_application_2 = create(:permit_application, template_version: template_version)
+
+        Timecop.freeze(Date.tomorrow) do
+          published_template_version = TemplateVersioningService.publish_version!(template_version)
+
+          permit_application.reload
+          permit_application_2.reload
+
+          expect(permit_application.template_version_id).to eq(published_template_version.id)
+          expect(permit_application_2.template_version_id).to eq(published_template_version.id)
+        end
+
+        new_template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow + 1)
+
+        new_permit_application = create(:permit_application, template_version: new_template_version)
+
+        Timecop.freeze(Date.tomorrow + 1) do
+          published_new_template_version = TemplateVersioningService.publish_version!(new_template_version)
+
+          permit_application.reload
+          permit_application_2.reload
+          new_permit_application.reload
+
+          expect(permit_application.template_version_id).to eq(published_new_template_version.id)
+          expect(permit_application_2.template_version_id).to eq(published_new_template_version.id)
+          expect(new_permit_application.template_version_id).to eq(published_new_template_version.id)
         end
       end
     end

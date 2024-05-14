@@ -13,6 +13,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
+import { t } from "i18next"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -60,14 +61,14 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
                 </GridItem>
               </Box>
               <Box display={"contents"} role={"row"}>
-                {Object.values(EContactSortFields).map((field) => (
-                  <GridHeader key={field} role={"columnheader"} cursor="default">
+                {Object.values(EContactSortFields).map((field, index) => (
+                  <GridHeader key={field} role={"columnheader"}>
                     <Flex
                       w={"full"}
                       justifyContent={"space-between"}
                       cursor="default"
-                      borderRight={"1px solid"}
                       borderColor={"border.light"}
+                      borderLeftWidth={index == 0 ? 0 : 1}
                       px={4}
                     >
                       <Text textAlign="left" cursor="default">
@@ -78,26 +79,51 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
                 ))}
               </Box>
             </Box>
-            {contacts.map((contact) => (
-              <Box key={contact.id} className={"contact-index-grid-row"} role={"row"} display={"contents"}>
-                <SearchGridItem>{contact.title}</SearchGridItem>
-                <SearchGridItem>{contact.name}</SearchGridItem>
-                <SearchGridItem>
-                  <Link href={`mailto:${contact.email}`} isExternal>
-                    {contact.email}
-                  </Link>
-                </SearchGridItem>
-                <SearchGridItem>
-                  <Link href={`tel:${contact.phone}`} isExternal>
-                    {contact.phone}
-                  </Link>
-                </SearchGridItem>
-                <SearchGridItem>{contact.address}</SearchGridItem>
-              </Box>
-            ))}
+            {contacts.map((contact) => {
+              const { title, name, email, phone, address } = contact
+              return (
+                <Contact key={contact.id} title={title} name={name} email={email} phone={phone} address={address} />
+              )
+            })}
+            {permitApplication.stepCode && (
+              <EnergyAdvisor checklist={permitApplication.stepCode.preConstructionChecklist} />
+            )}
           </SearchGrid>
         </ModalBody>
       </ModalContent>
     </Modal>
+  )
+}
+
+function EnergyAdvisor({ checklist }) {
+  const { completedBy, completedByEmail, completedByPhone, completedByAddress } = checklist
+  return (
+    <Contact
+      title={t("stepCodeChecklist.edit.completedBy.energyAdvisor")}
+      name={completedBy}
+      email={completedByEmail}
+      phone={completedByPhone}
+      address={completedByAddress}
+    />
+  )
+}
+
+function Contact({ title, name, email, phone, address }) {
+  return (
+    <Box className={"contact-index-grid-row"} role={"row"} display={"contents"}>
+      <SearchGridItem fontWeight="bold">{title}</SearchGridItem>
+      <SearchGridItem>{name}</SearchGridItem>
+      <SearchGridItem>
+        <Link href={`mailto:${email}`} isExternal>
+          {email}
+        </Link>
+      </SearchGridItem>
+      <SearchGridItem>
+        <Link href={`tel:${phone}`} isExternal>
+          {phone}
+        </Link>
+      </SearchGridItem>
+      <SearchGridItem>{address}</SearchGridItem>
+    </Box>
   )
 }

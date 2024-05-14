@@ -60,12 +60,12 @@ export const TemplateVersionModel = types
 
       return response
     }),
-    createJurisdictionTemplateVersionCustomization: flow(function* (
+    createOrUpdateJurisdictionTemplateVersionCustomization: flow(function* (
       jurisdictionId: string,
       params: IJurisdictionTemplateVersionCustomizationForm
     ) {
       const response = yield* toGenerator(
-        self.environment.api.createJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, params)
+        self.environment.api.createOrUpdateJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, params)
       )
       if (!response.ok) {
         return response.ok
@@ -74,26 +74,7 @@ export const TemplateVersionModel = types
       const customization = response.data.data
 
       if (customization) {
-        self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
-      }
-
-      return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
-    }),
-    updateJurisdictionTemplateVersionCustomization: flow(function* (
-      jurisdictionId: string,
-      params: IJurisdictionTemplateVersionCustomizationForm
-    ) {
-      const response = yield* toGenerator(
-        self.environment.api.updateJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, params)
-      )
-      if (!response.ok) {
-        return response.ok
-      }
-
-      const customization = response.data.data
-
-      if (customization) {
-        self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
+        self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customization)
       }
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)

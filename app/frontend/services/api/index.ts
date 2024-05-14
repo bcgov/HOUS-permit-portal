@@ -1,7 +1,8 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
-import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-tempate-screen"
+import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
+import { TCreateContactFormData } from "../../components/shared/contact/create-contact-modal"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -17,21 +18,20 @@ import {
   IApiResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
-  IJurisdictionUserResponse,
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
-  IResetPasswordResponse,
-  IUserResponse,
+  IUsersResponse,
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
+  EJurisdictionTypes,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { TSearchParams } from "../../types/types"
+import { IContact, ISiteConfiguration, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -62,28 +62,12 @@ export class Api {
     this.client.addMonitor(monitor)
   }
 
-  async login(username, password) {
-    return this.client.post<IUserResponse>("/login", { user: { username, password } })
-  }
-
-  async signUp(formData) {
-    return this.client.post<IUserResponse>("/signup", { user: formData })
+  async resendConfirmation(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
   async logout() {
     return this.client.delete("/logout")
-  }
-
-  async changePassword(params) {
-    return this.client.patch<IUserResponse>(`/users/change_password`, params)
-  }
-
-  async requestPasswordReset(params) {
-    return this.client.post("/password", { user: params })
-  }
-
-  async resetPassword(params) {
-    return this.client.put<IResetPasswordResponse>("/password", { user: params })
   }
 
   async validateToken() {
@@ -98,6 +82,10 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
+  async fetchInvitedUser(token: string) {
+    return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
+  }
+
   async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
@@ -110,12 +98,26 @@ export class Api {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
   }
 
+  async viewPermitApplication(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
 
+  async fetchContactOptions(query) {
+    return this.client.get<IOptionResponse<IContact>>(`/contacts/contact_options`, { query })
+  }
+
+  async fetchJurisdictionOptions(name: string, type: EJurisdictionTypes) {
+    return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, {
+      jurisdiction: { name, type },
+    })
+  }
+
   async fetchPermitClassifications() {
-    return this.client.get<IOptionResponse>(`/permit_classifications`)
+    return this.client.get<IOptionResponse<IContact>>(`/permit_classifications`)
   }
 
   async fetchPermitClassificationOptions(
@@ -123,7 +125,8 @@ export class Api {
     published = false,
     permit_type_id: string = null,
     activity_id: string = null,
-    pid: string = null
+    pid: string = null,
+    jurisdictionId: string = null
   ) {
     return this.client.post<IOptionResponse<IPermitType | IActivity>>(
       `/permit_classifications/permit_classification_options`,
@@ -133,6 +136,7 @@ export class Api {
         permit_type_id,
         activity_id,
         pid,
+        jurisdictionId,
       }
     )
   }
@@ -150,16 +154,22 @@ export class Api {
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
-    return this.client.post<IJurisdictionUserResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
+    return this.client.post<IUsersResponse>(`/jurisdictions/${jurisdictionId}/users/search`, params)
   }
 
-  async fetchPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
-    return jurisdictionId
-      ? this.client.post<IJurisdictionPermitApplicationResponse>(
-          `/jurisdictions/${jurisdictionId}/permit_applications/search`,
-          params
-        )
-      : this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
+  async fetchAdminUsers(params?: TSearchParams<EUserSortFields>) {
+    return this.client.post<IUsersResponse>(`/users/search`, params)
+  }
+
+  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields>) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
+  }
+
+  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+    return this.client.post<IJurisdictionPermitApplicationResponse>(
+      `/jurisdictions/${jurisdictionId}/permit_applications/search`,
+      params
+    )
   }
 
   async createPermitApplication(params: TCreatePermitApplicationFormData) {
@@ -247,12 +257,21 @@ export class Api {
     })
   }
 
+  async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/force_publish_now`,
+      {
+        requirementTemplate,
+      }
+    )
+  }
+
   async fetchSiteOptions(address: string, pid: string = null) {
     return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
   }
 
-  async fetchGeocodedJurisdiction(siteId: string) {
-    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId })
+  async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
+    return this.client.get<IOptionResponse>(`/geocoder/jurisdiction`, { siteId, pid })
   }
 
   async fetchPids(siteId: string) {
@@ -281,23 +300,12 @@ export class Api {
     )
   }
 
-  async createJurisdictionTemplateVersionCustomization(
+  async createOrUpdateJurisdictionTemplateVersionCustomization(
     templateId: string,
     jurisdictionId: string,
     jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
   ) {
     return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
-      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
-      { jurisdictionTemplateVersionCustomization }
-    )
-  }
-
-  async updateJurisdictionTemplateVersionCustomization(
-    templateId: string,
-    jurisdictionId: string,
-    jurisdictionTemplateVersionCustomization: IJurisdictionTemplateVersionCustomizationForm
-  ) {
-    return this.client.put<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
       { jurisdictionTemplateVersionCustomization }
     )
@@ -321,5 +329,21 @@ export class Api {
 
   async updateStepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
+  }
+
+  async fetchSiteConfiguration() {
+    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+  }
+
+  async updateSiteConfiguration(siteConfiguration) {
+    return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
+  }
+
+  async updateUser(id: string, user: IUser) {
+    return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
+  }
+
+  async createContact(params: TCreateContactFormData) {
+    return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }
 }

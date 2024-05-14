@@ -11,12 +11,8 @@ class TemplateVersionPolicy < ApplicationPolicy
     true
   end
 
-  def update_jurisdiction_template_version_cutomization?
-    show_jurisdiction_template_version_cutomization?
-  end
-
-  def create_jurisdiction_template_version_cutomization?
-    show_jurisdiction_template_version_cutomization?
+  def create_or_update_jurisdiction_template_version_cutomization?
+    user.review_manager? && record.jurisdiction_id == user.jurisdiction_id
   end
 
   class Scope < Scope

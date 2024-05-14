@@ -9,11 +9,9 @@ import { GridHeader } from "../../../shared/grid/grid-header"
 import { SortIcon } from "../../../shared/sort-icon"
 
 export const GridHeaders = observer(function GridHeaders() {
-  const { jurisdictionStore } = useMst()
-  const { currentJurisdiction } = jurisdictionStore
   const { userStore } = useMst()
 
-  const getSortColumnHeader = currentJurisdiction?.getUserSortColumnHeader
+  const { getSortColumnHeader } = userStore
 
   const { toggleSort, sort } = userStore
 

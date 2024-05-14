@@ -16,13 +16,16 @@ export type TAsyncSelectProps<
   TGroup extends GroupBase<TOption> = undefined,
 > = (
   | ({
-      isCreatable: true
+      isCreatable: false
     } & AsyncProps<TOption, TIsMulti, TGroup>)
-  | ({ isCreatable: false } & AsyncCreatableProps<TOption, TIsMulti, TGroup>)
+  | ({ isCreatable: true } & AsyncCreatableProps<TOption, TIsMulti, TGroup>)
 ) &
   RefAttributes<Select<TOption, TIsMulti, TGroup>> & {
-    stylesToMerge?: { [key in "control" | "menu" | "option" | "input" | "placeholder" | "menuList"]?: CSSProperties }
+    stylesToMerge?: {
+      [key in "control" | "menu" | "option" | "input" | "placeholder" | "menuList" | "container"]?: CSSProperties
+    }
   }
+
 export const AsyncSelect = observer(function <
   TOption = IOption,
   TIsMulti extends boolean = false,
@@ -32,6 +35,10 @@ export const AsyncSelect = observer(function <
 
   const getMergedStyles = (): StylesConfig<TOption, TIsMulti, TGroup> => {
     return {
+      container: (css, state) => ({
+        ...css,
+        ...(stylesToMerge?.container ?? {}),
+      }),
       control: (css, state) => ({
         ...css,
         borderColor: state.isFocused ? "var(--chakra-colors-focus)" : "var(--chakra-colors-border-light)",

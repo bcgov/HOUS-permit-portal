@@ -23,7 +23,7 @@ export const rules = {
     dynamic: { ...sharedDynamicRules },
   },
   [EUserRoles.reviewManager]: {
-    static: [...sharedStaticRules, "user:invite"],
+    static: [...sharedStaticRules, "user:invite", "application:download"],
     dynamic: {
       ...sharedDynamicRules,
       "jurisdiction:manage": (currentUser: IUser, data: { jurisdiction: IJurisdiction }) =>
@@ -31,7 +31,7 @@ export const rules = {
     },
   },
   [EUserRoles.reviewer]: {
-    static: [...sharedStaticRules, "user:view"],
+    static: [...sharedStaticRules, "user:view", "application:download"],
     dynamic: { ...sharedDynamicRules },
   },
   [EUserRoles.submitter]: {

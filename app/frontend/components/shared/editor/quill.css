@@ -3,6 +3,10 @@
 @import url("https://unpkg.com/react-quill@2.0.0/dist/quill.bubble.css");
 @import url("https://unpkg.com/quill-mention@3.1.0/dist/quill.mention.css");
 
+.ql-container {
+  font-family: inherit;
+}
+
 /* override default quill styles*/
 .quill .ql-container.ql-snow {
   border-bottom-left-radius: 0.25rem;
@@ -24,6 +28,7 @@
 
 .quill .ql-container {
   font-size: 1rem;
+  font-family: inherit;
   /* border: 0 !important; */
 }
 

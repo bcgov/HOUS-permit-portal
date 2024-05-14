@@ -1,10 +1,10 @@
-import { Flex, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Flex, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RemoveScroll } from "react-remove-scroll"
+import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 import { useRequirementTemplate } from "../../../../../hooks/resources/use-requirement-template"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
@@ -15,9 +15,11 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../../types/api-request"
+import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
-import { BuilderFloatingButtons } from "../../builder-floating-buttons"
+import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
+import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
 import { ControlsHeader } from "./controls-header"
@@ -31,6 +33,7 @@ const scrollToIdPrefix = "template-builder-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 
 export const EditRequirementTemplateScreen = observer(function EditRequirementTemplateScreen() {
+  const navigate = useNavigate()
   const { isOpen: isReorderMode, onClose: closeReorderMode, onOpen: openReorderMode } = useDisclosure()
   const { requirementTemplateStore, requirementBlockStore } = useMst()
   const { requirementTemplate, error } = useRequirementTemplate()
@@ -41,7 +44,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
     control,
   })
   const { t } = useTranslation()
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
@@ -81,7 +84,9 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   }, [watchedSectionsAttributes])
 
   useEffect(() => {
-    reset(formFormDefaults(requirementTemplate))
+    if (requirementTemplate?.isFullyLoaded) {
+      reset(formFormDefaults(requirementTemplate))
+    }
   }, [requirementTemplate?.isFullyLoaded])
 
   if (error) return <ErrorScreen error={error} />
@@ -90,90 +95,206 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
   const onSaveDraft = handleSubmit(async (templateFormData) => {
     const formattedSubmitData = formatSubmitData(templateFormData)
 
-    return await requirementTemplateStore.updateRequirementTemplate(requirementTemplate.id, formattedSubmitData)
+    const updatedTemplate = await requirementTemplateStore.updateRequirementTemplate(
+      requirementTemplate.id,
+      formattedSubmitData
+    )
+
+    updatedTemplate && formFormDefaults(updatedTemplate as IRequirementTemplate)
   })
 
   const onSchedule = async (date: Date) => {
     await handleSubmit(async (templateFormData) => {
       const formattedSubmitData = formatSubmitData(templateFormData)
 
-      return await requirementTemplateStore.scheduleRequirementTemplate(
+      const updatedRequirementTemplate = await requirementTemplateStore.scheduleRequirementTemplate(
         requirementTemplate.id,
         formattedSubmitData,
         date
       )
+
+      if (updatedRequirementTemplate) {
+        // the template versions are ordered by latest first, so this should return the newly scheduled template
+        // version
+        const scheduledTemplateVersion = (updatedRequirementTemplate as IRequirementTemplate)
+          .scheduledTemplateVersions?.[0]
+
+        scheduledTemplateVersion
+          ? navigate(`/template-versions/${scheduledTemplateVersion.id}`)
+          : navigate("/requirement-templates")
+      }
     })()
   }
 
+  const onForcePublishNow =
+    import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
+      ? async () => {
+          await handleSubmit(async (templateFormData) => {
+            const formattedSubmitData = formatSubmitData(templateFormData)
+
+            const updatedRequirementTemplate = await requirementTemplateStore.forcePublishRequirementTemplate(
+              requirementTemplate.id,
+              formattedSubmitData
+            )
+
+            if (updatedRequirementTemplate) {
+              const publishedTemplateVersion = updatedRequirementTemplate.publishedTemplateVersion
+
+              publishedTemplateVersion
+                ? navigate(`/template-versions/${publishedTemplateVersion.id}`)
+                : navigate("/requirement-templates")
+            }
+          })()
+        }
+      : undefined
+
   const hasNoSections = watchedSectionsAttributes.length === 0
 
-  return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
-    <RemoveScroll style={{ width: "100%", height: "100%" }}>
-      <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
-        <FormProvider {...formMethods}>
-          <EditableBuilderHeader requirementTemplate={requirementTemplate} />
-          <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
-            {isReorderMode ? (
-              <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
-            ) : (
-              <SectionsSidebar
-                onEdit={openReorderMode}
-                onItemClick={scrollIntoView}
-                sectionIdToHighlight={currentSectionId}
-                sections={denormalizedSections}
-              />
-            )}
-            <Flex
-              flexDir={"column"}
-              flex={1}
-              h={"full"}
-              bg={hasNoSections ? "greys.grey03" : undefined}
-              overflow={"auto"}
-              ref={rightContainerRef}
-            >
-              <ControlsHeader
-                onSaveDraft={onSaveDraft}
-                onScheduleDate={onSchedule}
-                onAddSection={onAddSection}
-                requirementTemplate={requirementTemplate}
-              />
-              {hasNoSections ? (
-                <Flex
-                  justifyContent={hasNoSections ? "center" : undefined}
-                  alignItems={hasNoSections ? "center" : undefined}
-                  flex={1}
-                  w={"full"}
-                >
-                  <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"}>
-                    {t("requirementTemplate.edit.emptyTemplateSectionText")}
-                  </Text>
-                </Flex>
-              ) : (
-                <SectionsDisplay shouldCollapseAll={shouldCollapseAll} setSectionRef={setSectionRef} />
-              )}
-            </Flex>
-          </Flex>
-        </FormProvider>
-        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
-      </Flex>
-    </RemoveScroll>
+  const allTemplateSectionBlocks = watchedSectionsAttributes.flatMap(
+    (section) => section.templateSectionBlocksAttributes
   )
 
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
+  const stepCodeRelatedWarningBannerErrors = getStepCodeRelatedWarningBannerErrors()
 
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
+  const hasStepCodeDependencyError = !!stepCodeRelatedWarningBannerErrors.find((error) => error.type === "error")
+  return (
+    <Box as="main" id="admin-edit-permit-template">
+      <FormProvider {...formMethods}>
+        <EditableBuilderHeader requirementTemplate={requirementTemplate} />
+        <Box
+          id="sidebar-and-form-container"
+          borderTop={"1px solid"}
+          borderColor={"border.base"}
+          position="relative"
+          sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}
+        >
+          {isReorderMode ? (
+            <SectionsDnd sections={watchedSectionsAttributes} onCancel={closeReorderMode} onDone={onDndComplete} />
+          ) : (
+            <SectionsSidebar
+              onEdit={openReorderMode}
+              onItemClick={scrollIntoView}
+              sectionIdToHighlight={currentSectionId}
+              sections={denormalizedSections}
+            />
+          )}
+          <Box
+            id="editing-permit-requirements-form"
+            display="flex"
+            flexDirection="column"
+            bg={hasNoSections ? "greys.grey03" : undefined}
+            ref={rightContainerRef}
+          >
+            <ControlsHeader
+              onSaveDraft={onSaveDraft}
+              onScheduleDate={onSchedule}
+              onForcePublishNow={onForcePublishNow}
+              onAddSection={onAddSection}
+              requirementTemplate={requirementTemplate}
+              hasStepCodeDependencyError={hasStepCodeDependencyError}
+            />
+            <FloatingHelpDrawer top="100px" />
+            {hasNoSections ? (
+              <Flex
+                justifyContent={hasNoSections ? "center" : undefined}
+                alignItems={hasNoSections ? "flex-start" : undefined}
+                flex={1}
+                w={"full"}
+                minH="100vh"
+              >
+                <Text color={"text.secondary"} fontSize={"sm"} fontStyle={"italic"} mt="20%">
+                  {t("requirementTemplate.edit.emptyTemplateSectionText")}
+                </Text>
+              </Flex>
+            ) : (
+              <>
+                <Box w="full" px={6}>
+                  {stepCodeRelatedWarningBannerErrors.map((error) => (
+                    <CalloutBanner key={error.title} type={error.type} title={error.title} />
+                  ))}
+                </Box>
+                <SectionsDisplay isCollapsedAll={isCollapsedAll} setSectionRef={setSectionRef} />
+              </>
+            )}
+          </Box>
+        </Box>
+      </FormProvider>
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
+    </Box>
+  )
+
+  function getEnergyStepCodeBlocks() {
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithEnergyStepCode
+    )
+  }
+
+  function getStepCodePackageFileBlocks() {
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithStepCodePackageFile
+    )
+  }
+
+  function getStepCodeRelatedWarningBannerErrors() {
+    const energyStepCodeBlocks = getEnergyStepCodeBlocks()
+    const stepCodePackageFileBlocks = getStepCodePackageFileBlocks()
+
+    const hasAnyEnergyStepCodeBlocks = energyStepCodeBlocks.length > 0
+    const hasDuplicateEnergyStepCodeBlocks = energyStepCodeBlocks.length > 1
+    const hasAnyStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 0
+    const hasDuplicateStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 1
+
+    const errors: Array<{ title: string; type: "warning" | "error" }> = []
+
+    if (!hasAnyEnergyStepCodeBlocks && !hasAnyStepCodePackageFileBlock) {
+      return errors
+    }
+
+    if (hasAnyEnergyStepCodeBlocks) {
+      if (!hasAnyStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.stepCodePackageRequired"),
+          type: "error",
+        })
+      }
+
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.duplicateStepCodePackage"),
+          type: "error",
+        })
+      }
+    } else if (hasAnyStepCodePackageFileBlock) {
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.duplicateStepCodePackage"),
+          type: "warning",
+        })
+      } else {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.energyStepCodeRecommended"),
+          type: "warning",
+        })
+      }
+    }
+
+    if (hasDuplicateEnergyStepCodeBlocks) {
+      errors.push({
+        title: t("requirementTemplate.edit.stepCodeErrors.duplicateEnergyStepCode"),
+        type: "error",
+      })
+    }
+
+    return errors
   }
 
   function scrollIntoView(id: string) {
     const element = document.getElementById(formScrollToId(id))
 
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" })
+      element.scrollIntoView({ behavior: "smooth", block: "nearest" })
     }
   }
 
@@ -194,7 +315,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
         // from another section, then we set the id to null so that it gets created
         // on the new section by rails.
         if (!existingMSTSection || !existingMSTSection.hasTemplateSectionBlock(sectionBlockAttributes.id)) {
-          sectionBlockAttributes.id = null
+          // this is to handle case if the same requirementBlock was removed then re-added during edit
+          const existingSectionAndRequirementBlockCombo =
+            existingMSTSection?.getTemplateSectionBlockByRequirementBlockId(sectionBlockAttributes.requirementBlockId)
+
+          sectionBlockAttributes.id = existingSectionAndRequirementBlockCombo
+            ? existingSectionAndRequirementBlockCombo.id
+            : null
         }
         sectionBlockAttributes.position = blockIndex
       })

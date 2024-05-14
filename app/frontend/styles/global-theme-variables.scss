@@ -3,7 +3,7 @@ $bcgov-blue: #003366;
 $bcgov-blue-secondary: #38598a;
 $bcgov-yellow: #fcba19;
 $bcgov-grey: #efefef;
-$bcgov-font: #313132;
+$bcgov-font: #292929;
 $bcgov-error: #d8292f;
 $bcgov-link: #1a5a96;
 $bcgov-link-hover: #3b99fc;
@@ -20,3 +20,28 @@ $bcgov-alert-success: #dff0d8;
 $blue-light: #f6f9fc;
 $error-light: #f7e1e3;
 $error: #d9292f;
+
+@mixin yellowBarHeader {
+  font-weight: bold;
+  font-size: var(--chakra-fontSizes-4xl);
+  line-height: 150%;
+  margin-top: var(--chakra-space-6);
+  margin-bottom: var(--chakra-space-3);
+
+  &::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 8px;
+    border-top: 4px solid #fcba19;
+  }
+}
+
+html {
+  --app-sidebar-width: 368px;
+  --app-sidebar-remaining-width: calc(100vw - var(--app-sidebar-width));
+  --app-permit-form-right-white-space: 170px; // space for floating greyButtons
+  --app-permit-grey-controlbar-height: 72px;
+  --app-permit-fieldset-right-white-space: 140px;
+  --app-permit-input-field-short: 339px;
+}

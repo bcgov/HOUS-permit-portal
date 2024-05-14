@@ -6,6 +6,7 @@ export const GeocoderStoreModel = types
   .model("GeocoderStoreModel")
   .props({
     fetchingPids: types.optional(types.boolean, false),
+    fetchingJurisdiction: types.optional(types.boolean, false),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -30,14 +31,15 @@ export const GeocoderStoreModel = types
       self.fetchingPids = false
       return response.ok
     }),
-    fetchGeocodedJurisdiction: flow(function* (siteId: string) {
-      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId)
+    fetchGeocodedJurisdiction: flow(function* (siteId: string, pid: string = null) {
+      self.fetchingJurisdiction = true
+      const response: any = yield self.environment.api.fetchGeocodedJurisdiction(siteId, pid)
+      let responseData = response?.data?.data
+      self.fetchingJurisdiction = false
       if (response.ok) {
-        let responseData = response.data.data
         self.rootStore.jurisdictionStore.addJurisdiction(responseData)
         return responseData
       }
-      return response.ok
     }),
   }))
 

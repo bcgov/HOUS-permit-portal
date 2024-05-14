@@ -31,13 +31,9 @@ Rails.application.routes.draw do
                path_names: {
                  sign_in: "login",
                  sign_out: "logout",
-                 registration: "signup",
                },
                controllers: {
                  sessions: "api/sessions",
-                 registrations: "api/registrations",
-                 confirmations: "api/confirmations",
-                 passwords: "api/passwords",
                  invitations: "api/invitations",
                  omniauth_callbacks: "api/omniauth_callbacks",
                }
@@ -45,8 +41,7 @@ Rails.application.routes.draw do
     devise_scope :user do
       get "/validate_token" => "sessions#validate_token"
       delete "/invitation/remove" => "invitations#remove"
-      put "/invitation/resend" => "invitations#resend"
-      get "/validate_invitation_token" => "invitations#validate_invitation_token"
+      get "/invitations/:invitation_token" => "invitations#show"
     end
 
     get "/permit_type_submission_contacts/confirm",
@@ -60,6 +55,7 @@ Rails.application.routes.draw do
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
       post "schedule", to: "requirement_templates#schedule", on: :member
+      post "force_publish_now", to: "requirement_templates#force_publish_now", on: :member
       patch "restore", on: :member
     end
 
@@ -67,16 +63,19 @@ Rails.application.routes.draw do
 
     get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
           "template_versions#show_jurisdiction_template_version_cutomization"
-    put "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
-          "template_versions#update_jurisdiction_template_version_cutomization"
     post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
-           "template_versions#create_jurisdiction_template_version_cutomization"
+           "template_versions#create_or_update_jurisdiction_template_version_cutomization"
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
       post "permit_applications/search", on: :member, to: "jurisdictions#search_permit_applications"
       get "locality_type_options", on: :collection
+      get "jurisdiction_options", on: :collection
+    end
+
+    resources :contacts, only: %i[create] do
+      get "contact_options", on: :collection
     end
 
     resources :permit_classifications, only: %i[index] do
@@ -92,12 +91,16 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
+      post "mark_as_viewed", on: :member
+      patch "upload_supporting_document", on: :member
     end
 
-    resource :profile, only: [:update], controller: "users"
-    resources :users, only: [:destroy] do
+    patch "profile", to: "users#profile"
+    resources :users, only: %i[destroy update] do
       patch "restore", on: :member
       patch "accept_eula", on: :member
+      post "search", on: :collection, to: "users#index"
+      post "resend_confirmation", on: :member
     end
 
     resources :end_user_license_agreement, only: %i[index]
@@ -111,6 +114,12 @@ Rails.application.routes.draw do
     get "storage/s3" => "storage#upload" # use a storage controller instead of shrine mount since we want api authentication before being able to access
     get "storage/s3/download" => "storage#download"
     delete "storage/s3/delete" => "storage#delete"
+
+    mount Shrine.uppy_s3_multipart(:cache) => "/storage/s3/multipart" if SHRINE_USE_S3
+    resources :site_configuration, only: [] do
+      get :show, on: :collection
+      put :update, on: :collection
+    end
   end
 
   root to: "home#index"

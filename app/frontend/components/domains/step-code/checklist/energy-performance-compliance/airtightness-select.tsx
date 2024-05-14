@@ -15,7 +15,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../setup/root"
 import { EStepCodeAirtightnessValue } from "../../../../../types/enums"
-import { translationPrefix } from "./translation-prefix"
+import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
   onChange: (event: any) => void
@@ -44,8 +44,8 @@ export const AirtightnessSelect = observer(function AirtightnessSelect({ onChang
                 shadow="base"
               >
                 {value
-                  ? t(`${translationPrefix}.airtightnessValue.options.${value}`)
-                  : t(`${translationPrefix}.airtightnessValue.select`)}
+                  ? t(`${i18nPrefix}.airtightnessValue.options.${value}`)
+                  : t(`${i18nPrefix}.airtightnessValue.select`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -65,7 +65,7 @@ export const AirtightnessSelect = observer(function AirtightnessSelect({ onChang
                   cursor="pointer"
                   _hover={{ bg: "hover.blue" }}
                 >
-                  {t(`${translationPrefix}.airtightnessValue.options.${value}`)}
+                  {t(`${i18nPrefix}.airtightnessValue.options.${value}`)}
                 </Flex>
               ))}
             </VStack>

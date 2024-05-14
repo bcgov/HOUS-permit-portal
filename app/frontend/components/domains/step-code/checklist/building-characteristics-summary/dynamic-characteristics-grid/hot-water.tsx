@@ -7,7 +7,7 @@ import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 import { PerformanceTypeSelect } from "./performance-type-select"
 
 export const HotWater = observer(function BuildingCharacteristicsSummaryHotWater() {
@@ -28,7 +28,7 @@ export const HotWater = observer(function BuildingCharacteristicsSummaryHotWater
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.hotWater`)}
+        {t(`${i18nPrefix}.hotWater`)}
       </GridColumnHeader>
 
       {fields.map((field, index) => (

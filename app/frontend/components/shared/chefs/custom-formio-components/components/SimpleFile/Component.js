@@ -24,7 +24,7 @@ export default class Component extends ParentComponent {
         imageSize: "200",
         filePattern: "*",
         fileMinSize: "0KB",
-        fileMaxSize: "1GB",
+        fileMaxSize: "100MB",
         uploadOnly: false,
         customClass: "formio-component-file",
       },

@@ -1,25 +1,18 @@
 import { Container, Heading, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import React, { Suspense, useEffect } from "react"
+import React, { Suspense } from "react"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
-import { useMst } from "../../../../../../setup/root"
+import { usePermitClassificationsLoad } from "../../../../../../hooks/resources/use-permit-classifications-load"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 import { Form } from "./form"
 import { i18nPrefix } from "./i18n-prefix"
 
 export const SubmissionsInboxSetupScreen = observer(function SubmissionsInboxSetupScreen() {
-  const {
-    permitClassificationStore: { isLoaded, fetchPermitClassifications },
-  } = useMst()
+  const { isLoaded } = usePermitClassificationsLoad()
 
   const { currentJurisdiction, error } = useJurisdiction()
-
-  useEffect(() => {
-    const fetch = async () => await fetchPermitClassifications()
-    !isLoaded && fetch()
-  }, [isLoaded])
 
   return error ? (
     <ErrorScreen />

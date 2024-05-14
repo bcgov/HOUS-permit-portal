@@ -1,5 +1,6 @@
 import BuilderUtils from "formiojs/utils/builder"
-import _ from "lodash"
+import get from "lodash/get"
+
 export default [
   {
     type: "textfield",
@@ -55,8 +56,8 @@ export default [
         data: {
           custom(context) {
             return BuilderUtils.getAvailableShortcuts(
-              _.get(context, "instance.options.editForm", {}),
-              _.get(context, "instance.options.editComponent", {})
+              get(context, "instance.options.editForm", {}),
+              get(context, "instance.options.editComponent", {})
             )
           },
         },

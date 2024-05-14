@@ -3,7 +3,7 @@ module Api::Concerns::Search::PermitApplications
 
   def perform_permit_application_search
     search_conditions = {
-      order: order,
+      order: permit_application_order,
       match: :word_start,
       page: permit_application_search_params[:page],
       per_page:
@@ -23,21 +23,17 @@ module Api::Concerns::Search::PermitApplications
 
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
     # Only add the jurisdiction_id condition if @jurisdiction is present
-    if current_user.submitter?
-      search_conditions[:where] = search_conditions[:where].merge({ submitter_id: current_user.id })
-    elsif current_user.review_staff?
-      raise StandardError unless @jurisdiction.present?
-
+    if @jurisdiction
       search_conditions[:where] = {
         jurisdiction_id: @jurisdiction.id,
         # Overrides status filter, reorder the code if necessary
         status: %i[submitted],
       }
-    elsif current_user.super_admin?
-      return
+    else
+      search_conditions[:where] = search_conditions[:where].merge({ submitter_id: current_user.id })
     end
 
-    @permit_application_search = PermitApplication.search(query, **search_conditions)
+    @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
   end
 
   private
@@ -46,15 +42,17 @@ module Api::Concerns::Search::PermitApplications
     params.permit(:query, :page, :per_page, :status_filter, sort: %i[field direction])
   end
 
-  def query
+  def permit_application_query
     permit_application_search_params[:query].present? ? permit_application_search_params[:query] : "*"
   end
 
-  def order
+  def permit_application_order
     if (sort = permit_application_search_params[:sort])
       { sort[:field] => { order: sort[:direction], unmapped_type: "long" } }
-    else
+    elsif current_user.submitter?
       { created_at: { order: :desc, unmapped_type: "long" } }
+    else
+      { number: { order: :desc, unmapped_type: "long" } }
     end
   end
 end

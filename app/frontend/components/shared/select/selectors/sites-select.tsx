@@ -1,18 +1,18 @@
 import { Flex, FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
-import { debounce } from "lodash"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import Select, { ControlProps, InputProps, OptionProps, components } from "react-select"
+import { ControlProps, InputProps, OptionProps, components } from "react-select"
+import CreatableSelect from "react-select/creatable"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
-  setSiteSelected: (boolean) => void
   onChange: (option: IOption) => void
   selectedOption: IOption
   pidName?: string
@@ -25,7 +25,6 @@ export const SitesSelect = observer(function ({
   onChange,
   selectedOption,
   stylesToMerge,
-  setSiteSelected,
   pidName = "pid",
   siteName = "site",
   ...rest
@@ -35,9 +34,7 @@ export const SitesSelect = observer(function ({
   const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids } = geocoderStore
   const pidSelectRef = useRef(null)
 
-  const { setValue, control, watch, reset } = useFormContext()
-  const pidWatch = watch(pidName)
-  const siteWatch = watch(siteName)
+  const { setValue, control, reset } = useFormContext()
   const { t } = useTranslation()
 
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
@@ -56,19 +53,15 @@ export const SitesSelect = observer(function ({
     if (option) {
       fetchPids(option.value).then((pids: string[]) => {
         setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
+        const selectControl = pidSelectRef?.current?.controlRef
+        if (selectControl && !R.isEmpty(pids)) {
+          selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+        }
       })
-    }
-    const selectControl = pidSelectRef.current.controlRef
-    if (selectControl) {
-      selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
     }
   }
 
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
-
-  useEffect(() => {
-    setSiteSelected(!!pidWatch || !!(!fetchingPids && siteWatch && R.isEmpty(pidOptions)))
-  }, [pidWatch, siteWatch, pidOptions, fetchingPids])
 
   return (
     <Flex direction={{ base: "column", md: "row" }} bg="greys.grey03" px={6} py={2} gap={4}>
@@ -120,13 +113,24 @@ export const SitesSelect = observer(function ({
               }}
               render={({ field: { onChange, value } }) => {
                 return (
-                  <Select
+                  <CreatableSelect
+                    // @ts-ignore
                     options={pidOptions}
                     ref={pidSelectRef}
-                    value={pidOptions.find((option) => option.value === value) ?? { label: null, value: null }}
+                    value={{
+                      label: value,
+                      value: value,
+                    }}
                     onChange={(option) => {
                       onChange(option.value)
                     }}
+                    onCreateOption={(inputValue: string) => {
+                      const newValue = { label: inputValue, value: inputValue }
+                      onChange(newValue.value)
+                    }}
+                    formatCreateLabel={(inputValue: string) => t("permitApplication.usePid", { inputValue })}
+                    isClearable
+                    isSearchable
                   />
                 )
               }}

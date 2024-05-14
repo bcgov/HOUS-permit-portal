@@ -2,15 +2,6 @@ class Api::ConfirmationsController < Devise::ConfirmationsController
   include BaseControllerMethods
   respond_to :json
 
-  # resend confirmation email
-  def resend
-    return if params[:email].blank?
-
-    @user = User.find_by_email(params[:email])
-    @user.resend_confirmation_instructions if @user.present?
-    render_success({}, "user.confirmation_email_sent_success")
-  end
-
   # GET /resource/confirmation?confirmation_token=abcdef
   # use a special redirect with a frontend flash message here
   def show
@@ -19,9 +10,9 @@ class Api::ConfirmationsController < Devise::ConfirmationsController
 
     if resource.errors.empty?
       PermitHubMailer.welcome(@user).deliver_later
-      redirect_to login_url(frontend_flash_message("user.confirmation_success", "success"))
+      redirect_to confirmed_url(frontend_flash_message("user.confirmation_success", "success"))
     else
-      redirect_to login_url(
+      redirect_to root_url(
                     frontend_flash_message(
                       "user.confirmation_error",
                       "error",

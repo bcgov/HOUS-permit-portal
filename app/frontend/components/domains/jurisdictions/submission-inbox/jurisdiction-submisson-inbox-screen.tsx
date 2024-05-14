@@ -1,13 +1,15 @@
-import { Box, Button, Center, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../../hooks/resources/use-jurisdiction"
+import { usePermitClassificationsLoad } from "../../../../hooks/resources/use-permit-classifications-load"
 import { useSearch } from "../../../../hooks/use-search"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
+import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
@@ -26,6 +28,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   const { t } = useTranslation()
   const { permitApplicationStore } = useMst()
   const { currentJurisdiction, error } = useJurisdiction()
+  const { isLoaded: isPermitClassificationsLoaded } = usePermitClassificationsLoad()
 
   const { currentPage, totalPages, totalCount, countPerPage, handleCountPerPageChange, handlePageChange, isSearching } =
     permitApplicationStore
@@ -33,11 +36,14 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   useSearch(permitApplicationStore, [currentJurisdiction?.id])
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentJurisdiction) return <LoadingScreen />
+  if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />
 
   return (
     <Container maxW="container.lg" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
+        {!currentJurisdiction.isSubmissionContactSetupComplete && (
+          <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
+        )}
         <Flex justify={"space-between"} w={"full"}>
           <Box>
             <Heading as="h1">{t("permitApplication.submissionInbox.title")}</Heading>
@@ -60,9 +66,9 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           <GridHeaders />
 
           {isSearching ? (
-            <Center p={50}>
+            <Flex py={50} gridColumn={"span 6"}>
               <SharedSpinner />
-            </Center>
+            </Flex>
           ) : (
             currentJurisdiction.tablePermitApplications.map((pa: IPermitApplication) => {
               return (

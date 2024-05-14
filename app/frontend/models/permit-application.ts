@@ -1,10 +1,20 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { t } from "i18next"
+import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitApplicationStatus } from "../types/enums"
-import { IDownloadableFile, IFormIOBlock, IFormJson, ISubmissionData, ITemplateCustomization } from "../types/types"
+import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
+import { EPermitApplicationStatus, ERequirementType } from "../types/enums"
+import {
+  IContact,
+  IDownloadableFile,
+  IFormIOBlock,
+  IFormJson,
+  ISubmissionData,
+  ITemplateCustomization,
+} from "../types/types"
 import { combineComplianceHints } from "../utils/formio-component-traversal"
+import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { StepCodeModel } from "./step-code"
@@ -38,6 +48,8 @@ export const PermitApplicationModel = types
     zipfileName: types.maybeNull(types.string),
     zipfileUrl: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
+    isFullyLoaded: types.optional(types.boolean, false),
+    isDirty: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -76,53 +88,144 @@ export const PermitApplicationModel = types
       return self.viewedAt !== null
     },
   }))
+  .actions((self) => ({
+    setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
+      self.submissionData = newData
+      self.isDirty = true
+    },
+    setIsDirty(isDirty: boolean) {
+      self.isDirty = true
+    },
+  }))
   .views((self) => ({
+    get statusTagText() {
+      if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
+        return t("permitApplication.viewed")
+      }
+
+      return self.status
+    },
     indexOfBlockId: (blockId: string) => {
+      if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)
     },
     getBlockClass(sectionId, blockId) {
-      return `formio-component-${self.blockKey(sectionId, blockId)}`
+      return `formio-component-${blockId === "section-signoff-id" ? "section-signoff-key" : self.blockKey(sectionId, blockId)}`
     },
     get blockClasses() {
       return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
     },
     get contacts() {
-      const blockIdToTitleMapping = R.pipe(
-        R.prop("components"), // Access the top-level components array
-        R.chain(R.prop("components")), // Flatten nested components into a single array
-        R.reduce((acc, { id, title }) => ({ ...acc, [id]: title }), {}) // Create an ID to title mapping
+      // traverses the nest form json components
+      // and collects the label for contact requirements
+      const contactKeyToLabelMapping = R.pipe(
+        R.prop("components"),
+        R.chain(R.prop("components")),
+        R.chain(R.prop("components")),
+        R.reduce((acc, { id, key, title, components, label }) => {
+          if (key.includes("multi_contact")) {
+            const firstComponent = components[0]
+
+            if (firstComponent) {
+              acc[firstComponent.key] = firstComponent.label
+            }
+          }
+
+          if (key.includes(ERequirementType.generalContact) || key.includes(ERequirementType.professionalContact)) {
+            acc[key] = label
+          }
+
+          return acc
+        }, {})
       )(self.formJson)
       // Convert each section's object into an array of [key, value] pairs
       const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
 
+      // Filters out non contact form components
+      const getContactBlocks = (blocks) =>
+        blocks.filter(
+          (block) =>
+            block[0].includes("multi_contact") ||
+            block[0].includes(ERequirementType.generalContact) ||
+            block[0].includes(ERequirementType.professionalContact)
+        )
+
+      const insertFullNameToContact = (contact: { firstName?: string; lastName?: string; name?: string }) => {
+        contact.name = `${contact?.firstName ?? ""} ${contact?.lastName ?? ""}`.trim()
+      }
+
       // Flatten one level of arrays to get a single array of [key, value] pairs
-      const allFields = R.chain(R.identity, sectionsPairs)
+      const allContactFieldPairs = getContactBlocks(R.chain(R.identity, sectionsPairs))
 
-      // Group the fields by block identifier, e.g., "section1|block1", to aggregate all related fields together
-      const groupedByBlock = R.groupBy(([key, _]) => key.split("|").slice(0, 2).join("|"), allFields)
+      // single contact field value is not an array and they have each contact field input
+      // as a separate value so we combine the individual field to an array of contact objects
+      const singleContacts = Object.values(
+        allContactFieldPairs
+          .filter(([_key, val]) => !Array.isArray(val))
+          .reduce((acc, [key, val]) => {
+            const splitKey = key.split("|")
+            // the end of the key is the contact input field name e.g. firstName, email etc.
+            const fieldName = splitKey.pop()
 
-      // Map over each block, obtaining ID and transforming them into the desired Contact object structure
-      const unfilteredContacts = R.keys(groupedByBlock).map((blockFieldsKey) => {
-        const keySplit = blockFieldsKey.split("|RB")
-        if (keySplit.length <= 1) return
+            //  the rest of the key is the shared key path
+            //  e.g. formSubmissionDataRSTsectioncId|RBId|owner_contact_block|multi_contact|general_contact
+            const sharedKeyPath = splitKey.join("|")
 
-        const blockId = keySplit[keySplit.length - 1]
-        const blockObject = R.fromPairs(groupedByBlock[blockFieldsKey])
-        return {
-          id: blockId,
-          address: blockObject[R.keys(blockObject).find((key: string) => key.includes("address"))!],
-          cellNumber: blockObject[R.keys(blockObject).find((key: string) => key.includes("cell"))!],
-          email: blockObject[R.keys(blockObject).find((key: string) => key.includes("email"))!],
-          name: blockObject[R.keys(blockObject).find((key: string) => key.includes("individual_name"))!],
-          phone: blockObject[R.keys(blockObject).find((key: string) => key.includes("phone"))!],
-          title: blockIdToTitleMapping[blockId],
-        }
-      })
+            if (!(sharedKeyPath in acc)) {
+              acc[sharedKeyPath] = {}
+            }
 
-      return unfilteredContacts.filter((contact) => {
-        const omitted = R.omit(["id", "title"], contact)
-        return R.keys(omitted).length > 0 && R.values(omitted).some((value) => value && !R.isEmpty(value))
-      })
+            acc[sharedKeyPath][fieldName] = val
+
+            if (!("title" in acc[sharedKeyPath])) {
+              acc[sharedKeyPath].title = contactKeyToLabelMapping[sharedKeyPath]
+            }
+
+            return acc
+          }, {})
+      )
+
+      singleContacts.forEach(insertFullNameToContact)
+
+      const reformatContactObjectFromMultiContactSubmission = (contact: Record<string, string>) => {
+        const formattedContactObject = {}
+
+        Object.keys(contact).forEach((key) => {
+          const splitKey = key.split("|")
+          // the end of the key is the contact input field name e.g. firstName, email etc.
+          const fieldName = splitKey.pop()
+
+          formattedContactObject[fieldName] = contact[key]
+
+          if (!("title" in formattedContactObject)) {
+            const parentKey = splitKey.join("|")
+            // sets the title form the parent field set
+            formattedContactObject["title"] = contactKeyToLabelMapping[parentKey]
+          }
+        })
+
+        insertFullNameToContact(formattedContactObject)
+
+        return formattedContactObject
+      }
+
+      // multi contact field pairs value is an array, so we filter them out then
+      // format all contacts into an array of contact objects
+      const multiContacts = allContactFieldPairs
+        .filter(([_key, val]) => Array.isArray(val))
+        .reduce((acc, [parentKey, contactArray]) => {
+          contactArray.forEach((unformattedContact) => {
+            const formattedContact: Record<string, string> =
+              reformatContactObjectFromMultiContactSubmission(unformattedContact)
+
+            acc.push(formattedContact)
+          })
+
+          return acc
+        }, [])
+
+      //   returns a single array of all contacts
+      return singleContacts.concat(multiContacts)
     },
   }))
   .actions((self) => ({
@@ -143,11 +246,16 @@ export const PermitApplicationModel = types
       })
       self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
     },
-    update: flow(function* (params) {
+    setFormattedComplianceData(data: Record<string, any>) {
+      self.formattedComplianceData = data
+    },
+    update: flow(function* ({ autosave, ...params }) {
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
         const { data: permitApplication } = response.data
-        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        if (!autosave) {
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
       }
       return response
     }),
@@ -161,8 +269,75 @@ export const PermitApplicationModel = types
       return response.ok
     }),
 
+    markAsViewed: flow(function* () {
+      const response = yield self.environment.api.viewPermitApplication(self.id)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.viewedAt = permitApplication.viewedAt
+      }
+      return response.ok
+    }),
+
     setSelectedTabIndex: (index: number) => {
       self.selectedTabIndex = index
+    },
+
+    updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
+      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
+      const newSectionFields = {}
+      INPUT_CONTACT_KEYS.forEach((contactField) => {
+        let newValue = ["cell", "phone"].includes(contactField)
+          ? // The normalized phone number starts with +1... (country code)
+            convertPhoneNumberToFormioFormat(contact[contactField] as string)
+          : contact[contactField] || ""
+        newSectionFields[`${requirementKey}|${contactField}`] = newValue
+      })
+
+      const newData = {
+        data: {
+          ...submissionState.data,
+          [sectionKey]: {
+            ...submissionState.data[sectionKey],
+            ...newSectionFields,
+          },
+        },
+      }
+      self.setSubmissionData(newData)
+    },
+    updateContactInSubmissionDatagrid: (
+      requirementPrefix: string,
+      index: number,
+      contact: IContact,
+      submissionState: any
+    ) => {
+      const parts = requirementPrefix.split("|")
+      const contactType = parts[parts.length - 1]
+      const requirementKey = parts.slice(0, -1).join("|")
+      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
+
+      const newContactElement = {}
+      INPUT_CONTACT_KEYS.forEach((contactField) => {
+        // The normalized phone number starts with +1... (country code)
+        let newValue = ["cell", "phone"].includes(contactField)
+          ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
+          : contact[contactField]
+        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
+      })
+      const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
+      clonedArray[index] = newContactElement
+      const newSectionFields = {
+        [requirementKey]: clonedArray,
+      }
+      const newData = {
+        data: {
+          ...submissionState.data,
+          [sectionKey]: {
+            ...submissionState.data[sectionKey],
+            ...newSectionFields,
+          },
+        },
+      }
+      self.setSubmissionData(newData)
     },
   }))
 

@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { values } from "mobx"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
@@ -9,16 +10,19 @@ import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
 import { EUserSortFields } from "../types/enums"
 import { IEULA } from "../types/types"
+import { toCamelCase } from "../utils/utility-functions"
 
 export const UserStoreModel = types
   .compose(
     types.model("UserStoreModel").props({
       usersMap: types.map(UserModel),
       currentUser: types.maybeNull(types.safeReference(UserModel)),
+      invitedUser: types.maybeNull(types.safeReference(UserModel)),
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
       eula: types.maybeNull(types.frozen<IEULA>()),
+      tableUsers: types.array(types.reference(UserModel)),
     }),
-    createSearchModel<EUserSortFields>("searchUsers", Object.values(EUserSortFields))
+    createSearchModel<EUserSortFields>("searchUsers")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -28,14 +32,34 @@ export const UserStoreModel = types
       //@ts-ignore
       return values(self.usersMap) as IUser[]
     },
+    get reinvitedEmails(): string[] {
+      return self.invitationResponse?.data?.reinvited?.map((user) => user.email) || []
+    },
     get invitedEmails(): string[] {
       return self.invitationResponse?.data?.invited?.map((user) => user.email) || []
     },
     get takenEmails(): string[] {
       return self.invitationResponse?.data?.emailTaken?.map((user) => user.email) || []
     },
+    getSortColumnHeader(field: EUserSortFields) {
+      //@ts-ignore
+      return t(`user.fields.${toCamelCase(field)}`)
+    },
   }))
   .actions((self) => ({
+    __beforeMergeUpdate(user) {
+      if (user.jurisdiction) {
+        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
+        user.jurisdiction = user.jurisdiction.id
+      }
+      return user
+    },
+    resetInvitationResponse: () => {
+      self.invitationResponse = null
+    },
+    setTableUsers: (users) => {
+      self.tableUsers = users.map((user) => user.id)
+    },
     setUsers(users) {
       R.forEach((u) => self.usersMap.put(u), users)
     },
@@ -43,20 +67,12 @@ export const UserStoreModel = types
       self.usersMap.delete(removedUser.id)
     },
     setCurrentUser(user) {
-      if (user.jurisdiction) {
-        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
-        user.jurisdiction = user.jurisdiction.id
-      }
-      self.usersMap.put(user)
+      self.mergeUpdate(user, "usersMap")
       self.currentUser = user.id
     },
     unsetCurrentUser() {
       self.currentUser = null
     },
-    signUp: flow(function* (formData) {
-      const response = yield self.environment.api.signUp(formData)
-      return response.ok
-    }),
     invite: flow(function* (formData) {
       const response = yield self.environment.api.invite(formData)
       self.invitationResponse = response.data
@@ -68,10 +84,20 @@ export const UserStoreModel = types
         window.location.replace(response.meta.redirectUrl)
       }
     }),
+    fetchInvitedUser: flow(function* (token: string) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.fetchInvitedUser(token))
+      if (ok) {
+        self.mergeUpdate(response.data, "usersMap")
+        self.invitedUser = response.data.id
+      }
+      return ok
+    }),
     updateProfile: flow(function* (formData) {
       const { ok, data: response } = yield self.environment.api.updateProfile(formData)
-      self.mergeUpdate(response.data, "usersMap")
-      return response.ok
+      if (ok) {
+        self.mergeUpdate(response.data, "usersMap")
+      }
+      return ok
     }),
     fetchEULA: flow(function* () {
       const response = yield self.environment.api.getEULA()
@@ -80,6 +106,9 @@ export const UserStoreModel = types
         return true
       }
     }),
+    getUserById(id: string) {
+      return self.usersMap.get(id)
+    },
   }))
   .actions((self) => ({
     searchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -87,21 +116,25 @@ export const UserStoreModel = types
         self.resetPages()
       }
 
-      const response = yield self.environment.api.fetchJurisdictionUsers(
-        self.rootStore.jurisdictionStore.currentJurisdiction.id,
-        {
-          query: self.query,
-          sort: self.sort,
-          page: opts?.page ?? self.currentPage,
-          perPage: opts?.countPerPage ?? self.countPerPage,
-          showArchived: self.showArchived,
-        }
-      )
+      const searchParams = {
+        query: self.query,
+        sort: self.sort,
+        page: opts?.page ?? self.currentPage,
+        perPage: opts?.countPerPage ?? self.countPerPage,
+        showArchived: self.showArchived,
+      }
+
+      const response = yield self.rootStore.jurisdictionStore.currentJurisdiction?.id
+        ? self.environment.api.fetchJurisdictionUsers(
+            self.rootStore.jurisdictionStore.currentJurisdiction.id,
+            searchParams
+          )
+        : self.environment.api.fetchAdminUsers(searchParams)
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "usersMap")
 
-        self.rootStore.jurisdictionStore.currentJurisdiction.setTableUsers(response.data.data)
+        self.setTableUsers(response.data.data)
         self.currentPage = opts?.page ?? self.currentPage
         self.totalPages = response.data.meta.totalPages
         self.totalCount = response.data.meta.totalCount

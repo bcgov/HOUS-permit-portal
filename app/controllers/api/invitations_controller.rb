@@ -2,28 +2,35 @@ class Api::InvitationsController < Devise::InvitationsController
   include BaseControllerMethods
   respond_to :json
   before_action :authenticate_user!
-  before_action :find_invited_user, only: %i[remove resend]
+  before_action :find_invited_user, only: %i[show]
+  skip_before_action :authenticate_user!, only: %i[show]
 
   def create
     inviter = Jurisdiction::UserInviter.new(inviter: current_user, users_params: users_params).call
-    if (inviter.results[:invited] + inviter.results[:email_taken]).any?
+    if (inviter.results[:invited] + inviter.results[:reinvited] + inviter.results[:email_taken]).any?
       render_success(inviter.results, nil, { blueprint: InvitationBlueprint })
     else
       render_error "user.create_invite_error" and return
     end
   end
 
-  def remove
-    render_success(@user, "user.invitation_removed_success") if @user.destroy
+  def show
+    if @invited_user
+      render_success @invited_user, nil, { blueprint: UserBlueprint, blueprint_opts: { view: :invited_user } }
+    else
+      render json: { error: :invalid_token }, status: :not_found
+    end
   end
 
   def update
     raw_invitation_token = update_resource_params["invitation_token"]
     user = User.find_by_invitation_token(raw_invitation_token, true)
-    user.update(user_params)
 
-    self.resource = accept_resource if user&.errors.empty?
-    invitation_accepted = resource.errors.empty?
+    render_error "user.invalid_invitation_error" and return unless user.present?
+    render_accept_invite_error(user) and return unless user.update(user_params)
+
+    self.resource = accept_resource
+    invitation_accepted = resource&.errors&.empty?
 
     yield resource if block_given?
 
@@ -40,27 +47,7 @@ class Api::InvitationsController < Devise::InvitationsController
       ) and return
     else
       resource.invitation_token = raw_invitation_token
-      # resource.errors.full_messages is full here probably with "Invitation token is invalid", lets just craft our own message for now
-      render_error "user.accept_invite_error",
-                   message_opts: {
-                     error_message: resource.errors.full_messages.join(", "),
-                   } and return
-    end
-  end
-
-  def resend
-    if @user.invite!
-      render_success({}, "user.send_invitation_success")
-    else
-      render_error "user.resend_invite_error" and return
-    end
-  end
-
-  def remove
-    if @user.destroy
-      render_success(@user, "user.invitation_removed_success")
-    else
-      render_error "user.remove_invite_error" and return
+      render_accept_invite_error(resource) and return
     end
   end
 
@@ -73,6 +60,15 @@ class Api::InvitationsController < Devise::InvitationsController
   end
 
   def user_params
-    params.require(:user).permit(:username, :password, :first_name, :last_name)
+    params.require(:user).permit(:nickname, :first_name, :last_name)
+  end
+
+  def render_accept_invite_error(resource)
+    render_error "user.accept_invite_error",
+                 { message_opts: { error_message: resource.errors.full_messages.join(", ") } }
+  end
+
+  def find_invited_user
+    @invited_user = User.find_by_invitation_token(params[:invitation_token], true)
   end
 end

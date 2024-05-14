@@ -20,45 +20,58 @@ jurisdictions = Jurisdiction.all
 north_van = Jurisdiction.find_by(name: "North Vancouver")
 
 puts "Seeding users..."
-5.times do |n|
-  suffix = n == 0 ? "" : n
-  User.find_or_create_by(username: "super_admin#{suffix}") do |user|
-    user.role = :super_admin
-    user.first_name = "SuperAdmin#{suffix}"
-    user.last_name = "McUser"
-    user.email = "super_admin#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "super_admin") do |user|
+  user.role = :super_admin
+  user.first_name = "SuperAdmin"
+  user.last_name = "McUser"
+  user.email = "super_admin@example.com"
+  user.password = "P@ssword1"
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "A41927C69D6549B8A396FCA748F53502"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "super_admin@example.com"
+  user.omniauth_username = "super_admin"
+end
 
-  User.find_or_create_by(username: "review_manager#{suffix}") do |user|
-    user.role = :review_manager
-    user.first_name = "ReviewManager#{suffix}"
-    user.last_name = "McUser"
-    user.email = "review_manager#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.jurisdiction = north_van
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "review_manager") do |user|
+  user.role = :review_manager
+  user.first_name = "ReviewManager"
+  user.last_name = "McUser"
+  user.email = "review_manager@example.com"
+  user.password = "P@ssword1"
+  user.jurisdiction = north_van
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "review_manager@example.com"
+  user.omniauth_username = "review_manager"
+end
 
-  User.find_or_create_by(username: "reviewer#{suffix}") do |user|
-    user.role = :reviewer
-    user.first_name = "Reviewer#{suffix}"
-    user.last_name = "McUser"
-    user.email = "reviewer#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.jurisdiction = north_van
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "reviewer") do |user|
+  user.role = :reviewer
+  user.first_name = "Reviewer"
+  user.last_name = "McUser"
+  user.email = "reviewer@example.com"
+  user.password = "P@ssword1"
+  user.jurisdiction = north_van
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "reviewer@example.com"
+  user.omniauth_username = "reviewer"
+end
 
-  User.find_or_create_by(username: "submitter#{suffix}") do |user|
-    user.role = :submitter
-    user.first_name = "Submitter#{suffix}"
-    user.last_name = "McUser"
-    user.email = "submitter#{suffix}@example.com"
-    user.password = "P@ssword1"
-    user.confirmed_at = Time.now
-  end
+User.find_or_create_by(nickname: "submitter") do |user|
+  user.role = :submitter
+  user.first_name = "Submitter"
+  user.last_name = "McUser"
+  user.email = "submitter@example.com"
+  user.password = "P@ssword1"
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "C2E3AA0067514FFEB587C11038E437E2"
+  user.omniauth_provider = "bceidboth"
+  user.omniauth_email = "submitter@example.com"
+  user.omniauth_username = "submitter"
 end
 
 User.reindex
@@ -71,36 +84,80 @@ permit_type1 = PermitType.find_by_code("low_residential")
 permit_type2 = PermitType.find_by_code("medium_residential")
 
 puts "Seeding contacts..."
+Jurisdiction.all.each do |j|
+  j
+    .permit_type_submission_contacts
+    .where(email: "north-van@laterolabs.com", permit_type: permit_type1)
+    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
+  j
+    .permit_type_submission_contacts
+    .where(email: "north-van@laterolabs.com", permit_type: permit_type2)
+    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
+end
 if PermitApplication.first.blank?
   jurisdictions
     .first(10)
     .each do |jurisdiction|
       if jurisdiction.contacts.blank?
         rand(3..5).times do |n|
-          Contact.create(
-            name: "Contact #{n}",
+          Contact.create!(
+            first_name: "Contactfirst #{n}",
+            last_name: "Contactlast #{n}",
             title: "Title #{n}",
             department: "Department #{n}",
             email: "contact_#{n}_#{jurisdiction.id}@example.com",
-            phone_number: "604-456-7802",
-            jurisdiction_id: jurisdiction.id,
+            phone: "604-456-7802",
+            contactable: jurisdiction,
+          )
+        end
+        jurisdiction.reload
+        if jurisdiction.permit_type_submission_contacts.blank?
+          jurisdiction.permit_type_submission_contacts.create!(
+            email: jurisdiction.contacts.first.email,
+            confirmed_at: Time.now,
+            permit_type: permit_type1,
           )
         end
       end
     end
 
+  User
+    .submitter
+    .first(10)
+    .each do |user|
+      if user.contacts.blank?
+        rand(3..5).times do |n|
+          Contact.create!(
+            first_name: "Usercontactfirst #{n}",
+            last_name: "Usercontactlast #{n}",
+            title: "Title #{n}",
+            department: "Department #{n}",
+            email: "user_contact_#{n}_#{user.id}@example.com",
+            address: "Address #{n}",
+            phone: "604-456-7802",
+            contactable: user,
+          )
+        end
+      end
+    end
+  Contact.reindex
   puts "Seeding requirement templates..."
   # Create RequirementTemplate records
   RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
   RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
   RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
   RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+
   RequirementTemplate.reindex
 
   # Requrements from seeder are idempotent
   # Requirments block will get created from requiremetms templates
   puts "Seeding requirements..."
   RequirementsFromXlsxSeeder.seed
+  if Rails.env.development?
+    PermitClassification.find_by_code("medium_residential").update(enabled: true)
+    RequirementsFromXlsxSeeder.seed_medium
+  end
 
   # Energy Step Code Reference Tables
   StepCode::MEUIReferencesSeeder.seed!
@@ -109,15 +166,16 @@ if PermitApplication.first.blank?
   # Creating Permit Applications
   puts "Seeding permit applications..."
   submitters = User.submitter
-  rt = RequirementTemplate.with_published_version.first.published_template_version
+  template_version = TemplateVersion.published.first
   20.times do |index|
-    PermitApplication.create(
+    PermitApplication.create!(
       submitter_id: submitters.sample.id,
       full_address: "123 Address st",
       pid: "999999999",
-      jurisdiction_id: index.even? ? jurisdictions.sample.id : north_van.id,
-      activity_id: rt.activity.id,
-      permit_type_id: rt.permit_type.id,
+      jurisdiction_id: index.even? ? jurisdictions.first(10).sample.id : north_van.id,
+      activity_id: template_version.activity.id,
+      permit_type_id: template_version.permit_type.id,
+      template_version: template_version,
     )
   end
   # Seed a North Vancouver Example
@@ -138,22 +196,24 @@ if PermitApplication.first.blank?
           "5419 ESPERANZA DR, NORTH VANCOUVER, BC, V7R 3W3"
         end
       )
-    PermitApplication.create(
+    PermitApplication.create!(
       submitter: submitters.sample,
       jurisdiction: north_van,
       activity: activity1,
       permit_type: permit_type1,
       full_address: full_address,
+      template_version: template_version,
       pid: pid,
     )
   end
 end
+PermitApplication.reindex
 
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
   .limit(3)
   .each do |template_version|
-    JurisdictionTemplateVersionCustomization.find_or_create_by(
+    JurisdictionTemplateVersionCustomization.find_or_create_by!(
       jurisdiction: north_van,
       template_version: template_version,
     ) do |customization|
@@ -162,44 +222,4 @@ TemplateVersion
   end
 
 puts "Seeding EULA..."
-EndUserLicenseAgreement.find_or_create_by(
-  active: true,
-  content:
-    "<h1>Non est ista, inquam, Piso, magna dissensio.</h1>
-
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. An eum discere ea mavis, quae cum plane perdidiceriti nihil sciat? Nulla profecto est, quin suam vim retineat a primo ad extremum. </p>
-    
-    <ol>
-      <li>Cur igitur, cum de re conveniat, non malumus usitate loqui?</li>
-      <li>Polemoni et iam ante Aristoteli ea prima visa sunt, quae paulo ante dixi.</li>
-      <li>Nam illud quidem adduci vix possum, ut ea, quae senserit ille, tibi non vera videantur.</li>
-    </ol>
-    
-    <h2>Quis istud possit, inquit, negare?</h2>
-    
-    <p>Duo Reges: constructio interrete. Ea possunt paria non esse. Ergo opifex plus sibi proponet ad formarum quam civis excellens ad factorum pulchritudinem? <b>Aliter enim nosmet ipsos nosse non possumus.</b> Quorum sine causa fieri nihil putandum est. Cum id fugiunt, re eadem defendunt, quae Peripatetici, verba. Quod quidem nobis non saepe contingit. Illo enim addito iuste fit recte factum, per se autem hoc ipsum reddere in officio ponitur. Ita enim se Athenis collocavit, ut sit paene unus ex Atticis, ut id etiam cognomen videatur habiturus. Re mihi non aeque satisfacit, et quidem locis pluribus. </p>
-    
-    <ul>
-      <li>Sullae consulatum?</li>
-      <li>Stulti autem malorum memoria torquentur, sapientes bona praeterita grata recordatione renovata delectant.</li>
-      <li>Quem Tiberina descensio festo illo die tanto gaudio affecit, quanto L.</li>
-    </ul>
-    
-    <dl>
-      <dt><dfn>Bork</dfn></dt>
-      <dd>Sextilio Rufo, cum is rem ad amicos ita deferret, se esse heredem Q.</dd>
-      <dt><dfn>Vide, quaeso, rectumne sit.</dfn></dt>
-      <dd>Quae qui non vident, nihil umquam magnum ac cognitione dignum amaverunt.</dd>
-      <dt><dfn>Sed videbimus.</dfn></dt>
-      <dd>Vadem te ad mortem tyranno dabis pro amico, ut Pythagoreus ille Siculo fecit tyranno?</dd>
-      <dt><dfn>Bork</dfn></dt>
-      <dd>Mihi, inquam, qui te id ipsum rogavi?</dd>
-      <dt><dfn>Immo videri fortasse.</dfn></dt>
-      <dd>Honesta oratio, Socratica, Platonis etiam.</dd>
-      <dt><dfn>Si longus, levis.</dfn></dt>
-      <dd>Idne consensisse de Calatino plurimas gentis arbitramur, primarium populi fuisse, quod praestantissimus fuisset in conficiendis voluptatibus?</dd>
-    </dl>
-    
-    <p>Atque his de rebus et splendida est eorum et illustris oratio. Cupiditates non Epicuri divisione finiebat, sed sua satietate. Expectoque quid ad id, quod quaerebam, respondeas. In eo autem voluptas omnium Latine loquentium more ponitur, cum percipitur ea, quae sensum aliquem moveat, iucunditas. Istam voluptatem perpetuam quis potest praestare sapienti? Similiter sensus, cum accessit ad naturam, tuetur illam quidem, sed etiam se tuetur; Ipse Epicurus fortasse redderet, ut Sextus Peducaeus, Sex. Habent enim et bene longam et satis litigiosam disputationem. Rationis enim perfectio est virtus; </p>
-  ",
-)
+EulaUpdater.run

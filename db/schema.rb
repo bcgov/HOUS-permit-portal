@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_06_171123) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -41,18 +41,27 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.string "name"
     t.string "title"
     t.string "email"
-    t.string "phone_number"
+    t.string "phone"
     t.string "extension"
-    t.uuid "jurisdiction_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "department"
     t.string "organization"
     t.string "cell_number"
-    t.index ["jurisdiction_id"], name: "index_contacts_on_jurisdiction_id"
+    t.string "first_name", default: "", null: false
+    t.string "last_name", default: "", null: false
+    t.string "cell"
+    t.text "address"
+    t.string "business_name"
+    t.string "business_license"
+    t.string "professional_association"
+    t.string "professional_number"
+    t.string "contactable_type"
+    t.uuid "contactable_id"
+    t.index %w[contactable_type contactable_id],
+            name: "index_contacts_on_contactable"
   end
 
   create_table "end_user_license_agreements",
@@ -63,6 +72,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.boolean "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "variant"
   end
 
   create_table "jurisdiction_template_version_customizations",
@@ -100,6 +110,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.integer "energy_step_required"
     t.integer "zero_carbon_step_required"
     t.string "slug"
+    t.integer "map_zoom"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -142,10 +153,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.datetime "signed_off_at"
     t.string "nickname"
     t.datetime "viewed_at"
-    t.uuid "template_version_id", null: false
     t.jsonb "zipfile_data"
+    t.uuid "template_version_id", null: false
     t.jsonb "form_customizations_snapshot"
     t.string "reference_number"
+    t.jsonb "compliance_data", default: {}, null: false
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -259,6 +271,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
             name: "index_requirements_on_requirement_block_id"
   end
 
+  create_table "site_configurations",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.boolean "display_sitewide_message"
+    t.text "sitewide_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "step_code_building_characteristics_summaries",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -331,6 +353,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.integer "epc_calculation_testing_target_type"
     t.boolean "epc_calculation_compliance"
     t.boolean "codeco"
+    t.integer "status", default: 0, null: false
+    t.string "builder"
+    t.index ["status"], name: "index_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
   end
 
@@ -406,7 +431,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.jsonb "file_data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.jsonb "compliance_data"
+    t.jsonb "compliance_data", default: {}, null: false
     t.string "data_key"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"
@@ -526,8 +551,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.string "email", null: false
-    t.string "username"
+    t.string "email"
+    t.string "nickname"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -551,35 +576,36 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_15_214621) do
     t.string "invited_by_type"
     t.uuid "invited_by_id"
     t.integer "invitations_count", default: 0
-    t.string "provider"
-    t.string "uid"
+    t.string "omniauth_provider"
+    t.string "omniauth_uid"
     t.datetime "discarded_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string "unconfirmed_email"
+    t.string "omniauth_email"
+    t.string "omniauth_username"
     t.index ["confirmation_token"],
             name: "index_users_on_confirmation_token",
             unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
-    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["email"], name: "index_users_on_email"
     t.index ["invitation_token"],
             name: "index_users_on_invitation_token",
             unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
-    t.index %w[provider uid],
-            name: "index_users_on_provider_and_uid",
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true
+    t.index %w[omniauth_provider omniauth_uid],
+            name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true
     t.index ["reset_password_token"],
             name: "index_users_on_reset_password_token",
             unique: true
-    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
-  add_foreign_key "contacts", "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",

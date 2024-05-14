@@ -1,14 +1,48 @@
 class AutomatedCompliance::ParcelInfoExtractor < AutomatedCompliance::Base
   def call(permit_application)
-    return if permit_application.pid.blank?
-    #extraction of parcel data can be done via LTSA base
-    attributes = Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: permit_application.pid)
-    updated_submission_data = permit_application.submission_data || { "data" => {} }
-    permit_application
-      .automated_compliance_requirements_for_module("ParcelInfoExtractor")
-      .each do |field_id, req|
-        updated_submission_data["data"][field_id] = attributes[req.input_options.dig("computed_compliance", "value")]
+    begin
+      raise Errors::ParcelError if permit_application.pid.blank? && permit_application.pin.blank?
+
+      # extraction of parcel data can be done via LTSA base
+      attributes =
+        Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(
+          pid: permit_application.pid,
+          pin: permit_application.pin,
+        )
+
+      raise Errors::ParcelError if attributes.nil?
+
+      # automation sets up the extracted data into compliance_data, the front end will allow the user to see what was extracted and override the result
+      # lock this while it is updating in case mulitple automated compliances run at once
+      permit_application.with_lock do
+        updated = false
+        permit_application
+          .automated_compliance_requirements_for_module("ParcelInfoExtractor")
+          .each do |field_id, req|
+            value = attributes[req.dig("computedCompliance", "value")]
+
+            if value != permit_application.compliance_data[field_id]
+              updated = true
+              permit_application.compliance_data[field_id] = value
+            end
+          end
+        permit_application.save! if updated
       end
-    permit_application.update(submission_data: updated_submission_data)
+    rescue Errors::ParcelError
+      permit_application.with_lock do
+        updated = false
+        permit_application
+          .automated_compliance_requirements_for_module("ParcelInfoExtractor")
+          .each do |field_id, req|
+            # set to nil if there is no existing value to indicate
+            # a valid value was not found
+            if !permit_application.compliance_data.has_key?(field_id)
+              updated = true
+              permit_application.compliance_data[field_id] = nil
+            end
+          end
+        permit_application.save! if updated
+      end
+    end
   end
 end

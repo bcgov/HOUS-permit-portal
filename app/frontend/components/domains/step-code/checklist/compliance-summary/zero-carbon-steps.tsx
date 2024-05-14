@@ -1,9 +1,14 @@
 import { Flex, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { translationPrefix } from "./translation-prefix"
+import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { i18nPrefix } from "./i18n-prefix"
 
-export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }) {
+interface IProps {
+  checklist: IStepCodeChecklist
+}
+
+export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }: IProps) {
   return (
     <Flex align="end" w="full">
       {[...Array(checklist.numberOfZeroCarbonSteps).keys()].map((stepOffset) => {
@@ -25,7 +30,7 @@ export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }) {
           <VStack key={`zeroCarbonStepsStep${step}`} align="stretch" flex={1}>
             {isRequiredStep && (
               <Text fontSize="xs" textAlign="center">
-                {t(`${translationPrefix}.required`)}
+                {t(`${i18nPrefix}.required`)}
               </Text>
             )}
             <Flex
@@ -39,7 +44,7 @@ export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }) {
               borderColor={isRequiredStep ? "semantic.info" : "border.base"}
               bg={isRequiredStep ? "semantic.infoLight" : "greys.grey03"}
             >
-              {t(`${translationPrefix}.zeroCarbonStepCode.steps.${step}`)}
+              {t(`${i18nPrefix}.zeroCarbonStepCode.steps.${step}`)}
             </Flex>
           </VStack>
         )

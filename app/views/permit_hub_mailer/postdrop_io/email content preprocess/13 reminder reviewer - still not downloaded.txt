@@ -254,7 +254,7 @@
                         >Contact us</a
                       >
                       <a
-                        href="<%= FrontendUrlHelper.frontend_url("/help") %>"
+                        href="https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub"
                         target="_blank"
                         style="margin-right: 20px"
                         >Help</a

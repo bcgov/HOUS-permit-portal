@@ -8,7 +8,7 @@ import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 import { PerformanceTypeSelect } from "./performance-type-select"
 
 export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
@@ -29,16 +29,13 @@ export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.doors`)}
+        {t(`${i18nPrefix}.doors`)}
       </GridColumnHeader>
 
       {fields.map((field, index) => {
-        GridData.defaultProps = {
-          borderTopWidth: index == 0 ? 1 : 0,
-        }
         return (
           <React.Fragment key={`buildingCharacteristicDoors${generateUUID()}`}>
-            <GridData gap={1} alignItems="start" pos="relative">
+            <GridData gap={1} pos="relative" borderTopWidth={index == 0 ? 1 : 0}>
               <DetailsInput
                 fieldName={`${fieldArrayName}.${index}.details`}
                 isRemovable={fields.length > 1}
@@ -47,7 +44,7 @@ export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
                 onRemove={() => remove(index)}
               />
             </GridData>
-            <GridData justifyContent="start">
+            <GridData borderTopWidth={index == 0 ? 1 : 0}>
               <Controller
                 control={control}
                 name={`${fieldArrayName}.${index}.performanceType`}
@@ -60,7 +57,7 @@ export const Doors = observer(function BuildingCharacteristicsSummaryDoors() {
                 )}
               />
             </GridData>
-            <GridData borderRightWidth={1}>
+            <GridData borderRightWidth={1} borderTopWidth={index == 0 ? 1 : 0}>
               <TextFormControl fieldName={`${fieldArrayName}.${index}.performanceValue`} />
             </GridData>
           </React.Fragment>

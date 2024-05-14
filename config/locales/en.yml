@@ -30,20 +30,47 @@
 en:
   activerecord:
     attributes:
-      user:
-        uid: BCeID
     errors:
       models:
+        permit_application:
+          attributes:
+            submitter:
+              incorrect_role: "must have the submitter role"
+            jurisdiction:
+              no_contact: "not available."
+            pid_or_pin: "must have a pid or pin."
+        requirement_template:
+          step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
+          duplicate_energy_step_code:
+            'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
+          duplicate_step_code_package:
+            'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
+        requirement_block:
+          attributes:
+            requirements:
+              incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
+              duplicate_step_code_package_file: "must have only one design package file for energy step code per requirement block"
+        requirement:
+          incorrect_energy_requirement_schema: "Incorrect schema for %{requirement_code}"
+          attributes:
+            requirement_code:
+              incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_step_code_package_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
         supporting_document:
           attributes:
             file:
               max_size: "must not be larger than %{max_size} bytes"
+            data_key:
+              duplicate: "file already exists for this permit application"
         user:
           attributes:
-            uid:
-              taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+            base:
+              bceid_taken: BCeID is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+              idir_taken: IDIR is associated with an existing account. To use this IDIR with a different account, contact your administrator to deactivate the existing account.
+            password:
+              password_format: "Password does no meet the required format"
   application_mailer:
-    subject_start: "BC Building Permit Hub"
+    subject_start: "Building Permit Hub"
     subjects:
       update_password_success: "You have successfully updated your password"
       welcome: "Welcome to the Building Permit Hub"
@@ -51,7 +78,7 @@ en:
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_application_updated: "Updated application status: %{permit_application_number}"
-      remind_reviewers: "Your report on outstanding permit applications"
+      remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
   arbitrary_message_construct:
     devise:
@@ -76,47 +103,66 @@ en:
         message: "Your password has been changed successfully"
     omniauth:
       failure:
-        title: BCeID login failed
+        title: Login failed
         message: Please try again or contact your adminstrator for support
-      failure_with_message:
+      bceid_failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
+      idir_failure_with_message:
+        title: IDIR login failed
+        message: "%{error_message}"
+      unavailable:
+        title: Account not found
+        message: Administrator accounts are not available for self-registration. Please contact your administrator to gain access.
     geocoder:
       site_options_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching site options
       pid_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching pid for address
       jurisdiction_error:
-        title: Oops
-        message: Error encountered fetching jurisdiction for address
+        title: Error
+        message: Jurisdiction could not be determined. Please manually enter your jurisdiction.
+      ltsa_unavailable_error:
+        title: Error
+        message: The land title service is currently unavailable
     permit_classification:
       options_error:
-        title: Oops
+        title: Error
         message: Error encountered fetching permit classification options
+    contact:
+      options_error:
+        title: Error
+        message: Error encountered fetching contact options
+      create_success:
+        title: ""
+        message: "New contact created successfully!"
+      create_error:
+        title: Oops
+        message: "%{error_message}"
     user:
-      login_error:
+      not_confirmed_error:
         title: Failed to login.
-        message: Invalid username or password.
+        message: Please confirm your registration by activating the link in the email you received. If you have not received the email please check your spam folder.
       logout_success:
         title: Successfully logged out.
         message: ""
       registration_error:
         title: Account could not be created.
         message: "%{error_message}"
+      invalid_invitation_error:
+        title: Error
+        message: We are sorry the invite link you have clicked on is not valid. Please reach out to the person who sent you the invite for further assistance.
       accept_invite_error:
-        title: Oops
-        message: The invitation link is invalid or has expired. Please ask your administrator to re-invite you to the workspace.
+        title: Error accepting invite
+        message: "%{error_message}"
       create_invite_error:
-        title: Oops
+        title: Error
         message: "Something went wrong inviting users"
       remove_invite_error:
-        title: Oops
+        title: Error
         message: "Something went wrong canceling the invite"
-      resend_invite_error:
-        title: Oops
-        message: "Something went wrong re-sending the invite"
       authorization_error:
         title: Not authorized.
         message: User is not authorized to perform this aciton.
@@ -126,11 +172,14 @@ en:
       confirmation_sent:
         title: Success
         message: You need to confirm your new email address. Please check your new email inbox.
+      reconfirmation_sent:
+        title: Confirmation email sent
+        message: Please click the link in your email inbox.
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed
       confirmation_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       send_invitation_success:
         title: ""
@@ -139,41 +188,41 @@ en:
         title: ""
         message: The invitation has been revoked
       invite_error:
-        title: Oops
+        title: Error
         message: The users you specified weren't able to be invited. Please contact support.
       update_success:
         title: ""
         message: The user was updated successfully
       update_error:
-        title: Oops
-        message: "There was an error updating the user"
+        title: There was an error updating the user
+        message: "%{error_message}"
       update_password_error:
-        title: Oops
+        title: Error
         message: "The provided current password is incorrect"
       destroy_success:
         title: ""
         message: The user was archived successfully
       destroy_error:
-        title: "Oops"
+        title: "Error"
         message: "There was an error archiving the user"
       restore_success:
         title: ""
         message: The user was restored successfully
       restore_error:
-        title: "Oops"
+        title: "Error"
         message: "There was an error restoring the user"
       eula_accepted:
         title: ""
         message: "End-User License Agreement accepted"
     requirement_block:
       create_error:
-        title: Oops
-        message: "Something went wrong creating the requirement block"
+        title: Error
+        message: "%{error_message}"
       update_error:
-        title: Oops
-        message: "Something went wrong updating the requirement block"
+        title: Error
+        message: "%{error_message}"
       delete_error:
-        title: Oops
+        title: Error
         message: "Something went wrong deleting the requirement block"
     requirement_template:
       create_success:
@@ -185,52 +234,58 @@ en:
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
+      force_publish_now_success:
+        title: ""
+        message: "Permit has been published."
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       destroy_success:
         title: ""
         message: "New template archived successfully"
       destroy_error:
-        title: Oops
+        title: Error
         message: "Something went wrong archiving the template"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       schedule_error:
-        title: Oops
+        title: Error
+        message: "%{error_message}"
+      force_publish_now_error:
+        title: Error force publishing template
         message: "%{error_message}"
       delete_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       restore_success:
         title: ""
         message: The template was restored successfully
       restore_error:
-        title: "Oops"
+        title: "Error"
         message: "There was an error restoring the template"
     jurisdiction:
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       create_success:
         title: ""
         message: "New jurisdiction created successfully!"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       update_success:
         title: ""
         message: "Jurisdiction successfully updated!"
     permit_application:
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       create_success:
         title: ""
         message: "New permit application started!"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
       save_success:
         title: ""
@@ -239,43 +294,46 @@ en:
         title: ""
         message: "Permit application successfully saved as draft!"
       submit_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
+    site_configuration:
+      update_success:
+        title: ""
+        message: "Successfully updated site configuration"
+      show_error:
+        tite: "Oops"
+        message: "There was an error loading the site configuration"
+      update_error:
+        tite: "Oops"
+        message: "There was an error updating the site configuration"
     step_code:
       h2k_imported:
         title: ""
         message: "Your Hot2000 file has been successfully imported. Please review the imported fields."
       create_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
     step_code_checklist:
       update_success:
         title: ""
         message: "Step code checklist updated!"
       update_error:
-        title: Oops
+        title: Error
         message: "%{error_message}"
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
         message: "The user is not authorized to do this action"
       not_found_error:
-        title: "Oops"
+        title: "Error"
         message: 404 - The requested resource could not be found
     jurisdiction_template_version_customization:
-      create_success:
-        title: ""
-        message: "Jurisdiction Template Customization created!"
       update_success:
         title: ""
         message: "Jurisdiction Template Customization updated!"
-      create_error:
-        title: Oops
-        message: "Something went wrong creating Jurisdiction Template Customization"
       update_error:
-        title: Oops
-        message: "Something went wrong updating Jurisdiction Template Customization"
-
+        title: Error
+        message: "Something went wrong updating Jurisdiction Customization"
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -284,8 +342,28 @@ en:
       signoff_checkbox_label: "I acknowledge that by checking this box and providing my digital signature, I am electronically signing."
       signoff_submit_title: "Review and Submit"
       energy_step_code: "Start"
+      autofill_contact: "Autofill"
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
+    requirement:
+      contact:
+        first_name: "First name"
+        last_name: "Last name"
+        email: "Email"
+        phone: "Phone"
+        address: "Address"
+        title: "Role/Position"
+        business_name: "Business name"
+        business_license: "Business license"
+        professional_association: "Professional association/organization"
+        professional_number: "Professional number"
+        organization: "Organization"
+        add_person_button: "Add another person"
   step_code_building_characteristics_summary:
     performance_type:
       error: "%{field_name} performance type must be one of %{accepted_values}"
+  model_validation:
+    requirement_template:
+      duplicate_block_in_template: "Requirement block %{requirement_block_name} is already used in another section of this template."
+    jurisdiction_template_version_customization:
+      enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"

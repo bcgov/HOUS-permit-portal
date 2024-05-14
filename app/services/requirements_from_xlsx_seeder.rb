@@ -96,6 +96,7 @@ class RequirementsFromXlsxSeeder
       .drop(3)
       .compact
       .uniq
+      .reject { |section_name| section_name.blank? }
       .each do |section_name|
         rs =
           requirement_template
@@ -113,7 +114,8 @@ class RequirementsFromXlsxSeeder
         # if column A(0) Section, C(2) Requirement Block Internal Name C(2) Requirement Block Display Name and L(11) value
 
         # go through each requirement block and add them to each section
-        if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] && sheet.row(row_index)[11].present?
+        if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] &&
+             (sheet.row(row_index)[3].present? || sheet.row(row_index)[11].present?)
           req_template_section =
             requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
           internal_name = sheet.row(row_index)[1]&.strip
@@ -124,21 +126,30 @@ class RequirementsFromXlsxSeeder
             RequirementBlock.where(name: internal_name).first_or_create!(
               name: internal_name,
               display_name: display_name,
-              display_description: sheet.row(row_index)[3]&.strip,
-            )
+              display_description:
+                (
+                  if (sheet.row(row_index)[3])&.strip.blank?
+                    ""
+                  else
+                    (sheet.row(row_index)[3])&.strip
+                  end
+                ),
+            ) #unicode has blank (nbsp) from excel
 
-          req_vals = (11..21).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
-          self.setup_requirements(rb, valid_rows, req_vals, errors)
+          if sheet.row(row_index)[11].present?
+            req_vals = (11..29).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
+            self.setup_requirements(rb, valid_rows, req_vals, errors)
 
-          rsrb =
-            req_template_section
-              .template_section_blocks
-              .where(requirement_block: rb)
-              .first_or_initialize(requirement_block: rb)
-          rsrb.update!(position: rstrb_position_incrementer[req_template_section.name] || 0)
-          rstrb_position_incrementer[req_template_section.name].present? ?
-            rstrb_position_incrementer[req_template_section.name] += 1 :
-            rstrb_position_incrementer[req_template_section.name] = 1
+            rsrb =
+              req_template_section
+                .template_section_blocks
+                .where(requirement_block: rb)
+                .first_or_initialize(requirement_block: rb)
+            rsrb.update!(position: rstrb_position_incrementer[req_template_section.name] || 0)
+            rstrb_position_incrementer[req_template_section.name].present? ?
+              rstrb_position_incrementer[req_template_section.name] += 1 :
+              rstrb_position_incrementer[req_template_section.name] = 1
+          end
         end
       rescue StandardError => e
         errors << "Error loading #{activity.name} #{permit_type.name} - row:#{row_index} - #{e.message}"
@@ -147,7 +158,14 @@ class RequirementsFromXlsxSeeder
   end
 
   def self.setup_requirements(requirement_block, valid_rows, requirement_block_requirement_codes, errors)
-    req_position_incrementer = 0
+    req_position_incrementer =
+      (
+        if requirement_block.requirements.present?
+          requirement_block.requirements.pluck(:position).max + 1
+        else
+          0
+        end
+      )
     requirement_block_requirement_codes.each do |val|
       row = valid_rows.find { |v| v["requirement_code"] == val }
       if row.present?

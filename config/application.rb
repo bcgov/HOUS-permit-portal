@@ -46,5 +46,7 @@ module HousPermitPortal
 
     # This will force all new tables to use UUIDs for id field
     config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
+
+    config.hosts.concat(ENV["AUTHORIZED_HOSTS"].split(",")) if ENV["AUTHORIZED_HOSTS"]
   end
 end

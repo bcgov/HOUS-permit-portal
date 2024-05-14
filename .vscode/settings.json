@@ -8,5 +8,8 @@
   },
   "[erb]": {
     "editor.defaultFormatter": "elia.erb-formatter"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

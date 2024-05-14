@@ -1,12 +1,12 @@
 require "rails_helper"
 
 RSpec.describe Contact, type: :model do
-  let(:invalid_email) { { email: "invalid_email", phone_number: "+1234567890" } }
+  let(:invalid_email) { { email: "invalid_email", phone: "+1234567890" } }
 
-  let(:invalid_phone) { { email: "test@example.com", phone_number: "invalid_phone" } }
+  let(:invalid_phone) { { email: "test@example.com", phone: "invalid_phone" } }
 
   describe "associations" do
-    it { should belong_to(:jurisdiction) }
+    it { should belong_to(:contactable) }
   end
 
   describe "formats" do

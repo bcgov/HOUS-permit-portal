@@ -1,13 +1,13 @@
 import { format } from "date-fns"
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-tempate-screen"
+import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-template-screen"
 import { datefnsAppDateFormat } from "../constants"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { RequirementTemplateModel } from "../models/requirement-template"
+import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields } from "../types/enums"
 import { toCamelCase } from "../utils/utility-functions"
@@ -46,9 +46,7 @@ export const RequirementTemplateStoreModel = types
       }
 
       if (requirementTemplate.templateVersions?.length > 0) {
-        requirementTemplate.templateVersions.forEach((templateVersion) =>
-          self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
-        )
+        self.rootStore.templateVersionStore.mergeUpdateAll(requirementTemplate.templateVersions, "templateVersionMap")
       }
 
       return requirementTemplate
@@ -109,6 +107,7 @@ export const RequirementTemplateStoreModel = types
       if (response.ok) {
         const templateData = response.data.data
         templateData.isFullyLoaded = true
+
         self.mergeUpdate(templateData, "requirementTemplateMap")
 
         return self.requirementTemplateMap.get(templateData.id)
@@ -133,10 +132,28 @@ export const RequirementTemplateStoreModel = types
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
 
-        return self.requirementTemplateMap.get(templateData.id)
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
       }
 
-      return response.ok
+      return false
+    }),
+    forcePublishRequirementTemplate: flow(function* (
+      templateId: string,
+      requirementParams: IRequirementTemplateUpdateParams
+    ) {
+      const response = yield* toGenerator(
+        self.environment.api.forcePublishRequirementTemplate(templateId, requirementParams)
+      )
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
     }),
   }))
 

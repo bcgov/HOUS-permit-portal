@@ -5,7 +5,7 @@ import { NumberFormControl, TextFormControl } from "../../../../../shared/form/i
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 
 export const Ventilation = function BuildingCharacteristicsSummaryVentilation() {
   const { control } = useFormContext()
@@ -22,7 +22,7 @@ export const Ventilation = function BuildingCharacteristicsSummaryVentilation() 
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.ventilation`)}
+        {t(`${i18nPrefix}.ventilation`)}
       </GridColumnHeader>
 
       {fields.map((field, index) => {
@@ -44,13 +44,13 @@ export const Ventilation = function BuildingCharacteristicsSummaryVentilation() 
             <GridData>
               <NumberFormControl
                 fieldName={`${fieldArrayName}.${index}.percentEff`}
-                hint={index == fields.length - 1 && t(`${translationPrefix}.percent_eff`)}
+                hint={index == fields.length - 1 && t(`${i18nPrefix}.percent_eff`)}
               />
             </GridData>
             <GridData borderRightWidth={1}>
               <TextFormControl
                 fieldName={`${fieldArrayName}.${index}.litersPerSec`}
-                hint={index == fields.length - 1 && t(`${translationPrefix}.litersPerSec`)}
+                hint={index == fields.length - 1 && t(`${i18nPrefix}.litersPerSec`)}
               />
             </GridData>
           </React.Fragment>

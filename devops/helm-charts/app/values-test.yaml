@@ -4,6 +4,12 @@ route:
   spec:
     host: "test.buildingpermit.gov.bc.ca"
 
+pvc:
+  spec:
+    resources:
+      requests:
+        storage: 250Mi
+
 deployments:
   - process: web
     replicaCount: 1

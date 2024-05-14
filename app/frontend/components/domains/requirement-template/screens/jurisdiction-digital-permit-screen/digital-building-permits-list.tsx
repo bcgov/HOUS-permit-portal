@@ -8,6 +8,7 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { RouterLink } from "../../../../shared/navigation/router-link"
 import { VersionTag } from "../../../../shared/version-tag"
+import { SectionBox } from "../../../home/section-box"
 
 interface IProps {
   activityId?: string
@@ -32,42 +33,35 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
       )}
       {templateVersions.map((templateVersion) => {
         return (
-          <Flex
-            key={templateVersion.id}
-            border="1px solid"
-            borderColor="border.light"
-            borderRadius="lg"
-            w="full"
-            as="section"
-            p={6}
-            className="jumbo-buttons"
-          >
-            <Stack spacing={3} flex={1}>
-              <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
-                {`${templateVersion.denormalizedTemplateJson?.permitType?.name} | ${templateVersion.denormalizedTemplateJson?.activity?.name}`}
-              </Text>
-              <Text fontSize={"sm"} color={"text.secondary"}>
-                {templateVersion.denormalizedTemplateJson?.description}
-              </Text>
-              <Text fontSize={"sm"} color={"text.secondary"}>
-                <Text as="span" fontWeight={700}>
-                  {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
+          <SectionBox key={templateVersion.id}>
+            <Flex w="full" as="section">
+              <Stack spacing={3} flex={1}>
+                <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
+                  {`${templateVersion.denormalizedTemplateJson?.permitType?.name} | ${templateVersion.denormalizedTemplateJson?.activity?.name}`}
                 </Text>
-                {format(templateVersion.updatedAt, "MMM d, yyyy")}
-              </Text>
-              <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-            </Stack>
+                <Text fontSize={"sm"} color={"text.secondary"}>
+                  {templateVersion.denormalizedTemplateJson?.description}
+                </Text>
+                <Text fontSize={"sm"} color={"text.secondary"}>
+                  <Text as="span" fontWeight={700}>
+                    {t("digitalBuildingPermits.index.lastUpdated")}:{" "}
+                  </Text>
+                  {format(templateVersion.updatedAt, "MMM d, yyyy")}
+                </Text>
+                <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
+              </Stack>
 
-            <Button
-              to={`/digital-building-permits/${templateVersion.id}/edit`}
-              as={RouterLink}
-              variant={"primary"}
-              ml={4}
-              alignSelf={"center"}
-            >
-              {t("ui.manage")}
-            </Button>
-          </Flex>
+              <Button
+                to={`/digital-building-permits/${templateVersion.id}/edit`}
+                as={RouterLink}
+                variant={"primary"}
+                ml={4}
+                alignSelf={"center"}
+              >
+                {t("ui.manage")}
+              </Button>
+            </Flex>
+          </SectionBox>
         )
       })}
       <Center>

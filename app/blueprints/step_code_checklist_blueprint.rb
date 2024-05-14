@@ -1,7 +1,7 @@
 class StepCodeChecklistBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :stage
+  fields :stage, :status
 
   view :extended do
     include_view :project_info
@@ -14,9 +14,7 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
   end
 
   view :project_info do
-    # TODO: may not need these fields once step code is integrated with permit application flow
-    # TODO: get build and postal code (TBD if needed?) from permit application
-    fields :building_permit_number, :jurisdiction_name, :pid, :building_type
+    fields :building_permit_number, :jurisdiction_name, :pid, :building_type, :builder
     field :full_address, name: :address
 
     field :dwelling_units_count do |checklist, _options|
@@ -28,11 +26,6 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
     fields :compliance_path
 
     fields :plan_author, :plan_version, :plan_date
-
-    # TODO: add required steps to jurisdiction
-    # field :required_energy_step do |checklist, _options|
-    #   checklist.step_code.permit_application.jurisdiction.required_energy_step
-    # end
   end
 
   view :completed_by do

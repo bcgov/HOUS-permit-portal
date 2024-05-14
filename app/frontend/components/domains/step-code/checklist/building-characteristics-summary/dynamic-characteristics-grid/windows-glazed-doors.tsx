@@ -8,7 +8,7 @@ import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
 import { DetailsInput } from "../details-input"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 import { PerformanceTypeSelect } from "./performance-type-select"
 
 export const WindowsGlazedDoors = observer(function WindowsGlazedDoors() {
@@ -30,7 +30,7 @@ export const WindowsGlazedDoors = observer(function WindowsGlazedDoors() {
 
   return (
     <>
-      <GridColumnHeader>{t(`${translationPrefix}.windowsGlazedDoors`)}</GridColumnHeader>
+      <GridColumnHeader>{t(`${i18nPrefix}.windowsGlazedDoors`)}</GridColumnHeader>
       <GridColumnHeader>
         <Controller
           control={control}
@@ -45,11 +45,11 @@ export const WindowsGlazedDoors = observer(function WindowsGlazedDoors() {
         />
       </GridColumnHeader>
       <GridColumnHeader borderRightWidth={1}>
-        <TextFormControl inputProps={{ isDisabled: true, value: t(`${translationPrefix}.shgc`) }} />
+        <TextFormControl inputProps={{ isDisabled: true, value: t(`${i18nPrefix}.shgc`) }} />
       </GridColumnHeader>
       {fields.map((field, index) => (
         <React.Fragment key={`buildingCharacteristicWindowsGlazedDoors${generateUUID()}`}>
-          <GridData gap={1} alignItems="start" pos="relative" borderTopWidth={index == 0 ? 1 : 0}>
+          <GridData gap={1} pos="relative" borderTopWidth={index == 0 ? 1 : 0}>
             <DetailsInput
               fieldName={`${fieldArrayName}.${index}.details`}
               isRemovable={fields.length > 1}

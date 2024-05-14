@@ -5,7 +5,7 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
-  skip_before_action :authenticate_user!, only: %i[show]
+  skip_before_action :authenticate_user!, only: %i[show index jurisdiction_options]
 
   def index
     perform_search
@@ -19,6 +19,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @search.current_page,
                      },
                      blueprint: JurisdictionBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -34,7 +37,9 @@ class Api::JurisdictionsController < Api::ApplicationController
       end
     end
     if @jurisdiction.update(jurisdiction_params)
-      render_success @jurisdiction, "jurisdiction.update_success", { blueprint: JurisdictionBlueprint }
+      render_success @jurisdiction,
+                     "jurisdiction.update_success",
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.update_error",
                    message_opts: {
@@ -46,16 +51,21 @@ class Api::JurisdictionsController < Api::ApplicationController
   # GET /api/jurisdictions/:id
   def show
     authorize @jurisdiction
-    render_success(@jurisdiction)
+    render_success(@jurisdiction, nil, blueprint_opts: { view: :base })
   end
 
   # POST /api/jurisdiction
   def create
-    @jurisdiction = Jurisdiction.build(jurisdiction_params)
+    class_to_use = Jurisdiction.class_for_locality_type(jurisdiction_params[:locality_type])
+
+    @jurisdiction = class_to_use.build(jurisdiction_params)
+
     authorize @jurisdiction
 
     if @jurisdiction.save
-      render_success @jurisdiction, "jurisdiction.create_success", { blueprint: JurisdictionBlueprint }
+      render_success @jurisdiction,
+                     "jurisdiction.create_success",
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.create_error",
                    message_opts: {
@@ -75,7 +85,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_users
     authorize @jurisdiction
     perform_user_search
-    authorized_results = apply_search_authorization(@user_search.results, "search_users")
+    authorized_results = apply_search_authorization(@user_search.results, "search_jurisdiction_users")
     render_success authorized_results,
                    nil,
                    {
@@ -85,6 +95,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -102,7 +115,23 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @permit_application_search.current_page,
                      },
                      blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :jurisdiction_review_inbox,
+                     },
                    }
+  end
+
+  def jurisdiction_options
+    authorize :jurisdiction, :jurisdiction_options?
+    name = jurisdiction_params["name"]
+    type = jurisdiction_params["type"]
+
+    filters = {}
+    filters = { where: { type: type } } if type.present?
+
+    search = Jurisdiction.search(name, **filters)
+    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
+    render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
 
   private
@@ -110,16 +139,20 @@ class Api::JurisdictionsController < Api::ApplicationController
   def jurisdiction_params
     params.require(:jurisdiction).permit(
       :name,
+      :type,
       :locality_type,
+      :address,
+      :regional_district_id,
       :description_html,
       :checklist_html,
       :look_out_html,
       :contact_summary_html,
       :energy_step_required,
       :zero_carbon_step_required,
+      :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
-      contacts_attributes: %i[id name department title phone_number email],
+      contacts_attributes: %i[id first_name last_name department title phone cell email],
       permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
     )
   end

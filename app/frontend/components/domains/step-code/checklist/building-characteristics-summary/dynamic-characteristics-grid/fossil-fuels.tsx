@@ -6,7 +6,7 @@ import { useMst } from "../../../../../../setup/root"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
-import { translationPrefix } from "../translation-prefix"
+import { i18nPrefix } from "../i18n-prefix"
 import { FossilFuelsPresenceSelect } from "./fossil-fuels-presence-select"
 
 export const FossilFuels = observer(function BuildingCharacteristicsSummaryFossilFuels() {
@@ -20,7 +20,7 @@ export const FossilFuels = observer(function BuildingCharacteristicsSummaryFossi
   return (
     <>
       <GridColumnHeader colSpan={3} borderRightWidth={1}>
-        {t(`${translationPrefix}.fossilFuels.label`)}
+        {t(`${i18nPrefix}.fossilFuels.label`)}
       </GridColumnHeader>
 
       <GridData colSpan={3} borderRightWidth={1}>

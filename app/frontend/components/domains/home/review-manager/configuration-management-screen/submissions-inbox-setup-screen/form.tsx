@@ -39,7 +39,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
     defaultValues: getDefaultValues(),
   })
   const { handleSubmit, reset, control } = formMethods
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control,
     name: fieldArrayName,
   })
@@ -71,6 +71,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
                 getIndex={getIndex}
                 append={append}
                 remove={remove}
+                update={update}
                 reset={handleReset}
               />
             )

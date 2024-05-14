@@ -10,7 +10,7 @@ class StepCode::TEDIReferencesSeeder
 
         data_rows.each do |row|
           data_hash = Hash[header_row.zip(row)]
-          ThermalEnergyDemandIntensityReference.create!(data_hash)
+          ThermalEnergyDemandIntensityReference.find_or_create_by!(data_hash)
         end
       end
     end

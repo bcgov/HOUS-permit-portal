@@ -3,7 +3,7 @@ source "https://rubygems.org"
 ruby "3.2.2"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.1.2"
+gem "rails", "~> 7.1.3.1"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
@@ -35,6 +35,7 @@ gem "devise", "4.9.3"
 gem "devise_invitable", "~> 2.0.9"
 gem "devise-jwt", "0.8.1"
 gem "devise-jwt-cookie", "0.5.1"
+gem "json-jwt", ">= 1.16.6"
 gem "dry-container", "0.8.0"
 gem "omniauth-keycloak", "1.5.1"
 gem "omniauth-rails_csrf_protection", "1.0.1"
@@ -62,11 +63,16 @@ gem "factory_bot", "~> 6.4"
 # The timcop gem mocks Time, it is only used in specs and for seeding a published template version to get around time based validations
 gem "timecop", "~> 0.9.8"
 gem "sidekiq-cron", "~> 1.12"
+gem "sidekiq-unique-jobs", "~> 8.0"
 gem "rubyzip", "~> 2.3.2"
 gem "anycable-rails", "~> 1.4"
 gem "addressable", "~> 2.8"
 gem "friendly_id", "~> 5.5.1"
-gem 'exception_notification', '~> 4.5.0'
+gem "exception_notification", "~> 4.5.0"
+gem "nokogiri", ">= 1.15.6"
+gem "rdoc", ">= 6.6.3.1"
+gem "rack", ">= 3.0.9.1"
+gem "uppy-s3_multipart", "~> 1.2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -77,6 +83,11 @@ group :development, :test do
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
   gem "vcr", "~> 6.2"
+  gem "bullet", "~> 7.1.6"
+end
+
+group :test do
+  gem "rspec-sidekiq", "~> 4.1"
 end
 
 group :development do

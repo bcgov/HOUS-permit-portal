@@ -1,4 +1,5 @@
 import * as R from "ramda"
+import { ISessionStore } from "../../stores/session-store"
 import { IUIStore } from "../../stores/ui-store"
 import { isNilOrEmpty } from "../../utils"
 import { API_ERROR_TYPES } from "../../utils/api-errors"
@@ -24,6 +25,20 @@ export const addApiErrorMonitor = (api: Api, uiStore: IUIStore) => {
       const err = API_ERROR_TYPES[response.problem]
       if (err) {
         uiStore.flashMessage.show(err.type, err.message, null)
+      }
+    }
+  })
+}
+
+export const addApiUnauthorizedError = (api: Api, sessionStore: ISessionStore) => {
+  api.addMonitor((response) => {
+    if (response.status == 401) {
+      const requestUrl = new URL(response.originalError.request.responseURL)
+      const whitelistedPaths = ["validate_token", "login"] // avoid infinite loops
+
+      if (requestUrl && !whitelistedPaths.map((path) => `/api/${path}`).includes(requestUrl.pathname)) {
+        sessionStore.setTokenExpired(true)
+        // the redirect logic handled in navigation/index.tsx based on above flag
       }
     }
   })

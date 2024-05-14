@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
-import { debounce } from "lodash"
+import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import React, { useCallback } from "react"
 import { useFormContext } from "react-hook-form"
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, StylesConfig, components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
+import { RouterLink } from "../../navigation/router-link"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
@@ -28,13 +29,13 @@ export const AddressSelect = observer(function ({
   const { geocoderStore } = useMst()
   const { fetchSiteOptions: fetchOptions } = geocoderStore
 
-  const { reset } = useFormContext()
+  const { setValue } = useFormContext()
   const { t } = useTranslation()
 
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
       fetchOptions(address).then((options: IOption[]) => {
-        reset()
+        setValue(addressName, null)
         callback(options)
       })
     } else callback([])
@@ -62,9 +63,8 @@ export const AddressSelect = observer(function ({
     }),
     // Add other custom styles as needed
   }
-
   return (
-    <FormControl w="full">
+    <FormControl w="full" zIndex={2}>
       <FormLabel>{t("landing.addressSelectLabel")}</FormLabel>
       <InputGroup w="full">
         <AsyncSelect<IOption, boolean>
@@ -86,6 +86,9 @@ export const AddressSelect = observer(function ({
           {...rest}
         />
       </InputGroup>
+      <Text mt={2}>
+        {t("landing.cantFind")} <RouterLink to="/jurisdictions">{t("landing.browseList")}</RouterLink>
+      </Text>
     </FormControl>
   )
 })

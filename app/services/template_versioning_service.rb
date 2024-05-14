@@ -33,7 +33,9 @@ class TemplateVersioningService
 
   def self.schedule!(requirement_template, version_date)
     if !is_valid_schedule_version_date?(requirement_template, version_date)
-      raise StandardError.new("Version date must be in the future and after latest scheduled version date")
+      raise TemplateVersionScheduleError.new(
+              "Version date must be in the future and after latest scheduled version date",
+            )
     end
 
     template_version =
@@ -47,16 +49,45 @@ class TemplateVersioningService
         status: "scheduled",
       )
 
-    raise StandardError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
+    raise TemplateVersionScheduleError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
 
     template_version
   end
 
-  def self.publish_version!(template_version)
+  def self.force_publish_now!(requirement_template)
+    unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
+      raise TemplateVersionForcePublishNowError.new("Force publish is not enabled")
+    end
+
+    version_date = Date.current
+
+    template_version =
+      requirement_template.template_versions.build(
+        denormalized_template_json:
+          RequirementTemplateBlueprint.render_as_hash(requirement_template, view: :template_snapshot),
+        form_json: requirement_template.to_form_json,
+        requirement_blocks_json: form_requirement_blocks_hash(requirement_template),
+        version_diff: diff_of_current_changes_and_last_version,
+        version_date: version_date,
+        status: "scheduled",
+      )
+
+    raise TemplateVersionScheduleError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
+
+    template_version.reload
+
+    template_version = publish_version!(template_version, true)
+
+    template_version
+  end
+
+  def self.publish_version!(template_version, skip_date_check = false)
     return template_version if template_version.status == "published" || template_version.status == "deprecated"
 
-    if template_version.version_date > Date.current
-      raise StandardError.new("Version cannot be published before it's scheduled date")
+    skip_date_check = skip_date_check && (ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true")
+
+    if template_version.version_date > Date.current && (!skip_date_check)
+      raise TemplateVersionPublishError.new("Version cannot be published before it's scheduled date")
     end
 
     ActiveRecord::Base.transaction do
@@ -64,7 +95,7 @@ class TemplateVersioningService
 
       deprecate_versions_before_template(template_version)
 
-      raise StandardError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
+      raise TemplateVersionPublishError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
 
       previous_version = previous_version(template_version)
 
@@ -79,6 +110,9 @@ class TemplateVersioningService
           Rails.logger.error("Error copying customizations to new template version: #{e.message}")
         end
       end
+
+      #  updates draft permits with the new template version
+      update_draft_permits_with_new_template_version(previous_version, template_version)
     end
 
     return template_version
@@ -86,13 +120,22 @@ class TemplateVersioningService
 
   private
 
+  def self.update_draft_permits_with_new_template_version(previous_template_version, new_template_version)
+    return if new_template_version.status != "published"
+
+    previous_template_version
+      .permit_applications
+      .where(status: "draft")
+      .update_all(template_version_id: new_template_version.id)
+  end
+
   def self.previous_version(template_version)
     template_version
       .requirement_template
       .template_versions
       .where("version_date <=?", template_version.version_date)
       .where.not(id: template_version.id)
-      .order(version_date: :desc)
+      .order(version_date: :desc, created_at: :desc)
       .first
   end
 
@@ -116,7 +159,8 @@ class TemplateVersioningService
       !new_template_version.requirement_blocks_json.key?(key)
     end
 
-    # Remove any enabled_elective_field_ids that are not present in the new template version's requirement_blocks
+    # Remove any enabled_elective_field_ids and reasons that are not present in the new template version's
+    # requirement_blocks
     modified_copied_customizations["requirement_block_changes"].each do |key, current_requirement_block_change|
       next if current_requirement_block_change["enabled_elective_field_ids"].blank?
 
@@ -127,6 +171,14 @@ class TemplateVersioningService
 
       modified_copied_customizations["requirement_block_changes"][key]["enabled_elective_field_ids"].delete_if do |id|
         !available_elective_field_ids.include?(id)
+      end
+
+      if modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_reasons").present?
+        modified_copied_customizations
+          .dig("requirement_block_changes", key, "enabled_elective_field_reasons")
+          .delete_if { |id| !available_elective_field_ids.include?(id) }
+      else
+        modified_copied_customizations["requirement_block_changes"][key]["enabled_elective_field_reasons"] = {}
       end
 
       if !does_new_template_already_have_customization ||
@@ -145,6 +197,15 @@ class TemplateVersioningService
         key,
         "enabled_elective_field_ids",
       ) | modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_ids")
+
+      # Combine the enabled_elective_field_reasons from the old and new template versions and remove any duplicates
+      modified_copied_customizations.dig("requirement_block_changes", key, "enabled_elective_field_reasons").merge!(
+        existing_customization_for_template.customizations.dig(
+          "requirement_block_changes",
+          key,
+          "enabled_elective_field_reasons",
+        ),
+      )
     end
 
     copied_jurisdiction_template_version_customization = nil
@@ -161,7 +222,7 @@ class TemplateVersioningService
     end
 
     if !copied_jurisdiction_template_version_customization.save
-      raise StandardError.new(
+      raise TemplateVersionPublishError.new(
               "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:#{jurisdiction_template_version_customization.jurisdiction_id}",
             )
     end
@@ -193,7 +254,7 @@ class TemplateVersioningService
   end
 
   def self.is_valid_schedule_version_date?(requirement_template, version_date)
-    last_version = requirement_template.template_versions.order(version_date: :desc).first
+    last_version = requirement_template.template_versions.order(version_date: :desc, created_at: :desc).first
 
     version_date > Date.current && (last_version.blank? || version_date > last_version.version_date)
   end

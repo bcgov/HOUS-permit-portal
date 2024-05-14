@@ -1,6 +1,12 @@
 OPENSHIFT_NAMESPACE: bb18ab
 STAGE: dev
 
+name: anycable-go
+
+route:
+  spec:
+    host: "websockets.dev.buildingpermit.gov.bc.ca"
+
 anycable-go:
   nameOverride: "anycable-go"
   fullNameOverride: "anycable-go"

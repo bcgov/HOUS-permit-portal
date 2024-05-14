@@ -1,13 +1,13 @@
-import { Button, Flex } from "@chakra-ui/react"
+import { Box, Button, Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { RemoveScroll } from "react-remove-scroll"
 import { useNavigate } from "react-router-dom"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
-import { BuilderFloatingButtons } from "../builder-floating-buttons"
+import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
+import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons"
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { useSectionHighlight } from "../use-section-highlight"
@@ -25,7 +25,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
     sectionRefs,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: denormalizedTemplate?.requirementTemplateSections })
-  const [shouldCollapseAll, setShouldCollapseAll] = useState(false)
+  const [isCollapsedAll, setIsCollapsedAll] = useState(false)
   const navigate = useNavigate()
 
   if (error) return <ErrorScreen error={error} />
@@ -39,70 +39,64 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
   }
 
   return (
-    // the height 1px is needed other wise scroll does not work
-    // as it seems like the browser has issues calculating height for flex=1 containers
-    <RemoveScroll style={{ width: "100%", height: "100%" }}>
-      <Flex flexDir={"column"} w={"full"} maxW={"full"} h="full" as="main">
-        <BuilderHeader
-          breadCrumbs={[
-            {
-              href: "/template-versions",
-              title: t("site.breadcrumb.templateVersions"),
-            },
-          ]}
-          requirementTemplate={denormalizedTemplate}
-          status={templateVersion.status}
-          versionDate={templateVersion.versionDate}
+    <Box as="main" id="view-template-version">
+      <BuilderHeader
+        breadCrumbs={[
+          {
+            href: "/template-versions",
+            title: t("site.breadcrumb.templateVersions"),
+          },
+        ]}
+        requirementTemplate={denormalizedTemplate}
+        status={templateVersion.status}
+        versionDate={templateVersion.versionDate}
+      />
+      <Box borderTop={"1px solid"} borderColor={"border.base"}>
+        <SectionsSidebar
+          sections={templateSections}
+          onItemClick={scrollIntoView}
+          sectionIdToHighlight={currentSectionId}
         />
-        <Flex flex={1} w={"full"} h={"1px"} borderTop={"1px solid"} borderColor={"border.base"}>
-          <SectionsSidebar
-            sections={templateSections}
-            onItemClick={scrollIntoView}
-            sectionIdToHighlight={currentSectionId}
-          />
+        <Box
+          bg={hasNoSections ? "greys.grey03" : undefined}
+          ref={rightContainerRef}
+          position={"relative"}
+          display="flex"
+          flexDirection="column"
+        >
           <Flex
-            flexDir={"column"}
-            flex={1}
-            h={"full"}
-            bg={hasNoSections ? "greys.grey03" : undefined}
-            overflow={"auto"}
-            ref={rightContainerRef}
+            position="sticky"
+            zIndex="1"
+            left="0"
+            right="0"
+            top="0"
+            px="6"
+            py="4"
+            bg="greys.grey03"
+            w="var(--app-sidebar-remaining-width)"
+            justifyContent={"flex-end"}
+            boxShadow={"elevations.elevation02"}
           >
-            <Flex
-              px={6}
-              py={4}
-              bg={"greys.grey03"}
-              w={"full"}
-              justifyContent={"flex-end"}
-              boxShadow={"elevations.elevation02"}
-            >
-              <Button variant={"secondary"} onClick={onClose}>
-                {t("ui.close")}
-              </Button>
-            </Flex>
-            <SectionsDisplay
-              sections={templateSections}
-              shouldCollapseAll={shouldCollapseAll}
-              setSectionRef={setSectionRef}
-              formScrollToId={formScrollToId}
-            />
+            <Button variant={"secondary"} onClick={onClose}>
+              {t("ui.close")}
+            </Button>
           </Flex>
-        </Flex>
-        <BuilderFloatingButtons onScrollToTop={scrollToTop} onCollapseAll={onCollapseAll} />
-      </Flex>
-    </RemoveScroll>
+          <FloatingHelpDrawer top="24" />
+
+          <SectionsDisplay
+            sections={templateSections}
+            isCollapsedAll={isCollapsedAll}
+            setSectionRef={setSectionRef}
+            formScrollToId={formScrollToId}
+          />
+        </Box>
+      </Box>
+      <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
+    </Box>
   )
 
   function scrollToTop() {
     rightContainerRef.current?.scrollTo({ behavior: "smooth", top: 0 })
-  }
-
-  function onCollapseAll() {
-    setShouldCollapseAll(true)
-
-    setTimeout(() => {
-      setShouldCollapseAll(false)
-    }, 500)
   }
 
   function scrollIntoView(id: string) {

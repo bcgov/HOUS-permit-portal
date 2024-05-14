@@ -44,8 +44,14 @@ export const ReviewPermitApplicationScreen = observer(() => {
     reset({ referenceNumber: currentPermitApplication?.referenceNumber || "" })
   }, [currentPermitApplication?.referenceNumber])
 
+  useEffect(() => {
+    if (currentPermitApplication && !currentPermitApplication.isViewed) {
+      currentPermitApplication.markAsViewed()
+    }
+  }, [currentPermitApplication])
+
   if (error) return <ErrorScreen error={error} />
-  if (!currentPermitApplication) return <LoadingScreen />
+  if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
   const { permitTypeAndActivity, formJson, number } = currentPermitApplication
 
@@ -64,12 +70,12 @@ export const ReviewPermitApplicationScreen = observer(() => {
   })
 
   return (
-    <Box as="main" overflow="hidden" h="full">
+    <Box as="main" id="reviewing-permit-application">
       <Flex
         id="permitHeader"
         position="sticky"
         top={0}
-        zIndex={10}
+        zIndex={11}
         w="full"
         px={6}
         py={3}
@@ -83,7 +89,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <Heading fontSize="xl" as="h3">
               {currentPermitApplication.nickname}
             </Heading>
-            <Text>{permitTypeAndActivity}</Text>
+            <Text noOfLines={1}>{permitTypeAndActivity}</Text>
             <HStack>
               <CopyableValue textTransform={"uppercase"} value={number} label={t("permitApplication.fields.number")} />
               <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
@@ -121,18 +127,19 @@ export const ReviewPermitApplicationScreen = observer(() => {
           </Button>
         </Stack>
       </Flex>
-      <Flex w="full" h="calc(100% - 96px)" overflow="auto" id="permitApplicationFieldsContainer">
+      <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={24}>
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
+              showHelpButton
             />
           </Flex>
         )}
-      </Flex>
+      </Box>
       {isContactsOpen && (
         <ContactSummaryModal
           isOpen={isContactsOpen}
