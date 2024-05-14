@@ -293,6 +293,7 @@ const options = {
           search: "Search jurisdictions",
         },
         permitApplication: {
+          updateToNewVersion: "Update my application",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",

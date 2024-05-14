@@ -3,22 +3,8 @@ class PermitApplication < ApplicationRecord
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
-  searchkick searchable: %i[
-               number
-               nickname
-               full_address
-               permit_classifications
-               submitter
-               status
-             ],
-             word_start: %i[
-               number
-               nickname
-               full_address
-               permit_classifications
-               submitter
-               status
-             ]
+  searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
+             word_start: %i[number nickname full_address permit_classifications submitter status]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
@@ -49,6 +35,7 @@ class PermitApplication < ApplicationRecord
   delegate :energy_step_required, to: :jurisdiction, allow_nil: true
   delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
   delegate :form_json, to: :template_version
+  delegate :published_template_version, to: :template_version
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
@@ -59,21 +46,16 @@ class PermitApplication < ApplicationRecord
 
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
-  after_commit :zip_and_upload_supporting_documents,
-               if: :saved_change_to_status?
+  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
 
-  scope :unviewed,
-        -> do
-          where(status: :submitted, viewed_at: nil).order(submitted_at: :asc)
-        end
+  scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
   def force_update_published_template_version
     return unless Rails.env.development?
     # for development purposes only
 
     current_published_template_version.update(
-      form_json:
-        current_published_template_version.requirement_template.to_form_json
+      form_json: current_published_template_version.requirement_template.to_form_json,
     )
   end
 
@@ -88,7 +70,7 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
-      created_at: created_at
+      created_at: created_at,
     }
   end
 
@@ -98,10 +80,7 @@ class PermitApplication < ApplicationRecord
 
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    RequirementTemplate.published_requirement_template_version(
-      activity,
-      permit_type
-    )
+    RequirementTemplate.published_requirement_template_version(activity, permit_type)
   end
 
   def form_customizations
@@ -164,29 +143,18 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(
-      submitter,
-      self
-    ).deliver_later
-    jurisdiction.users.each do |user|
-      PermitHubMailer.notify_reviewer_application_received(
-        user,
-        self
-      ).deliver_later
-    end
+    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
   end
 
   def formatted_submission_data_for_external_use
-    ExternalPermitApplicationService.new(
-      self
-    ).formatted_submission_data_for_external_use
+    ExternalPermitApplicationService.new(self).formatted_submission_data_for_external_use
   end
 
   private
 
   def assign_default_nickname
-    self.nickname =
-      "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
+    self.nickname = "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
   end
 
   def assign_unique_number
@@ -225,7 +193,7 @@ class PermitApplication < ApplicationRecord
           number_prefix,
           new_integer / 1_000_000 % 1000,
           new_integer / 1000 % 1000,
-          new_integer % 1000
+          new_integer % 1000,
         )
     else
       # Start with the initial number if there are no previous numbers
@@ -255,8 +223,7 @@ class PermitApplication < ApplicationRecord
     return if new_record?
     viewed_at_change = previous_changes.dig("viewed_at")
     # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
-    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) ||
-         saved_change_to_reference_number?
+    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
       PermitHubMailer.notify_application_updated(submitter, self).deliver_later
     end
   end
@@ -275,39 +242,23 @@ class PermitApplication < ApplicationRecord
 
   def submitter_must_have_role
     unless submitter&.submitter?
-      errors.add(
-        :submitter,
-        I18n.t(
-          "errors.models.permit_application.attributes.submitter.incorrect_role"
-        )
-      )
+      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
     end
   end
 
   def jurisdiction_has_matching_submission_contact
-    matching_contacts =
-      PermitTypeSubmissionContact.where(
-        jurisdiction: jurisdiction,
-        permit_type: permit_type
-      )
+    matching_contacts = PermitTypeSubmissionContact.where(jurisdiction: jurisdiction, permit_type: permit_type)
     if matching_contacts.empty?
       errors.add(
         :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
-        )
+        I18n.t("activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"),
       )
     end
   end
 
   def pid_or_pin_presence
     if pin.blank? && pid.blank?
-      errors.add(
-        :base,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.pid_or_pin"
-        )
-      )
+      errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
     end
   end
 end

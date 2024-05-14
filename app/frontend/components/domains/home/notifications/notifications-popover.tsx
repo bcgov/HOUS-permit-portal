@@ -5,6 +5,7 @@ import {
   Flex,
   Heading,
   IconButton,
+  IconButtonProps,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -25,7 +26,9 @@ import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { HStack } from "../../step-code/checklist/pdf-content/shared/h-stack"
 
-export const NotificationsPopover: React.FC = observer(() => {
+interface INotificationsPopoverProps extends IconButtonProps {}
+
+export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observer(({ ...rest }) => {
   const { notificationStore } = useMst()
   const {
     notifications,
@@ -57,11 +60,11 @@ export const NotificationsPopover: React.FC = observer(() => {
       <PopoverTrigger>
         <Box position="relative">
           <IconButton
-            color="greys.white"
             variant="ghost"
             icon={anyUnread ? <BellRinging size={24} /> : <Bell size={24} />}
             aria-label="open notifications"
             zIndex={1}
+            {...rest}
           />
           {anyUnread && (
             <Badge

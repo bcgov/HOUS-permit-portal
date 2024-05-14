@@ -10,7 +10,14 @@ interface ScrollLinkProps {
 export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, ...props }) => {
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault()
-    const targetElement = document.getElementById(to)
+    let targetElement = document.getElementById(to)
+    // If no element found by ID, try finding by class
+    if (!targetElement) {
+      const classElements = document.getElementsByClassName(to)
+      if (classElements.length > 0) {
+        targetElement = classElements[0] as HTMLElement
+      }
+    }
     if (targetElement) {
       // Scroll to the target element
       targetElement.scrollIntoView({ behavior: "smooth", block: "center" })

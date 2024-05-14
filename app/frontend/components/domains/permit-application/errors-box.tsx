@@ -31,7 +31,7 @@ export const ErrorsBox = ({ data }: IErrorBoxProps) => {
       zIndex={14}
       p={4}
       overflowY={"auto"}
-      id="floating-error-alert-box"
+      id="floating-side-box"
     >
       <Flex align="center" gap={4}>
         <Box color="semantic.error">

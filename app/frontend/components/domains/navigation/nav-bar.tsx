@@ -16,7 +16,7 @@ import {
   Spacer,
   Text,
 } from "@chakra-ui/react"
-import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
+import { Envelope, Folders, List } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -146,7 +146,12 @@ export const NavBar = observer(() => {
                   {t("home.jurisdictionsTitle")}
                 </RouterLinkButton>
               )}
-              {loggedIn && <NotificationsPopover />}
+              {loggedIn && (
+                <NotificationsPopover
+                  aria-label="notifications popover"
+                  color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
+                />
+              )}
               <NavBarMenu />
             </HStack>
           </Flex>
@@ -157,16 +162,6 @@ export const NavBar = observer(() => {
     </>
   )
 })
-
-const NavBarSearch = () => {
-  const { t } = useTranslation()
-
-  return (
-    <Button variant="tertiary" leftIcon={<MagnifyingGlass size={16} />}>
-      {t("ui.search")}
-    </Button>
-  )
-}
 
 interface INavBarMenuProps {}
 
