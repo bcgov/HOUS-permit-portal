@@ -994,6 +994,7 @@ const options = {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
           fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
+          fetchAutoComplianceModuleOptions: "Something went wrong fetching the auto compliance module options",
           fetchActivityOptions: "Something went wrong fetching the activity options",
           workTypeNotFound: "Work type not found",
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",

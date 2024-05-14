@@ -68,6 +68,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
     end
   end
 
+  def auto_compliance_module_options
+    available_module_options = AutomatedComplianceOptionsService.available_module_options
+    authorize available_module_options, policy_class: RequirementBlockPolicy
+    render json: { data: available_module_options }
+  end
+
   private
 
   def requirement_block_params

@@ -1,5 +1,6 @@
 import * as humps from "humps"
 import * as R from "ramda"
+import { EAutoComplianceModule } from "../types/enums"
 import { isUUID } from "./utility-functions"
 
 const SUBMISSION_DATA_PREFIX = "formSubmissionData"
@@ -9,6 +10,7 @@ const SECTION_COMPLETION = "section-completion-key"
 export const camelizeResponse = (data: { [key: string]: any }) => {
   return humps.camelizeKeys(data, function (key, convert) {
     return isUUID(key) ||
+      Object.values(EAutoComplianceModule).includes(key) ||
       key == SECTION_COMPLETION ||
       key.startsWith(SUBMISSION_DATA_PREFIX) ||
       FORMIO_SECTION_REGEX.test(key)

@@ -50,6 +50,7 @@ Rails.application.routes.draw do
 
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
+      get "auto_compliance_module_options", on: :collection, to: "requirement_blocks#auto_compliance_module_options"
     end
 
     resources :requirement_templates, only: %i[show create destroy update] do

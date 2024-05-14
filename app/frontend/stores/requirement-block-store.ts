@@ -7,11 +7,14 @@ import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
 import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
+import { TAutoComplianceModuleOptions } from "../types/types"
 
 export const RequirementBlockStoreModel = types
   .compose(
     types.model("RequirementBlockStoreModel").props({
       requirementBlockMap: types.map(RequirementBlockModel),
+      autoComplianceModuleOptions: types.maybeNull(types.frozen<TAutoComplianceModuleOptions>()),
+      isAutoComplianceModuleOptionsLoading: types.optional(types.boolean, false),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
     }),
     createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks")
@@ -37,6 +40,9 @@ export const RequirementBlockStoreModel = types
         case ERequirementLibrarySortFields.configurations:
           return t("requirementsLibrary.configurationsColumn")
       }
+    },
+    get autoComplianceModuleNames() {
+      return Object.keys(self.autoComplianceModuleOptions ?? {})
     },
   }))
 
@@ -94,6 +100,19 @@ export const RequirementBlockStoreModel = types
       }
 
       return []
+    }),
+    fetchAutoComplianceModuleOptions: flow(function* () {
+      self.isAutoComplianceModuleOptionsLoading = true
+
+      const response = yield* toGenerator(self.environment.api.fetchAutoComplianceModuleOptions())
+
+      if (response.ok) {
+        self.autoComplianceModuleOptions = response.data.data
+      }
+
+      self.isAutoComplianceModuleOptionsLoading = false
+
+      return self.autoComplianceModuleOptions
     }),
   }))
 

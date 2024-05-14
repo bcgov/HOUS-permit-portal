@@ -1,6 +1,8 @@
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
+  EAutoComplianceModule,
+  EAutoComplianceType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
   EEnergyStep,
@@ -259,4 +261,36 @@ export interface IHelpLinkItems {
   bestPracticesLinkItem: ILinkItem
   dictionaryLinkItem: ILinkItem
   userGuideLinkItem: ILinkItem
+}
+
+interface ICommonAutoComplianceModuleOption<EModule extends EAutoComplianceModule> {
+  module: EModule
+  type: EAutoComplianceType
+  availableOnInputTypes: ERequirementType[]
+}
+
+interface IAutoComplianceValueExtractorOption {
+  type: EAutoComplianceType.externalValueExtractor | EAutoComplianceType.internalValueExtractor
+  availableFields: Array<IOption<string> & { availableOnInputTypes: ERequirementType[] }>
+}
+
+export interface IDigitalSealValidatorModuleOption
+  extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.DigitalSealValidator> {}
+
+export interface IParcelInfoExtractorModuleOption
+  extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.ParcelInfoExtractor>,
+    IAutoComplianceValueExtractorOption {
+  type: EAutoComplianceType.externalValueExtractor
+}
+
+export interface IPermitApplicationModuleOption
+  extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.PermitApplication>,
+    IAutoComplianceValueExtractorOption {
+  type: EAutoComplianceType.internalValueExtractor
+}
+
+export type TAutoComplianceModuleOptions = {
+  [EAutoComplianceModule.DigitalSealValidator]: IDigitalSealValidatorModuleOption
+  [EAutoComplianceModule.ParcelInfoExtractor]: IParcelInfoExtractorModuleOption
+  [EAutoComplianceModule.PermitApplication]: IPermitApplicationModuleOption
 }

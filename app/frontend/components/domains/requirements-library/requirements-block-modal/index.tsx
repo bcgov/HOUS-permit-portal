@@ -17,6 +17,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useAutoComplianceModuleOptions } from "../../../../hooks/resources/use-auto-compliance-module-options"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
@@ -45,6 +46,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { t } = useTranslation()
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
+
+  useAutoComplianceModuleOptions()
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
