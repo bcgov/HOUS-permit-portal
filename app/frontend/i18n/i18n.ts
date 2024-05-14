@@ -188,6 +188,7 @@ const options = {
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
           emailPlaceholder: "email@example.com",
+          urlPlaceholder: "https://",
         },
         eula: {
           title: "End-User License Agreement",
@@ -1219,6 +1220,31 @@ const options = {
             hint: "This message will appear at the top of each page for all users.",
             settings: "Site-wide message settings",
           },
+          helpDrawerSetup: {
+            title: "Help drawer links",
+            description: "Setup links to show in the help drawer for all users",
+            settings: "Links",
+            fields: {
+              show: "Show",
+              title: "Title",
+              href: "GUID Link Url",
+              description: "Description",
+              titleHint: "Text for the main call-to-action",
+              descriptionHint: "Short description below to give context",
+            },
+            getStartedLinkItem: {
+              label: "Get started",
+            },
+            bestPracticesLinkItem: {
+              label: "Best practices",
+            },
+            dictionaryLinkItem: {
+              label: "Dictionary of terms",
+            },
+            userGuideLinkItem: {
+              label: "User and role guide",
+            },
+          },
         },
         site: {
           title: "Building Permit Hub",
@@ -1282,6 +1308,9 @@ const options = {
           copyright: "Copyright",
           foippaWarning:
             "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
+          needMoreHelp: "Need more help?",
+          pleaseContact:
+            "Please contact your local government for questions related to your permit application. For help with the Building Permit Hub please contact:",
           breadcrumb: {
             profile: "Profile",
             jurisdictions: "Jurisdictions",
@@ -1307,6 +1336,7 @@ const options = {
             confirmed: "E-mail confirmed",
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
+            helpDrawerSetup: "Help drawer setup",
           },
         },
         automatedCompliance: {

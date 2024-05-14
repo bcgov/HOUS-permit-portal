@@ -1,4 +1,6 @@
 import {
+  Box,
+  BoxProps,
   Button,
   ButtonProps,
   Drawer,
@@ -7,11 +9,19 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  Flex,
+  HStack,
+  Heading,
+  IconButton,
+  Link,
+  Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Info } from "@phosphor-icons/react"
-import React, { Ref, useRef } from "react"
+import { CaretRight, Envelope, Info } from "@phosphor-icons/react"
+import React, { ReactNode, Ref, useRef } from "react"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../setup/root"
+import { SectionBox } from "../domains/home/section-box"
 
 interface IProps {
   defaultButtonProps?: Partial<ButtonProps>
@@ -20,8 +30,11 @@ interface IProps {
 
 export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) {
   const { t } = useTranslation()
+  const { siteConfigurationStore } = useMst()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef<HTMLButtonElement>()
+
+  const { helpLinkItems } = siteConfigurationStore
 
   return (
     <>
@@ -44,22 +57,81 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
         <DrawerContent display={"flex"} flexDir={"column"} h={"full"} maxW={"430px"}>
           <DrawerCloseButton fontSize={"xs"} />
           <DrawerHeader display={"flex"} alignItems={"center"} p={6} pt={10} fontSize={"2xl"}>
-            <Info style={{ marginRight: "var(--chakra-sizes-2)" }} />
             {t("ui.help")}
           </DrawerHeader>
 
-          <DrawerBody
-            sx={{
-              iframe: {
-                w: "full",
-                h: "full",
-              },
-            }}
-          >
-            <iframe src="https://www2.gov.bc.ca/gov/content?id=A5A88A4CE1D54D95AB23D57858EF11EE" title="Help"></iframe>
+          <DrawerBody>
+            {helpLinkItems && (
+              <Flex direction="column" gap={6}>
+                {Object.keys(helpLinkItems)
+                  .filter((key) => helpLinkItems[key].show)
+                  .map((key) => (
+                    <HelpDrawerBox
+                      key={key}
+                      icon={<Info size={24} />}
+                      href={helpLinkItems[key].href}
+                      title={helpLinkItems[key].title}
+                      description={helpLinkItems[key].description}
+                      p={4}
+                    />
+                  ))}
+              </Flex>
+            )}
+            <Box w="full" boxShadow="md" mt={6} border="1px solid" borderRadius="md" borderColor="border.light">
+              <Flex direction="column">
+                <Box background="theme.blueAlt" borderTopRadius="md" color="white" p={4} fontWeight="bold">
+                  {t("site.needMoreHelp")}
+                </Box>
+                <Box p={4}>
+                  {t("site.pleaseContact")}
+
+                  <HStack w="full" py={4}>
+                    <Envelope size={24} style={{ color: "var(--chakra-colors-text-link)" }} />
+                    <Link href={`mailto:digital.codes.permits@gov.bc.ca`}>digital.codes.permits@gov.bc.ca</Link>
+                  </HStack>
+                </Box>
+              </Flex>
+            </Box>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
     </>
+  )
+}
+
+interface IHelpDrawerBoxProps extends BoxProps {
+  icon: ReactNode
+  href: string
+  title: string
+  description: string
+  linkText?: string
+}
+
+export const HelpDrawerBox = ({ icon, title, description, href, linkText, ...rest }: IHelpDrawerBoxProps) => {
+  const { t } = useTranslation()
+
+  return (
+    <SectionBox {...rest}>
+      <Flex gap={8} align="center">
+        <Flex direction="column" gap={3} flex={1}>
+          <HStack align="center" color="text.link">
+            <Box w={6}>{icon}</Box>
+            <Heading as="h3" mb={0} fontSize="lg">
+              {title}
+            </Heading>
+          </HStack>
+          <Text ml={8} fontSize="sm">
+            {description}
+          </Text>
+        </Flex>
+        <Link href="https://www.google.com" isExternal>
+          <IconButton
+            variant="tertiary"
+            icon={<CaretRight size={24} style={{ color: "var(--chakra-colors-text-link)" }} />}
+            aria-label={"external-link"}
+          />
+        </Link>
+      </Flex>
+    </SectionBox>
   )
 }

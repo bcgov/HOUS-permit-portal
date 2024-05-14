@@ -1,7 +1,8 @@
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
-import { TSiteConfiguration } from "../components/domains/super-admin/site-configuration-management/sitewide-message-screen.js"
+import { TSiteWideMessageConfiguration } from "../components/domains/super-admin/site-configuration-management/sitewide-message-screen.js"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { IHelpLinkItems } from "../types/types.js"
 
 // Define the SiteConfiguration model
 export const SiteConfigurationStoreModel = types
@@ -10,6 +11,7 @@ export const SiteConfigurationStoreModel = types
     configurationLoaded: types.optional(types.boolean, false),
     displaySitewideMessage: types.maybeNull(types.boolean),
     sitewideMessage: types.maybeNull(types.string),
+    helpLinkItems: types.frozen<IHelpLinkItems>(),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -22,8 +24,9 @@ export const SiteConfigurationStoreModel = types
       }
       return response.ok
     }),
-    updateSiteConfiguration: flow(function* updateSiteConfiguration(siteConfiguration: TSiteConfiguration) {
+    updateSiteConfiguration: flow(function* updateSiteConfiguration(siteConfiguration: TSiteWideMessageConfiguration) {
       const response: any = yield self.environment.api.updateSiteConfiguration(siteConfiguration)
+
       if (response.ok) {
         let responseData = response.data.data
         applySnapshot(self, responseData)

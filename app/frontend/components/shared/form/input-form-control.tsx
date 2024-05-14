@@ -10,6 +10,7 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  Textarea,
 } from "@chakra-ui/react"
 import { AsteriskSimple, Phone } from "@phosphor-icons/react"
 import { t } from "i18next"
@@ -68,6 +69,22 @@ export const PhoneFormControl = (props: IInputFormControlProps) => {
 
 export const FileFormControl = (props: IInputFormControlProps) => {
   return <InputFormControl {...(R.mergeDeepRight({ inputProps: { type: "file" } }, props) as IInputFormControlProps)} />
+}
+
+export const TextAreaFormControl = (props: IInputFormControlProps) => {
+  return (
+    <InputFormControl
+      {...(R.mergeDeepRight(
+        {
+          inputProps: { as: Textarea }, // Use Chakra's Textarea instead of Input
+          validate: {
+            satisfiesLength: (str) => !props.required || (str?.length >= 1 && str?.length < 256) || "Input is invalid", // Use a default error message or use translation as needed
+          },
+        },
+        props
+      ) as IInputFormControlProps)}
+    />
+  )
 }
 
 const InputFormControl = ({
