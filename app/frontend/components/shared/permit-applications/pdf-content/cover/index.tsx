@@ -66,7 +66,10 @@ export const CoverPage = function PermitApplicationPDFCoverPage({
             label={t("permitApplication.pdf.submissionDate")}
             value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
           />
-          <Row label={t("permitApplication.pdf.applicant")} value={permitApplication.submitter.name} />
+          <Row
+            label={t("permitApplication.pdf.applicant")}
+            value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
+          />
           <Row
             label={t("permitApplication.pdf.permitType")}
             value={`${permitApplication.permitType.name} | ${permitApplication.activity.name}`}

@@ -44,7 +44,7 @@ class Api::UsersController < Api::ApplicationController
 
     # allow user to change back to original confirmed email
     # https://github.com/heartcombo/devise/issues/5470
-    current_user.unconfirmed_email = nil if profile_params[:email] == current_user.email
+    current_user.unconfirmed_email = nil if current_user.email && profile_params[:email] == current_user.email
 
     if current_user.update(profile_params)
       should_send_confirmation = @user.confirmed_at.blank? && @user.confirmation_sent_at.blank?

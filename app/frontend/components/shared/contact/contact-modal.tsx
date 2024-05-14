@@ -18,6 +18,7 @@ export interface IContactModalProps extends Partial<ReturnType<typeof useDisclos
   permitApplication?: IPermitApplication
   autofillContactKey?: string
   onContactChange?: (option: IOption<IContact>) => void
+  submissionState: any
 }
 
 export const ContactModal: React.FC<IContactModalProps> = ({
@@ -27,6 +28,7 @@ export const ContactModal: React.FC<IContactModalProps> = ({
   permitApplication,
   autofillContactKey,
   onContactChange,
+  submissionState,
 }) => {
   const { t } = useTranslation()
 
@@ -43,11 +45,11 @@ export const ContactModal: React.FC<IContactModalProps> = ({
 
       if (position === "in_section") {
         const requirementKey = parts.slice(0, -1).join("|")
-        updateContactInSubmissionSection(requirementKey, option.value)
+        updateContactInSubmissionSection(requirementKey, option.value, submissionState)
       } else {
         const requirementPrefix = parts.slice(0, -1).join("|")
         const index = parseInt(position)
-        updateContactInSubmissionDatagrid(requirementPrefix, index, option.value)
+        updateContactInSubmissionDatagrid(requirementPrefix, index, option.value, submissionState)
       }
     }
 

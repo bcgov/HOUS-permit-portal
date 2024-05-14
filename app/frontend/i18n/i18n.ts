@@ -930,7 +930,6 @@ const options = {
             adminDescription:
               "Manage site-wide settings and messages along with providing administrative control to Super Admins.",
             jurisdictionLocalityTypeLabel: "Locality type of local jurisdiction",
-            editPermission: "Only Review Managers are able to edit.",
             jurisdictionNameLabel: "Name of local jurisdiction",
             jurisdictionLocationLabel: "Location",
             jurisdictionAbout: {
@@ -1042,8 +1041,11 @@ const options = {
             message: "Please contact your jurisdiction to request a new invitation link.",
           },
           createAccount: "Proceed with your account creation",
-          bceid: "BCeID",
-          idir: "IDIR",
+          omniauthProviders: {
+            idir: "IDIR",
+            bceidbasic: "Basic BCeID",
+            bceidbusiness: "Business BCeID",
+          },
           changeBceid: "If you want to change your BCeID information, please go to ",
           changeBceidLinkText: "bceid.ca",
           confirmationRequiredWithEmail:
