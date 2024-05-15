@@ -6,8 +6,8 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
-import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
-import { TAutoComplianceModuleOptions } from "../types/types"
+import { EAutoComplianceType, ERequirementLibrarySortFields, ERequirementType, ETagType } from "../types/enums"
+import { TAutoComplianceModuleOptions, TValueExtractorAutoComplianceModuleOption } from "../types/types"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -23,6 +23,11 @@ export const RequirementBlockStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    get availableComplianceModuleOptions(): Array<TAutoComplianceModuleOptions[keyof TAutoComplianceModuleOptions]> {
+      return Object.values(self.autoComplianceModuleOptions ?? {}) as Array<
+        TAutoComplianceModuleOptions[keyof TAutoComplianceModuleOptions]
+      >
+    },
     // View to get a RequirementBlock by id
     getRequirementBlockById(id: string) {
       return self.requirementBlockMap.get(id)
@@ -41,11 +46,28 @@ export const RequirementBlockStoreModel = types
           return t("requirementsLibrary.configurationsColumn")
       }
     },
-    get autoComplianceModuleNames() {
-      return Object.keys(self.autoComplianceModuleOptions ?? {})
+  }))
+  .views((self) => ({
+    getAutoComplianceModuleOptionsForRequirementType(requirementType: ERequirementType) {
+      return self.availableComplianceModuleOptions
+        .filter((option) => option.availableOnInputTypes.includes(requirementType))
+        .map((option) => {
+          if (
+            option.type === EAutoComplianceType.externalValueExtractor ||
+            option.type === EAutoComplianceType.internalValueExtractor
+          ) {
+            return {
+              ...option,
+              availableFields: (option as TValueExtractorAutoComplianceModuleOption).availableFields.filter((field) =>
+                field.availableOnInputTypes.includes(requirementType)
+              ),
+            }
+          }
+
+          return option
+        })
     },
   }))
-
   .actions((self) => ({
     fetchRequirementBlocks: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {

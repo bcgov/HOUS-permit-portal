@@ -460,6 +460,7 @@ const options = {
               triggerButton: "Options",
               remove: "Remove",
               conditionalLogic: "Conditional logic",
+              computedCompliance: "Computed compliance",
               dataValidation: "Data validation",
             },
             conditionalSetup: {
@@ -474,6 +475,9 @@ const options = {
               then: "Then...",
               show: "Show this field",
               hide: "Hide this field",
+            },
+            computedComplianceSetup: {
+              module: "Module",
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",

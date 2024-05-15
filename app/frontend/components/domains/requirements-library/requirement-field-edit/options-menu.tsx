@@ -14,6 +14,7 @@ import { CaretDown, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { ComputedComplianceSetupModal } from "./computed-compliance-setup-modal"
 import { ConditionalSetupModal } from "./conditional-setup-modal"
 
 export interface IRequirementOptionsMenu {
@@ -70,6 +71,7 @@ export const OptionsMenu = observer(function OptionsMenu({
             isDisabled: disabledOptions.includes("conditional"),
           }}
         />
+        <ComputedComplianceSetupModal requirementIndex={index} />
 
         <MenuDivider />
         <MenuItem color={"semantic.error"} onClick={onRemove} isDisabled={disabledOptions.includes("remove")}>

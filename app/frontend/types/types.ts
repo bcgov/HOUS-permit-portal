@@ -71,11 +71,19 @@ export type TSearchParams<IModelSortFields> = {
   statusFilter?: string
 }
 
+export type TComputedCompliance = {
+  module: EAutoComplianceModule
+  value?: string
+  valueOn?: string
+  trigger?: string
+}
+
 export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
   canAddMultipleContacts?: boolean
   conditional?: TConditional
+  computedCompliance?: TComputedCompliance
   energyStepCode?: string
   dataValidation?: Object
 }
@@ -266,28 +274,37 @@ export interface IHelpLinkItems {
 interface ICommonAutoComplianceModuleOption<EModule extends EAutoComplianceModule> {
   module: EModule
   type: EAutoComplianceType
+  label: string
   availableOnInputTypes: ERequirementType[]
+  defaultSettings?: Object
 }
 
-interface IAutoComplianceValueExtractorOption {
-  type: EAutoComplianceType.externalValueExtractor | EAutoComplianceType.internalValueExtractor
-  availableFields: Array<IOption<string> & { availableOnInputTypes: ERequirementType[] }>
-}
+type TAutoComplianceValueExtractorOption<EModule extends EAutoComplianceModule> =
+  ICommonAutoComplianceModuleOption<EModule> & {
+    type: EAutoComplianceType.externalValueExtractor | EAutoComplianceType.internalValueExtractor
+    availableFields: Array<
+      IOption<string> & {
+        availableOnInputTypes: ERequirementType[]
+      }
+    >
+  }
 
 export interface IDigitalSealValidatorModuleOption
   extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.DigitalSealValidator> {}
 
 export interface IParcelInfoExtractorModuleOption
-  extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.ParcelInfoExtractor>,
-    IAutoComplianceValueExtractorOption {
+  extends TAutoComplianceValueExtractorOption<EAutoComplianceModule.ParcelInfoExtractor> {
   type: EAutoComplianceType.externalValueExtractor
 }
 
 export interface IPermitApplicationModuleOption
-  extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.PermitApplication>,
-    IAutoComplianceValueExtractorOption {
+  extends TAutoComplianceValueExtractorOption<EAutoComplianceModule.PermitApplication> {
   type: EAutoComplianceType.internalValueExtractor
 }
+
+export type TValueExtractorAutoComplianceModuleOption =
+  | IParcelInfoExtractorModuleOption
+  | IPermitApplicationModuleOption
 
 export type TAutoComplianceModuleOptions = {
   [EAutoComplianceModule.DigitalSealValidator]: IDigitalSealValidatorModuleOption

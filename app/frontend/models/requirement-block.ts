@@ -68,6 +68,7 @@ export const RequirementBlockModel = types
                   then,
                 },
             energyStepCode: requirement.inputOptions?.energyStepCode,
+            computedCompliance: requirement.inputOptions?.computedCompliance,
           },
         }
       })
