@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, FormLabel, HStack, Input, Select, Tag, TagProps, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, FormControl, FormLabel, HStack, Select, Tag, TagProps, Text } from "@chakra-ui/react"
 import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
@@ -13,12 +13,11 @@ import { SharedSpinner } from "../shared-spinner"
 interface IUserInputProps {
   index: number
   remove?: (index: number) => any
-  jurisdictionId?: string
   adminOnly?: boolean
 }
 
-export const UserInput = observer(({ index, remove, jurisdictionId, adminOnly }: IUserInputProps) => {
-  const { register, formState, control, watch, setValue } = useFormContext()
+export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps) => {
+  const { formState, control, watch } = useFormContext()
   const { isSubmitting } = formState
   const { t } = useTranslation()
 
@@ -32,7 +31,6 @@ export const UserInput = observer(({ index, remove, jurisdictionId, adminOnly }:
 
   return (
     <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
-      <Input hidden {...register(`users.${index}.jurisdictionId`)} value={jurisdictionId} />
       <HStack spacing={4} w="full">
         <FormControl>
           <FormLabel>{t("auth.role")}</FormLabel>
@@ -49,6 +47,9 @@ export const UserInput = observer(({ index, remove, jurisdictionId, adminOnly }:
                       <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
                     ) : (
                       <>
+                        <option value={EUserRoles.regionalReviewManager}>
+                          {t(`user.roles.${EUserRoles.regionalReviewManager}`)}
+                        </option>
                         <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
                         <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
                       </>

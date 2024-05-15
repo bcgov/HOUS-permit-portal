@@ -12,7 +12,7 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def create_or_update_jurisdiction_template_version_cutomization?
-    user.review_manager? && record.jurisdiction_id == user.jurisdiction_id
+    user.review_manager? && user.jurisdictions.find(record.jurisdiction_id)
   end
 
   class Scope < Scope

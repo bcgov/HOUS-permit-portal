@@ -38,6 +38,7 @@ Devise.setup do |config|
                   authorize_options: [:kc_idp_hint],
                   scope: "openid",
                   name: :keycloak,
+                  scope: "openid",
                   strategy_class: OmniAuth::Strategies::KeycloakOpenId
 
   # The secret key used by Devise. Devise uses this key to generate

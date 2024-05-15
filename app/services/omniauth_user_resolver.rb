@@ -23,6 +23,7 @@ class OmniauthUserResolver
       result = MergeSubmitterWithInvitedUser.new(submitter: existing_user, invited_user:).call
       self.invited_user = result.submitter
     end
+
     accept_invitation_with_omniauth if invited_user.present?
 
     self.user = invited_user || existing_user || create_user
@@ -52,8 +53,6 @@ class OmniauthUserResolver
 
   def accept_invitation_with_omniauth
     return unless invited_user.present?
-
-    # If IDIR, validate that the invited user's email matches the IDIR email ONLY on invite
 
     invited_user.update(
       password: Devise.friendly_token[0, 20],

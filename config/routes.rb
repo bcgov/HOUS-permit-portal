@@ -42,6 +42,7 @@ Rails.application.routes.draw do
       get "/validate_token" => "sessions#validate_token"
       delete "/invitation/remove" => "invitations#remove"
       get "/invitations/:invitation_token" => "invitations#show"
+      get "/logout" => "sessions#destroy"
     end
 
     get "/permit_type_submission_contacts/confirm",

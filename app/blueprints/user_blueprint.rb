@@ -30,13 +30,13 @@ class UserBlueprint < Blueprinter::Base
   view :extended do
     include_view :base
     include_view :current_user
-    association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
+    association :jurisdictions, blueprint: JurisdictionBlueprint, view: :base
   end
 
   view :invited_user do
     fields :email, :role
 
-    association :jurisdiction, blueprint: JurisdictionBlueprint, view: :minimal
+    association :jurisdictions, blueprint: JurisdictionBlueprint, view: :minimal
 
     field :invited_by_email do |user, _options|
       user.invited_by&.email
