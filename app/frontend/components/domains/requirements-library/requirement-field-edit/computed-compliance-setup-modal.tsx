@@ -300,9 +300,10 @@ export const ComputedComplianceSetupModal = observer(
         computedCompliance.value = form.value
       }
 
-      setRequirementBlockFormValue(`requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`, {
-        ...computedCompliance,
-      })
+      setRequirementBlockFormValue(
+        `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`,
+        computedCompliance
+      )
 
       onClose()
     }
