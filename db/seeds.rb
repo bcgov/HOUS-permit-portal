@@ -39,7 +39,7 @@ User.find_or_create_by(nickname: "review_manager") do |user|
   user.last_name = "McUser"
   user.email = "review_manager@example.com"
   user.password = "P@ssword1"
-  user.jurisdiction = north_van
+  user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
   user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
   user.omniauth_provider = "bceidbasic"
@@ -53,7 +53,7 @@ User.find_or_create_by(nickname: "reviewer") do |user|
   user.last_name = "McUser"
   user.email = "reviewer@example.com"
   user.password = "P@ssword1"
-  user.jurisdiction = north_van
+  user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"

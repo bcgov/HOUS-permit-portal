@@ -6,13 +6,20 @@ RSpec.describe User, type: :model do
     it { should have_many(:permit_applications) }
     it { should have_many(:applied_jurisdictions).through(:permit_applications).source(:jurisdiction) }
 
-    # Testing optional belongs_to association
-    it { should belong_to(:jurisdiction).optional }
+    it { should have_many(:jurisdictions).through(:jurisdiction_memberships) }
   end
 
   describe "enums" do
     # Testing enum for role
-    it { should define_enum_for(:role).with_values(submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3) }
+    it do
+      should define_enum_for(:role).with_values(
+               submitter: 0,
+               review_manager: 1,
+               reviewer: 2,
+               super_admin: 3,
+               regional_review_manager: 4,
+             )
+    end
 
     # Testing default value for role
     it "has submitter as a default role" do

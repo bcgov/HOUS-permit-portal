@@ -19,6 +19,7 @@ export const UserModel = types
     nickname: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
+    jurisdictions: types.array(types.reference(types.late(() => JurisdictionModel))),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
     createdAt: types.maybeNull(types.Date),
     confirmationSentAt: types.maybeNull(types.Date),

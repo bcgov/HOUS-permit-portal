@@ -93,6 +93,19 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
+  create_table "jurisdiction_memberships",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_jurisdiction_memberships_on_jurisdiction_id"
+    t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
+  end
+
   create_table "jurisdiction_template_version_customizations",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -658,6 +671,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "jurisdiction_memberships", "jurisdictions"
+  add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",

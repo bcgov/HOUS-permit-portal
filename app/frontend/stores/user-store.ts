@@ -48,9 +48,10 @@ export const UserStoreModel = types
   }))
   .actions((self) => ({
     __beforeMergeUpdate(user) {
-      if (user.jurisdiction) {
-        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
-        user.jurisdiction = user.jurisdiction.id
+      if (user.jurisdictions) {
+        self.rootStore.jurisdictionStore.mergeUpdateAll(user.jurisdictions, "jurisdictionMap")
+        user.jurisdictions = R.pluck("id")(user.jurisdictions)
+        user.jurisdiction = user.jurisdictions[0]
       }
       return user
     },

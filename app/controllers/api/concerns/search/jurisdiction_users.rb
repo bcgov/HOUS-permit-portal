@@ -6,7 +6,7 @@ module Api::Concerns::Search::JurisdictionUsers
       User.search(
         user_query,
         where: {
-          jurisdiction_id: @jurisdiction&.id,
+          jurisdiction_ids: [@jurisdiction&.id],
           discarded: discarded,
           # Only show the review managers if current user is a super admin, but also show reviewers if a review manager
           role:

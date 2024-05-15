@@ -12,7 +12,8 @@ class Jurisdiction < ApplicationRecord
   # Associations
   has_many :permit_applications
   has_many :contacts, as: :contactable, dependent: :destroy
-  has_many :users, dependent: :destroy
+  has_many :jurisdiction_memberships, dependent: :destroy
+  has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_template_version_customizations
   has_many :template_versions, through: :jurisdiction_template_version_customizations
@@ -36,11 +37,11 @@ class Jurisdiction < ApplicationRecord
   before_create :assign_unique_prefix
 
   def review_managers
-    users&.kept&.review_managers
+    users&.kept&.review_manager
   end
 
   def reviewers
-    users&.kept&.reviewers
+    users&.kept&.reviewer
   end
 
   def assign_unique_prefix

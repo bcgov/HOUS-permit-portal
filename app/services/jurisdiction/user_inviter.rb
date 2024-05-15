@@ -32,14 +32,7 @@ class Jurisdiction::UserInviter
             u.last_name = user_params[:last_name]
             u.discarded_at = nil
             u.invited_by = inviter
-            u.jurisdiction_id =
-              (
-                if inviter.super_admin?
-                  user_params[:jurisdiction_id]
-                else
-                  inviter.jurisdiction&.id
-                end
-              )
+            u.jurisdiction_ids = [user_params[:jurisdiction_id]]
             u.save
           end
         reinvited ? self.results[:reinvited] << user : self.results[:invited] << user
