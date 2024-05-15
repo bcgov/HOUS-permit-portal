@@ -83,10 +83,14 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
                   {t("site.needMoreHelp")}
                 </Box>
                 <Box p={4}>
-                  {t("site.pleaseContact")}
+                  <Text>{t("site.pleaseContact")}</Text>
+                  <br />
+                  <Text>{t("site.forHelp")}</Text>
 
                   <HStack w="full" py={4}>
-                    <Envelope size={24} style={{ color: "var(--chakra-colors-text-link)" }} />
+                    <Box bg="theme.blueAlt" borderRadius="full" p="6px" w="8">
+                      <Envelope weight="fill" size="full" color="white" />
+                    </Box>
                     <Link href={`mailto:digital.codes.permits@gov.bc.ca`}>digital.codes.permits@gov.bc.ca</Link>
                   </HStack>
                 </Box>

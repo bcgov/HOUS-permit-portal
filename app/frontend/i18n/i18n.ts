@@ -1227,7 +1227,7 @@ const options = {
             fields: {
               show: "Show",
               title: "Title",
-              href: "GUID Link Url",
+              href: "CMS Lite GUID Link Url",
               description: "Description",
               titleHint: "Text for the main call-to-action",
               descriptionHint: "Short description below to give context",
@@ -1309,8 +1309,8 @@ const options = {
           foippaWarning:
             "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
           needMoreHelp: "Need more help?",
-          pleaseContact:
-            "Please contact your local government for questions related to your permit application. For help with the Building Permit Hub please contact:",
+          pleaseContact: "Please contact your local government for questions related to your permit application.",
+          forHelp: "For help with the Building Permit Hub please contact:",
           breadcrumb: {
             profile: "Profile",
             jurisdictions: "Jurisdictions",
