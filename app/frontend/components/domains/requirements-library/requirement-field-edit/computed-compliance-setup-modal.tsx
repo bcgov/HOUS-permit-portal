@@ -23,6 +23,7 @@ import React, { useEffect } from "react"
 import { useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
+import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { useMst } from "../../../../setup/root"
 import { EAutoComplianceModule } from "../../../../types/enums"
 import { IOption, TComputedCompliance } from "../../../../types/types"
@@ -50,13 +51,15 @@ export const ComputedComplianceSetupModal = observer(
     const { requirementBlockStore } = useMst()
     const requirementBlockFormMethods = useFormContext<IRequirementBlockForm>()
     const { watch: watchRequirementBlockForm } = requirementBlockFormMethods
+    const { autoComplianceModuleConfigurations, error: configurationFetchError } =
+      useAutoComplianceModuleConfigurations()
 
     const watchedRequirementType = watchRequirementBlockForm(`requirementsAttributes.${requirementIndex}.inputType`)
     const watchedComputedCompliance = watchRequirementBlockForm(
       `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`
     )
-    const autoComplianceModuleOptions =
-      requirementBlockStore.getAutoComplianceModuleOptionsForRequirementType(watchedRequirementType)
+    const availableAutoComplianceModuleConfigurations =
+      requirementBlockStore.getAvailableAutoComplianceModuleConfigurationsForRequirementType(watchedRequirementType)
 
     const {
       control,
@@ -78,13 +81,13 @@ export const ComputedComplianceSetupModal = observer(
       rules: {
         required: true,
         validate: {
-          isSupportedModule: (value) => value in (requirementBlockStore.autoComplianceModuleOptions ?? {}),
+          isSupportedModule: (value) => value in (autoComplianceModuleConfigurations ?? {}),
         },
       },
     })
     const { field: valueField } = useController({ name: "value", control })
 
-    const moduleSelectOptions = autoComplianceModuleOptions.map((option) => ({
+    const moduleSelectOptions = availableAutoComplianceModuleConfigurations.map((option) => ({
       value: option.module,
       label: option.label,
     }))

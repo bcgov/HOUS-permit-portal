@@ -7,13 +7,13 @@ import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
 import { EAutoComplianceType, ERequirementLibrarySortFields, ERequirementType, ETagType } from "../types/enums"
-import { TAutoComplianceModuleOptions, TValueExtractorAutoComplianceModuleOption } from "../types/types"
+import { TAutoComplianceModuleConfigurations, TValueExtractorAutoComplianceModuleConfiguration } from "../types/types"
 
 export const RequirementBlockStoreModel = types
   .compose(
     types.model("RequirementBlockStoreModel").props({
       requirementBlockMap: types.map(RequirementBlockModel),
-      autoComplianceModuleOptions: types.maybeNull(types.frozen<TAutoComplianceModuleOptions>()),
+      autoComplianceModuleConfigurations: types.maybeNull(types.frozen<TAutoComplianceModuleConfigurations>()),
       isAutoComplianceModuleOptionsLoading: types.optional(types.boolean, false),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
     }),
@@ -23,9 +23,11 @@ export const RequirementBlockStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
-    get availableComplianceModuleOptions(): Array<TAutoComplianceModuleOptions[keyof TAutoComplianceModuleOptions]> {
-      return Object.values(self.autoComplianceModuleOptions ?? {}) as Array<
-        TAutoComplianceModuleOptions[keyof TAutoComplianceModuleOptions]
+    get autoComplianceModuleConfigurationsList(): Array<
+      TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
+    > {
+      return Object.values(self.autoComplianceModuleConfigurations ?? {}) as Array<
+        TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
       >
     },
     // View to get a RequirementBlock by id
@@ -48,8 +50,8 @@ export const RequirementBlockStoreModel = types
     },
   }))
   .views((self) => ({
-    getAutoComplianceModuleOptionsForRequirementType(requirementType: ERequirementType) {
-      return self.availableComplianceModuleOptions
+    getAvailableAutoComplianceModuleConfigurationsForRequirementType(requirementType: ERequirementType) {
+      return self.autoComplianceModuleConfigurationsList
         .filter((option) => option.availableOnInputTypes.includes(requirementType))
         .map((option) => {
           if (
@@ -58,8 +60,8 @@ export const RequirementBlockStoreModel = types
           ) {
             return {
               ...option,
-              availableFields: (option as TValueExtractorAutoComplianceModuleOption).availableFields.filter((field) =>
-                field.availableOnInputTypes.includes(requirementType)
+              availableFields: (option as TValueExtractorAutoComplianceModuleConfiguration).availableFields.filter(
+                (field) => field.availableOnInputTypes.includes(requirementType)
               ),
             }
           }
@@ -123,18 +125,18 @@ export const RequirementBlockStoreModel = types
 
       return []
     }),
-    fetchAutoComplianceModuleOptions: flow(function* () {
+    fetchAutoComplianceModuleConfigurations: flow(function* () {
       self.isAutoComplianceModuleOptionsLoading = true
 
-      const response = yield* toGenerator(self.environment.api.fetchAutoComplianceModuleOptions())
+      const response = yield* toGenerator(self.environment.api.fetchAutoComplianceModuleConfigurations())
 
       if (response.ok) {
-        self.autoComplianceModuleOptions = response.data.data
+        self.autoComplianceModuleConfigurations = response.data.data
       }
 
       self.isAutoComplianceModuleOptionsLoading = false
 
-      return self.autoComplianceModuleOptions
+      return self.autoComplianceModuleConfigurations
     }),
   }))
 

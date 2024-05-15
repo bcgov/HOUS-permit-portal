@@ -271,7 +271,7 @@ export interface IHelpLinkItems {
   userGuideLinkItem: ILinkItem
 }
 
-interface ICommonAutoComplianceModuleOption<EModule extends EAutoComplianceModule> {
+interface ICommonAutoComplianceModuleConfiguration<EModule extends EAutoComplianceModule> {
   module: EModule
   type: EAutoComplianceType
   label: string
@@ -279,8 +279,8 @@ interface ICommonAutoComplianceModuleOption<EModule extends EAutoComplianceModul
   defaultSettings?: Object
 }
 
-type TAutoComplianceValueExtractorOption<EModule extends EAutoComplianceModule> =
-  ICommonAutoComplianceModuleOption<EModule> & {
+type TAutoComplianceValueExtractorTypeConfiguration<EModule extends EAutoComplianceModule> =
+  ICommonAutoComplianceModuleConfiguration<EModule> & {
     type: EAutoComplianceType.externalValueExtractor | EAutoComplianceType.internalValueExtractor
     availableFields: Array<
       IOption<string> & {
@@ -289,25 +289,25 @@ type TAutoComplianceValueExtractorOption<EModule extends EAutoComplianceModule> 
     >
   }
 
-export interface IDigitalSealValidatorModuleOption
-  extends ICommonAutoComplianceModuleOption<EAutoComplianceModule.DigitalSealValidator> {}
+export interface IDigitalSealValidatorModuleConfiguration
+  extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
 
-export interface IParcelInfoExtractorModuleOption
-  extends TAutoComplianceValueExtractorOption<EAutoComplianceModule.ParcelInfoExtractor> {
+export interface IParcelInfoExtractorModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
   type: EAutoComplianceType.externalValueExtractor
 }
 
-export interface IPermitApplicationModuleOption
-  extends TAutoComplianceValueExtractorOption<EAutoComplianceModule.PermitApplication> {
+export interface IPermitApplicationModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
   type: EAutoComplianceType.internalValueExtractor
 }
 
-export type TValueExtractorAutoComplianceModuleOption =
-  | IParcelInfoExtractorModuleOption
-  | IPermitApplicationModuleOption
+export type TValueExtractorAutoComplianceModuleConfiguration =
+  | IParcelInfoExtractorModuleConfiguration
+  | IPermitApplicationModuleConfiguration
 
-export type TAutoComplianceModuleOptions = {
-  [EAutoComplianceModule.DigitalSealValidator]: IDigitalSealValidatorModuleOption
-  [EAutoComplianceModule.ParcelInfoExtractor]: IParcelInfoExtractorModuleOption
-  [EAutoComplianceModule.PermitApplication]: IPermitApplicationModuleOption
+export type TAutoComplianceModuleConfigurations = {
+  [EAutoComplianceModule.DigitalSealValidator]: IDigitalSealValidatorModuleConfiguration
+  [EAutoComplianceModule.ParcelInfoExtractor]: IParcelInfoExtractorModuleConfiguration
+  [EAutoComplianceModule.PermitApplication]: IPermitApplicationModuleConfiguration
 }

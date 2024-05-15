@@ -1,5 +1,5 @@
-class AutomatedComplianceOptionsService
-  AVAILABLE_MODULE_OPTIONS = {
+class AutomatedComplianceConfigurationService
+  AVAILABLE_MODULE_CONFIGURATIONS = {
     DigitalSealValidator: {
       module: "DigitalSealValidator",
       label: "Digital Seal Validator - Validates the digital seal of a file",
@@ -41,7 +41,7 @@ class AutomatedComplianceOptionsService
     # },
   }
 
-  def self.available_module_options
-    AVAILABLE_MODULE_OPTIONS
+  def self.available_module_configurations
+    AVAILABLE_MODULE_CONFIGURATIONS
   end
 end

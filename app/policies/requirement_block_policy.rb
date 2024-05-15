@@ -20,7 +20,7 @@ class RequirementBlockPolicy < ApplicationPolicy
     create?
   end
 
-  def auto_compliance_module_options?
+  def auto_compliance_module_configurations?
     show?
   end
 
