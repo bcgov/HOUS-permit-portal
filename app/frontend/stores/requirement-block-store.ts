@@ -7,7 +7,11 @@ import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
 import { EAutoComplianceType, ERequirementLibrarySortFields, ERequirementType, ETagType } from "../types/enums"
-import { TAutoComplianceModuleConfigurations, TValueExtractorAutoComplianceModuleConfiguration } from "../types/types"
+import {
+  TAutoComplianceModuleConfiguration,
+  TAutoComplianceModuleConfigurations,
+  TValueExtractorAutoComplianceModuleConfiguration,
+} from "../types/types"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -23,12 +27,8 @@ export const RequirementBlockStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
-    get autoComplianceModuleConfigurationsList(): Array<
-      TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
-    > {
-      return Object.values(self.autoComplianceModuleConfigurations ?? {}) as Array<
-        TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
-      >
+    get autoComplianceModuleConfigurationsList(): Array<TAutoComplianceModuleConfiguration> {
+      return Object.values(self.autoComplianceModuleConfigurations ?? {}) as Array<TAutoComplianceModuleConfiguration>
     },
     // View to get a RequirementBlock by id
     getRequirementBlockById(id: string) {

@@ -460,7 +460,7 @@ const options = {
               triggerButton: "Options",
               remove: "Remove",
               conditionalLogic: "Conditional logic",
-              computedCompliance: "Computed compliance",
+              automatedCompliance: "Automated compliance",
               dataValidation: "Data validation",
             },
             conditionalSetup: {
@@ -478,6 +478,7 @@ const options = {
             },
             computedComplianceSetup: {
               module: "Module",
+              valueExtractionField: "Value extraction field",
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",

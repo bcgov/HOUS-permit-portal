@@ -311,3 +311,6 @@ export type TAutoComplianceModuleConfigurations = {
   [EAutoComplianceModule.ParcelInfoExtractor]: IParcelInfoExtractorModuleConfiguration
   [EAutoComplianceModule.PermitApplication]: IPermitApplicationModuleConfiguration
 }
+
+export type TAutoComplianceModuleConfiguration =
+  TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
