@@ -18,8 +18,9 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { SlidersHorizontal } from "@phosphor-icons/react"
+import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
@@ -87,12 +88,21 @@ export const ComputedComplianceSetupModal = observer(
     })
     const { field: valueField } = useController({ name: "value", control })
 
-    const moduleSelectOptions = availableAutoComplianceModuleConfigurations.map((option) => ({
-      value: option.module,
-      label: option.label,
-    }))
+    const moduleSelectOptions = useMemo(
+      () =>
+        computed(() =>
+          availableAutoComplianceModuleConfigurations.map((option) => ({
+            value: option.module,
+            label: option.label,
+          }))
+        ),
+      []
+    ).get()
 
-    const selectedModuleOption = moduleSelectOptions.find((option) => option.value === moduleField?.value) ?? null
+    const selectedModuleOption = useMemo(
+      () => computed(() => moduleSelectOptions.find((option) => option.value === moduleField?.value ?? null)),
+      [moduleField?.value]
+    ).get()
 
     const onModuleChange = (option: IOption) => {
       moduleField.onChange(option?.value)
