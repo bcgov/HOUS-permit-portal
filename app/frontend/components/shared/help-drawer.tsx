@@ -34,7 +34,7 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef<HTMLButtonElement>()
 
-  const { helpLinkItems } = siteConfigurationStore
+  const { shownHelpLinkItems } = siteConfigurationStore
 
   return (
     <>
@@ -61,20 +61,18 @@ export function HelpDrawer({ defaultButtonProps, renderTriggerButton }: IProps) 
           </DrawerHeader>
 
           <DrawerBody>
-            {helpLinkItems && (
+            {shownHelpLinkItems && (
               <Flex direction="column" gap={6}>
-                {Object.keys(helpLinkItems)
-                  .filter((key) => helpLinkItems[key].show)
-                  .map((key) => (
-                    <HelpDrawerBox
-                      key={key}
-                      icon={<Info size={24} />}
-                      href={helpLinkItems[key].href}
-                      title={helpLinkItems[key].title}
-                      description={helpLinkItems[key].description}
-                      p={4}
-                    />
-                  ))}
+                {shownHelpLinkItems.map((item) => (
+                  <HelpDrawerBox
+                    key={item.href}
+                    icon={<Info size={24} />}
+                    href={item.href}
+                    title={item.title}
+                    description={item.description}
+                    p={4}
+                  />
+                ))}
               </Flex>
             )}
             <Box w="full" boxShadow="md" mt={6} border="1px solid" borderRadius="md" borderColor="border.light">
@@ -128,7 +126,7 @@ export const HelpDrawerBox = ({ icon, title, description, href, linkText, ...res
             {description}
           </Text>
         </Flex>
-        <Link href="https://www.google.com" isExternal>
+        <Link href={href} isExternal>
           <IconButton
             variant="tertiary"
             icon={<CaretRight size={24} style={{ color: "var(--chakra-colors-text-link)" }} />}

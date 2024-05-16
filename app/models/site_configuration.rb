@@ -32,9 +32,17 @@ class SiteConfiguration < ApplicationRecord
         end
       end
 
-      # Check if href is a valid URL
+      # Check if href is a valid URL using the same logic as validate_url_attributes
       if item["href"].present?
-        unless item["href"].match?(%r{\Ahttps://.+\z})
+        begin
+          uri = URI.parse(item["href"])
+          unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+            errors.add(
+              :base,
+              I18n.t("activerecord.errors.models.site_configuration.attributes.help_link_items.invalid_url", link: key),
+            )
+          end
+        rescue URI::InvalidURIError
           errors.add(
             :base,
             I18n.t("activerecord.errors.models.site_configuration.attributes.help_link_items.invalid_url", link: key),

@@ -41,5 +41,12 @@ export const SiteConfigurationStoreModel = types
       self.fetchSiteConfiguration()
     },
   }))
+  .views((self) => ({
+    get shownHelpLinkItems() {
+      if (!self?.helpLinkItems) return []
+
+      return Object.values(self.helpLinkItems).filter((item) => item.show)
+    },
+  }))
 
 export interface ISiteConfigurationStore extends Instance<typeof SiteConfigurationStoreModel> {}
