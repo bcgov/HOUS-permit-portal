@@ -243,6 +243,7 @@ export const FieldsSetup = observer(function FieldsSetup({
               const watchedElective = watch(`requirementsAttributes.${index}.elective`)
               const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
               const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
+              const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
               // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
               const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
                 watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
@@ -409,6 +410,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                     onRemove={() => onRemoveRequirement(index)}
                     elective={watchedElective}
                     conditional={watchedConditional}
+                    computedCompliance={watchedComputedCompliance}
                     requirementType={requirementType}
                     index={index}
                     disabledMenuOptions={disabledMenuOptions}

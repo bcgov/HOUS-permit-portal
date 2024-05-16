@@ -19,7 +19,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { Form } from "@formio/react"
-import { SlidersHorizontal } from "@phosphor-icons/react"
+import { LightningA } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
@@ -162,14 +162,18 @@ export const ComputedComplianceSetupModal = observer(
       valueExtractionField.onChange(option.value)
     }
 
+    const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0
     return (
       <>
         {renderTriggerButton ? (
-          renderTriggerButton({ onClick: onOpen })
+          renderTriggerButton({
+            onClick: onOpen,
+            isDisabled: isSetupDisabled,
+          })
         ) : (
-          <MenuItem color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
+          <MenuItem color={"text.primary"} onClick={onOpen} isDisabled={isSetupDisabled} {...triggerButtonProps}>
             <HStack spacing={2} fontSize={"sm"}>
-              <SlidersHorizontal />
+              <LightningA weight={"fill"} />
               <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.automatedCompliance")}</Text>
             </HStack>
           </MenuItem>
@@ -187,7 +191,7 @@ export const ComputedComplianceSetupModal = observer(
               maxHeight={12}
               fontSize="md"
             >
-              <SlidersHorizontal style={{ marginRight: "var(--chakra-space-2)" }} />
+              <LightningA weight={"fill"} style={{ marginRight: "var(--chakra-space-2)" }} />
               {t("requirementsLibrary.modals.optionsMenu.automatedCompliance")}
             </ModalHeader>
             <ModalBody py={4}>
