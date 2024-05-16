@@ -116,6 +116,9 @@ const options = {
           learnRequirements: "Learn about local requirements",
           cantFind: "Can't find your address?",
           browseList: "Browse list of jurisdictions",
+          goTo: "Go to {{ location }}",
+          permitApp: "permit app",
+          adminPanel: "admin panel",
         },
         ui: {
           verified: "Verified",
@@ -1121,7 +1124,7 @@ const options = {
             scheduleModalTitle: "Publish permit?",
             scheduleModalBody:
               "Once you publish, local jurisdictions and submitters will be able to see and use this new version of the form.",
-            scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
+            scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish!",
             errorsBox: {
@@ -1226,7 +1229,6 @@ const options = {
           titleLong: "Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
           adminPanel: "Admin Panel",
-          goTo: "Go to",
           beta: "Beta",
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",
