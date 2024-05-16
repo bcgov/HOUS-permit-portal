@@ -12,9 +12,9 @@ module Api::Concerns::Search::JurisdictionUsers
           role:
             (
               if current_user.super_admin?
-                ["review_manager"]
+                %w[review_manager regional_review_manager]
               elsif current_user.review_manager?
-                %w[review_manager reviewer]
+                %w[regional_review_manager review_manager reviewer]
               else
                 nil
               end

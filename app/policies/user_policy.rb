@@ -20,7 +20,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def search_jurisdiction_users?
-    return true if user.super_admin? && record.review_manager?
+    return true if user.super_admin? && (record.review_manager? || record.regional_review_manager?)
     user.manager? && record_in_users_jurisdictions?
   end
 

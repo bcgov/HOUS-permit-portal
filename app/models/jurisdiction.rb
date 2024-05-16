@@ -36,6 +36,10 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
+  def regional_review_managers
+    users&.kept&.regional_review_manager
+  end
+
   def review_managers
     users&.kept&.review_manager
   end
@@ -107,7 +111,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def review_managers_size
-    review_managers&.size || 0
+    (review_managers&.size || 0) + (regional_review_managers&.size || 0)
   end
 
   def reviewers_size

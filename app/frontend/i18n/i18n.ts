@@ -1076,6 +1076,7 @@ const options = {
 
           roles: {
             submitter: "submitter",
+            regional_review_manager: "regional review manager",
             review_manager: "review manager",
             reviewer: "reviewer",
             super_admin: "super admin",
