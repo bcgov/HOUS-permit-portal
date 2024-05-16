@@ -103,6 +103,7 @@ export enum EPermitApplicationSubmitterSortFields {
 
 export enum EPermitApplicationReviewerSortFields {
   number = "number",
+  referenceNumber = "reference_number",
   permitClassification = "permit_classification",
   submitter = "submitter",
   viewedAt = "viewed_at",

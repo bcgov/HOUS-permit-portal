@@ -322,6 +322,7 @@ const options = {
           },
           columns: {
             number: "Application #",
+            reference_number: "Reference #",
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted at",

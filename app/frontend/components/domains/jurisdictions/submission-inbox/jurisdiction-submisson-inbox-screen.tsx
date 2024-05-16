@@ -62,11 +62,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Can>
         </Flex>
 
-        <SearchGrid templateColumns="170px 2fr 2fr repeat(3, 1fr)">
+        <SearchGrid templateColumns="170px 1.2fr 1.5fr repeat(4, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
-            <Flex py={50} gridColumn={"span 6"}>
+            <Flex py={50} gridColumn={"span 7"}>
               <SharedSpinner />
             </Flex>
           ) : (
@@ -79,6 +79,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   display={"contents"}
                 >
                   <SearchGridItem>{pa.number}</SearchGridItem>
+                  <SearchGridItem>{pa.referenceNumber}</SearchGridItem>
                   <SearchGridItem>
                     <Flex direction="column">
                       <Text fontWeight={700}>{pa.permitType.name}</Text>
