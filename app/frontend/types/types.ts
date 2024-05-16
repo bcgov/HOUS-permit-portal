@@ -246,3 +246,17 @@ export type TConditional = {
   when: string
   eq: string
 }
+
+export interface ILinkItem {
+  href: string
+  title: string
+  descrption: string
+  show: boolean
+}
+
+export interface IHelpLinkItems {
+  getStartedLinkItem: ILinkItem
+  bestPracticesLinkItem: ILinkItem
+  dictionaryLinkItem: ILinkItem
+  userGuideLinkItem: ILinkItem
+}

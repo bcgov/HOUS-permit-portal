@@ -32,6 +32,12 @@ en:
     attributes:
     errors:
       models:
+        site_configuration:
+          single_record: "There can only be one SiteConfiguration record."
+          attributes:
+            help_link_items:
+              incomplete: "%{link} can only be shown if href, title, and description are all set."
+              invalid_url: "%{link} has an invalid URL. It must start with https://."
         permit_application:
           attributes:
             submitter:
@@ -41,10 +47,8 @@ en:
             pid_or_pin: "must have a pid or pin."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
-          duplicate_energy_step_code:
-            'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
-          duplicate_step_code_package:
-            'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
+          duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
+          duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
         requirement_block:
           attributes:
             requirements:
