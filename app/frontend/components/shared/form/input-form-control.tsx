@@ -41,7 +41,7 @@ export const TextFormControl = (props: IInputFormControlProps) => {
           inputProps: { type: "text" },
           validate: {
             satisfiesLength: (str) =>
-              ((!props.required || str?.length >= 1) && str?.length < 128) || t("ui.invalidInput"),
+              (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
           },
         },
         props
@@ -79,7 +79,7 @@ export const TextAreaFormControl = (props: IInputFormControlProps) => {
           inputProps: { as: Textarea }, // Use Chakra's Textarea instead of Input
           validate: {
             satisfiesLength: (str) =>
-              ((!props.required || str?.length >= 1) && str?.length < 512) || "Input is invalid", // Use a default error message or use translation as needed
+              (!props.required && !str) || (str?.length >= 1 && str?.length < 512) || "Input is invalid", // Use a default error message or use translation as needed
           },
         },
         props
