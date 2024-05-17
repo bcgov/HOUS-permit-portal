@@ -110,7 +110,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         }
       }
 
-      return cleanOptionsMapperComplianceConfiguration(returnValue, autoComplianceModuleConfigurations)
+      return getPrunedOptionsMapperComplianceConfiguration(returnValue, autoComplianceModuleConfigurations)
     })
 
     if (requirementBlock) {
@@ -209,7 +209,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   )
 })
 
-function cleanOptionsMapperComplianceConfiguration(
+function getPrunedOptionsMapperComplianceConfiguration(
   requirementAttributes: IRequirementAttributes,
   autoComplianceModuleConfigurations: TAutoComplianceModuleConfigurations
 ) {
@@ -236,15 +236,15 @@ function cleanOptionsMapperComplianceConfiguration(
     return clonesAttributes
   }
 
-  const optionsMapping = clonesAttributes.inputOptions.computedCompliance?.optionsMap ?? {}
+  const optionsMap = clonesAttributes.inputOptions.computedCompliance?.optionsMap ?? {}
 
-  Object.entries(optionsMapping).forEach(([key, value]) => {
+  Object.entries(optionsMap).forEach(([key, value]) => {
     if (!valueOptions.find((option) => option.value === value)) {
-      delete optionsMapping[key]
+      delete optionsMap[key]
     }
   })
 
-  if (Object.keys(optionsMapping).length === 0) {
+  if (Object.keys(optionsMap).length === 0) {
     delete clonesAttributes.inputOptions.computedCompliance
   }
 

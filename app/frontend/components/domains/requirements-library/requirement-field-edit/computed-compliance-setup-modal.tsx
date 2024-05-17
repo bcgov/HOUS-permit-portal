@@ -21,6 +21,7 @@ import {
 import { CaretDoubleRight, LightningA } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect, useMemo } from "react"
 import { useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -109,6 +110,18 @@ export const ComputedComplianceSetupModal = observer(
         reset(formFormDefaults(watchedComputedCompliance))
       }
     }, [watchedComputedCompliance, isOpen, autoComplianceModuleConfigurations, watchedRequirementValueOptions])
+
+    useEffect(() => {
+      if (isOpen && watchedOptionsMap && autoComplianceModuleConfigurations) {
+        const prunedOptionsMap = getPrunedOptionsMapBasedOnValueOptions(
+          watchedOptionsMap,
+          watchedRequirementValueOptions,
+          autoComplianceModuleConfigurations?.[watchedModule]
+        )
+
+        setValue("optionsMap", prunedOptionsMap)
+      }
+    }, [isOpen, watchedRequirementValueOptions, autoComplianceModuleConfigurations])
 
     const { field: moduleField } = useController({
       name: "module",
@@ -514,6 +527,36 @@ export const ComputedComplianceSetupModal = observer(
     function resetModuleDependencies() {
       setValue("value", null)
       setValue("optionsMap", null)
+    }
+
+    // removes mapping which are not present in the value options
+    function getPrunedOptionsMapBasedOnValueOptions(
+      optionsMap: Record<string, string>,
+      valueOptions: IOption[],
+      moduleConfig: TAutoComplianceModuleConfiguration | undefined
+    ) {
+      if (!isOptionsMapperModuleConfiguration(moduleConfig)) {
+        return null
+      }
+
+      const clonedOptionsMap = R.clone(optionsMap) as Record<string, string>
+      valueOptions = valueOptions ?? []
+
+      if (valueOptions.length === 0) {
+        return null
+      }
+
+      Object.entries(optionsMap).forEach(([key, value]) => {
+        if (!valueOptions.find((option) => option.value === value)) {
+          delete clonedOptionsMap[key]
+        }
+      })
+
+      if (Object.keys(clonedOptionsMap).length === 0) {
+        return null
+      }
+
+      return clonedOptionsMap
     }
   }
 )
