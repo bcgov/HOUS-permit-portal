@@ -18,7 +18,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDoubleRight, LightningA } from "@phosphor-icons/react"
+import { Equals, LightningA } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -95,7 +95,6 @@ export const ComputedComplianceSetupModal = observer(
     const {
       control,
       reset,
-      setValue,
       formState: { isValid },
       handleSubmit,
       watch,
@@ -110,18 +109,6 @@ export const ComputedComplianceSetupModal = observer(
         reset(formFormDefaults(watchedComputedCompliance))
       }
     }, [watchedComputedCompliance, isOpen, autoComplianceModuleConfigurations, watchedRequirementValueOptions])
-
-    useEffect(() => {
-      if (isOpen && watchedOptionsMap && autoComplianceModuleConfigurations) {
-        const prunedOptionsMap = getPrunedOptionsMapBasedOnValueOptions(
-          watchedOptionsMap,
-          watchedRequirementValueOptions,
-          autoComplianceModuleConfigurations?.[watchedModule]
-        )
-
-        setValue("optionsMap", prunedOptionsMap)
-      }
-    }, [isOpen, watchedRequirementValueOptions, autoComplianceModuleConfigurations])
 
     const { field: moduleField } = useController({
       name: "module",
@@ -230,6 +217,20 @@ export const ComputedComplianceSetupModal = observer(
     }, [watchedRequirementValueOptions, watchedOptionsMap])
 
     const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0
+
+    // prunes the optionsMap if the value options changed
+    useEffect(() => {
+      if (isOpen && watchedOptionsMap && autoComplianceModuleConfigurations) {
+        const prunedOptionsMap = getPrunedOptionsMapBasedOnValueOptions(
+          watchedOptionsMap,
+          watchedRequirementValueOptions,
+          autoComplianceModuleConfigurations?.[watchedModule]
+        )
+
+        optionsMapField.onChange(prunedOptionsMap)
+      }
+    }, [isOpen, watchedRequirementValueOptions, autoComplianceModuleConfigurations])
+
     return (
       <>
         {renderTriggerButton ? (
@@ -335,7 +336,7 @@ export const ComputedComplianceSetupModal = observer(
                             >
                               <SearchGridItem {...gridCellProps}>{mappableExternalOption.label}</SearchGridItem>
                               <SearchGridItem {...gridCellProps}>
-                                <CaretDoubleRight />
+                                <Equals />
                               </SearchGridItem>
                               <SearchGridItem {...gridCellProps}>
                                 <Box w={"full"}>
@@ -525,8 +526,8 @@ export const ComputedComplianceSetupModal = observer(
     }
 
     function resetModuleDependencies() {
-      setValue("value", null)
-      setValue("optionsMap", null)
+      valueExtractionField.onChange(null)
+      optionsMapField.onChange(null)
     }
 
     // removes mapping which are not present in the value options
