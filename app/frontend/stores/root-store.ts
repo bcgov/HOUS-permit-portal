@@ -46,6 +46,11 @@ export const RootStoreModel = types
         properties: ["afterLoginPath"],
         storage: localStorage,
       })
+      yield makePersistable(self.uiStore, {
+        name: `${self.userStore.currentUser?.id}-UIStore`,
+        properties: ["currentlySelectedJurisdictionId"],
+        storage: localStorage,
+      })
       protect(self)
     }),
     subscribeToUserChannel() {

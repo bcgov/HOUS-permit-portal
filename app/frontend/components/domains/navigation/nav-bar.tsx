@@ -17,6 +17,7 @@ import {
   Show,
   Spacer,
   Text,
+  VStack,
 } from "@chakra-ui/react"
 import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
@@ -29,6 +30,7 @@ import { EUserRoles } from "../../../types/enums"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -110,7 +112,7 @@ export const NavBar = observer(() => {
             </RouterLink>
             <Show above="md">
               <Text fontSize="2xl" fontWeight="normal" mb="0">
-                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+                {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Text>
 
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
@@ -127,7 +129,7 @@ export const NavBar = observer(() => {
                   {t("site.myPermits")}
                 </RouterLinkButton>
               )}
-              {currentUser?.jurisdiction && (
+              {currentUser?.isReviewStaff && !currentUser.isRegionalReviewManager && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
@@ -135,13 +137,19 @@ export const NavBar = observer(() => {
                   </Text>
                 </Flex>
               )}
-              {currentUser?.isReviewer ||
-                currentUser?.isReviewManager ||
-                (currentUser?.isSuperAdmin && (
-                  <Text color="greys.white" textTransform="capitalize">
+              {currentUser?.isRegionalReviewManager && (
+                <VStack align="flex-end" gap={1}>
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
-                ))}
+                  <RegionalRMJurisdictionSelect />
+                </VStack>
+              )}
+              {currentUser?.isSuperAdmin && (
+                <Text color="greys.white" textTransform="capitalize">
+                  {t(`user.roles.${currentUser.role as EUserRoles}`)}
+                </Text>
+              )}
               {(!loggedIn || currentUser?.isSubmitter) && (
                 <RouterLinkButton variant="tertiary" to="/jurisdictions">
                   {t("home.jurisdictionsTitle")}
@@ -254,8 +262,11 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                   )}
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
-                  {currentUser?.isReviewManager && reviewManagerOnlyItems}
-                  {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                  {(currentUser?.isReviewManager || currentUser?.isRegionalReviewManager) && reviewManagerOnlyItems}
+                  {(currentUser?.isSuperAdmin ||
+                    currentUser?.isReviewManager ||
+                    currentUser?.isRegionalReviewManager) &&
+                    adminOrManagerItems}
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   {!currentUser?.isSubmitter && (

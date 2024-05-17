@@ -22,7 +22,15 @@ export type TAsyncSelectProps<
 ) &
   RefAttributes<Select<TOption, TIsMulti, TGroup>> & {
     stylesToMerge?: {
-      [key in "control" | "menu" | "option" | "input" | "placeholder" | "menuList" | "container"]?: CSSProperties
+      [key in
+        | "control"
+        | "menu"
+        | "option"
+        | "input"
+        | "placeholder"
+        | "menuList"
+        | "container"
+        | "valueContainer"]?: CSSProperties
     }
   }
 

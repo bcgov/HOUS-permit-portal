@@ -6,7 +6,6 @@ import { Trans } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
-import { EUserRoles } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
@@ -41,8 +40,7 @@ interface IProps {
   invitedUser: IUser
 }
 function Content({ invitedUser }: Readonly<IProps>) {
-  const { invitedByEmail, jurisdiction, role, email } = invitedUser
-  const isAdmin = role == EUserRoles.superAdmin
+  const { invitedByEmail, jurisdiction, isSuperAdmin, email, role } = invitedUser
 
   return (
     <CenterContainer>
@@ -71,7 +69,7 @@ function Content({ invitedUser }: Readonly<IProps>) {
             </VStack>
           </>
         ) : (
-          isAdmin && (
+          isSuperAdmin && (
             <Text>
               <Trans i18nKey="user.invitedAsAdmin" values={{ email: invitedByEmail }} />
             </Text>
@@ -88,14 +86,14 @@ function Content({ invitedUser }: Readonly<IProps>) {
           {t("user.createAccount")}
         </Heading>
         <form action={`/api/auth/keycloak`} method="post">
-          <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
+          <input type="hidden" name="kc_idp_hint" value={isSuperAdmin ? "idir" : "bceidboth"} />
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
-            {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
+            {isSuperAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
           </Button>
         </form>
 
-        {!isAdmin && (
+        {!isSuperAdmin && (
           <>
             <Divider my={4} />
             <BusinessBCeIDInfo />

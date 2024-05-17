@@ -91,6 +91,7 @@ class Jurisdiction < ApplicationRecord
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
+      user_ids: users.pluck(:id),
     }
   end
 

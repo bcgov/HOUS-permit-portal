@@ -342,7 +342,10 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isSuperAdmin)}
+              isAllowed={
+                loggedIn &&
+                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
+              }
               redirectPath={loggedIn && "/not-found"}
             />
           }
@@ -360,10 +363,7 @@ const AppRoutes = observer(() => {
 
         <Route
           element={
-            <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewer || currentUser.isReviewManager)}
-              redirectPath={loggedIn && "/not-found"}
-            />
+            <ProtectedRoute isAllowed={loggedIn && currentUser.isReviewStaff} redirectPath={loggedIn && "/not-found"} />
           }
         >
           {managerOrReviewerRoutes}
@@ -372,7 +372,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && currentUser.isReviewManager}
+              isAllowed={loggedIn && currentUser.isReviewStaff && !currentUser.isReviewer}
               redirectPath={loggedIn && "/not-found"}
             />
           }

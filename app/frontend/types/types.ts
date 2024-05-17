@@ -6,6 +6,7 @@ import {
   EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
+  EJurisdictionTypes,
   ENumberUnit,
   ERequirementType,
   ESZeroCarbonStep,
@@ -245,4 +246,10 @@ export type TConditional = {
   show: boolean
   when: string
   eq: string
+}
+
+export interface IJurisdictionFilters {
+  name?: string
+  type?: EJurisdictionTypes
+  userId?: string
 }

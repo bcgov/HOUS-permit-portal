@@ -51,7 +51,6 @@ export const UserStoreModel = types
       if (user.jurisdictions) {
         self.rootStore.jurisdictionStore.mergeUpdateAll(user.jurisdictions, "jurisdictionMap")
         user.jurisdictions = R.pluck("id")(user.jurisdictions)
-        user.jurisdiction = user.jurisdictions[0]
       }
       return user
     },

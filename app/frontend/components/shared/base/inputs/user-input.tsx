@@ -47,11 +47,11 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
                       <option value={EUserRoles.superAdmin}>{t(`user.roles.${EUserRoles.superAdmin}`)}</option>
                     ) : (
                       <>
+                        <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
+                        <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
                         <option value={EUserRoles.regionalReviewManager}>
                           {t(`user.roles.${EUserRoles.regionalReviewManager}`)}
                         </option>
-                        <option value={EUserRoles.reviewManager}>{t(`user.roles.${EUserRoles.reviewManager}`)}</option>
-                        <option value={EUserRoles.reviewer}>{t(`user.roles.${EUserRoles.reviewer}`)}</option>
                       </>
                     )}
                   </Select>
