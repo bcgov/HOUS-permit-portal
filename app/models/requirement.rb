@@ -167,9 +167,13 @@ class Requirement < ApplicationRecord
 
   def validate_computed_compliance
     configuration_service = AutomatedComplianceConfigurationService.new(self)
-    return if configuration_service.valid_configuration?
+    config_validation = configuration_service.validate_configuration
 
-    errors.add(:input_options, "invalid automated compliance configuration")
+    error = config_validation[:error]
+
+    return unless error.present?
+
+    errors.add(:input_options, error)
   end
 
   def validate_step_code_package_file

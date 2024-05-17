@@ -324,6 +324,21 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+    misc:
+      user_not_authorized_error:
+        title: "Unauthorized"
+        message: "The user is not authorized to do this action"
+      not_found_error:
+        title: "Error"
+        message: 404 - The requested resource could not be found
+    jurisdiction_template_version_customization:
+      update_success:
+        title: ""
+        message: "Jurisdiction Template Customization updated!"
+      update_error:
+        title: Error
+        message: "Something went wrong updating Jurisdiction Customization"
+  services:
     auto_compliance_configuration:
       digital_seal_validator:
         label: "Digital Seal Validator - Validates the digital seal of a file"
@@ -345,20 +360,12 @@ en:
         mappable_external_option_labels:
           y: "Y"
           n: "N"
-    misc:
-      user_not_authorized_error:
-        title: "Unauthorized"
-        message: "The user is not authorized to do this action"
-      not_found_error:
-        title: "Error"
-        message: 404 - The requested resource could not be found
-    jurisdiction_template_version_customization:
-      update_success:
-        title: ""
-        message: "Jurisdiction Template Customization updated!"
-      update_error:
-        title: Error
-        message: "Something went wrong updating Jurisdiction Customization"
+      validation_errors:
+        incorrect_computed_compliance_module: "automated compliance module must be one of %{accepted_values}"
+        incompatible_input_type_for_module: "%{module_name} automated compliance module is not compatible with input type %{input_type}"
+        incorrect_value_extraction_field: "incorrect extraction field for %{module_name} automated compliance module"
+        incorrect_options_map: "incorrect options map for %{module_name} automated compliance module"
+        default_settings_not_valid: "computed compliance is not populated with default settings for %{module_name} automated compliance module"
   formio:
     requirement_template:
       completion_title: "Completion"
