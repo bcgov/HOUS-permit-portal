@@ -31,16 +31,16 @@ class AutomatedComplianceConfigurationService
       available_fields: [{ value: "full_address", label: "Full address", available_on_input_types: %w[text] }],
       available_on_input_types: %w[text number],
     },
-    # HistoricSite: {
-    #   module: "HistoricSite",
-    #   label: "Extracts info from historic site",
-    #   type: :external_options_mapper,
-    #   default_settings: {
-    #     value: "HISTORIC_SITE_IND",
-    #   },
-    #   mappable_external_options: [{ value: "Y", label: "Yes" }, { value: "N", label: "No" }],
-    #   available_on_input_types: %w[select],
-    # },
+    HistoricSite: {
+      module: "HistoricSite",
+      label: "Extracts info from historic site",
+      type: :external_options_mapper,
+      default_settings: {
+        value: "HISTORIC_SITE_IND",
+      },
+      mappable_external_options: [{ value: "Y", label: "Yes" }, { value: "N", label: "No" }],
+      available_on_input_types: %w[select],
+    },
   }
   VALUE_EXTRACTION_TYPES = %i[external_value_extractor internal_value_extractor]
 

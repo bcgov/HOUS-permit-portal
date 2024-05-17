@@ -313,5 +313,5 @@ export enum EAutoComplianceType {
   fileValidator = "file_validator",
   externalValueExtractor = "external_value_extractor",
   internalValueExtractor = "internal_value_extractor",
-  externalOptionsManager = "external_options_manager",
+  externalOptionsMapper = "external_options_mapper",
 }

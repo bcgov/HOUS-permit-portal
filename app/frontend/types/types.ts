@@ -76,6 +76,7 @@ export type TComputedCompliance = {
   value?: string
   valueOn?: string
   trigger?: string
+  optionsMap?: Record<string, string>
 }
 
 export interface IRequirementOptions {
@@ -289,6 +290,12 @@ type TAutoComplianceValueExtractorTypeConfiguration<EModule extends EAutoComplia
     >
   }
 
+type TAutoComplianceOptionsMapperTypeConfiguration<EModule extends EAutoComplianceModule> =
+  ICommonAutoComplianceModuleConfiguration<EModule> & {
+    type: EAutoComplianceType.externalOptionsMapper
+    mappableExternalOptions: Array<IOption<string>>
+  }
+
 export interface IDigitalSealValidatorModuleConfiguration
   extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
 
@@ -306,10 +313,16 @@ export type TValueExtractorAutoComplianceModuleConfiguration =
   | IParcelInfoExtractorModuleConfiguration
   | IPermitApplicationModuleConfiguration
 
+export interface IHistoricSiteModuleConfiguration
+  extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
+
+export type TOptionsMapperAutoComplianceModuleConfiguration = IHistoricSiteModuleConfiguration
+
 export type TAutoComplianceModuleConfigurations = {
   [EAutoComplianceModule.DigitalSealValidator]: IDigitalSealValidatorModuleConfiguration
   [EAutoComplianceModule.ParcelInfoExtractor]: IParcelInfoExtractorModuleConfiguration
   [EAutoComplianceModule.PermitApplication]: IPermitApplicationModuleConfiguration
+  [EAutoComplianceModule.HistoricSite]: IHistoricSiteModuleConfiguration
 }
 
 export type TAutoComplianceModuleConfiguration =

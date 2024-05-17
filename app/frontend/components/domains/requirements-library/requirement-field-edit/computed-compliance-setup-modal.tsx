@@ -18,15 +18,13 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Form } from "@formio/react"
-import { LightningA } from "@phosphor-icons/react"
+import { CaretDoubleRight, LightningA } from "@phosphor-icons/react"
 import { computed } from "mobx"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo } from "react"
 import { useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
-import { VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES } from "../../../../constants"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { useMst } from "../../../../setup/root"
 import { EAutoComplianceModule } from "../../../../types/enums"
@@ -34,10 +32,17 @@ import {
   IOption,
   TAutoComplianceModuleConfiguration,
   TComputedCompliance,
+  TOptionsMapperAutoComplianceModuleConfiguration,
   TValueExtractorAutoComplianceModuleConfiguration,
 } from "../../../../types/types"
+import {
+  isOptionsMapperModuleConfiguration,
+  isValueExtractorModuleConfiguration,
+} from "../../../../utils/utility-functions"
+import { GridHeader } from "../../../shared/grid/grid-header"
+import { SearchGrid } from "../../../shared/grid/search-grid"
+import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { IRequirementBlockForm } from "../requirements-block-modal"
-import onSubmit = Form.propTypes.onSubmit
 
 interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
@@ -48,6 +53,7 @@ interface IProps {
 interface IComputedComplianceForm {
   module: EAutoComplianceModule | null
   value?: string | null
+  optionsMap?: Record<string, string> | null
 }
 
 const MODULE_SELECT_LABEL_ID = "compliance-module-select-label"
@@ -55,9 +61,15 @@ const MODULE_SELECT_ID = "compliance-module-select-id"
 const VALUE_EXTRACTION_FIELD_SELECT_LABEL_ID = "compliance-extraction-field-select-label"
 const VALUE_EXTRACTION_FIELD_SELECT_ID = "compliance-extraction-field-select-id"
 
-function isValueExtractorModuleConfiguration(moduleConfiguration?: TAutoComplianceModuleConfiguration) {
-  return VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES.includes(moduleConfiguration?.type)
+const gridHeaderProps = {
+  borderWidth: 0,
+  borderColor: "border.light",
+  borderTop: "none",
+  borderBottom: "none",
+  px: 4,
 }
+
+const gridCellProps = {}
 
 export const ComputedComplianceSetupModal = observer(
   ({ triggerButtonProps, renderTriggerButton, requirementIndex }: IProps) => {
@@ -73,6 +85,8 @@ export const ComputedComplianceSetupModal = observer(
     const watchedComputedCompliance = watchRequirementBlockForm(
       `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`
     )
+    const watchedRequirementValueOptions =
+      watchRequirementBlockForm(`requirementsAttributes.${requirementIndex}.inputOptions.valueOptions`) ?? []
 
     const availableAutoComplianceModuleConfigurations =
       requirementBlockStore.getAvailableAutoComplianceModuleConfigurationsForRequirementType(watchedRequirementType)
@@ -88,12 +102,13 @@ export const ComputedComplianceSetupModal = observer(
 
     const watchedModule = watch("module")
     const watchedValueExtractionField = watch("value")
+    const watchedOptionsMap = watch("optionsMap")
 
     useEffect(() => {
       if (isOpen) {
         reset(formFormDefaults(watchedComputedCompliance))
       }
-    }, [watchedComputedCompliance, isOpen, autoComplianceModuleConfigurations])
+    }, [watchedComputedCompliance, isOpen, autoComplianceModuleConfigurations, watchedRequirementValueOptions])
 
     const { field: moduleField } = useController({
       name: "module",
@@ -116,7 +131,17 @@ export const ComputedComplianceSetupModal = observer(
         },
       },
     })
-    const { field: valueField } = useController({ name: "value", control })
+
+    const { field: optionsMapField } = useController({
+      name: "optionsMap",
+      control,
+      rules: {
+        required: isOptionsMapperModuleConfiguration(autoComplianceModuleConfigurations?.[watchedModule]),
+        validate: {
+          isValidMappedOptions,
+        },
+      },
+    })
 
     const moduleSelectOptions = useMemo(
       () =>
@@ -153,14 +178,43 @@ export const ComputedComplianceSetupModal = observer(
       return valueExtractionFieldOptions?.find((option) => option.value === watchedValueExtractionField) ?? null
     }, [watchedValueExtractionField, valueExtractionFieldOptions])
 
-    const onModuleChange = (option: IOption) => {
-      moduleField.onChange(option.value)
-      setValue("value", null)
-    }
+    const mappableExternalOptions = useMemo(
+      () =>
+        computed(() => {
+          const moduleConfiguration = autoComplianceModuleConfigurations?.[selectedModuleOption?.value]
 
-    const onValueExtractionFieldChange = (option: IOption) => {
-      valueExtractionField.onChange(option.value)
-    }
+          if (!moduleConfiguration || !isOptionsMapperModuleConfiguration(moduleConfiguration)) {
+            return null
+          }
+
+          return (moduleConfiguration as TOptionsMapperAutoComplianceModuleConfiguration).mappableExternalOptions.map(
+            (option) => ({ ...option })
+          )
+        }),
+      [selectedModuleOption]
+    ).get()
+
+    const optionValueToRequirementOption = useMemo(() => {
+      return watchedRequirementValueOptions.reduce((acc, currOption) => {
+        acc[currOption.value] = currOption
+        return acc
+      }, {})
+    }, [watchedRequirementValueOptions])
+
+    const optionValueToMappableExternalOption = useMemo(() => {
+      return (
+        mappableExternalOptions?.reduce((acc, currOption) => {
+          acc[currOption.value] = currOption
+          return acc
+        }, {}) ?? {}
+      )
+    }, [mappableExternalOptions])
+
+    const availableRequirementOptions = useMemo(() => {
+      return watchedRequirementValueOptions.filter(
+        (option) => !Object.values(watchedOptionsMap ?? {}).includes(option.value)
+      )
+    }, [watchedRequirementValueOptions, watchedOptionsMap])
 
     const isSetupDisabled = availableAutoComplianceModuleConfigurations.length === 0
     return (
@@ -180,7 +234,7 @@ export const ComputedComplianceSetupModal = observer(
         )}
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
-          <ModalContent maxW={"md"} fontSize={"sm"} color={"text.secondary"}>
+          <ModalContent maxW={"lg"} fontSize={"sm"} color={"text.secondary"}>
             <ModalCloseButton />
             <ModalHeader
               display={"flex"}
@@ -202,6 +256,7 @@ export const ComputedComplianceSetupModal = observer(
                   </FormLabel>
                   <Box px={4}>
                     <Select
+                      isClearable
                       inputId={MODULE_SELECT_ID}
                       aria-labelledby={MODULE_SELECT_LABEL_ID}
                       options={moduleSelectOptions}
@@ -231,9 +286,64 @@ export const ComputedComplianceSetupModal = observer(
                     </Box>
                   </FormControl>
                 )}
+                {mappableExternalOptions && (
+                  <Box as={"section"}>
+                    <Text color={"text.primary"} fontWeight={"bold"} fontSize={"md"}>
+                      Options Mapper
+                    </Text>
+                    <Box px={4}>
+                      <SearchGrid
+                        mt={2}
+                        gridRowClassName={"compliance-mapper-grid-row"}
+                        templateColumns={"1fr 55px 1fr"}
+                        sx={{
+                          "[role='columnheader'], [role='cell']": {
+                            justifyContent: "center",
+                            display: "flex",
+                          },
+                        }}
+                      >
+                        <Box display={"contents"} role={"row"} className={"compliance-mapper-grid-row"}>
+                          <GridHeader {...gridHeaderProps}>External Option</GridHeader>
+                          <GridHeader {...gridHeaderProps} />
+                          <GridHeader {...gridHeaderProps} borderRight={"none"}>
+                            Requirement Option
+                          </GridHeader>
+                        </Box>
+                        {mappableExternalOptions.map((mappableExternalOption) => {
+                          const requirementOption =
+                            optionValueToRequirementOption[watchedOptionsMap?.[mappableExternalOption.value]] ?? null
+                          return (
+                            <Box
+                              key={mappableExternalOption.value}
+                              display={"contents"}
+                              role={"row"}
+                              className={"compliance-mapper-grid-row"}
+                            >
+                              <SearchGridItem {...gridCellProps}>{mappableExternalOption.label}</SearchGridItem>
+                              <SearchGridItem {...gridCellProps}>
+                                <CaretDoubleRight />
+                              </SearchGridItem>
+                              <SearchGridItem {...gridCellProps}>
+                                <Box w={"full"}>
+                                  <Select
+                                    isClearable
+                                    menuPosition={"fixed"}
+                                    options={availableRequirementOptions}
+                                    value={requirementOption}
+                                    onChange={(option) => setOptionMapValue(mappableExternalOption.value, option)}
+                                  />
+                                </Box>
+                              </SearchGridItem>
+                            </Box>
+                          )
+                        })}
+                      </SearchGrid>
+                    </Box>
+                  </Box>
+                )}
               </Stack>
             </ModalBody>
-
             <ModalFooter justifyContent={"flex-start"}>
               <ButtonGroup>
                 <Button variant={"secondary"} onClick={onReset}>
@@ -248,6 +358,26 @@ export const ComputedComplianceSetupModal = observer(
         </Modal>
       </>
     )
+
+    function onModuleChange(option: IOption) {
+      moduleField.onChange(option?.value ?? null)
+      resetModuleDependencies()
+    }
+
+    function onValueExtractionFieldChange(option: IOption) {
+      valueExtractionField.onChange(option?.value ?? null)
+    }
+
+    function setOptionMapValue(mappableExternalOptionValue: string, requirementOption: IOption | null) {
+      const clonedOptionsMap = { ...(watchedOptionsMap ?? {}) }
+      if (requirementOption) {
+        clonedOptionsMap[mappableExternalOptionValue] = requirementOption.value
+      } else {
+        delete clonedOptionsMap[mappableExternalOptionValue]
+      }
+
+      optionsMapField.onChange(clonedOptionsMap)
+    }
 
     function isValidValueExtractionField(value) {
       // value should be only present for value extractor types
@@ -280,6 +410,36 @@ export const ComputedComplianceSetupModal = observer(
       return isSelectedFieldValid
     }
 
+    function isValidMappedOptions(mappedOptions: IComputedComplianceForm["optionsMap"]) {
+      if (!mappedOptions && !isOptionsMapperModuleConfiguration(autoComplianceModuleConfigurations?.[watchedModule])) {
+        return true
+      }
+
+      if (!(watchedModule in autoComplianceModuleConfigurations)) {
+        return false
+      }
+
+      const moduleConfiguration = autoComplianceModuleConfigurations[
+        watchedModule
+      ] as TOptionsMapperAutoComplianceModuleConfiguration
+
+      if (
+        !isOptionsMapperModuleConfiguration(moduleConfiguration) ||
+        !moduleConfiguration.availableOnInputTypes.includes(watchedRequirementType)
+      ) {
+        return false
+      }
+
+      const validMappedOption =
+        Object.entries(mappedOptions ?? {}).every(
+          ([mappableExternalOptionValue, requirementOptionValue]) =>
+            !!optionValueToRequirementOption[requirementOptionValue] &&
+            !!optionValueToMappableExternalOption[mappableExternalOptionValue]
+        ) && Object.keys(mappedOptions ?? {}).length > 0
+
+      return validMappedOption
+    }
+
     function onReset() {
       reset(formFormDefaults())
     }
@@ -304,6 +464,10 @@ export const ComputedComplianceSetupModal = observer(
         computedCompliance.value = form.value
       }
 
+      if (isOptionsMapperModuleConfiguration(moduleConfiguration)) {
+        computedCompliance.optionsMap = { ...(form.optionsMap ?? {}) }
+      }
+
       setRequirementBlockFormValue(
         `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`,
         computedCompliance
@@ -313,16 +477,43 @@ export const ComputedComplianceSetupModal = observer(
     }
 
     function formFormDefaults(computedCompliance?: TComputedCompliance): IComputedComplianceForm {
-      const defaults = {
+      const defaults: TComputedCompliance = {
         module: computedCompliance?.module ?? null,
         value: null,
+        optionsMap: null,
       }
 
-      if (isValueExtractorModuleConfiguration(autoComplianceModuleConfigurations?.[computedCompliance?.module])) {
+      const autoComplianceModuleConfiguration = autoComplianceModuleConfigurations?.[computedCompliance?.module]
+
+      if (isValueExtractorModuleConfiguration(autoComplianceModuleConfiguration)) {
         defaults.value = computedCompliance?.value
       }
 
+      if (isOptionsMapperModuleConfiguration(autoComplianceModuleConfiguration)) {
+        defaults.optionsMap = computedCompliance?.optionsMap
+
+        // This for backwards compatibility with old data, as the initial implementation did not have optionsMap
+        // and assumed that the requirement will have a yes or no option
+        const requiresBackwardCompatability =
+          !defaults.optionsMap &&
+          autoComplianceModuleConfiguration?.type === EAutoComplianceModule.HistoricSite &&
+          !!optionValueToRequirementOption["yes"] &&
+          !!optionValueToRequirementOption["no"]
+
+        if (requiresBackwardCompatability) {
+          defaults.optionsMap = {
+            Y: "yes",
+            N: "no",
+          }
+        }
+      }
+
       return defaults
+    }
+
+    function resetModuleDependencies() {
+      setValue("value", null)
+      setValue("optionsMap", null)
     }
   }
 )

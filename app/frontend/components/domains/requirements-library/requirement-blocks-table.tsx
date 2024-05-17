@@ -21,6 +21,8 @@ interface IProps extends Partial<StackProps> {
   renderActionButton?: (props: ButtonProps & { requirementBlock: IRequirementBlock }) => JSX.Element
 }
 
+const ROW_CLASS_NAME = "requirements-library-grid-row"
+
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
   ...containerProps
@@ -40,7 +42,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   useSearch(requirementBlockStore as ISearch)
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
-      <SearchGrid templateColumns="repeat(4, 1fr) max(230px) 80px" pos={"relative"}>
+      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(4, 1fr) max(230px) 80px" pos={"relative"}>
         <GridHeaders />
 
         {isSearching ? (
@@ -50,12 +52,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
         ) : (
           tableRequirementBlocks.map((requirementBlock) => {
             return (
-              <Box
-                key={requirementBlock.id}
-                className={"requirements-library-grid-row"}
-                role={"row"}
-                display={"contents"}
-              >
+              <Box key={requirementBlock.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
                 <SearchGridItem fontWeight={700} minW="250px">
                   {requirementBlock.name}
                 </SearchGridItem>

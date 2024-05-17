@@ -14,6 +14,7 @@ import {
 import { resetForm } from "@formio/react"
 import { autorun } from "mobx"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -22,7 +23,8 @@ import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
-import { IDenormalizedRequirementBlock } from "../../../../types/types"
+import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
+import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
 import { FieldsSetup } from "./fields-setup"
@@ -47,7 +49,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  useAutoComplianceModuleConfigurations()
+  const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
@@ -108,7 +110,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         }
       }
 
-      return returnValue
+      return cleanOptionsMapperComplianceConfiguration(returnValue, autoComplianceModuleConfigurations)
     })
 
     if (requirementBlock) {
@@ -206,3 +208,45 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     </>
   )
 })
+
+function cleanOptionsMapperComplianceConfiguration(
+  requirementAttributes: IRequirementAttributes,
+  autoComplianceModuleConfigurations: TAutoComplianceModuleConfigurations
+) {
+  const clonesAttributes = R.clone(requirementAttributes) as IRequirementAttributes
+
+  const moduleName = clonesAttributes.inputOptions?.computedCompliance?.module
+
+  if (!moduleName) {
+    return clonesAttributes
+  }
+
+  const moduleConfig = autoComplianceModuleConfigurations?.[moduleName]
+
+  if (!isOptionsMapperModuleConfiguration(moduleConfig)) {
+    return clonesAttributes
+  }
+
+  const valueOptions = clonesAttributes.inputOptions?.valueOptions ?? []
+
+  if (valueOptions.length === 0) {
+    // remove the computed compliance if there are no value options (could happen if options were removed after mapping)
+    delete clonesAttributes.inputOptions.computedCompliance
+
+    return clonesAttributes
+  }
+
+  const optionsMapping = clonesAttributes.inputOptions.computedCompliance?.optionsMap ?? {}
+
+  Object.entries(optionsMapping).forEach(([key, value]) => {
+    if (!valueOptions.find((option) => option.value === value)) {
+      delete optionsMapping[key]
+    }
+  })
+
+  if (Object.keys(optionsMapping).length === 0) {
+    delete clonesAttributes.inputOptions.computedCompliance
+  }
+
+  return clonesAttributes
+}

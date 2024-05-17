@@ -173,3 +173,5 @@ export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
   EAutoComplianceType.internalValueExtractor,
   EAutoComplianceType.externalValueExtractor,
 ]
+
+export const OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES = [EAutoComplianceType.externalOptionsMapper]
