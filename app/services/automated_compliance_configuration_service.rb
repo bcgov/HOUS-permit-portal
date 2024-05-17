@@ -4,7 +4,7 @@ class AutomatedComplianceConfigurationService
   AVAILABLE_MODULE_CONFIGURATIONS = {
     DigitalSealValidator: {
       module: "DigitalSealValidator",
-      label: "Digital Seal Validator - Validates the digital seal of a file",
+      label: I18n.t("arbitrary_message_construct.auto_compliance_configuration.digital_seal_validator.label"),
       default_settings: {
         "trigger" => "on_save",
         "value_on" => "compliance_data",
@@ -14,31 +14,99 @@ class AutomatedComplianceConfigurationService
     },
     ParcelInfoExtractor: {
       module: "ParcelInfoExtractor",
-      label: "Parcel Info Extractor - Extracts info from parcel information",
+      label: I18n.t("arbitrary_message_construct.auto_compliance_configuration.parcel_info_extractor.label"),
       type: :external_value_extractor,
       available_fields: [
-        { value: "FEATURE_AREA_SQM", label: "Feature area (sqm)", available_on_input_types: %w[text number] },
-        { value: "PID", label: "PID", available_on_input_types: %w[text] },
-        { value: "PIN", label: "PIN", available_on_input_types: %w[text] },
-        { value: "PLAN_NUMBER", label: "Plan number", available_on_input_types: %w[text] },
+        {
+          value: "FEATURE_AREA_SQM",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.parcel_info_extractor.available_field_labels.feature_area",
+            ),
+          available_on_input_types: %w[text number],
+        },
+        {
+          value: "PID",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pid",
+            ),
+          available_on_input_types: %w[text],
+        },
+        {
+          value: "PIN",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pin",
+            ),
+          available_on_input_types: %w[text],
+        },
+        {
+          value: "PLAN_NUMBER",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.parcel_info_extractor.available_field_labels.plan_number",
+            ),
+          available_on_input_types: %w[text number],
+        },
       ],
-      available_on_input_types: %w[text number],
+      available_on_input_types: %w[text],
     },
     PermitApplication: {
       module: "PermitApplication",
-      label: "Permit Application - Extracts info from permit application",
+      label: I18n.t("arbitrary_message_construct.auto_compliance_configuration.permit_application.label"),
       type: :internal_value_extractor,
-      available_fields: [{ value: "full_address", label: "Full address", available_on_input_types: %w[text] }],
-      available_on_input_types: %w[text number],
+      available_fields: [
+        {
+          value: "full_address",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.permit_application.available_field_labels.full_address",
+            ),
+          available_on_input_types: %w[text],
+        },
+        {
+          value: "pid",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.permit_application.available_field_labels.pid",
+            ),
+          available_on_input_types: %w[text],
+        },
+        {
+          value: "pin",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.permit_application.available_field_labels.pin",
+            ),
+          available_on_input_types: %w[text],
+        },
+      ],
+      available_on_input_types: %w[text],
     },
     HistoricSite: {
       module: "HistoricSite",
-      label: "Extracts info from historic site",
+      label: I18n.t("arbitrary_message_construct.auto_compliance_configuration.historic_site.label"),
       type: :external_options_mapper,
       default_settings: {
         value: "HISTORIC_SITE_IND",
       },
-      mappable_external_options: [{ value: "Y", label: "Yes" }, { value: "N", label: "No" }],
+      mappable_external_options: [
+        {
+          value: "Y",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.historic_site.mappable_external_option_labels.y",
+            ),
+        },
+        {
+          value: "N",
+          label:
+            I18n.t(
+              "arbitrary_message_construct.auto_compliance_configuration.historic_site.mappable_external_option_labels.n",
+            ),
+        },
+      ],
       available_on_input_types: %w[select],
     },
   }

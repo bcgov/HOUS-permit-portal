@@ -324,6 +324,27 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
+    auto_compliance_configuration:
+      digital_seal_validator:
+        label: "Digital Seal Validator - Validates the digital seal of a file"
+      parcel_info_extractor:
+        label: "Parcel Info Extractor - Extracts info from parcel information: PID, PIN, etc"
+        available_field_labels:
+          feature_area: "Feature area (sqm)"
+          pid: "PID"
+          pin: "PIN"
+          plan_number: "Plan number"
+      permit_application:
+        label: "Permit Application - Extracts info from permit application: address, PID, PIN, etc"
+        available_field_labels:
+          full_address: "Full address"
+          pid: "PID"
+          pin: "PIN"
+      historic_site:
+        label: "Historic Site - Extracts info from historic site"
+        mappable_external_option_labels:
+          y: "Y"
+          n: "N"
     misc:
       user_not_authorized_error:
         title: "Unauthorized"
