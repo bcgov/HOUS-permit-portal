@@ -8,6 +8,7 @@ import {
   EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
+  EJurisdictionTypes,
   ENumberUnit,
   ERequirementType,
   ESZeroCarbonStep,
@@ -327,3 +328,8 @@ export type TAutoComplianceModuleConfigurations = {
 
 export type TAutoComplianceModuleConfiguration =
   TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
+export interface IJurisdictionFilters {
+  name?: string
+  type?: EJurisdictionTypes
+  userId?: string
+}

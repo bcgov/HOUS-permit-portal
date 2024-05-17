@@ -6,8 +6,8 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
-import { EJurisdictionSortFields, EJurisdictionTypes } from "../types/enums"
-import { ISort } from "../types/types"
+import { EJurisdictionSortFields } from "../types/enums"
+import { IJurisdictionFilters, ISort } from "../types/types"
 import { isUUID, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
@@ -102,9 +102,9 @@ export const JurisdictionStoreModel = types
       const { ok, data: response } = yield self.environment.api.fetchLocalityTypeOptions()
       return response.data
     }),
-    fetchJurisdictionOptions: flow(function* (name: string, jurisdictionType: EJurisdictionTypes = null) {
+    fetchJurisdictionOptions: flow(function* (filters: IJurisdictionFilters) {
       // Jurisdiction not found in the map, fetch from API
-      const { ok, data: response } = yield self.environment.api.fetchJurisdictionOptions(name, jurisdictionType)
+      const { ok, data: response } = yield self.environment.api.fetchJurisdictionOptions(filters)
       return response.data
     }),
     setCurrentJurisdiction(jurisdictionId) {

@@ -297,6 +297,7 @@ const options = {
           applicationsReceived: "Applications received",
           templatesUsed: "Templates used",
           search: "Search jurisdictions",
+          view: "View Jurisdiction",
         },
         permitApplication: {
           referenceNumber: "Reference #",

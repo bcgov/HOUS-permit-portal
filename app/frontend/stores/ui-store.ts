@@ -7,10 +7,14 @@ export const UIStoreModel = types
   .model("UIStoreModel")
   .props({
     flashMessage: types.optional(FlashMessageModel, {}),
+    currentlySelectedJurisdictionId: types.maybeNull(types.string),
   })
   .extend(withRootStore())
   .views((self) => ({}))
   .actions((self) => ({
+    setCurrentlySelectedJurisdictionId(id: string) {
+      self.currentlySelectedJurisdictionId = id
+    },
     afterCreate() {
       // check if there are any messages to show in the URL params
       const query = queryString.parse(location.search)

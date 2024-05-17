@@ -6,6 +6,7 @@ import {
   FormLabel,
   Heading,
   Input,
+  InputGroup,
   Link,
   ListItem,
   Text,
@@ -182,7 +183,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
 })
 
 export const PinModeInputs = () => {
-  const { register, control } = useFormContext()
+  const { register, control, setValue } = useFormContext()
   const { jurisdictionStore } = useMst()
   const { addJurisdiction } = jurisdictionStore
   const { t } = useTranslation()
@@ -201,15 +202,20 @@ export const PinModeInputs = () => {
           control={control}
           render={({ field: { onChange, value } }) => {
             return (
-              <JurisdictionSelect
-                onChange={(value) => {
-                  addJurisdiction(value)
-                  onChange(value)
-                }}
-                placeholder={undefined}
-                selectedOption={{ label: value?.reverseQualifiedName, value }}
-                menuPortalTarget={document.body}
-              />
+              <FormControl w="full" zIndex={1}>
+                <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
+                <InputGroup w="full">
+                  <JurisdictionSelect
+                    onChange={(value) => {
+                      addJurisdiction(value)
+                      onChange(value)
+                    }}
+                    onFetch={() => setValue("jurisdiction", null)}
+                    selectedOption={{ label: value?.reverseQualifiedName, value }}
+                    menuPortalTarget={document.body}
+                  />
+                </InputGroup>
+              </FormControl>
             )
           }}
         />

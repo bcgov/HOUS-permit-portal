@@ -1,46 +1,43 @@
-import { FormControl, FormLabel, HStack, InputGroup, Text } from "@chakra-ui/react"
+import { HStack, Text } from "@chakra-ui/react"
 import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useCallback } from "react"
-import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, StylesConfig, components } from "react-select"
 import { IJurisdiction } from "../../../../models/jurisdiction"
 import { useMst } from "../../../../setup/root"
-import { EJurisdictionTypes } from "../../../../types/enums"
-import { IOption } from "../../../../types/types"
+import { IJurisdictionFilters, IOption } from "../../../../types/types"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TJurisdictionSelectProps = {
   onChange: (option: IOption<IJurisdiction>) => void
+  onFetch?: () => void
   selectedOption: IOption<IJurisdiction>
   title?: string
-  jurisdictionName?: string
-  jurisdictionType?: EJurisdictionTypes
+  filters?: IJurisdictionFilters
 } & Partial<TAsyncSelectProps>
-
-// Please be advised that this is expected to be used within a form context!
 
 export const JurisdictionSelect = observer(function ({
   onChange,
+  onFetch,
   selectedOption,
   stylesToMerge,
   title,
-  jurisdictionName = "jurisdiction",
-  jurisdictionType = null,
+  components = {},
+  filters = {},
   ...rest
 }: TJurisdictionSelectProps) {
   const { jurisdictionStore } = useMst()
   const { fetchJurisdictionOptions: fetchOptions } = jurisdictionStore
 
-  const { setValue } = useFormContext()
   const { t } = useTranslation()
 
   const fetchJurisdictionOptions = (name: string, callback: (options) => void) => {
-    if (name.length > 3) {
-      fetchOptions(name, jurisdictionType).then((options: IOption<IJurisdiction>[]) => {
-        setValue(jurisdictionName, null)
+    if (name.length > 3 || !R.isEmpty(filters)) {
+      fetchOptions(!R.isEmpty(name) ? { name, ...filters } : filters).then((options: IOption<IJurisdiction>[]) => {
+        onFetch && onFetch()
         callback(options)
       })
     } else callback([])
@@ -53,6 +50,7 @@ export const JurisdictionSelect = observer(function ({
       ...provided,
       padding: 0,
       width: "100%", // This will make the container have a width of 100%
+      ...(stylesToMerge?.container ?? {}),
     }),
     control: (provided) => ({
       ...provided,
@@ -60,45 +58,47 @@ export const JurisdictionSelect = observer(function ({
       paddingInline: "0.75rem",
       height: "40px",
       width: "100%", // Ensure the control also takes up 100% width
+      ...(stylesToMerge?.control ?? {}),
     }),
     menu: (provided) => ({
       ...provided,
       width: "100%", // Ensure the menu matches the width of the control/container
       background: "var(--chakra-colors-greys-grey10)",
+      ...(stylesToMerge?.menu ?? {}),
     }),
     input: (provided) => ({
       ...provided,
       display: "flex",
+      ...(stylesToMerge?.input ?? {}),
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      ...(stylesToMerge?.valueContainer ?? {}),
     }),
     // Add other custom styles as needed
   }
 
   return (
-    <FormControl w="full" zIndex={1}>
-      <FormLabel>{title ?? t("jurisdiction.index.title")}</FormLabel>
-      <InputGroup w="full">
-        <AsyncSelect<IOption<IJurisdiction>, boolean>
-          isClearable={true}
-          onChange={(option: IOption<IJurisdiction>) => {
-            onChange(option?.value)
-          }}
-          value={selectedOption}
-          defaultValue={selectedOption}
-          components={{
-            Control,
-            Option,
-            Input,
-          }}
-          styles={customStyles}
-          defaultOptions
-          loadOptions={debouncedFetchOptions}
-          closeMenuOnSelect={true}
-          isCreatable={false}
-          {...rest}
-          placeholder={t("ui.typeToSearch")}
-        />
-      </InputGroup>
-    </FormControl>
+    <AsyncSelect<IOption<IJurisdiction>, boolean>
+      onChange={(option: IOption<IJurisdiction>) => {
+        onChange(option?.value)
+      }}
+      value={selectedOption}
+      defaultValue={selectedOption}
+      components={{
+        Control,
+        Option,
+        Input,
+        ...components,
+      }}
+      styles={customStyles}
+      loadOptions={debouncedFetchOptions}
+      isCreatable={false}
+      isClearable
+      defaultOptions
+      placeholder={t("ui.typeToSearch")}
+      {...rest}
+    />
   )
 })
 
@@ -116,16 +116,15 @@ const Option = (props: OptionProps<IOption<IJurisdiction>>) => {
 const Control = ({ children, ...props }: ControlProps<IOption<IJurisdiction>>) => {
   return (
     <components.Control {...props}>
-      <MapPin size={"16.7px"} />
+      <MapPin color={"text.secondary"} size={"16.7px"} />
       {children}
     </components.Control>
   )
 }
 
 const Input = ({ children, style, ...props }: InputProps) => {
-  const { t } = useTranslation()
   return (
-    <components.Input {...props} aria-label="type here to search jurisdictions" placeholder={t("ui.typeToSearch")}>
+    <components.Input {...props} aria-label="type here to search jurisdictions">
       {children}
     </components.Input>
   )
