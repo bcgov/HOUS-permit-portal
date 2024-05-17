@@ -86,8 +86,13 @@ export const ComputedComplianceSetupModal = observer(
     const watchedComputedCompliance = watchRequirementBlockForm(
       `requirementsAttributes.${requirementIndex}.inputOptions.computedCompliance`
     )
-    const watchedRequirementValueOptions =
-      watchRequirementBlockForm(`requirementsAttributes.${requirementIndex}.inputOptions.valueOptions`) ?? []
+
+    // have to use useMemo to prevent infinite loop as the default [] is a new reference every time
+    // and will cause use effect to run every time
+    const watchedRequirementValueOptions = useMemo(
+      () => watchRequirementBlockForm(`requirementsAttributes.${requirementIndex}.inputOptions.valueOptions`) ?? [],
+      [watchRequirementBlockForm(`requirementsAttributes.${requirementIndex}.inputOptions.valueOptions`)]
+    )
 
     const availableAutoComplianceModuleConfigurations =
       requirementBlockStore.getAvailableAutoComplianceModuleConfigurationsForRequirementType(watchedRequirementType)
