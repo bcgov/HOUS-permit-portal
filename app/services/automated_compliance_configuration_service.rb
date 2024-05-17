@@ -37,10 +37,10 @@ class AutomatedComplianceConfigurationService
           value: "PLAN_NUMBER",
           label:
             I18n.t("services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.plan_number"),
-          available_on_input_types: %w[text number],
+          available_on_input_types: %w[text],
         },
       ],
-      available_on_input_types: %w[text],
+      available_on_input_types: %w[text number],
     },
     PermitApplication: {
       module: "PermitApplication",
@@ -71,7 +71,7 @@ class AutomatedComplianceConfigurationService
       label: I18n.t("services.auto_compliance_configuration.historic_site.label"),
       type: :external_options_mapper,
       default_settings: {
-        value: "HISTORIC_SITE_IND",
+        "value" => "HISTORIC_SITE_IND",
       },
       mappable_external_options: [
         {
@@ -222,7 +222,7 @@ class AutomatedComplianceConfigurationService
     is_valid_options_map =
       options_map.all? do |external_option_value, requirement_option_value|
         external_option_valid = mappable_external_options.any? { |option| option[:value] == external_option_value }
-        requirement_option_valid = value_options.any? { |option| option[:value] == requirement_option_value }
+        requirement_option_valid = value_options.any? { |option| option["value"] == requirement_option_value }
 
         external_option_valid && requirement_option_valid
       end

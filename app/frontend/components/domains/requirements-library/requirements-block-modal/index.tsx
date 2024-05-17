@@ -24,6 +24,7 @@ import { useMst } from "../../../../setup/root"
 import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
+import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { BlockSetup } from "./block-setup"
@@ -247,6 +248,17 @@ function getPrunedOptionsMapperComplianceConfiguration(
   if (Object.keys(optionsMap).length === 0) {
     delete clonesAttributes.inputOptions.computedCompliance
   }
+
+  // this needs to be done to prevent decamelizing the computed compliance options map keys
+  // as conversion results in unexpected behaviour
+  // for example value Y is converted to y, when we don't want to change the key
+  clonesAttributes.inputOptions.computedCompliance.optionsMap = Object.entries(optionsMap).reduce(
+    (acc, [key, value]) => {
+      acc[`${AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX}${key}`] = value
+      return acc
+    },
+    {}
+  )
 
   return clonesAttributes
 }

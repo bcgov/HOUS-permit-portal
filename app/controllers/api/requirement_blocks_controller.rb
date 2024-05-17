@@ -104,7 +104,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
           value_options: [%i[value label]],
           conditional: {
           },
-          computed_compliance: %i[value module],
+          computed_compliance: [:value, :module, options_map: {}],
         ],
       ],
     )

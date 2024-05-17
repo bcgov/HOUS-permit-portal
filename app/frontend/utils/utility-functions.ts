@@ -154,3 +154,7 @@ export function isValueExtractorModuleConfiguration(moduleConfiguration?: TAutoC
 export function isOptionsMapperModuleConfiguration(moduleConfiguration?: TAutoComplianceModuleConfiguration) {
   return OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES.includes(moduleConfiguration?.type)
 }
+
+export function removePrefix(str: string, prefix: string) {
+  return str.startsWith(prefix) ? str.slice(prefix.length) : str
+}
