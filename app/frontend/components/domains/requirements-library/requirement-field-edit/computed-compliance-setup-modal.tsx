@@ -108,6 +108,10 @@ export const ComputedComplianceSetupModal = observer(
     const watchedModule = watch("module")
     const watchedValueExtractionField = watch("value")
     const watchedOptionsMap = watch("optionsMap")
+    const selectedModuleConfig = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+      watchedModule,
+      watchedRequirementType
+    )
 
     useEffect(() => {
       if (isOpen) {
@@ -121,8 +125,11 @@ export const ComputedComplianceSetupModal = observer(
       rules: {
         validate: {
           isSupportedModule: (module) =>
-            module in (autoComplianceModuleConfigurations ?? {}) &&
-            autoComplianceModuleConfigurations[module].availableOnInputTypes.includes(watchedRequirementType),
+            !module ||
+            !!requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+              module,
+              watchedRequirementType
+            ),
         },
       },
     })
@@ -130,7 +137,7 @@ export const ComputedComplianceSetupModal = observer(
       name: "value",
       control,
       rules: {
-        required: isValueExtractorModuleConfiguration(autoComplianceModuleConfigurations?.[watchedModule]),
+        required: isValueExtractorModuleConfiguration(selectedModuleConfig),
         validate: {
           isValidField: isValidValueExtractionField,
         },
@@ -141,7 +148,7 @@ export const ComputedComplianceSetupModal = observer(
       name: "optionsMap",
       control,
       rules: {
-        required: isOptionsMapperModuleConfiguration(autoComplianceModuleConfigurations?.[watchedModule]),
+        required: isOptionsMapperModuleConfiguration(selectedModuleConfig),
         validate: {
           isValidMappedOptions,
         },
@@ -166,7 +173,10 @@ export const ComputedComplianceSetupModal = observer(
     const valueExtractionFieldOptions = useMemo(
       () =>
         computed(() => {
-          const moduleConfiguration = autoComplianceModuleConfigurations?.[selectedModuleOption?.value]
+          const moduleConfiguration = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+            selectedModuleOption?.value,
+            watchedRequirementType
+          )
 
           if (!moduleConfiguration || !isValueExtractorModuleConfiguration(moduleConfiguration)) {
             return null
@@ -186,7 +196,10 @@ export const ComputedComplianceSetupModal = observer(
     const mappableExternalOptions = useMemo(
       () =>
         computed(() => {
-          const moduleConfiguration = autoComplianceModuleConfigurations?.[selectedModuleOption?.value]
+          const moduleConfiguration = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+            selectedModuleOption?.value,
+            watchedRequirementType
+          )
 
           if (!moduleConfiguration || !isOptionsMapperModuleConfiguration(moduleConfiguration)) {
             return null
@@ -229,7 +242,7 @@ export const ComputedComplianceSetupModal = observer(
         const prunedOptionsMap = getPrunedOptionsMapBasedOnValueOptions(
           watchedOptionsMap,
           watchedRequirementValueOptions,
-          autoComplianceModuleConfigurations?.[watchedModule]
+          selectedModuleConfig
         )
 
         optionsMapField.onChange(prunedOptionsMap)
@@ -269,7 +282,7 @@ export const ComputedComplianceSetupModal = observer(
             </ModalHeader>
             <ModalBody py={4}>
               <Stack direction="column" spacing={6}>
-                <FormControl isRequired>
+                <FormControl>
                   <FormLabel id={MODULE_SELECT_LABEL_ID} htmlFor={MODULE_SELECT_ID} fontWeight="bold" size="lg">
                     {t("requirementsLibrary.modals.computedComplianceSetup.module")}
                   </FormLabel>
@@ -401,7 +414,7 @@ export const ComputedComplianceSetupModal = observer(
     function isValidValueExtractionField(value) {
       // value should be only present for value extractor types
       // so it's valid if it's not present
-      if (!value?.trim() && !isValueExtractorModuleConfiguration(autoComplianceModuleConfigurations?.[watchedModule])) {
+      if (!value?.trim() && !isValueExtractorModuleConfiguration(selectedModuleConfig)) {
         return true
       }
 
@@ -420,7 +433,7 @@ export const ComputedComplianceSetupModal = observer(
         return false
       }
 
-      const isSelectedFieldValid = (
+      const isSelectedFieldValid = !!(
         moduleConfiguration as TValueExtractorAutoComplianceModuleConfiguration
       ).availableFields.find(
         (field) => field.value === value && field.availableOnInputTypes.includes(watchedRequirementType)
@@ -430,7 +443,7 @@ export const ComputedComplianceSetupModal = observer(
     }
 
     function isValidMappedOptions(mappedOptions: IComputedComplianceForm["optionsMap"]) {
-      if (!mappedOptions && !isOptionsMapperModuleConfiguration(autoComplianceModuleConfigurations?.[watchedModule])) {
+      if (!mappedOptions && !isOptionsMapperModuleConfiguration(selectedModuleConfig)) {
         return true
       }
 
@@ -438,9 +451,7 @@ export const ComputedComplianceSetupModal = observer(
         return false
       }
 
-      const moduleConfiguration = autoComplianceModuleConfigurations[
-        watchedModule
-      ] as TOptionsMapperAutoComplianceModuleConfiguration
+      const moduleConfiguration = selectedModuleConfig as TOptionsMapperAutoComplianceModuleConfiguration
 
       if (
         !isOptionsMapperModuleConfiguration(moduleConfiguration) ||
@@ -464,7 +475,10 @@ export const ComputedComplianceSetupModal = observer(
     }
 
     function onDone(form: IComputedComplianceForm) {
-      const moduleConfiguration = autoComplianceModuleConfigurations?.[form.module]
+      const moduleConfiguration = requirementBlockStore.getAutoComplianceModuleConfigurationForRequirementType(
+        form.module,
+        watchedRequirementType
+      )
 
       if (!moduleConfiguration) {
         setRequirementBlockFormValue(
@@ -515,7 +529,7 @@ export const ComputedComplianceSetupModal = observer(
         // and assumed that the requirement will have a yes or no option
         const requiresBackwardCompatability =
           !defaults.optionsMap &&
-          autoComplianceModuleConfiguration?.type === EAutoComplianceModule.HistoricSite &&
+          autoComplianceModuleConfiguration?.module === EAutoComplianceModule.HistoricSite &&
           !!optionValueToRequirementOption["yes"] &&
           !!optionValueToRequirementOption["no"]
 

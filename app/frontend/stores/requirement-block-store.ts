@@ -6,12 +6,19 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
-import { EAutoComplianceType, ERequirementLibrarySortFields, ERequirementType, ETagType } from "../types/enums"
+import {
+  EAutoComplianceModule,
+  EAutoComplianceType,
+  ERequirementLibrarySortFields,
+  ERequirementType,
+  ETagType,
+} from "../types/enums"
 import {
   TAutoComplianceModuleConfiguration,
   TAutoComplianceModuleConfigurations,
   TValueExtractorAutoComplianceModuleConfiguration,
 } from "../types/types"
+import { isValueExtractorModuleConfiguration } from "../utils/utility-functions"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -50,6 +57,27 @@ export const RequirementBlockStoreModel = types
     },
   }))
   .views((self) => ({
+    getAutoComplianceModuleConfigurationForRequirementType(
+      moduleName: EAutoComplianceModule,
+      requirementType: ERequirementType
+    ) {
+      const moduleConfig = self.autoComplianceModuleConfigurations?.[moduleName]
+
+      if (!moduleConfig || !moduleConfig.availableOnInputTypes.includes(requirementType)) {
+        return null
+      }
+
+      if (!isValueExtractorModuleConfiguration(moduleConfig)) {
+        return moduleConfig
+      }
+
+      return {
+        ...moduleConfig,
+        availableFields: (moduleConfig as TValueExtractorAutoComplianceModuleConfiguration).availableFields.filter(
+          (field) => field.availableOnInputTypes.includes(requirementType)
+        ),
+      }
+    },
     getAvailableAutoComplianceModuleConfigurationsForRequirementType(requirementType: ERequirementType) {
       return self.autoComplianceModuleConfigurationsList
         .filter((option) => option.availableOnInputTypes.includes(requirementType))
