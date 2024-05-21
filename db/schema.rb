@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_21_213238) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -62,6 +62,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
   end
 
   create_table "end_user_license_agreements",
@@ -573,6 +579,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
     t.uuid "requirement_template_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "deprecation_reason"
+    t.uuid "deprecated_by_id"
+    t.index ["deprecated_by_id"],
+            name: "index_template_versions_on_deprecated_by_id"
     t.index ["requirement_template_id"],
             name: "index_template_versions_on_requirement_template_id"
   end
@@ -711,6 +721,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
   add_foreign_key "template_versions", "requirement_templates"
+  add_foreign_key "template_versions", "users", column: "deprecated_by_id"
   add_foreign_key "user_license_agreements",
                   "end_user_license_agreements",
                   column: "agreement_id"

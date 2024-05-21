@@ -138,6 +138,9 @@ GEM
     connection_pool (2.4.1)
     content_disposition (1.0.0)
     crass (1.0.6)
+    data_migrate (9.4.0)
+      activerecord (>= 6.1)
+      railties (>= 6.1)
     date (3.3.4)
     debug (1.9.0)
       irb (~> 1.10)
@@ -564,6 +567,7 @@ DEPENDENCIES
   blueprinter (~> 1.0.2)
   bootsnap
   bullet (~> 7.1.6)
+  data_migrate (~> 9.4)
   debug
   devise (= 4.9.3)
   devise-jwt (= 0.8.1)

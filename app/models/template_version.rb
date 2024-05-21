@@ -1,6 +1,8 @@
 class TemplateVersion < ApplicationRecord
   include TraverseDataJson
   belongs_to :requirement_template
+  belongs_to :deprecated_by, class_name: "User", optional: true
+
   has_many :jurisdiction_template_version_customizations
   has_many :permit_applications
 
@@ -8,6 +10,12 @@ class TemplateVersion < ApplicationRecord
   delegate :activity, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
+  enum deprecation_reason: { new_publish: 0, unscheduled: 1 }, _prefix: true
+
+  validates :deprecation_reason, presence: true, if: :deprecated?
+  validates :deprecated_by, presence: true, if: :deprecation_reason_unscheduled?
+
+  before_validation :set_default_deprecation_reason
 
   after_save :reindex_requirement_template_if_published, if: :status_changed?
 
@@ -36,6 +44,12 @@ class TemplateVersion < ApplicationRecord
   end
 
   private
+
+  def set_default_deprecation_reason
+    return unless deprecated? && deprecation_reason.nil?
+
+    self.deprecation_reason = "new_publish"
+  end
 
   def reindex_requirement_template_if_published
     reindex_requirement_template if published?
