@@ -78,6 +78,10 @@ class PermitApplication < ApplicationRecord
     "#{permit_type.name} - #{activity.name}"
   end
 
+  def using_current_template_version
+    self.template_version === current_published_template_version
+  end
+
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
     RequirementTemplate.published_requirement_template_version(activity, permit_type)

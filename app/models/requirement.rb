@@ -47,8 +47,6 @@ class Requirement < ApplicationRecord
               message: "should be unique within the same requirement block",
             }
 
-  delegate :scroll_class, to: :requirement_block
-
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]

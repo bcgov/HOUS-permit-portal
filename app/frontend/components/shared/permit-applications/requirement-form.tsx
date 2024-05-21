@@ -333,15 +333,16 @@ export const RequirementForm = observer(
           }}
         >
           <ErrorsBox data={errorBoxData} />
-          {(!usesPublishedTemplateVersion || permitApplication.showCompareAfter) && diff ? (
-            <CompareRequirementsBox
-              data={infoBoxData}
-              handleUpdatePermitApplicationVersion={handleUpdatePermitApplicationVersion}
-              showCompareAfter={permitApplication.showCompareAfter}
-            />
-          ) : (
-            <SharedSpinner position="fixed" right={24} top="50vh" />
-          )}
+          {(!usesPublishedTemplateVersion || permitApplication.showCompareAfter) &&
+            (diff ? (
+              <CompareRequirementsBox
+                data={infoBoxData}
+                handleUpdatePermitApplicationVersion={handleUpdatePermitApplicationVersion}
+                showCompareAfter={permitApplication.showCompareAfter}
+              />
+            ) : (
+              <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
+            ))}
 
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
