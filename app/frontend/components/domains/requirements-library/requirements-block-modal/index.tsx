@@ -85,7 +85,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       const { conditional, ...restOfInputOptions } = ra?.inputOptions
 
-      const returnValue = {
+      const processedRequirementAttributes = {
         ...ra,
         inputOptions: {
           ...restOfInputOptions,
@@ -101,17 +101,20 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       // energy step code dependency conditionals is not possible to edit from the front-end and has default values
       // and follows a slightly different structure so we make sure not to remove them or alter them
       if (isEnergyStepCodeDependency) {
-        returnValue.inputOptions.conditional = conditional
+        processedRequirementAttributes.inputOptions.conditional = conditional
       } else if (shouldAppendConditional) {
         const cond = ra.inputOptions.conditional
-        returnValue.inputOptions.conditional = {
+        processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
           eq: cond.operand,
           [cond.then]: true,
         }
       }
 
-      return getPrunedOptionsMapperComplianceConfiguration(returnValue, autoComplianceModuleConfigurations)
+      return getPrunedOptionsMapperComplianceConfiguration(
+        processedRequirementAttributes,
+        autoComplianceModuleConfigurations
+      )
     })
 
     if (requirementBlock) {

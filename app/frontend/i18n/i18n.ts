@@ -481,6 +481,11 @@ const options = {
             computedComplianceSetup: {
               module: "Module",
               valueExtractionField: "Value extraction field",
+              optionsMapGrid: {
+                title: "Options mapper",
+                externalOption: "External option",
+                requirementOption: "Requirement option",
+              },
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",

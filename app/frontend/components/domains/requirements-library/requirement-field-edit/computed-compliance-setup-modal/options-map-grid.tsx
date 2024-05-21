@@ -2,6 +2,7 @@ import { Box, Text } from "@chakra-ui/react"
 import { Equals } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Select from "react-select"
 import { IOption } from "../../../../../types/types"
 import { GridHeader } from "../../../../shared/grid/grid-header"
@@ -31,10 +32,11 @@ export const OptionsMapGrid = observer(function OptionsMapGrid({
   optionValueToRequirementOption,
   currentOptionsMap,
 }: IProps) {
+  const { t } = useTranslation()
   return (
     <Box as={"section"}>
       <Text color={"text.primary"} fontWeight={"bold"} fontSize={"md"}>
-        Options Mapper
+        {t("requirementsLibrary.modals.computedComplianceSetup.optionsMapGrid.title")}
       </Text>
       <Box px={4}>
         <SearchGrid
@@ -49,10 +51,12 @@ export const OptionsMapGrid = observer(function OptionsMapGrid({
           }}
         >
           <Box display={"contents"} role={"row"} className={"compliance-mapper-grid-row"}>
-            <GridHeader {...gridHeaderProps}>External Option</GridHeader>
+            <GridHeader {...gridHeaderProps}>
+              {t("requirementsLibrary.modals.computedComplianceSetup.optionsMapGrid.externalOption")}
+            </GridHeader>
             <GridHeader {...gridHeaderProps} />
             <GridHeader {...gridHeaderProps} borderRight={"none"}>
-              Requirement Option
+              {t("requirementsLibrary.modals.computedComplianceSetup.optionsMapGrid.requirementOption")}
             </GridHeader>
           </Box>
           {mappableExternalOptions.map((mappableExternalOption) => {
