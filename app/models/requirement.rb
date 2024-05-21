@@ -60,8 +60,6 @@ class Requirement < ApplicationRecord
   validate :validate_energy_step_code_related_requirements_schema
   validate :validate_computed_compliance
 
-  delegate :scroll_class, to: :requirement_block
-
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
   CONTACT_TYPES = %w[general_contact professional_contact]
