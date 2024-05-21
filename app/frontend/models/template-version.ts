@@ -46,6 +46,9 @@ export const TemplateVersionModel = types
     ) {
       self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
     },
+    setStatus(status: ETemplateVersionStatus) {
+      self.status = status
+    },
   }))
   .actions((self) => ({
     fetchJurisdictionTemplateVersionCustomization: flow(function* (jurisdictionId: string) {
@@ -133,6 +136,18 @@ export const TemplateVersionModel = types
         }
         throw error
       }
+    }),
+    unschedule: flow(function* () {
+      if (!self.isScheduled) {
+        return false
+      }
+      const response = yield* toGenerator(self.environment.api.unscheduleTemplateVersion(self.id))
+
+      if (response.ok) {
+        self.setStatus(response.data.data.status)
+      }
+
+      return response.ok
     }),
   }))
 

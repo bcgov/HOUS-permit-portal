@@ -88,6 +88,12 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
               <VersionsList
                 type={ETemplateVersionStatus.scheduled}
                 templateVersions={requirementTemplate.scheduledTemplateVersions}
+                onUnschedule={requirementTemplate.unscheduleTemplateVersion}
+              />
+
+              <VersionsList
+                type={ETemplateVersionStatus.deprecated}
+                templateVersions={requirementTemplate.deprecatedTemplateVersions}
               />
               {requirementTemplate.publishedTemplateVersion && (
                 <Menu>
@@ -116,9 +122,11 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
 const VersionsList = observer(function VersionsList({
   type,
   templateVersions,
+  onUnschedule,
 }: {
   type: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
   templateVersions: ITemplateVersion[]
+  onUnschedule?: (templateVersionId: string) => Promise<boolean>
 }) {
   const { t } = useTranslation()
 
@@ -138,13 +146,14 @@ const VersionsList = observer(function VersionsList({
           borderTopRadius={index === 0 ? "sm" : undefined}
           borderBottomRadius={index === templateVersions.length - 1 ? "sm" : undefined}
           borderRadius={"none"}
+          onUnschedule={() => onUnschedule(templateVersion.id)}
         />
       ))}
     </Box>
   )
 })
 
-type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => void } & (
+type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => Promise<boolean> } & (
     | { status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>; versionDate: Date; updatedAt?: never }
     | { status: ETemplateVersionStatus.draft; versionDate?: never; updatedAt: Date }
   )
@@ -158,6 +167,7 @@ const VersionCard = observer(function VersionCard({
   ...containerProps
 }: TVersionCardProps) {
   const { t } = useTranslation()
+  const [isPending, setIsPending] = React.useState(false)
 
   const renderTemplateButton = () => {
     if (status === ETemplateVersionStatus.published || status === ETemplateVersionStatus.deprecated) {
@@ -178,7 +188,29 @@ const VersionCard = observer(function VersionCard({
           <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
             {t("ui.preview")}
           </Button>
-          <Button variant={"secondary"} size="sm" onClick={onUnschedule} isDisabled>
+          <Button
+            variant={"secondary"}
+            size="sm"
+            onClick={
+              onUnschedule
+                ? async () => {
+                    try {
+                      setIsPending(true)
+                      const isSuccess = await onUnschedule()
+
+                      // only update the state if the unschedule was unsuccessful.
+                      // this is because on successfull unschedule, this component would be
+                      // unmounted and removed
+                      !isSuccess && setIsPending(false)
+                    } catch (e) {
+                      setIsPending(false)
+                    }
+                  }
+                : undefined
+            }
+            isDisabled={isPending}
+            isLoading={isPending}
+          >
             {t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
           </Button>
         </ButtonGroup>

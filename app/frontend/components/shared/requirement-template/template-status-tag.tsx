@@ -1,5 +1,5 @@
 import { Flex, HStack, Tag, Text } from "@chakra-ui/react"
-import { CheckSquareOffset, Clock, Pencil } from "@phosphor-icons/react"
+import { CheckSquareOffset, Clock, Pencil, TrashSimple } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import React, { ReactNode } from "react"
@@ -30,7 +30,7 @@ const statusIcons: { [key in ETemplateVersionStatus]: ReactNode } = {
   [ETemplateVersionStatus.published]: <CheckSquareOffset />,
   [ETemplateVersionStatus.scheduled]: <Clock />,
   [ETemplateVersionStatus.draft]: <Pencil />,
-  [ETemplateVersionStatus.deprecated]: <></>,
+  [ETemplateVersionStatus.deprecated]: <TrashSimple />,
 }
 
 export const TemplateStatusTag = ({ status, scheduledFor }: ITemplateStatusTagProps) => {

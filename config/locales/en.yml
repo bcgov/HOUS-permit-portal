@@ -284,6 +284,12 @@ en:
       schedule_error:
         title: Error
         message: "%{error_message}"
+      template_unschedule_error:
+        title: Error unscheduling template
+        message: "%{error_message}"
+      template_unschedule_success:
+        title: ""
+        message: "Template unscheduled successfully"
       force_publish_now_error:
         title: Error force publishing template
         message: "%{error_message}"

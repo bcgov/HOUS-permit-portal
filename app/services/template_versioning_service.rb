@@ -54,6 +54,18 @@ class TemplateVersioningService
     template_version
   end
 
+  def self.unschedule!(template_version)
+    return template_version unless template_version.status == "scheduled"
+
+    template_version.status = "deprecated"
+
+    unless template_version.save
+      raise TemplateVersionUnscheduleError.new(template_version.errors.full_messages.join(", "))
+    end
+
+    template_version
+  end
+
   def self.force_publish_now!(requirement_template)
     unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
       raise TemplateVersionForcePublishNowError.new("Force publish is not enabled")
