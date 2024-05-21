@@ -33,8 +33,8 @@ export const LoginScreen = ({ isAdmin }: ILoginScreenProps) => {
           {!isAdmin && <Text fontSize="md">{t("auth.prompt")}</Text>}
         </VStack>
         <form action="/api/auth/keycloak" method="post">
-          {/* @ts-ignore */}
           <input type="hidden" name="kc_idp_hint" value={isAdmin ? "idir" : "bceidboth"} />
+          {/* @ts-ignore */}
           <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
           <Button variant="primary" w="full" type="submit">
             {isAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
