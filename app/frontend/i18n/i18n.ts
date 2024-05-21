@@ -334,7 +334,8 @@ const options = {
             status: "Status",
           },
           submissionInbox: {
-            contactInviteWarning: "Please have a Review Manager setup the Submissions Inbox for all permit types.",
+            contactInviteWarning:
+              "Please have a Review Manager setup the Submissions Inbox for all permit types to allow submissions to be received.",
             title: "Submissions inbox",
             tableHeading: "Permit applications",
             submissionsSentTo:
@@ -416,8 +417,9 @@ const options = {
         requirementsLibrary: {
           addAnotherPerson: "Add another person",
           elective: "Elective",
-          hasElective: "Has Elective(s)",
-          hasConditionalLogic: "Has Conditional Logic",
+          hasElective: "Has elective(s)",
+          hasConditionalLogic: "Has conditional logic",
+          hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
           index: {
@@ -460,6 +462,7 @@ const options = {
               triggerButton: "Options",
               remove: "Remove",
               conditionalLogic: "Conditional logic",
+              automatedCompliance: "Automated compliance",
               dataValidation: "Data validation",
             },
             conditionalSetup: {
@@ -474,6 +477,15 @@ const options = {
               then: "Then...",
               show: "Show this field",
               hide: "Hide this field",
+            },
+            computedComplianceSetup: {
+              module: "Module",
+              valueExtractionField: "Value extraction field",
+              optionsMapGrid: {
+                title: "Options mapper",
+                externalOption: "External option",
+                requirementOption: "Requirement option",
+              },
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
@@ -994,6 +1006,7 @@ const options = {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
           fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
+          fetchAutoComplianceModuleConfigurations: "Something went wrong fetching the auto compliance module options",
           fetchActivityOptions: "Something went wrong fetching the activity options",
           workTypeNotFound: "Work type not found",
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",

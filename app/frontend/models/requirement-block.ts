@@ -3,7 +3,7 @@ import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../types/enums"
+import { EAutoComplianceModule, EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../types/enums"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -37,6 +37,13 @@ export const RequirementBlockModel = types
     get hasAnyConditional() {
       return self.requirements.some((requirement) => !!requirement.conditional)
     },
+    get hasAutomatedCompliance() {
+      return self.requirements.some(
+        (requirement) =>
+          requirement.computedCompliance &&
+          Object.values(EAutoComplianceModule).includes(requirement.computedCompliance?.module)
+      )
+    },
     get hasAnyDataValidation() {
       return self.requirements.some((requirement) => !!requirement.dataValidation)
     },
@@ -68,6 +75,7 @@ export const RequirementBlockModel = types
                   then,
                 },
             energyStepCode: requirement.inputOptions?.energyStepCode,
+            computedCompliance: requirement.inputOptions?.computedCompliance,
           },
         }
       })

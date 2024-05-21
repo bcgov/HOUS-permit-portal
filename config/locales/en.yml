@@ -338,6 +338,34 @@ en:
       update_error:
         title: Error
         message: "Something went wrong updating Jurisdiction Customization"
+  services:
+    auto_compliance_configuration:
+      digital_seal_validator:
+        label: "Digital Seal Validator - Validates the digital seal of a file"
+      parcel_info_extractor:
+        label: "Parcel Info Extractor - Extracts info from parcel information: PID, PIN, etc"
+        available_field_labels:
+          feature_area: "Feature area (sqm)"
+          pid: "PID"
+          pin: "PIN"
+          plan_number: "Plan number"
+      permit_application:
+        label: "Permit Application - Extracts info from permit application: address, PID, PIN, etc"
+        available_field_labels:
+          full_address: "Full address"
+          pid: "PID"
+          pin: "PIN"
+      historic_site:
+        label: "Historic Site - Extracts info from historic site"
+        mappable_external_option_labels:
+          y: "Y"
+          n: "N"
+      validation_errors:
+        incorrect_computed_compliance_module: "automated compliance module must be one of %{accepted_values}"
+        incompatible_input_type_for_module: "%{module_name} automated compliance module is not compatible with input type %{input_type}"
+        incorrect_value_extraction_field: "incorrect extraction field for %{module_name} automated compliance module"
+        incorrect_options_map: "incorrect options map for %{module_name} automated compliance module"
+        default_settings_not_valid: "computed compliance is not populated with default settings for %{module_name} automated compliance module"
   formio:
     requirement_template:
       completion_title: "Completion"

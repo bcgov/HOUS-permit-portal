@@ -12,6 +12,7 @@ import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../shared/has-conditional-tag"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
@@ -19,6 +20,8 @@ import { RequirementsBlockModal } from "./requirements-block-modal"
 interface IProps extends Partial<StackProps> {
   renderActionButton?: (props: ButtonProps & { requirementBlock: IRequirementBlock }) => JSX.Element
 }
+
+const ROW_CLASS_NAME = "requirements-library-grid-row"
 
 export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   renderActionButton,
@@ -39,7 +42,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   useSearch(requirementBlockStore as ISearch)
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
-      <SearchGrid templateColumns="repeat(4, 1fr) max(200px) 85px" pos={"relative"}>
+      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(4, 1fr) max(230px) 80px" pos={"relative"}>
         <GridHeaders />
 
         {isSearching ? (
@@ -49,16 +52,11 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
         ) : (
           tableRequirementBlocks.map((requirementBlock) => {
             return (
-              <Box
-                key={requirementBlock.id}
-                className={"requirements-library-grid-row"}
-                role={"row"}
-                display={"contents"}
-              >
+              <Box key={requirementBlock.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
                 <SearchGridItem fontWeight={700} minW="250px">
                   {requirementBlock.name}
                 </SearchGridItem>
-                <SearchGridItem maxW="200px">
+                <SearchGridItem maxW="190px">
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
                     {requirementBlock.associations.map((association) => (
                       <Tag key={association} as={"li"} bg={"greys.grey03"} color={"text.secondary"} fontSize={"xs"}>
@@ -81,10 +79,11 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                 <SearchGridItem maxW="150px" fontSize={"sm"}>
                   {format(requirementBlock.updatedAt, "yyyy-MM-dd")}
                 </SearchGridItem>
-                <SearchGridItem maxW="200px">
+                <SearchGridItem maxW="230px">
                   <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>
                     {requirementBlock.hasAnyElective && <ElectiveTag hasElective />}
                     {requirementBlock.hasAnyConditional && <HasConditionalTag />}
+                    {requirementBlock.hasAutomatedCompliance && <HasAutomatedComplianceTag />}
                   </HStack>
                 </SearchGridItem>
                 <SearchGridItem justifyContent={"center"}>
