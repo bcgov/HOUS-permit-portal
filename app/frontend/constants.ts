@@ -1,6 +1,7 @@
 import { t } from "i18next"
 import { IRequirementAttributes } from "./types/api-request"
 import {
+  EAutoComplianceType,
   EEnabledElectiveFieldReason,
   EEnergyStepCodeDependencyRequirementCode,
   EGovFeedbackResponseNoReason,
@@ -167,3 +168,10 @@ export function getEnergyStepCodeRequirementRequiredSchema(
 }
 
 export const STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file" as const
+
+export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
+  EAutoComplianceType.internalValueExtractor,
+  EAutoComplianceType.externalValueExtractor,
+]
+
+export const OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES = [EAutoComplianceType.externalOptionsMapper]

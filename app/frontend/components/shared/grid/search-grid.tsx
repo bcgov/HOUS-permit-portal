@@ -4,9 +4,16 @@ import React, { ReactNode } from "react"
 interface ISearchGridProps extends Partial<Omit<GridProps, "templateColumns">> {
   children: ReactNode
   templateColumns: string
+  gridRowClassName?: string
 }
 
-export const SearchGrid = ({ children, templateColumns, ...containerProps }: ISearchGridProps) => {
+export const SearchGrid = ({
+  sx,
+  children,
+  templateColumns,
+  gridRowClassName,
+  ...containerProps
+}: ISearchGridProps) => {
   return (
     <Grid
       mt={3}
@@ -17,14 +24,19 @@ export const SearchGrid = ({ children, templateColumns, ...containerProps }: ISe
       overflow={"auto"}
       sx={{
         borderCollapse: "separate",
-        ".requirements-library-grid-row:not(:last-of-type) > div": {
-          borderBottom: "1px solid",
-          borderColor: "border.light",
-        },
+        ...(gridRowClassName
+          ? {
+              [`.${gridRowClassName}:not(:last-of-type) > div`]: {
+                borderBottom: "1px solid",
+                borderColor: "border.light",
+              },
+            }
+          : {}),
         "[role='row']:not(:last-child) > [role='cell']": {
           borderBottom: "1px solid",
           borderColor: "border.light",
         },
+        ...sx,
       }}
       border={"1px solid"}
       borderColor={"border.light"}

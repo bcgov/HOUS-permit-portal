@@ -29,7 +29,10 @@ class Requirement < ApplicationRecord
 
   # This needs to run before validation because we have validations related to the requirement_code
   before_validation :set_requirement_code
-  before_save :convert_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
+  before_validation :merge_computed_compliance_default_settings
+
+  before_validation :convert_value_options,
+                    if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   before_save :set_digital_seal_validator_to_step_code_package_file
   validate :validate_value_options, if: Proc.new { |req| TYPES_WITH_VALUE_OPTIONS.include?(req.input_type.to_s) }
   validate :validate_unit_for_number_inputs
@@ -53,6 +56,7 @@ class Requirement < ApplicationRecord
             }
   validate :validate_energy_step_code_requirement_code
   validate :validate_energy_step_code_related_requirements_schema
+  validate :validate_computed_compliance
 
   NUMBER_UNITS = %w[no_unit mm cm m in ft mi sqm sqft cad]
   TYPES_WITH_VALUE_OPTIONS = %w[multi_option_select select radio]
@@ -121,6 +125,12 @@ class Requirement < ApplicationRecord
     input_options["number_unit"]
   end
 
+  def computed_compliance
+    return nil if input_options.blank? || input_options["computed_compliance"].blank?
+
+    input_options["computed_compliance"]
+  end
+
   def key(requirement_block_key)
     "#{requirement_block_key}|#{requirement_code}"
   end
@@ -150,6 +160,11 @@ class Requirement < ApplicationRecord
   end
 
   private
+
+  def merge_computed_compliance_default_settings
+    configuration_service = AutomatedComplianceConfigurationService.new(self)
+    configuration_service.merge_default_settings!
+  end
 
   def validate_step_code_package_file
     return unless step_code_package_file?
@@ -254,6 +269,10 @@ class Requirement < ApplicationRecord
 
   def convert_value_options
     return unless attribute_changed?(:input_options)
+
+    inverted_computed_compliance_options_map =
+      computed_compliance["options_map"].invert if computed_compliance.present? &&
+      computed_compliance["options_map"].present? && computed_compliance["options_map"].is_a?(Hash)
     # all values MUST be converted to camelCase and stripped of white space to be compatible with rehyration on front
     # end
     input_options["value_options"] = input_options["value_options"].map do |option_json|
@@ -266,8 +285,25 @@ class Requirement < ApplicationRecord
 
       # join the words together and then run camelize
       formatted_value = words.join("").strip.camelize(:lower)
+
+      # update the option in computed compliance options map
+      if inverted_computed_compliance_options_map.present? && inverted_computed_compliance_options_map[value].present?
+        self.computed_compliance["options_map"][inverted_computed_compliance_options_map[value]] = formatted_value
+      end
+
       option_json.merge("value" => formatted_value)
     end
+  end
+
+  def validate_computed_compliance
+    configuration_service = AutomatedComplianceConfigurationService.new(self)
+    config_validation = configuration_service.validate_configuration
+
+    error = config_validation[:error]
+
+    return unless error.present?
+
+    errors.add(:input_options, error)
   end
 
   def validate_can_add_multiple_contacts

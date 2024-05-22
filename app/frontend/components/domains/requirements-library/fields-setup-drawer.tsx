@@ -100,7 +100,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                 .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
                 .map(({ requirementType, isStepCodePackageFileRequirement = false }) => (
                   <HStack
-                    key={requirementType}
+                    key={`${requirementType}${isStepCodePackageFileRequirement ? "_stepCodePackage" : ""}`}
                     alignItems={"flex-end"}
                     justifyContent={"space-between"}
                     spacing={6}

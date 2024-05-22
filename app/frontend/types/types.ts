@@ -1,6 +1,8 @@
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import {
+  EAutoComplianceModule,
+  EAutoComplianceType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
   EEnergyStep,
@@ -69,11 +71,20 @@ export type TSearchParams<IModelSortFields> = {
   statusFilter?: string
 }
 
+export type TComputedCompliance = {
+  module: EAutoComplianceModule
+  value?: string
+  valueOn?: string
+  trigger?: string
+  optionsMap?: Record<string, string>
+}
+
 export interface IRequirementOptions {
   valueOptions?: IOption[]
   numberUnit?: ENumberUnit
   canAddMultipleContacts?: boolean
   conditional?: TConditional
+  computedCompliance?: TComputedCompliance
   energyStepCode?: string
   dataValidation?: Object
 }
@@ -246,3 +257,73 @@ export type TConditional = {
   when: string
   eq: string
 }
+
+export interface ILinkItem {
+  href: string
+  title: string
+  descrption: string
+  show: boolean
+}
+
+export interface IHelpLinkItems {
+  getStartedLinkItem: ILinkItem
+  bestPracticesLinkItem: ILinkItem
+  dictionaryLinkItem: ILinkItem
+  userGuideLinkItem: ILinkItem
+}
+
+interface ICommonAutoComplianceModuleConfiguration<EModule extends EAutoComplianceModule> {
+  module: EModule
+  type: EAutoComplianceType
+  label: string
+  availableOnInputTypes: ERequirementType[]
+  defaultSettings?: Object
+}
+
+type TAutoComplianceValueExtractorTypeConfiguration<EModule extends EAutoComplianceModule> =
+  ICommonAutoComplianceModuleConfiguration<EModule> & {
+    type: EAutoComplianceType.externalValueExtractor | EAutoComplianceType.internalValueExtractor
+    availableFields: Array<
+      IOption<string> & {
+        availableOnInputTypes: ERequirementType[]
+      }
+    >
+  }
+
+type TAutoComplianceOptionsMapperTypeConfiguration<EModule extends EAutoComplianceModule> =
+  ICommonAutoComplianceModuleConfiguration<EModule> & {
+    type: EAutoComplianceType.externalOptionsMapper
+    mappableExternalOptions: Array<IOption<string>>
+  }
+
+export interface IDigitalSealValidatorModuleConfiguration
+  extends ICommonAutoComplianceModuleConfiguration<EAutoComplianceModule.DigitalSealValidator> {}
+
+export interface IParcelInfoExtractorModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.ParcelInfoExtractor> {
+  type: EAutoComplianceType.externalValueExtractor
+}
+
+export interface IPermitApplicationModuleConfiguration
+  extends TAutoComplianceValueExtractorTypeConfiguration<EAutoComplianceModule.PermitApplication> {
+  type: EAutoComplianceType.internalValueExtractor
+}
+
+export type TValueExtractorAutoComplianceModuleConfiguration =
+  | IParcelInfoExtractorModuleConfiguration
+  | IPermitApplicationModuleConfiguration
+
+export interface IHistoricSiteModuleConfiguration
+  extends TAutoComplianceOptionsMapperTypeConfiguration<EAutoComplianceModule.HistoricSite> {}
+
+export type TOptionsMapperAutoComplianceModuleConfiguration = IHistoricSiteModuleConfiguration
+
+export type TAutoComplianceModuleConfigurations = {
+  [EAutoComplianceModule.DigitalSealValidator]: IDigitalSealValidatorModuleConfiguration
+  [EAutoComplianceModule.ParcelInfoExtractor]: IParcelInfoExtractorModuleConfiguration
+  [EAutoComplianceModule.PermitApplication]: IPermitApplicationModuleConfiguration
+  [EAutoComplianceModule.HistoricSite]: IHistoricSiteModuleConfiguration
+}
+
+export type TAutoComplianceModuleConfiguration =
+  TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]

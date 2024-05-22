@@ -52,8 +52,8 @@ export const SessionStoreModel = types
       if (response.ok) {
         self.resetAuth()
       }
-      // Do a full browser refresh to enhance security
-      window.location.href = "/"
+      // logout of siteminder / keycloak as well
+      window.location.href = `${import.meta.env.VITE_SITEMINDER_LOGOUT_URL}?retnow=1&returl=${import.meta.env.VITE_KEYCLOAK_LOGOUT_URL}?redirect_uri=${import.meta.env.VITE_POST_LOGOUT_REDIRECT_URL}`
     }),
     setTokenExpired(isExpired: boolean) {
       self.tokenExpired = isExpired

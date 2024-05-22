@@ -20,7 +20,7 @@ import { useMst } from "../../../../setup/root"
 import { TextFormControl } from "../../../shared/form/input-form-control"
 import { SectionBox } from "../../home/section-box"
 
-export type TSiteConfiguration = {
+export type TSiteWideMessageConfiguration = {
   displaySitewideMessage: boolean
   sitewideMessage: string | null
 }
@@ -36,7 +36,7 @@ export const SitewideMessageScreen = observer(function SitewideMessageScreen() {
     return { displaySitewideMessage, sitewideMessage }
   }
 
-  const formMethods = useForm<TSiteConfiguration>({
+  const formMethods = useForm<TSiteWideMessageConfiguration>({
     mode: "onChange",
     defaultValues: getFormDefaults(),
   })

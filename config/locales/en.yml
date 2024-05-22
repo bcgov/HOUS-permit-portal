@@ -32,6 +32,12 @@ en:
     attributes:
     errors:
       models:
+        site_configuration:
+          single_record: "There can only be one SiteConfiguration record."
+          attributes:
+            help_link_items:
+              incomplete: "%{link} can only be shown if href, title, and description are all set."
+              invalid_url: "%{link} has an invalid URL. It must start with https://."
         permit_application:
           attributes:
             submitter:
@@ -41,10 +47,8 @@ en:
             pid_or_pin: "must have a pid or pin."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
-          duplicate_energy_step_code:
-            'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
-          duplicate_step_code_package:
-            'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
+          duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
+          duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
         requirement_block:
           attributes:
             requirements:
@@ -334,6 +338,34 @@ en:
       update_error:
         title: Error
         message: "Something went wrong updating Jurisdiction Customization"
+  services:
+    auto_compliance_configuration:
+      digital_seal_validator:
+        label: "Digital Seal Validator - Validates the digital seal of a file"
+      parcel_info_extractor:
+        label: "Parcel Info Extractor - Extracts info from parcel information: PID, PIN, etc"
+        available_field_labels:
+          feature_area: "Feature area (sqm)"
+          pid: "PID"
+          pin: "PIN"
+          plan_number: "Plan number"
+      permit_application:
+        label: "Permit Application - Extracts info from permit application: address, PID, PIN, etc"
+        available_field_labels:
+          full_address: "Full address"
+          pid: "PID"
+          pin: "PIN"
+      historic_site:
+        label: "Historic Site - Extracts info from historic site"
+        mappable_external_option_labels:
+          y: "Y"
+          n: "N"
+      validation_errors:
+        incorrect_computed_compliance_module: "automated compliance module must be one of %{accepted_values}"
+        incompatible_input_type_for_module: "%{module_name} automated compliance module is not compatible with input type %{input_type}"
+        incorrect_value_extraction_field: "incorrect extraction field for %{module_name} automated compliance module"
+        incorrect_options_map: "incorrect options map for %{module_name} automated compliance module"
+        default_settings_not_valid: "computed compliance is not populated with default settings for %{module_name} automated compliance module"
   formio:
     requirement_template:
       completion_title: "Completion"

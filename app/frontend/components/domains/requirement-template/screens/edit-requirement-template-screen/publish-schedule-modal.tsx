@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import React, { useEffect } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../../types/enums"
 import { DatePicker } from "../../../../shared/date-picker"
@@ -61,7 +61,15 @@ export function PublishScheduleModal({ minDate, onScheduleConfirm, triggerButton
           <ModalBody>
             <Text>{t("requirementTemplate.edit.scheduleModalBody")}</Text>
             <Stack spacing={1} mt={6}>
-              <Text>{t("requirementTemplate.edit.scheduleModalHelperText")}</Text>
+              <Text>
+                <Trans
+                  i18nKey="requirementTemplate.edit.scheduleModalHelperText"
+                  components={{
+                    1: <Text as="span" color="semantic.error" fontWeight="bold" />,
+                  }}
+                />
+              </Text>
+
               <Box>
                 <DatePicker selected={scheduleDate} onChange={setScheduleDate} minDate={minDate} />
               </Box>

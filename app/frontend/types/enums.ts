@@ -103,6 +103,7 @@ export enum EPermitApplicationSubmitterSortFields {
 
 export enum EPermitApplicationReviewerSortFields {
   number = "number",
+  referenceNumber = "reference_number",
   permitClassification = "permit_classification",
   submitter = "submitter",
   viewedAt = "viewed_at",
@@ -299,4 +300,18 @@ export enum EOmniauthProvider {
   idir = "idir",
   basicBceid = "bceidbasic",
   businessBceid = "bceidbusiness",
+}
+
+export enum EAutoComplianceModule {
+  DigitalSealValidator = "DigitalSealValidator",
+  ParcelInfoExtractor = "ParcelInfoExtractor",
+  PermitApplication = "PermitApplication",
+  HistoricSite = "HistoricSite",
+}
+
+export enum EAutoComplianceType {
+  fileValidator = "file_validator",
+  externalValueExtractor = "external_value_extractor",
+  internalValueExtractor = "internal_value_extractor",
+  externalOptionsMapper = "external_options_mapper",
 }
