@@ -393,3 +393,4 @@ en:
   notification:
     template_version:
       new_version_notification: "A new version of this template has been published"
+      new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"

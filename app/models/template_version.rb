@@ -45,9 +45,9 @@ class TemplateVersion < ApplicationRecord
     before_requirements = before_json&.values&.flat_map { |block| block["requirements"] }
     after_requirements = after_json&.values&.flat_map { |block| block["requirements"] }
 
-    after_requirements_components = after_json&.values&.flat_map { |block| block["form_json"]["components"] }
+    after_requirements_components = after_json&.values&.flat_map { |block| block["form_json"]["components"] } || []
 
-    before_requirements_components = before_json&.values&.flat_map { |block| block["form_json"]["components"] }
+    before_requirements_components = before_json&.values&.flat_map { |block| block["form_json"]["components"] } || []
 
     before_ids = before_requirements&.map { |req| req["id"] } || []
     after_ids = after_requirements&.map { |req| req["id"] } || []

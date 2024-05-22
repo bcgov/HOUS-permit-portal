@@ -15,10 +15,24 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   before_save :sanitize_tip
   validates_uniqueness_of :template_version_id, scope: :jurisdiction_id
   after_commit :reindex_jurisdiction_templates_used_size
+  after_commit :publish_customization_event, on: %i[create update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
+
+  def create_update_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE,
+      "action_text" =>
+        "#{I18n.t("notification.template_version.new_customization_notification", jurisdiction_name: jurisdiction.qualified_name, template_label: template_version.label)}",
+      "object_data" => {
+        "template_version_id" => template_version.id,
+        "customizations" => customizations,
+      },
+    }
+  end
 
   private
 
@@ -66,5 +80,9 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         )
       end
     end
+  end
+
+  def publish_customization_event
+    NotificationService.publish_customization_create_update_event(self)
   end
 end
