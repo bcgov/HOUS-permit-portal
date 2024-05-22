@@ -1207,6 +1207,10 @@ const options = {
               scheduled: "Scheduled",
               deprecated: "Deprecated (last 3)",
             },
+            unscheduleWarning: {
+              title: "Are you sure you want to unschedule this template?",
+              body: "This action cannot be undone.",
+            },
             deprecationReasonLabels: {
               unscheduled: "reason: unscheduled",
               new_publish: "reason: new publish",

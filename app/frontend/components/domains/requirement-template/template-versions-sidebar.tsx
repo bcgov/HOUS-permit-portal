@@ -30,6 +30,7 @@ import { IRequirementTemplate } from "../../../models/requirement-template"
 import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RemoveConfirmationModal } from "../../shared/remove-confirmation-modal"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { VersionTag } from "../../shared/version-tag"
 
@@ -174,7 +175,6 @@ const VersionCard = observer(function VersionCard({
   ...containerProps
 }: TVersionCardProps) {
   const { t } = useTranslation()
-  const [isPending, setIsPending] = React.useState(false)
 
   const renderTemplateButton = () => {
     if (status === ETemplateVersionStatus.published || status === ETemplateVersionStatus.deprecated) {
@@ -195,31 +195,19 @@ const VersionCard = observer(function VersionCard({
           <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
             {t("ui.preview")}
           </Button>
-          <Button
-            variant={"secondary"}
-            size="sm"
-            onClick={
-              onUnschedule
-                ? async () => {
-                    try {
-                      setIsPending(true)
-                      const isSuccess = await onUnschedule()
-
-                      // only update the state if the unschedule was unsuccessful.
-                      // this is because on successfull unschedule, this component would be
-                      // unmounted and removed
-                      !isSuccess && setIsPending(false)
-                    } catch (e) {
-                      setIsPending(false)
-                    }
-                  }
-                : undefined
-            }
-            isDisabled={isPending}
-            isLoading={isPending}
-          >
-            {t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
-          </Button>
+          <RemoveConfirmationModal
+            title={t("requirementTemplate.versionSidebar.unscheduleWarning.title")}
+            body={t("requirementTemplate.versionSidebar.unscheduleWarning.body")}
+            renderTriggerButton={(props) => {
+              return (
+                <Button variant={"secondary"} size="sm" {...props}>
+                  {t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
+                </Button>
+              )
+            }}
+            onRemove={onUnschedule}
+            triggerText={t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
+          />
         </ButtonGroup>
       )
     }
