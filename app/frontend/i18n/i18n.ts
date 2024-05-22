@@ -1205,7 +1205,7 @@ const options = {
               published: "Published",
               draft: "Drafts",
               scheduled: "Scheduled",
-              deprecated: "Deprecated",
+              deprecated: "Deprecated (last 3)",
             },
             deprecationReasonLabels: {
               unscheduled: "reason: unscheduled",

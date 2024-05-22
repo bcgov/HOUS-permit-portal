@@ -104,10 +104,14 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       getScheduledTemplateVersionById(id: string) {
         return self.scheduledTemplateVersions.find((version) => version.id === id)
       },
+      get lastThreeDeprecatedTemplateVersions() {
+        return self.deprecatedTemplateVersions.slice(0, 3)
+      },
     }))
     .actions((self) => ({
       addDeprecatedTemplateVersionReference(templateVersionId: string) {
         self.deprecatedTemplateVersions.unshift(templateVersionId)
+        self.deprecatedTemplateVersions.sort((a, b) => b.versionDate.getTime() - a.versionDate.getTime())
       },
       removeScheduledTemplateVersion(templateVersionId: string) {
         const templateVersion = self.getScheduledTemplateVersionById(templateVersionId)

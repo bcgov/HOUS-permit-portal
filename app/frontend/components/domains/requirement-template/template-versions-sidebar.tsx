@@ -93,7 +93,7 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
 
               <VersionsList
                 type={ETemplateVersionStatus.deprecated}
-                templateVersions={requirementTemplate.deprecatedTemplateVersions}
+                templateVersions={requirementTemplate.lastThreeDeprecatedTemplateVersions}
               />
               {requirementTemplate.publishedTemplateVersion && (
                 <Menu>
