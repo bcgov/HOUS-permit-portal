@@ -37,7 +37,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { IContact, ISiteConfiguration, TSearchParams } from "../../types/types"
+import { IContact, ISiteConfiguration, TAutoComplianceModuleConfigurations, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -218,6 +218,12 @@ export class Api {
 
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
+  }
+
+  async fetchAutoComplianceModuleConfigurations() {
+    return this.client.get<ApiResponse<TAutoComplianceModuleConfigurations>>(
+      "/requirement_blocks/auto_compliance_module_configurations"
+    )
   }
 
   async updatePermitApplication(id, params) {

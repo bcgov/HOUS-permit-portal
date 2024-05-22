@@ -148,6 +148,11 @@ const SitewideMessageScreen = lazy(() =>
     default: module.SitewideMessageScreen,
   }))
 )
+const HelpDrawerSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/help-drawer-setup-screen").then((module) => ({
+    default: module.HelpDrawerSetupScreen,
+  }))
+)
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
     default: module.AdminUserIndexScreen,
@@ -245,6 +250,7 @@ const AppRoutes = observer(() => {
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
       <Route path="/configuration-management" element={<SiteConfigurationManagementScreen />} />
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
+      <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
     </>

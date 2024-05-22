@@ -118,6 +118,9 @@ const options = {
           learnRequirements: "Learn about local requirements",
           cantFind: "Can't find your address?",
           browseList: "Browse list of jurisdictions",
+          goTo: "Go to {{ location }}",
+          permitApp: "permit app",
+          adminPanel: "admin panel",
         },
         ui: {
           disable: "Disable",
@@ -193,6 +196,7 @@ const options = {
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
           emailPlaceholder: "email@example.com",
+          urlPlaceholder: "https://",
         },
         eula: {
           title: "End-User License Agreement",
@@ -328,6 +332,7 @@ const options = {
           },
           columns: {
             number: "Application #",
+            reference_number: "Reference #",
             permit_classification: "Types",
             submitter: "Submitter",
             submitted_at: "Submitted at",
@@ -335,7 +340,8 @@ const options = {
             status: "Status",
           },
           submissionInbox: {
-            contactInviteWarning: "Please have a Review Manager setup the Submissions Inbox for all permit types.",
+            contactInviteWarning:
+              "Please have a Review Manager setup the Submissions Inbox for all permit types to allow submissions to be received.",
             title: "Submissions inbox",
             tableHeading: "Permit applications",
             submissionsSentTo:
@@ -417,8 +423,9 @@ const options = {
         requirementsLibrary: {
           addAnotherPerson: "Add another person",
           elective: "Elective",
-          hasElective: "Has Elective(s)",
-          hasConditionalLogic: "Has Conditional Logic",
+          hasElective: "Has elective(s)",
+          hasConditionalLogic: "Has conditional logic",
+          hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
           index: {
@@ -461,6 +468,7 @@ const options = {
               triggerButton: "Options",
               remove: "Remove",
               conditionalLogic: "Conditional logic",
+              automatedCompliance: "Automated compliance",
               dataValidation: "Data validation",
             },
             conditionalSetup: {
@@ -475,6 +483,15 @@ const options = {
               then: "Then...",
               show: "Show this field",
               hide: "Hide this field",
+            },
+            computedComplianceSetup: {
+              module: "Module",
+              valueExtractionField: "Value extraction field",
+              optionsMapGrid: {
+                title: "Options mapper",
+                externalOption: "External option",
+                requirementOption: "Requirement option",
+              },
             },
             addOptionButton: "Add another option",
             editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
@@ -999,6 +1016,7 @@ const options = {
           fetchJurisdiction: "Something went wrong fetching the jurisdiction",
           fetchPermitApplication: "Something went wrong fetching the permit application",
           fetchPermitTypeOptions: "Something went wrong fetching the permit type options",
+          fetchAutoComplianceModuleConfigurations: "Something went wrong fetching the auto compliance module options",
           fetchActivityOptions: "Something went wrong fetching the activity options",
           workTypeNotFound: "Work type not found",
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
@@ -1130,7 +1148,7 @@ const options = {
             scheduleModalTitle: "Publish permit?",
             scheduleModalBody:
               "Once you publish, local jurisdictions and submitters will be able to see and use this new version of the form.",
-            scheduleModalHelperText: "Schedule to publish (at 00:01 PST)",
+            scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish!",
             errorsBox: {
@@ -1230,6 +1248,31 @@ const options = {
             hint: "This message will appear at the top of each page for all users.",
             settings: "Site-wide message settings",
           },
+          helpDrawerSetup: {
+            title: "Help drawer links",
+            description: "Setup links to show in the help drawer for all users",
+            settings: "Links",
+            fields: {
+              show: "Show",
+              title: "Title",
+              href: "CMS Lite GUID Link Url",
+              description: "Description",
+              titleHint: "Text for the main call-to-action",
+              descriptionHint: "Short description below to give context",
+            },
+            getStartedLinkItem: {
+              label: "Get started",
+            },
+            bestPracticesLinkItem: {
+              label: "Best practices",
+            },
+            dictionaryLinkItem: {
+              label: "Dictionary of terms",
+            },
+            userGuideLinkItem: {
+              label: "User and role guide",
+            },
+          },
         },
         externalApiKey: {
           index: {
@@ -1278,7 +1321,6 @@ const options = {
           titleLong: "Building Permit Hub",
           adminNavBarTitle: "Building Permit Hub - Admin Panel",
           adminPanel: "Admin Panel",
-          goTo: "Go to",
           beta: "Beta",
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",
@@ -1335,6 +1377,9 @@ const options = {
           copyright: "Copyright",
           foippaWarning:
             "We are collecting your personal information for the purpose of creating and submitting a building permit application. We are collecting your personal information under section 26(c) of the Freedom of Information and Protection of Privacy Act. If you have questions about our collection of your information, please contact us at ",
+          needMoreHelp: "Need more help?",
+          pleaseContact: "Please contact your local government for questions related to your permit application.",
+          forHelp: "For help with the Building Permit Hub please contact:",
           breadcrumb: {
             profile: "Profile",
             jurisdictions: "Jurisdictions",
@@ -1362,6 +1407,7 @@ const options = {
             sitewideMessage: "Site-Wide Message",
             apiSettings: "API settings",
             create: "Create",
+            helpDrawerSetup: "Help drawer setup",
           },
         },
         automatedCompliance: {

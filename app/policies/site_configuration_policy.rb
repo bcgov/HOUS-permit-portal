@@ -1,5 +1,5 @@
 class SiteConfigurationPolicy < ApplicationPolicy
-  def create?
+  def update?
     user.super_admin?
   end
 

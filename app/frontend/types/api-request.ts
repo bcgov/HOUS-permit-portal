@@ -1,5 +1,5 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
-import { IOption } from "./types"
+import { IOption, TComputedCompliance } from "./types"
 
 export interface IFormConditional {
   when: string
@@ -21,6 +21,7 @@ export interface IRequirementAttributes {
     canAddMultipleContacts?: boolean
     conditional?: IFormConditional
     energyStepCode?: string
+    computedCompliance?: TComputedCompliance
   }
 }
 

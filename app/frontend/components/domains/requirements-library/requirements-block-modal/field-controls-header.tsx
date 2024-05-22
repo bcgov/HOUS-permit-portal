@@ -2,9 +2,11 @@ import { Button, HStack } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IFormConditional } from "../../../../types/api-request"
-import { ERequirementType } from "../../../../types/enums"
+import { EAutoComplianceModule, ERequirementType } from "../../../../types/enums"
+import { TComputedCompliance } from "../../../../types/types"
 import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
 import { ElectiveTag } from "../../../shared/elective-tag"
+import { HasAutomatedComplianceTag } from "../../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../../shared/has-conditional-tag"
 import { RequirementTypeTag } from "../../../shared/requirement-type-tag"
 import { IRequirementOptionsMenu, OptionsMenu } from "../requirement-field-edit/options-menu"
@@ -18,6 +20,7 @@ interface IProps {
   disabledMenuOptions?: IRequirementOptionsMenu["disabledOptions"]
   elective?: boolean
   conditional?: IFormConditional
+  computedCompliance?: TComputedCompliance
   index: number
 }
 
@@ -28,6 +31,7 @@ export function FieldControlsHeader({
   elective,
   conditional,
   requirementType,
+  computedCompliance,
   onRemove,
   index,
   requirementCode,
@@ -53,6 +57,11 @@ export function FieldControlsHeader({
         {conditional && !isRequirementInEditMode && (
           <HasConditionalTag display={isRequirementInEditMode ? "none" : "flex"} />
         )}
+        {computedCompliance &&
+          !isRequirementInEditMode &&
+          Object.values(EAutoComplianceModule).includes(computedCompliance?.module) && (
+            <HasAutomatedComplianceTag display={isRequirementInEditMode ? "none" : "flex"} />
+          )}
         {!isRequirementInEditMode && (
           <RequirementTypeTag
             type={requirementType}

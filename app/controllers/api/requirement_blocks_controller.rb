@@ -68,6 +68,12 @@ class Api::RequirementBlocksController < Api::ApplicationController
     end
   end
 
+  def auto_compliance_module_configurations
+    available_module_configurations = AutomatedComplianceConfigurationService.available_module_configurations
+    authorize available_module_configurations, policy_class: RequirementBlockPolicy
+    render json: { data: available_module_configurations }
+  end
+
   private
 
   def requirement_block_params
@@ -98,6 +104,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
           value_options: [%i[value label]],
           conditional: {
           },
+          computed_compliance: [:value, :module, options_map: {}],
         ],
       ],
     )

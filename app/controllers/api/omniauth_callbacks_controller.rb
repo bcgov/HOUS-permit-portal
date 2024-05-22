@@ -14,17 +14,19 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       sign_in(resource_name, @user, store: false)
       redirect_to root_path
     else
-      redirect_to login_path frontend_flash_message(
-                               result.error_key,
-                               "error",
-                               message_opts: {
-                                 error_message: @user&.errors&.full_messages&.join(","),
-                               },
-                             )
+      redirect_to login_path(
+                    frontend_flash_message(
+                      result.error_key,
+                      "error",
+                      message_opts: {
+                        error_message: @user&.errors&.full_messages&.join(","),
+                      },
+                    ),
+                  )
     end
   end
 
   def failure
-    redirect_to login_path, frontend_flash_message("omniauth.failure", "error")
+    redirect_to login_path(frontend_flash_message("omniauth.failure", "error"))
   end
 end

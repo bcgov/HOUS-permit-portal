@@ -118,10 +118,12 @@ class RequirementBlock < ApplicationRecord
     has_any_elective = requirements.any?(&:elective?)
     has_any_conditional = requirements.any?(&:has_conditional?)
     has_any_data_validation = requirements.any?(&:has_data_validation?)
+    has_any_computed_compliance = requirements.any?(&:computed_compliance?)
 
     configurations << "elective" if has_any_elective
     configurations << "conditional" if has_any_conditional
     configurations << "data_validation" if has_any_data_validation
+    configurations << "automated_compliance" if has_any_computed_compliance
 
     configurations
   end

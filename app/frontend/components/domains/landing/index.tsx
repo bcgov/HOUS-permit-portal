@@ -106,8 +106,10 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
                   variant="primaryInverse"
                   icon={<CaretRight size={16} />}
                 >
-                  {t("site.goTo")}{" "}
-                  {!currentUser || currentUser.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
+                  {t("landing.goTo", {
+                    location:
+                      !currentUser || currentUser.isSubmitter ? t("landing.permitApp") : t("landing.adminPanel"),
+                  })}
                 </RouterLinkButton>
               </Flex>
             </Flex>

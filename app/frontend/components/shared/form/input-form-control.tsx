@@ -11,6 +11,7 @@ import {
   InputLeftElement,
   InputProps,
   InputRightElement,
+  Textarea,
 } from "@chakra-ui/react"
 import { AsteriskSimple, Phone } from "@phosphor-icons/react"
 import { t } from "i18next"
@@ -43,7 +44,7 @@ export const TextFormControl = (props: IInputFormControlProps) => {
           inputProps: { type: "text" },
           validate: {
             satisfiesLength: (str) =>
-              !props.required || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
+              (!props.required && !str) || (str?.length >= 1 && str?.length < 128) || t("ui.invalidInput"),
           },
         },
         props
@@ -147,6 +148,22 @@ export const DatePickerFormControl = ({
         {rightElement && <InputRightElement pointerEvents="none">{rightElement}</InputRightElement>}
       </InputGroup>
     </FormControl>
+  )
+}
+export const TextAreaFormControl = (props: IInputFormControlProps) => {
+  return (
+    <InputFormControl
+      {...(R.mergeDeepRight(
+        {
+          inputProps: { as: Textarea }, // Use Chakra's Textarea instead of Input
+          validate: {
+            satisfiesLength: (str) =>
+              (!props.required && !str) || (str?.length >= 1 && str?.length < 512) || "Input is invalid", // Use a default error message or use translation as needed
+          },
+        },
+        props
+      ) as IInputFormControlProps)}
+    />
   )
 }
 

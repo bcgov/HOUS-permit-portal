@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_06_171123) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -298,6 +298,38 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_06_171123) do
     t.text "sitewide_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "help_link_items",
+            default: {
+              "dictionary_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "Dictionary of terms",
+                "description" =>
+                  "See detailed explanations of terms that appear on building permits"
+              },
+              "user_guide_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "User and role guides",
+                "description" =>
+                  "Step-by-step instructions on how to make the most out of the platform"
+              },
+              "get_started_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "Get started on Building Permit Hub",
+                "description" =>
+                  "How to submit a building permit application through a streamlined and standardized approach across BC"
+              },
+              "best_practices_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "Best practices",
+                "description" =>
+                  "How to use the Building Permit Hub efficiently for application submission"
+              }
+            },
+            null: false
   end
 
   create_table "step_code_building_characteristics_summaries",
