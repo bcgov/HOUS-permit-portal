@@ -54,10 +54,12 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.unschedule!(template_version)
+  def self.unschedule!(template_version, deprecated_by)
     return template_version unless template_version.status == "scheduled"
 
     template_version.status = "deprecated"
+    template_version.deprecation_reason = TemplateVersion.deprecation_reasons[:unscheduled]
+    template_version.deprecated_by = deprecated_by
 
     unless template_version.save
       raise TemplateVersionUnscheduleError.new(template_version.errors.full_messages.join(", "))
@@ -109,7 +111,7 @@ class TemplateVersioningService
 
       raise TemplateVersionPublishError.new(template_version.errors.full_messages.join(", ")) if !template_version.save
 
-      previous_version = previous_version(template_version)
+      previous_version = previous_published_version(template_version)
 
       return template_version if previous_version.blank?
 
@@ -141,11 +143,16 @@ class TemplateVersioningService
       .update_all(template_version_id: new_template_version.id)
   end
 
-  def self.previous_version(template_version)
+  def self.previous_published_version(template_version)
     template_version
       .requirement_template
       .template_versions
-      .where("version_date <=?", template_version.version_date)
+      .where(
+        "version_date <=? AND status = ? AND deprecation_reason = ?",
+        template_version.version_date,
+        TemplateVersion.statuses[:deprecated],
+        TemplateVersion.deprecation_reasons[:new_publish],
+      )
       .where.not(id: template_version.id)
       .order(version_date: :desc, created_at: :desc)
       .first
@@ -247,7 +254,7 @@ class TemplateVersioningService
       .where(status: %w[published scheduled])
       .where("version_date <=?", template_version.version_date)
       .where.not(id: template_version.id)
-      .update_all(status: "deprecated")
+      .update_all(status: "deprecated", deprecation_reason: TemplateVersion.deprecation_reasons[:new_publish])
   end
 
   def self.form_requirement_blocks_hash(requirement_template)

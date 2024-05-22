@@ -119,7 +119,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         end
       end
 
-      it "sets all earlier versions to be deprecated" do
+      it "sets all earlier versions to be deprecated and adds correct depreciation reason" do
         template_version_1 = nil
         template_version_2 = nil
         Timecop.freeze(Date.current - 3) do
@@ -141,6 +141,7 @@ RSpec.describe TemplateVersioningService, type: :service do
             template_version.reload
 
             expect(template_version.status).to eq("deprecated")
+            expect(template_version.deprecation_reason).to eq("new_publish")
           end
 
           expect(template_version_4.status).to eq("scheduled")
@@ -209,7 +210,7 @@ RSpec.describe TemplateVersioningService, type: :service do
   end
 
   context "publish_versions_publishable_now!" do
-    it "publishes latest version publishable now and deprecates all older versions" do
+    it "publishes latest version publishable now and deprecates all older versions with correct reason" do
       expected_published_versions = []
       expected_deprecated_versions = []
       expected_scheduled_versions = []
@@ -241,6 +242,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         expected_deprecated_version.reload
 
         expect(expected_deprecated_version.status).to eq("deprecated")
+        expect(expected_deprecated_version.deprecation_reason).to eq("new_publish")
       end
 
       expected_scheduled_versions.each do |expected_scheduled_version|

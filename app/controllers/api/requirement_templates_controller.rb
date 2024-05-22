@@ -120,7 +120,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     authorize @template_version, policy_class: RequirementTemplatePolicy
 
     begin
-      template_version = TemplateVersioningService.unschedule!(@template_version)
+      template_version = TemplateVersioningService.unschedule!(@template_version, current_user)
     rescue StandardError => e
       render_error "requirement_template.template_unschedule_error", message_opts: { error_message: e.message }
     end
