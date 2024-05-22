@@ -294,7 +294,6 @@ const options = {
           search: "Search jurisdictions",
         },
         permitApplication: {
-          updateToNewVersion: "Update my application",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
@@ -1085,6 +1084,10 @@ const options = {
             diffBox: {
               title: "Template changes",
               instructions: "Please review the following:",
+              added: "Added",
+              changed: "Changed",
+              removed: "Removed",
+              updateToNewVersion: "See new",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
           },

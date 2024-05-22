@@ -166,6 +166,13 @@ export interface ICompareRequirementsBoxData {
   id?: string
   class?: string
   label: string
+  diffSectionLabel: string
+}
+
+export interface ICompareRequirementsBoxDiff {
+  added: ICompareRequirementsBoxData[]
+  removed: ICompareRequirementsBoxData[]
+  changed: ICompareRequirementsBoxData[]
 }
 
 export interface IErrorsBoxData {
