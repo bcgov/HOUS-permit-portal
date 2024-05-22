@@ -10,7 +10,7 @@ import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 interface ICompareRequirementsBoxDataProps {
   data: ICompareRequirementsBoxData[]
   handleUpdatePermitApplicationVersion?: () => void
-  showCompareAfter: boolean
+  showCompareAfter?: boolean
 }
 
 export const CompareRequirementsBox = ({
@@ -26,7 +26,6 @@ export const CompareRequirementsBox = ({
   if (data.length === 0) {
     return <React.Fragment key={"errors"}></React.Fragment>
   }
-
   return (
     <Box
       key={"template-changes"}
@@ -35,15 +34,18 @@ export const CompareRequirementsBox = ({
       borderWidth={"1px"}
       borderRadius="lg"
       minH="85px"
-      maxH="calc(100vh - 360px)"
+      maxH="calc(100vh - 600px)"
       w="340px"
-      position="fixed"
-      right="6"
-      top="220px"
       zIndex={11}
       id="floating-side-box"
       overflow="hidden"
       p={0}
+      position="fixed"
+      top="380px"
+      right="0"
+      mt="12"
+      mr="6"
+      ml="auto"
     >
       <Box p={4}>
         <Flex direction="column">
@@ -104,7 +106,7 @@ export const CompareRequirementsBox = ({
           {data.map((item, index) => {
             return (
               <ListItem key={index}>
-                <ScrollLink key={item.id} to={item.class}>
+                <ScrollLink key={item.id} to={item.class || item.id}>
                   {item.label}
                 </ScrollLink>
               </ListItem>

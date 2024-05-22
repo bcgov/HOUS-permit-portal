@@ -10,6 +10,7 @@ interface ScrollLinkProps {
 export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, ...props }) => {
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     event.preventDefault()
+    debugger
     let targetElement = document.getElementById(to)
     // If no element found by ID, try finding by class
     if (!targetElement) {
