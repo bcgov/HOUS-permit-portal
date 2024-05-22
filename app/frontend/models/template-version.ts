@@ -4,7 +4,7 @@ import { Instance, toGenerator, types } from "mobx-state-tree"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EExportFormat, ETemplateVersionStatus } from "../types/enums"
+import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
 import { IDenormalizedTemplate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
@@ -14,6 +14,7 @@ export const TemplateVersionModel = types
   .props({
     id: types.identifier,
     status: types.enumeration(Object.values(ETemplateVersionStatus)),
+    deprecationReason: types.maybeNull(types.enumeration(Object.values(EDeprecationReason))),
     versionDate: types.Date,
     label: types.string,
     updatedAt: types.Date,
@@ -38,6 +39,15 @@ export const TemplateVersionModel = types
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {
       return self.templateVersionCustomizationsByJurisdiction.get(jurisdictionId)
     },
+    get deprecationReasonLabel() {
+      if (!self.deprecationReason) {
+        return ""
+      }
+
+      return t(
+        `requirementTemplate.versionSidebar.deprecationReasonLabels.${self.deprecationReason as EDeprecationReason}`
+      )
+    },
   }))
   .actions((self) => ({
     setJurisdictionTemplateVersionCustomization(
@@ -48,6 +58,9 @@ export const TemplateVersionModel = types
     },
     setStatus(status: ETemplateVersionStatus) {
       self.status = status
+    },
+    setDeprecationReason(reason: EDeprecationReason | null) {
+      self.deprecationReason = reason
     },
   }))
   .actions((self) => ({
@@ -145,6 +158,7 @@ export const TemplateVersionModel = types
 
       if (response.ok) {
         self.setStatus(response.data.data.status)
+        self.setDeprecationReason(response.data.data.deprecationReason)
       }
 
       return response.ok

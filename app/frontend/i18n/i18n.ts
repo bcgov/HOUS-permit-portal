@@ -1178,6 +1178,7 @@ const options = {
             draft: "Draft",
             deprecated: "Deprecated",
           },
+
           index: {
             tableHeading: "Templates",
             title: "Permit templates catalogue",
@@ -1205,6 +1206,10 @@ const options = {
               draft: "Drafts",
               scheduled: "Scheduled",
               deprecated: "Deprecated",
+            },
+            deprecationReasonLabels: {
+              unscheduled: "reason: unscheduled",
+              new_publish: "reason: new publish",
             },
             lastUpdated: "Last updated",
           },

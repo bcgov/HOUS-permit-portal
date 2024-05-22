@@ -147,6 +147,7 @@ const VersionsList = observer(function VersionsList({
           borderBottomRadius={index === templateVersions.length - 1 ? "sm" : undefined}
           borderRadius={"none"}
           onUnschedule={() => onUnschedule(templateVersion.id)}
+          deprecationReasonLabel={templateVersion.deprecationReasonLabel}
         />
       ))}
     </Box>
@@ -154,8 +155,13 @@ const VersionsList = observer(function VersionsList({
 })
 
 type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => Promise<boolean> } & (
-    | { status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>; versionDate: Date; updatedAt?: never }
-    | { status: ETemplateVersionStatus.draft; versionDate?: never; updatedAt: Date }
+    | {
+        status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
+        versionDate: Date
+        updatedAt?: never
+        deprecationReasonLabel?: string
+      }
+    | { status: ETemplateVersionStatus.draft; versionDate?: never; updatedAt: Date; deprecationReasonLabel?: never }
   )
 
 const VersionCard = observer(function VersionCard({
@@ -164,6 +170,7 @@ const VersionCard = observer(function VersionCard({
   status,
   versionDate,
   updatedAt,
+  deprecationReasonLabel,
   ...containerProps
 }: TVersionCardProps) {
   const { t } = useTranslation()
@@ -231,6 +238,7 @@ const VersionCard = observer(function VersionCard({
         <TemplateStatusTag
           status={status}
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
+          subText={status === ETemplateVersionStatus.deprecated ? deprecationReasonLabel : undefined}
         />
         {status === ETemplateVersionStatus.draft ? (
           <Text>
