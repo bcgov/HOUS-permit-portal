@@ -94,8 +94,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
     signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
 
     # for submissions, we do not run the automated compliance as that should have already been complete
-    if signed && @permit_application.using_current_template_version
-      @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
+    if signed && @permit_application.using_current_template_version &&
+         @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
       @permit_application.send_submit_notifications
 
       render_success @permit_application,
