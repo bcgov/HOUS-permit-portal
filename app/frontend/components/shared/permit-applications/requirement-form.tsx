@@ -59,7 +59,6 @@ export const RequirementForm = observer(
       blockClasses,
       formattedFormJson,
       isDraft,
-      setIsDirty,
     } = permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
@@ -309,6 +308,8 @@ export const RequirementForm = observer(
     }
 
     if (permitApplication.isLoading) return <SharedSpinner />
+
+    console.log(JSON.stringify(formattedFormJson, null, 2))
 
     return (
       <>

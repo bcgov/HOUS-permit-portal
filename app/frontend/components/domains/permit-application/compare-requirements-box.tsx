@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Heading, IconButton, ListItem, OrderedList, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, CaretUp, Warning } from "@phosphor-icons/react"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { ICompareRequirementsBoxData } from "../../../types/types"
@@ -21,6 +21,22 @@ export const CompareRequirementsBox = ({
   const { t } = useTranslation()
   const { userStore } = useMst()
   const { currentUser } = userStore
+
+  useEffect(() => {
+    const classNames = data.map((obj) => obj.class)
+    classNames.forEach((className) => {
+      const targetElement = document.getElementsByClassName(className)[0]
+
+      if (targetElement) {
+        // debugger
+        // targetElement.classList.add("warning-highlight")
+        // targetElement.classList.add("warning-highlight")
+        targetElement.setAttribute("data-warning", "true")
+      }
+      // elements.forEach((element) => {
+      // })
+    })
+  }, [data])
 
   const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true })
   if (data.length === 0) {

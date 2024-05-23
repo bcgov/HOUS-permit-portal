@@ -796,6 +796,12 @@
     }
   }
 
+  .warning-highlight {
+    border: 1px solid var(--chakra-colors-semantic-warning);
+    background-color: var(--chakra-colors-semantic-warningLight);
+  }
+
+
   // the floating error alert box's show/hide
   .floating-side-box {
     transition-property: opacity, transform;
