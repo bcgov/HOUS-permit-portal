@@ -31,13 +31,18 @@ import {
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
-  EJurisdictionTypes,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { IContact, ISiteConfiguration, TAutoComplianceModuleConfigurations, TSearchParams } from "../../types/types"
+import {
+  IContact,
+  IJurisdictionFilters,
+  ISiteConfiguration,
+  TAutoComplianceModuleConfigurations,
+  TSearchParams,
+} from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -116,9 +121,9 @@ export class Api {
     return this.client.get<IOptionResponse<IContact>>(`/contacts/contact_options`, { query })
   }
 
-  async fetchJurisdictionOptions(name: string, type: EJurisdictionTypes) {
+  async fetchJurisdictionOptions(filters: IJurisdictionFilters) {
     return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, {
-      jurisdiction: { name, type },
+      jurisdiction: { ...filters },
     })
   }
 

@@ -19,7 +19,7 @@ export const UserModel = types
     nickname: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
-    jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
+    jurisdictions: types.array(types.reference(types.late(() => JurisdictionModel))),
     createdAt: types.maybeNull(types.Date),
     confirmationSentAt: types.maybeNull(types.Date),
     confirmedAt: types.maybeNull(types.Date),
@@ -34,8 +34,8 @@ export const UserModel = types
     get isSuperAdmin() {
       return self.role == EUserRoles.superAdmin
     },
-    get isAdmin() {
-      return self.role == EUserRoles.superAdmin || self.role == EUserRoles.reviewManager
+    get isRegionalReviewManager() {
+      return self.role == EUserRoles.regionalReviewManager
     },
     get isReviewManager() {
       return self.role == EUserRoles.reviewManager
@@ -44,7 +44,11 @@ export const UserModel = types
       return self.role == EUserRoles.reviewer
     },
     get isReviewStaff() {
-      return self.role == EUserRoles.reviewer || self.role == EUserRoles.reviewManager
+      return (
+        self.role == EUserRoles.reviewer ||
+        self.role == EUserRoles.reviewManager ||
+        self.role == EUserRoles.regionalReviewManager
+      )
     },
     get isSubmitter() {
       return self.role == EUserRoles.submitter
@@ -57,6 +61,12 @@ export const UserModel = types
     },
     get name() {
       return self.firstName && self.lastName && `${self.firstName} ${self.lastName}`
+    },
+    get jurisdiction() {
+      return (
+        self.jurisdictions.find((j) => j.id == self.rootStore.uiStore.currentlySelectedJurisdictionId) ||
+        self.jurisdictions[0]
+      )
     },
   }))
   .actions((self) => ({

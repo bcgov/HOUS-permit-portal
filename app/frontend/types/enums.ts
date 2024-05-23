@@ -39,6 +39,7 @@ export enum ExternalApiKeyStatus {
 
 export enum EUserRoles {
   submitter = "submitter",
+  regionalReviewManager = "regional_review_manager",
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",

@@ -5,9 +5,12 @@ import {
   Center,
   Container,
   Flex,
+  FormControl,
+  FormLabel,
   HStack,
   Heading,
   Image,
+  InputGroup,
   Link,
   ListItem,
   Text,
@@ -197,7 +200,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   const { fetchGeocodedJurisdiction, fetchingJurisdiction } = geocoderStore
   const { addJurisdiction } = jurisdictionStore
   const formMethods = useForm()
-  const { control, watch } = formMethods
+  const { control, watch, setValue } = formMethods
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
   const [manualMode, setManualMode] = useState<boolean>(false)
 
@@ -241,14 +244,20 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
               />
 
               {manualMode && (
-                <JurisdictionSelect
-                  onChange={(value) => {
-                    if (value) addJurisdiction(value)
-                    setJurisdiction(value)
-                  }}
-                  selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
-                  menuPortalTarget={document.body}
-                />
+                <FormControl w="full" zIndex={1}>
+                  <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
+                  <InputGroup w="full">
+                    <JurisdictionSelect
+                      onChange={(value) => {
+                        if (value) addJurisdiction(value)
+                        setJurisdiction(value)
+                      }}
+                      onFetch={() => setValue("jurisdiction", null)}
+                      selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
+                      menuPortalTarget={document.body}
+                    />
+                  </InputGroup>
+                </FormControl>
               )}
             </Flex>
           </form>

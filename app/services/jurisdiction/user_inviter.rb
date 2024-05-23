@@ -18,8 +18,14 @@ class Jurisdiction::UserInviter
   def invite_users
     users_params.each do |user_params|
       user = User.where.not(role: :submitter).find_by(email: user_params[:email].strip)
-      if user.present? && !user.discarded? && user.confirmed?
+      if user.present? && !user.discarded? && user.confirmed? && !user.regional_review_manager?
         self.results[:email_taken] << user
+      elsif user&.regional_review_manager? && jurisdiction_id = user_params[:jurisdiction_id]
+        user
+          .jurisdiction_memberships
+          .where(jurisdiction_id:)
+          .first_or_create { |m| PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later }
+        self.results[:invited] << user
       else
         reinvited = user.present?
         user =
@@ -32,14 +38,7 @@ class Jurisdiction::UserInviter
             u.last_name = user_params[:last_name]
             u.discarded_at = nil
             u.invited_by = inviter
-            u.jurisdiction_id =
-              (
-                if inviter.super_admin?
-                  user_params[:jurisdiction_id]
-                else
-                  inviter.jurisdiction&.id
-                end
-              )
+            u.jurisdiction_ids = [user_params[:jurisdiction_id]]
             u.save
           end
         reinvited ? self.results[:reinvited] << user : self.results[:invited] << user

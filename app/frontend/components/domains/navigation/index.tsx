@@ -8,7 +8,6 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
-import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 
@@ -373,7 +372,10 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isSuperAdmin)}
+              isAllowed={
+                loggedIn &&
+                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
+              }
               redirectPath={loggedIn && "/not-found"}
             />
           }
@@ -391,10 +393,7 @@ const AppRoutes = observer(() => {
 
         <Route
           element={
-            <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewer || currentUser.isReviewManager)}
-              redirectPath={loggedIn && "/not-found"}
-            />
+            <ProtectedRoute isAllowed={loggedIn && currentUser.isReviewStaff} redirectPath={loggedIn && "/not-found"} />
           }
         >
           {managerOrReviewerRoutes}
@@ -403,7 +402,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && currentUser.isReviewManager}
+              isAllowed={loggedIn && currentUser.isReviewStaff && !currentUser.isReviewer}
               redirectPath={loggedIn && "/not-found"}
             />
           }

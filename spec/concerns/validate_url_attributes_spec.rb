@@ -27,7 +27,10 @@ RSpec.describe ValidateUrlAttributes, type: :model do
 
   # Rollback migration after running the tests
   after(:all) do
-    ActiveRecord::Migration.drop_table(:dummy_models) if ActiveRecord::Base.connection.table_exists?(:dummy_models)
+    if ActiveRecord::Base.connection.table_exists?(:dummy_models)
+      ActiveRecord::Migration.drop_table(:dummy_models)
+      ActiveRecord::Migration.maintain_test_schema!
+    end
   end
 
   describe "URL validation" do

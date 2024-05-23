@@ -12,6 +12,7 @@ const roleSpecificScreens = (role: EUserRoles, props: IHomeScreenProps) => {
     [EUserRoles.superAdmin]: <SuperAdminHomeScreen {...props} />,
     [EUserRoles.reviewer]: <ReviewerHomeScreen {...props} />,
     [EUserRoles.reviewManager]: <ReviewManagerHomeScreen {...props} />,
+    [EUserRoles.regionalReviewManager]: <ReviewManagerHomeScreen {...props} />,
     [EUserRoles.submitter]: <PermitApplicationIndexScreen {...props} />,
   }[role]
 }
