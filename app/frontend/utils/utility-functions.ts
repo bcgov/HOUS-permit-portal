@@ -1,8 +1,13 @@
 import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
-import { vancouverTimeZone } from "../constants"
+import {
+  OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES,
+  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
+  VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
+  vancouverTimeZone,
+} from "../constants"
 import { ERequirementType } from "../types/enums"
-import { TDebouncedFunction } from "../types/types"
+import { TAutoComplianceModuleConfiguration, TDebouncedFunction } from "../types/types"
 
 export function isUUID(str) {
   const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -131,4 +136,35 @@ export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName
   a.download = fileName
   a.click()
   window.URL.revokeObjectURL(url)
+}
+
+export function isStepCodePackageFileRequirementCode(requirementCode: string) {
+  return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+}
+
+export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
+  // Remove any non-numeric characters, especially the leading '+'
+  if (!phoneNumber) return ""
+
+  const digits = phoneNumber.replace(/\D+/g, "")
+
+  // Extract the area code, first three digits, and last four digits
+  const areaCode = digits.substring(1, 4)
+  const firstThree = digits.substring(4, 7)
+  const lastFour = digits.substring(7, 11)
+
+  // Return the formatted phone number
+  return `(${areaCode}) ${firstThree}-${lastFour}`
+}
+
+export function isValueExtractorModuleConfiguration(moduleConfiguration?: TAutoComplianceModuleConfiguration) {
+  return VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES.includes(moduleConfiguration?.type)
+}
+
+export function isOptionsMapperModuleConfiguration(moduleConfiguration?: TAutoComplianceModuleConfiguration) {
+  return OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES.includes(moduleConfiguration?.type)
+}
+
+export function removePrefix(str: string, prefix: string) {
+  return str.startsWith(prefix) ? str.slice(prefix.length) : str
 }

@@ -1,4 +1,5 @@
-import { IStateTreeNode, types } from "mobx-state-tree"
+import { makePersistable } from "mobx-persist-store"
+import { IStateTreeNode, flow, protect, types, unprotect } from "mobx-state-tree"
 import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
 import { ContactStoreModel, IContactStore } from "./contact-store"
@@ -38,6 +39,15 @@ export const RootStoreModel = types
   }))
   .views((self) => ({}))
   .actions((self) => ({
+    loadLocalPersistedData: flow(function* () {
+      unprotect(self)
+      yield makePersistable(self.sessionStore, {
+        name: `${self.userStore.currentUser?.id}-SessionStore`,
+        properties: ["afterLoginPath"],
+        storage: localStorage,
+      })
+      protect(self)
+    }),
     subscribeToUserChannel() {
       if (!self.userChannelConsumer && self.userStore.currentUser) {
         // @ts-ignore
@@ -46,6 +56,11 @@ export const RootStoreModel = types
     },
     disconnectUserChannel() {
       self.userChannelConsumer?.consumer?.disconnect()
+    },
+  }))
+  .actions((self) => ({
+    afterCreate() {
+      self.loadLocalPersistedData()
     },
   }))
 
@@ -65,4 +80,5 @@ export interface IRootStore extends IStateTreeNode {
   contactStore: IContactStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
+  loadLocalPersistedData: () => void
 }

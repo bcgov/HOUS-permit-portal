@@ -369,6 +369,7 @@ export const RequirementForm = observer(
             onClose={onContactsClose}
             autofillContactKey={autofillContactKey}
             permitApplication={permitApplication}
+            submissionState={clonedSubmissionData}
           />
         )}
       </>

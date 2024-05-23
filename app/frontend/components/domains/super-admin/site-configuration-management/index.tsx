@@ -1,5 +1,5 @@
 import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
-import { FlagBanner, Users } from "@phosphor-icons/react"
+import { FlagBanner, Question, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -33,6 +33,16 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               linkText={t("ui.edit")}
               icon={<Users size="24px" color="--var(chakra-colors-text-primary)" />}
               href="users"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.helpDrawerSetup.title`)}
+              description={t(`${i18nPrefix}.helpDrawerSetup.description`)}
+              linkText={t("ui.edit")}
+              icon={<Question size="24px" color="--var(chakra-colors-text-primary)" />}
+              href="help-drawer-setup"
               h="full"
             />
           </GridItem>

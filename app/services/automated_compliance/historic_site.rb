@@ -13,10 +13,17 @@ class AutomatedCompliance::HistoricSite < AutomatedCompliance::Base
         permit_application
           .automated_compliance_requirements_for_module("HistoricSite")
           .each do |field_id, req|
+            attribute_value = attributes[req.dig("computedCompliance", "value")]
+
+            options_map = req.dig("computedCompliance", "optionsMap")
+
             result =
-              if attributes[req.dig("computedCompliance", "value")] == "Y"
+              if options_map.present? && options_map.is_a?(Hash)
+                # set to configured requirement option value
+                options_map[attribute_value]
+              elsif attribute_value == "Y" # this is for backward compatibility when options_map wasn't implemented
                 "yes"
-              elsif attributes[req.dig("computedCompliance", "value")] == "N"
+              elsif attribute_value == "N" # this is for backward compatibility when options_map wasn't implemented
                 "no"
               else
                 # set to nil to indicate a valid value was not found

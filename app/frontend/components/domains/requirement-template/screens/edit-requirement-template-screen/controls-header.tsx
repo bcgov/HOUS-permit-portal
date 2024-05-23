@@ -15,6 +15,7 @@ interface IProps {
   onSaveDraft: () => void
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
+  hasStepCodeDependencyError?: boolean
 }
 
 export const ControlsHeader = observer(function ControlsHeader({
@@ -23,6 +24,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   onSaveDraft,
   onAddSection,
   onForcePublishNow,
+  hasStepCodeDependencyError,
 }: IProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -32,7 +34,7 @@ export const ControlsHeader = observer(function ControlsHeader({
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
   }
-  const isSubmitDisabled = !!requirementTemplate.discardedAt || isSubmitting || !isValid
+  const isSubmitDisabled = hasStepCodeDependencyError || !!requirementTemplate.discardedAt || isSubmitting || !isValid
 
   return (
     <HStack

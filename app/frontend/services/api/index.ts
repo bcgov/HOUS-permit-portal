@@ -27,8 +27,6 @@ import {
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
-  IResetPasswordResponse,
-  IUserResponse,
   IUsersResponse,
 } from "../../types/api-responses"
 import {
@@ -39,7 +37,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { IContact, ISiteConfiguration, TSearchParams } from "../../types/types"
+import { IContact, ISiteConfiguration, TAutoComplianceModuleConfigurations, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -70,28 +68,12 @@ export class Api {
     this.client.addMonitor(monitor)
   }
 
-  async login(username, password) {
-    return this.client.post<IUserResponse>("/login", { user: { username, password } })
-  }
-
-  async signUp(formData) {
-    return this.client.post<IUserResponse>("/signup", { user: formData })
+  async resendConfirmation(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
   async logout() {
     return this.client.delete("/logout")
-  }
-
-  async changePassword(params) {
-    return this.client.patch<IUserResponse>(`/users/change_password`, params)
-  }
-
-  async requestPasswordReset(params) {
-    return this.client.post("/password", { user: params })
-  }
-
-  async resetPassword(params) {
-    return this.client.put<IResetPasswordResponse>("/password", { user: params })
   }
 
   async validateToken() {
@@ -106,6 +88,10 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
+  async fetchInvitedUser(token: string) {
+    return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
+  }
+
   async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
@@ -116,6 +102,10 @@ export class Api {
 
   async fetchPermitApplication(id) {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
+  }
+
+  async viewPermitApplication(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
   }
 
   async fetchLocalityTypeOptions() {
@@ -228,6 +218,12 @@ export class Api {
 
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
+  }
+
+  async fetchAutoComplianceModuleConfigurations() {
+    return this.client.get<ApiResponse<TAutoComplianceModuleConfigurations>>(
+      "/requirement_blocks/auto_compliance_module_configurations"
+    )
   }
 
   async updatePermitApplication(id, params) {

@@ -5,9 +5,19 @@ import React, { useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
+import {
+  STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
+  getEnergyStepCodeRequirementRequiredSchema,
+} from "../../../../constants"
+import { IRequirementBlock } from "../../../../models/requirement-block"
 import { IRequirementAttributes } from "../../../../types/api-request"
-import { ENumberUnit, ERequirementType } from "../../../../types/enums"
-import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
+import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
+import { IDenormalizedRequirementBlock } from "../../../../types/types"
+import {
+  isContactRequirement,
+  isMultiOptionRequirement,
+  isStepCodePackageFileRequirementCode,
+} from "../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
@@ -26,9 +36,13 @@ const fieldContainerSharedProps = {
   mt: 7,
 }
 
-export const FieldsSetup = observer(function FieldsSetup() {
+export const FieldsSetup = observer(function FieldsSetup({
+  requirementBlock,
+}: {
+  requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock
+}) {
   const { t } = useTranslation()
-  const { setValue, control, register, watch } = useFormContext<IRequirementBlockForm>()
+  const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
   const { fields, append, remove } = useFieldArray<IRequirementBlockForm>({
     control,
     name: "requirementsAttributes",
@@ -40,6 +54,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
     name: "displayName",
     rules: { required: true },
   })
+  const watchedRequirements = watch("requirementsAttributes")
 
   const [requirementIdsToEdit, setRequirementIdsToEdit] = useState<Record<string, boolean>>({})
 
@@ -47,34 +62,116 @@ export const FieldsSetup = observer(function FieldsSetup() {
     setRequirementIdsToEdit((pastState) => ({ ...pastState, [requirementId]: !pastState[requirementId] }))
   }
 
-  const onUseRequirement = (requirementType: ERequirementType) => {
-    append({
-      requirementCode: `dummy-${uuidv4()}`,
-      inputType: requirementType,
-      label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
-        ? t("requirementsLibrary.modals.defaultContactLabel")
-        : undefined,
-      ...(isMultiOptionRequirement(requirementType)
-        ? {
-            inputOptions: {
-              valueOptions: [
-                { value: "Option 1", label: "Option 1" },
-                {
-                  value: "Option 2",
-                  label: "Option 2",
-                },
-                { value: "Option 3", label: "Option 3" },
-              ],
-            },
-          }
-        : {}),
-    })
+  const onUseRequirement = (
+    requirementType: ERequirementType,
+    _callBack: any,
+    matchesStepCodePackageRequirementCode?: boolean
+  ) => {
+    if (requirementType !== ERequirementType.energyStepCode) {
+      const isStepCodePackageFile = requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode
+      const defaults = {
+        requirementCode: isStepCodePackageFile ? STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE : `dummy-${uuidv4()}`,
+        inputType: requirementType,
+        label: [ERequirementType.generalContact, ERequirementType.professionalContact].includes(requirementType)
+          ? t("requirementsLibrary.modals.defaultContactLabel")
+          : undefined,
+        ...(isMultiOptionRequirement(requirementType)
+          ? {
+              inputOptions: {
+                valueOptions: [
+                  { value: "Option 1", label: "Option 1" },
+                  {
+                    value: "Option 2",
+                    label: "Option 2",
+                  },
+                  { value: "Option 3", label: "Option 3" },
+                ],
+              },
+            }
+          : {}),
+      }
+      append(defaults)
+
+      return
+    }
+
+    // handle energy_step_code requirement as it's a special case where we have to add multiple other requirements
+    // with additional defaults
+    const energyStepCodeDependencyDefaults = Object.values(EEnergyStepCodeDependencyRequirementCode)
+      .map((code) => getEnergyStepCodeRequirementRequiredSchema(code))
+      .map((requirement) => {
+        const energyRequirementInOriginalBlock = requirementBlock?.requirements.find(
+          (r) => requirement.requirementCode === r.requirementCode
+        )
+
+        // we reuse the id of the original energy requirement dependency if it exists
+        // this is to prevent duplicate label error from back-end, when removing then adding an energy_step_code requirement
+        if (energyRequirementInOriginalBlock) {
+          requirement.id = energyRequirementInOriginalBlock.id
+        }
+        return requirement
+      })
+
+    append(energyStepCodeDependencyDefaults)
   }
 
   const hasFields = fields.length > 0
 
+  const disabledRequirementTypeOptions = (() => {
+    const hasEnergyStepCodeRequirement = watchedRequirements.some(
+      (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCode
+    )
+    const hasStepCodePackageFileRequirement = watchedRequirements.some((r) =>
+      isStepCodePackageFileRequirementCode(r.requirementCode)
+    )
+
+    const disabledTypes: Array<{
+      requirementType: ERequirementType
+      isStepCodePackageFileRequirement?: boolean
+    }> = []
+
+    if (hasEnergyStepCodeRequirement) {
+      disabledTypes.push({ requirementType: ERequirementType.energyStepCode })
+    }
+
+    if (hasStepCodePackageFileRequirement) {
+      disabledTypes.push({ requirementType: ERequirementType.file, isStepCodePackageFileRequirement: true })
+    }
+    return disabledTypes
+  })()
+
   function isRequirementInEditMode(id: string) {
     return !!requirementIdsToEdit[id]
+  }
+
+  const onRemoveRequirement = (index: number) => {
+    const requirement = watchedRequirements[index]
+
+    if (!requirement) {
+      return
+    }
+
+    const isEnergyStepCodeRequirement = requirement.inputType === ERequirementType.energyStepCode
+
+    if (!isEnergyStepCodeRequirement) {
+      remove(index)
+
+      return
+    }
+
+    const stepCodeDependencyIndexes = watchedRequirements.reduce((acc, req, idx) => {
+      const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+        req.requirementCode as EEnergyStepCodeDependencyRequirementCode
+      )
+
+      if (isEnergyStepCodeDependency) {
+        acc.push(idx)
+      }
+
+      return acc
+    }, [])
+
+    remove(stepCodeDependencyIndexes)
   }
 
   return (
@@ -92,6 +189,13 @@ export const FieldsSetup = observer(function FieldsSetup() {
           borderTopRadius="lg"
           borderBottom="1px solid"
           borderBottomColor="border.light"
+          sx={{
+            ":after": {
+              content: "'*'",
+              color: "var(--chakra-colors-red-500)",
+            },
+          }}
+          alignItems={"center"}
         >
           <EditableInputWithControls
             initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
@@ -125,7 +229,10 @@ export const FieldsSetup = observer(function FieldsSetup() {
           {!hasFields && (
             <Flex w={"full"} justifyContent={"space-between"} px={6}>
               <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-              <FieldsSetupDrawer onUse={onUseRequirement} />
+              <FieldsSetupDrawer
+                disabledRequirementTypeOptions={disabledRequirementTypeOptions}
+                onUse={onUseRequirement}
+              />
             </Flex>
           )}
           <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
@@ -135,6 +242,26 @@ export const FieldsSetup = observer(function FieldsSetup() {
               const requirementType = (field as IRequirementAttributes).inputType
               const watchedElective = watch(`requirementsAttributes.${index}.elective`)
               const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
+              const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
+              const watchedComputedCompliance = watch(`requirementsAttributes.${index}.inputOptions.computedCompliance`)
+              // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
+              const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+                watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
+              )
+              const disabledMenuOptions: ("remove" | "conditional")[] =
+                isStepCodeDependency || isStepCodePackageFileRequirementCode(watchedRequirementCode)
+                  ? ["conditional"]
+                  : []
+
+              // for step code dependency only the step_code requirement is removable and the other
+              // dependencies rely on it for removal
+              if (
+                isStepCodeDependency &&
+                watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9
+              ) {
+                disabledMenuOptions.push("remove")
+              }
+
               return (
                 <Box
                   key={field.id}
@@ -239,6 +366,7 @@ export const FieldsSetup = observer(function FieldsSetup() {
                             }
                           : undefined
                       }
+                      requirementCode={watchedRequirementCode}
                     />
                   </Box>
                   <Box
@@ -247,6 +375,9 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     {...fieldContainerSharedProps}
                   >
                     <RequirementFieldDisplay
+                      matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
+                        watchedRequirementCode
+                      )}
                       requirementType={requirementType}
                       label={watch(`requirementsAttributes.${index}.label`)}
                       helperText={watchedHint}
@@ -273,19 +404,23 @@ export const FieldsSetup = observer(function FieldsSetup() {
                     />
                   </Box>
                   <FieldControlsHeader
+                    requirementCode={watchedRequirementCode}
                     isRequirementInEditMode={isRequirementInEditMode(field.id)}
                     toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
-                    onRemove={() => remove(index)}
+                    onRemove={() => onRemoveRequirement(index)}
                     elective={watchedElective}
                     conditional={watchedConditional}
+                    computedCompliance={watchedComputedCompliance}
                     requirementType={requirementType}
                     index={index}
+                    disabledMenuOptions={disabledMenuOptions}
                   />
                 </Box>
               )
             })}
             {hasFields && (
               <FieldsSetupDrawer
+                disabledRequirementTypeOptions={disabledRequirementTypeOptions}
                 onUse={onUseRequirement}
                 defaultButtonProps={{
                   alignSelf: "flex-end",

@@ -4,6 +4,8 @@ class CustomDeviseMailer < Devise::Mailer
 
   # If you wanted to override devise confirmation instructions do it here
   def confirmation_instructions(record, token, opts = {})
+    @change_type = record.email.present? ? "changed" : "created"
+    @user = record
     super
   end
 

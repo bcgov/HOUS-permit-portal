@@ -41,7 +41,7 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
           />
           <HomeScreenBox
             title={t("home.configurationManagement.title")}
-            description={t("home.configurationManagement.description")}
+            description={t("home.configurationManagement.adminDescription")}
             icon={<Pencil size={24} />}
             href="/configuration-management"
           />

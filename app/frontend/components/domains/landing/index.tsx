@@ -20,7 +20,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -101,20 +101,16 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                {loggedIn ? (
-                  <RouterLinkButton to="/" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                    {t("site.goTo")} {currentUser?.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
-                  </RouterLinkButton>
-                ) : (
-                  <>
-                    <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.login")}
-                    </RouterLinkButton>
-                    <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.register")}
-                    </RouterLinkButton>
-                  </>
-                )}
+                <RouterLinkButton
+                  to={currentUser ? "/" : "/login"}
+                  variant="primaryInverse"
+                  icon={<CaretRight size={16} />}
+                >
+                  {t("landing.goTo", {
+                    location:
+                      !currentUser || currentUser.isSubmitter ? t("landing.permitApp") : t("landing.adminPanel"),
+                  })}
+                </RouterLinkButton>
               </Flex>
             </Flex>
             <VStack as="section" align="flex-start" spacing={4}>
@@ -158,6 +154,15 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               {t("landing.whenNotNecessaryQ")}
             </Heading>
             <Text>{t("landing.whenNotNecessaryA")}</Text>
+
+            <Text>
+              <Trans
+                i18nKey="landing.permitConnect"
+                components={{
+                  1: <Link href={"https://permitconnectbc.gov.bc.ca/"}></Link>,
+                }}
+              />
+            </Text>
           </VStack>
         </Container>
       </Box>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_25_172912) do
+ActiveRecord::Schema[7.1].define(version: 2024_05_16_230948) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -298,6 +298,38 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_25_172912) do
     t.text "sitewide_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "help_link_items",
+            default: {
+              "dictionary_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "Dictionary of terms",
+                "description" =>
+                  "See detailed explanations of terms that appear on building permits"
+              },
+              "user_guide_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "User and role guides",
+                "description" =>
+                  "Step-by-step instructions on how to make the most out of the platform"
+              },
+              "get_started_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "Get started on Building Permit Hub",
+                "description" =>
+                  "How to submit a building permit application through a streamlined and standardized approach across BC"
+              },
+              "best_practices_link_item" => {
+                "href" => "",
+                "show" => false,
+                "title" => "Best practices",
+                "description" =>
+                  "How to use the Building Permit Hub efficiently for application submission"
+              }
+            },
+            null: false
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -570,8 +602,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_25_172912) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.string "email", null: false
-    t.string "username"
+    t.string "email"
+    t.string "nickname"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -595,31 +627,33 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_25_172912) do
     t.string "invited_by_type"
     t.uuid "invited_by_id"
     t.integer "invitations_count", default: 0
-    t.string "provider"
-    t.string "uid"
+    t.string "omniauth_provider"
+    t.string "omniauth_uid"
     t.datetime "discarded_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string "unconfirmed_email"
+    t.string "omniauth_email"
+    t.string "omniauth_username"
     t.index ["confirmation_token"],
             name: "index_users_on_confirmation_token",
             unique: true
     t.index ["discarded_at"], name: "index_users_on_discarded_at"
-    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["email"], name: "index_users_on_email"
     t.index ["invitation_token"],
             name: "index_users_on_invitation_token",
             unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
-    t.index %w[provider uid],
-            name: "index_users_on_provider_and_uid",
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true
+    t.index %w[omniauth_provider omniauth_uid],
+            name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true
     t.index ["reset_password_token"],
             name: "index_users_on_reset_password_token",
             unique: true
-    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade

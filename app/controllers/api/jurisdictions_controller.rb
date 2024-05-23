@@ -20,6 +20,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @search.current_page,
                      },
                      blueprint: JurisdictionBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -34,7 +37,9 @@ class Api::JurisdictionsController < Api::ApplicationController
       end
     end
     if @jurisdiction.update(jurisdiction_params)
-      render_success @jurisdiction, "jurisdiction.update_success", { blueprint: JurisdictionBlueprint }
+      render_success @jurisdiction,
+                     "jurisdiction.update_success",
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.update_error",
                    message_opts: {
@@ -67,7 +72,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   # GET /api/jurisdictions/:id
   def show
     authorize @jurisdiction
-    render_success(@jurisdiction)
+    render_success(@jurisdiction, nil, blueprint_opts: { view: :base })
   end
 
   # POST /api/jurisdiction
@@ -79,7 +84,9 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize @jurisdiction
 
     if @jurisdiction.save
-      render_success @jurisdiction, "jurisdiction.create_success", { blueprint: JurisdictionBlueprint }
+      render_success @jurisdiction,
+                     "jurisdiction.create_success",
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.create_error",
                    message_opts: {
@@ -109,6 +116,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 

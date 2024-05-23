@@ -1,5 +1,8 @@
 class AutomatedCompliance::PermitApplication < AutomatedCompliance::Base
-  WHITELISTED_ATTRIBUTES = ["full_address"]
+  WHITELISTED_ATTRIBUTES =
+    AutomatedComplianceConfigurationService.available_module_configurations[:PermitApplication][:available_fields]
+      .map { |field| field[:value] }
+      .freeze
 
   def call(permit_application)
     return if permit_application.full_address.blank?

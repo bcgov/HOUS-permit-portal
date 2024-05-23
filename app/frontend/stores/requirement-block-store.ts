@@ -6,12 +6,26 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
-import { ERequirementLibrarySortFields, ETagType } from "../types/enums"
+import {
+  EAutoComplianceModule,
+  EAutoComplianceType,
+  ERequirementLibrarySortFields,
+  ERequirementType,
+  ETagType,
+} from "../types/enums"
+import {
+  TAutoComplianceModuleConfiguration,
+  TAutoComplianceModuleConfigurations,
+  TValueExtractorAutoComplianceModuleConfiguration,
+} from "../types/types"
+import { isValueExtractorModuleConfiguration } from "../utils/utility-functions"
 
 export const RequirementBlockStoreModel = types
   .compose(
     types.model("RequirementBlockStoreModel").props({
       requirementBlockMap: types.map(RequirementBlockModel),
+      autoComplianceModuleConfigurations: types.maybeNull(types.frozen<TAutoComplianceModuleConfigurations>()),
+      isAutoComplianceModuleOptionsLoading: types.optional(types.boolean, false),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
     }),
     createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks")
@@ -20,6 +34,9 @@ export const RequirementBlockStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    get autoComplianceModuleConfigurationsList(): Array<TAutoComplianceModuleConfiguration> {
+      return Object.values(self.autoComplianceModuleConfigurations ?? {}) as Array<TAutoComplianceModuleConfiguration>
+    },
     // View to get a RequirementBlock by id
     getRequirementBlockById(id: string) {
       return self.requirementBlockMap.get(id)
@@ -39,7 +56,48 @@ export const RequirementBlockStoreModel = types
       }
     },
   }))
+  .views((self) => ({
+    getAutoComplianceModuleConfigurationForRequirementType(
+      moduleName: EAutoComplianceModule,
+      requirementType: ERequirementType
+    ) {
+      const moduleConfig = self.autoComplianceModuleConfigurations?.[moduleName]
 
+      if (!moduleConfig || !moduleConfig.availableOnInputTypes.includes(requirementType)) {
+        return null
+      }
+
+      if (!isValueExtractorModuleConfiguration(moduleConfig)) {
+        return moduleConfig
+      }
+
+      return {
+        ...moduleConfig,
+        availableFields: (moduleConfig as TValueExtractorAutoComplianceModuleConfiguration).availableFields.filter(
+          (field) => field.availableOnInputTypes.includes(requirementType)
+        ),
+      }
+    },
+    getAvailableAutoComplianceModuleConfigurationsForRequirementType(requirementType: ERequirementType) {
+      return self.autoComplianceModuleConfigurationsList
+        .filter((option) => option.availableOnInputTypes.includes(requirementType))
+        .map((option) => {
+          if (
+            option.type === EAutoComplianceType.externalValueExtractor ||
+            option.type === EAutoComplianceType.internalValueExtractor
+          ) {
+            return {
+              ...option,
+              availableFields: (option as TValueExtractorAutoComplianceModuleConfiguration).availableFields.filter(
+                (field) => field.availableOnInputTypes.includes(requirementType)
+              ),
+            }
+          }
+
+          return option
+        })
+    },
+  }))
   .actions((self) => ({
     fetchRequirementBlocks: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
@@ -94,6 +152,19 @@ export const RequirementBlockStoreModel = types
       }
 
       return []
+    }),
+    fetchAutoComplianceModuleConfigurations: flow(function* () {
+      self.isAutoComplianceModuleOptionsLoading = true
+
+      const response = yield* toGenerator(self.environment.api.fetchAutoComplianceModuleConfigurations())
+
+      if (response.ok) {
+        self.autoComplianceModuleConfigurations = response.data.data
+      }
+
+      self.isAutoComplianceModuleOptionsLoading = false
+
+      return self.autoComplianceModuleConfigurations
     }),
   }))
 

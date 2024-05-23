@@ -21,6 +21,7 @@ export function ContactFieldItemDisplay({ contactFieldItemType, required }: ICon
       ERequirementContactFieldItemType.email,
       ERequirementContactFieldItemType.phone,
       ERequirementContactFieldItemType.address,
+      ERequirementContactFieldItemType.title,
     ].includes(contactFieldItemType)
 
   const propsByType = {
@@ -35,6 +36,9 @@ export function ContactFieldItemDisplay({ contactFieldItemType, required }: ICon
     },
     [ERequirementContactFieldItemType.organization]: {
       labelProps: { maxW: "full" },
+    },
+    [ERequirementContactFieldItemType.title]: {
+      requirementType: ERequirementType.text,
     },
   }
   return <RequirementFieldDisplay {...defaultProps} {...propsByType[contactFieldItemType]} required={isRequiredItem} />

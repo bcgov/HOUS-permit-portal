@@ -22,25 +22,21 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :jurisdiction_review_inbox do
     include_view :base
 
-    association :submitter, blueprint: UserBlueprint
+    association :submitter, blueprint: UserBlueprint, view: :base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
   end
 
   view :extended do
     include_view :base
-    fields :form_json,
-           :submission_data,
-           :formatted_compliance_data,
-           :front_end_form_update,
-           :form_customizations
+    fields :form_json, :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
 
     field :is_fully_loaded do |pa, options|
       true
     end
 
-    association :submitter, blueprint: UserBlueprint
+    association :submitter, blueprint: UserBlueprint, view: :base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
-    association :jurisdiction, blueprint: JurisdictionBlueprint
+    association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
   end
 

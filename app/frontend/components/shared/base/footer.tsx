@@ -9,17 +9,14 @@ import { RouterLink } from "../navigation/router-link"
 export const Footer = observer(() => {
   const location = useLocation()
   const {
-    userStore,
     sessionStore: { loggedIn },
   } = useMst()
-  const { currentUser } = userStore
   const { t } = useTranslation()
   const onlyShowFooterOnRoutes = [
     "/reset-password",
     "/accept-invitation",
     "/login",
     "/forgot-password",
-    "/register",
     "/welcome",
     "/contact",
   ]
@@ -72,18 +69,12 @@ export const Footer = observer(() => {
                         >
                           {t("site.help")}
                         </Link>
-                      </VStack>
-
-                      {!loggedIn && (
-                        <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
+                        {!loggedIn && (
                           <RouterLink to="/login" color="text.primary">
                             {t("auth.login")}
                           </RouterLink>
-                          <RouterLink to="/register" color="text.primary">
-                            {t("auth.register")}
-                          </RouterLink>
-                        </VStack>
-                      )}
+                        )}
+                      </VStack>
 
                       <VStack align="flex-start" gap={4} w={{ base: "100%", md: "33%" }}>
                         <Link
