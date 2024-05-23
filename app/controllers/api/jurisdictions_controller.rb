@@ -144,14 +144,20 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def jurisdiction_options
     authorize :jurisdiction, :jurisdiction_options?
+
+    # TODO: refactor jurisdictions search to accomodate filters,
+    # then use that here instead of having the search logic in the controller
     name = jurisdiction_params["name"]
     type = jurisdiction_params["type"]
+    user_id = jurisdiction_params["user_id"]
 
     filters = {}
-    filters = { where: { type: type } } if type.present?
+    filters = { type: type } if type.present?
+    filters = filters.merge({ user_ids: [user_id] }) if user_id.present?
+    filters = { where: filters, match: :word_start }
 
-    search = Jurisdiction.search(name, **filters)
-    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
+    search = Jurisdiction.search(name || "*", **filters)
+    options = search.results.map { |j| { label: j.qualified_name, value: j } }
     render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
 
@@ -161,6 +167,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     params.require(:jurisdiction).permit(
       :name,
       :type,
+      :user_id,
       :locality_type,
       :address,
       :regional_district_id,

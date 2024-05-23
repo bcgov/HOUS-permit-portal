@@ -7,6 +7,7 @@ import {
   FormLabel,
   HStack,
   Heading,
+  InputGroup,
   Switch,
   Text,
   VStack,
@@ -153,14 +154,18 @@ export const NewJurisdictionScreen = observer(() => {
                         control={control}
                         render={({ field: { onChange, value } }) => {
                           return (
-                            <JurisdictionSelect
-                              title={t("jurisdiction.fields.regionalDistrictName")}
-                              onChange={onChange}
-                              isDisabled={localityTypeWatch == regionalDistrictLocalityType}
-                              jurisdictionType={EJurisdictionTypes.regionalDistrict}
-                              selectedOption={{ label: value?.reverseQualifiedName, value }}
-                              menuPortalTarget={document.body}
-                            />
+                            <FormControl w="full" zIndex={1}>
+                              <FormLabel>{t("jurisdiction.fields.regionalDistrictName")}</FormLabel>
+                              <InputGroup w="full">
+                                <JurisdictionSelect
+                                  onChange={onChange}
+                                  isDisabled={localityTypeWatch == regionalDistrictLocalityType}
+                                  filters={{ type: EJurisdictionTypes.regionalDistrict }}
+                                  selectedOption={{ label: value?.reverseQualifiedName, value }}
+                                  menuPortalTarget={document.body}
+                                />
+                              </InputGroup>
+                            </FormControl>
                           )
                         }}
                       />

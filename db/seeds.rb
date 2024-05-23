@@ -18,6 +18,7 @@ JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
 north_van = Jurisdiction.find_by(name: "North Vancouver")
+van = Jurisdiction.find_by(name: "Vancouver")
 
 puts "Seeding users..."
 User.find_or_create_by(nickname: "super_admin") do |user|
@@ -39,12 +40,26 @@ User.find_or_create_by(nickname: "review_manager") do |user|
   user.last_name = "McUser"
   user.email = "review_manager@example.com"
   user.password = "P@ssword1"
-  user.jurisdiction = north_van
+  user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
   user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "review_manager@example.com"
   user.omniauth_username = "review_manager"
+end
+
+User.find_or_create_by(nickname: "regional_review_manager") do |user|
+  user.role = :regional_review_manager
+  user.first_name = "RegionalReviewManager"
+  user.last_name = "McUser"
+  user.email = "regional_review_manager@example.com"
+  user.password = "P@ssword1"
+  user.jurisdictions = [north_van, van]
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "08B5EED1DB3E42909CB050FFAA600145"
+  user.omniauth_provider = "bceidbasic"
+  user.omniauth_email = "regional_review_manager@example.com"
+  user.omniauth_username = "regional_rm"
 end
 
 User.find_or_create_by(nickname: "reviewer") do |user|
@@ -53,7 +68,7 @@ User.find_or_create_by(nickname: "reviewer") do |user|
   user.last_name = "McUser"
   user.email = "reviewer@example.com"
   user.password = "P@ssword1"
-  user.jurisdiction = north_van
+  user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"
