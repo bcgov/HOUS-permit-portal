@@ -15,7 +15,6 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   before_save :sanitize_tip
   validates_uniqueness_of :template_version_id, scope: :jurisdiction_id
   after_commit :reindex_jurisdiction_templates_used_size
-  delegate :scheduled?, to: :template_version
 
   validate :ensure_reason_set_for_enabled_elective_fields
 

@@ -108,7 +108,7 @@ export const TemplateVersionModel = types
         startBlobDownload(blobData, mimeType, fileName)
         return response
       } catch (error) {
-        if (process.env.NODE_ENV === "development") {
+        if (import.meta.env.DEV) {
           console.error(`Failed to download template version ${format}:`, error)
         }
         throw error
@@ -128,7 +128,7 @@ export const TemplateVersionModel = types
 
         return response
       } catch (error) {
-        if (process.env.NODE_ENV === "development") {
+        if (import.meta.env.DEV) {
           console.error(`Failed to download requirement summary:`, error)
         }
         throw error
