@@ -27,7 +27,7 @@ class ExternalApiKeyPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      raise Pundit::NotAuthorizedError unless user.super_admin? || user.review_manager?
+      raise Pundit::NotAuthorizedError unless user.super_admin? || user.review_manager? || user.regional_review_manager?
 
       user.super_admin? ? ExternalApiKey.all : ExternalApiKey.where(jurisdiction_id: user.jurisdictions.pluck(:id))
     end
