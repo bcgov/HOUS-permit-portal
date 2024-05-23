@@ -294,6 +294,17 @@ export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
 }
 
+export enum EExportFormat {
+  csv = "csv",
+  json = "json",
+}
+
+export enum EReportingColumns {
+  name = "name",
+  description = "description",
+  href = "href",
+}
+
 export enum EEnergyStepCodeDependencyRequirementCode {
   energyStepCodeMethod = "energy_step_code_method",
   energyStepCodeToolPart9 = "energy_step_code_tool_part_9",

@@ -2,6 +2,8 @@ class Requirement < ApplicationRecord
   include HtmlSanitizeAttributes
   sanitizable :hint
 
+  scope :electives, -> { where(elective: true) }
+
   belongs_to :requirement_block, touch: true
 
   acts_as_list scope: :requirement_block, top_of_list: 0
@@ -153,6 +155,10 @@ class Requirement < ApplicationRecord
     # TODO: false for now, but will be implemented in the future when
     # custom data validation is added
     false
+  end
+
+  def self.extract_requirement_id_from_submission_key(key)
+    key.split("|").second
   end
 
   def step_code_package_file?

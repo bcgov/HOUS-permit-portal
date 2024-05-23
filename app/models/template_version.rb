@@ -11,9 +11,28 @@ class TemplateVersion < ApplicationRecord
 
   after_save :reindex_requirement_template_if_published, if: :status_changed?
 
+  def label
+    "#{permit_type.name} #{activity.name} (#{version_date.to_s})"
+  end
+
   def lookup_props
-    #form_json starts at root template
+    # form_json starts at root template
     flatten_requirements_from_form_hash(form_json)
+  end
+
+  def form_json_requirements
+    json_requirements = []
+    requirement_blocks_json.each_pair do |block_id, block_json|
+      block_json["requirements"].each do |requirement|
+        dup_requirement = requirement.dup
+
+        dup_requirement["requirement_block_id"] = block_id
+
+        json_requirements.push(dup_requirement)
+      end
+    end
+
+    json_requirements
   end
 
   private
@@ -21,6 +40,7 @@ class TemplateVersion < ApplicationRecord
   def reindex_requirement_template_if_published
     reindex_requirement_template if published?
   end
+
   def reindex_requirement_template
     requirement_template.reindex
   end

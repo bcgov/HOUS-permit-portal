@@ -15,6 +15,11 @@ import { ProtectedRoute } from "./protected-route"
 const ExternalApiKeysIndexScreen = lazy(() =>
   import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
 )
+
+const AdminInviteScreen = lazy(() =>
+  import("../users/admin-invite-screen").then((module) => ({ default: module.AdminInviteScreen }))
+)
+
 const ExternalApiKeyModalSubRoute = lazy(() =>
   import("../external-api-key/external-api-key-modal-sub-route").then((module) => ({
     default: module.ExternalApiKeyModalSubRoute,
@@ -131,6 +136,13 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+
+const ExportTemplatesScreen = lazy(() =>
+  import("../jurisdictions/exports/export-templates-screen").then((module) => ({
+    default: module.ExportTemplatesScreen,
+  }))
+)
+
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
@@ -156,6 +168,16 @@ const HelpDrawerSetupScreen = lazy(() =>
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
     default: module.AdminUserIndexScreen,
+  }))
+)
+
+const ReportingScreen = lazy(() =>
+  import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
+)
+
+const ExportTemplateSummaryScreen = lazy(() =>
+  import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
+    default: module.ExportTemplateSummaryScreen,
   }))
 )
 
@@ -253,6 +275,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
+      <Route path="/reporting" element={<ReportingScreen />} />
+      <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
     </>
   )
 
@@ -260,6 +284,7 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
         <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />

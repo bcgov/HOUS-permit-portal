@@ -130,6 +130,7 @@ const options = {
           unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
+          export: "Export",
           preview: "Preview",
           back: "Back",
           backHome: "Back to home",
@@ -264,6 +265,7 @@ const options = {
             tableHeading: "Local governments",
             users: "Users",
             externalApiKeys: "API settings",
+            exportTemplates: "Export templates",
             about: "About",
           },
           fields: {
@@ -935,6 +937,9 @@ const options = {
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
+          reportingTitle: "Reporting",
+          reportingDescription:
+            "Explore reports and analytics to gain insights and make informed decisions about your permit applications",
           permitTemplateCatalogueDescription:
             "Develop and publish a collection of permit templates that provide a standardized foundation for building permits across local jurisdictions. These templates include requirement blocks to establish a structured flow for the building permit template.",
           requirementsLibraryTitle: "Requirements library",
@@ -1201,6 +1206,13 @@ const options = {
             },
             lastUpdated: "Last updated",
           },
+          export: {
+            title: "Export Templates",
+            downloadSummaryCsv: "Download Summary CSV",
+            templateSummaryFilename: "Template Summary",
+            downloadCustomizationCsv: "Download Customizations CSV",
+            downloadCustomizationJson: "Download Customizations JSON",
+          },
         },
         digitalBuildingPermits: {
           index: {
@@ -1272,6 +1284,21 @@ const options = {
             userGuideLinkItem: {
               label: "User and role guide",
             },
+          },
+        },
+        reporting: {
+          title: "Reporting",
+          tableHeading: "Available reports",
+          open: "Open",
+          filterPlaceholder: "Filter reports by name",
+          templateSummaryName: "Template summary",
+          templateSummaryDescription: "A summary of template usage by jurisdictions",
+          exportTemplateSummary: {
+            title: "Export Template Summary",
+          },
+          columnHeaders: {
+            name: "Name",
+            description: "Description",
           },
         },
         externalApiKey: {
@@ -1407,6 +1434,9 @@ const options = {
             sitewideMessage: "Site-Wide Message",
             apiSettings: "API settings",
             create: "Create",
+            exportTemplates: "Export templates",
+            reporting: "Reporting",
+            exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
           },
         },
