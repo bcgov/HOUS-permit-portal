@@ -45,6 +45,7 @@ class PermitApplication < ApplicationRecord
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
   after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+  after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
@@ -151,6 +152,15 @@ class PermitApplication < ApplicationRecord
 
   def formatted_submission_data_for_external_use
     ExternalPermitApplicationService.new(self).formatted_submission_data_for_external_use
+  end
+
+  def send_submitted_webhook
+    return unless submitted?
+
+    jurisdiction
+      .active_external_api_keys
+      .where.not(webhook_url: [nil, ""]) # Only send webhooks to keys with a webhook URL
+      .each { |external_api_key| PermitWebhookJob.perform_async(external_api_key.id, "permit_submitted", id) }
   end
 
   private

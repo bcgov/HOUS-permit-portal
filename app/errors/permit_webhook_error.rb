@@ -1,0 +1,2 @@
+class PermitWebhookError < StandardError
+end
