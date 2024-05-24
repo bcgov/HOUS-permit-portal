@@ -73,7 +73,8 @@ const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
   const { currentUser } = userStore
   const { t } = useTranslation()
 
-  const isDisabled = currentUser.isReviewManager
+  const isDisabled =
+    (currentUser.isReviewManager || currentUser.isRegionalReviewManager) && !currentJurisdiction.externalApiEnabled
   const shouldUseDisableConfirmationModal =
     !isDisabled && currentJurisdiction.externalApiEnabled && currentJurisdiction.externalApiKeysMap.size > 0
 

@@ -60,7 +60,7 @@ class Api::JurisdictionsController < Api::ApplicationController
                          "jurisdiction.external_api_disabled_success"
                        end
                      ),
-                     { blueprint: JurisdictionBlueprint }
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :minimal } }
     else
       render_error "jurisdiction.update_external_api_enabled_error",
                    message_opts: {
