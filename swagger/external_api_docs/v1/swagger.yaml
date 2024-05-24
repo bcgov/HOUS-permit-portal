@@ -1,0 +1,64 @@
+---
+openapi: 3.0.1
+info:
+  title: External API V1
+  version: v1
+paths:
+  "/external_api/v1/permit_applications/search":
+    post:
+      summary: lists submitted permit applications
+      security:
+      - Bearer: {}
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Filters permit applications by submitted date and permit
+                classifications
+              properties:
+                permit_classifications:
+                  description: Filters by permit classifications
+                  type: string
+                submitted_at:
+                  type: object
+                  description: Filters by submitted date
+                  properties:
+                    gt:
+                      type: date
+                      description: 'Greater than: submitted date is greater than this
+                        date'
+                    lt:
+                      type: date
+                      description: 'Less than: submitted date is less than this date'
+                    gte:
+                      type: date
+                      description: 'Greater than or equal to: submitted date is greater
+                        than or equal to this date'
+                    lte:
+                      type: date
+                      description: 'Less than or equal to: submitted date is less
+                        than or equal to this date'
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.buildingpermit.gov.bc.ca
+components:
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: Bearer token
+formats:
+- json
+- yaml
