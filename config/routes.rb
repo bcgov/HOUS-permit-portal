@@ -150,8 +150,10 @@ Rails.application.routes.draw do
   end
 
   scope module: :external_api, path: :external_api do
-    resources :permit_applications, only: %i[show] do
-      post "search", on: :collection, to: "permit_applications#index"
+    namespace :v1 do
+      resources :permit_applications, only: %i[show] do
+        post "search", on: :collection, to: "permit_applications#index"
+      end
     end
   end
 
