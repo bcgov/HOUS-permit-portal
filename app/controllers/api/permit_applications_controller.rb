@@ -1,7 +1,7 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
-  before_action :set_permit_application, only: %i[show update submit upload_supporting_document]
+  before_action :set_permit_application, only: %i[show update submit upload_supporting_document update_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -57,6 +57,21 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
+  def update_version
+    authorize @permit_application
+
+    if TemplateVersioningService.update_draft_permit_with_new_template_version(@permit_application)
+      render_success @permit_application,
+                     ("permit_application.update_version_succes"),
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "permit_application.update_error",
+                   message_opts: {
+                     error_message: @permit_application.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
   def upload_supporting_document
     authorize @permit_application
     success = @permit_application.update(supporting_document_params)
@@ -79,7 +94,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     signed = permit_application_params["submission_data"]["data"]["section-completion-key"]["signed"]
 
     # for submissions, we do not run the automated compliance as that should have already been complete
-    if signed &&
+    if signed && @permit_application.using_current_template_version &&
          @permit_application.update(permit_application_params.merge(status: :submitted, signed_off_at: Time.current))
       @permit_application.send_submit_notifications
 

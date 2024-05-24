@@ -22,11 +22,15 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { IErrorsBoxData } from "../../../types/types"
+import { IRequirement } from "../../../models/requirement"
+import { ERequirementChangeAction } from "../../../types/enums"
+import { ICompareRequirementsBoxData, IErrorsBoxData, ITemplateVersionDiff } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
+import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomMessageBox } from "../base/custom-message-box"
+import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 
@@ -76,6 +80,38 @@ export const RequirementForm = observer(
     const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+
+    const usesPublishedTemplateVersion = permitApplication?.usesPublishedTemplateVersion
+    const [diff, setDiff] = useState<ITemplateVersionDiff>(null)
+
+    const diffToInfoBoxData = (): ICompareRequirementsBoxData[] => {
+      if (!diff) return []
+      const mapFn = (req: IRequirement, action: ERequirementChangeAction): ICompareRequirementsBoxData => {
+        return {
+          label: t("requirementTemplate.compareAction", {
+            requirementName: `${req.label}${req.elective ? ` (${t("requirementsLibrary.elective")})` : ""}`,
+            action: t(`requirementTemplate.${action}`),
+          }),
+          class: `formio-component-${req.formJson.key}`,
+        }
+      }
+      const addedErrorBoxData = diff.added.map((req) => mapFn(req, ERequirementChangeAction.added))
+      const removedErrorBoxData = diff.removed.map((req) => mapFn(req, ERequirementChangeAction.removed))
+      const changedErrorBoxData = diff.changed.map((req) => mapFn(req, ERequirementChangeAction.changed))
+      return [...addedErrorBoxData, ...removedErrorBoxData, ...changedErrorBoxData]
+    }
+    const infoBoxData = diffToInfoBoxData()
+
+    useEffect(() => {
+      if (!usesPublishedTemplateVersion) {
+        ;(async () => {
+          const diffData = await permitApplication.publishedTemplateVersion.fetchTemplateVersionCompare(
+            permitApplication.templateVersion.id
+          )
+          setDiff(diffData.data)
+        })()
+      }
+    }, [usesPublishedTemplateVersion])
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -264,6 +300,16 @@ export const RequirementForm = observer(
       persistFileUploadUrl: `/api/permit_applications/${permitApplication.id}/upload_supporting_document`,
     }
 
+    const handleUpdatePermitApplicationVersion = () => {
+      if (permitApplication.showCompareAfter) {
+        permitApplication.resetCompareAfter()
+      } else {
+        permitApplication.updateVersion()
+      }
+    }
+
+    if (permitApplication.isLoading) return <SharedSpinner />
+
     return (
       <>
         <Flex
@@ -287,6 +333,16 @@ export const RequirementForm = observer(
           }}
         >
           <ErrorsBox data={errorBoxData} />
+          {(!usesPublishedTemplateVersion || permitApplication.showCompareAfter) &&
+            (diff ? (
+              <CompareRequirementsBox
+                data={infoBoxData}
+                handleUpdatePermitApplicationVersion={handleUpdatePermitApplicationVersion}
+                showCompareAfter={permitApplication.showCompareAfter}
+              />
+            ) : (
+              <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
+            ))}
 
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
@@ -310,7 +366,6 @@ export const RequirementForm = observer(
               </Link>
             </Text>
           </Box>
-
           <Form
             form={formattedFormJson}
             formReady={formReady}

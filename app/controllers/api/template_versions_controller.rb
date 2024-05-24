@@ -58,9 +58,12 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def compare_requirements
     authorize @template_version
-    render_success @template_version.compare_requirements(compare_requirements_params[:previous_version_id]),
-                   nil,
-                   { blueprint: CompareRequirementsBlueprint }
+    before_json =
+      TemplateVersion.find(
+        compare_requirements_params[:previous_version_id],
+      ).requirement_blocks_json if compare_requirements_params[:previous_version_id].present?
+
+    render_success @template_version.compare_requirements(before_json), nil, { blueprint: CompareRequirementsBlueprint }
   end
 
   private

@@ -187,12 +187,13 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
-          showOlder: "Show older",
+          seeMore: "See more",
           go: "Go",
         },
         notification: {
           title: "Notifications",
           nUnread: "{{ n }} new",
+          noUnread: "No unread notifications",
         },
         eula: {
           title: "End-User License Agreement",
@@ -293,6 +294,7 @@ const options = {
           search: "Search jurisdictions",
         },
         permitApplication: {
+          updateToNewVersion: "Update my application",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",

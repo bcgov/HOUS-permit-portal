@@ -1,23 +1,31 @@
-import { Box, Flex, Heading, IconButton, ListItem, OrderedList, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Flex, Heading, IconButton, ListItem, OrderedList, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, CaretUp, Warning } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import { ICompareRequirementsBoxData } from "../../../types/types"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 
 interface ICompareRequirementsBoxDataProps {
   data: ICompareRequirementsBoxData[]
+  handleUpdatePermitApplicationVersion?: () => void
+  showCompareAfter?: boolean
 }
 
-export const CompareRequirementsBox = ({ data }: ICompareRequirementsBoxDataProps) => {
+export const CompareRequirementsBox = ({
+  data,
+  handleUpdatePermitApplicationVersion,
+  showCompareAfter,
+}: ICompareRequirementsBoxDataProps) => {
   const { t } = useTranslation()
-  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true })
+  const { userStore } = useMst()
+  const { currentUser } = userStore
 
+  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true })
   if (data.length === 0) {
     return <React.Fragment key={"errors"}></React.Fragment>
   }
-
   return (
     <Box
       key={"template-changes"}
@@ -26,15 +34,18 @@ export const CompareRequirementsBox = ({ data }: ICompareRequirementsBoxDataProp
       borderWidth={"1px"}
       borderRadius="lg"
       minH="85px"
-      maxH="calc(100vh - 360px)"
+      maxH="calc(100vh - 600px)"
       w="340px"
-      position="fixed"
-      right="6"
-      top="220px"
-      zIndex={10}
-      id="floating-error-alert-box"
+      zIndex={11}
+      id="floating-side-box"
       overflow="hidden"
       p={0}
+      position="fixed"
+      top="380px"
+      right="0"
+      mt="12"
+      mr="6"
+      ml="auto"
     >
       <Box p={4}>
         <Flex direction="column">
@@ -53,9 +64,21 @@ export const CompareRequirementsBox = ({ data }: ICompareRequirementsBoxDataProp
               aria-label={"Open errors"}
             ></IconButton>
           </Flex>
-          <RouterLinkButton to="#" alignSelf="center" mt={1}>
-            {t("ui.dismiss")}
-          </RouterLinkButton>
+          {currentUser.isSubmitter ? (
+            <Button
+              variant="primary"
+              alignSelf="center"
+              mt={2}
+              color="greys.white"
+              onClick={handleUpdatePermitApplicationVersion}
+            >
+              {showCompareAfter ? t("ui.dismiss") : t("permitApplication.updateToNewVersion")}
+            </Button>
+          ) : (
+            <RouterLinkButton to="#" alignSelf="center" mt={2} color="greys.white">
+              {t("ui.dismiss")}
+            </RouterLinkButton>
+          )}
         </Flex>
       </Box>
       <Box
@@ -80,13 +103,15 @@ export const CompareRequirementsBox = ({ data }: ICompareRequirementsBoxDataProp
             },
           }}
         >
-          {data.map((item, index) => (
-            <ListItem key={index}>
-              <ScrollLink key={item.id} to={item.id}>
-                {item.label}
-              </ScrollLink>
-            </ListItem>
-          ))}
+          {data.map((item, index) => {
+            return (
+              <ListItem key={index}>
+                <ScrollLink key={item.id} to={item.class || item.id}>
+                  {item.label}
+                </ScrollLink>
+              </ListItem>
+            )
+          })}
         </OrderedList>
       </Box>
     </Box>

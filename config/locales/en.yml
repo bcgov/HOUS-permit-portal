@@ -305,6 +305,9 @@ en:
       save_success:
         title: ""
         message: "Permit application successfully updated!"
+      update_version_succes:
+        title: ""
+        message: "Permit application successfully updated to new version!"
       save_draft_success:
         title: ""
         message: "Permit application successfully saved as draft!"

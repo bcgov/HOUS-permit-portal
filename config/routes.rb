@@ -104,6 +104,7 @@ Rails.application.routes.draw do
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       patch "upload_supporting_document", on: :member
+      patch "update_version", on: :member
     end
 
     patch "profile", to: "users#profile"

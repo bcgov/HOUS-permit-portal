@@ -237,6 +237,10 @@ export class Api {
     })
   }
 
+  async updatePermitApplicationVersion(id) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
+  }
+
   async submitPermitApplication(id, params) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,
@@ -314,7 +318,7 @@ export class Api {
   }
 
   async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
-    const params = previousVersionId ? { previous_version_id: previousVersionId } : {}
+    const params = previousVersionId ? { previousVersionId } : {}
 
     return this.client.get<ApiResponse<ITemplateVersionDiff>>(
       `/template_versions/${templateVersionId}/compare_requirements`,
