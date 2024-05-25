@@ -119,6 +119,12 @@ const options = {
           goTo: "Go to {{ location }}",
           permitApp: "permit app",
           adminPanel: "admin panel",
+          additionalContent: {
+            left: "Digital building permit applications with tips from your local jurisdictions.",
+            mid: "Preview the New construction checklist for 1 - 4 Dwelling Units including secondary suites.",
+            midDownload: "Download",
+            end: "Start a permit application",
+          },
         },
         ui: {
           verified: "Verified",
