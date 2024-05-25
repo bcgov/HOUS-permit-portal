@@ -182,7 +182,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             </IconBox>
 
             <BareBox>
-              <RouterLinkButton variant={"primary"} to={"/login"}>
+              <RouterLinkButton variant={"primary"} to={loggedIn ? "/permit-applications/new" : "/login"}>
                 {t("landing.additionalContent.end")}
               </RouterLinkButton>
             </BareBox>
