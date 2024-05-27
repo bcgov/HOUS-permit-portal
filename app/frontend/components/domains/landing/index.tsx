@@ -21,6 +21,7 @@ import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { enabledJurisdictions } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -386,10 +387,6 @@ const BareBox: React.FC<IBareBoxProps> = ({ n, children }) => {
 const AvailableJurisdictionsMessageBox: React.FC = () => {
   const { t } = useTranslation()
 
-  const enabledCommunities = i18next.t("landing.enabledCommunities", {
-    returnObjects: true,
-  }) as Array<{ name: string; href: string }>
-
   return (
     <Flex
       direction="column"
@@ -407,11 +404,11 @@ const AvailableJurisdictionsMessageBox: React.FC = () => {
         <Flex direction="column" gap={2}>
           <Text fontWeight="bold">
             {t("landing.enabledCommunitiesDescription")}{" "}
-            {enabledCommunities.map((obj) => (
+            {enabledJurisdictions.map((obj) => (
               <Text as="span" fontWeight="normal">
                 {" "}
                 <RouterLink color="black" to={obj.href}>
-                  {obj.name}
+                  {obj.label}
                 </RouterLink>
               </Text>
             ))}

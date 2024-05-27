@@ -120,9 +120,6 @@ const options = {
           permitApp: "permit app",
           adminPanel: "admin panel",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
-          enabledCommunities: [
-            { name: "City of North Vancouver", href: "/jurisdictions/corporation-of-the-city-of-north-vancouver" },
-          ],
           moreComingSoon: "(more coming soon)",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
