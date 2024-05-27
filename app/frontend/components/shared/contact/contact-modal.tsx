@@ -57,7 +57,7 @@ export const ContactModal: React.FC<IContactModalProps> = ({
   }
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} size="xl">
+    <Modal onClose={onClose} isOpen={isOpen} size="2xl">
       <ModalOverlay />
 
       <ModalContent mt={48}>

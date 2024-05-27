@@ -148,6 +148,18 @@ en:
       create_error:
         title: Oops
         message: "%{error_message}"
+      update_success:
+        title: ""
+        message: "Contact updated successfully!"
+      update_error:
+        title: Oops
+        message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: "Contact deleted successfully!"
+      destroy_error:
+        title: Oops
+        message: "%{error_message}"
     user:
       not_confirmed_error:
         title: Failed to login.

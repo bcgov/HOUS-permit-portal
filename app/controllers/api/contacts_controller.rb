@@ -1,5 +1,6 @@
 class Api::ContactsController < Api::ApplicationController
   skip_after_action :verify_authorized, only: %i[contact_options]
+  before_action :set_contact, only: %i[update destroy]
 
   def contact_options
     contacts =
@@ -31,7 +32,31 @@ class Api::ContactsController < Api::ApplicationController
     end
   end
 
+  def update
+    authorize @contact
+
+    if @contact.update(contact_params)
+      render_success @contact, "contact.update_success", { blueprint: ContactBlueprint }
+    else
+      render_error "contact.update_error", message_opts: { error_message: @contact.errors.full_messages.join(", ") }
+    end
+  end
+
+  def destroy
+    authorize @contact
+
+    if @contact.destroy
+      render_success @contact, "contact.destroy_success", { blueprint: ContactBlueprint }
+    else
+      render_error "contact.destroy_success", message_opts: { error_message: @contact.errors.full_messages.join(", ") }
+    end
+  end
+
   private
+
+  def set_contact
+    @contact = Contact.find(params[:id])
+  end
 
   def contact_params
     params.require(:contact).permit(
