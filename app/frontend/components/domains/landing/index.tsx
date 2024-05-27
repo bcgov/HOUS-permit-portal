@@ -17,7 +17,7 @@ import {
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, MapPin } from "@phosphor-icons/react"
+import { CaretRight, CheckCircle, ClipboardText, DownloadSimple, FileArrowUp, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -175,6 +175,30 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             {t("landing.expectQ")}
           </Heading>
           <Text>{t("landing.expectA")}</Text>
+
+          <Flex gap={6} direction={{ base: "column", md: "row" }}>
+            <BareBox>{t("landing.additionalContent.left")}</BareBox>
+
+            <IconBox icon={<DownloadSimple size={32} />}>
+              {t("landing.additionalContent.mid")}
+
+              <Button
+                as="a"
+                variant={"primary"}
+                href={"/Building Permit Hub Structure_May 16_2024.pdf"}
+                download={"Building Permit Hub Structure_May 16_2024.pdf"}
+                m="6"
+              >
+                {t("landing.additionalContent.midDownload")}
+              </Button>
+            </IconBox>
+
+            <BareBox>
+              <RouterLinkButton variant={"primary"} to={loggedIn ? "/permit-applications/new" : "/login"}>
+                {t("landing.additionalContent.end")}
+              </RouterLinkButton>
+            </BareBox>
+          </Flex>
         </Container>
       </Box>
       <Box bg="greys.grey03">
@@ -332,6 +356,18 @@ const IconBox = ({ icon, children, ...rest }: IIconBoxProps) => {
     <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1} {...rest}>
       <Flex gap={4} align="center" h="full">
         <Box>{icon}</Box>
+        <Text fontSize="md" fontWeight="bold">
+          {children}
+        </Text>
+      </Flex>
+    </Box>
+  )
+}
+
+const BareBox = ({ children }: { children: ReactNode }) => {
+  return (
+    <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
+      <Flex gap={4} align="center" h="full">
         <Text fontSize="md" fontWeight="bold">
           {children}
         </Text>

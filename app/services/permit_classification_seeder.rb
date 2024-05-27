@@ -5,7 +5,7 @@ class PermitClassificationSeeder
       {
         name: "Low Density Residential",
         code: "low_residential",
-        description: "1-2 units: Detatched dwellings, duplexes",
+        description: "1-4 units: Detatched dwellings, duplexes",
         enabled: true,
         type: "PermitType",
       },
