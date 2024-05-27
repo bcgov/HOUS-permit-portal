@@ -49,17 +49,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :external_api do
     identifier :id
-    fields :nickname,
-           :status,
-           :number,
-           :full_address,
-           :pid,
-           :pin,
-           :zipfile_size,
-           :zipfile_name,
-           :zipfile_url,
-           :reference_number,
-           :submitted_at
+    fields :status, :number, :full_address, :pid, :pin, :reference_number, :submitted_at
 
     field :submission_data do |pa, _options|
       pa.formatted_submission_data_for_external_use
