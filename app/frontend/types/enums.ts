@@ -332,3 +332,8 @@ export enum EAutoComplianceType {
   internalValueExtractor = "internal_value_extractor",
   externalOptionsMapper = "external_options_mapper",
 }
+
+export enum EDeprecationReason {
+  newPublish = "new_publish",
+  unscheduled = "unscheduled",
+}

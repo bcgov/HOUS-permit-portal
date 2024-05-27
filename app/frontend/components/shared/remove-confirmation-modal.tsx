@@ -35,6 +35,7 @@ export const RemoveConfirmationModal = observer(function RemoveConfirmationModal
 }: IProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
+
   return (
     <>
       {renderTriggerButton ? (

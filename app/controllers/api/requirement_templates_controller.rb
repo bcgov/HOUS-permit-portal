@@ -2,6 +2,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
 
   before_action :set_requirement_template, only: %i[show destroy restore update schedule force_publish_now]
+  before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -115,6 +116,20 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  def unschedule_template_version
+    authorize @template_version, policy_class: RequirementTemplatePolicy
+
+    begin
+      template_version = TemplateVersioningService.unschedule!(@template_version, current_user)
+    rescue StandardError => e
+      render_error "requirement_template.template_unschedule_error", message_opts: { error_message: e.message }
+    end
+
+    render_success @template_version,
+                   "requirement_template.template_unschedule_success",
+                   { blueprint: TemplateVersionBlueprint }
+  end
+
   def destroy
     authorize @requirement_template
     if @requirement_template.discard
@@ -137,6 +152,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def set_requirement_template
     @requirement_template = RequirementTemplate.find(params[:id])
+  end
+
+  def set_template_version
+    @template_version = TemplateVersion.find(params[:id])
   end
 
   def requirement_template_params

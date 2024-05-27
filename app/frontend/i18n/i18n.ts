@@ -1184,6 +1184,7 @@ const options = {
             draft: "Draft",
             deprecated: "Deprecated",
           },
+
           index: {
             tableHeading: "Templates",
             title: "Permit templates catalogue",
@@ -1210,7 +1211,15 @@ const options = {
               published: "Published",
               draft: "Drafts",
               scheduled: "Scheduled",
-              deprecated: "Deprecated",
+              deprecated: "Deprecated (last 3)",
+            },
+            unscheduleWarning: {
+              title: "Are you sure you want to unschedule this template?",
+              body: "This action cannot be undone.",
+            },
+            deprecationReasonLabels: {
+              unscheduled: "reason: unscheduled",
+              new_publish: "reason: new publish",
             },
             lastUpdated: "Last updated",
           },

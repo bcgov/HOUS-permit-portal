@@ -30,6 +30,7 @@ import { IRequirementTemplate } from "../../../models/requirement-template"
 import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
+import { RemoveConfirmationModal } from "../../shared/remove-confirmation-modal"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { VersionTag } from "../../shared/version-tag"
 
@@ -88,6 +89,12 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
               <VersionsList
                 type={ETemplateVersionStatus.scheduled}
                 templateVersions={requirementTemplate.scheduledTemplateVersions}
+                onUnschedule={requirementTemplate.unscheduleTemplateVersion}
+              />
+
+              <VersionsList
+                type={ETemplateVersionStatus.deprecated}
+                templateVersions={requirementTemplate.lastThreeDeprecatedTemplateVersions}
               />
               {requirementTemplate.publishedTemplateVersion && (
                 <Menu>
@@ -116,9 +123,11 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
 const VersionsList = observer(function VersionsList({
   type,
   templateVersions,
+  onUnschedule,
 }: {
   type: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
   templateVersions: ITemplateVersion[]
+  onUnschedule?: (templateVersionId: string) => Promise<boolean>
 }) {
   const { t } = useTranslation()
 
@@ -138,15 +147,22 @@ const VersionsList = observer(function VersionsList({
           borderTopRadius={index === 0 ? "sm" : undefined}
           borderBottomRadius={index === templateVersions.length - 1 ? "sm" : undefined}
           borderRadius={"none"}
+          onUnschedule={() => onUnschedule(templateVersion.id)}
+          deprecationReasonLabel={templateVersion.deprecationReasonLabel}
         />
       ))}
     </Box>
   )
 })
 
-type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => void } & (
-    | { status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>; versionDate: Date; updatedAt?: never }
-    | { status: ETemplateVersionStatus.draft; versionDate?: never; updatedAt: Date }
+type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => Promise<boolean> } & (
+    | {
+        status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
+        versionDate: Date
+        updatedAt?: never
+        deprecationReasonLabel?: string
+      }
+    | { status: ETemplateVersionStatus.draft; versionDate?: never; updatedAt: Date; deprecationReasonLabel?: never }
   )
 
 const VersionCard = observer(function VersionCard({
@@ -155,6 +171,7 @@ const VersionCard = observer(function VersionCard({
   status,
   versionDate,
   updatedAt,
+  deprecationReasonLabel,
   ...containerProps
 }: TVersionCardProps) {
   const { t } = useTranslation()
@@ -178,9 +195,19 @@ const VersionCard = observer(function VersionCard({
           <Button as={RouterLink} to={viewRoute} variant={"primary"} size="sm">
             {t("ui.preview")}
           </Button>
-          <Button variant={"secondary"} size="sm" onClick={onUnschedule} isDisabled>
-            {t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
-          </Button>
+          <RemoveConfirmationModal
+            title={t("requirementTemplate.versionSidebar.unscheduleWarning.title")}
+            body={t("requirementTemplate.versionSidebar.unscheduleWarning.body")}
+            renderTriggerButton={(props) => {
+              return (
+                <Button variant={"secondary"} size="sm" {...props}>
+                  {t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
+                </Button>
+              )
+            }}
+            onRemove={onUnschedule}
+            triggerText={t("translation:requirementTemplate.versionSidebar.unscheduleButton")}
+          />
         </ButtonGroup>
       )
     }
@@ -199,6 +226,7 @@ const VersionCard = observer(function VersionCard({
         <TemplateStatusTag
           status={status}
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
+          subText={status === ETemplateVersionStatus.deprecated ? deprecationReasonLabel : undefined}
         />
         {status === ETemplateVersionStatus.draft ? (
           <Text>

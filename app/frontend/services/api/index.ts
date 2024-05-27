@@ -334,6 +334,12 @@ export class Api {
     )
   }
 
+  async unscheduleTemplateVersion(templateId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(
+      `requirement_templates/template_versions/${templateId}/unschedule`
+    )
+  }
+
   async fetchStepCodes() {
     return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
   }

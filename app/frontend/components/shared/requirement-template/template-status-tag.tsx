@@ -1,5 +1,5 @@
 import { Flex, HStack, Tag, Text } from "@chakra-ui/react"
-import { CheckSquareOffset, Clock, Pencil } from "@phosphor-icons/react"
+import { CheckSquareOffset, Clock, Pencil, TrashSimple } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import React, { ReactNode } from "react"
@@ -10,6 +10,7 @@ import { ETemplateVersionStatus } from "../../../types/enums"
 interface ITemplateStatusTagProps {
   status: ETemplateVersionStatus
   scheduledFor?: Date
+  subText?: string
 }
 
 const statusColors: { [key in ETemplateVersionStatus]: string } = {
@@ -30,10 +31,10 @@ const statusIcons: { [key in ETemplateVersionStatus]: ReactNode } = {
   [ETemplateVersionStatus.published]: <CheckSquareOffset />,
   [ETemplateVersionStatus.scheduled]: <Clock />,
   [ETemplateVersionStatus.draft]: <Pencil />,
-  [ETemplateVersionStatus.deprecated]: <></>,
+  [ETemplateVersionStatus.deprecated]: <TrashSimple />,
 }
 
-export const TemplateStatusTag = ({ status, scheduledFor }: ITemplateStatusTagProps) => {
+export const TemplateStatusTag = ({ status, scheduledFor, subText }: ITemplateStatusTagProps) => {
   const color = statusColors[status]
   const borderColor = statusBorderColors[status]
   const { t } = useTranslation()
@@ -56,6 +57,11 @@ export const TemplateStatusTag = ({ status, scheduledFor }: ITemplateStatusTagPr
       {scheduledFor && (
         <Text fontSize="sm" fontWeight="bold">
           {format(utcToZonedTime(scheduledFor, vancouverTimeZone), "yyyy-MM-dd")}
+        </Text>
+      )}
+      {subText && (
+        <Text fontSize="sm" fontWeight="bold">
+          {subText}
         </Text>
       )}
     </Flex>
