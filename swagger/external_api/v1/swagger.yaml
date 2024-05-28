@@ -1,5 +1,5 @@
 ---
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Integration API V1
   version: v1
@@ -15,13 +15,33 @@ info:
     each jurisdiction you would like to access.\n\n### Rate Limit\nThe API is rate
     limited to 100 requests per minute per API key and 300 requests per IP. If you
     exceed this limit, you will receive a 429 response.\n"
+# Since OAS 3.1.0 the paths element isn't necessary. Now a valid OpenAPI Document can describe only paths, webhooks, or even only reusable components
+# Note this is manually added after rswag generation as rswag is not compatible with OAS 3.1.0
+webhooks:
+  permit_submitted:
+    tags:
+      - Webhooks
+    post:
+      requestBody:
+        description: "Information about a submitted permit application. This will
+          be sent to the webhook url provided by the external integrator. The permit
+          application id returned can then be used to retrieve the full permit application
+          via the [get permit application endpoint](#/paths/~1permit_applications~1{id}/get) endpoint.\n\n
+        ### Retries\n If the external integrator does not return a 200 status, the webhook will be retried up to 8 times with an exponential backoff."
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookPayload"
+      responses:
+        "200":
+          description: The external integrator should return a 200 status to indicate that the data was received successfully.
 paths:
   "/permit_applications/search":
     post:
       summary: Lists paginated permit applications
       tags:
-      - Permit applications
-      parameters: []
+        - Permit applications
+      parameters: [ ]
       responses:
         '200':
           description: Successful
@@ -48,12 +68,12 @@ paths:
                         type: integer
                         description: Current page number
                     required:
-                    - total_pages
-                    - total_count
-                    - current_page
+                      - total_pages
+                      - total_count
+                      - current_page
                 required:
-                - data
-                - meta
+                  - data
+                  - meta
         '429':
           description: Rate limit exceeded
           content:
@@ -96,16 +116,16 @@ paths:
                         than or equal to this date'
   "/permit_applications/{id}":
     parameters:
-    - name: id
-      in: path
-      description: Submitted permit application id
-      required: true
-      schema:
-        type: string
+      - name: id
+        in: path
+        description: Submitted permit application id
+        required: true
+        schema:
+          type: string
     get:
       summary: requests are rate limited
       tags:
-      - Permit applications
+        - Permit applications
       responses:
         '200':
           description: Successful
@@ -117,7 +137,7 @@ paths:
                   data:
                     "$ref": "#/components/schemas/PermitApplication"
                 required:
-                - data
+                  - data
         '403':
           description: Accessing a permit application for unauthorized jurisdiction
         '404':
@@ -130,16 +150,16 @@ paths:
                 "$ref": "#/components/schemas/ResponseError"
 basePath: "/external_api/v1"
 servers:
-- url: https:/buildingpermit.gov.bc.ca
-  description: Production server
-- url: "{serverUrl}"
-  description: Server url
-  variables:
-    serverUrl:
-      default: https:/buildingpermit.gov.bc.ca
+  - url: https:/buildingpermit.gov.bc.ca
+    description: Production server
+  - url: "{serverUrl}"
+    description: Server url
+    variables:
+      serverUrl:
+        default: https:/buildingpermit.gov.bc.ca
 tags:
-- name: Permit applications
-  description: Submitted permit applications (scoped to API key jurisdiction)
+  - name: Permit applications
+    description: Submitted permit applications (scoped to API key jurisdiction)
 components:
   securitySchemes:
     Bearer:
@@ -218,43 +238,43 @@ components:
                 type:
                   type: string
                   enum:
-                  - text
-                  - number
-                  - checkbox
-                  - select
-                  - multi_option_select
-                  - date
-                  - textarea
-                  - file
-                  - phone
-                  - email
-                  - radio
-                  - address
-                  - bcaddress
-                  - signature
-                  - energy_step_code
-                  - general_contact
-                  - professional_contact
+                    - text
+                    - number
+                    - checkbox
+                    - select
+                    - multi_option_select
+                    - date
+                    - textarea
+                    - file
+                    - phone
+                    - email
+                    - radio
+                    - address
+                    - bcaddress
+                    - signature
+                    - energy_step_code
+                    - general_contact
+                    - professional_contact
                   description: The input type for this requirement.
                 value:
                   description: The submitted value for this requirement.
                   oneOf:
-                  - type: string
-                  - type: number
-                  - type: boolean
-                  - "$ref": "#/components/schemas/ContactSubmissionValue"
-                  - "$ref": "#/components/schemas/MultiOptionSubmissionValue"
+                    - type: string
+                    - type: number
+                    - type: boolean
+                    - "$ref": "#/components/schemas/ContactSubmissionValue"
+                    - "$ref": "#/components/schemas/MultiOptionSubmissionValue"
               required:
-              - id
-              - name
-              - requirement_code
-              - type
-              - value
+                - id
+                - name
+                - requirement_code
+                - type
+                - value
         required:
-        - id
-        - requirement_block_code
-        - name
-        - requirements
+          - id
+          - requirement_block_code
+          - name
+          - requirements
     PermitClassification:
       type: object
       properties:
@@ -303,7 +323,7 @@ components:
       properties:
         data:
           type: object
-          properties: {}
+          properties: { }
         meta:
           type: object
           properties:
@@ -313,9 +333,27 @@ components:
             type:
               type: string
               enum:
-              - error
+                - error
+    WebhookPayload:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+            - permit_submitted
+          description: The event type.
+        payload:
+          type: object
+          properties:
+            permit_id:
+              type: string
+              description: The permit application id.
+            submitted_at:
+              type: string
+              format: date-time
+              description: The date and time the permit application was submitted.
 formats:
-- json
-- yaml
+  - json
+  - yaml
 security:
-- Bearer: []
+  - Bearer: [ ]
