@@ -18,13 +18,13 @@ info:
 paths:
   "/permit_applications/search":
     post:
-      summary: lists paginated permit applications
+      summary: Lists paginated permit applications
       tags:
-      - permit applications
+      - Permit applications
       parameters: []
       responses:
         '200':
-          description: successful
+          description: Successful
           content:
             application/json:
               schema:
@@ -54,6 +54,12 @@ paths:
                 required:
                 - data
                 - meta
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
       requestBody:
         content:
           application/json:
@@ -97,12 +103,12 @@ paths:
       schema:
         type: string
     get:
-      summary: show permit_application
+      summary: requests are rate limited
       tags:
-      - permit applications
+      - Permit applications
       responses:
         '200':
-          description: successful
+          description: Successful
           content:
             application/json:
               schema:
@@ -112,17 +118,27 @@ paths:
                     "$ref": "#/components/schemas/PermitApplication"
                 required:
                 - data
+        '403':
+          description: Accessing a permit application for unauthorized jurisdiction
+        '404':
+          description: Accessing a permit application which does not exist
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
 basePath: "/external_api/v1"
 servers:
 - url: https:/buildingpermit.gov.bc.ca
-  description: Production Server
+  description: Production server
 - url: "{serverUrl}"
-  description: Server Url
+  description: Server url
   variables:
     serverUrl:
       default: https:/buildingpermit.gov.bc.ca
 tags:
-- name: permit applications
+- name: Permit applications
   description: Submitted permit applications (scoped to API key jurisdiction)
 components:
   securitySchemes:
@@ -131,49 +147,44 @@ components:
       scheme: bearer
       description: Bearer token
   schemas:
-    PermitClassification:
+    PermitApplication:
       type: object
       properties:
         id:
           type: string
-        name:
+        full_address:
           type: string
-        description:
-          type: string
+          description: The full address of the permit application.
           nullable: true
-        code:
+        number:
           type: string
-          description: The code of the permit classification.
-    MultiOptionSubmissionValue:
-      type: object
-      additionalProperties:
-        type: boolean
-    ContactSubmissionValue:
-      type: array
-      items:
-        type: object
-        properties:
-          first_name:
-            type: string
-            description: The first name of the contact.
-          last_name:
-            type: string
-            description: The last name of the contact.
-          email:
-            type: string
-            description: The email of the contact.
-          phone:
-            type: string
-            description: The phone number of the contact.
-          address:
-            type: string
-            description: The address of the contact.
-          title:
-            type: string
-            description: The title of the contact.
-          organization:
-            type: string
-            description: The organization of the contact.
+          description: The permit application number displayed to the user.
+          nullable: true
+        pid:
+          type: string
+          description: The PID of the permit application.
+          nullable: true
+        pin:
+          type: string
+          description: The PIN of the permit application.
+          nullable: true
+        reference_number:
+          type: string
+          description: The reference number of the permit application in external
+            system.
+          nullable: true
+        submitted_at:
+          type: number
+          format: int64
+          description: Datetime in milliseconds since the epoch (Unix time)
+        permit_classifications:
+          type: string
+        permit_type:
+          "$ref": "#/components/schemas/PermitClassification"
+        activity:
+          "$ref": "#/components/schemas/PermitClassification"
+        submission_data:
+          "$ref": "#/components/schemas/SubmissionData"
     SubmissionData:
       type: object
       description: 'The submitted permit application data. Note: the keys are the
@@ -244,44 +255,65 @@ components:
         - requirement_block_code
         - name
         - requirements
-    PermitApplication:
+    PermitClassification:
       type: object
       properties:
         id:
           type: string
-        full_address:
+        name:
           type: string
-          description: The full address of the permit application.
+        description:
+          type: string
           nullable: true
-        number:
+        code:
           type: string
-          description: The permit application number displayed to the user.
-          nullable: true
-        pid:
-          type: string
-          description: The PID of the permit application.
-          nullable: true
-        pin:
-          type: string
-          description: The PIN of the permit application.
-          nullable: true
-        reference_number:
-          type: string
-          description: The reference number of the permit application in external
-            system.
-          nullable: true
-        submitted_at:
-          type: number
-          format: int64
-          description: Datetime in milliseconds since the epoch (Unix time)
-        permit_classifications:
-          type: string
-        permit_type:
-          "$ref": "#/components/schemas/PermitClassification"
-        activity:
-          "$ref": "#/components/schemas/PermitClassification"
-        submission_data:
-          "$ref": "#/components/schemas/SubmissionData"
+          description: The code of the permit classification.
+    MultiOptionSubmissionValue:
+      type: object
+      additionalProperties:
+        type: boolean
+    ContactSubmissionValue:
+      type: array
+      items:
+        type: object
+        properties:
+          first_name:
+            type: string
+            description: The first name of the contact.
+          last_name:
+            type: string
+            description: The last name of the contact.
+          email:
+            type: string
+            description: The email of the contact.
+          phone:
+            type: string
+            description: The phone number of the contact.
+          address:
+            type: string
+            description: The address of the contact.
+          title:
+            type: string
+            description: The title of the contact.
+          organization:
+            type: string
+            description: The organization of the contact.
+    ResponseError:
+      type: object
+      properties:
+        data:
+          type: object
+          properties: {}
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              description: The error message.
+            type:
+              type: string
+              enum:
+              - error
 formats:
 - json
 - yaml

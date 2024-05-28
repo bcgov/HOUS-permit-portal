@@ -9,10 +9,10 @@ RSpec.configure do |config|
   config.openapi_root = Rails.root.join("swagger").to_s
 
   servers = [
-    { url: "https:/buildingpermit.gov.bc.ca", description: "Production Server" },
+    { url: "https:/buildingpermit.gov.bc.ca", description: "Production server" },
     {
       url: "{serverUrl}",
-      description: "Server Url",
+      description: "Server url",
       variables: {
         serverUrl: {
           default: "https:/buildingpermit.gov.bc.ca",
@@ -55,7 +55,7 @@ The API is rate limited to 100 requests per minute per API key and 300 requests 
       basePath: "/external_api/v1",
       servers: servers,
       tags: [
-        { name: "permit applications", description: "Submitted permit applications (scoped to API key jurisdiction)" },
+        { name: "Permit applications", description: "Submitted permit applications (scoped to API key jurisdiction)" },
       ],
       components: {
         securitySchemes: {
@@ -66,64 +66,53 @@ The API is rate limited to 100 requests per minute per API key and 300 requests 
           },
         },
         schemas: {
-          PermitClassification: {
+          PermitApplication: {
             type: :object,
             properties: {
               id: {
                 type: :string,
               },
-              name: {
+              full_address: {
                 type: :string,
-              },
-              description: {
-                type: :string,
+                description: "The full address of the permit application.",
                 nullable: true,
               },
-              code: {
+              number: {
                 type: :string,
-                description: "The code of the permit classification.",
+                description: "The permit application number displayed to the user.",
+                nullable: true,
               },
-            },
-          },
-          MultiOptionSubmissionValue: {
-            type: :object,
-            additionalProperties: {
-              type: :boolean,
-            },
-          },
-          ContactSubmissionValue: {
-            type: :array,
-            items: {
-              type: :object,
-              properties: {
-                first_name: {
-                  type: :string,
-                  description: "The first name of the contact.",
-                },
-                last_name: {
-                  type: :string,
-                  description: "The last name of the contact.",
-                },
-                email: {
-                  type: :string,
-                  description: "The email of the contact.",
-                },
-                phone: {
-                  type: :string,
-                  description: "The phone number of the contact.",
-                },
-                address: {
-                  type: :string,
-                  description: "The address of the contact.",
-                },
-                title: {
-                  type: :string,
-                  description: "The title of the contact.",
-                },
-                organization: {
-                  type: :string,
-                  description: "The organization of the contact.",
-                },
+              pid: {
+                type: :string,
+                description: "The PID of the permit application.",
+                nullable: true,
+              },
+              pin: {
+                type: :string,
+                description: "The PIN of the permit application.",
+                nullable: true,
+              },
+              reference_number: {
+                type: :string,
+                description: "The reference number of the permit application in external system.",
+                nullable: true,
+              },
+              submitted_at: {
+                type: :number,
+                format: :int64, # Indicates that it's an integer representing time in milliseconds since epoch
+                description: "Datetime in milliseconds since the epoch (Unix time)",
+              },
+              permit_classifications: {
+                type: :string,
+              },
+              permit_type: {
+                "$ref" => "#/components/schemas/PermitClassification",
+              },
+              activity: {
+                "$ref" => "#/components/schemas/PermitClassification",
+              },
+              submission_data: {
+                "$ref" => "#/components/schemas/SubmissionData",
               },
             },
           },
@@ -185,53 +174,87 @@ The API is rate limited to 100 requests per minute per API key and 300 requests 
               required: %w[id requirement_block_code name requirements],
             },
           },
-          PermitApplication: {
+          PermitClassification: {
             type: :object,
             properties: {
               id: {
                 type: :string,
               },
-              full_address: {
+              name: {
                 type: :string,
-                description: "The full address of the permit application.",
+              },
+              description: {
+                type: :string,
                 nullable: true,
               },
-              number: {
+              code: {
                 type: :string,
-                description: "The permit application number displayed to the user.",
-                nullable: true,
+                description: "The code of the permit classification.",
               },
-              pid: {
-                type: :string,
-                description: "The PID of the permit application.",
-                nullable: true,
+            },
+          },
+          MultiOptionSubmissionValue: {
+            type: :object,
+            additionalProperties: {
+              type: :boolean,
+            },
+          },
+          ContactSubmissionValue: {
+            type: :array,
+            items: {
+              type: :object,
+              properties: {
+                first_name: {
+                  type: :string,
+                  description: "The first name of the contact.",
+                },
+                last_name: {
+                  type: :string,
+                  description: "The last name of the contact.",
+                },
+                email: {
+                  type: :string,
+                  description: "The email of the contact.",
+                },
+                phone: {
+                  type: :string,
+                  description: "The phone number of the contact.",
+                },
+                address: {
+                  type: :string,
+                  description: "The address of the contact.",
+                },
+                title: {
+                  type: :string,
+                  description: "The title of the contact.",
+                },
+                organization: {
+                  type: :string,
+                  description: "The organization of the contact.",
+                },
               },
-              pin: {
-                type: :string,
-                description: "The PIN of the permit application.",
-                nullable: true,
+            },
+          },
+          ResponseError: {
+            type: :object,
+            properties: {
+              data: {
+                type: :object,
+                properties: {
+                },
               },
-              reference_number: {
-                type: :string,
-                description: "The reference number of the permit application in external system.",
-                nullable: true,
-              },
-              submitted_at: {
-                type: :number,
-                format: :int64, # Indicates that it's an integer representing time in milliseconds since epoch
-                description: "Datetime in milliseconds since the epoch (Unix time)",
-              },
-              permit_classifications: {
-                type: :string,
-              },
-              permit_type: {
-                "$ref" => "#/components/schemas/PermitClassification",
-              },
-              activity: {
-                "$ref" => "#/components/schemas/PermitClassification",
-              },
-              submission_data: {
-                "$ref" => "#/components/schemas/SubmissionData",
+              meta: {
+                type: :object,
+                properties: {
+                  message: {
+                    type: :string,
+                    description: "The error message.",
+                  },
+                  type: {
+                    type: :string,
+                    enum: %w[error],
+                  },
+                },
               },
             },
           },

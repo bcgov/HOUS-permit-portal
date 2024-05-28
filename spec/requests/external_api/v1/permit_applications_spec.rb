@@ -28,9 +28,9 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
   end
 
   path "/permit_applications/search" do
-    post "lists paginated permit applications" do
+    post "Lists paginated permit applications" do
+      tags "Permit applications"
       let(:constraints) { nil }
-      tags "permit applications"
       consumes "application/json"
       produces "application/json"
       parameter name: :constraints,
@@ -72,7 +72,7 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
                   },
                 }
 
-      response(200, "successful") do
+      response(200, "Successful") do
         schema type: :object,
                properties: {
                  data: {
@@ -109,6 +109,14 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
           expect(data.dig("data").length).to eq(submitted_permit_applications.length)
         end
       end
+
+      response(429, "Rate limit exceeded") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        around { |example| with_temporary_rate_limit("external_api/ip", limit: 3, period: 1.minute) { example.run } }
+        before { 5.times { get search_v1_permit_applications_path, headers: { Authorization: "Bearer #{token}" } } }
+
+        run_test! { |response| expect(response.status).to eq(429) }
+      end
     end
   end
 
@@ -118,10 +126,10 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
     let(:id) { submitted_permit_applications.first.id }
 
     get("show permit_application") do
-      tags "permit applications"
+      tags "Permit applications"
       consumes "application/json"
       produces "application/json"
-      response(200, "successful") do
+      response(200, "Successful") do
         schema type: :object,
                properties: {
                  data: {
@@ -135,6 +143,39 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
 
           expect(data.dig("data", "id")).to eq(submitted_permit_applications.first.id)
         end
+      end
+    end
+
+    get "accessing permit application from a different jurisdiction" do
+      let(:id) { unauthorized_jurisdiction_permit_applications.first.id }
+      consumes "application/json"
+      produces "application/json"
+
+      response(403, "Accessing a permit application for unauthorized jurisdiction") do
+        run_test! { |response| expect(response.status).to eq(403) }
+      end
+    end
+
+    get "accessing permit application that does not exist" do
+      let(:id) { "does_not_exist" }
+      consumes "application/json"
+      produces "application/json"
+
+      response(404, "Accessing a permit application which does not exist") do
+        run_test! { |response| expect(response.status).to eq(404) }
+      end
+    end
+
+    get "requests are rate limited" do
+      consumes "application/json"
+      produces "application/json"
+
+      response(429, "Rate limit exceeded") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        around { |example| with_temporary_rate_limit("external_api/ip", limit: 3, period: 1.minute) { example.run } }
+        before { 5.times { get v1_permit_application_path(id), headers: { Authorization: "Bearer #{token}" } } }
+
+        run_test! { |response| expect(response.status).to eq(429) }
       end
     end
   end
