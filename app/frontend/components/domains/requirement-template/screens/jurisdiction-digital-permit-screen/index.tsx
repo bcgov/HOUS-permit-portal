@@ -1,40 +1,14 @@
-import { Box, Container, Heading, Tab, TabList, TabPanel, TabPanels, TabProps, Tabs, Text } from "@chakra-ui/react"
+import { Box, Center, Container, Heading, Link, TabPanel, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../../hooks/resources/use-activity-options"
 import { useMst } from "../../../../../setup/root"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
-import { DigitalBuildingPermitsList } from "./digital-building-permits-list"
-
-const sharedTabTextStyles = {
-  fontSize: "md",
-  px: 6,
-  py: 2,
-  w: "full",
-}
-
-const selectedTabStyles = {
-  color: "text.link",
-  bg: "theme.blueLight",
-  borderLeft: "4px solid",
-  borderColor: "theme.blue",
-  fontWeight: 700,
-}
-
-const tabStyles: TabProps = {
-  ...sharedTabTextStyles,
-  borderLeft: "none",
-  justifyContent: "flex-start",
-  _active: {
-    ...selectedTabStyles,
-  },
-  _selected: {
-    ...selectedTabStyles,
-  },
-}
+import { ActivityTabSwitcher } from "../../activity-tab-switcher"
+import { DigitalBuildingPermitsList } from "../../digital-building-permits-list"
 
 export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDigitalPermitScreen() {
   const { t } = useTranslation()
@@ -79,29 +53,34 @@ export const JurisdictionDigitalPermitScreen = observer(function JurisdictionDig
         <Text color="text.secondary" my={6}>
           {t("digitalBuildingPermits.index.selectPermit")}
         </Text>
-        <Tabs orientation="vertical" as="article" index={selectedTabIndex} isLazy>
-          <TabList borderLeft="none" w="200px">
-            <Text as="h2" {...sharedTabTextStyles} fontWeight={700}>
-              {t("digitalBuildingPermits.index.workType")}
-            </Text>
-            {enabledActivityOptions.map((activityOption) => (
-              <Tab
-                key={activityOption.value.id}
-                onClick={() => navigateToActivityTab(activityOption.value.id)}
-                {...tabStyles}
-              >
-                {activityOption.label}
-              </Tab>
-            ))}
-          </TabList>
-          <TabPanels flex={1}>
-            {enabledActivityOptions.map((activityOption) => (
-              <TabPanel key={activityOption.value.id} w="100%" pt={0}>
-                <DigitalBuildingPermitsList activityId={activityOption.value.id} />
-              </TabPanel>
-            ))}
-          </TabPanels>
-        </Tabs>
+
+        <ActivityTabSwitcher
+          selectedTabIndex={selectedTabIndex}
+          navigateToActivityTab={navigateToActivityTab}
+          enabledActivityOptions={enabledActivityOptions}
+        >
+          {enabledActivityOptions.map((activityOption) => (
+            <TabPanel key={activityOption.value.id} w="100%" pt={0}>
+              <DigitalBuildingPermitsList activityId={activityOption.value.id} />
+              <Center>
+                <Box bg="greys.grey03" p={4} w="75%" mt={24}>
+                  <Trans
+                    i18nKey="digitalBuildingPermits.index.requestNewPromptWithLink"
+                    components={{
+                      // This is the component that replaces the <1></1> in your i18n string.
+                      // It's an array where each index corresponds to the placeholder number.
+                      1: (
+                        <Link
+                          href={`mailto:digital.codes.permits@gov.bc.ca?subject=New%20permit%20type%20requested`}
+                        ></Link>
+                      ),
+                    }}
+                  />
+                </Box>
+              </Center>
+            </TabPanel>
+          ))}
+        </ActivityTabSwitcher>
       </Box>
     </Container>
   )

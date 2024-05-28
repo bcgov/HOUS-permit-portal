@@ -19,7 +19,6 @@ class PermitApplication < ApplicationRecord
 
   # Custom validation
 
-  validate :submitter_must_have_role
   validate :jurisdiction_has_matching_submission_contact
   validate :pid_or_pin_presence
   validates :nickname, presence: true
@@ -47,6 +46,7 @@ class PermitApplication < ApplicationRecord
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
   after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+  after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
@@ -146,13 +146,27 @@ class PermitApplication < ApplicationRecord
     "#{activity.name} - #{permit_type.name}".strip
   end
 
+  def permit_type_submission_contact
+    jurisdiction.permit_type_submission_contacts.find_by(permit_type: permit_type)
+  end
+
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
     jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
   end
 
   def formatted_submission_data_for_external_use
     ExternalPermitApplicationService.new(self).formatted_submission_data_for_external_use
+  end
+
+  def send_submitted_webhook
+    return unless submitted?
+
+    jurisdiction
+      .active_external_api_keys
+      .where.not(webhook_url: [nil, ""]) # Only send webhooks to keys with a webhook URL
+      .each { |external_api_key| PermitWebhookJob.perform_async(external_api_key.id, "permit_submitted", id) }
   end
 
   private

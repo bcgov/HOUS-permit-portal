@@ -39,6 +39,7 @@ export enum ExternalApiKeyStatus {
 
 export enum EUserRoles {
   submitter = "submitter",
+  regionalReviewManager = "regional_review_manager",
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",
@@ -82,7 +83,7 @@ export enum ERequirementTemplateSortFields {
 }
 
 export enum EContactSortFields {
-  title = "title",
+  title = "role/position",
   name = "name",
   email = "email",
   phone = "phone",
@@ -108,6 +109,7 @@ export enum EPermitApplicationSubmitterSortFields {
 
 export enum EPermitApplicationReviewerSortFields {
   number = "number",
+  referenceNumber = "reference_number",
   permitClassification = "permit_classification",
   submitter = "submitter",
   viewedAt = "viewed_at",
@@ -258,6 +260,7 @@ export enum ERequirementContactFieldItemType {
   lastName = "lastName",
   email = "email",
   phone = "phone",
+  title = "title",
   address = "address",
   organization = "organization",
   businessName = "businessName",
@@ -291,6 +294,49 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+}
+
+export enum EExportFormat {
+  csv = "csv",
+  json = "json",
+}
+
+export enum EReportingColumns {
+  name = "name",
+  description = "description",
+  href = "href",
+}
+
+export enum EEnergyStepCodeDependencyRequirementCode {
+  energyStepCodeMethod = "energy_step_code_method",
+  energyStepCodeToolPart9 = "energy_step_code_tool_part_9",
+  energyStepCodeReportFile = "energy_step_code_report_file",
+  energyStepCodeH2000File = "energy_step_code_h2000_file",
+}
+
+export enum EOmniauthProvider {
+  idir = "idir",
+  basicBceid = "bceidbasic",
+  businessBceid = "bceidbusiness",
+}
+
+export enum EAutoComplianceModule {
+  DigitalSealValidator = "DigitalSealValidator",
+  ParcelInfoExtractor = "ParcelInfoExtractor",
+  PermitApplication = "PermitApplication",
+  HistoricSite = "HistoricSite",
+}
+
+export enum EAutoComplianceType {
+  fileValidator = "file_validator",
+  externalValueExtractor = "external_value_extractor",
+  internalValueExtractor = "internal_value_extractor",
+  externalOptionsMapper = "external_options_mapper",
+}
+
+export enum EDeprecationReason {
+  newPublish = "new_publish",
+  unscheduled = "unscheduled",
 }
 
 export enum EFollowableTypes {

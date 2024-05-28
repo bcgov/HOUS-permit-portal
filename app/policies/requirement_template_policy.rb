@@ -31,6 +31,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def unschedule_template_version?
+    create? && record.scheduled?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

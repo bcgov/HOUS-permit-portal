@@ -17,6 +17,7 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import { combineComplianceHints, combineDiff } from "../utils/formio-component-traversal"
+import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IRequirement } from "./requirement"
@@ -342,34 +343,52 @@ export const PermitApplicationModel = types
       }
       return response.ok
     }),
+
+    markAsViewed: flow(function* () {
+      const response = yield self.environment.api.viewPermitApplication(self.id)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.viewedAt = permitApplication.viewedAt
+      }
+      return response.ok
+    }),
+
     setSelectedTabIndex: (index: number) => {
       self.selectedTabIndex = index
     },
+
     resetCompareAfter: () => {
       self.showCompareAfter = false
     },
-    updateContactInSubmissionSection: (requirementKey: string, contact: IContact) => {
+
+    updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
       const sectionKey = requirementKey.split("|")[0].slice(21, 64)
       const newSectionFields = {}
       INPUT_CONTACT_KEYS.forEach((contactField) => {
         let newValue = ["cell", "phone"].includes(contactField)
           ? // The normalized phone number starts with +1... (country code)
-            (contact[contactField] as string)?.slice(2)
+            convertPhoneNumberToFormioFormat(contact[contactField] as string)
           : contact[contactField] || ""
         newSectionFields[`${requirementKey}|${contactField}`] = newValue
       })
+
       const newData = {
         data: {
-          ...self.submissionData.data,
+          ...submissionState.data,
           [sectionKey]: {
-            ...self.submissionData.data[sectionKey],
+            ...submissionState.data[sectionKey],
             ...newSectionFields,
           },
         },
       }
       self.setSubmissionData(newData)
     },
-    updateContactInSubmissionDatagrid: (requirementPrefix: string, index: number, contact: IContact) => {
+    updateContactInSubmissionDatagrid: (
+      requirementPrefix: string,
+      index: number,
+      contact: IContact,
+      submissionState: any
+    ) => {
       const parts = requirementPrefix.split("|")
       const contactType = parts[parts.length - 1]
       const requirementKey = parts.slice(0, -1).join("|")
@@ -379,21 +398,20 @@ export const PermitApplicationModel = types
       INPUT_CONTACT_KEYS.forEach((contactField) => {
         // The normalized phone number starts with +1... (country code)
         let newValue = ["cell", "phone"].includes(contactField)
-          ? (contact[contactField] as string)?.slice(2)
+          ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
           : contact[contactField]
         newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
       })
-      const clonedArray = R.clone(self.submissionData.data?.[sectionKey]?.[requirementKey] ?? [])
+      const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
       clonedArray[index] = newContactElement
       const newSectionFields = {
         [requirementKey]: clonedArray,
       }
-
       const newData = {
         data: {
-          ...self.submissionData.data,
+          ...submissionState.data,
           [sectionKey]: {
-            ...self.submissionData.data[sectionKey],
+            ...submissionState.data[sectionKey],
             ...newSectionFields,
           },
         },

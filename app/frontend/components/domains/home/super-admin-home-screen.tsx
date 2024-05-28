@@ -1,5 +1,5 @@
 import { Container, Flex, Heading } from "@chakra-ui/react"
-import { BookOpen, Buildings, FileText, Pencil } from "@phosphor-icons/react"
+import { BookOpen, Buildings, ChartBar, FileText, Pencil } from "@phosphor-icons/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IHomeScreenProps } from "."
@@ -34,8 +34,14 @@ export const SuperAdminHomeScreen = ({ ...rest }: IHomeScreenProps) => {
             href="/requirements-library"
           />
           <HomeScreenBox
+            title={t("home.reportingTitle")}
+            description={t("home.reportingDescription")}
+            icon={<ChartBar size={24} />}
+            href="/reporting"
+          />
+          <HomeScreenBox
             title={t("home.configurationManagement.title")}
-            description={t("home.configurationManagement.description")}
+            description={t("home.configurationManagement.adminDescription")}
             icon={<Pencil size={24} />}
             href="/configuration-management"
           />

@@ -1,7 +1,8 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
-  before_action :set_permit_application, only: %i[show update submit upload_supporting_document update_version]
+  before_action :set_permit_application,
+                only: %i[show update submit upload_supporting_document mark_as_viewed update_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -22,14 +23,18 @@ class Api::PermitApplicationsController < Api::ApplicationController
                    }
   end
 
+  def mark_as_viewed
+    authorize @permit_application
+    @permit_application.update_viewed_at
+    render_success @permit_application, nil, { blueprint_opts: { view: :base } }
+  end
+
   def show
     authorize @permit_application
 
     render_success @permit_application,
                    nil,
                    { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
-
-    @permit_application.update_viewed_at if current_user.review_staff?
   end
 
   def update

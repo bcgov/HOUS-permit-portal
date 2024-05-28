@@ -14,16 +14,24 @@ import { CaretDown, Warning, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { ComputedComplianceSetupModal } from "./computed-compliance-setup-modal"
 import { ConditionalSetupModal } from "./conditional-setup-modal"
 
-interface IProps {
+export interface IRequirementOptionsMenu {
   menuButtonProps?: Partial<ButtonProps>
   onRemove?: () => void
   emitOpenState?: (isOpen: boolean) => void
   index: number
+  disabledOptions?: Array<"remove" | "conditional">
 }
 
-export const OptionsMenu = observer(function UnitSelect({ menuButtonProps, onRemove, emitOpenState, index }: IProps) {
+export const OptionsMenu = observer(function OptionsMenu({
+  disabledOptions = [],
+  menuButtonProps,
+  onRemove,
+  emitOpenState,
+  index,
+}: IRequirementOptionsMenu) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -57,10 +65,16 @@ export const OptionsMenu = observer(function UnitSelect({ menuButtonProps, onRem
             <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
           </HStack>
         </MenuItem>
-        <ConditionalSetupModal index={index} />
+        <ConditionalSetupModal
+          index={index}
+          triggerButtonProps={{
+            isDisabled: disabledOptions.includes("conditional"),
+          }}
+        />
+        <ComputedComplianceSetupModal requirementIndex={index} />
 
         <MenuDivider />
-        <MenuItem color={"semantic.error"} onClick={onRemove}>
+        <MenuItem color={"semantic.error"} onClick={onRemove} isDisabled={disabledOptions.includes("remove")}>
           <HStack spacing={2} fontSize={"sm"}>
             <X />
             <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.remove")}</Text>

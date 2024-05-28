@@ -5,26 +5,31 @@ import {
   Center,
   Container,
   Flex,
+  FormControl,
+  FormLabel,
   HStack,
   Heading,
   Image,
+  InputGroup,
   Link,
   ListItem,
   Text,
   UnorderedList,
   VStack,
 } from "@chakra-ui/react"
-import { CaretRight, CheckCircle, ClipboardText, FileArrowUp, MapPin } from "@phosphor-icons/react"
+import { CaretRight, CheckCircle, ClipboardText, Download, FileArrowUp, Info, MapPin } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
+import { enabledJurisdictions } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { AddressSelect } from "../../shared/select/selectors/address-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
@@ -101,20 +106,16 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Text>{t("landing.accessExplanation")}</Text>
               <YellowLineSmall />
               <Flex gap={6} direction={{ base: "column", md: "row" }}>
-                {loggedIn ? (
-                  <RouterLinkButton to="/" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                    {t("site.goTo")} {currentUser?.isSubmitter ? t("site.myPermits") : t("site.adminPanel")}
-                  </RouterLinkButton>
-                ) : (
-                  <>
-                    <RouterLinkButton to="/login" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.login")}
-                    </RouterLinkButton>
-                    <RouterLinkButton to="/register" variant="primaryInverse" icon={<CaretRight size={16} />}>
-                      {t("auth.register")}
-                    </RouterLinkButton>
-                  </>
-                )}
+                <RouterLinkButton
+                  to={currentUser ? "/" : "/login"}
+                  variant="primaryInverse"
+                  icon={<CaretRight size={16} />}
+                >
+                  {t("landing.goTo", {
+                    location:
+                      !currentUser || currentUser.isSubmitter ? t("landing.permitApp") : t("landing.adminPanel"),
+                  })}
+                </RouterLinkButton>
               </Flex>
             </Flex>
             <VStack as="section" align="flex-start" spacing={4}>
@@ -152,8 +153,8 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
       <Box bg="greys.grey03">
         <Container maxW="container.lg" py={10} px={8}>
           <VStack as="section" direction="column" gap={6}>
+            <AvailableJurisdictionsMessageBox />
             <JurisdictionSearch />
-
             <Heading as="h3" fontSize="md" mt="8">
               {t("landing.whenNotNecessaryQ")}
             </Heading>
@@ -176,6 +177,36 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
             {t("landing.expectQ")}
           </Heading>
           <Text>{t("landing.expectA")}</Text>
+
+          <Flex mt={8} gap={6} direction={{ base: "column", md: "row" }}>
+            <BareBox n={"1"}>{t("landing.additionalContent.left")}</BareBox>
+
+            <BareBox n={"2"}>
+              {t("landing.additionalContent.mid")}
+              <br />
+              <Text as="span" fontWeight={400}>
+                {t("landing.additionalContent.midSub")}
+              </Text>
+
+              <Button
+                as="a"
+                variant={"primary"}
+                href={"/Building Permit Hub Structure_May 16_2024.pdf"}
+                download={"Building Permit Hub Structure_May 16_2024.pdf"}
+                mt={2}
+                leftIcon={<Download />}
+              >
+                {t("landing.additionalContent.midDownload")}
+              </Button>
+            </BareBox>
+
+            <BareBox n={"3"}>
+              {t("landing.additionalContent.end")}
+              <RouterLinkButton mt={2} variant={"primary"} to={loggedIn ? "/permit-applications/new" : "/login"}>
+                {t("landing.additionalContent.endButton")}
+              </RouterLinkButton>
+            </BareBox>
+          </Flex>
         </Container>
       </Box>
       <Box bg="greys.grey03">
@@ -201,7 +232,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   const { fetchGeocodedJurisdiction, fetchingJurisdiction } = geocoderStore
   const { addJurisdiction } = jurisdictionStore
   const formMethods = useForm()
-  const { control, watch } = formMethods
+  const { control, watch, setValue } = formMethods
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
   const [manualMode, setManualMode] = useState<boolean>(false)
 
@@ -245,14 +276,20 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
               />
 
               {manualMode && (
-                <JurisdictionSelect
-                  onChange={(value) => {
-                    if (value) addJurisdiction(value)
-                    setJurisdiction(value)
-                  }}
-                  selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
-                  menuPortalTarget={document.body}
-                />
+                <FormControl w="full" zIndex={1}>
+                  <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
+                  <InputGroup w="full">
+                    <JurisdictionSelect
+                      onChange={(value) => {
+                        if (value) addJurisdiction(value)
+                        setJurisdiction(value)
+                      }}
+                      onFetch={() => setValue("jurisdiction", null)}
+                      selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
+                      menuPortalTarget={document.body}
+                    />
+                  </InputGroup>
+                </FormControl>
               )}
             </Flex>
           </form>
@@ -332,5 +369,74 @@ const IconBox = ({ icon, children, ...rest }: IIconBoxProps) => {
         </Text>
       </Flex>
     </Box>
+  )
+}
+
+interface IBareBoxProps {
+  n: string
+  children: ReactNode
+}
+
+const BareBox: React.FC<IBareBoxProps> = ({ n, children }) => {
+  return (
+    <Box p={4} borderRadius="lg" bg="theme.blueLight" color="theme.blueAlt" flex={1}>
+      <Flex gap={6} align="center" h="full">
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          bg="theme.blue"
+          color="white"
+          borderRadius="50%"
+          minWidth="35px"
+          height="35px"
+          fontSize={20}
+          fontWeight="bold"
+        >
+          {n}
+        </Flex>
+        <Text fontSize="md" fontWeight="bold" textAlign="left">
+          {children}
+        </Text>
+      </Flex>
+    </Box>
+  )
+}
+
+const AvailableJurisdictionsMessageBox: React.FC = () => {
+  const { t } = useTranslation()
+
+  return (
+    <Flex
+      direction="column"
+      gap={2}
+      bg={"semantic.infoLight"}
+      border="1px solid"
+      borderRadius="lg"
+      borderColor={"semantic.info"}
+      p={4}
+    >
+      <Flex align="flex-start" gap={2}>
+        <Box color={"semantic.info"}>
+          <Info size={24} />
+        </Box>
+        <Flex direction="column" gap={2}>
+          <Text fontWeight="bold">
+            {t("landing.enabledCommunitiesDescription")}{" "}
+            {enabledJurisdictions.map((obj) => (
+              <Text as="span" fontWeight="normal">
+                {" "}
+                <RouterLink color="black" to={obj.href}>
+                  {obj.label}
+                </RouterLink>
+              </Text>
+            ))}
+            <Text as="span" fontWeight="normal">
+              {" "}
+              {t("landing.moreComingSoon")}
+            </Text>
+          </Text>
+        </Flex>
+      </Flex>
+    </Flex>
   )
 }

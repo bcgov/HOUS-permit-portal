@@ -20,6 +20,10 @@ class RequirementBlockPolicy < ApplicationPolicy
     create?
   end
 
+  def auto_compliance_module_configurations?
+    show?
+  end
+
   class Scope < Scope
     def resolve
       user.super_admin? ? RequirementBlock.all : []

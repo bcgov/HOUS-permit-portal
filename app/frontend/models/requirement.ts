@@ -1,6 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
 import { ENumberUnit, ERequirementType } from "../types/enums"
-import { IFormIORequirement, IOption, IRequirementOptions, TConditional } from "../types/types"
+import { IFormIORequirement, IOption, IRequirementOptions, TComputedCompliance, TConditional } from "../types/types"
 
 export const RequirementModel = types
   .model("RequirementModel", {
@@ -26,6 +26,9 @@ export const RequirementModel = types
     },
     get conditional(): TConditional | undefined {
       return self.inputOptions?.conditional
+    },
+    get computedCompliance(): TComputedCompliance | undefined {
+      return self.inputOptions?.computedCompliance
     },
     get dataValidation(): Object | undefined {
       return self.inputOptions?.dataValidation

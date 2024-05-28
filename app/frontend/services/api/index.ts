@@ -28,13 +28,10 @@ import {
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
-  IResetPasswordResponse,
-  IUserResponse,
   IUsersResponse,
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
-  EJurisdictionTypes,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -71,28 +68,12 @@ export class Api {
     this.client.addMonitor(monitor)
   }
 
-  async login(username, password) {
-    return this.client.post<IUserResponse>("/login", { user: { username, password } })
-  }
-
-  async signUp(formData) {
-    return this.client.post<IUserResponse>("/signup", { user: formData })
+  async resendConfirmation(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
   async logout() {
     return this.client.delete("/logout")
-  }
-
-  async changePassword(params) {
-    return this.client.patch<IUserResponse>(`/users/change_password`, params)
-  }
-
-  async requestPasswordReset(params) {
-    return this.client.post("/password", { user: params })
-  }
-
-  async resetPassword(params) {
-    return this.client.put<IResetPasswordResponse>("/password", { user: params })
   }
 
   async validateToken() {
@@ -107,6 +88,10 @@ export class Api {
     return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
   }
 
+  async fetchInvitedUser(token: string) {
+    return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
+  }
+
   async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
@@ -119,6 +104,10 @@ export class Api {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
   }
 
+  async viewPermitApplication(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
+  }
+
   async fetchLocalityTypeOptions() {
     return this.client.get<IOptionResponse>(`/jurisdictions/locality_type_options`)
   }
@@ -127,9 +116,9 @@ export class Api {
     return this.client.get<IOptionResponse<IContact>>(`/contacts/contact_options`, { query })
   }
 
-  async fetchJurisdictionOptions(name: string, type: EJurisdictionTypes) {
+  async fetchJurisdictionOptions(filters: IJurisdictionFilters) {
     return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, {
-      jurisdiction: { name, type },
+      jurisdiction: { ...filters },
     })
   }
 
@@ -229,6 +218,12 @@ export class Api {
 
   async searchTags(params: Partial<ITagSearchParams>) {
     return this.client.post<string[]>(`/tags/search`, { search: params })
+  }
+
+  async fetchAutoComplianceModuleConfigurations() {
+    return this.client.get<ApiResponse<TAutoComplianceModuleConfigurations>>(
+      "/requirement_blocks/auto_compliance_module_configurations"
+    )
   }
 
   async updatePermitApplication(id, params) {
@@ -347,6 +342,12 @@ export class Api {
     )
   }
 
+  async unscheduleTemplateVersion(templateId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(
+      `requirement_templates/template_versions/${templateId}/unschedule`
+    )
+  }
+
   async fetchStepCodes() {
     return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
   }
@@ -401,6 +402,22 @@ export class Api {
 
   async createContact(params: TCreateContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
+  }
+
+  async downloadCustomizationJson(templateVersionId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_json`
+    )
+  }
+
+  async downloadCustomizationCsv(templateVersionId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_csv`
+    )
+  }
+
+  async downloadRequirementSummaryCsv(templateVersionId: string) {
+    return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
   }
 
   async fetchNotifications(page: number) {

@@ -1,6 +1,8 @@
 import { Stack, StackProps } from "@chakra-ui/react"
 import React from "react"
 import { FieldValues } from "react-hook-form"
+import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
+import { isStepCodePackageFileRequirementCode } from "../../../../utils/utility-functions"
 import { EditableHelperText, TEditableHelperTextProps } from "./editable-helper-text"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
 import { IsElectiveCheckbox, TIsElectiveCheckboxProps } from "./is-elective-checkbox"
@@ -13,6 +15,7 @@ export type TEditableGroupProps<TFieldValues extends FieldValues> = {
   isElectiveCheckboxProps: TIsElectiveCheckboxProps<TFieldValues>
   editableInput?: JSX.Element
   multiOptionEditableInput?: JSX.Element
+  requirementCode: string
 } & Partial<StackProps>
 
 export function EditableGroup<TFieldValues>({
@@ -22,8 +25,14 @@ export function EditableGroup<TFieldValues>({
   multiOptionEditableInput,
   isOptionalCheckboxProps,
   isElectiveCheckboxProps,
+  requirementCode,
   ...containerProps
 }: TEditableGroupProps<TFieldValues>) {
+  const isEditLimited =
+    isStepCodePackageFileRequirementCode(requirementCode) ||
+    Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+      requirementCode as EEnergyStepCodeDependencyRequirementCode
+    )
   return (
     <Stack spacing={4} {...containerProps}>
       <EditableLabel {...editableLabelProps} />
@@ -35,8 +44,8 @@ export function EditableGroup<TFieldValues>({
           <EditableHelperText {...editableHelperTextProps} />
         </Stack>
       )}
-      <IsOptionalCheckbox {...isOptionalCheckboxProps} />
-      <IsElectiveCheckbox mt={"0.625rem"} {...isElectiveCheckboxProps} />
+      <IsOptionalCheckbox isDisabled={isEditLimited} {...isOptionalCheckboxProps} />
+      <IsElectiveCheckbox isDisabled={isEditLimited} mt={"0.625rem"} {...isElectiveCheckboxProps} />
     </Stack>
   )
 }

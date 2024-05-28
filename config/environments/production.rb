@@ -46,7 +46,9 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # Don't force all traffic to SSL here since we want the liveness probes to be able to hit /up properly without redirecting to an SSL scheme
+  # instead this will be redirected on the route level
+  # config.force_ssl = true
 
   # Log to STDOUT by default
   config.logger =

@@ -41,7 +41,7 @@ export const BlockSetup = observer(function BlockSetup() {
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
           {t("requirementsLibrary.modals.internalUse")}
         </Text>
-        <FormControl mt={1}>
+        <FormControl mt={1} isRequired>
           <FormLabel>{t("requirementsLibrary.fields.name")}</FormLabel>
           <Input bg={"white"} {...register("name", { required: true })} />
         </FormControl>

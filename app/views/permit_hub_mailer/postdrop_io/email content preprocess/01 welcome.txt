@@ -100,8 +100,8 @@
                           <tr>
                             <td>
                               <dl class="table-like">
-                                <dt>Username</dt>
-                                <dd>[Username @TODO]</dd>
+                                <dt>BCeID Username</dt>
+                                <dd>[BCeID Username @TODO]</dd>
                               </dl>
                             </td>
                           </tr>

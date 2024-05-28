@@ -10,17 +10,22 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "onboarding")
   end
 
+  def new_jurisdiction_membership(user, jurisdiction_id)
+    @user = user
+    @jurisdiction = Jurisdiction.find(jurisdiction_id)
+    send_user_mail(email: user.email, template_key: "new_jurisdiction_membership")
+  end
+
   def notify_submitter_application_submitted(user, permit_application)
     @user = user
     @permit_application = permit_application
     send_user_mail(email: user.email, template_key: "notify_submitter_application_submitted")
   end
 
-  def notify_reviewer_application_received(user, permit_application)
-    @user = user
+  def notify_reviewer_application_received(permit_type_submission_contact, permit_application)
     @permit_application = permit_application
-    send_user_mail(
-      email: user.email,
+    send_mail(
+      email: permit_type_submission_contact.email,
       template_key: "notify_reviewer_application_received",
       subject_i18n_params: {
         permit_application_number: permit_application.number,
@@ -40,10 +45,9 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def remind_reviewer(user, permit_applications)
-    @user = user
+  def remind_reviewer(permit_type_submission_contact, permit_applications)
     @permit_applications = permit_applications
-    send_user_mail(email: user.email, template_key: "remind_reviewer")
+    send_mail(email: permit_type_submission_contact.email, template_key: "remind_reviewer")
   end
 
   #### PermitTypeSubmission Contact Mailer

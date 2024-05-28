@@ -15,6 +15,7 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../../types/api-request"
+import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
@@ -149,6 +150,13 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
 
   const hasNoSections = watchedSectionsAttributes.length === 0
 
+  const allTemplateSectionBlocks = watchedSectionsAttributes.flatMap(
+    (section) => section.templateSectionBlocksAttributes
+  )
+
+  const stepCodeRelatedWarningBannerErrors = getStepCodeRelatedWarningBannerErrors()
+
+  const hasStepCodeDependencyError = !!stepCodeRelatedWarningBannerErrors.find((error) => error.type === "error")
   return (
     <Box as="main" id="admin-edit-permit-template">
       <FormProvider {...formMethods}>
@@ -183,6 +191,7 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
               onForcePublishNow={onForcePublishNow}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
+              hasStepCodeDependencyError={hasStepCodeDependencyError}
             />
             <FloatingHelpDrawer top="100px" />
             {hasNoSections ? (
@@ -198,7 +207,14 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
                 </Text>
               </Flex>
             ) : (
-              <SectionsDisplay isCollapsedAll={isCollapsedAll} setSectionRef={setSectionRef} />
+              <>
+                <Box w="full" px={6}>
+                  {stepCodeRelatedWarningBannerErrors.map((error) => (
+                    <CalloutBanner key={error.title} type={error.type} title={error.title} />
+                  ))}
+                </Box>
+                <SectionsDisplay isCollapsedAll={isCollapsedAll} setSectionRef={setSectionRef} />
+              </>
             )}
           </Box>
         </Box>
@@ -206,6 +222,73 @@ export const EditRequirementTemplateScreen = observer(function EditRequirementTe
       <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
     </Box>
   )
+
+  function getEnergyStepCodeBlocks() {
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithEnergyStepCode
+    )
+  }
+
+  function getStepCodePackageFileBlocks() {
+    return allTemplateSectionBlocks.filter(
+      (sectionBlock) =>
+        requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)?.blocksWithStepCodePackageFile
+    )
+  }
+
+  function getStepCodeRelatedWarningBannerErrors() {
+    const energyStepCodeBlocks = getEnergyStepCodeBlocks()
+    const stepCodePackageFileBlocks = getStepCodePackageFileBlocks()
+
+    const hasAnyEnergyStepCodeBlocks = energyStepCodeBlocks.length > 0
+    const hasDuplicateEnergyStepCodeBlocks = energyStepCodeBlocks.length > 1
+    const hasAnyStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 0
+    const hasDuplicateStepCodePackageFileBlock = stepCodePackageFileBlocks.length > 1
+
+    const errors: Array<{ title: string; type: "warning" | "error" }> = []
+
+    if (!hasAnyEnergyStepCodeBlocks && !hasAnyStepCodePackageFileBlock) {
+      return errors
+    }
+
+    if (hasAnyEnergyStepCodeBlocks) {
+      if (!hasAnyStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.stepCodePackageRequired"),
+          type: "error",
+        })
+      }
+
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeErrors.duplicateStepCodePackage"),
+          type: "error",
+        })
+      }
+    } else if (hasAnyStepCodePackageFileBlock) {
+      if (hasDuplicateStepCodePackageFileBlock) {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.duplicateStepCodePackage"),
+          type: "warning",
+        })
+      } else {
+        errors.push({
+          title: t("requirementTemplate.edit.stepCodeWarnings.energyStepCodeRecommended"),
+          type: "warning",
+        })
+      }
+    }
+
+    if (hasDuplicateEnergyStepCodeBlocks) {
+      errors.push({
+        title: t("requirementTemplate.edit.stepCodeErrors.duplicateEnergyStepCode"),
+        type: "error",
+      })
+    }
+
+    return errors
+  }
 
   function scrollIntoView(id: string) {
     const element = document.getElementById(formScrollToId(id))

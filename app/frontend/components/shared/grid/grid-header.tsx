@@ -9,4 +9,5 @@ GridHeader.defaultProps = {
   borderTop: "1px solid",
   borderBottom: "1px solid",
   borderColor: "border.light",
+  role: "columnheader",
 }

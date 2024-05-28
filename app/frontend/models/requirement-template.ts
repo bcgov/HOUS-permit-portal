@@ -1,6 +1,6 @@
 import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -12,10 +12,23 @@ import { TemplateVersionModel } from "./template-version"
 function preProcessor(snapshot) {
   const processedSnapShot = {
     ...snapshot,
-    scheduledTemplateVersions: snapshot.templateVersions
-      ?.filter((version) => version.status === ETemplateVersionStatus.scheduled)
-      .map((version) => version.id),
     publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
+  }
+
+  if (Array.isArray(snapshot.templateVersions)) {
+    const statusToTemplateVersions =
+      snapshot.templateVersions.reduce((acc, version) => {
+        if (!acc[version.status]) {
+          acc[version.status] = []
+        }
+
+        acc[version.status].push(version.id)
+
+        return acc
+      }, {}) ?? {}
+
+    processedSnapShot.scheduledTemplateVersions = statusToTemplateVersions[ETemplateVersionStatus.scheduled]
+    processedSnapShot.deprecatedTemplateVersions = statusToTemplateVersions[ETemplateVersionStatus.deprecated]
   }
 
   if (snapshot.requirementTemplateSections) {
@@ -41,6 +54,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       jurisdictionsSize: types.optional(types.number, 0),
       publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
+      deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
@@ -88,8 +102,44 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       getRequirementSectionById(id: string) {
         return self.requirementTemplateSectionMap.get(id)
       },
+      getScheduledTemplateVersionById(id: string) {
+        return self.scheduledTemplateVersions.find((version) => version.id === id)
+      },
+      get lastThreeDeprecatedTemplateVersions() {
+        return self.deprecatedTemplateVersions.slice(0, 3)
+      },
     }))
     .actions((self) => ({
+      addDeprecatedTemplateVersionReference(templateVersionId: string) {
+        self.deprecatedTemplateVersions.unshift(templateVersionId)
+        self.deprecatedTemplateVersions.sort((a, b) => b.versionDate.getTime() - a.versionDate.getTime())
+      },
+      removeScheduledTemplateVersion(templateVersionId: string) {
+        const templateVersion = self.getScheduledTemplateVersionById(templateVersionId)
+
+        if (!templateVersion) {
+          return
+        }
+        self.scheduledTemplateVersions.remove(templateVersion)
+      },
+    }))
+    .actions((self) => ({
+      unscheduleTemplateVersion: flow(function* (templateVersionId: string) {
+        const templateVersion = self.getScheduledTemplateVersionById(templateVersionId)
+
+        if (!templateVersion) {
+          return false
+        }
+
+        const updateSuccessful = yield* toGenerator(templateVersion.unschedule())
+
+        if (updateSuccessful) {
+          self.addDeprecatedTemplateVersionReference(templateVersionId)
+          self.removeScheduledTemplateVersion(templateVersionId)
+        }
+
+        return updateSuccessful
+      }),
       destroy: flow(function* () {
         const response = yield self.environment.api.destroyRequirementTemplate(self.id)
         return response.ok

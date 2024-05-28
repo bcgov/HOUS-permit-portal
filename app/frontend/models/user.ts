@@ -1,26 +1,32 @@
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EUserRoles } from "../types/enums"
+import { EOmniauthProvider, EUserRoles } from "../types/enums"
 import { JurisdictionModel } from "./jurisdiction"
 
 export const UserModel = types
   .model("UserModel")
   .props({
     id: types.identifier,
-    email: types.string,
+    email: types.maybeNull(types.string),
+    unconfirmedEmail: types.maybeNull(types.string),
     role: types.enumeration(Object.values(EUserRoles)),
-    firstName: types.string,
-    lastName: types.string,
-    username: types.string,
-    certified: types.boolean,
+    omniauthEmail: types.maybeNull(types.string),
+    omniauthUsername: types.maybeNull(types.string),
+    omniauthProvider: types.maybeNull(types.enumeration(Object.values(EOmniauthProvider))),
+    firstName: types.maybeNull(types.string),
+    lastName: types.maybeNull(types.string),
+    nickname: types.maybeNull(types.string),
+    certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
-    jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
-    createdAt: types.Date,
+    jurisdictions: types.array(types.reference(types.late(() => JurisdictionModel))),
+    createdAt: types.maybeNull(types.Date),
+    confirmationSentAt: types.maybeNull(types.Date),
     confirmedAt: types.maybeNull(types.Date),
     discardedAt: types.maybeNull(types.Date),
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
+    invitedByEmail: types.maybeNull(types.string),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -28,8 +34,8 @@ export const UserModel = types
     get isSuperAdmin() {
       return self.role == EUserRoles.superAdmin
     },
-    get isAdmin() {
-      return self.role == EUserRoles.superAdmin || self.role == EUserRoles.reviewManager
+    get isRegionalReviewManager() {
+      return self.role == EUserRoles.regionalReviewManager
     },
     get isReviewManager() {
       return self.role == EUserRoles.reviewManager
@@ -38,7 +44,11 @@ export const UserModel = types
       return self.role == EUserRoles.reviewer
     },
     get isReviewStaff() {
-      return self.role == EUserRoles.reviewer || self.role == EUserRoles.reviewManager
+      return (
+        self.role == EUserRoles.reviewer ||
+        self.role == EUserRoles.reviewManager ||
+        self.role == EUserRoles.regionalReviewManager
+      )
     },
     get isSubmitter() {
       return self.role == EUserRoles.submitter
@@ -50,7 +60,13 @@ export const UserModel = types
       return self.confirmedAt == null
     },
     get name() {
-      return `${self.firstName} ${self.lastName}`
+      return self.firstName && self.lastName && `${self.firstName} ${self.lastName}`
+    },
+    get jurisdiction() {
+      return (
+        self.jurisdictions.find((j) => j.id == self.rootStore.uiStore.currentlySelectedJurisdictionId) ||
+        self.jurisdictions[0]
+      )
     },
   }))
   .actions((self) => ({
@@ -80,6 +96,16 @@ export const UserModel = types
     }),
     acceptEULA: flow(function* () {
       const response = yield self.environment.api.acceptEULA(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
+      return response.ok
+    }),
+    resendConfirmation: flow(function* () {
+      const response = yield self.environment.api.resendConfirmation(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
       return response.ok
     }),
   }))

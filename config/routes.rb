@@ -32,13 +32,9 @@ Rails.application.routes.draw do
                path_names: {
                  sign_in: "login",
                  sign_out: "logout",
-                 registration: "signup",
                },
                controllers: {
                  sessions: "api/sessions",
-                 registrations: "api/registrations",
-                 confirmations: "api/confirmations",
-                 passwords: "api/passwords",
                  invitations: "api/invitations",
                  omniauth_callbacks: "api/omniauth_callbacks",
                }
@@ -46,7 +42,8 @@ Rails.application.routes.draw do
     devise_scope :user do
       get "/validate_token" => "sessions#validate_token"
       delete "/invitation/remove" => "invitations#remove"
-      get "/validate_invitation_token" => "invitations#validate_invitation_token"
+      get "/invitations/:invitation_token" => "invitations#show"
+      get "/logout" => "sessions#destroy"
     end
 
     get "/permit_type_submission_contacts/confirm",
@@ -55,6 +52,13 @@ Rails.application.routes.draw do
 
     resources :requirement_blocks, only: %i[create show update] do
       post "search", on: :collection, to: "requirement_blocks#index"
+      get "auto_compliance_module_configurations",
+          on: :collection,
+          to: "requirement_blocks#auto_compliance_module_configurations"
+    end
+
+    resources :notifications, only: %i[index] do
+      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
     end
 
     resources :notifications, only: %i[index] do
@@ -66,6 +70,7 @@ Rails.application.routes.draw do
       post "schedule", to: "requirement_templates#schedule", on: :member
       post "force_publish_now", to: "requirement_templates#force_publish_now", on: :member
       patch "restore", on: :member
+      post "template_versions/:id/unschedule", on: :collection, to: "requirement_templates#unschedule_template_version"
     end
 
     resources :template_versions, only: %i[index show] do
@@ -76,6 +81,11 @@ Rails.application.routes.draw do
           "template_versions#show_jurisdiction_template_version_cutomization"
     post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
            "template_versions#create_or_update_jurisdiction_template_version_cutomization"
+    get "template_versions/:id/download_requirement_summary_csv" => "template_versions#download_summary_csv"
+    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_csv" =>
+          "template_versions#download_customization_csv"
+    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_json" =>
+          "template_versions#download_customization_json"
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
@@ -103,6 +113,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
+      post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
     end
@@ -112,6 +123,7 @@ Rails.application.routes.draw do
       patch "restore", on: :member
       patch "accept_eula", on: :member
       post "search", on: :collection, to: "users#index"
+      post "resend_confirmation", on: :member
     end
 
     resources :end_user_license_agreement, only: %i[index]

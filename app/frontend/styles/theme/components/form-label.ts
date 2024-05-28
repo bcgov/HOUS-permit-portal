@@ -4,5 +4,8 @@ export const FormLabel = {
     fontWeight: "normal",
     lineHeight: "27px",
     marginBottom: 1,
+    _disabled: {
+      opacity: 1,
+    },
   },
 }

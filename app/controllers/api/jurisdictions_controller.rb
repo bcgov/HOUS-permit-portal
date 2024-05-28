@@ -20,6 +20,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @search.current_page,
                      },
                      blueprint: JurisdictionBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -34,7 +37,9 @@ class Api::JurisdictionsController < Api::ApplicationController
       end
     end
     if @jurisdiction.update(jurisdiction_params)
-      render_success @jurisdiction, "jurisdiction.update_success", { blueprint: JurisdictionBlueprint }
+      render_success @jurisdiction,
+                     "jurisdiction.update_success",
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.update_error",
                    message_opts: {
@@ -67,7 +72,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   # GET /api/jurisdictions/:id
   def show
     authorize @jurisdiction
-    render_success(@jurisdiction)
+    render_success(@jurisdiction, nil, blueprint_opts: { view: :base })
   end
 
   # POST /api/jurisdiction
@@ -79,7 +84,9 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize @jurisdiction
 
     if @jurisdiction.save
-      render_success @jurisdiction, "jurisdiction.create_success", { blueprint: JurisdictionBlueprint }
+      render_success @jurisdiction,
+                     "jurisdiction.create_success",
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.create_error",
                    message_opts: {
@@ -109,6 +116,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                        current_page: @user_search.current_page,
                      },
                      blueprint: UserBlueprint,
+                     blueprint_opts: {
+                       view: :base,
+                     },
                    }
   end
 
@@ -134,14 +144,20 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def jurisdiction_options
     authorize :jurisdiction, :jurisdiction_options?
+
+    # TODO: refactor jurisdictions search to accomodate filters,
+    # then use that here instead of having the search logic in the controller
     name = jurisdiction_params["name"]
     type = jurisdiction_params["type"]
+    user_id = jurisdiction_params["user_id"]
 
     filters = {}
-    filters = { where: { type: type } } if type.present?
+    filters = { type: type } if type.present?
+    filters = filters.merge({ user_ids: [user_id] }) if user_id.present?
+    filters = { where: filters, match: :word_start }
 
-    search = Jurisdiction.search(name, **filters)
-    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
+    search = Jurisdiction.search(name || "*", **filters)
+    options = search.results.map { |j| { label: j.qualified_name, value: j } }
     render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
 
@@ -151,6 +167,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     params.require(:jurisdiction).permit(
       :name,
       :type,
+      :user_id,
       :locality_type,
       :address,
       :regional_district_id,

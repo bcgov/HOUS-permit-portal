@@ -2,7 +2,11 @@ class Api::TemplateVersionsController < Api::ApplicationController
   before_action :set_template_version, except: :index
 
   before_action :set_jurisdiction_template_version_customization,
-                only: %i[show_jurisdiction_template_version_cutomization]
+                only: %i[
+                  show_jurisdiction_template_version_cutomization
+                  download_customization_csv
+                  download_customization_json
+                ]
 
   def index
     @template_versions =
@@ -66,6 +70,37 @@ class Api::TemplateVersionsController < Api::ApplicationController
     render_success @template_version.compare_requirements(before_version),
                    nil,
                    { blueprint: CompareRequirementsBlueprint }
+  end
+
+  def download_summary_csv
+    authorize @template_version
+
+    csv_data = TemplateExportService.new(@template_version).summary_csv
+    send_data csv_data, type: "text/csv"
+  end
+
+  def download_customization_csv
+    authorize @template_version
+
+    csv_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_csv
+    send_data csv_data, type: "text/csv"
+  end
+
+  def download_customization_json
+    authorize @template_version
+
+    json_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_json
+    send_data json_data, type: "text/plain"
+  end
+
+  def compare_requirements
+    authorize @template_version
+    before_json =
+      TemplateVersion.find(
+        compare_requirements_params[:previous_version_id],
+      ).requirement_blocks_json if compare_requirements_params[:previous_version_id].present?
+
+    render_success @template_version.compare_requirements(before_json), nil, { blueprint: CompareRequirementsBlueprint }
   end
 
   private

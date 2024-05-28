@@ -30,10 +30,14 @@
 en:
   activerecord:
     attributes:
-      user:
-        uid: BCeID
     errors:
       models:
+        site_configuration:
+          single_record: "There can only be one SiteConfiguration record."
+          attributes:
+            help_link_items:
+              incomplete: "%{link} can only be shown if href, title, and description are all set."
+              invalid_url: "%{link} has an invalid URL. It must start with https://."
         permit_application:
           attributes:
             submitter:
@@ -41,6 +45,21 @@ en:
             jurisdiction:
               no_contact: "not available."
             pid_or_pin: "must have a pid or pin."
+        requirement_template:
+          step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
+          duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
+          duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
+        requirement_block:
+          attributes:
+            requirements:
+              incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
+              duplicate_step_code_package_file: "must have only one design package file for energy step code per requirement block"
+        requirement:
+          incorrect_energy_requirement_schema: "Incorrect schema for %{requirement_code}"
+          attributes:
+            requirement_code:
+              incorrect_energy_requirement_code: "must be %{correct_requirement_code} for energy step code requirements, but received %{incorrect_requirement_code}"
+              incorrect_step_code_package_file_attributes: "must have input type file, required true, and elective false for design package file for energy step code"
         supporting_document:
           attributes:
             file:
@@ -49,8 +68,12 @@ en:
               duplicate: "file already exists for this permit application"
         user:
           attributes:
-            uid:
-              taken: is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+            base:
+              bceid_taken: BCeID is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
+              idir_taken: IDIR is associated with an existing account. To use this IDIR with a different account, contact your administrator to deactivate the existing account.
+              single_jurisdiction: Only regional review managers can access multiple jurisdictions.
+            jurisdictions:
+              reviewers_only: can only be added to review staff
             password:
               password_format: "Password does no meet the required format"
   application_mailer:
@@ -87,14 +110,17 @@ en:
         message: "Your password has been changed successfully"
     omniauth:
       failure:
-        title: BCeID login failed
+        title: Login failed
         message: Please try again or contact your adminstrator for support
-      failure_with_message:
+      bceid_failure_with_message:
         title: BCeID login failed
         message: "%{error_message}"
+      idir_failure_with_message:
+        title: IDIR login failed
+        message: "%{error_message}"
       unavailable:
-        title: Sorry! BCeID login is not supported for new accounts
-        message: Please create an account and login with username and password
+        title: Account not found
+        message: Administrator accounts are not available for self-registration. Please contact your administrator to gain access.
     geocoder:
       site_options_error:
         title: Error
@@ -123,9 +149,6 @@ en:
         title: Oops
         message: "%{error_message}"
     user:
-      login_error:
-        title: Failed to login.
-        message: Invalid username or password.
       not_confirmed_error:
         title: Failed to login.
         message: Please confirm your registration by activating the link in the email you received. If you have not received the email please check your spam folder.
@@ -156,6 +179,9 @@ en:
       confirmation_sent:
         title: Success
         message: You need to confirm your new email address. Please check your new email inbox.
+      reconfirmation_sent:
+        title: Confirmation email sent
+        message: Please click the link in your email inbox.
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed
@@ -175,8 +201,8 @@ en:
         title: ""
         message: The user was updated successfully
       update_error:
-        title: Error
-        message: "There was an error updating the user"
+        title: There was an error updating the user
+        message: "%{error_message}"
       update_password_error:
         title: Error
         message: "The provided current password is incorrect"
@@ -258,6 +284,12 @@ en:
       schedule_error:
         title: Error
         message: "%{error_message}"
+      template_unschedule_error:
+        title: Error unscheduling template
+        message: "%{error_message}"
+      template_unschedule_success:
+        title: ""
+        message: "Template unscheduled successfully"
       force_publish_now_error:
         title: Error force publishing template
         message: "%{error_message}"
@@ -358,6 +390,34 @@ en:
       update_error:
         title: Error
         message: "Something went wrong updating Jurisdiction Customization"
+  services:
+    auto_compliance_configuration:
+      digital_seal_validator:
+        label: "Digital Seal Validator - Validates the digital seal of a file"
+      parcel_info_extractor:
+        label: "Parcel Info Extractor - Extracts info from parcel information: PID, PIN, etc"
+        available_field_labels:
+          feature_area: "Feature area (sqm)"
+          pid: "PID"
+          pin: "PIN"
+          plan_number: "Plan number"
+      permit_application:
+        label: "Permit Application - Extracts info from permit application: address, PID, PIN, etc"
+        available_field_labels:
+          full_address: "Full address"
+          pid: "PID"
+          pin: "PIN"
+      historic_site:
+        label: "Historic Site - Extracts info from historic site"
+        mappable_external_option_labels:
+          y: "Y"
+          n: "N"
+      validation_errors:
+        incorrect_computed_compliance_module: "automated compliance module must be one of %{accepted_values}"
+        incompatible_input_type_for_module: "%{module_name} automated compliance module is not compatible with input type %{input_type}"
+        incorrect_value_extraction_field: "incorrect extraction field for %{module_name} automated compliance module"
+        incorrect_options_map: "incorrect options map for %{module_name} automated compliance module"
+        default_settings_not_valid: "computed compliance is not populated with default settings for %{module_name} automated compliance module"
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -376,6 +436,7 @@ en:
         email: "Email"
         phone: "Phone"
         address: "Address"
+        title: "Role/Position"
         business_name: "Business name"
         business_license: "Business license"
         professional_association: "Professional association/organization"
@@ -394,3 +455,6 @@ en:
     template_version:
       new_version_notification: "A new version of this template has been published"
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
+  export:
+    template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
+    requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"

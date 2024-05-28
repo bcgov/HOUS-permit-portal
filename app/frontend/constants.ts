@@ -1,6 +1,9 @@
 import { t } from "i18next"
+import { IRequirementAttributes } from "./types/api-request"
 import {
+  EAutoComplianceType,
   EEnabledElectiveFieldReason,
+  EEnergyStepCodeDependencyRequirementCode,
   EGovFeedbackResponseNoReason,
   ENumberUnit,
   ERequirementContactFieldItemType,
@@ -58,14 +61,21 @@ export const datefnsTableDateFormat = "yyyy-MM-dd"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 
-export function getRequirementTypeLabel(requirementType: ERequirementType) {
-  let derivedTranslationKey: keyof typeof ERequirementType
+export function getRequirementTypeLabel(
+  requirementType: ERequirementType,
+  matchesStepCodePackageRequirementCode?: boolean
+) {
+  let derivedTranslationKey: keyof typeof ERequirementType | "stepCodePackageFile"
 
-  Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
-    if (value === requirementType) {
-      derivedTranslationKey = key
-    }
-  })
+  if (requirementType === ERequirementType.file && matchesStepCodePackageRequirementCode) {
+    derivedTranslationKey = "stepCodePackageFile"
+  } else {
+    Object.entries(ERequirementType).forEach(([key, value]: [keyof typeof ERequirementType, ERequirementType]) => {
+      if (value === requirementType) {
+        derivedTranslationKey = key
+      }
+    })
+  }
 
   return t(`requirementsLibrary.requirementTypeLabels.${derivedTranslationKey}`)
 }
@@ -91,3 +101,86 @@ export function getEnabledElectiveReasonOptions(): IOption<EEnabledElectiveField
     }
   })
 }
+
+export function getEnergyStepCodeRequirementRequiredSchema(
+  energyRequirementCode: EEnergyStepCodeDependencyRequirementCode
+) {
+  const requirementCodeToSchema: Record<EEnergyStepCodeDependencyRequirementCode, IRequirementAttributes> = {
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+      inputType: ERequirementType.select,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.label"),
+      inputOptions: {
+        valueOptions: [
+          {
+            label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.tool"),
+            value: "tool",
+          },
+          {
+            label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeMethod.file"),
+            value: "file",
+          },
+        ],
+      },
+    },
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9,
+      inputType: ERequirementType.energyStepCode,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeToolPart9.label"),
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "tool",
+          show: true,
+          when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+        energyStepCode: "part_9",
+      },
+    },
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeReportFile]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeReportFile,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeReportFile.label"),
+      inputType: ERequirementType.file,
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "file",
+          show: true,
+          when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+      },
+    },
+    [EEnergyStepCodeDependencyRequirementCode.energyStepCodeH2000File]: {
+      requirementCode: EEnergyStepCodeDependencyRequirementCode.energyStepCodeH2000File,
+      label: t("requirementsLibrary.modals.stepCodeDependencies.energyStepCodeH2000File.label"),
+      inputType: ERequirementType.file,
+      inputOptions: {
+        conditional: {
+          // @ts-ignore
+          eq: "file",
+          show: true,
+          when: EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod,
+        },
+      },
+    },
+  }
+
+  return requirementCodeToSchema[energyRequirementCode]
+}
+
+export const STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE = "architectural_drawing_file" as const
+
+export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
+  EAutoComplianceType.internalValueExtractor,
+  EAutoComplianceType.externalValueExtractor,
+]
+
+export const OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES = [EAutoComplianceType.externalOptionsMapper]
+
+export const enabledJurisdictions = [
+  {
+    // Translations not necessary for place names
+    label: "City of North Vancouver",
+    href: "/jurisdictions/corporation-of-the-city-of-north-vancouver",
+  },
+]

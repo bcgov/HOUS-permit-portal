@@ -36,6 +36,10 @@ NULL",
     revoked_at.present?
   end
 
+  def enabled?
+    jurisdiction.external_api_enabled && !expired? && !revoked?
+  end
+
   def revoke
     update(revoked_at: Time.now)
   end

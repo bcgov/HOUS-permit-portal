@@ -25,7 +25,10 @@ export const Footer = ({ permitApplication }: { permitApplication: IPermitApplic
             label={t("permitApplication.pdf.submissionDate")}
             value={format(permitApplication.submittedAt, "yyyy-MM-dd")}
           />
-          <Field label={t("permitApplication.pdf.applicant")} value={permitApplication.submitter.name} />
+          <Field
+            label={t("permitApplication.pdf.applicant")}
+            value={`${permitApplication.submitter.firstName} ${permitApplication.submitter.lastName}`}
+          />
           <Field label={t("permitApplication.pdf.jurisdiction")} value={permitApplication.jurisdiction.name} />
           <Field
             label={t("permitApplication.pdf.page", { pageNumber: pageNumber, totalPages: totalPages })}

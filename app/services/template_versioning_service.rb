@@ -54,6 +54,20 @@ class TemplateVersioningService
     template_version
   end
 
+  def self.unschedule!(template_version, deprecated_by)
+    return template_version unless template_version.status == "scheduled"
+
+    template_version.status = "deprecated"
+    template_version.deprecation_reason = TemplateVersion.deprecation_reasons[:unscheduled]
+    template_version.deprecated_by = deprecated_by
+
+    unless template_version.save
+      raise TemplateVersionUnscheduleError.new(template_version.errors.full_messages.join(", "))
+    end
+
+    template_version
+  end
+
   def self.force_publish_now!(requirement_template)
     unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
       raise TemplateVersionForcePublishNowError.new("Force publish is not enabled")
@@ -294,7 +308,7 @@ class TemplateVersioningService
       .where(status: %w[published scheduled])
       .where("version_date <=?", template_version.version_date)
       .where.not(id: template_version.id)
-      .update_all(status: "deprecated")
+      .update_all(status: "deprecated", deprecation_reason: TemplateVersion.deprecation_reasons[:new_publish])
   end
 
   def self.form_requirement_blocks_hash(requirement_template)
@@ -313,9 +327,14 @@ class TemplateVersioningService
   end
 
   def self.is_valid_schedule_version_date?(requirement_template, version_date)
-    last_version = requirement_template.template_versions.order(version_date: :desc, created_at: :desc).first
+    last_scheduled_version =
+      requirement_template
+        .template_versions
+        .where(status: TemplateVersion.statuses[:scheduled])
+        .order(version_date: :desc, created_at: :desc)
+        .first
 
-    version_date > Date.current && (last_version.blank? || version_date > last_version.version_date)
+    version_date > Date.current && (last_scheduled_version.blank? || version_date > last_scheduled_version.version_date)
   end
 
   def self.diff_of_current_changes_and_last_version
