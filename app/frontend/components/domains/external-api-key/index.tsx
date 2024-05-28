@@ -64,7 +64,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
             {t("externalApiKey.index.createExternalApiKey")}
           </RouterLinkButton>
         </Flex>
-        {!externalApiEnabled && currentUser.isReviewManager && (
+        {!externalApiEnabled && (currentUser.isReviewManager || currentUser.isRegionalReviewManager) && (
           <CalloutBanner
             type={"warning"}
             title={

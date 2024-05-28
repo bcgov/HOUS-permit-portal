@@ -29,6 +29,6 @@ class JurisdictionBlueprint < Blueprinter::Base
   end
 
   view :minimal do
-    fields :qualified_name
+    fields :qualified_name, :external_api_enabled
   end
 end
