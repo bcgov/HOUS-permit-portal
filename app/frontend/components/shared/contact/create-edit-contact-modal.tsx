@@ -19,7 +19,7 @@ import { IContact } from "../../../types/types"
 import { convertE164PhoneToInputDefault } from "../../../utils/utility-functions"
 import { EmailFormControl } from "../form/email-form-control"
 import { PhoneFormControl, TextFormControl } from "../form/input-form-control"
-import { ConfirmDeleteModal } from "../modals/confirm-delete-modal"
+import { RemoveConfirmationModal } from "../remove-confirmation-modal"
 
 export type TContactFormData = {
   id: string
@@ -151,21 +151,24 @@ export const CreateEditContactModal = ({
                   {contact ? t("contact.updateButton") : t("contact.createButton")}
                 </Button>
 
-                <ConfirmDeleteModal
-                  title="Delete view"
-                  onConfirm={handleDelete}
-                  renderTrigger={(props) => (
-                    <Button
-                      color="semantic.error"
-                      onClick={(e) => {}}
-                      leftIcon={<Trash />}
-                      variant="link"
-                      px={2}
-                      {...props}
-                    >
-                      {t("ui.delete")}
-                    </Button>
-                  )}
+                <RemoveConfirmationModal
+                  title={t("contact.confirmDeleteTitle")}
+                  body={t("contact.confirmDeleteBody")}
+                  renderTriggerButton={(props) => {
+                    return (
+                      <Button
+                        color="semantic.error"
+                        onClick={(e) => {}}
+                        leftIcon={<Trash />}
+                        variant="link"
+                        px={2}
+                        {...props}
+                      >
+                        {t("ui.delete")}
+                      </Button>
+                    )
+                  }}
+                  onRemove={handleDelete}
                 />
               </Flex>
             </Flex>
