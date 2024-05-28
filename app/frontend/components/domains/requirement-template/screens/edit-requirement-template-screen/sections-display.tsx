@@ -164,7 +164,7 @@ const SectionDisplay = observer(
             onUse={(requirementBlock, closeDrawer) => {
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
             }}
-            disabledUseForBlockIds={disabledUseForBlockIds}
+            disabledUseForBlockIds={new Set(disabledUseForBlockIds)}
             disabledReason={t("requirementTemplate.edit.duplicateRequirementBlockDisabledReason")}
           />
         </Stack>
