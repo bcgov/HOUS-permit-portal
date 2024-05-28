@@ -31,7 +31,7 @@ RSpec.configure do |config|
     "external_api/v1/swagger.yaml" => {
       openapi: "3.0.1",
       info: {
-        title: "External API V1",
+        title: "Integration API V1",
         version: "v1",
         description: <<-DESC,
 This document describes the APIs available to external integrators to query and retrieve submitted permit applications.

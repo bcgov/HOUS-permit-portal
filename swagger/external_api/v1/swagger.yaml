@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.1
 info:
-  title: External API V1
+  title: Integration API V1
   version: v1
   description: "This document describes the APIs available to external integrators
     to query and retrieve submitted permit applications.\nAdditional webhook events
