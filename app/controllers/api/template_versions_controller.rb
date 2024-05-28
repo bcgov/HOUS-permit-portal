@@ -61,6 +61,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def compare_requirements
+    binding.pry
     authorize @template_version
     before_version =
       TemplateVersion.find(compare_requirements_params[:previous_version_id]) if compare_requirements_params[
@@ -91,16 +92,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
     json_data = TemplateExportService.new(@template_version, @jurisdiction_template_version_customization).to_json
     send_data json_data, type: "text/plain"
-  end
-
-  def compare_requirements
-    authorize @template_version
-    before_json =
-      TemplateVersion.find(
-        compare_requirements_params[:previous_version_id],
-      ).requirement_blocks_json if compare_requirements_params[:previous_version_id].present?
-
-    render_success @template_version.compare_requirements(before_json), nil, { blueprint: CompareRequirementsBlueprint }
   end
 
   private

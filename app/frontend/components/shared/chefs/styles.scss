@@ -863,15 +863,15 @@
 }
 
 .removed-in-diff.formio-hidden::after {
-  @include hidden-diff-explainer("This field has been removed and is no longer required for your application.");
+  @include hidden-diff-explainer("A hidden field has been removed and is no longer required for your application.");
 }
 
 .changed-in-diff.formio-hidden::after {
-  @include hidden-diff-explainer("This field has been changed but is currently not required for your application.");
+  @include hidden-diff-explainer("A hidden field has been changed but is currently not required for your application.");
 }
 
 .added-in-diff.formio-hidden::after {
-  @include hidden-diff-explainer("A field has been added that is currently not required for your application.");
+  @include hidden-diff-explainer("A hidden field has been added that is currently not required for your application.");
 }
 
 /* ======================================
