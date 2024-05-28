@@ -50,7 +50,7 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
-    review_manager_ids = User.review_managers.pluck(:id)
+    review_manager_ids = User.review_manager.pluck(:id)
     relevant_submitter_ids =
       PermitApplication
         .joins(:template_version)
