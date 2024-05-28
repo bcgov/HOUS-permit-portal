@@ -142,16 +142,26 @@ export function isStepCodePackageFileRequirementCode(requirementCode: string) {
   return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
 }
 
+export function convertE164PhoneToInputDefault(e164PhoneNumber: string): string {
+  if (!e164PhoneNumber) return ""
+
+  // Removes the + from a database formatted number to make it fit in our max lengthed inputs
+  return e164PhoneNumber.substring(2)
+}
+
 export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
   // Remove any non-numeric characters, especially the leading '+'
   if (!phoneNumber) return ""
 
-  const digits = phoneNumber.replace(/\D+/g, "")
+  let digits = phoneNumber.replace(/\D+/g, "")
+
+  // Modified to handle converting both from user input format and database e164 format
+  if (digits.length === 11) digits = digits.substring(1)
 
   // Extract the area code, first three digits, and last four digits
-  const areaCode = digits.substring(1, 4)
-  const firstThree = digits.substring(4, 7)
-  const lastFour = digits.substring(7, 11)
+  const areaCode = digits.substring(0, 3)
+  const firstThree = digits.substring(3, 6)
+  const lastFour = digits.substring(6, 10)
 
   // Return the formatted phone number
   return `(${areaCode}) ${firstThree}-${lastFour}`

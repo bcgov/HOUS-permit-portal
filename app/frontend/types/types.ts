@@ -33,6 +33,7 @@ export interface IContact {
   department?: string
   email?: string
   phone?: string
+  extension: string
   cell?: string
   address?: string
   organization?: string

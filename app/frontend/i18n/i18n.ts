@@ -133,6 +133,9 @@ const options = {
           },
         },
         ui: {
+          delete: "Delete",
+          confirmDelete: "Confirm delete",
+          sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
           revoke: "Revoke",
           create: "Create",
@@ -215,7 +218,11 @@ const options = {
         },
         contact: {
           create: "New contact",
+          edit: "Edit contact",
           createButton: "Save to my contacts",
+          updateButton: "Update contact",
+          confirmDeleteTitle: "Are you sure you want to delete this contact?",
+          confirmDeleteBody: "This will not remove information from the form.",
           fields: {
             firstName: "First name",
             lastName: "Last name",

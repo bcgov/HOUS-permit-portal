@@ -85,7 +85,7 @@ Rails.application.routes.draw do
       get "jurisdiction_options", on: :collection
     end
 
-    resources :contacts, only: %i[create] do
+    resources :contacts, only: %i[create update destroy] do
       get "contact_options", on: :collection
     end
 
