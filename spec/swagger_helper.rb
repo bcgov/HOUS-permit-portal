@@ -33,6 +33,22 @@ RSpec.configure do |config|
       info: {
         title: "External API V1",
         version: "v1",
+        description: <<-DESC,
+This document describes the APIs available to external integrators to query and retrieve submitted permit applications.
+Additional webhook events are also documented which will be sent to the url provided by the external integrator.
+
+The submitted permit applications returned only include permit applications scoped to the jurisdiction of the API key used to authenticate the request.
+
+If you would like to integrate with this API, please contact the Building Permit team to obtain an API key and submit your webhook url.
+
+### Authentication/Authorization 
+Access to the API is controlled by an API key. The API key is passed in the `Authorization` header as a Bearer token.
+
+Note: A new API key is required for each jurisdiction you would like to access.
+
+### Rate Limit
+The API is rate limited to 100 requests per minute per API key and 300 requests per IP. If you exceed this limit, you will receive a 429 response.
+        DESC
       },
       paths: {
       },

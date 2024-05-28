@@ -3,6 +3,18 @@ openapi: 3.0.1
 info:
   title: External API V1
   version: v1
+  description: "This document describes the APIs available to external integrators
+    to query and retrieve submitted permit applications.\nAdditional webhook events
+    are also documented which will be sent to the url provided by the external integrator.\n\nThe
+    submitted permit applications returned only include permit applications scoped
+    to the jurisdiction of the API key used to authenticate the request.\n\nIf you
+    would like to integrate with this API, please contact the Building Permit team
+    to obtain an API key and submit your webhook url.\n\n### Authentication/Authorization
+    \nAccess to the API is controlled by an API key. The API key is passed in the
+    `Authorization` header as a Bearer token.\n\nNote: A new API key is required for
+    each jurisdiction you would like to access.\n\n### Rate Limit\nThe API is rate
+    limited to 100 requests per minute per API key and 300 requests per IP. If you
+    exceed this limit, you will receive a 429 response.\n"
 paths:
   "/permit_applications/search":
     post:
@@ -20,7 +32,7 @@ paths:
                 properties:
                   data:
                     type: array
-                    description: Submitted permit applications for the jurisdiction
+                    description: Submitted permit applications
                     items:
                       "$ref": "#/components/schemas/PermitApplication"
                   meta:
@@ -76,6 +88,30 @@ paths:
                       format: date-time
                       description: 'Less than or equal to: submitted date is less
                         than or equal to this date'
+  "/permit_applications/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: Submitted permit application id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: show permit_application
+      tags:
+      - permit applications
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/PermitApplication"
+                required:
+                - data
 basePath: "/external_api/v1"
 servers:
 - url: https:/buildingpermit.gov.bc.ca
