@@ -61,6 +61,10 @@ Rails.application.routes.draw do
       post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
     end
 
+    resources :notifications, only: %i[index] do
+      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
+    end
+
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
       post "schedule", to: "requirement_templates#schedule", on: :member

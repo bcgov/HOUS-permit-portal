@@ -1191,6 +1191,10 @@ const options = {
             diffBox: {
               title: "Template changes",
               instructions: "Please review the following:",
+              added: "Added",
+              changed: "Changed",
+              removed: "Removed",
+              updateToNewVersion: "See new",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
           },

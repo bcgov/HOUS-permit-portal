@@ -351,4 +351,5 @@ export enum ERequirementChangeAction {
 
 export enum ENotificationActionType {
   newTemplateVersionPublish = "new_template_version_publish",
+  customizationUpdate = "customization_update",
 }

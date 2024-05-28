@@ -37,6 +37,9 @@ export const NotificationStoreModel = types
           return `/`
         }
       }
+      if (notification.actionType === ENotificationActionType.customizationUpdate) {
+        return `/`
+      }
     },
   }))
   .actions((self) => ({

@@ -1,7 +1,8 @@
 class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
-  before_action :set_permit_application, only: %i[show update submit upload_supporting_document mark_as_viewed update_version]
+  before_action :set_permit_application,
+                only: %i[show update submit upload_supporting_document mark_as_viewed update_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index

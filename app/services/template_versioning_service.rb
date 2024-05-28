@@ -142,6 +142,89 @@ class TemplateVersioningService
     permit_application.update(template_version: new_template_version)
   end
 
+  def self.add_current_section_labels(form_json, requirement_blueprints)
+    find_section_label =
+      lambda do |id|
+        form_json["components"].each do |section|
+          section_label = section["label"]
+          section["components"].each do |block|
+            block["components"].each { |component| return section_label if component["id"] == id }
+          end
+        end
+        nil
+      end
+
+    requirement_blueprints.each do |blueprint|
+      section_label = find_section_label.call(blueprint["id"])
+      blueprint["diff_section_label"] = section_label
+    end
+
+    requirement_blueprints
+  end
+
+  def self.produce_diff_hash(before_version, template_version)
+    before_version ||= template_version.previous_version
+
+    before_json = before_version&.requirement_blocks_json
+    after_json = template_version.requirement_blocks_json
+
+    before_requirements = before_json&.values&.flat_map { |block| block["requirements"] }
+
+    after_requirements = after_json&.values&.flat_map { |block| block["requirements"] }
+
+    before_requirements_components = before_json&.values&.flat_map { |block| block["form_json"]["components"] } || []
+
+    after_requirements_components = after_json&.values&.flat_map { |block| block["form_json"]["components"] } || []
+
+    before_ids = before_requirements&.map { |req| req["id"] } || []
+    after_ids = after_requirements&.map { |req| req["id"] } || []
+
+    added_ids = after_ids - before_ids
+    removed_ids = before_ids - after_ids
+    intersection_ids = before_ids & after_ids
+    changed_ids =
+      intersection_ids.select do |id|
+        before_req = before_requirements.find { |req| req["id"] == id }.reject { |key, _| key == "updated_at" }
+        after_req = after_requirements.find { |req| req["id"] == id }.reject { |key, _| key == "updated_at" }
+        before_req != after_req
+      end
+
+    added_requirement_blueprints = after_requirements&.select { |req| added_ids.include?(req["id"]) } || []
+    removed_requirement_blueprints = before_requirements&.select { |req| removed_ids.include?(req["id"]) } || []
+    changed_requirement_blueprints = after_requirements&.select { |req| changed_ids.include?(req["id"]) } || []
+
+    # Workaround: need to add the fully formed form_json into the requirement blueprint
+    (changed_requirement_blueprints + added_requirement_blueprints + removed_requirement_blueprints).each do |blueprint|
+      matching_component =
+        (after_requirements_components + before_requirements_components).find do |component|
+          component["id"] == blueprint["id"]
+        end
+
+      blueprint["form_json"] = matching_component if matching_component
+    end
+
+    {
+      added: add_current_section_labels(template_version.form_json, added_requirement_blueprints),
+      changed: add_current_section_labels(template_version.form_json, changed_requirement_blueprints),
+      removed: add_current_section_labels(before_version.form_json, removed_requirement_blueprints),
+    }
+  end
+
+  def self.previous_published_version(template_version)
+    template_version
+      .requirement_template
+      .template_versions
+      .where(
+        "version_date <=? AND status = ? AND deprecation_reason = ?",
+        template_version.version_date,
+        TemplateVersion.statuses[:deprecated],
+        TemplateVersion.deprecation_reasons[:new_publish],
+      )
+      .where.not(id: template_version.id)
+      .order(version_date: :desc, created_at: :desc)
+      .first
+  end
+
   private
 
   def self.copy_jurisdiction_customizations_to_template_version(

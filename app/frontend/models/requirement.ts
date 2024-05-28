@@ -11,6 +11,7 @@ export const RequirementModel = types
     formJson: types.maybeNull(types.frozen<IFormIORequirement>()),
     inputType: types.enumeration<ERequirementType[]>(Object.values(ERequirementType)),
     inputOptions: types.frozen<IRequirementOptions>({}),
+    diffSectionLabel: types.maybeNull(types.string),
     elective: types.boolean,
     required: types.boolean,
     createdAt: types.Date,

@@ -60,6 +60,18 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
+  def compare_requirements
+    authorize @template_version
+    before_version =
+      TemplateVersion.find(compare_requirements_params[:previous_version_id]) if compare_requirements_params[
+      :previous_version_id
+    ].present?
+
+    render_success @template_version.compare_requirements(before_version),
+                   nil,
+                   { blueprint: CompareRequirementsBlueprint }
+  end
+
   def download_summary_csv
     authorize @template_version
 

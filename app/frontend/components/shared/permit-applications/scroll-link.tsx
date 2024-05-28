@@ -31,9 +31,14 @@ export const ScrollLink: React.FC<ScrollLinkProps> = ({ to, children, ...props }
       const formControlElement = id ? document.getElementById(id) : null
       formControlElement?.focus?.()
 
-      targetElement.addEventListener("blur", () => {
-        targetElement.removeAttribute("tabIndex") // Removes the tabIndex attribute, returning it to its default behavior
-      })
+      const handleBlur = () => {
+        // Removes the tabIndex attribute, returning it to its default behavior
+        targetElement.removeAttribute("tabIndex")
+        // Clean up the event listener
+        targetElement.removeEventListener("blur", handleBlur)
+      }
+
+      targetElement.addEventListener("blur", handleBlur)
     }
   }
 

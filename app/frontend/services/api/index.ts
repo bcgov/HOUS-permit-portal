@@ -37,13 +37,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import {
-  IContact,
-  IJurisdictionFilters,
-  ISiteConfiguration,
-  TAutoComplianceModuleConfigurations,
-  TSearchParams,
-} from "../../types/types"
+import { IContact, ISiteConfiguration, ITemplateVersionDiff, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {

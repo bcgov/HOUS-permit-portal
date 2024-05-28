@@ -57,62 +57,11 @@ class TemplateVersion < ApplicationRecord
   end
 
   def previous_version
-    requirement_template
-    .template_versions
-    .where(
-      "version_date <=? AND status = ? AND deprecation_reason = ?",
-      template_version.version_date,
-      TemplateVersion.statuses[:deprecated],
-      TemplateVersion.deprecation_reasons[:new_publish],
-    )
-    .where.not(id: template_version.id)
-    .order(version_date: :desc, created_at: :desc)
-    .first
+    TemplateVersioningService.previous_published_version(self)
   end
 
-  def compare_requirements(before_json)
-    before_json ||= previous_version&.requirement_blocks_json
-    after_json = requirement_blocks_json
-
-    before_requirements = before_json&.values&.flat_map { |block| block["requirements"] }
-    after_requirements = after_json&.values&.flat_map { |block| block["requirements"] }
-
-    after_requirements_components = after_json&.values&.flat_map { |block| block["form_json"]["components"] }
-
-    before_requirements_components = before_json&.values&.flat_map { |block| block["form_json"]["components"] }
-
-    before_ids = before_requirements&.map { |req| req["id"] } || []
-    after_ids = after_requirements&.map { |req| req["id"] } || []
-
-    added_ids = after_ids - before_ids
-    removed_ids = before_ids - after_ids
-    intersection_ids = before_ids & after_ids
-    changed_ids =
-      intersection_ids.select do |id|
-        before_req = before_requirements.find { |req| req["id"] == id }.reject { |key, _| key == "updated_at" }
-        after_req = after_requirements.find { |req| req["id"] == id }.reject { |key, _| key == "updated_at" }
-        before_req != after_req
-      end
-
-    added_requirement_blueprints = after_requirements&.select { |req| added_ids.include?(req["id"]) } || []
-    removed_requirement_blueprints = before_requirements&.select { |req| removed_ids.include?(req["id"]) } || []
-    changed_requirement_blueprints = after_requirements&.select { |req| changed_ids.include?(req["id"]) } || []
-
-    # Workaround: need to add the fully formed form_json into the requirement blueprint
-    (changed_requirement_blueprints + added_requirement_blueprints + removed_requirement_blueprints).each do |blueprint|
-      matching_component =
-        (after_requirements_components + before_requirements_components).find do |component|
-          component["id"] == blueprint["id"]
-        end
-
-      blueprint["form_json"] = matching_component if matching_component
-    end
-
-    {
-      added: added_requirement_blueprints,
-      removed: removed_requirement_blueprints,
-      changed: changed_requirement_blueprints,
-    }
+  def compare_requirements(before_version)
+    TemplateVersioningService.produce_diff_hash(before_version, self)
   end
 
   private

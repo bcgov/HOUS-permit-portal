@@ -447,15 +447,14 @@ en:
     performance_type:
       error: "%{field_name} performance type must be one of %{accepted_values}"
   model_validation:
-    template_section_block:
-      requirement_block_on_template_exits: ': "%{requirement_block_name}" already exists on this template'
     requirement_template:
       duplicate_block_in_template: "Requirement block %{requirement_block_name} is already used in another section of this template."
     jurisdiction_template_version_customization:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"
-  export:
-    template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
-    requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
   notification:
     template_version:
       new_version_notification: "A new version of this template has been published"
+      new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
+  export:
+    template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
+    requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"

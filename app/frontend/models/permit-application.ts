@@ -4,19 +4,23 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
-import { EPermitApplicationStatus, ERequirementType } from "../types/enums"
+import { EPermitApplicationStatus, ERequirementChangeAction, ERequirementType } from "../types/enums"
 import {
+  ICompareRequirementsBoxData,
+  ICompareRequirementsBoxDiff,
   IContact,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
   ISubmissionData,
   ITemplateCustomization,
+  ITemplateVersionDiff,
 } from "../types/types"
-import { combineComplianceHints } from "../utils/formio-component-traversal"
+import { combineComplianceHints, combineDiff } from "../utils/formio-component-traversal"
 import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
+import { IRequirement } from "./requirement"
 import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
@@ -55,6 +59,7 @@ export const PermitApplicationModel = types
     isDirty: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
     showCompareAfter: types.optional(types.boolean, false),
+    diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -75,7 +80,13 @@ export const PermitApplicationModel = types
     },
     get formattedFormJson() {
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
-      return combineComplianceHints(self.formJson, self.formCustomizations, self.formattedComplianceData)
+      const complianceHintedFormJson = combineComplianceHints(
+        self.formJson,
+        self.formCustomizations,
+        self.formattedComplianceData
+      )
+      const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+      return diffColoredFormJson
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
@@ -95,6 +106,24 @@ export const PermitApplicationModel = types
     get usesPublishedTemplateVersion() {
       return self.templateVersion.id === self.publishedTemplateVersion.id
     },
+    get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
+      if (!self.diff) return null
+
+      const mapFn = (req: IRequirement, action: ERequirementChangeAction): ICompareRequirementsBoxData => {
+        return {
+          label: t("requirementTemplate.compareAction", {
+            requirementName: `${req.label}${req.elective ? ` (${t("requirementsLibrary.elective")})` : ""}`,
+            action: t(`requirementTemplate.${action}`),
+          }),
+          class: `formio-component-${req.formJson.key}`,
+          diffSectionLabel: req.diffSectionLabel,
+        }
+      }
+      const addedErrorBoxData = self.diff.added.map((req) => mapFn(req, ERequirementChangeAction.added))
+      const removedErrorBoxData = self.diff.removed.map((req) => mapFn(req, ERequirementChangeAction.removed))
+      const changedErrorBoxData = self.diff.changed.map((req) => mapFn(req, ERequirementChangeAction.changed))
+      return { added: addedErrorBoxData, removed: removedErrorBoxData, changed: changedErrorBoxData }
+    },
   }))
   .actions((self) => ({
     setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
@@ -104,8 +133,15 @@ export const PermitApplicationModel = types
     setIsDirty(isDirty: boolean) {
       self.isDirty = true
     },
+    resetDiff() {
+      self.showCompareAfter = false
+      self.diff = null
+    },
   }))
   .views((self) => ({
+    get formDiffKey() {
+      return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
+    },
     get statusTagText() {
       if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
         return t("permitApplication.viewed")
@@ -282,15 +318,21 @@ export const PermitApplicationModel = types
       self.isLoading = false
       return response
     }),
+    fetchDiff: flow(function* () {
+      const diffData = yield self.publishedTemplateVersion.fetchTemplateVersionCompare(self.templateVersion.id)
+      self.diff = diffData.data
+    }),
     updateVersion: flow(function* () {
       self.isLoading = true
+      const retainedDiff = self.diff
       const response = yield self.environment.api.updatePermitApplicationVersion(self.id)
       if (response.ok) {
         const { data: permitApplication } = response.data
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
-      self.isLoading = false
+      self.diff = retainedDiff
       self.showCompareAfter = true
+      self.isLoading = false
       return response
     }),
     submit: flow(function* (params) {
