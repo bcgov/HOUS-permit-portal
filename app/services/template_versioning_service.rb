@@ -163,7 +163,6 @@ class TemplateVersioningService
   end
 
   def self.produce_diff_hash(before_version, template_version)
-    binding.pry
     before_version ||= template_version.previous_version
 
     before_json = before_version&.requirement_blocks_json

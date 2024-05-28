@@ -61,7 +61,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def compare_requirements
-    binding.pry
     authorize @template_version
     before_version =
       TemplateVersion.find(compare_requirements_params[:previous_version_id]) if compare_requirements_params[
