@@ -2,7 +2,7 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
-import { TCreateContactFormData } from "../../components/shared/contact/create-contact-modal"
+import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
@@ -400,8 +400,16 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
   }
 
-  async createContact(params: TCreateContactFormData) {
+  async createContact(params: TContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
+  }
+
+  async updateContact(id: string, params: TContactFormData) {
+    return this.client.put<ApiResponse<IContact>>(`/contacts/${id}`, { contact: params })
+  }
+
+  async destroyContact(id: string) {
+    return this.client.delete<ApiResponse<IContact>>(`/contacts/${id}`)
   }
 
   async downloadCustomizationJson(templateVersionId: string, jurisdictionId: string) {
