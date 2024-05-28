@@ -57,12 +57,7 @@ class TemplateVersion < ApplicationRecord
   end
 
   def previous_version
-    requirement_template
-      .template_versions
-      .where("version_date <=?", version_date)
-      .where.not(id: id)
-      .order(version_date: :desc, created_at: :desc)
-      .first
+    TemplateVersioningService.previous_published_version(self)
   end
 
   def compare_requirements(before_version)

@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
 import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
 import { IJurisdictionTemplateVersionCustomization } from "../../../../../models/jurisdiction-template-version-customization"
@@ -93,9 +93,8 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     reset(formFormDefaults(jurisdictionTemplateVersionCustomization))
   }, [jurisdictionTemplateVersionCustomization?.customizations])
 
-  const location = useLocation()
-  const queryParams = new URLSearchParams(location.search)
-  const isCompare = queryParams.get("compare") === "true"
+  const [searchParams] = useSearchParams()
+  const isCompare = searchParams.get("compare") === "true"
 
   const [diff, setDiff] = useState<ITemplateVersionDiff>(null)
   const diffToInfoBoxData = (): ICompareRequirementsBoxDiff | null => {

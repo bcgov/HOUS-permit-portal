@@ -210,6 +210,21 @@ class TemplateVersioningService
     }
   end
 
+  def self.previous_published_version(template_version)
+    template_version
+      .requirement_template
+      .template_versions
+      .where(
+        "version_date <=? AND status = ? AND deprecation_reason = ?",
+        template_version.version_date,
+        TemplateVersion.statuses[:deprecated],
+        TemplateVersion.deprecation_reasons[:new_publish],
+      )
+      .where.not(id: template_version.id)
+      .order(version_date: :desc, created_at: :desc)
+      .first
+  end
+
   private
 
   def self.copy_jurisdiction_customizations_to_template_version(
