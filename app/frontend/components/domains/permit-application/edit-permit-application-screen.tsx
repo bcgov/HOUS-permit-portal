@@ -202,7 +202,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
         color="greys.white"
         position="sticky"
         top="0"
-        zIndex="11"
+        zIndex={10}
         flexDirection={{ base: "column", md: "row" }}
       >
         <HStack gap={4} flex={1}>

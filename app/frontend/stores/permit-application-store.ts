@@ -48,11 +48,17 @@ export const PermitApplicationStoreModel = types
         pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
         pad.jurisdiction && self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
         pad.submitter && self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
+        pad.templateVersion &&
+          self.rootStore.templateVersionStore.mergeUpdate(pad.templateVersion, "templateVersionMap")
+        pad.publishedTemplateVersion &&
+          self.rootStore.templateVersionStore.mergeUpdate(pad.publishedTemplateVersion, "templateVersionMap")
       }
 
       return R.mergeRight(pad, {
         jurisdiction: pad.jurisdiction?.id,
         submitter: pad.submitter?.id,
+        templateVersion: pad.templateVersion?.id,
+        publishedTemplateVersion: pad.publishedTemplateVersion?.id,
         stepCode: pad.stepCode?.id,
       })
     },
@@ -70,6 +76,22 @@ export const PermitApplicationStoreModel = types
         permitApplicationsData.filter((pa) => pa.submitter).map((pa) => pa.submitter)
       )
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
+
+      self.rootStore.templateVersionStore.mergeUpdateAll(
+        R.reject(
+          R.isNil,
+          permitApplicationsData.map((pa) => pa.templateVersion)
+        ),
+        "templateVersionMap"
+      )
+
+      self.rootStore.templateVersionStore.mergeUpdateAll(
+        R.reject(
+          R.isNil,
+          permitApplicationsData.map((pa) => pa.publishedTemplateVersion)
+        ),
+        "templateVersionMap"
+      )
 
       self.rootStore.stepCodeStore.mergeUpdateAll(
         R.reject(

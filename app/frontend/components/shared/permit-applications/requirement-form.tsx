@@ -24,9 +24,11 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
+import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
-import { CustomToast } from "../base/flash-message"
+import { CustomMessageBox } from "../base/custom-message-box"
+import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 
@@ -55,7 +57,6 @@ export const RequirementForm = observer(
       blockClasses,
       formattedFormJson,
       isDraft,
-      setIsDirty,
     } = permitApplication
     const isMounted = useMountStatus()
     const { t } = useTranslation()
@@ -77,10 +78,20 @@ export const RequirementForm = observer(
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
+    const usesPublishedTemplateVersion = permitApplication?.usesPublishedTemplateVersion
+
+    const infoBoxData = permitApplication.diffToInfoBoxData
+
+    useEffect(() => {
+      if (!usesPublishedTemplateVersion) {
+        permitApplication.fetchDiff()
+      }
+    }, [usesPublishedTemplateVersion])
+
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
       // This triggers a re-registration whenever the body of the box is clicked
-      // Click listender must be registered this way because formIO prevents bubbling
+      // Click listener must be registered this way because formIO prevents bubbling
 
       const box = boxRef.current
       const handleClick = () => {
@@ -264,6 +275,16 @@ export const RequirementForm = observer(
       persistFileUploadUrl: `/api/permit_applications/${permitApplication.id}/upload_supporting_document`,
     }
 
+    const handleUpdatePermitApplicationVersion = () => {
+      if (permitApplication.showCompareAfter) {
+        permitApplication.resetCompareAfter()
+      } else {
+        permitApplication.updateVersion()
+      }
+    }
+
+    if (permitApplication.isLoading) return <SharedSpinner />
+
     return (
       <>
         <Flex
@@ -286,10 +307,22 @@ export const RequirementForm = observer(
             },
           }}
         >
-          <ErrorsBox errorBox={errorBoxData} />
-
+          <ErrorsBox data={errorBoxData} />
+          {(!usesPublishedTemplateVersion || permitApplication.showCompareAfter) &&
+            (permitApplication.diff ? (
+              <CompareRequirementsBox
+                data={infoBoxData}
+                handleUpdatePermitApplicationVersion={handleUpdatePermitApplicationVersion}
+                showCompareAfter={permitApplication.showCompareAfter}
+                handleClickDismiss={() => {
+                  permitApplication.resetDiff()
+                }}
+              />
+            ) : (
+              <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
+            ))}
           {permitApplication?.isSubmitted ? (
-            <CustomToast
+            <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
                 date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
                 jurisdictionName: jurisdiction.qualifiedName,
@@ -297,7 +330,7 @@ export const RequirementForm = observer(
               status="info"
             />
           ) : (
-            <CustomToast
+            <CustomMessageBox
               description={t("permitApplication.show.submittingTo", { jurisdictionName: jurisdiction.qualifiedName })}
               status="info"
             />
@@ -310,12 +343,12 @@ export const RequirementForm = observer(
               </Link>
             </Text>
           </Box>
-
           <Form
+            key={permitApplication.formDiffKey}
             form={formattedFormJson}
             formReady={formReady}
-            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be
-                                                                                                                                                                                                                         mutated*/
+            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
+            can't be mutated*/
             submission={clonedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}

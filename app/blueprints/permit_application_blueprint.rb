@@ -35,6 +35,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
 
     association :submitter, blueprint: UserBlueprint, view: :base
+    association :template_version, blueprint: TemplateVersionBlueprint
+    association :published_template_version, blueprint: TemplateVersionBlueprint
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint

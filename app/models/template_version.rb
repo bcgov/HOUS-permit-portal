@@ -8,6 +8,8 @@ class TemplateVersion < ApplicationRecord
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
+  delegate :label, to: :requirement_template
+  delegate :published_template_version, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
   enum deprecation_reason: { new_publish: 0, unscheduled: 1 }, _prefix: true
@@ -41,6 +43,25 @@ class TemplateVersion < ApplicationRecord
     end
 
     json_requirements
+  end
+
+  def publish_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
+      "action_text" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
+      "object_data" => {
+        "template_version_id" => id,
+      },
+    }
+  end
+
+  def previous_version
+    TemplateVersioningService.previous_published_version(self)
+  end
+
+  def compare_requirements(before_version)
+    TemplateVersioningService.produce_diff_hash(before_version, self)
   end
 
   private

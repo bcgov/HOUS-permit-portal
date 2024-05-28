@@ -283,6 +283,7 @@ export enum ESocketDomainTypes {
 
 export enum ESocketEventTypes {
   update = "update",
+  new = "new",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -336,4 +337,19 @@ export enum EAutoComplianceType {
 export enum EDeprecationReason {
   newPublish = "new_publish",
   unscheduled = "unscheduled",
+}
+
+export enum EFollowableTypes {
+  permitTemplate = "PermitTemplate",
+}
+
+export enum ERequirementChangeAction {
+  added = "added",
+  changed = "changed",
+  removed = "removed",
+}
+
+export enum ENotificationActionType {
+  newTemplateVersionPublish = "new_template_version_publish",
+  customizationUpdate = "customization_update",
 }

@@ -5,6 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
+import { INotificationStore, NotificationStoreModel } from "./notification-store"
 import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-application-store"
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
@@ -32,6 +33,7 @@ export const RootStoreModel = types
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
+    notificationStore: types.optional(NotificationStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -55,8 +57,10 @@ export const RootStoreModel = types
     }),
     subscribeToUserChannel() {
       if (!self.userChannelConsumer && self.userStore.currentUser) {
-        // @ts-ignore
-        self.userChannelConsumer = createUserChannelConsumer(self.userStore.currentUser.id, self)
+        self.userChannelConsumer = createUserChannelConsumer(
+          self.userStore.currentUser.id,
+          self as unknown as IRootStore
+        )
       }
     },
     disconnectUserChannel() {
@@ -83,6 +87,7 @@ export interface IRootStore extends IStateTreeNode {
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore
+  notificationStore: INotificationStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void
