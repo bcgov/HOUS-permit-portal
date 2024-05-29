@@ -28,9 +28,9 @@ namespace :db do
         password: Devise.friendly_token[0, 20],
         jurisdiction: j,
         omniauth_uid: row["bceid_uid"],
-        omniauth_provider: "bceidboth",
         omniauth_email: row["bceid_email"],
-        omniauth_username: row["bceid_username"]
+        omniauth_username: row["bceid_username"],
+        omniauth_provider: row["omniauth_provider"]
       ).confirm
     rescue ActiveRecord::RecordInvalid => e
       puts "Skipping invalid user record: #{e.message}"
