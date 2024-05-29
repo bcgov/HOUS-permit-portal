@@ -14,6 +14,9 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: postgres://user:password@localhost:5432/test_db
       ELASTICSEARCH_URL: http://localhost:9200
+      REDIS_URL: redis://localhost:6379/0
+      RATE_LIMIT_DEV_REDIS_URL: redis://localhost:6379/1
+      SIMPLE_FEED_DEV_REDIS_URL: redis://localhost:6379/2
       CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
       GEO_ALR_REST_URL: https://alr_rest_url_stub/arcserver/rest/services
       GEO_LTSA_PARCELMAP_REST_URL: https://ltsa_parcel_map_url_stub/arcserver/rest/services
@@ -36,6 +39,15 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7.2.5
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
