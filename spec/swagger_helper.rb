@@ -29,25 +29,47 @@ RSpec.configure do |config|
   # the root example_group in your specs, e.g. describe '...', openapi_spec: 'v2/swagger.json'
   config.openapi_specs = {
     "external_api/v1/swagger.yaml" => {
-      openapi: "3.0.1",
+      openapi: "3.1.0",
       info: {
         title: "Integration API V1",
         version: "v1",
         description: <<-DESC,
-This document describes the APIs available to external integrators to query and retrieve submitted permit applications.
-Additional webhook events are also documented which will be sent to the url provided by the external integrator.
+### API documentation overview
+This document provides detailed information about the APIs available for external integrators to query and retrieve submitted permit applications.
+It also includes specifications on webhook events that notify your systems in real-time.
 
-The submitted permit applications returned only include permit applications scoped to the jurisdiction of the API key used to authenticate the request.
+### Data scope:
+The permit applications returned by these APIs are limited to those within the jurisdiction associated with the API key used for the request. This
+ensures that each integrator has access solely to relevant data.
 
-If you would like to integrate with this API, please contact the Building Permit team to obtain an API key and submit your webhook url.
+### Integration steps:
+To integrate with our APIs, please contact the Building Permit Hub team to enable your API access. Your local jurisdiction can then obtain the API key
+and register your webhook URL in their configuration settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>
+for further assistance.
 
-### Authentication/Authorization 
-Access to the API is controlled by an API key. The API key is passed in the `Authorization` header as a Bearer token.
+### Authentication and authorization: 
+Access to these APIs is controlled via an API key, which must be included in the Authorization header as a Bearer token like so:
+```
+Authorization: Bearer {Your_API_Key_Here}
+```
+Please note that a unique API key is required for each jurisdiction you wish to access, enhancing security and data integrity.
 
-Note: A new API key is required for each jurisdiction you would like to access.
+### Rate limits:
+To ensure fair usage, the API is rate-limited to 100 requests per minute per API key and 300 requests per IP in a 3 minute interval. Exceeding these
+limits will result in a 429 response. If this occurs, we recommend spacing out your requests. Continued exceeding of rate limits
+may necessitate further contact with the building permit hub team.
 
-### Rate Limit
-The API is rate limited to 100 requests per minute per API key and 300 requests per IP. If you exceed this limit, you will receive a 429 response.
+### Api base path:
+The base path for all API endpoints is `/external_api/v1`.
+
+### Server information for testing:
+For testing purposes, please use the server located at {serverUrl}. The computed URL for API interactions is https://buildingpermit.gov.bc.ca.
+During your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to
+tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
+
+### Visual aids and examples:
+For a better understanding of how our APIs work, including webhook setups and request handling, please refer to the code examples included later
+in this document.
         DESC
       },
       paths: {

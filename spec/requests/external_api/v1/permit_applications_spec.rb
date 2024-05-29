@@ -28,7 +28,7 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
   end
 
   path "/permit_applications/search" do
-    post "Lists paginated permit applications" do
+    post "This endpoint retrieves a list of permit applications in a paginated format. It allows you to search through permit applications based on specified criteria, returning results in manageable pages." do
       tags "Permit applications"
       let(:constraints) { nil }
       consumes "application/json"
@@ -125,7 +125,9 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
 
     let(:id) { submitted_permit_applications.first.id }
 
-    get("show permit_application") do
+    get(
+      "This endpoint retrieves detailed information about a specific permit application using its unique identifier (ID). Please note that requests to this endpoint are subject to rate limiting to ensure optimal performance and fair usage.",
+    ) do
       tags "Permit applications"
       consumes "application/json"
       produces "application/json"

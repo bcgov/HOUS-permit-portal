@@ -3,19 +3,36 @@ openapi: 3.1.0
 info:
   title: Integration API V1
   version: v1
-  description: "This document describes the APIs available to external integrators
-    to query and retrieve submitted permit applications.\nAdditional webhook events
-    are also documented which will be sent to the url provided by the external integrator.\n\nThe
-    submitted permit applications returned only include permit applications scoped
-    to the jurisdiction of the API key used to authenticate the request.\n\nIf you
-    would like to integrate with this API, please contact the Building Permit team
-    to obtain an API key and submit your webhook url.\n\n### Authentication/Authorization
-    \nAccess to the API is controlled by an API key. The API key is passed in the
-    `Authorization` header as a Bearer token.\n\nNote: A new API key is required for
-    each jurisdiction you would like to access.\n\n### Rate Limit\nThe API is rate
-    limited to 100 requests per minute per API key and 300 requests per IP. If you
-    exceed this limit, you will receive a 429 response.\n"
-# Since OAS 3.1.0 the paths element isn't necessary. Now a valid OpenAPI Document can describe only paths, webhooks, or even only reusable components
+  description: "### API documentation overview\nThis document provides detailed information
+    about the APIs available for external integrators to query and retrieve submitted
+    permit applications.\nIt also includes specifications on webhook events that notify
+    your systems in real-time.\n\n### Data scope:\nThe permit applications returned
+    by these APIs are limited to those within the jurisdiction associated with the
+    API key used for the request. This\nensures that each integrator has access solely
+    to relevant data.\n\n### Integration steps:\nTo integrate with our APIs, please
+    contact the Building Permit Hub team to enable your API access. Your local jurisdiction
+    can then obtain the API key\nand register your webhook URL in their configuration
+    settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>\nfor
+    further assistance.\n\n### Authentication and authorization: \nAccess to these
+    APIs is controlled via an API key, which must be included in the Authorization
+    header as a Bearer token like so:\n```\nAuthorization: Bearer {Your_API_Key_Here}\n```\nPlease
+    note that a unique API key is required for each jurisdiction you wish to access,
+    enhancing security and data integrity.\n\n### Rate limits:\nTo ensure fair usage,
+    the API is rate-limited to 100 requests per minute per API key and 300 requests
+    per IP in a 3 minute interval. Exceeding these\nlimits will result in a 429 response. If this occurs,
+    we recommend spacing out your requests. Continued exceeding of rate limits\nmay
+    necessitate further contact with the building permit hub team.\n\n### Api base
+    path:\nThe base path for all API endpoints is `/external_api/v1`.\n\n### Server
+    information for testing:\nFor testing purposes, please use the server located
+    at {serverUrl}. The computed URL for API interactions is https://buildingpermit.gov.bc.ca.\nDuring
+    your integration testing phase, you have the flexibility to use custom URLs by
+    configuring the serverUrl variable. This allows you to\ntailor the API environment
+    to better suit your development needs. Ensure that your custom URLs are configured
+    correctly to avoid any connectivity or data access issues.\n\n### Visual aids
+    and examples:\nFor a better understanding of how our APIs work, including webhook
+    setups and request handling, please refer to the code examples included later\nin
+    this document.\n"
+# Since OAS 3.1.0 the paths element isn't necessary. Now a valid OpenAPI Document can describe only paths, webhooks, or even only reusable components.
 # Note this is manually added after rswag generation as rswag is not compatible with OAS 3.1.0
 webhooks:
   permit_submitted:
@@ -23,11 +40,14 @@ webhooks:
       - Webhooks
     post:
       requestBody:
-        description: "Information about a submitted permit application. This will
-          be sent to the webhook url provided by the external integrator. The permit
-          application id returned can then be used to retrieve the full permit application
-          via the [get permit application endpoint](#/paths/~1permit_applications~1{id}/get) endpoint.\n\n
-        ### Retries\n If the external integrator does not return a 200 status, the webhook will be retried up to 8 times with an exponential backoff."
+        description: "### Request body:\nThis webhook sends information about a recently submitted permit 
+        application in a JSON format to the webhook URL specified by the external integrator.\nIt includes 
+        the permit application ID, which can be used to fetch the complete details of the permit application using the 
+        `GET/permit_applications/{id}` endpoint.\n\n### Retries:\nIf the webhook does not receive a 200 status response 
+        from the external integrator, it will attempt to resend the notification up to 8 times using an exponential backoff 
+        strategy. This ensures multiple attempts to deliver the webhook in case of temporary issues on the receiving end.\n\n
+        ### Expected responses:\nThe external integrator is expected to return a 200 status code to confirm successful receipt 
+        of the data. This acknowledgment indicates that the payload was received and processed without issues"
         content:
           application/json:
             schema:
@@ -38,7 +58,9 @@ webhooks:
 paths:
   "/permit_applications/search":
     post:
-      summary: Lists paginated permit applications
+      summary: This endpoint retrieves a list of permit applications in a paginated
+        format. It allows you to search through permit applications based on specified
+        criteria, returning results in manageable pages.
       tags:
         - Permit applications
       parameters: [ ]
@@ -123,7 +145,7 @@ paths:
         schema:
           type: string
     get:
-      summary: requests are rate limited
+      summary: "This endpoint retrieves detailed information about a specific permit application using its unique identifier (ID). Please note that requests to this endpoint are subject to rate limiting to ensure optimal performance and fair usage."
       tags:
         - Permit applications
       responses:
