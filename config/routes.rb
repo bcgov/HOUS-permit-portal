@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   end
 
   mount Sidekiq::Web => "/sidekiq"
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", :as => :rails_health_check
@@ -56,6 +57,14 @@ Rails.application.routes.draw do
           to: "requirement_blocks#auto_compliance_module_configurations"
     end
 
+    resources :notifications, only: %i[index] do
+      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
+    end
+
+    resources :notifications, only: %i[index] do
+      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
+    end
+
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
       post "schedule", to: "requirement_templates#schedule", on: :member
@@ -64,7 +73,9 @@ Rails.application.routes.draw do
       post "template_versions/:id/unschedule", on: :collection, to: "requirement_templates#unschedule_template_version"
     end
 
-    resources :template_versions, only: %i[index show]
+    resources :template_versions, only: %i[index show] do
+      get "compare_requirements", to: "template_versions#compare_requirements", on: :member
+    end
 
     get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
           "template_versions#show_jurisdiction_template_version_cutomization"
@@ -104,6 +115,7 @@ Rails.application.routes.draw do
       post "submit", on: :member
       post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
+      patch "update_version", on: :member
     end
 
     patch "profile", to: "users#profile"

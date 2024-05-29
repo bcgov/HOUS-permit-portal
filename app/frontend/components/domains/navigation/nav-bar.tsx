@@ -19,7 +19,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
+import { Envelope, Folders, List } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -30,6 +30,7 @@ import { EUserRoles } from "../../../types/enums"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { NotificationsPopover } from "../home/notifications/notifications-popover"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
@@ -155,6 +156,12 @@ export const NavBar = observer(() => {
                   {t("home.jurisdictionsTitle")}
                 </RouterLinkButton>
               )}
+              {loggedIn && (
+                <NotificationsPopover
+                  aria-label="notifications popover"
+                  color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
+                />
+              )}
               <NavBarMenu />
             </HStack>
           </Flex>
@@ -165,16 +172,6 @@ export const NavBar = observer(() => {
     </>
   )
 })
-
-const NavBarSearch = () => {
-  const { t } = useTranslation()
-
-  return (
-    <Button variant="tertiary" leftIcon={<MagnifyingGlass size={16} />}>
-      {t("ui.search")}
-    </Button>
-  )
-}
 
 interface INavBarMenuProps {}
 

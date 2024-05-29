@@ -1,5 +1,6 @@
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
+import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
@@ -9,6 +10,7 @@ import {
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
   EJurisdictionTypes,
+  ENotificationActionType,
   ENumberUnit,
   ERequirementType,
   ESZeroCarbonStep,
@@ -127,6 +129,7 @@ export interface IFormIORequirement {
   validation: { required: boolean }
   label: string
   widget?: any
+  customClass?: string
 }
 
 export interface ISubmissionData {
@@ -138,6 +141,7 @@ export interface IDenormalizedRequirement {
   label: string
   inputType: ERequirementType
   inputOptions: IRequirementOptions
+  formJson?: IFormIORequirement
   hint?: string | null
   elective?: boolean
   required?: boolean
@@ -146,6 +150,7 @@ export interface IDenormalizedRequirement {
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  formJson?: IFormIOBlock
   description?: string
   displayName: string
   displayDescription?: string
@@ -169,6 +174,19 @@ export interface IDenormalizedTemplate {
   permitType: IPermitType
   activity: IActivity
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
+}
+
+export interface ICompareRequirementsBoxData {
+  id?: string
+  class?: string
+  label: string
+  diffSectionLabel: string
+}
+
+export interface ICompareRequirementsBoxDiff {
+  added: ICompareRequirementsBoxData[]
+  removed: ICompareRequirementsBoxData[]
+  changed: ICompareRequirementsBoxData[]
 }
 
 export interface IErrorsBoxData {
@@ -218,22 +236,35 @@ export interface IEULA {
   content: string
 }
 
-export interface INotification {
-  title: string
-  description: string
-  at: string
-}
-
 export interface IPermitApplicationUpdate {
   id
   frontEndFormUpdate: Object
   formattedComplianceData: Object
 }
 
+export interface INotificationObjectData {
+  templateVersionId?: string
+  // Add future notification data here
+}
+
+export interface INotification {
+  id: string
+  actionType: ENotificationActionType
+  actionText: string
+  objectData?: INotificationObjectData
+}
+
+export type TSocketEventData = IPermitApplication | INotification
+
 export interface IUserPushPayload {
+  data: TSocketEventData
   domain: ESocketDomainTypes
   eventType: ESocketEventTypes
-  data: INotification | IPermitApplicationUpdate
+  meta: {
+    lastReadAt: number
+    totalPages: number
+    unreadCount: number
+  }
 }
 
 export interface ISiteConfiguration {
@@ -333,4 +364,10 @@ export interface IJurisdictionFilters {
   name?: string
   type?: EJurisdictionTypes
   userId?: string
+}
+
+export interface ITemplateVersionDiff {
+  added: IRequirement[]
+  removed: IRequirement[]
+  changed: IRequirement[]
 }

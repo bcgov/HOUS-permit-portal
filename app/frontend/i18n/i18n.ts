@@ -137,6 +137,8 @@ const options = {
           confirmDelete: "Confirm delete",
           sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
+          ok: "OK",
+          dismiss: "Dismiss",
           revoke: "Revoke",
           create: "Create",
           verified: "Verified",
@@ -211,6 +213,14 @@ const options = {
           hideAdvanced: "Hide advanced",
           emailPlaceholder: "email@example.com",
           urlPlaceholder: "https://",
+          showOlder: "Show older",
+          seeMore: "See more",
+          go: "Go",
+        },
+        notification: {
+          title: "Notifications",
+          nUnread: "{{ n }} new",
+          noUnread: "No unread notifications",
         },
         eula: {
           title: "End-User License Agreement",
@@ -317,6 +327,7 @@ const options = {
           view: "View Jurisdiction",
         },
         permitApplication: {
+          updateToNewVersion: "Update my application",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
@@ -1135,6 +1146,10 @@ const options = {
           },
         },
         requirementTemplate: {
+          compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
+          changed: "changed",
+          added: "added",
+          removed: "removed",
           edit: {
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
@@ -1175,9 +1190,18 @@ const options = {
             scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish!",
+            pleaseReview: "Please review the following:",
             errorsBox: {
               title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",
+            },
+            diffBox: {
+              title: "Template changes",
+              instructions: "Please review the following:",
+              added: "Added",
+              changed: "Changed",
+              removed: "Removed",
+              updateToNewVersion: "See new",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
           },

@@ -24,6 +24,7 @@ import {
   IApiResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
+  INotificationResponse,
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
@@ -36,13 +37,7 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import {
-  IContact,
-  IJurisdictionFilters,
-  ISiteConfiguration,
-  TAutoComplianceModuleConfigurations,
-  TSearchParams,
-} from "../../types/types"
+import { IContact, ISiteConfiguration, ITemplateVersionDiff, TSearchParams } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -237,6 +232,10 @@ export class Api {
     })
   }
 
+  async updatePermitApplicationVersion(id) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
+  }
+
   async submitPermitApplication(id, params) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,
@@ -311,6 +310,15 @@ export class Api {
 
   async fetchTemplateVersions(activityId?: string) {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId })
+  }
+
+  async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
+    const params = previousVersionId ? { previousVersionId } : {}
+
+    return this.client.get<ApiResponse<ITemplateVersionDiff>>(
+      `/template_versions/${templateVersionId}/compare_requirements`,
+      params
+    )
   }
 
   async fetchTemplateVersion(id: string) {
@@ -418,5 +426,13 @@ export class Api {
 
   async downloadRequirementSummaryCsv(templateVersionId: string) {
     return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
+  }
+
+  async fetchNotifications(page: number) {
+    return this.client.get<INotificationResponse>(`/notifications`, { page })
+  }
+
+  async resetLastReadNotifications() {
+    return this.client.post(`/notifications/reset_last_read`)
   }
 }

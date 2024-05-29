@@ -59,7 +59,7 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
               fontSize={"md"}
               fontWeight={700}
               mt={2}
-            >{`${t("requirementTemplate.versionSidebar.subtitlePrefix")} ${requirementTemplate.permitType.name} | ${requirementTemplate.activity.name}`}</Text>
+            >{`${t("requirementTemplate.versionSidebar.subtitlePrefix")} ${requirementTemplate.label}`}</Text>
           </DrawerHeader>
 
           <DrawerBody py={10} px={8}>

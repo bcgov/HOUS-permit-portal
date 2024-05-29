@@ -4,15 +4,25 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useJurisdictionTemplateVersionCustomization } from "../../../../../hooks/resources/use-jurisdiction-template-version-customization"
 import { useTemplateVersion } from "../../../../../hooks/resources/use-template-version"
 import { IJurisdictionTemplateVersionCustomization } from "../../../../../models/jurisdiction-template-version-customization"
+import { IRequirement } from "../../../../../models/requirement"
 import { useMst } from "../../../../../setup/root"
-import { IRequirementBlockCustomization, ITemplateCustomization } from "../../../../../types/types"
+import { ERequirementChangeAction } from "../../../../../types/enums"
+import {
+  ICompareRequirementsBoxData,
+  ICompareRequirementsBoxDiff,
+  IRequirementBlockCustomization,
+  ITemplateCustomization,
+  ITemplateVersionDiff,
+} from "../../../../../types/types"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
+import { CompareRequirementsBox } from "../../../permit-application/compare-requirements-box"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
 import { SectionsDisplay } from "../../sections-display"
 import { SectionsSidebar } from "../../sections-sidebar"
@@ -82,6 +92,36 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
   useEffect(() => {
     reset(formFormDefaults(jurisdictionTemplateVersionCustomization))
   }, [jurisdictionTemplateVersionCustomization?.customizations])
+
+  const [searchParams] = useSearchParams()
+  const isCompare = searchParams.get("compare") === "true"
+
+  const [diff, setDiff] = useState<ITemplateVersionDiff>(null)
+  const diffToInfoBoxData = (): ICompareRequirementsBoxDiff | null => {
+    if (!diff) return null
+
+    const mapFn = (req: IRequirement, action: ERequirementChangeAction): ICompareRequirementsBoxData => ({
+      id: formScrollToId(req.formJson.key.split("|")[1].slice(2)),
+      label: t("requirementTemplate.compareAction", {
+        requirementName: `${req.label}${req.elective ? ` (${t("requirementsLibrary.elective")})` : ""}`,
+        action: t(`requirementTemplate.${action}`),
+      }),
+      diffSectionLabel: req.diffSectionLabel,
+    })
+    const addedErrorBoxData = diff.added.map((req) => mapFn(req, ERequirementChangeAction.added))
+    const removedErrorBoxData = diff.removed.map((req) => mapFn(req, ERequirementChangeAction.removed))
+    const changedErrorBoxData = diff.changed.map((req) => mapFn(req, ERequirementChangeAction.changed))
+    return { added: addedErrorBoxData, removed: removedErrorBoxData, changed: changedErrorBoxData }
+  }
+  const infoBoxData = diffToInfoBoxData()
+  useEffect(() => {
+    if (isCompare && templateVersion) {
+      ;(async () => {
+        const diffData = await templateVersion.fetchTemplateVersionCompare()
+        setDiff(diffData.data)
+      })()
+    }
+  }, [isCompare, templateVersion])
 
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   if (templateVersionError || customizationError)
@@ -167,7 +207,14 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
               </Button>
             </ButtonGroup>
           </Flex>
+
           <FloatingHelpDrawer top="100px" />
+          {isCompare &&
+            (diff ? (
+              <CompareRequirementsBox data={infoBoxData} />
+            ) : (
+              <SharedSpinner position="fixed" right={24} top="50vh" />
+            ))}
           <SectionsDisplay
             sections={templateSections}
             isCollapsedAll={isCollapsedAll}

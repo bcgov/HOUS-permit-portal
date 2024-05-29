@@ -79,6 +79,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
       borderColor={"border.light"}
       borderRadius={"lg"}
       bg="greys.grey04"
+      _focus={{ bg: "semantic.warningLight", borderColor: "semantic.warning" }}
       allowMultiple
       index={isOpen ? 0 : null}
       {...accordionProps}

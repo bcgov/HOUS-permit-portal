@@ -6,13 +6,13 @@ import { IErrorsBoxData } from "../../../types/types"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 
 interface IErrorBoxProps {
-  errorBox: IErrorsBoxData[] //need to add types
+  data: IErrorsBoxData[] //need to add types
 }
 
-export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
+export const ErrorsBox = ({ data }: IErrorBoxProps) => {
   const { t } = useTranslation()
   const { isOpen, onToggle } = useDisclosure()
-  if (errorBox.length == 0) {
+  if (data.length == 0) {
     return <React.Fragment key={"errors"}></React.Fragment>
   }
   return (
@@ -31,14 +31,14 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
       zIndex={14}
       p={4}
       overflowY={"auto"}
-      id="floating-error-alert-box"
+      id="floating-side-box"
     >
       <Flex align="center" gap={4}>
         <Box color="semantic.error">
           <WarningCircle size={24} aria-label={"Warning icon"} />
         </Box>
         <Heading as="h4" mb="0" overflowWrap={"break-word"}>
-          {t("requirementTemplate.edit.errorsBox.title", { count: errorBox.length })}
+          {t("requirementTemplate.edit.errorsBox.title", { count: data.length })}
         </Heading>
         <Button
           onClick={onToggle}
@@ -63,7 +63,7 @@ export const ErrorsBox = ({ errorBox }: IErrorBoxProps) => {
             },
           }}
         >
-          {errorBox.map((error, index) => (
+          {data.map((error, index) => (
             <ListItem key={index}>
               <ScrollLink key={error.id} to={error.id}>
                 {error.label}

@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next"
 import { IPermitType } from "../../../models/permit-classification"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
-import { CustomToast } from "../base/flash-message"
+import { CustomMessageBox } from "../base/custom-message-box"
 import { SharedSpinner } from "../base/shared-spinner"
 
 interface IPermitTypeRadioSelect extends FlexProps {
@@ -49,7 +49,7 @@ export const PermitTypeRadioSelect = observer(({ onChange, value, fetchOptions, 
   if (isPermitTypeLoading) return <SharedSpinner />
 
   if (R.isEmpty(permitTypeOptions)) {
-    return <CustomToast status="error" description={t("translation:permitApplication.new.noContactsAvailable")} />
+    return <CustomMessageBox status="error" description={t("translation:permitApplication.new.noContactsAvailable")} />
   }
 
   return (

@@ -34,6 +34,7 @@ class PermitApplication < ApplicationRecord
   delegate :energy_step_required, to: :jurisdiction, allow_nil: true
   delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
   delegate :form_json, to: :template_version
+  delegate :published_template_version, to: :template_version
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
@@ -75,6 +76,10 @@ class PermitApplication < ApplicationRecord
 
   def formatted_permit_classifications
     "#{permit_type.name} - #{activity.name}"
+  end
+
+  def using_current_template_version
+    self.template_version === current_published_template_version
   end
 
   def current_published_template_version
@@ -148,6 +153,7 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
   end
 
   def formatted_submission_data_for_external_use
@@ -250,6 +256,12 @@ class PermitApplication < ApplicationRecord
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
     self.submitted_at = Time.current if submitted? && submitted_at.nil?
+  end
+
+  def submitter_must_have_role
+    unless submitter&.submitter?
+      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+    end
   end
 
   def jurisdiction_has_matching_submission_contact
