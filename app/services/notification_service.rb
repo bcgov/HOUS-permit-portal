@@ -68,8 +68,9 @@ class NotificationService
     )
   end
 
-  def self.publish_customization_create_update_event(customization)
+  def self.publish_customization_create_update_event(customization, saved_changes)
     template_version = customization.template_version
+
     relevant_submitter_ids =
       PermitApplication
         .joins(:template_version)
@@ -81,7 +82,10 @@ class NotificationService
         )
         .pluck(:submitter_id)
 
-    NotificationPushJob.perform_async(customization.create_update_event_notification_data, relevant_submitter_ids)
+    NotificationPushJob.perform_async(
+      customization.create_update_event_notification_data(saved_changes),
+      relevant_submitter_ids,
+    )
   end
 
   private
