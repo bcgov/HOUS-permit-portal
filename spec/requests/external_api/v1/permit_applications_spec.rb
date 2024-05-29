@@ -1,11 +1,5 @@
 require "swagger_helper"
 
-# rwag gem does not support Open API 3.1.0 yet. So the webhook documentation
-# is manually entered in the yaml as the prior to this version Open Api
-# had to have path keys. So when running `RAILS_ENV=test rails rswag` to generate the swagger.yaml
-# this will remove those changes, so make sure to copy over the webhook changes
-# and set openapi version to 3.1.0
-
 RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_spec: "external_api/v1/swagger.yaml" do
   let!(:external_api_key) { create(:external_api_key) }
   let!(:token) { external_api_key.token }
@@ -146,31 +140,16 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
           expect(data.dig("data", "id")).to eq(submitted_permit_applications.first.id)
         end
       end
-    end
-
-    get "accessing permit application from a different jurisdiction" do
-      let(:id) { unauthorized_jurisdiction_permit_applications.first.id }
-      consumes "application/json"
-      produces "application/json"
 
       response(403, "Accessing a permit application for unauthorized jurisdiction") do
+        let(:id) { unauthorized_jurisdiction_permit_applications.first.id }
         run_test! { |response| expect(response.status).to eq(403) }
       end
-    end
-
-    get "accessing permit application that does not exist" do
-      let(:id) { "does_not_exist" }
-      consumes "application/json"
-      produces "application/json"
 
       response(404, "Accessing a permit application which does not exist") do
+        let(:id) { "does_not_exist" }
         run_test! { |response| expect(response.status).to eq(404) }
       end
-    end
-
-    get "requests are rate limited" do
-      consumes "application/json"
-      produces "application/json"
 
       response(429, "Rate limit exceeded") do
         schema "$ref" => "#/components/schemas/ResponseError"

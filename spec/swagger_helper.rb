@@ -72,6 +72,37 @@ For a better understanding of how our APIs work, including webhook setups and re
 in this document.
         DESC
       },
+      webhooks: {
+        permit_submitted: {
+          tags: ["Webhooks"],
+          post: {
+            requestBody: {
+              description:
+                "### Request body:\nThis webhook sends information about a recently submitted permit
+        application in a JSON format to the webhook URL specified by the external integrator.\nIt includes
+        the permit application ID, which can be used to fetch the complete details of the permit application using the
+        `GET/permit_applications/{id}` endpoint.\n\n### Retries:\nIf the webhook does not receive a 200 status response
+        from the external integrator, it will attempt to resend the notification up to 8 times using an exponential backoff
+        strategy. This ensures multiple attempts to deliver the webhook in case of temporary issues on the receiving end.\n\n
+### Expected responses:\nThe external integrator is expected to return a 200 status code to confirm successful receipt
+        of the data. This acknowledgment indicates that the payload was received and processed without issues",
+              content: {
+                "application/json" => {
+                  schema: {
+                    "$ref" => "#/components/schemas/WebhookPayload",
+                  },
+                },
+              },
+            },
+            responses: {
+              "200" => {
+                description:
+                  "The external integrator should return a 200 status to indicate that the data was received successfully.",
+              },
+            },
+          },
+        },
+      },
       paths: {
       },
       basePath: "/external_api/v1",
@@ -275,6 +306,30 @@ in this document.
                   type: {
                     type: :string,
                     enum: %w[error],
+                  },
+                },
+              },
+            },
+          },
+          WebhookPayload: {
+            type: :object,
+            properties: {
+              event: {
+                type: :string,
+                enum: %w[permit_submitted],
+                description: "The event type",
+              },
+              payload: {
+                type: :object,
+                properties: {
+                  permit_id: {
+                    type: :string,
+                    description: "The permit application ID",
+                  },
+                  submitted_at: {
+                    type: :string,
+                    format: "date-time",
+                    description: "The date and time the permit application was submitted",
                   },
                 },
               },
