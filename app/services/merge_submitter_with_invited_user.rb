@@ -18,7 +18,7 @@ class MergeSubmitterWithInvitedUser
       invited_user.slice(
         %i[
           role
-          jurisdiction_id
+          jurisdiction_ids
           invitation_token
           invitation_created_at
           invitation_sent_at
