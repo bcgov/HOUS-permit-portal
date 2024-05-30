@@ -169,6 +169,9 @@ in this document.
               activity: {
                 "$ref" => "#/components/schemas/PermitClassification",
               },
+              submitter: {
+                "$ref" => "#/components/schemas/Submitter",
+              },
               submission_data: {
                 "$ref" => "#/components/schemas/SubmissionData",
               },
@@ -327,6 +330,20 @@ in this document.
                   format: "url",
                   description: "The signed URL to download the file.",
                 },
+              },
+            },
+          },
+          Submitter: {
+            type: :object,
+            description: "The submitter of the permit application.",
+            properties: {
+              id: {
+                type: :string,
+                description: "The ID of the submitter.",
+              },
+              email: {
+                type: :string,
+                description: "The email of the submitter.",
               },
             },
           },

@@ -59,6 +59,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_permit_classifications
     end
 
+    association :submitter, blueprint: UserBlueprint, view: :external_api
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
   end
