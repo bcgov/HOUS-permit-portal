@@ -39,23 +39,6 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     get("#{PARCEL_SERVICE}/query", query_params, true)
   end
 
-  def search_pin_from_coordinates(coord_array: [], fields: "*")
-    query_params = {
-      f: "json",
-      returnIdsOnly: false,
-      returnCountOnly: false,
-      where: "PIN+IS+NOT+NULL",
-      geometry: coord_array.join(","),
-      geometryType: "esriGeometryPoint",
-      inSR: 4326,
-      spatialRel: "esriSpatialRelIntersects",
-      returnGeometry: true,
-      outFields: fields,
-    }
-
-    get("#{PARCEL_SERVICE}/query", query_params, true)
-  end
-
   def historic_site_by_pid(pid:)
     query_params = {
       f: "json",
@@ -136,7 +119,7 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     end
   end
 
-  private
+  protected
 
   def parse_attributes_from_response(response)
     if response.success?
