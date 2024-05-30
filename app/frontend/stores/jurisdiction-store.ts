@@ -7,7 +7,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
-import { IJurisdictionFilters, ISort } from "../types/types"
+import { IJurisdictionFilters } from "../types/types"
 import { isUUID, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
@@ -16,7 +16,6 @@ export const JurisdictionStoreModel = types
       jurisdictionMap: types.map(JurisdictionModel),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
       currentJurisdiction: types.maybeNull(types.maybe(types.reference(JurisdictionModel))),
-      sort: types.maybeNull(types.frozen<ISort<EJurisdictionSortFields>>()),
     }),
     createSearchModel<EJurisdictionSortFields>("searchJurisdictions")
   )
@@ -61,7 +60,10 @@ export const JurisdictionStoreModel = types
         return response.data
       }
     }),
-    searchJurisdictions: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+    searchJurisdictions: flow(function* (
+      opts?: { reset?: boolean; page?: number; countPerPage?: number },
+      submissionInboxSetUp?: boolean
+    ) {
       if (opts?.reset) {
         self.resetPages()
       }
@@ -72,9 +74,9 @@ export const JurisdictionStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
+          submissionInboxSetUp,
         })
       )
-
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "jurisdictionMap")
         self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
@@ -118,6 +120,11 @@ export const JurisdictionStoreModel = types
       self.currentJurisdiction = j?.id
       return j?.id
     },
+  }))
+  .actions((self) => ({
+    searchEnabledJurisdictions: flow(function* () {
+      return self.searchJurisdictions({ reset: true, page: 1, countPerPage: 12 }, true)
+    }),
   }))
 
 export interface IJurisdictionStore extends Instance<typeof JurisdictionStoreModel> {}

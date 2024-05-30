@@ -5,6 +5,8 @@ class PermitTypeSubmissionContact < ApplicationRecord
   before_create :generate_confirmation_token
   before_update :reset_confirmation, if: :email_changed?
   after_commit :send_confirmation_instructions, on: %i[create update]
+  after_commit :reindex_jurisdiction, on: %i[create update]
+  after_destroy :reindex_jurisdiction
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
 
@@ -35,5 +37,9 @@ class PermitTypeSubmissionContact < ApplicationRecord
 
   def reset_confirmation
     self.confirmed_at = nil
+  end
+
+  def reindex_jurisdiction
+    jurisdiction.reindex
   end
 end

@@ -6,6 +6,7 @@ import { Trans } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
+import { EUserRoles } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
@@ -65,7 +66,7 @@ function Content({ invitedUser }: Readonly<IProps>) {
                 {jurisdiction.qualifiedName}
               </Heading>
               <Text>{t("user.invitedAs")}</Text>
-              <Text fontWeight="bold">{t(`user.roles.${role}`)}</Text>
+              <Text fontWeight="bold">{t(`user.roles.${role as EUserRoles}`)}</Text>
             </VStack>
           </>
         ) : (
@@ -87,7 +88,11 @@ function Content({ invitedUser }: Readonly<IProps>) {
         </Heading>
         <form action={`/api/auth/keycloak`} method="post">
           <input type="hidden" name="kc_idp_hint" value={isSuperAdmin ? "idir" : "bceidboth"} />
-          <input type="hidden" name="authenticity_token" value={document.querySelector("[name=csrf-token]").content} />
+          <input
+            type="hidden"
+            name="authenticity_token"
+            value={(document.querySelector("[name=csrf-token]") as HTMLMetaElement).content}
+          />
           <Button variant="primary" w="full" type="submit">
             {isSuperAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
           </Button>

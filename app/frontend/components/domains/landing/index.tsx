@@ -24,7 +24,6 @@ import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
-import { enabledJurisdictions } from "../../../constants"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -402,8 +401,15 @@ const BareBox: React.FC<IBareBoxProps> = ({ n, children }) => {
   )
 }
 
-const AvailableJurisdictionsMessageBox: React.FC = () => {
+const AvailableJurisdictionsMessageBox: React.FC = observer(() => {
   const { t } = useTranslation()
+  const { jurisdictionStore } = useMst()
+
+  const { tableJurisdictions, searchEnabledJurisdictions, totalPages } = jurisdictionStore
+
+  useEffect(() => {
+    searchEnabledJurisdictions()
+  }, [])
 
   return (
     <Flex
@@ -422,21 +428,26 @@ const AvailableJurisdictionsMessageBox: React.FC = () => {
         <Flex direction="column" gap={2}>
           <Text fontWeight="bold">
             {t("landing.enabledCommunitiesDescription")}{" "}
-            {enabledJurisdictions.map((obj) => (
-              <Text as="span" fontWeight="normal">
-                {" "}
-                <RouterLink color="black" to={obj.href}>
-                  {obj.label}
+            {tableJurisdictions.map((jurisdiction) => (
+              <Text as="span" fontWeight="normal" key={jurisdiction.id} mr={2}>
+                <RouterLink color="black" to={`/jurisdictions/${jurisdiction.slug}`}>
+                  {jurisdiction.qualifiedName}
                 </RouterLink>
               </Text>
             ))}
-            <Text as="span" fontWeight="normal">
-              {" "}
-              {t("landing.moreComingSoon")}
-            </Text>
+            <br />
+            {totalPages > 1 ? (
+              <Text as="span" fontWeight="bold">
+                {t("landing.andMore")}
+              </Text>
+            ) : (
+              <Text as="span" fontWeight="normal">
+                {t("landing.moreComingSoon")}
+              </Text>
+            )}
           </Text>
         </Flex>
       </Flex>
     </Flex>
   )
-}
+})

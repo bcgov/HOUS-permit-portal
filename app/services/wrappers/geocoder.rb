@@ -26,7 +26,6 @@ class Wrappers::Geocoder < Wrappers::Base
 
     site_params[:addressString] = address_string if address_string.present?
     site_params[:parcelPoint] = coordinates.join(",") if coordinates.present?
-
     r = get("/addresses.json", site_params)
     return(
       r["features"]

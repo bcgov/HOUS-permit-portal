@@ -92,6 +92,7 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
+      submission_inbox_set_up: submission_inbox_set_up,
     }
   end
 
@@ -125,6 +126,14 @@ class Jurisdiction < ApplicationRecord
 
   def unviewed_permit_applications
     permit_applications.unviewed
+  end
+
+  def submission_inbox_set_up
+    PermitType.all.all? do |permit_type|
+      self.permit_type_submission_contacts.any? do |contact|
+        contact.permit_type_id == permit_type.id && contact.email.present? && contact.confirmed_at.present?
+      end
+    end
   end
 
   def self.class_for_locality_type(locality_type)

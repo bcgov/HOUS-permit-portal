@@ -1,4 +1,5 @@
 import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { CheckCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -44,9 +45,9 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="3fr repeat(3, 1fr) 1fr">
+        <SearchGrid templateColumns="3fr repeat(5, 1fr)">
           <GridHeaders
-            span={5}
+            span={6}
             includeActionColumn
             columns={Object.values(EJurisdictionSortFields).filter(
               (field) => field !== EJurisdictionSortFields.regionalDistrict
@@ -54,7 +55,7 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
           />
 
           {isSearching ? (
-            <Flex py={50} gridColumn={"span 5"}>
+            <Flex py={50} gridColumn={"span 6"}>
               <SharedSpinner />
             </Flex>
           ) : (
@@ -65,6 +66,14 @@ export const JurisdictionIndexScreen = observer(function JurisdictionIndex() {
                   <SearchGridItem>{j.reviewManagersSize}</SearchGridItem>
                   <SearchGridItem>{j.reviewersSize}</SearchGridItem>
                   <SearchGridItem>{j.permitApplicationsSize}</SearchGridItem>
+                  <SearchGridItem>
+                    {j.submissionInboxSetUp && (
+                      <Flex gap={1}>
+                        <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
+                        {t("ui.yes")}
+                      </Flex>
+                    )}
+                  </SearchGridItem>
                   <SearchGridItem>
                     <Flex justify="center" w="full" gap={3}>
                       <RouterLink to={`${j.slug}/users/invite`}>{t("user.invite")}</RouterLink>

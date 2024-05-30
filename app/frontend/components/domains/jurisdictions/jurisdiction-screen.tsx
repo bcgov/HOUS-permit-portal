@@ -22,8 +22,10 @@ import { useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { IContact, TLatLngTuple } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditorWithPreview } from "../../shared/editor/custom-extensions/editor-with-preview"
@@ -96,6 +98,11 @@ export const JurisdictionScreen = observer(() => {
         <JurisdictionMap mapPosition={mapPositionWatch} mapZoom={mapZoomWatch} />
       </Show>
       <Container maxW="container.lg" py={{ base: 6, md: 16 }} px={8}>
+        {!currentJurisdiction.submissionInboxSetUp && (
+          <Box my={8}>
+            <CustomMessageBox status={EFlashMessageStatus.warning} description={t("jurisdiction.notEnabled")} />
+          </Box>
+        )}
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Flex direction="column" gap={16}>

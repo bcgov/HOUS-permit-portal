@@ -74,7 +74,7 @@ const options = {
           bestPractices: "Standardized requirements across participating jurisdictions",
           easyToFollow: "Easy to follow instructions to help you submit a building permit application",
           accessMyPermits: "Access my building permits",
-          accessExplanation: "Use your BCeID account to log or register for the Building Permit Hub.",
+          accessExplanation: "Use your BCeID account to log in or register for the Building Permit Hub.",
           whoForTitle: "Who is this for?",
           whoFor: [
             "I want to build housing",
@@ -123,6 +123,7 @@ const options = {
           adminPanel: "admin panel",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
+          andMore: "...and more",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the New construction checklist for 1 - 4 Dwelling Units",
@@ -304,6 +305,7 @@ const options = {
             templatesUsed: "Templates used",
             mapPosition: "Map position",
             regionalDistrictName: "Regional district",
+            submissionInboxSetUp: "Accepting submissions",
           },
           submissionEmailConfirmed: {
             heading: "Email confirmed!",
@@ -312,6 +314,7 @@ const options = {
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
+          notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
           checklist: "Checklist",
           lookOut: "Things to look out for",
           startApplication: "Start a permit application",
