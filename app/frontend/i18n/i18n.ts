@@ -1361,6 +1361,10 @@ const options = {
             table: {
               heading: "API keys",
             },
+            apiKeyInfo: {
+              title: "Generate API Keys for Third-Party Integrators",
+              body: "Use this screen to generate API keys for third-party integrations. For technical details on using the API, refer to our documentation site.<1>Access the API Documentation</1> Share the above link with developers or technical team members needing detailed integration information.",
+            },
             disabledWarningTitle:
               "API keys for this jurisdiction have not been enabled. To enable them, please contact" + " us at",
             disabledTooltipLabel: "User is not authorized to make this change",

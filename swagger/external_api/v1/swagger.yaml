@@ -1,0 +1,392 @@
+---
+openapi: 3.1.0
+info:
+  title: Integration API V1
+  version: v1
+  description: "### API documentation overview\nThis document provides detailed information
+    about the APIs available for external integrators to query and retrieve submitted
+    permit applications.\nIt also includes specifications on webhook events that notify
+    your systems in real-time.\n\n### Data scope:\nThe permit applications returned
+    by these APIs are limited to those within the jurisdiction associated with the
+    API key used for the request. This\nensures that each integrator has access solely
+    to relevant data.\n\n### Integration steps:\nTo integrate with our APIs, please
+    contact the Building Permit Hub team to enable your API access. Your local jurisdiction
+    can then obtain the API key\nand register your webhook URL in their configuration
+    settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>\nfor
+    further assistance.\n\n### Authentication and authorization: \nAccess to these
+    APIs is controlled via an API key, which must be included in the Authorization
+    header as a Bearer token like so:\n```\nAuthorization: Bearer {Your_API_Key_Here}\n```\nPlease
+    note that a unique API key is required for each jurisdiction you wish to access,
+    enhancing security and data integrity.\n\n### Rate limits:\nTo ensure fair usage,
+    the API is rate-limited to 100 requests per minute per API key and 300 requests
+    per IP in a 3 minute interval. Exceeding these\nlimits will result in a 429 response.
+    If this occurs, we recommend spacing out your requests. Continued exceeding of
+    rate limits\nmay necessitate further contact with the building permit hub team.\n\n###
+    Api base path:\nThe base path for all API endpoints is `/external_api/v1`.\n\n###
+    Server information for testing:\nFor testing purposes, please use the server located
+    at {serverUrl}. The computed URL for API interactions is https://buildingpermit.gov.bc.ca.\nDuring
+    your integration testing phase, you have the flexibility to use custom URLs by
+    configuring the serverUrl variable. This allows you to\ntailor the API environment
+    to better suit your development needs. Ensure that your custom URLs are configured
+    correctly to avoid any connectivity or data access issues.\n\n### Visual aids
+    and examples:\nFor a better understanding of how our APIs work, including webhook
+    setups and request handling, please refer to the code examples included later\nin
+    this document.\n"
+webhooks:
+  permit_submitted:
+    tags:
+    - Webhooks
+    post:
+      requestBody:
+        description: |-
+          ### Request body:
+          This webhook sends information about a recently submitted permit
+                  application in a JSON format to the webhook URL specified by the external integrator.
+          It includes
+                  the permit application ID, which can be used to fetch the complete details of the permit application using the
+                  `GET/permit_applications/{id}` endpoint.
+
+          ### Retries:
+          If the webhook does not receive a 200 status response
+                  from the external integrator, it will attempt to resend the notification up to 8 times using an exponential backoff
+                  strategy. This ensures multiple attempts to deliver the webhook in case of temporary issues on the receiving end.
+
+
+          ### Expected responses:
+          The external integrator is expected to return a 200 status code to confirm successful receipt
+                  of the data. This acknowledgment indicates that the payload was received and processed without issues
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/WebhookPayload"
+      responses:
+        '200':
+          description: The external integrator should return a 200 status to indicate
+            that the data was received successfully.
+paths:
+  "/permit_applications/search":
+    post:
+      summary: This endpoint retrieves a list of permit applications in a paginated
+        format. It allows you to search through permit applications based on specified
+        criteria, returning results in manageable pages.
+      tags:
+      - Permit applications
+      parameters: []
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: Submitted permit applications
+                    items:
+                      "$ref": "#/components/schemas/PermitApplication"
+                  meta:
+                    type: object
+                    properties:
+                      total_pages:
+                        type: integer
+                        description: Total number of pages
+                      total_count:
+                        type: integer
+                        description: Total number of permit applications
+                      current_page:
+                        type: integer
+                        description: Current page number
+                    required:
+                    - total_pages
+                    - total_count
+                    - current_page
+                required:
+                - data
+                - meta
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Filters permit applications by submitted date and permit
+                classifications
+              properties:
+                permit_classifications:
+                  description: Filters by permit classifications
+                  type: string
+                submitted_at:
+                  type: object
+                  description: Filters by submitted date
+                  properties:
+                    gt:
+                      type: string
+                      format: date-time
+                      description: 'Greater than: submitted date is greater than this
+                        date'
+                    lt:
+                      type: string
+                      format: date-time
+                      description: 'Less than: submitted date is less than this date'
+                    gte:
+                      type: string
+                      format: date-time
+                      description: 'Greater than or equal to: submitted date is greater
+                        than or equal to this date'
+                    lte:
+                      type: string
+                      format: date-time
+                      description: 'Less than or equal to: submitted date is less
+                        than or equal to this date'
+  "/permit_applications/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: Submitted permit application id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: This endpoint retrieves detailed information about a specific permit
+        application using its unique identifier (ID). Please note that requests to
+        this endpoint are subject to rate limiting to ensure optimal performance and
+        fair usage.
+      tags:
+      - Permit applications
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/PermitApplication"
+                required:
+                - data
+        '403':
+          description: Accessing a permit application for unauthorized jurisdiction
+        '404':
+          description: Accessing a permit application which does not exist
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
+basePath: "/external_api/v1"
+servers:
+- url: https:/buildingpermit.gov.bc.ca
+  description: Production server
+- url: "{serverUrl}"
+  description: Server url
+  variables:
+    serverUrl:
+      default: https:/buildingpermit.gov.bc.ca
+tags:
+- name: Permit applications
+  description: Submitted permit applications (scoped to API key jurisdiction)
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      description: Bearer token
+  schemas:
+    PermitApplication:
+      type: object
+      properties:
+        id:
+          type: string
+        full_address:
+          type: string
+          description: The full address of the permit application.
+          nullable: true
+        number:
+          type: string
+          description: The permit application number displayed to the user.
+          nullable: true
+        pid:
+          type: string
+          description: The PID of the permit application.
+          nullable: true
+        pin:
+          type: string
+          description: The PIN of the permit application.
+          nullable: true
+        reference_number:
+          type: string
+          description: The reference number of the permit application in external
+            system.
+          nullable: true
+        submitted_at:
+          type: number
+          format: int64
+          description: Datetime in milliseconds since the epoch (Unix time)
+        permit_classifications:
+          type: string
+        permit_type:
+          "$ref": "#/components/schemas/PermitClassification"
+        activity:
+          "$ref": "#/components/schemas/PermitClassification"
+        submission_data:
+          "$ref": "#/components/schemas/SubmissionData"
+    SubmissionData:
+      type: object
+      description: 'The submitted permit application data. Note: the keys are the
+        requirement block codes.'
+      additionalProperties:
+        type: object
+        properties:
+          id:
+            type: string
+          requirement_block_code:
+            type: string
+          name:
+            type: string
+          description:
+            type: string
+            nullable: true
+          requirements:
+            type: array
+            descriptions: The requirements for this requirement block and their submitted
+              values.
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                requirement_code:
+                  type: string
+                  description: The requirement code for this requirement.
+                type:
+                  type: string
+                  enum:
+                  - text
+                  - number
+                  - checkbox
+                  - select
+                  - multi_option_select
+                  - date
+                  - textarea
+                  - file
+                  - phone
+                  - email
+                  - radio
+                  - address
+                  - bcaddress
+                  - signature
+                  - energy_step_code
+                  - general_contact
+                  - professional_contact
+                  description: The input type for this requirement.
+                value:
+                  description: The submitted value for this requirement.
+                  oneOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
+                  - "$ref": "#/components/schemas/ContactSubmissionValue"
+                  - "$ref": "#/components/schemas/MultiOptionSubmissionValue"
+              required:
+              - id
+              - name
+              - requirement_code
+              - type
+              - value
+        required:
+        - id
+        - requirement_block_code
+        - name
+        - requirements
+    PermitClassification:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        code:
+          type: string
+          description: The code of the permit classification.
+    MultiOptionSubmissionValue:
+      type: object
+      additionalProperties:
+        type: boolean
+    ContactSubmissionValue:
+      type: array
+      items:
+        type: object
+        properties:
+          first_name:
+            type: string
+            description: The first name of the contact.
+          last_name:
+            type: string
+            description: The last name of the contact.
+          email:
+            type: string
+            description: The email of the contact.
+          phone:
+            type: string
+            description: The phone number of the contact.
+          address:
+            type: string
+            description: The address of the contact.
+          title:
+            type: string
+            description: The title of the contact.
+          organization:
+            type: string
+            description: The organization of the contact.
+    ResponseError:
+      type: object
+      properties:
+        data:
+          type: object
+          properties: {}
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              description: The error message.
+            type:
+              type: string
+              enum:
+              - error
+    WebhookPayload:
+      type: object
+      properties:
+        event:
+          type: string
+          enum:
+          - permit_submitted
+          description: The event type
+        payload:
+          type: object
+          properties:
+            permit_id:
+              type: string
+              description: The permit application ID
+            submitted_at:
+              type: string
+              format: date-time
+              description: The date and time the permit application was submitted
+formats:
+- json
+- yaml
+security:
+- Bearer: []

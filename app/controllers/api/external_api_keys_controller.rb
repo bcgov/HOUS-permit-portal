@@ -2,15 +2,15 @@ class Api::ExternalApiKeysController < Api::ApplicationController
   before_action :set_external_api_key, except: %i[index create]
 
   def index
-    # Only authoris\zed to query own jurisdiction for review managers
-    if current_user.review_manager? && params[:jurisdiction_id].present? &&
-         !current_user.jurisdictions.find(params[:jursidiction_id])
+    # Only authorized to query own jurisdiction for review managers
+    if (current_user.review_manager? || current_user.regional_review_manager?) && params[:jurisdiction_id].present? &&
+         !current_user.jurisdictions.find(params[:jurisdiction_id])
       raise Pundit::NotAuthorizedError
     end
 
     @external_api_key =
       (
-        if params[:jurisdiction_id].present? && current_user.super_admin?
+        if params[:jurisdiction_id].present?
           policy_scope(ExternalApiKey).where(jurisdiction_id: params[:jurisdiction_id])
         else
           policy_scope(ExternalApiKey)
