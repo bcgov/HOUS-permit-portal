@@ -81,6 +81,8 @@ class ExternalPermitApplicationService
         formatted_value =
           if submitted_field_key.to_s.ends_with?("multi_contact")
             get_formatted_multi_contact_submission_value(submitted_value)
+          elsif requirement["input_type"] == "file"
+            get_file_urls_from_submission_value(submitted_value)
           else
             submitted_value
           end
@@ -180,5 +182,29 @@ class ExternalPermitApplicationService
 
       formatted_contact_value
     end
+  end
+
+  def get_file_urls_from_submission_value(submitted_value)
+    return nil unless submitted_value.present? && submitted_value.is_a?(Array)
+
+    submitted_value
+      .map do |file_data|
+        file_model_name = file_data["model"]
+        file_model_id = file_data["model_id"]
+        next unless file_model_name.present? && file_model_id.present?
+
+        file_model = file_model_name.constantize.find_by(id: file_model_id)
+
+        next unless file_model.present?
+
+        {
+          id: file_model_id,
+          name: file_data&.dig("metadata", "filename"),
+          type: file_data["type"],
+          size: file_data["size"],
+          url: file_model.file_url,
+        }
+      end
+      .compact
   end
 end

@@ -67,6 +67,11 @@ For testing purposes, please use the server located at {serverUrl}. The computed
 During your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
+### Special considerations:
+For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
+We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a 
+new file URL.
+
 ### Visual aids and examples:
 For a better understanding of how our APIs work, including webhook setups and request handling, please refer to the code examples included later
 in this document.
@@ -217,6 +222,7 @@ in this document.
                           { type: :boolean },
                           { "$ref" => "#/components/schemas/ContactSubmissionValue" },
                           { "$ref" => "#/components/schemas/MultiOptionSubmissionValue" },
+                          { "$ref" => "#/components/schemas/FileSubmissionValue" },
                         ],
                       },
                     },
@@ -248,12 +254,17 @@ in this document.
           },
           MultiOptionSubmissionValue: {
             type: :object,
+            description:
+              "The submission value for requirement input types, which are limited to a set of options. e.g. an option from a select drop down, or checkboxes",
             additionalProperties: {
               type: :boolean,
+              description:
+                "The key is the option value, and the value is a boolean indicating if the option was selected.",
             },
           },
           ContactSubmissionValue: {
             type: :array,
+            description: "The contact submission value. It is an array of contact objects",
             items: {
               type: :object,
               properties: {
@@ -284,6 +295,37 @@ in this document.
                 organization: {
                   type: :string,
                   description: "The organization of the contact.",
+                },
+              },
+            },
+          },
+          FileSubmissionValue: {
+            description:
+              "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour .",
+            type: :array,
+            items: {
+              type: :object,
+              properties: {
+                id: {
+                  type: :string,
+                  description: "The ID of the file.",
+                },
+                name: {
+                  type: :string,
+                  description: "The name of the file.",
+                },
+                size: {
+                  type: :integer,
+                  description: "The size of the file in bytes.",
+                },
+                type: {
+                  type: :string,
+                  description: "The type of the file. e.g. image/png, application/pdf, etc.",
+                },
+                url: {
+                  type: :string,
+                  format: "url",
+                  description: "The signed URL to download the file.",
                 },
               },
             },
