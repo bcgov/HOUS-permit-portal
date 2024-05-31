@@ -7,7 +7,7 @@ import { EUserRoles } from "../types/enums"
 const sharedStaticRules = ["jurisdiction:view"]
 
 const sharedDynamicRules = {
-  "user.manage": (currentUser: IUser, data: { user: IUser }) => userRule(currentUser, data),
+  "user:manage": (currentUser: IUser, data: { user: IUser }) => userRule(currentUser, data),
 }
 
 export const rules = {
@@ -17,13 +17,12 @@ export const rules = {
       "jurisdiction:create",
       "jurisdiction:manage",
       "user:invite",
-      "user:manage",
       "requirementTemplate:manage",
     ],
     dynamic: { ...sharedDynamicRules },
   },
   [EUserRoles.reviewManager]: {
-    static: [...sharedStaticRules, "user:invite", "application:download"],
+    static: [...sharedStaticRules, "user:invite", "application:download", "user:updateRole"],
     dynamic: {
       ...sharedDynamicRules,
       "jurisdiction:manage": (currentUser: IUser, data: { jurisdiction: IJurisdiction }) =>
