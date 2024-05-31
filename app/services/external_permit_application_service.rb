@@ -99,6 +99,12 @@ class ExternalPermitApplicationService
       end
     end
 
+    remaining_energy_step_code_submission = form_remaining_energy_step_code_submission_data
+
+    if remaining_energy_step_code_submission.present?
+      formatted_submission_data.merge!(remaining_energy_step_code_submission)
+    end
+
     formatted_submission_data
   end
 
@@ -117,7 +123,7 @@ class ExternalPermitApplicationService
         next unless url.present?
 
         {
-          id: data_entry.h2k_file_id,
+          id: data_entry.id,
           name: data_entry.h2k_file_name,
           type: data_entry.h2k_file_type,
           size: data_entry.h2k_file_size,
@@ -227,5 +233,50 @@ class ExternalPermitApplicationService
         }
       end
       .compact
+  end
+
+  def form_remaining_energy_step_code_submission_data
+    return nil unless permit_application.present?
+
+    step_code_documents =
+      permit_application.supporting_documents.where(data_key: PermitApplication::STEP_CODE_DOCUMENT_DATA_KEYS)
+
+    return nil if step_code_documents.empty?
+
+    # These is originally not part of the requirement model, but to keep a unified structure, we will format it as such.
+    file_values =
+      step_code_documents
+        .map do |step_code_document|
+          url = step_code_document.file_url
+
+          next unless url.present?
+
+          {
+            id: step_code_document.id,
+            name: step_code_document.file_name,
+            type: step_code_document.file_type,
+            size: step_code_document.file_size,
+            url: step_code_document.file_url,
+          }
+        end
+        .compact
+
+    return nil if file_values.empty?
+
+    {
+      id: "energy_step_code",
+      requirement_block_code: "energy_step_code_compliance",
+      name: "Energy step code",
+      description: "",
+      requirement: [
+        {
+          id: "energy_step_code_documents",
+          name: "Energy step code documents",
+          requirement_code: "energy_step_code_documents",
+          type: :file,
+          value: file_values,
+        },
+      ],
+    }
   end
 end

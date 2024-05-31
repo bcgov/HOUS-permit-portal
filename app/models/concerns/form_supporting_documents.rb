@@ -7,17 +7,20 @@ module FormSupportingDocuments
     has_many :active_supporting_documents,
              ->(permit_application) { where(id: permit_application.supporting_doc_ids_from_submission_data) },
              class_name: "SupportingDocument"
+
+    STEP_CODE_DOCUMENT_DATA_KEYS = %i[permit_application_pdf step_code_checklist_pdf]
+
     has_many :inactive_supporting_documents,
              ->(permit_application) do
                where
                  .not(id: permit_application.supporting_doc_ids_from_submission_data)
-                 .where.not(data_key: %i[permit_application_pdf step_code_checklist_pdf])
+                 .where.not(data_key: STEP_CODE_DOCUMENT_DATA_KEYS)
              end,
              class_name: "SupportingDocument"
     has_many :completed_supporting_documents,
              ->(permit_application) do
                where(id: permit_application.supporting_doc_ids_from_submission_data).or(
-                 where(data_key: %i[permit_application_pdf step_code_checklist_pdf]),
+                 where(data_key: STEP_CODE_DOCUMENT_DATA_KEYS),
                )
              end,
              class_name: "SupportingDocument"
@@ -31,11 +34,11 @@ module FormSupportingDocuments
   end
 
   def formatted_compliance_data
-    #compliance data on the permit_applicaiton itself
+    # compliance data on the permit_applicaiton itself
     joined = compliance_data
 
-    #compliance data for energy step code
-    #fetch the energy step_code from json
+    # compliance data for energy step code
+    # fetch the energy step_code from json
     if requirement_energy_step_code_key_value && step_code
       if step_code.plan_out_of_date
         joined[requirement_energy_step_code_key_value[0]] = "warningFileOutOfDate"
@@ -44,7 +47,7 @@ module FormSupportingDocuments
       end
     end
 
-    #data from individual documents
+    # data from individual documents
     grouped_compliance_data =
       active_supporting_documents.where.not(compliance_data: {}).map { |sd| sd.compliance_message_view }
     grouped_compliance_data.group_by { |sd| sd["data_key"] }.each { |key, value| joined[key] = value }
@@ -52,7 +55,7 @@ module FormSupportingDocuments
     joined
   end
 
-  #for automated compliance fields
+  # for automated compliance fields
   def fetch_file_ids_from_submission_data_matching_requirements(fields_and_requirements_array)
     fields_and_requirements_array
       .map do |field_id, req|
