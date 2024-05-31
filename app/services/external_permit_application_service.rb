@@ -106,6 +106,27 @@ class ExternalPermitApplicationService
     self.permit_application.template_version.requirement_blocks_json[requirement_block_id]
   end
 
+  def get_raw_h2k_files
+    return nil unless permit_application.step_code.present? && !permit_application.step_code.data_entries.empty?
+
+    permit_application
+      .step_code
+      .data_entries
+      .map do |data_entry|
+        url = data_entry.h2k_file_url
+        next unless url.present?
+
+        {
+          id: data_entry.h2k_file_id,
+          name: data_entry.h2k_file_name,
+          type: data_entry.h2k_file_type,
+          size: data_entry.h2k_file_size,
+          url: data_entry.h2k_file_url,
+        }
+      end
+      .compact
+  end
+
   private
 
   # single_contact submissions are not formatted in the same way as multi_contact submissions.

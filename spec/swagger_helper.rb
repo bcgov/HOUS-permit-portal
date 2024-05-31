@@ -175,6 +175,9 @@ in this document.
               submission_data: {
                 "$ref" => "#/components/schemas/SubmissionData",
               },
+              raw_h2k_files: {
+                "$ref" => "#/components/schemas/FileSubmissionValue",
+              },
             },
           },
           SubmissionData: {

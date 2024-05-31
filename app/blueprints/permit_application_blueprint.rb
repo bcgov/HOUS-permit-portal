@@ -59,6 +59,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_permit_classifications
     end
 
+    field :raw_h2k_files do |pa, _options|
+      pa.formatted_raw_h2k_files_for_external_use
+    end
+
     association :submitter, blueprint: UserBlueprint, view: :external_api
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint

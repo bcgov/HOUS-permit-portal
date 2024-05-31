@@ -160,6 +160,10 @@ class PermitApplication < ApplicationRecord
     ExternalPermitApplicationService.new(self).formatted_submission_data_for_external_use
   end
 
+  def formatted_raw_h2k_files_for_external_use
+    ExternalPermitApplicationService.new(self).get_raw_h2k_files
+  end
+
   def send_submitted_webhook
     return unless submitted?
 

@@ -244,6 +244,8 @@ components:
           "$ref": "#/components/schemas/Submitter"
         submission_data:
           "$ref": "#/components/schemas/SubmissionData"
+        raw_h2k_files:
+          "$ref": "#/components/schemas/FileSubmissionValue"
     SubmissionData:
       type: object
       description: 'The submitted permit application data. Note: the keys are the
