@@ -8,19 +8,21 @@ module FormSupportingDocuments
              ->(permit_application) { where(id: permit_application.supporting_doc_ids_from_submission_data) },
              class_name: "SupportingDocument"
 
-    STEP_CODE_DOCUMENT_DATA_KEYS = %i[permit_application_pdf step_code_checklist_pdf]
+    CHECKLIST_PDF_DATA_KEY = :step_code_checklist_pdf
+    PERMIT_APP_PDF_DATA_KEY = :permit_application_pdf
+    STATIC_DOCUMENT_DATA_KEYS = [PERMIT_APP_PDF_DATA_KEY, CHECKLIST_PDF_DATA_KEY].freeze
 
     has_many :inactive_supporting_documents,
              ->(permit_application) do
                where
                  .not(id: permit_application.supporting_doc_ids_from_submission_data)
-                 .where.not(data_key: STEP_CODE_DOCUMENT_DATA_KEYS)
+                 .where.not(data_key: STATIC_DOCUMENT_DATA_KEYS)
              end,
              class_name: "SupportingDocument"
     has_many :completed_supporting_documents,
              ->(permit_application) do
                where(id: permit_application.supporting_doc_ids_from_submission_data).or(
-                 where(data_key: STEP_CODE_DOCUMENT_DATA_KEYS),
+                 where(data_key: STATIC_DOCUMENT_DATA_KEYS),
                )
              end,
              class_name: "SupportingDocument"

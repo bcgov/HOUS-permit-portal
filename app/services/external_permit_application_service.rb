@@ -238,34 +238,29 @@ class ExternalPermitApplicationService
   def form_remaining_energy_step_code_submission_data
     return nil unless permit_application.present?
 
-    step_code_documents =
-      permit_application.supporting_documents.where(data_key: PermitApplication::STEP_CODE_DOCUMENT_DATA_KEYS)
+    checklist_document =
+      permit_application.supporting_documents.find_by(data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY)
 
-    return nil if step_code_documents.empty?
+    return nil unless checklist_document.present?
+
+    url = checklist_document.file_url
+
+    return nil unless url.present?
 
     # These is originally not part of the requirement model, but to keep a unified structure, we will format it as such.
-    file_values =
-      step_code_documents
-        .map do |step_code_document|
-          url = step_code_document.file_url
-
-          next unless url.present?
-
-          {
-            id: step_code_document.id,
-            name: step_code_document.file_name,
-            type: step_code_document.file_type,
-            size: step_code_document.file_size,
-            url: step_code_document.file_url,
-          }
-        end
-        .compact
-
-    return nil if file_values.empty?
+    file_values = [
+      {
+        id: checklist_document.id,
+        name: checklist_document.file_name,
+        type: checklist_document.file_type,
+        size: checklist_document.file_size,
+        url: checklist_document.file_url,
+      },
+    ]
 
     {
-      id: "energy_step_code",
-      requirement_block_code: "energy_step_code_compliance",
+      id: "energy_step_code_tool",
+      requirement_block_code: "energy_step_code_tool",
       name: "Energy step code",
       description: "",
       requirement: [
