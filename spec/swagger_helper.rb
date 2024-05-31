@@ -9,9 +9,9 @@ RSpec.configure do |config|
   config.openapi_root = Rails.root.join("swagger").to_s
 
   servers = [
-    { url: "https:/buildingpermit.gov.bc.ca", description: "Production server" },
+    { url: "/external_api/v1", description: "Current environment server" },
     {
-      url: "{serverUrl}",
+      url: "{serverUrl}/external_api/v1",
       description: "Server url",
       variables: {
         serverUrl: {
@@ -63,7 +63,7 @@ may necessitate further contact with the building permit hub team.
 The base path for all API endpoints is `/external_api/v1`.
 
 ### Server information for testing:
-For testing purposes, please use the server located at {serverUrl}. The computed URL for API interactions is https://buildingpermit.gov.bc.ca.
+By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable. 
 During your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
@@ -110,7 +110,6 @@ in this document.
       },
       paths: {
       },
-      basePath: "/external_api/v1",
       servers: servers,
       tags: [
         { name: "Permit applications", description: "Submitted permit applications (scoped to API key jurisdiction)" },
