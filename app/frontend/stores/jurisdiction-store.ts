@@ -122,8 +122,8 @@ export const JurisdictionStoreModel = types
     },
   }))
   .actions((self) => ({
-    searchEnabledJurisdictions: flow(function* () {
-      return self.searchJurisdictions({ reset: true, page: 1, countPerPage: 12 }, true)
+    searchEnabledJurisdictions: flow(function* (countPerPage: number = 10) {
+      return self.searchJurisdictions({ reset: true, page: 1, countPerPage }, true)
     }),
   }))
 

@@ -129,11 +129,11 @@ class Jurisdiction < ApplicationRecord
   end
 
   def submission_inbox_set_up
-    PermitType.all.all? do |permit_type|
-      self.permit_type_submission_contacts.any? do |contact|
-        contact.permit_type_id == permit_type.id && contact.email.present? && contact.confirmed_at.present?
-      end
-    end
+    # preload all of the permit_types and contacts for efficiency
+    permit_types = PermitType.all.to_a
+    contacts = permit_type_submission_contacts.where.not(email: nil).where.not(confirmed_at: nil).to_a
+
+    permit_types.all? { |permit_type| contacts.any? { |contact| contact.permit_type_id == permit_type.id } }
   end
 
   def self.class_for_locality_type(locality_type)
