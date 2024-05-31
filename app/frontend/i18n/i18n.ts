@@ -217,6 +217,9 @@ const options = {
           showOlder: "Show older",
           seeMore: "See more",
           go: "Go",
+          all: "All",
+          and: "and",
+          or: "or",
         },
         notification: {
           title: "Notifications",
@@ -277,6 +280,14 @@ const options = {
             ],
             editMapEnd:
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
+            stepCode: {
+              title: "Step code requirements",
+              description: "Below are the step code requirements for each permit template",
+              permitTemplate: "Permit template",
+              energyStepRequired: "Energy step code required",
+              zeroCarbonStepRequired: "Zero carbon step required",
+              helpLinkText: "What does each step code level mean?",
+            },
           },
           new: {
             title: "Create new jurisdiction",
