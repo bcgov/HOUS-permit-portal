@@ -176,7 +176,13 @@ in this document.
                 "$ref" => "#/components/schemas/SubmissionData",
               },
               raw_h2k_files: {
-                "$ref" => "#/components/schemas/FileSubmissionValue",
+                description:
+                  "The raw h2k files uploaded by the submitter. Note: the urls are signed and will expire after 1 hour.",
+                type: :array,
+                items: {
+                  "$ref" => "#/components/schemas/File",
+                },
+                nullable: true,
               },
             },
           },
@@ -310,29 +316,32 @@ in this document.
               "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour .",
             type: :array,
             items: {
-              type: :object,
-              properties: {
-                id: {
-                  type: :string,
-                  description: "The ID of the file.",
-                },
-                name: {
-                  type: :string,
-                  description: "The name of the file.",
-                },
-                size: {
-                  type: :integer,
-                  description: "The size of the file in bytes.",
-                },
-                type: {
-                  type: :string,
-                  description: "The type of the file. e.g. image/png, application/pdf, etc.",
-                },
-                url: {
-                  type: :string,
-                  format: "url",
-                  description: "The signed URL to download the file.",
-                },
+              "$ref" => "#/components/schemas/File",
+            },
+          },
+          File: {
+            type: :object,
+            properties: {
+              id: {
+                type: :string,
+                description: "The ID of the file.",
+              },
+              name: {
+                type: :string,
+                description: "The name of the file.",
+              },
+              size: {
+                type: :integer,
+                description: "The size of the file in bytes.",
+              },
+              type: {
+                type: :string,
+                description: "The type of the file. e.g. image/png, application/pdf, etc.",
+              },
+              url: {
+                type: :string,
+                format: "url",
+                description: "The signed URL to download the file.",
               },
             },
           },
