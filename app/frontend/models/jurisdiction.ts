@@ -38,6 +38,7 @@ export const JurisdictionModel = types
     energyStepRequired: types.maybeNull(types.number),
     zeroCarbonStepRequired: types.maybeNull(types.number),
     externalApiEnabled: types.optional(types.boolean, false),
+    submissionInboxSetUp: types.boolean,
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -56,18 +57,6 @@ export const JurisdictionModel = types
     },
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
-    },
-    get isSubmissionContactSetupComplete() {
-      const permitTypes = self.rootStore.permitClassificationStore.permitTypes
-
-      const hasValidContactForAllPermitTypes = permitTypes.every((permitType) => {
-        //   checks if there is at least one confirmed email for each permit type
-        return self.permitTypeSubmissionContacts.some(
-          (c) => c.permitTypeId == permitType.id && c.email && c.confirmedAt
-        )
-      })
-
-      return hasValidContactForAllPermitTypes
     },
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)

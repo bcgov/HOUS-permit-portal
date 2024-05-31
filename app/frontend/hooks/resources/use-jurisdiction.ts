@@ -38,13 +38,13 @@ export const useJurisdiction = () => {
   // check if this is a jurisdiction specific route
   // if it is and if the user's jurisdiction changes, navigate to the same route for the new jurisdiction
   useEffect(() => {
-    if (currentUser.isRegionalReviewManager && currentUser.jurisdiction.id != jurisdictionId) {
+    if (currentUser?.isRegionalReviewManager && currentUser?.jurisdiction?.id != jurisdictionId) {
       const originalPath = findMatchingPathTemplate(pathname)
       if (!originalPath) return
       const path = generatePath(originalPath, { jurisdictionId: currentUser.jurisdiction.slug })
       navigate(path, { replace: true })
     }
-  }, [currentUser.jurisdiction])
+  }, [currentUser?.jurisdiction])
 
   useEffect(() => {
     ;(async () => {

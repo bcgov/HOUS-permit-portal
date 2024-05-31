@@ -22,7 +22,8 @@ class JurisdictionBlueprint < Blueprinter::Base
            :regional_district_name,
            :created_at,
            :updated_at,
-           :external_api_enabled
+           :external_api_enabled,
+           :submission_inbox_set_up
 
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
