@@ -6,8 +6,6 @@ class Jurisdiction < ApplicationRecord
   searchkick searchable: %i[name reverse_qualified_name qualified_name],
              word_start: %i[name reverse_qualified_name qualified_name],
              text_start: %i[name reverse_qualified_name qualified_name]
-  #  word_middle: %i[reverse_qualified_name qualified_name],
-  #  word_end: %i[reverse_qualified_name qualified_name]
 
   # Associations
   has_many :permit_applications
