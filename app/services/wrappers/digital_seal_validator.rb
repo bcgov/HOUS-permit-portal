@@ -20,7 +20,7 @@ class Wrappers::DigitalSealValidator < Wrappers::Base
   def call(*args) # take file and the fie type
     # raise NameError.new("File not found") if !File.exist?(args[0])
     form_data = { json: '{"in":"{file}"}', file: Faraday::FilePart.new(args[0], args[1]) }
-    response = post("/stub/api/v1/validatePDF", form_data, true)
+    response = post("/validatePDF", form_data, true)
     if response.success? && response.body.dig("response", "result") == "SUCCESS"
       signatures = response.body.dig("response", "singleSignatureResults") #contains all info to be parsed for display
       OpenStruct.new(success: true, signatures: signatures)
