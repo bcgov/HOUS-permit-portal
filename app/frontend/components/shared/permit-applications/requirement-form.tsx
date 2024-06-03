@@ -307,17 +307,7 @@ export const RequirementForm = observer(
           }}
         >
           {permitApplication.isLoading && (
-            <Center
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              zIndex={12}
-              h="100vh"
-              w="full"
-              bg="greys.grey03"
-              opacity={0.5}
-            >
+            <Center position="absolute" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">
               <SharedSpinner h={24} w={24} />
             </Center>
           )}
