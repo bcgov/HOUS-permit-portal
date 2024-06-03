@@ -30,6 +30,13 @@ class Api::StepCodesController < Api::ApplicationController
     render json: {}, status: :ok
   end
 
+  def download_step_code_summary_csv
+    authorize :step_code, :download_step_code_summary_csv?
+
+    csv_data = StepCodeExportService.new.summary_csv
+    send_data csv_data, type: "text/csv"
+  end
+
   private
 
   def step_code_params

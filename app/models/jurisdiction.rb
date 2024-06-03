@@ -146,6 +146,16 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
+  def energy_step_required(activit = nil, permit_type = nil)
+    # TODO: Revisit this after per-type step code requirements implemented
+    self[:energy_step_required]
+  end
+
+  def zero_carbon_step_required(activity = nil, permit_type = nil)
+    # TODO: Revisit this after per-type step code requirements implemented
+    self[:zero_carbon_step_required]
+  end
+
   private
 
   def sanitize_html_fields
