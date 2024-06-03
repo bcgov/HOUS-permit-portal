@@ -131,6 +131,7 @@ Rails.application.routes.draw do
 
     resources :step_codes, only: %i[index create destroy], shallow: true do
       resources :step_code_checklists, only: %i[index show update]
+      get "download_step_code_summary_csv", on: :collection, to: "step_codes#download_step_code_summary_csv"
     end
 
     post "tags/search", to: "tags#index", as: :tags_search

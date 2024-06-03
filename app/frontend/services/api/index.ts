@@ -39,9 +39,11 @@ import {
 } from "../../types/enums"
 import {
   IContact,
+  IJurisdictionFilters,
   IJurisdictionSearchFilters,
   ISiteConfiguration,
   ITemplateVersionDiff,
+  TAutoComplianceModuleConfigurations,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
@@ -364,6 +366,10 @@ export class Api {
 
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async downloadStepCodeSummaryCsv() {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
   }
 
   async fetchStepCodeChecklist(id: string) {

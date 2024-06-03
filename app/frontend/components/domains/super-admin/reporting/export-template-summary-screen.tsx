@@ -22,7 +22,7 @@ import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ActivityTabSwitcher } from "../../requirement-template/activity-tab-switcher"
 import { DigitalBuildingPermitsList } from "../../requirement-template/digital-building-permits-list"
 
-export const ExportTemplateSummaryScreen = observer(function JurisdictionSubmissionInbox() {
+export const ExportTemplateSummaryScreen = observer(function ExportTemplateSummaryScreen() {
   const { t } = useTranslation()
   const { activityOptions: allActivityOptions, error: activityOptionsError } = useActivityOptions({
     customErrorMessage: t("errors.fetchWorkTypeOptions"),
@@ -58,7 +58,7 @@ export const ExportTemplateSummaryScreen = observer(function JurisdictionSubmiss
     <Container maxW="container.lg" w="full" p={8} as="main">
       <Box w="full" px={8}>
         <Heading as="h1" size="2xl">
-          {t("reporting.exportTemplateSummary.title")}
+          {t("reporting.templateSummary.title")}
         </Heading>
         <Text color="text.secondary" my={6}>
           {t("digitalBuildingPermits.index.selectPermit")}

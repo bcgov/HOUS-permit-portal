@@ -15,6 +15,10 @@ class StepCodePolicy < ApplicationPolicy
     update?
   end
 
+  def download_step_code_summary_csv?
+    user.super_admin?
+  end
+
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve
