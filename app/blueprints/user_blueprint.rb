@@ -20,6 +20,10 @@ class UserBlueprint < Blueprinter::Base
            :last_sign_in_at
   end
 
+  view :external_api do
+    fields :email
+  end
+
   view :current_user do
     include_view :base
     field :eula_accepted do |user, _options|

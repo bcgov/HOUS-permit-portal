@@ -9,9 +9,9 @@ RSpec.configure do |config|
   config.openapi_root = Rails.root.join("swagger").to_s
 
   servers = [
-    { url: "https:/buildingpermit.gov.bc.ca", description: "Production server" },
+    { url: "/external_api/v1", description: "Current environment server" },
     {
-      url: "{serverUrl}",
+      url: "{serverUrl}/external_api/v1",
       description: "Server url",
       variables: {
         serverUrl: {
@@ -63,9 +63,14 @@ may necessitate further contact with the building permit hub team.
 The base path for all API endpoints is `/external_api/v1`.
 
 ### Server information for testing:
-For testing purposes, please use the server located at {serverUrl}. The computed URL for API interactions is https://buildingpermit.gov.bc.ca.
+By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable. 
 During your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
+
+### Special considerations:
+For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
+We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a 
+new file URL.
 
 ### Visual aids and examples:
 For a better understanding of how our APIs work, including webhook setups and request handling, please refer to the code examples included later
@@ -105,7 +110,6 @@ in this document.
       },
       paths: {
       },
-      basePath: "/external_api/v1",
       servers: servers,
       tags: [
         { name: "Permit applications", description: "Submitted permit applications (scoped to API key jurisdiction)" },
@@ -164,8 +168,20 @@ in this document.
               activity: {
                 "$ref" => "#/components/schemas/PermitClassification",
               },
+              submitter: {
+                "$ref" => "#/components/schemas/Submitter",
+              },
               submission_data: {
                 "$ref" => "#/components/schemas/SubmissionData",
+              },
+              raw_h2k_files: {
+                description:
+                  "The raw h2k files uploaded by the submitter. Note: the urls are signed and will expire after 1 hour.",
+                type: :array,
+                items: {
+                  "$ref" => "#/components/schemas/File",
+                },
+                nullable: true,
               },
             },
           },
@@ -217,6 +233,7 @@ in this document.
                           { type: :boolean },
                           { "$ref" => "#/components/schemas/ContactSubmissionValue" },
                           { "$ref" => "#/components/schemas/MultiOptionSubmissionValue" },
+                          { "$ref" => "#/components/schemas/FileSubmissionValue" },
                         ],
                       },
                     },
@@ -248,12 +265,17 @@ in this document.
           },
           MultiOptionSubmissionValue: {
             type: :object,
+            description:
+              "The submission value for requirement input types, which are limited to a set of options. e.g. an option from a select drop down, or checkboxes",
             additionalProperties: {
               type: :boolean,
+              description:
+                "The key is the option value, and the value is a boolean indicating if the option was selected.",
             },
           },
           ContactSubmissionValue: {
             type: :array,
+            description: "The contact submission value. It is an array of contact objects",
             items: {
               type: :object,
               properties: {
@@ -285,6 +307,54 @@ in this document.
                   type: :string,
                   description: "The organization of the contact.",
                 },
+              },
+            },
+          },
+          FileSubmissionValue: {
+            description:
+              "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour .",
+            type: :array,
+            items: {
+              "$ref" => "#/components/schemas/File",
+            },
+          },
+          File: {
+            type: :object,
+            properties: {
+              id: {
+                type: :string,
+                description: "The ID of the file.",
+              },
+              name: {
+                type: :string,
+                description: "The name of the file.",
+              },
+              size: {
+                type: :integer,
+                description: "The size of the file in bytes.",
+              },
+              type: {
+                type: :string,
+                description: "The type of the file. e.g. image/png, application/pdf, etc.",
+              },
+              url: {
+                type: :string,
+                format: "url",
+                description: "The signed URL to download the file.",
+              },
+            },
+          },
+          Submitter: {
+            type: :object,
+            description: "The submitter of the permit application.",
+            properties: {
+              id: {
+                type: :string,
+                description: "The ID of the submitter.",
+              },
+              email: {
+                type: :string,
+                description: "The email of the submitter.",
               },
             },
           },
