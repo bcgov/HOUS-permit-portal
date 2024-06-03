@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Center,
   Flex,
   Heading,
   Link,
@@ -283,8 +284,6 @@ export const RequirementForm = observer(
       }
     }
 
-    if (permitApplication.isLoading) return <SharedSpinner />
-
     return (
       <>
         <Flex
@@ -307,6 +306,22 @@ export const RequirementForm = observer(
             },
           }}
         >
+          {permitApplication.isLoading && (
+            <Center
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              zIndex={12}
+              h="100vh"
+              w="full"
+              bg="greys.grey03"
+              opacity={0.5}
+            >
+              <SharedSpinner h={24} w={24} />
+            </Center>
+          )}
+
           <ErrorsBox data={errorBoxData} />
           {(!usesPublishedTemplateVersion || permitApplication.showCompareAfter) &&
             (permitApplication.diff ? (
