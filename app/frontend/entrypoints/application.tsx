@@ -1,6 +1,7 @@
 import "@bcgov/bc-sans/css/BC_Sans.css"
 import { ChakraProvider, Flex } from "@chakra-ui/react"
 import { Global } from "@emotion/react"
+import { enableActivityTracking, newTracker, trackPageView } from "@snowplow/browser-tracker"
 import React from "react"
 import { createRoot } from "react-dom/client"
 import { Helmet } from "react-helmet"
@@ -14,6 +15,26 @@ import { theme } from "../styles/theme"
 
 import { useTranslation } from "react-i18next"
 import "../i18n/i18n"
+
+if (import.meta.env.VITE_SNOWPLOW_APP_ID && import.meta.env.VITE_SNOWPLOW_COLLECTOR) {
+  let tracker = newTracker("sp", import.meta.env.VITE_SNOWPLOW_COLLECTOR, {
+    appId: import.meta.env.VITE_SNOWPLOW_APP_ID,
+    platform: "web",
+    cookieSameSite: "Lax",
+    // cookieLifetime: 86400 * 548,
+    // post: true,
+    // forceSecureTracker: true,
+    // contexts: {
+    //   webPage: true,
+    //   performanceTiming: true,
+    // },
+  })
+  enableActivityTracking({
+    minimumVisitLength: 30,
+    heartbeatDelay: 10,
+  })
+  trackPageView()
+}
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")

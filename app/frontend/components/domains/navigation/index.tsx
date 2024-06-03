@@ -1,4 +1,5 @@
 import { Box, Center } from "@chakra-ui/react"
+import { trackPageView } from "@snowplow/browser-tracker"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, lazy, useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -192,6 +193,18 @@ const RedirectScreen = lazy(() =>
 )
 const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({ default: module.Footer })))
 
+const TrackPageView = () => {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (import.meta.env.VITE_SNOWPLOW_APP_ID && import.meta.env.VITE_SNOWPLOW_COLLECTOR) {
+      trackPageView()
+    }
+  }, [location])
+
+  return null
+}
+
 export const Navigation = observer(() => {
   const { sessionStore, siteConfigurationStore, subscribeToUserChannel } = useMst()
   const { isLoggingOut } = sessionStore
@@ -207,6 +220,7 @@ export const Navigation = observer(() => {
 
   return (
     <BrowserRouter>
+      <TrackPageView />
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
