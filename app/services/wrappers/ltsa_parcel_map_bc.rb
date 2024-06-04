@@ -113,9 +113,67 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     response = get_details_by_pid(pid: pid)
     if response.success?
       #assumes there is one layer to these features at the moment
-      return(JSON.parse(response.body).dig("features", 0, "geometry", "rings", 0, 0))
+      # return(JSON.parse(response.body).dig("features", 0, "geometry", "rings", 0, 0))
+
+      parsed_response = JSON.parse(response.body)
+
+      wkid = parsed_response.dig("spatialReference", "wkid")
+
+      geometry_coords = parsed_response.dig("features", 0, "geometry", "rings", 0)
+
+      #cartesians system for 102190 OR 3005 #{"wkid"=>, "latestWkid"=>3005}
+      #https://epsg.io/102190.proj4
+      factory = wkid_factory_lookup(wkid || 102_190)
+
+      # Create an array of RGeo points
+      points = geometry_coords.map { |xy| factory.point(xy[0], xy[1]) }
+
+      # Create a polygon from the points
+      polygon = factory.polygon(factory.linear_ring(points))
+
+      # Calculate the centroid
+      centroid = polygon.centroid
+
+      target_factory = wkid_factory_lookup(4326) #default bc geo utilizes 4326
+
+      transformed_centroid = RGeo::Feature.cast(centroid, factory: target_factory, project: true)
     else
       raise Errors::FeatureAttributesRetrievalError
+    end
+  end
+
+  def wkid_factory_lookup(wkid)
+    case (wkid)
+    when 102_190
+      RGeo::Cartesian.factory(
+        srid: 102_190,
+        proj4:
+          "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs",
+        coord_sys:
+          'PROJCS["NAD_1983_BC_Environment_Albers (deprecated)",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["latitude_of_center",45],PARAMETER["longitude_of_center",-126],PARAMETER["standard_parallel_1",50],PARAMETER["standard_parallel_2",58.5],PARAMETER["false_easting",1000000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["ESRI","102190"]]',
+      )
+    when 3005
+      RGeo::Cartesian.factory(
+        srid: 3005,
+        proj4:
+          "+proj=aea +lat_0=45 +lon_0=-126 +lat_1=50 +lat_2=58.5 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
+        coord_sys:
+          'PROJCS["NAD83 / BC Albers",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101],TOWGS84[0,0,0,0,0,0,0]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["latitude_of_center",45],PARAMETER["longitude_of_center",-126],PARAMETER["standard_parallel_1",50],PARAMETER["standard_parallel_2",58.5],PARAMETER["false_easting",1000000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","3005"]]',
+      )
+    when 4326
+      RGeo::Geographic.spherical_factory(
+        srid: 4326,
+        proj4: "+proj=longlat +datum=WGS84 +no_defs +type=crs",
+        coord_sys:
+          'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]',
+      )
+    else
+      #fetch the proj4 string from website
+      espg = Faraday.new("https://epsg.io")
+      response_proj4 = espg.get("#{wkid}.proj4")
+      response_wkt = espg.get("#{wkid}.wkt")
+      RGeo::Cartesian.factory(srid: wkid, proj4: response_proj4.body, coord_sys: response_wkt.body)
+      #this will raise an error if it fails
     end
   end
 

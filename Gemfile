@@ -75,6 +75,12 @@ gem "rack", ">= 3.0.9.1"
 gem "uppy-s3_multipart", "~> 1.2"
 gem "simple-feed", "~> 3.1.2"
 
+# brew install geos
+# bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
+gem "rgeo"
+# brew install proj
+gem "rgeo-proj4"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[mri windows]
