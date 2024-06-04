@@ -10,6 +10,15 @@ const sharedDynamicRules = {
   "user:manage": (currentUser: IUser, data: { user: IUser }) => userRule(currentUser, data),
 }
 
+const reviewManagerRules = {
+  static: [...sharedStaticRules, "user:invite", "application:download", "user:updateRole"],
+  dynamic: {
+    ...sharedDynamicRules,
+    "jurisdiction:manage": (currentUser: IUser, data: { jurisdiction: IJurisdiction }) =>
+      jurisdictionRule(currentUser, data),
+  },
+}
+
 export const rules = {
   [EUserRoles.superAdmin]: {
     static: [
@@ -21,14 +30,8 @@ export const rules = {
     ],
     dynamic: { ...sharedDynamicRules },
   },
-  [EUserRoles.reviewManager]: {
-    static: [...sharedStaticRules, "user:invite", "application:download", "user:updateRole"],
-    dynamic: {
-      ...sharedDynamicRules,
-      "jurisdiction:manage": (currentUser: IUser, data: { jurisdiction: IJurisdiction }) =>
-        jurisdictionRule(currentUser, data),
-    },
-  },
+  [EUserRoles.reviewManager]: reviewManagerRules,
+  [EUserRoles.regionalReviewManager]: reviewManagerRules,
   [EUserRoles.reviewer]: {
     static: [...sharedStaticRules, "user:view", "application:download"],
     dynamic: { ...sharedDynamicRules },
