@@ -87,7 +87,7 @@ en:
       notify_application_updated: "Updated application status: %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
-      new_jurisdiction_membership: "Confirm submission inbox email"
+      new_jurisdiction_membership: "New jurisdiction membership"
   arbitrary_message_construct:
     devise:
       failure:
