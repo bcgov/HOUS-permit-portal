@@ -27,6 +27,7 @@ export const UserModel = types
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
     invitedByEmail: types.maybeNull(types.string),
+    preference: types.frozen<IPreference>(),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -111,3 +112,10 @@ export const UserModel = types
   }))
 
 export interface IUser extends Instance<typeof UserModel> {}
+
+export interface IPreference {
+  enableInAppNewTemplateVersionPublishNotification: boolean
+  enableEmailNewTemplateVersionPublishNotification: boolean
+  enableInAppCustomizationUpdateNotification: boolean
+  enableEmailCustomizationUpdateNotification: boolean
+}

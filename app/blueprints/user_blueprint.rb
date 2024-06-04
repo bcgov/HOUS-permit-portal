@@ -18,6 +18,7 @@ class UserBlueprint < Blueprinter::Base
            :confirmation_sent_at,
            :discarded_at,
            :last_sign_in_at
+    association :preference, blueprint: PreferenceBlueprint
   end
 
   view :external_api do

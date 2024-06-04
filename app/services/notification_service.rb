@@ -50,17 +50,30 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
-    review_manager_ids = User.review_manager.pluck(:id)
+    review_manager_ids =
+      User
+        .review_manager
+        .joins(:preference)
+        .where(preferences: { enable_in_app_new_template_version_publish_notification: true })
+        .pluck(:id)
+        .uniq
+
     relevant_submitter_ids =
       PermitApplication
         .joins(:template_version)
+        .joins(submitter: :preference)
         .where(
           template_versions: {
-            requirement_template_id: template_version.requirement_template_id,
+            # requirement_template_id: template_version.requirement_template_id,
+            requirement_template_id: TemplateVersion.last.requirement_template_id,
           },
           status: "draft",
+          preferences: {
+            enable_in_app_new_template_version_publish_notification: true,
+          },
         )
         .pluck(:submitter_id)
+        .uniq
 
     NotificationPushJob.perform_async(
       template_version.publish_event_notification_data,
@@ -68,20 +81,26 @@ class NotificationService
     )
   end
 
-  def self.publish_customization_create_update_event(customization)
+  def self.publish_customization_update_event(customization)
     template_version = customization.template_version
     relevant_submitter_ids =
       PermitApplication
         .joins(:template_version)
+        .joins(submitter: :preference)
         .where(
           template_versions: {
-            requirement_template_id: template_version.requirement_template_id,
+            # requirement_template_id: template_version.requirement_template_id,
+            requirement_template_id: TemplateVersion.last.requirement_template_id,
           },
           status: "draft",
+          preferences: {
+            enable_in_app_customization_update_notification: true,
+          },
         )
         .pluck(:submitter_id)
+        .uniq
 
-    NotificationPushJob.perform_async(customization.create_update_event_notification_data, relevant_submitter_ids)
+    NotificationPushJob.perform_async(customization.update_event_notification_data, relevant_submitter_ids)
   end
 
   private
