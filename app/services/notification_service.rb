@@ -54,7 +54,7 @@ class NotificationService
       User
         .review_manager
         .joins(:preference)
-        .where(preferences: { enable_in_app_new_template_version_publish_notification: true })
+        .where(users: { preferences: { enable_in_app_new_template_version_publish_notification: true } })
         .pluck(:id)
         .uniq
 
@@ -64,12 +64,13 @@ class NotificationService
         .joins(submitter: :preference)
         .where(
           template_versions: {
-            # requirement_template_id: template_version.requirement_template_id,
-            requirement_template_id: TemplateVersion.last.requirement_template_id,
+            requirement_template_id: template_version.requirement_template_id,
           },
           status: "draft",
-          preferences: {
-            enable_in_app_new_template_version_publish_notification: true,
+          users: {
+            preferences: {
+              enable_in_app_new_template_version_publish_notification: true,
+            },
           },
         )
         .pluck(:submitter_id)
@@ -89,12 +90,13 @@ class NotificationService
         .joins(submitter: :preference)
         .where(
           template_versions: {
-            # requirement_template_id: template_version.requirement_template_id,
-            requirement_template_id: TemplateVersion.last.requirement_template_id,
+            requirement_template_id: template_version.requirement_template_id,
           },
           status: "draft",
-          preferences: {
-            enable_in_app_customization_update_notification: true,
+          users: {
+            preferences: {
+              enable_in_app_customization_update_notification: true,
+            },
           },
         )
         .pluck(:submitter_id)
