@@ -41,7 +41,7 @@ class User < ApplicationRecord
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
-  after_initialize :create_default_preference
+  before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
