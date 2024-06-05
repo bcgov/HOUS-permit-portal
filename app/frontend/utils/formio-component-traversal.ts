@@ -1,4 +1,5 @@
 import { t } from "i18next"
+import { COMPLETTION_SECTION_ID } from "../constants"
 import { IFormIOBlock, IFormIORequirement, IFormIOSection, IFormJson, ITemplateVersionDiff } from "../types/types"
 
 const findComponentsByType = (components, type) => {
@@ -152,6 +153,44 @@ export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => 
 
         requirement.customClass = classes.filter(Boolean).join(" ")
       })
+    })
+  })
+  return formJson
+}
+
+const convertToRevisionButton = (requirement: IFormIORequirement) => {
+  return {
+    id: requirement.id + "-revision-button",
+    key: requirement.key + "-revision-button",
+    type: "button",
+    label: "",
+    title: "Revision Button",
+    input: true,
+    action: "custom",
+    custom: `console.log("${requirement.key} says hello")`,
+    customClass: "revision-button",
+    hideLabel: true,
+    customConditional: requirement.customConditional,
+    conditional: requirement.conditional,
+  } as IFormIORequirement
+}
+
+export const combineRevisionButtons = (formJson: IFormJson) => {
+  formJson.components.forEach((section: IFormIOSection) => {
+    if (section.id === COMPLETTION_SECTION_ID) return
+
+    section.components.forEach((block: IFormIOBlock) => {
+      for (let i = 0; i < block.components.length; i++) {
+        const requirement = block.components[i]
+        requirement.disabled = true
+        const revisionButton = convertToRevisionButton(requirement)
+
+        // Insert the revision button before the current requirement
+        block.components.splice(i, 0, revisionButton)
+
+        // Move the index to the next requirement to skip the newly added revision button
+        i++
+      }
     })
   })
   return formJson

@@ -481,6 +481,11 @@ const options = {
             downloadForm: "Download application form",
             downloadStepCode: "Download step code checklist",
             backToInbox: "Back to inbox",
+            requestRevisions: "Request revisions",
+            requestingRevisions: "Requesting revisions",
+            showList: "Show list",
+            hideList: "Hide list",
+            clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
           },
         },
         requirementsLibrary: {

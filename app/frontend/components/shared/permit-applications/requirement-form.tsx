@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
@@ -60,6 +61,8 @@ export const RequirementForm = observer(
     const location = useLocation()
     const { isOpen, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
+    const { userStore } = useMst()
+    const { currentUser } = userStore
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
@@ -84,7 +87,7 @@ export const RequirementForm = observer(
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (!usingCurrentTemplateVersion && isEditing) {
+      if (!usingCurrentTemplateVersion && currentUser.shouldSeeApplicationDiff) {
         permitApplication.fetchDiff()
       }
     }, [usingCurrentTemplateVersion])
@@ -269,7 +272,7 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: true }),
+      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: !permitApplication.revisionMode }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -311,7 +314,6 @@ export const RequirementForm = observer(
               <SharedSpinner h={24} w={24} />
             </Center>
           )}
-
           <ErrorsBox data={errorBoxData} />
           {permitApplication.shouldShowApplicationDiff(isEditing) &&
             (permitApplication.diff ? (
@@ -350,7 +352,7 @@ export const RequirementForm = observer(
             </Text>
           </Box>
           <Form
-            key={permitApplication.formDiffKey}
+            key={permitApplication.formFormatKey}
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props

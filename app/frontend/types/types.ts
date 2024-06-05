@@ -125,14 +125,19 @@ export interface IFormIOBlock {
 }
 
 export interface IFormIORequirement {
-  id: string
-  key: string
+  id?: string
+  key?: string
   type: string
-  input: true
-  validation: { required: boolean }
+  input?: true
+  validation?: { required: boolean }
   label: string
   widget?: any
+  action?: string
   customClass?: string
+  disabled?: boolean
+  customConditional?: string
+  conditional?: any
+  components?: IFormIORequirement[]
 }
 
 export interface ISubmissionData {
