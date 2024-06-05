@@ -16,7 +16,7 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
-import { combineComplianceHints, combineDiff } from "../utils/formio-component-traversal"
+import { combineComplianceHints, combineDiff, combineRevisionButtons } from "../utils/formio-component-traversal"
 import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
@@ -59,6 +59,7 @@ export const PermitApplicationModel = types
     isDirty: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
     showCompareAfter: types.optional(types.boolean, false),
+    revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
   })
   .extend(withEnvironment())
@@ -86,7 +87,8 @@ export const PermitApplicationModel = types
         self.formattedComplianceData
       )
       const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
-      return diffColoredFormJson
+      const revisionModeFormJson = self.revisionMode ? combineRevisionButtons(diffColoredFormJson) : diffColoredFormJson
+      return revisionModeFormJson
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
@@ -130,6 +132,9 @@ export const PermitApplicationModel = types
       self.submissionData = newData
       self.isDirty = true
     },
+    setRevisionMode(revisionMode: boolean) {
+      self.revisionMode = revisionMode
+    },
     setIsDirty(isDirty: boolean) {
       self.isDirty = true
     },
@@ -139,8 +144,17 @@ export const PermitApplicationModel = types
     },
   }))
   .views((self) => ({
-    get formDiffKey() {
-      return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
+    get shouldShowApplicationDiff() {
+      return (
+        self.rootStore.userStore.currentUser.shouldSeeApplicationDiff &&
+        (!self.usesPublishedTemplateVersion || self.showCompareAfter)
+      )
+    },
+    get formFormatKey() {
+      return (
+        (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
+        (self.revisionMode ? "-revision" : "")
+      )
     },
     get statusTagText() {
       if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
