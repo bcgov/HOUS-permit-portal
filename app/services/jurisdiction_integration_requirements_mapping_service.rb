@@ -11,7 +11,7 @@ class JurisdictionIntegrationRequirementsMappingService
   # @param simplified_map [Hash] the simplified map of requirements
   # @return requirement_mapping [HASH] updated requirements mapping hash
   def get_updated_requirements_mapping(simplified_map)
-    return unless simplified_map.present? && simplified_map.is_a?(Hash)
+    return unless simplified_map.is_a?(Hash)
 
     updated_mapping = @mapping.requirements_mapping.deep_dup
 
