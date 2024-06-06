@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
   let(:jurisdiction) { create(:sub_district) }
   let(:mapping) { create(:jurisdiction_integration_requirements_mapping, jurisdiction: jurisdiction) }
-  let(:mock_mapping) do
+  let(:mock_requirements_mapping_json) do
     {
       "sku" => {
         "id" => "1",
@@ -29,14 +29,14 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
         create(
           :jurisdiction_integration_requirements_mapping,
           jurisdiction: jurisdiction,
-          requirements_mapping: mock_mapping,
+          requirements_mapping: mock_requirements_mapping_json,
           template_version:
             create(:template_version, status: "deprecated", deprecation_reason: "new_publish", version_date: Time.now),
         )
         create(
           :jurisdiction_integration_requirements_mapping,
           jurisdiction: jurisdiction,
-          requirements_mapping: mock_mapping,
+          requirements_mapping: mock_requirements_mapping_json,
           template_version:
             create(
               :template_version,
@@ -47,7 +47,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
         )
       end
       let!(:same_mapping_different_jurisdiction) do
-        create(:jurisdiction_integration_requirements_mapping, requirements_mapping: mock_mapping)
+        create(:jurisdiction_integration_requirements_mapping, requirements_mapping: mock_requirements_mapping_json)
       end
 
       it "returns the latest version existing mapping for the jurisdiction" do
@@ -60,14 +60,14 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
         create(
           :jurisdiction_integration_requirements_mapping,
           jurisdiction: jurisdiction,
-          requirements_mapping: mock_mapping,
+          requirements_mapping: mock_requirements_mapping_json,
         )
       end
       let!(:existing_mapping) do
         create(
           :jurisdiction_integration_requirements_mapping,
           jurisdiction: jurisdiction,
-          requirements_mapping: mock_mapping,
+          requirements_mapping: mock_requirements_mapping_json,
           template_version: create(:template_version, status: "deprecated", deprecation_reason: "new_publish"),
         )
       end
@@ -81,8 +81,9 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
   describe "#initialize_requirements_mapping" do
     context "when requirements_mapping is not empty" do
       it "does not change requirements_mapping" do
-        mapping = create(:jurisdiction_integration_requirements_mapping, requirements_mapping: mock_mapping)
-        expect(mapping.requirements_mapping).to eq(mock_mapping)
+        mapping =
+          create(:jurisdiction_integration_requirements_mapping, requirements_mapping: mock_requirements_mapping_json)
+        expect(mapping.requirements_mapping).to eq(mock_requirements_mapping_json)
       end
     end
 
@@ -110,7 +111,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
               },
             },
           )
-        expected_mapping = {
+        expected_requirements_mapping_json = {
           "sku" => {
             "id" => "1",
             "requirements" => {
@@ -140,7 +141,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
         }
         mapping = create(:jurisdiction_integration_requirements_mapping, template_version: template_version)
 
-        expect(mapping.requirements_mapping).to eq(expected_mapping)
+        expect(mapping.requirements_mapping).to eq(expected_requirements_mapping_json)
       end
     end
 
@@ -340,79 +341,119 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
   describe "#update_requirements_mapping" do
     let(:jurisdiction) { create(:sub_district) }
     let(:mapping) do
-      create(:jurisdiction_integration_requirements_mapping, mapping: mock_mapping, jurisdiction: jurisdiction)
+      create(
+        :jurisdiction_integration_requirements_mapping,
+        requirements_mapping: mock_requirements_mapping_json,
+        jurisdiction: jurisdiction,
+      )
     end
-    let(:simplified_map) do
-      { "sku" => { "requirements" => { "code" => "updated_field" } } }
-      context "when the simplified map is valid" do
-        it "updates the requirements mapping successfully" do
-          expected_mapping = mock_mapping.deep_dup
+    let(:simplified_map) { { "sku" => { "code" => "updated_field" } } }
 
-          expected_mapping["sku"]["requirements"]["code"]["local_system_mapping"] = "updated_field"
+    context "when the simplified map is valid" do
+      it "updates the requirements mapping successfully" do
+        expected_requirements_mapping_json = mock_requirements_mapping_json.deep_dup
 
-          expect { mapping.update_requirements_mapping(simplified_map) }.to change {
-            mapping.reload.requirements_mapping
-          }.to(expected_mapping)
-        end
+        expected_requirements_mapping_json["sku"]["requirements"]["code"]["local_system_mapping"] = "updated_field"
+
+        mapping.update_requirements_mapping(simplified_map)
+
+        expect(mapping.requirements_mapping).to eq(expected_requirements_mapping_json)
       end
 
-      context "when the simplified map is not a hash" do
-        it "does not update the requirements mapping" do
-          expect { mapping.update_requirements_mapping("invalid") }.not_to change {
-            mapping.reload.requirements_mapping
-          }
-        end
-      end
-
-      context "when the simplified map is nil" do
-        it "does not update the requirements mapping" do
-          expect { mapping.update_requirements_mapping(nil) }.not_to change { mapping.reload.requirements_mapping }
-        end
-      end
-
-      context "when the simplified map is has all code which does not exist in original mapping" do
-        it "does not update the requirements mapping" do
-          expect {
-            mapping.update_requirements_mapping(
-              {
-                "sku" => {
-                  "requirements" => {
-                    "code_not_exist" => "updated_field",
-                  },
-                },
-                "sku2" => {
-                  "requirements" => {
-                    "code_not_exist" => "updated_field",
-                  },
-                },
+      it "syncs the requirements mapping successfully to exiting mappings with published template of same jurisdiction" do
+        diff_requirements_mapping_json = {
+          "sku" => {
+            "id" => "1",
+            "requirements" => {
+              "code" => {
+                "id" => "1",
+                "local_system_mapping" => "test_field",
               },
-            )
-          }.not_to change { mapping.reload.requirements_mapping }
-        end
-      end
-
-      context "when the simplified map has some code which does not exist in original mapping" do
-        it "only updates the requirements mapping which exist in the original mapping" do
-          expected_mapping = mock_mapping.deep_dup
-
-          expected_mapping["sku"]["requirements"]["code"]["local_system_mapping"] = "updated_field"
-          expect {
-            mapping.update_requirements_mapping(
-              {
-                "sku" => {
-                  "requirements" => {
-                    "code" => "updated_field",
-                  },
-                },
-                "sku2" => {
-                  "requirements" => {
-                    "code_not_exist" => "updated_field",
-                  },
-                },
+              "code2" => {
+                "id" => "2",
+                "local_system_mapping" => "test_field_2",
               },
-            )
-          }.to change { mapping.reload.requirements_mapping }.to(expected_mapping)
-        end
+            },
+          },
+          "sku_2" => {
+            "id" => "1",
+            "requirements" => {
+              "code" => {
+                "id" => "1",
+                "local_system_mapping" => "test_field",
+              },
+              "code2" => {
+                "id" => "2",
+                "local_system_mapping" => "test_field_2",
+              },
+            },
+          },
+        }
+        published_mapping_same_jurisdiction =
+          create(
+            :jurisdiction_integration_requirements_mapping,
+            requirements_mapping: diff_requirements_mapping_json,
+            jurisdiction: jurisdiction,
+          )
+        published_mapping_diff_jurisdiction =
+          create(:jurisdiction_integration_requirements_mapping, requirements_mapping: diff_requirements_mapping_json)
+        deprecated_mapping_same_jurisdiction =
+          create(
+            :jurisdiction_integration_requirements_mapping,
+            template_version: create(:template_version, status: "deprecated"),
+            requirements_mapping: diff_requirements_mapping_json,
+            jurisdiction: jurisdiction,
+          )
+        expected_synced_requirements_mapping_json = diff_requirements_mapping_json.deep_dup
+        expected_synced_requirements_mapping_json["sku"]["requirements"]["code"][
+          "local_system_mapping"
+        ] = "updated_field_sync"
+
+        mapping.update_requirements_mapping({ "sku" => { "code" => "updated_field_sync" } })
+
+        expect(published_mapping_same_jurisdiction.reload.requirements_mapping).to eq(
+          expected_synced_requirements_mapping_json,
+        )
+        expect(published_mapping_diff_jurisdiction.reload.requirements_mapping).to eq(diff_requirements_mapping_json)
+        expect(deprecated_mapping_same_jurisdiction.reload.requirements_mapping).to eq(diff_requirements_mapping_json)
+      end
+    end
+
+    context "when the simplified map is not a hash" do
+      it "does not update the requirements mapping" do
+        mapping.update_requirements_mapping("invalid")
+
+        expect(mapping.requirements_mapping).to eq(mock_requirements_mapping_json)
+      end
+    end
+
+    context "when the simplified map is nil" do
+      it "does not update the requirements mapping" do
+        mapping.update_requirements_mapping(nil)
+        expect(mapping.requirements_mapping).to eq(mock_requirements_mapping_json)
+      end
+    end
+
+    context "when the simplified map is has all code which does not exist in original mapping" do
+      it "does not update the requirements mapping" do
+        mapping.update_requirements_mapping(
+          { "sku" => { "code_not_exist" => "updated_field" }, "sku2" => { "code_not_exist" => "updated_field" } },
+        )
+        expect(mapping.requirements_mapping).to eq(mock_requirements_mapping_json)
+      end
+    end
+
+    context "when the simplified map has some code which does not exist in original mapping" do
+      it "only updates the requirements mapping which exist in the original mapping" do
+        expected_requirements_mapping_json = mock_requirements_mapping_json.deep_dup
+
+        expected_requirements_mapping_json["sku"]["requirements"]["code"]["local_system_mapping"] = "updated_field"
+
+        mapping.update_requirements_mapping(
+          { "sku" => { "code" => "updated_field" }, "sku2" => { "code_not_exist" => "updated_field" } },
+        )
+
+        expect(mapping.requirements_mapping).to eq(expected_requirements_mapping_json)
       end
     end
   end
