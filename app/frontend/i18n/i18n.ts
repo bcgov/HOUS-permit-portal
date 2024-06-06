@@ -27,8 +27,7 @@ const options = {
             heading: "Which BCeID should I use?",
             basic: {
               title: "Basic BCeID",
-              description:
-                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              description: "Use when accessing a service in a personal capacity.",
               homeownerAgent: "homeowner, agent",
               architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
               register: "Register for Basic BCeID",

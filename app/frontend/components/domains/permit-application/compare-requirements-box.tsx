@@ -24,6 +24,7 @@ interface ICompareRequirementsBoxDataProps {
   handleUpdatePermitApplicationVersion?: () => void
   showCompareAfter?: boolean
   handleClickDismiss?: () => void
+  isUpdatable?: boolean
 }
 
 export const CompareRequirementsBox = ({
@@ -31,6 +32,7 @@ export const CompareRequirementsBox = ({
   handleUpdatePermitApplicationVersion,
   showCompareAfter = false,
   handleClickDismiss,
+  isUpdatable,
 }: ICompareRequirementsBoxDataProps) => {
   const { t } = useTranslation()
   const { userStore } = useMst()
@@ -78,7 +80,7 @@ export const CompareRequirementsBox = ({
               aria-label={"Open errors"}
             ></IconButton>
           </Flex>
-          {currentUser.isSubmitter ? (
+          {isUpdatable ? (
             <Button
               variant="primary"
               alignSelf="center"

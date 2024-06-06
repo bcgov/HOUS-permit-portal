@@ -30,12 +30,14 @@ export const NotificationStoreModel = types
     generateSpecificHref(notification: INotification) {
       const currentUser = self.rootStore.userStore.currentUser
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
-        if (currentUser.isReviewManager) {
+        if (currentUser.isManager) {
           return `/digital-building-permits/${notification.objectData.templateVersionId}/edit?compare=true`
         }
         if (currentUser.isSubmitter) {
-          return `/`
+          return "/"
         }
+
+        return "/permit-applications"
       }
       if (notification.actionType === ENotificationActionType.customizationUpdate) {
         return `/`
