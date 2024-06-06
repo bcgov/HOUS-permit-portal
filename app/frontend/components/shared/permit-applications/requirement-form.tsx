@@ -322,6 +322,7 @@ export const RequirementForm = observer(
                 handleClickDismiss={() => {
                   permitApplication.resetDiff()
                 }}
+                isUpdatable
               />
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
