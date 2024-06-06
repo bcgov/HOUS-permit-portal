@@ -3,33 +3,31 @@ class JurisdictionIntegrationRequirementsMappingService
     @mapping = jurisdiction_integration_requirements_mapping
   end
 
-  # Updates the requirements mapping of the jurisdiction integration requirements mapping instance.
-  # This method takes a simplified map of the requirements and updates the existing mapping accordingly.
+  # Returns an new requirements mapping hash for the jurisdiction_integration_requirements_mapping instance.
+  # This method takes a simplified map of the requirements and returns an updated requirements mapping hash.
   # The simplified map should be a hash where each key is a requirement block SKU and the value is another hash.
   # The inner hash should have requirement codes as keys and local system mapping as values.
-  # Note: mappings which does now exist in the original mapping will not be created.
+  # Note: mappings which does now exist in the original mapping will not be added to the returned hash.
   # @param simplified_map [Hash] the simplified map of requirements
-  # @return [Boolean] true if the update was successful, false otherwise
-  def update_requirements_mapping(simplified_map)
+  # @return requirement_mapping [HASH] updated requirements mapping hash
+  def get_updated_requirements_mapping(simplified_map)
     return unless simplified_map.present? && simplified_map.is_a?(Hash)
 
     updated_mapping = @mapping.requirements_mapping.deep_dup
 
-    updated_mapping.with_lock do
-      simplified_map.each do |requirement_block_sku, requirements|
-        next unless requirements.is_a?(Hash) && updated_mapping[requirement_block_sku].present?
+    simplified_map.each do |requirement_block_sku, requirements|
+      next unless requirements.is_a?(Hash) && updated_mapping[requirement_block_sku].present?
 
-        requirements.each do |requirement_code, local_system_mapping|
-          next unless updated_mapping[requirement_block_sku]["requirements"][requirement_code].present?
+      requirements.each do |requirement_code, local_system_mapping|
+        next unless updated_mapping[requirement_block_sku]["requirements"][requirement_code].present?
 
-          updated_mapping[requirement_block_sku]["requirements"][requirement_code][
-            "local_system_mapping"
-          ] = local_system_mapping
-        end
+        updated_mapping[requirement_block_sku]["requirements"][requirement_code][
+          "local_system_mapping"
+        ] = local_system_mapping
       end
     end
 
-    @mapping.update(requirements_mapping: updated_mapping)
+    updated_mapping
   end
 
   # Initializes the requirements mapping of the jurisdiction integration requirements mapping instance.
