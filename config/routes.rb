@@ -76,17 +76,21 @@ Rails.application.routes.draw do
 
     resources :template_versions, only: %i[index show] do
       get "compare_requirements", to: "template_versions#compare_requirements", on: :member
-    end
+      get "download_requirement_summary_csv", to: "template_versions#download_summary_csv", on: :member
 
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
-          "template_versions#show_jurisdiction_template_version_cutomization"
-    post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
-           "template_versions#create_or_update_jurisdiction_template_version_cutomization"
-    get "template_versions/:id/download_requirement_summary_csv" => "template_versions#download_summary_csv"
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_csv" =>
-          "template_versions#download_customization_csv"
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_json" =>
-          "template_versions#download_customization_json"
+      member do
+        resources :jurisdictions, only: [] do
+          get "jurisdiction_template_version_customization",
+              to: "template_versions#show_jurisdiction_template_version_customization"
+          post "jurisdiction_template_version_customization",
+               to: "template_versions#create_or_update_jurisdiction_template_version_customization"
+          get "download_customization_csv", to: "template_versions#download_customization_csv"
+          get "download_customization_json", to: "template_versions#download_customization_json"
+          get "integration_requirements_mapping",
+              to: "template_versions#show_jurisdiction_integration_requirements_mapping"
+        end
+      end
+    end
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"

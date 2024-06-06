@@ -7,7 +7,7 @@ class TemplateVersionPolicy < ApplicationPolicy
     !record.scheduled? || user.super_admin?
   end
 
-  def show_jurisdiction_template_version_cutomization?
+  def show_jurisdiction_template_version_customization?
     true
   end
 
@@ -23,8 +23,13 @@ class TemplateVersionPolicy < ApplicationPolicy
     download_summary_csv?
   end
 
-  def create_or_update_jurisdiction_template_version_cutomization?
+  def create_or_update_jurisdiction_template_version_customization?
     (user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id)
+  end
+
+  def show_jurisdiction_integration_requirements_mapping?
+    user.super_admin? ||
+      ((user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id))
   end
 
   def compare_requirements?
