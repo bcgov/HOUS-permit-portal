@@ -50,13 +50,12 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
-    review_manager_ids =
+    manager_ids =
       User
-        .review_manager
         .joins(:preference)
+        .where(role: %i[review_manager regional_review_manager])
         .where(users: { preferences: { enable_in_app_new_template_version_publish_notification: true } })
         .pluck(:id)
-        .uniq
 
     relevant_submitter_ids =
       PermitApplication
@@ -78,7 +77,7 @@ class NotificationService
 
     NotificationPushJob.perform_async(
       template_version.publish_event_notification_data,
-      review_manager_ids + relevant_submitter_ids,
+      manager_ids + relevant_submitter_ids,
     )
   end
 
