@@ -336,4 +336,84 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
       end
     end
   end
+
+  describe "#update_requirements_mapping" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:mapping) do
+      create(:jurisdiction_integration_requirements_mapping, mapping: mock_mapping, jurisdiction: jurisdiction)
+    end
+    let(:simplified_map) do
+      { "sku" => { "requirements" => { "code" => "updated_field" } } }
+      context "when the simplified map is valid" do
+        it "updates the requirements mapping successfully" do
+          expected_mapping = mock_mapping.deep_dup
+
+          expected_mapping["sku"]["requirements"]["code"]["local_system_mapping"] = "updated_field"
+
+          expect { mapping.update_requirements_mapping(simplified_map) }.to change {
+            mapping.reload.requirements_mapping
+          }.to(expected_mapping)
+        end
+      end
+
+      context "when the simplified map is not a hash" do
+        it "does not update the requirements mapping" do
+          expect { mapping.update_requirements_mapping("invalid") }.not_to change {
+            mapping.reload.requirements_mapping
+          }
+        end
+      end
+
+      context "when the simplified map is nil" do
+        it "does not update the requirements mapping" do
+          expect { mapping.update_requirements_mapping(nil) }.not_to change { mapping.reload.requirements_mapping }
+        end
+      end
+
+      context "when the simplified map is has all code which does not exist in original mapping" do
+        it "does not update the requirements mapping" do
+          expect {
+            mapping.update_requirements_mapping(
+              {
+                "sku" => {
+                  "requirements" => {
+                    "code_not_exist" => "updated_field",
+                  },
+                },
+                "sku2" => {
+                  "requirements" => {
+                    "code_not_exist" => "updated_field",
+                  },
+                },
+              },
+            )
+          }.not_to change { mapping.reload.requirements_mapping }
+        end
+      end
+
+      context "when the simplified map has some code which does not exist in original mapping" do
+        it "only updates the requirements mapping which exist in the original mapping" do
+          expected_mapping = mock_mapping.deep_dup
+
+          expected_mapping["sku"]["requirements"]["code"]["local_system_mapping"] = "updated_field"
+          expect {
+            mapping.update_requirements_mapping(
+              {
+                "sku" => {
+                  "requirements" => {
+                    "code" => "updated_field",
+                  },
+                },
+                "sku2" => {
+                  "requirements" => {
+                    "code_not_exist" => "updated_field",
+                  },
+                },
+              },
+            )
+          }.to change { mapping.reload.requirements_mapping }.to(expected_mapping)
+        end
+      end
+    end
+  end
 end
