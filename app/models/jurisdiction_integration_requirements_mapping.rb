@@ -18,6 +18,17 @@ class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
 
   before_create :initialize_requirements_mapping
 
+  # Updates the requirements mapping of the current model instance.
+  # This method takes a simplified map of the requirements and updates the existing mapping accordingly.
+  # The simplified map should be a hash where each key is a requirement block SKU and the value is another hash.
+  # The inner hash should have requirement codes as keys and local system mapping as values.
+  # Note: mappings which does now exist in the original mapping will not be created.
+  # @param simplified_map [Hash] the simplified map of requirements
+  # @return [Boolean] true if the update was successful, false otherwise
+  def update_requirements_mapping(simplified_map)
+    JurisdictionIntegrationRequirementsMappingService.new(self).update_requirements_mapping(simplified_map)
+  end
+
   # This method is used to return a copyable record with existing mapping
   # for a given requirement block sku and requirement code.
   # It returns the first record with a published template version if it exists,
@@ -38,6 +49,6 @@ class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
   private
 
   def initialize_requirements_mapping
-    JurisdictionIntegrationRequirementsMappingService.new(self).initialize_requirements_mapping
+    JurisdictionIntegrationRequirementsMappingService.new(self).initialize_requirements_mapping!
   end
 end

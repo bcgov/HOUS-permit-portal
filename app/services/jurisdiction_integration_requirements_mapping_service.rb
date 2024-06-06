@@ -3,7 +3,46 @@ class JurisdictionIntegrationRequirementsMappingService
     @mapping = jurisdiction_integration_requirements_mapping
   end
 
-  def initialize_requirements_mapping
+  # Updates the requirements mapping of the jurisdiction integration requirements mapping instance.
+  # This method takes a simplified map of the requirements and updates the existing mapping accordingly.
+  # The simplified map should be a hash where each key is a requirement block SKU and the value is another hash.
+  # The inner hash should have requirement codes as keys and local system mapping as values.
+  # Note: mappings which does now exist in the original mapping will not be created.
+  # @param simplified_map [Hash] the simplified map of requirements
+  # @return [Boolean] true if the update was successful, false otherwise
+  def update_requirements_mapping(simplified_map)
+    return unless simplified_map.present? && simplified_map.is_a?(Hash)
+
+    updated_mapping = @mapping.requirements_mapping.deep_dup
+
+    updated_mapping.with_lock do
+      simplified_map.each do |requirement_block_sku, requirements|
+        next unless requirements.is_a?(Hash) && updated_mapping[requirement_block_sku].present?
+
+        requirements.each do |requirement_code, local_system_mapping|
+          next unless updated_mapping[requirement_block_sku]["requirements"][requirement_code].present?
+
+          updated_mapping[requirement_block_sku]["requirements"][requirement_code][
+            "local_system_mapping"
+          ] = local_system_mapping
+        end
+      end
+    end
+
+    @mapping.update(requirements_mapping: updated_mapping)
+  end
+
+  # Initializes the requirements mapping of the jurisdiction integration requirements mapping instance.
+  # This method is called when the requirements mapping is empty.
+  # It creates a new mapping based on the requirement blocks and requirements in the template version associated with the jurisdiction integration requirements mapping instance.
+  # For each requirement block in the template version, it creates a new entry in the mapping with the SKU of the requirement block as the key.
+  # For each requirement in the requirement block, it creates a new entry in the inner hash with the requirement code as the key.
+  # The value of the inner entry is another hash with the ID of the requirement and the local system mapping.
+  # The local system mapping is either copied from an existing mapping for the same requirement block SKU and requirement code, or it is an empty string if no such mapping exists.
+  # The new mapping is only created in memory and assigned to the requirements_mapping attribute of the jurisdiction integration requirements mapping instance.
+  # The changes are not persisted to the database.
+  # @return [void]
+  def initialize_requirements_mapping!
     return unless @mapping.requirements_mapping.empty?
 
     new_mappings = {}

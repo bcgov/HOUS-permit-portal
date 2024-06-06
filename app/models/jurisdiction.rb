@@ -163,7 +163,10 @@ class Jurisdiction < ApplicationRecord
     return unless external_api_enabled?
 
     relevant_template_versions =
-      TemplateVersion.published.or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
+      TemplateVersion
+        .published
+        .or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
+        .order(version_date: :asc)
 
     existing_mapping_template_ids = jurisdiction_integration_requirements_mappings.pluck(:template_version_id)
 
