@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_29_205744) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -236,6 +236,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_29_205744) do
             name: "index_permit_type_submission_contacts_on_jurisdiction_id"
     t.index ["permit_type_id"],
             name: "index_permit_type_submission_contacts_on_permit_type_id"
+  end
+
+  create_table "preferences",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.boolean "enable_in_app_new_template_version_publish_notification",
+              default: true
+    t.boolean "enable_email_new_template_version_publish_notification",
+              default: true
+    t.boolean "enable_in_app_customization_update_notification", default: true
+    t.boolean "enable_email_customization_update_notification", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
   create_table "requirement_blocks",
@@ -703,6 +719,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_29_205744) do
   add_foreign_key "permit_type_submission_contacts",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "preferences", "users"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates",
                   "permit_classifications",

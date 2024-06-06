@@ -1128,8 +1128,16 @@ const options = {
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
+          notifications: {
+            essential: "Essential communications (cannot disable)",
+            event: "Event",
+            enableNotification: "Enable notification",
+            templateChanged: "Changes to permit requirements",
+            templateCustomized: "Jurisdiction customizations to permit requirements",
+          },
+          inApp: "In-App",
+          email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
-
           roles: {
             submitter: "submitter",
             regional_review_manager: "regional review manager",
