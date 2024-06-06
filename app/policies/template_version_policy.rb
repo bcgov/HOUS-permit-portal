@@ -28,8 +28,7 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show_jurisdiction_integration_requirements_mapping?
-    user.super_admin? ||
-      ((user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id))
+    ((user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id))
   end
 
   def compare_requirements?

@@ -39,7 +39,10 @@ class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
       new_requirements_mapping =
         JurisdictionIntegrationRequirementsMappingService.new(self).get_updated_requirements_mapping(simplified_map)
 
-      unless new_requirements_mapping.blank? || self.requirements_mapping == new_requirements_mapping
+      # nothing to update, so returns true
+      return true if self.requirements_mapping == new_requirements_mapping
+
+      unless new_requirements_mapping.blank?
         self.simplified_map_to_sync = simplified_map unless skip_sync
         self.requirements_mapping = new_requirements_mapping
 

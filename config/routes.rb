@@ -92,6 +92,8 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :jurisdiction_integration_requirements_mappings, only: [:update]
+
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
