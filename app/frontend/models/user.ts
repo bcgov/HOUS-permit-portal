@@ -72,6 +72,9 @@ export const UserModel = types
         self.jurisdictions[0]
       )
     },
+    get shouldSeeApplicationDiff() {
+      return self.role == EUserRoles.submitter
+    },
   }))
   .actions((self) => ({
     destroy: flow(function* () {

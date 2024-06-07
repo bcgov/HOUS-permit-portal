@@ -244,6 +244,8 @@ export interface IPermitApplicationUpdate {
 
 export interface INotificationObjectData {
   templateVersionId?: string
+  previousTemplateVersionId?: string
+  requirementTemplateId?: string
   // Add future notification data here
 }
 

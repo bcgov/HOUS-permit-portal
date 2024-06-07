@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
@@ -39,6 +40,7 @@ interface IRequirementFormProps {
   formRef: any
   triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
   showHelpButton?: boolean
+  isEditing?: boolean
 }
 
 export const RequirementForm = observer(
@@ -48,6 +50,7 @@ export const RequirementForm = observer(
     formRef,
     triggerSave,
     showHelpButton = true,
+    isEditing = false,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -83,8 +86,11 @@ export const RequirementForm = observer(
 
     const infoBoxData = permitApplication.diffToInfoBoxData
 
+    const { userStore } = useMst()
+    const { currentUser } = userStore
+
     useEffect(() => {
-      if (!usesPublishedTemplateVersion) {
+      if (!usesPublishedTemplateVersion && isEditing) {
         permitApplication.fetchDiff()
       }
     }, [usesPublishedTemplateVersion])
@@ -269,7 +275,7 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? {} : { readOnly: true }),
+      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: true }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -277,7 +283,7 @@ export const RequirementForm = observer(
     }
 
     const handleUpdatePermitApplicationVersion = () => {
-      if (permitApplication.showCompareAfter) {
+      if (permitApplication.showingCompareAfter) {
         permitApplication.resetCompareAfter()
       } else {
         permitApplication.updateVersion()
@@ -313,12 +319,12 @@ export const RequirementForm = observer(
           )}
 
           <ErrorsBox data={errorBoxData} />
-          {(!usesPublishedTemplateVersion || permitApplication.showCompareAfter) &&
+          {permitApplication.shouldShowApplicationDiff(isEditing) &&
             (permitApplication.diff ? (
               <CompareRequirementsBox
                 data={infoBoxData}
                 handleUpdatePermitApplicationVersion={handleUpdatePermitApplicationVersion}
-                showCompareAfter={permitApplication.showCompareAfter}
+                showingCompareAfter={permitApplication.showingCompareAfter}
                 handleClickDismiss={() => {
                   permitApplication.resetDiff()
                 }}

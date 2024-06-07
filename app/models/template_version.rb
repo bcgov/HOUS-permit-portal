@@ -53,12 +53,18 @@ class TemplateVersion < ApplicationRecord
       "action_text" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
       "object_data" => {
         "template_version_id" => id,
+        "previous_template_version_id" => previous_version.id,
+        "requirement_template_id" => requirement_template_id,
       },
     }
   end
 
   def previous_version
     TemplateVersioningService.previous_published_version(self)
+  end
+
+  def latest_version
+    TemplateVersioningService.latest_published_version(self)
   end
 
   def compare_requirements(before_version)

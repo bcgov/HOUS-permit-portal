@@ -185,6 +185,7 @@ const options = {
           submit: "Submit",
           select: "Select",
           notAvailable: "Not available yet",
+          notApplicable: "Not applicable",
           isRequired: "{{field}} is required",
           notSupported: "Not supported",
           use: "Use",
@@ -1215,6 +1216,7 @@ const options = {
               updateToNewVersion: "See new",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
+            goToLatest: "Go to latest",
           },
           fields: {
             status: "Status",
@@ -1482,6 +1484,7 @@ const options = {
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
           breadcrumb: {
+            latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
             new: "Create new",
