@@ -167,7 +167,7 @@ const convertToRevisionButton = (requirement: IFormIORequirement) => {
     title: "Revision Button",
     input: true,
     action: "custom",
-    custom: `console.log("${requirement.key} says hello")`,
+    custom: `document.dispatchEvent(new CustomEvent('openRequestRevision', { detail: { key: '${requirement.key}' } } ));`,
     customClass: "revision-button",
     hideLabel: true,
     customConditional: requirement.customConditional,
@@ -194,4 +194,24 @@ export const combineRevisionButtons = (formJson: IFormJson) => {
     })
   })
   return formJson
+}
+
+export const getRequirementByKey = (formJson: IFormJson, requirementKey: string) => {
+  let foundRequirement: IFormIORequirement = null
+
+  traverseFormIORequirements(formJson, (requirement) => {
+    if (requirement.key === requirementKey) foundRequirement = requirement
+  })
+
+  return foundRequirement
+}
+
+export const traverseFormIORequirements = (formJson: IFormJson, callback: (requirement) => void) => {
+  formJson.components.forEach((section: IFormIOSection) => {
+    section.components.forEach((block: IFormIOBlock) => {
+      block.components.forEach((requirement: IFormIORequirement) => {
+        callback(requirement)
+      })
+    })
+  })
 }

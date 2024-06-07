@@ -322,7 +322,7 @@ class RequirementFormJsonService
 
     key = "#{requirement.key(requirement_block_key)}|multi_contact"
     {
-      label: "Multi Contact",
+      label: requirement.label,
       id: requirement.id,
       reorder: false,
       addAnother: I18n.t("formio.requirement.contact.add_person_button"),

@@ -12,6 +12,7 @@ import {
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
+  IRevisionRequest,
   ISubmissionData,
   ITemplateCustomization,
   ITemplateVersionDiff,
@@ -61,6 +62,7 @@ export const PermitApplicationModel = types
     showCompareAfter: types.optional(types.boolean, false),
     revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
+    stagedRevisionRequests: types.optional(types.array(types.frozen<IRevisionRequest>()), []),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -432,6 +434,23 @@ export const PermitApplicationModel = types
       }
       self.setSubmissionData(newData)
     },
+
+    stageRevisionRequest: (revisionRequest: IRevisionRequest) => {
+      self.stagedRevisionRequests.push(revisionRequest)
+    },
   }))
+
+export const reasonCodes = [
+  "non_compliant",
+  "conflicting_inaccurate",
+  "insufficient_detail",
+  "incorrect_format",
+  "missing_documentation",
+  "outdated",
+  "inapplicable",
+  "missing_signatures",
+  "incorrect_calculations",
+  "other",
+]
 
 export interface IPermitApplication extends Instance<typeof PermitApplicationModel> {}

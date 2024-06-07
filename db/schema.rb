@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_07_170547) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -323,6 +323,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
     t.boolean "elective", default: false
     t.index ["requirement_block_id"],
             name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "revision_requests",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.integer "reason_code"
+    t.jsonb "requirement_json"
+    t.string "comment", limit: 350
+    t.uuid "permit_application_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_application_id"],
+            name: "index_revision_requests_on_permit_application_id"
   end
 
   create_table "site_configurations",
@@ -728,6 +742,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "revision_requests", "permit_applications"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists", "step_codes"

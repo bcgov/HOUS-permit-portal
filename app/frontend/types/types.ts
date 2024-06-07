@@ -379,3 +379,10 @@ export interface ITemplateVersionDiff {
   removed: IRequirement[]
   changed: IRequirement[]
 }
+
+export interface IRevisionRequest {
+  label: string
+  requirementKey: string
+  reason: string
+  comment?: string
+}
