@@ -125,6 +125,12 @@ const JurisdictionEditDigitalPermitScreen = lazy(() =>
     default: module.JurisdictionEditDigitalPermitScreen,
   }))
 )
+const JurisdictionApiMappingsSetupIndexScreen = lazy(() =>
+  import("../requirement-template/screens/jurisdiction-api-mappings-setup-index-screen").then((module) => ({
+    default: module.JurisdictionApiMappingsSetupIndexScreen,
+  }))
+)
+
 const RequirementTemplatesScreen = lazy(() =>
   import("../requirement-template/screens/requirement-template-screen").then((module) => ({
     default: module.RequirementTemplatesScreen,
@@ -284,6 +290,10 @@ const AppRoutes = observer(() => {
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
+      <Route
+        path="/jurisdictions/:jurisdictionId/api-settings/api-mappings-setup"
+        element={<JurisdictionApiMappingsSetupIndexScreen />}
+      />
       <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
         <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
