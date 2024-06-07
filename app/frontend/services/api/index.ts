@@ -5,6 +5,7 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IJurisdictionIntegrationRequirementsMapping } from "../../models/jurisdiction-integration-requirements-mapping"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
@@ -15,6 +16,7 @@ import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import {
   IExternalApiKeyParams,
+  IJurisdictionIntegrationRequirementsMappingUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -340,6 +342,24 @@ export class Api {
   async fetchJurisdictionTemplateVersionCustomization(templateId: string, jurisdictionId: string) {
     return this.client.get<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`
+    )
+  }
+
+  async fetchJurisdictionIntegrationRequirementsMapping(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IJurisdictionIntegrationRequirementsMapping>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/integration_requirements_mapping`
+    )
+  }
+
+  async updateJurisdictionIntegrationRequirementsMapping(
+    id: string,
+    params: IJurisdictionIntegrationRequirementsMappingUpdateParams
+  ) {
+    return this.client.patch<ApiResponse<IJurisdictionIntegrationRequirementsMapping>>(
+      `/jurisdiction_integration_requirements_mappings/${id}`,
+      {
+        jurisdictionIntegrationRequirementsMapping: params,
+      }
     )
   }
 

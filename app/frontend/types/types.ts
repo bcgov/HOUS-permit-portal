@@ -227,6 +227,18 @@ export interface ITemplateCustomization {
   requirementBlockChanges?: Record<string, IRequirementBlockCustomization>
 }
 
+export interface IRequirementsMapping {
+  [requirementBlockSku: string]: {
+    id: string
+    requirements: {
+      [requirementSku: string]: {
+        id: string
+        localSystemMapping: string
+      }
+    }
+  }
+}
+
 export interface IDownloadableFile {
   fileUrl: string
   fileName: string
@@ -364,11 +376,13 @@ export type TAutoComplianceModuleConfigurations = {
 
 export type TAutoComplianceModuleConfiguration =
   TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
+
 export interface IJurisdictionFilters {
   name?: string
   type?: EJurisdictionTypes
   userId?: string
 }
+
 export interface IJurisdictionSearchFilters {
   submissionInboxSetUp?: boolean
 }
@@ -383,4 +397,12 @@ export interface ITemplateVersionDiff {
   added: IRequirement[]
   removed: IRequirement[]
   changed: IRequirement[]
+}
+
+type TLocalSystemMapping = string
+
+export interface ISimplifiedRequirementsMap {
+  [requirementBlockSku: string]: {
+    [requirementCode: string]: TLocalSystemMapping
+  }
 }

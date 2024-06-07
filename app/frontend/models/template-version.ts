@@ -7,6 +7,10 @@ import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
 import { IDenormalizedTemplate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
+import {
+  IJurisdictionIntegrationRequirementsMapping,
+  JurisdictionIntegrationRequirementsMappingModel,
+} from "./jurisdiction-integration-requirements-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
 export const TemplateVersionModel = types
@@ -20,6 +24,7 @@ export const TemplateVersionModel = types
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
+    integrationRequirementsMappingByJurisdiction: types.map(JurisdictionIntegrationRequirementsMappingModel),
     latestVersionId: types.maybeNull(types.string),
     isFullyLoaded: types.optional(types.boolean, false),
   })
@@ -40,6 +45,9 @@ export const TemplateVersionModel = types
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {
       return self.templateVersionCustomizationsByJurisdiction.get(jurisdictionId)
     },
+    getJurisdictionIntegrationRequirementsMapping(jurisdictionId: string) {
+      return self.integrationRequirementsMappingByJurisdiction.get(jurisdictionId)
+    },
     get deprecationReasonLabel() {
       if (!self.deprecationReason) {
         return ""
@@ -56,6 +64,12 @@ export const TemplateVersionModel = types
       customization: IJurisdictionTemplateVersionCustomizationForm
     ) {
       self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
+    },
+    setJurisdictionIntegrationRequirementsMapping(
+      jurisdictionId: string,
+      jurisdictionIntegrationRequirementsMapping: IJurisdictionIntegrationRequirementsMapping
+    ) {
+      self.integrationRequirementsMappingByJurisdiction.set(jurisdictionId, jurisdictionIntegrationRequirementsMapping)
     },
     setStatus(status: ETemplateVersionStatus) {
       self.status = status
@@ -81,6 +95,23 @@ export const TemplateVersionModel = types
       }
 
       return response
+    }),
+    fetchJurisdictionIntegrationRequirementsMapping: flow(function* (jurisdictionId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.fetchJurisdictionIntegrationRequirementsMapping(self.id, jurisdictionId)
+      )
+      if (!response.ok || !response.data?.data) {
+        return
+      }
+
+      const jurisdictionIntegrationRequirementsMapping = response.data.data
+
+      const mappingModel = JurisdictionIntegrationRequirementsMappingModel.create(
+        jurisdictionIntegrationRequirementsMapping
+      )
+      self.setJurisdictionIntegrationRequirementsMapping(jurisdictionId, mappingModel)
+
+      return self.getJurisdictionIntegrationRequirementsMapping(jurisdictionId)
     }),
     fetchTemplateVersionCompare: flow(function* (previousVersionId?: string) {
       const response = yield* toGenerator(self.environment.api.fetchTemplateVersionCompare(self.id, previousVersionId))
