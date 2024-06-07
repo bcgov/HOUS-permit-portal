@@ -852,6 +852,13 @@
     .fieldset-body label {
       border-bottom: 0;
       margin-bottom: 0px;
+      background-color: transparent !important;
+    }
+
+    .revision-requested legend,
+    .form-group.revision-requested > label {
+      border-color: var(--chakra-colors-semantic-error);
+      background-color: var(--chakra-colors-semantic-warningLight);
     }
   }
 }

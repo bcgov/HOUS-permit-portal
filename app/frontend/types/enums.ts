@@ -359,3 +359,16 @@ export enum ENotificationActionType {
   newTemplateVersionPublish = "new_template_version_publish",
   customizationUpdate = "customization_update",
 }
+
+export enum EReasonCode {
+  nonCompliant = 0,
+  conflictingInaccurate = 1,
+  insufficientDetail = 2,
+  incorrectFormat = 3,
+  missingDocumentation = 4,
+  outdated = 5,
+  inapplicable = 6,
+  missingSignatures = 7,
+  incorrectCalculations = 8,
+  other = 9,
+}

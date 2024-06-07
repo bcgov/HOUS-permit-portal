@@ -14,16 +14,17 @@ import {
 import { CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
-import { useController, useForm } from "react-hook-form"
+import { FormProvider, useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { IRevisionRequest } from "../../../types/types"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
-import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import { RequirementForm } from "../../shared/permit-applications/requirement-form/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
@@ -43,6 +44,22 @@ export const ReviewPermitApplicationScreen = observer(() => {
       referenceNumber: currentPermitApplication?.referenceNumber || "",
     },
   })
+
+  interface IRevisionRequestForm {
+    revisionRequests: IRevisionRequest[]
+  }
+
+  const revisionFormMethods = useForm<IRevisionRequestForm>({
+    defaultValues: {
+      revisionRequests: [] as IRevisionRequest[],
+    },
+  })
+
+  const { handleSubmit: revisionHandleSubmit } = revisionFormMethods
+
+  const onSubmitRevisions = (data: IRevisionRequestForm) => {
+    console.log(data)
+  }
 
   const {
     field: { value: referenceNumber, onChange: onReferenceNumberChange },
@@ -197,7 +214,11 @@ export const ReviewPermitApplicationScreen = observer(() => {
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         {revisionMode && !hideRevisionList ? (
-          <RevisionSideBar permitApplication={currentPermitApplication} />
+          <FormProvider {...revisionFormMethods}>
+            <form onSubmit={revisionHandleSubmit(onSubmitRevisions)}>
+              <RevisionSideBar permitApplication={currentPermitApplication} />
+            </form>
+          </FormProvider>
         ) : (
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         )}

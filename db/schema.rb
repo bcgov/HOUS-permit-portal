@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -688,6 +688,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
     t.string "unconfirmed_email"
     t.string "omniauth_email"
     t.string "omniauth_username"
+    t.uuid "jurisdiction_id"
+    t.string "nickname"
     t.index ["confirmation_token"],
             name: "index_users_on_confirmation_token",
             unique: true
@@ -698,6 +700,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
             unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
+    t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
     t.index %w[omniauth_provider omniauth_uid],
             name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true
@@ -756,4 +759,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
                   "end_user_license_agreements",
                   column: "agreement_id"
   add_foreign_key "user_license_agreements", "users"
+  add_foreign_key "users", "jurisdictions"
 end

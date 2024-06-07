@@ -15,6 +15,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EReasonCode,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -433,4 +434,10 @@ export type TChakraColor = keyof Theme["colors"]
 export interface ILinkData {
   text: string
   href: string
+}
+
+export interface IRevisionRequest {
+  reasonCode: EReasonCode
+  requirementJson: IFormIORequirement
+  comment: string
 }
