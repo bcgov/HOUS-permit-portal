@@ -1277,6 +1277,12 @@ const options = {
             downloadCustomizationJson: "Download Customizations JSON",
           },
         },
+        apiMappingsSetup: {
+          title: "API mappings setup",
+          index: {
+            helperSubtitle: "See details of how fields are mapped to the API.",
+          },
+        },
         digitalBuildingPermits: {
           index: {
             title: "Digital Building Permits",
@@ -1512,6 +1518,7 @@ const options = {
             reporting: "Reporting",
             exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
+            apiMappingsSetup: "API mappings setup",
           },
         },
         automatedCompliance: {

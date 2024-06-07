@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Heading, Link, StackProps, VStack } from "@chakra-ui/react"
+import { Box, ButtonGroup, Container, Flex, Heading, Link, StackProps, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -54,15 +54,28 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           <Box>
             <Heading as="h1">{currentJurisdiction?.qualifiedName}</Heading>
           </Box>
-          <RouterLinkButton
-            alignSelf={"flex-end"}
-            variant={"primary"}
-            to={"create"}
-            isDisabled={!externalApiEnabled}
-            onClick={disableLinkClick}
-          >
-            {t("externalApiKey.index.createExternalApiKey")}
-          </RouterLinkButton>
+          <ButtonGroup gap={4}>
+            {currentUser?.isManager && (
+              <RouterLinkButton
+                alignSelf={"flex-end"}
+                variant={"secondary"}
+                to={"api-mappings-setup"}
+                isDisabled={!externalApiEnabled}
+                onClick={disableLinkClick}
+              >
+                {t("apiMappingsSetup.title")}
+              </RouterLinkButton>
+            )}
+            <RouterLinkButton
+              alignSelf={"flex-end"}
+              variant={"primary"}
+              to={"create"}
+              isDisabled={!externalApiEnabled}
+              onClick={disableLinkClick}
+            >
+              {t("externalApiKey.index.createExternalApiKey")}
+            </RouterLinkButton>
+          </ButtonGroup>
         </Flex>
         {!externalApiEnabled && (currentUser.isReviewManager || currentUser.isRegionalReviewManager) && (
           <CalloutBanner
