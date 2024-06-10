@@ -59,7 +59,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
               <RouterLinkButton
                 alignSelf={"flex-end"}
                 variant={"secondary"}
-                to={"api-mappings-setup"}
+                to={"/api-settings/api-mappings"}
                 isDisabled={!externalApiEnabled}
                 onClick={disableLinkClick}
               >

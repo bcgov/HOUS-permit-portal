@@ -1301,6 +1301,11 @@ const options = {
           index: {
             helperSubtitle: "See details of how fields are mapped to the API.",
           },
+          edit: {
+            permitTemplate: "Permit template",
+            seeApiDoc: "See API documentation",
+            heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
+          },
         },
         digitalBuildingPermits: {
           index: {
@@ -1538,7 +1543,8 @@ const options = {
             reporting: "Reporting",
             exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
-            apiMappingsSetup: "API mappings setup",
+            apiMappings: "API mappings",
+            manageMapping: "Manage mapping",
           },
         },
         automatedCompliance: {

@@ -61,6 +61,11 @@ function isPermitApplicationEditPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isApiMappingPath(path: string): boolean {
+  const regex = /^\/api-settings\/api-mappings.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -69,6 +74,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationEditPath,
     isPermitApplicationPath,
     isDigitalPermitEditPath,
+    isApiMappingPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
