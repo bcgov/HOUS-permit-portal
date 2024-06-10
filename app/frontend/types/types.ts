@@ -246,6 +246,7 @@ export interface INotificationObjectData {
   templateVersionId?: string
   previousTemplateVersionId?: string
   requirementTemplateId?: string
+  recentPermitApplicationId?: string
   // Add future notification data here
 }
 

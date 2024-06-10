@@ -46,7 +46,7 @@ class TemplateVersion < ApplicationRecord
     json_requirements
   end
 
-  def publish_event_notification_data
+  def publish_event_notification_data(recent_permit_application = nil)
     {
       "id" => SecureRandom.uuid,
       "action_type" => Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
@@ -55,6 +55,7 @@ class TemplateVersion < ApplicationRecord
         "template_version_id" => id,
         "previous_template_version_id" => previous_version.id,
         "requirement_template_id" => requirement_template_id,
+        "recent_permit_application_id" => recent_permit_application&.id,
       },
     }
   end
