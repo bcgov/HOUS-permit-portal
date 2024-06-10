@@ -111,6 +111,15 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
   def get_coordinates_by_pid(pid)
     response = get_details_by_pid(pid: pid)
+    get_coordinates_from_ltsa_response(response)
+  end
+
+  def get_coordinates_by_pin(pin)
+    response = get_details_by_pin(pin: pin)
+    get_coordinates_from_ltsa_response(response)
+  end
+
+  def get_coordinates_from_ltsa_response(response)
     if response.success?
       #assumes there is one layer to these features at the moment
       # return(JSON.parse(response.body).dig("features", 0, "geometry", "rings", 0, 0))
@@ -137,6 +146,8 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
       target_factory = wkid_factory_lookup(4326) #default bc geo utilizes 4326
 
       transformed_centroid = RGeo::Feature.cast(centroid, factory: target_factory, project: true)
+
+      [transformed_centroid.x, transformed_centroid.y]
     else
       raise Errors::FeatureAttributesRetrievalError
     end
