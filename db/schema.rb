@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_11_171642) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -112,6 +112,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
     t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
   end
 
+  create_table "jurisdiction_template_required_steps",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "requirement_template_id", null: false
+    t.integer "energy_step_required"
+    t.integer "zero_carbon_step_required"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name:
+              "index_jurisdiction_template_required_steps_on_jurisdiction_id"
+    t.index ["requirement_template_id"],
+            name: "idx_on_requirement_template_id_b62f7ea082"
+  end
+
   create_table "jurisdiction_template_version_customizations",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -144,8 +161,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
     t.text "contact_summary_html"
     t.jsonb "map_position"
     t.string "prefix", null: false
-    t.integer "energy_step_required", default: 3
-    t.integer "zero_carbon_step_required", default: 1
     t.string "slug"
     t.integer "map_zoom"
     t.boolean "external_api_enabled", default: false
@@ -699,6 +714,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_04_183218) do
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
+  add_foreign_key "jurisdiction_template_required_steps", "jurisdictions"
+  add_foreign_key "jurisdiction_template_required_steps",
+                  "requirement_templates"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",

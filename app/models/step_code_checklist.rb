@@ -48,6 +48,7 @@ class StepCodeChecklist < ApplicationRecord
   end
 
   def energy_step_compliance
+    # STEP CODE NOTE:
     @energy_step_compliance ||= StepCode::Compliance::ProposeStep::Energy.new(checklist: self).call
   end
 

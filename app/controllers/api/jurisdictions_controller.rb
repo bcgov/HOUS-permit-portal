@@ -175,8 +175,9 @@ class Api::JurisdictionsController < Api::ApplicationController
       :checklist_html,
       :look_out_html,
       :contact_summary_html,
-      :energy_step_required,
-      :zero_carbon_step_required,
+      # TODO: replace jurisdiciton step code integers
+      # :energy_step_required,
+      # :zero_carbon_step_required,
       :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],

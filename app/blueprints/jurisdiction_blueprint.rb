@@ -17,8 +17,9 @@ class JurisdictionBlueprint < Blueprinter::Base
            :permit_applications_size,
            :map_position,
            :map_zoom,
-           :energy_step_required,
-           :zero_carbon_step_required,
+           # TODO: replace jurisdiciton step code integers
+           #  :energy_step_required,
+           #  :zero_carbon_step_required,
            :regional_district_name,
            :created_at,
            :updated_at,

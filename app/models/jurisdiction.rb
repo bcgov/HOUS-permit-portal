@@ -18,6 +18,7 @@ class Jurisdiction < ApplicationRecord
   has_many :requirement_templates, through: :template_versions
   has_many :permit_type_submission_contacts
   has_many :external_api_keys, dependent: :destroy
+  has_many :jurisdiction_template_required_steps, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -146,15 +147,25 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
-  def energy_step_required(activit = nil, permit_type = nil)
-    # TODO: Revisit this after per-type step code requirements implemented
-    self[:energy_step_required]
+  def jurisdiction_template_required_steps_by_classification(activity = nil, permit_type = nil)
+    return JurisdictionTemplateRequiredStep.none unless activity && permit_type
+
+    requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type, discarded_at: nil)
+
+    return JurisdictionTemplateRequiredStep.none unless requirement_template
+
+    jurisdiction_template_required_steps.where(requirement_template: requirement_template)
   end
 
-  def zero_carbon_step_required(activity = nil, permit_type = nil)
-    # TODO: Revisit this after per-type step code requirements implemented
-    self[:zero_carbon_step_required]
-  end
+  # def energy_steps_required(activity = nil, permit_type = nil)
+  #   # TODO: Revisit this after per-type step code requirements implemented
+  #   self[:energy_step_required]
+  # end
+
+  # def zero_carbon_steps_required(activity = nil, permit_type = nil)
+  #   # TODO: Revisit this after per-type step code requirements implemented
+  #   self[:zero_carbon_step_required]
+  # end
 
   private
 
