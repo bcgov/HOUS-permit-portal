@@ -1,9 +1,9 @@
-class JurisdictionIntegrationRequirementsMappingService
-  def initialize(jurisdiction_integration_requirements_mapping)
-    @mapping = jurisdiction_integration_requirements_mapping
+class IntegrationMappingService
+  def initialize(integration_mapping)
+    @mapping = integration_mapping
   end
 
-  # Returns an new requirements mapping hash for the jurisdiction_integration_requirements_mapping instance.
+  # Returns an new requirements mapping hash for the integration_mapping instance.
   # This method takes a simplified map of the requirements and returns an updated requirements mapping hash.
   # The simplified map should be a hash where each key is a requirement block SKU and the value is another hash.
   # The inner hash should have requirement codes as keys and local system mapping as values.
@@ -84,7 +84,7 @@ class JurisdictionIntegrationRequirementsMappingService
   # @param requirement_block_sku [String] the sku of the requirement block
   # @param requirement_code [String] the code of the requirement
   #
-  # @return [JurisdictionIntegrationRequirementsMapping] the copyable record with existing mapping
+  # @return [IntegrationMapping] the copyable record with existing mapping
 
   def copyable_record_with_existing_mapping(requirement_block_sku, requirement_code)
     records_with_existing_mapping = fetch_records_with_existing_mapping(requirement_block_sku, requirement_code)
@@ -96,7 +96,7 @@ class JurisdictionIntegrationRequirementsMappingService
   private
 
   def fetch_records_with_existing_mapping(requirement_block_sku, requirement_code)
-    JurisdictionIntegrationRequirementsMapping
+    IntegrationMapping
       .joins(:template_version)
       .where(jurisdiction: @mapping.jurisdiction)
       .where.not(id: @mapping.id)

@@ -4,7 +4,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   before_action :set_jurisdiction_template_version_customization,
                 only: %i[
                   show_jurisdiction_template_version_customization
-                  show_jurisdiction_integration_requirements_mapping
+                  show_integration_mapping
                   download_customization_csv
                   download_customization_json
                 ]
@@ -61,20 +61,17 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
-  def show_jurisdiction_integration_requirements_mapping
+  def show_integration_mapping
     authorize @template_version, :show?
 
-    @jurisdiction_integration_requirements_mapping =
-      @template_version.jurisdiction_integration_requirements_mappings.find_by(
-        jurisdiction_id: params[:jurisdiction_id],
-      )
+    @integration_mapping = @template_version.integration_mappings.find_by(jurisdiction_id: params[:jurisdiction_id])
 
-    authorize @jurisdiction_integration_requirements_mapping, policy_class: TemplateVersionPolicy
+    authorize @integration_mapping, policy_class: TemplateVersionPolicy
 
-    if @jurisdiction_integration_requirements_mapping.present?
-      render_success @jurisdiction_integration_requirements_mapping
+    if @integration_mapping.present?
+      render_success @integration_mapping
     else
-      render_error "jurisdiction_integration_requirements_mapping.not_found_error", status: 404
+      render_error "integration_mapping.not_found_error", status: 404
     end
   end
 
