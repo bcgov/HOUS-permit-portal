@@ -214,8 +214,8 @@ if PermitApplication.first.blank?
     PermitApplication.create!(
       submitter: submitters.sample,
       jurisdiction: north_van,
-      activity: activity1,
-      permit_type: permit_type1,
+      activity_id: template_version.activity.id,
+      permit_type_id: template_version.permit_type.id,
       full_address: full_address,
       template_version: template_version,
       pid: pid,

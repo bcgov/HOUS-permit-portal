@@ -91,28 +91,34 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def force_publish_now
     authorize @requirement_template
 
+    success = false
+    error_message = ""
+
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
-        render_error "requirement_template.force_publish_now_error",
-                     message_opts: {
-                       error_message: @requirement_template.errors.full_messages.join(", "),
-                     }
+        error_message = @requirement_template.errors.full_messages.join(", ")
+        raise ActiveRecord::Rollback
       end
 
       begin
         published_template_version = TemplateVersioningService.force_publish_now!(@requirement_template)
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
-        render_error "requirement_template.force_publish_now_error", message_opts: { error_message: e.message }
+        error_message = e.message
         raise ActiveRecord::Rollback
       end
 
       # A reload is required, otherwise the new template version is not ordered correctly
       @requirement_template.reload
+      success = true
+    end
 
+    if success
       render_success @requirement_template,
                      "requirement_template.force_publish_now_success",
                      { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "requirement_template.force_publish_now_error", message_opts: { error_message: error_message }
     end
   end
 

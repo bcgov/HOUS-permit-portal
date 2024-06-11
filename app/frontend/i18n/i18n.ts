@@ -453,6 +453,7 @@ const options = {
             downloadZip: "Download attached files",
             downloadForm: "Download application form",
             downloadStepCode: "Download step code checklist",
+            backToInbox: "Back to inbox",
           },
         },
         requirementsLibrary: {
