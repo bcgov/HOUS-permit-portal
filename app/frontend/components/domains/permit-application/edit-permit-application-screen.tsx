@@ -129,6 +129,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       // need to update the computed compliance result
       // even if value is null, as that indicates autocompliance ran
       // but result wasn't found
+
       updateComputedComplianceResult(componentToSet, value)
     }
   }
