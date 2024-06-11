@@ -384,3 +384,10 @@ export interface ITemplateVersionDiff {
   removed: IRequirement[]
   changed: IRequirement[]
 }
+
+export interface IJurisdictionTemplateRequiredStep {
+  requirementTemplateId: string
+  requirementTemplateLabel: string
+  energyStepRequired: number
+  zeroCarbonStepRequired: number
+}
