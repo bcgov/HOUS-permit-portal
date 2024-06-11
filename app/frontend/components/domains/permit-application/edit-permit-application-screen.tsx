@@ -296,6 +296,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
               showHelpButton
+              isEditing
             />
           </Flex>
         )}

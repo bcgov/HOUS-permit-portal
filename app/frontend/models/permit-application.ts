@@ -58,7 +58,7 @@ export const PermitApplicationModel = types
     isFullyLoaded: types.optional(types.boolean, false),
     isDirty: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
-    showCompareAfter: types.optional(types.boolean, false),
+    showingCompareAfter: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
   })
   .extend(withEnvironment())
@@ -134,11 +134,14 @@ export const PermitApplicationModel = types
       self.isDirty = true
     },
     resetDiff() {
-      self.showCompareAfter = false
+      self.showingCompareAfter = false
       self.diff = null
     },
   }))
   .views((self) => ({
+    shouldShowApplicationDiff(isEditing: boolean) {
+      return isEditing && (!self.usesPublishedTemplateVersion || self.showingCompareAfter)
+    },
     get formDiffKey() {
       return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
     },
@@ -331,7 +334,7 @@ export const PermitApplicationModel = types
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
       self.diff = retainedDiff
-      self.showCompareAfter = true
+      self.showingCompareAfter = true
       self.isLoading = false
       return response
     }),
@@ -358,7 +361,7 @@ export const PermitApplicationModel = types
     },
 
     resetCompareAfter: () => {
-      self.showCompareAfter = false
+      self.showingCompareAfter = false
     },
 
     updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {

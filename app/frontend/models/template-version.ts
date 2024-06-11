@@ -20,6 +20,7 @@ export const TemplateVersionModel = types
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
+    latestVersionId: types.maybeNull(types.string),
     isFullyLoaded: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())

@@ -34,7 +34,9 @@ export const NotificationStoreModel = types
           return `/digital-building-permits/${notification.objectData.templateVersionId}/edit?compare=true`
         }
         if (currentUser.isSubmitter) {
-          return "/"
+          return notification.objectData.recentPermitApplicationId
+            ? `/permit-applications/${notification.objectData.recentPermitApplicationId}/edit`
+            : "/"
         }
 
         return "/permit-applications"
