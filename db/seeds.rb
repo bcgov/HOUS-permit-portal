@@ -162,6 +162,8 @@ if PermitApplication.first.blank?
 
   RequirementTemplate.reindex
 
+  JurisdictionTemplateRequiredStepSeeder.seed
+
   # Requrements from seeder are idempotent
   # Requirments block will get created from requiremetms templates
   puts "Seeding requirements..."

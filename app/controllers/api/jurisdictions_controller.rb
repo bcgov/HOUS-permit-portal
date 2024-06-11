@@ -175,8 +175,6 @@ class Api::JurisdictionsController < Api::ApplicationController
       :checklist_html,
       :look_out_html,
       :contact_summary_html,
-      :energy_step_required,
-      :zero_carbon_step_required,
       :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
@@ -190,7 +188,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   end
 
   def set_jurisdiction
-    @jurisdiction = Jurisdiction.friendly.find(params[:id])
+    @jurisdiction = Jurisdiction.includes(Jurisdiction::BASE_INCLUDES).friendly.find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
   end

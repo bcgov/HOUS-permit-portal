@@ -385,29 +385,55 @@ interface IStepCodeTableProps {
 
 const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) => {
   const { t } = useTranslation()
-
+  const requiredStepsByTemplate = currentJurisdiction.requiredStepsByTemplate
   return (
     <TableContainer>
       <Table variant="simple">
         <Thead>
           <Tr>
-            <Th textAlign="center">{t("jurisdiction.edit.stepCode.permitTemplate")}</Th>
+            <Th textAlign="left">{t("jurisdiction.edit.stepCode.permitTemplate")}</Th>
             <Th textAlign="center">{t("jurisdiction.edit.stepCode.energyStepRequired")}</Th>
             <Th textAlign="center"></Th>
-            <Th textAlign="center">{t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}</Th>
+            <Th textAlign="right">{t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}</Th>
           </Tr>
         </Thead>
         <Tbody>
-          <Tr>
-            <Td textAlign="center" fontWeight="bold">
-              {t("ui.all")}
-            </Td>
-            <Td textAlign="center">{currentJurisdiction.energyStepRequired}</Td>
-            <Td textAlign="center" textTransform="lowercase" fontStyle="italic">
-              {t("ui.and")}
-            </Td>
-            <Td textAlign="center">{currentJurisdiction.zeroCarbonLevelTranslation}</Td>
-          </Tr>
+          {Object.keys(requiredStepsByTemplate).map((templateId) => {
+            return (
+              <>
+                {requiredStepsByTemplate[templateId].map((jtrs, i) => (
+                  <>
+                    <Tr>
+                      <Td textAlign="left" fontWeight="bold">
+                        {jtrs.requirementTemplateLabel}
+                      </Td>
+                      <Td textAlign="center">
+                        {currentJurisdiction.energyStepRequiredTranslation(jtrs.energyStepRequired)}
+                      </Td>
+                      <Td textAlign="center" textTransform="lowercase" fontStyle="italic">
+                        {t("ui.and")}
+                      </Td>
+                      <Td textAlign="right">
+                        {currentJurisdiction.zeroCarbonLevelTranslation(jtrs.zeroCarbonStepRequired)}
+                      </Td>
+                    </Tr>
+                    {i !== requiredStepsByTemplate[templateId].length - 1 && (
+                      <Tr>
+                        <Td colSpan={4}>
+                          <Center>{t("ui.or")}</Center>
+                        </Td>
+                      </Tr>
+                    )}
+                  </>
+                ))}
+                <Tr>
+                  <Td colSpan={4}>
+                    <Box borderTop="2px" borderColor="greys.grey02" />
+                  </Td>
+                </Tr>
+              </>
+            )
+          })}
         </Tbody>
       </Table>
     </TableContainer>

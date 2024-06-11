@@ -429,3 +429,10 @@ export interface ILinkData {
   text: string
   href: string
 }
+
+export interface IJurisdictionTemplateRequiredStep {
+  requirementTemplateId: string
+  requirementTemplateLabel: string
+  energyStepRequired: number
+  zeroCarbonStepRequired: number
+}
