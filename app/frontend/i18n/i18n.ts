@@ -1082,8 +1082,7 @@ const options = {
           fetchOptions: "Something went wrong fetching options",
           fetchJurisdictionTemplateVersionCustomization:
             "Something went wrong fetching jurisdiction template version customization",
-          fetchJurisdictionIntegrationRequirementsMapping:
-            "Something went wrong fetching jurisdiction integration requirements mapping",
+          fetchIntegrationMapping: "Something went wrong fetching jurisdiction integration requirements mapping",
         },
         user: {
           fields: {

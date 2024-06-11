@@ -68,6 +68,6 @@ export interface IExternalApiKeyParams {
   jurisdictionId?: string
 }
 
-export interface IJurisdictionIntegrationRequirementsMappingUpdateParams {
+export interface IIntegrationMappingUpdateParams {
   simplifiedMap?: ISimplifiedRequirementsMap
 }

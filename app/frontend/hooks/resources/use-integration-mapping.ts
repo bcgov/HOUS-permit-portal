@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { IJurisdictionIntegrationRequirementsMapping } from "../../models/jurisdiction-integration-requirements-mapping"
+import { IIntegrationMapping } from "../../models/integration-mapping"
 import { ITemplateVersion } from "../../models/template-version"
 
 interface IOptions {
@@ -18,40 +18,38 @@ interface IOptions {
  * @param {string | undefined} options.customErrorMessage - Custom error message to be used when an error occurs (optional).
  *
  * @returns {Object} - The jurisdiction integration requirements mapping and any error that occurred during fetching.
- * @returns {IJurisdictionIntegrationRequirementsMapping | undefined} jurisdictionIntegrationRequirementsMapping - The jurisdiction
+ * @returns {IIntegrationMapping | undefined} integrationMapping - The jurisdiction
  * integration requirements mapping MST model instance.
  * @returns {Error | undefined} error - Any error that occurred during fetching.
  *
  * @example
- * const { jurisdictionIntegrationRequirementsMapping, error } = useJurisdictionIntegrationRequirementsMapping({
+ * const { integrationMapping, error } = useIntegrationMapping({
  *   templateVersion: someTemplateVersion,
  *   jurisdictionId: '123',
  *   customErrorMessage: 'An error occurred while fetching the jurisdiction integration requirements mapping.',
  * });
  */
 
-export const useJurisdictionIntegrationRequirementsMapping = ({
+export const useIntegrationMapping = ({
   templateVersion,
   jurisdictionId,
   customErrorMessage,
 }: IOptions): {
   error?: Error
-  jurisdictionIntegrationRequirementsMapping?: IJurisdictionIntegrationRequirementsMapping
+  integrationMapping?: IIntegrationMapping
 } => {
-  const jurisdictionIntegrationRequirementsMapping =
-    templateVersion?.getJurisdictionIntegrationRequirementsMapping(jurisdictionId)
+  const integrationMapping = templateVersion?.getIntegrationMapping(jurisdictionId)
   const [error, setError] = useState<Error | undefined>(undefined)
   const { t } = useTranslation()
-  const errorMessage = customErrorMessage ?? t("errors.fetchJurisdictionIntegrationRequirementsMapping")
+  const errorMessage = customErrorMessage ?? t("errors.fetchIntegrationMapping")
 
   useEffect(() => {
     if (jurisdictionId && templateVersion) {
       ;(async () => {
         try {
-          const integrationRequirementsMapping =
-            await templateVersion.fetchJurisdictionIntegrationRequirementsMapping(jurisdictionId)
+          const integrationMapping = await templateVersion.fetchIntegrationMapping(jurisdictionId)
 
-          if (!integrationRequirementsMapping) {
+          if (!integrationMapping) {
             setError(new Error(errorMessage))
           }
         } catch (e) {
@@ -61,5 +59,5 @@ export const useJurisdictionIntegrationRequirementsMapping = ({
     }
   }, [templateVersion?.id, jurisdictionId])
 
-  return { jurisdictionIntegrationRequirementsMapping, error }
+  return { integrationMapping, error }
 }

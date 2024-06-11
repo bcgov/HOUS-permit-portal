@@ -5,12 +5,9 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../components/dom
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
-import { IDenormalizedTemplate } from "../types/types"
+import { IDenormalizedRequirementBlock, IDenormalizedTemplate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
-import {
-  IJurisdictionIntegrationRequirementsMapping,
-  JurisdictionIntegrationRequirementsMappingModel,
-} from "./jurisdiction-integration-requirements-mapping"
+import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
 
 export const TemplateVersionModel = types
@@ -23,8 +20,9 @@ export const TemplateVersionModel = types
     label: types.string,
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
+    requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
-    integrationRequirementsMappingByJurisdiction: types.map(JurisdictionIntegrationRequirementsMappingModel),
+    integrationMappingByJurisdiction: types.map(IntegrationMappingModel),
     latestVersionId: types.maybeNull(types.string),
     isFullyLoaded: types.optional(types.boolean, false),
   })
@@ -45,8 +43,8 @@ export const TemplateVersionModel = types
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {
       return self.templateVersionCustomizationsByJurisdiction.get(jurisdictionId)
     },
-    getJurisdictionIntegrationRequirementsMapping(jurisdictionId: string) {
-      return self.integrationRequirementsMappingByJurisdiction.get(jurisdictionId)
+    getIntegrationMapping(jurisdictionId: string) {
+      return self.integrationMappingByJurisdiction.get(jurisdictionId)
     },
     get deprecationReasonLabel() {
       if (!self.deprecationReason) {
@@ -57,6 +55,9 @@ export const TemplateVersionModel = types
         `requirementTemplate.versionSidebar.deprecationReasonLabels.${self.deprecationReason as EDeprecationReason}`
       )
     },
+    getRequirementBlockJsonById(id: string) {
+      return self.requirementBlocksJson?.[id]
+    },
   }))
   .actions((self) => ({
     setJurisdictionTemplateVersionCustomization(
@@ -65,11 +66,8 @@ export const TemplateVersionModel = types
     ) {
       self.templateVersionCustomizationsByJurisdiction.set(jurisdictionId, customization)
     },
-    setJurisdictionIntegrationRequirementsMapping(
-      jurisdictionId: string,
-      jurisdictionIntegrationRequirementsMapping: IJurisdictionIntegrationRequirementsMapping
-    ) {
-      self.integrationRequirementsMappingByJurisdiction.set(jurisdictionId, jurisdictionIntegrationRequirementsMapping)
+    setIntegrationMapping(jurisdictionId: string, integrationMapping: IIntegrationMapping) {
+      self.integrationMappingByJurisdiction.set(jurisdictionId, integrationMapping)
     },
     setStatus(status: ETemplateVersionStatus) {
       self.status = status
@@ -96,22 +94,18 @@ export const TemplateVersionModel = types
 
       return response
     }),
-    fetchJurisdictionIntegrationRequirementsMapping: flow(function* (jurisdictionId: string) {
-      const response = yield* toGenerator(
-        self.environment.api.fetchJurisdictionIntegrationRequirementsMapping(self.id, jurisdictionId)
-      )
+    fetchIntegrationMapping: flow(function* (jurisdictionId: string) {
+      const response = yield* toGenerator(self.environment.api.fetchIntegrationMapping(self.id, jurisdictionId))
       if (!response.ok || !response.data?.data) {
         return
       }
 
-      const jurisdictionIntegrationRequirementsMapping = response.data.data
+      const integrationMapping = response.data.data
 
-      const mappingModel = JurisdictionIntegrationRequirementsMappingModel.create(
-        jurisdictionIntegrationRequirementsMapping
-      )
-      self.setJurisdictionIntegrationRequirementsMapping(jurisdictionId, mappingModel)
+      const mappingModel = IntegrationMappingModel.create(integrationMapping)
+      self.setIntegrationMapping(jurisdictionId, mappingModel)
 
-      return self.getJurisdictionIntegrationRequirementsMapping(jurisdictionId)
+      return self.getIntegrationMapping(jurisdictionId)
     }),
     fetchTemplateVersionCompare: flow(function* (previousVersionId?: string) {
       const response = yield* toGenerator(self.environment.api.fetchTemplateVersionCompare(self.id, previousVersionId))

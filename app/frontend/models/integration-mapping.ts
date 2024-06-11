@@ -3,10 +3,10 @@ import { Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { IRequirementsMapping, ISimplifiedRequirementsMap } from "../types/types"
 
-export const JurisdictionIntegrationRequirementsMappingModel = types
-  .model("JurisdictionIntegrationRequirementsMappingModel")
+export const IntegrationMappingModel = types
+  .model("IntegrationMappingModel")
   .props({
-    // this needs to be string as the JurisdictionIntegrationRequirementsMappingModel needs to be stored in
+    // this needs to be string as the IntegrationMappingModel needs to be stored in
     // a map where the key is not it's own id
     id: types.string,
     jurisdictionId: types.string,
@@ -22,7 +22,7 @@ export const JurisdictionIntegrationRequirementsMappingModel = types
   .actions((self) => ({
     updateRequirementsMapping: flow(function* (simplifiedRequirementsMapping: ISimplifiedRequirementsMap) {
       const response = yield* toGenerator(
-        self.environment.api.updateJurisdictionIntegrationRequirementsMapping(self.id, {
+        self.environment.api.updateIntegrationMapping(self.id, {
           simplifiedMap: simplifiedRequirementsMapping,
         })
       )
@@ -31,14 +31,12 @@ export const JurisdictionIntegrationRequirementsMappingModel = types
         return false
       }
 
-      const jurisdictionIntegrationRequirementsMapping = response.data
-        .data as IJurisdictionIntegrationRequirementsMapping
+      const integrationMapping = response.data.data as IIntegrationMapping
 
-      self.setRequirementsMapping(jurisdictionIntegrationRequirementsMapping.requirementsMapping)
+      self.setRequirementsMapping(integrationMapping.requirementsMapping)
 
       return true
     }),
   }))
 
-export interface IJurisdictionIntegrationRequirementsMapping
-  extends Instance<typeof JurisdictionIntegrationRequirementsMappingModel> {}
+export interface IIntegrationMapping extends Instance<typeof IntegrationMappingModel> {}

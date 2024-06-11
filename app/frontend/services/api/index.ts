@@ -4,8 +4,8 @@ import { TCreateRequirementTemplateFormData } from "../../components/domains/req
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
-import { IJurisdictionIntegrationRequirementsMapping } from "../../models/jurisdiction-integration-requirements-mapping"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
@@ -16,7 +16,7 @@ import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import {
   IExternalApiKeyParams,
-  IJurisdictionIntegrationRequirementsMappingUpdateParams,
+  IIntegrationMappingUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -345,22 +345,16 @@ export class Api {
     )
   }
 
-  async fetchJurisdictionIntegrationRequirementsMapping(templateId: string, jurisdictionId: string) {
-    return this.client.get<ApiResponse<IJurisdictionIntegrationRequirementsMapping>>(
-      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/integration_requirements_mapping`
+  async fetchIntegrationMapping(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IIntegrationMapping>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/integration_mapping`
     )
   }
 
-  async updateJurisdictionIntegrationRequirementsMapping(
-    id: string,
-    params: IJurisdictionIntegrationRequirementsMappingUpdateParams
-  ) {
-    return this.client.patch<ApiResponse<IJurisdictionIntegrationRequirementsMapping>>(
-      `/jurisdiction_integration_requirements_mappings/${id}`,
-      {
-        jurisdictionIntegrationRequirementsMapping: params,
-      }
-    )
+  async updateIntegrationMapping(id: string, params: IIntegrationMappingUpdateParams) {
+    return this.client.patch<ApiResponse<IIntegrationMapping>>(`/integration_mappings/${id}`, {
+      integrationMapping: params,
+    })
   }
 
   async createOrUpdateJurisdictionTemplateVersionCustomization(
