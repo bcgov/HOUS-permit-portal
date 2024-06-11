@@ -1,4 +1,5 @@
 import { Instance, flow, types } from "mobx-state-tree"
+import { isNil } from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 
@@ -39,6 +40,17 @@ export const GeocoderStoreModel = types
       if (response.ok) {
         self.rootStore.jurisdictionStore.addJurisdiction(responseData)
         return responseData
+      }
+    }),
+    fetchPinVerification: flow(function* (pin: string) {
+      self.fetchingPids = true
+      const response: any = yield self.environment.api.fetchPin(pin)
+      if (response.ok && !isNil(response?.data?.pin)) {
+        self.fetchingPids = false
+        return true
+      } else {
+        self.fetchingPids = false
+        return false
       }
     }),
   }))

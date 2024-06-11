@@ -54,6 +54,16 @@ class Api::GeocoderController < Api::ApplicationController
     end
   end
 
+  def pin
+    authorize :geocoder, :pin?
+    begin
+      attributes = Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(pin: pin_params[:pin], pid: nil)
+      render json: { pin: attributes }, status: :ok
+    rescue StandardError => e
+      render_error "geocoder.ltsa_unavailable_error", {}, e and return
+    end
+  end
+
   private
 
   def handle_ltsa_unavailable(exception)
@@ -62,5 +72,9 @@ class Api::GeocoderController < Api::ApplicationController
 
   def geocoder_params
     params.permit(:address, :site_id, :pid)
+  end
+
+  def pin_params
+    params.permit(:pin)
   end
 end

@@ -108,6 +108,7 @@ Rails.application.routes.draw do
       get "site_options", on: :collection
       get "pids", on: :collection
       get "jurisdiction", on: :collection
+      get "pin", on: :collection
     end
 
     resources :permit_applications, only: %i[create update show] do

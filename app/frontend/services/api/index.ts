@@ -300,6 +300,10 @@ export class Api {
     return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
   }
 
+  async fetchPin(pin: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pin`, { pin })
+  }
+
   async destroyRequirementTemplate(id) {
     return this.client.delete<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}`)
   }

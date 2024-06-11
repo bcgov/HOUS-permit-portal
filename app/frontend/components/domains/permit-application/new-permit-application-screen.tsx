@@ -61,7 +61,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const { handleSubmit, formState, control, watch, register, setValue } = formMethods
   const { isSubmitting } = formState
   const { permitClassificationStore, permitApplicationStore, geocoderStore } = useMst()
-  const { fetchGeocodedJurisdiction } = geocoderStore
+  const { fetchGeocodedJurisdiction, fetchingPids } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions } = permitClassificationStore
   const navigate = useNavigate()
 
@@ -139,7 +139,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     )
                   }}
                 />
-                {pinMode && <PinModeInputs />}
+                {pinMode && <PinModeInputs disabled={fetchingPids} />}
               </Flex>
               {jurisdictionWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={2}>
@@ -182,11 +182,27 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   )
 })
 
-export const PinModeInputs = () => {
+export const PinModeInputs = ({ disabled }) => {
   const { register, control, setValue } = useFormContext()
-  const { jurisdictionStore } = useMst()
+  const { jurisdictionStore, geocoderStore } = useMst()
   const { addJurisdiction } = jurisdictionStore
+  const { fetchPinVerification } = geocoderStore
   const { t } = useTranslation()
+
+  const [pinValid, setPinValid] = useState<"unchecked" | "valid" | "invalid">("unchecked")
+  //upon inputing pin and losing focus, we should call pin validation
+  const handleBlur = async (e) => {
+    if (R.isEmpty(e?.target?.value)) {
+      setPinValid("unchecked")
+    } else {
+      try {
+        const verified = await fetchPinVerification(e?.target?.value)
+        verified ? setPinValid("valid") : setPinValid("invalid")
+      } catch (e) {
+        setPinValid("invalid")
+      }
+    }
+  }
 
   return (
     <Flex direction="column" bg="greys.grey03" px={6} py={2} gap={4}>
@@ -194,7 +210,9 @@ export const PinModeInputs = () => {
       <Flex gap={4}>
         <FormControl>
           <FormLabel>{t("permitApplication.fields.pin")}</FormLabel>
-          <Input {...register("pin")} bg="greys.white" />
+          <Input {...register("pin")} onBlur={handleBlur} bg="greys.white" disabled={disabled} />
+          {pinValid == "valid" && <Text key={"valid"}>{t("permitApplication.new.pinVerified")}</Text>}
+          {pinValid == "invalid" && <Text key={"invalid"}>{t("permitApplication.new.pinUnableToVerify")}</Text>}
         </FormControl>
 
         <Controller
