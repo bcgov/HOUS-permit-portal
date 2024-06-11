@@ -1304,6 +1304,14 @@ const options = {
             permitTemplate: "Permit template",
             seeApiDoc: "See API documentation",
             heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
+            table: {
+              title: "API mappings",
+              headers: {
+                localField: "Your local field name",
+                templateField: "Map to <1>requirement code</1> in template",
+                requirementDetail: "Field in template",
+              },
+            },
           },
         },
         digitalBuildingPermits: {

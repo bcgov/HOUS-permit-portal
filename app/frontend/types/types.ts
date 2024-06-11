@@ -146,11 +146,13 @@ export interface IDenormalizedRequirement {
   hint?: string | null
   elective?: boolean
   required?: boolean
+  requirementCode: string
 }
 
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  sku: string
   formJson?: IFormIOBlock
   description?: string
   displayName: string
