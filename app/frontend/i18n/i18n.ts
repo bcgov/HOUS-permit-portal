@@ -780,6 +780,7 @@ const options = {
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "0": "N/A",
                   "3": "3",
                   "4": "4",
                   "5": "5",
@@ -790,6 +791,7 @@ const options = {
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "0": "N/A",
                   "1": "EL 1",
                   "2": "EL 2",
                   "3": "EL 3",
@@ -1045,6 +1047,7 @@ const options = {
                 energy: {
                   title: "Energy Step required",
                   options: {
+                    "0": "N/A",
                     "3": "3",
                     "4": "4",
                     "5": "5",
@@ -1053,6 +1056,7 @@ const options = {
                 zeroCarbon: {
                   title: "Zero Carbon Step Code Level required",
                   options: {
+                    "0": "N/A",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",
                     "3": "EL 3 - Strong",

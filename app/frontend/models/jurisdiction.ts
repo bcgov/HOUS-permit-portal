@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { IContact, IJurisdictionTemplateRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 
@@ -36,10 +36,9 @@ export const JurisdictionModel = types
     boundryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
     mapZoom: types.maybeNull(types.number),
-    energyStepRequired: types.maybeNull(types.number),
-    zeroCarbonStepRequired: types.maybeNull(types.number),
     externalApiEnabled: types.optional(types.boolean, false),
     submissionInboxSetUp: types.boolean,
+    jurisdictionTemplateRequiredSteps: types.array(types.frozen<IJurisdictionTemplateRequiredStep>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -56,16 +55,37 @@ export const JurisdictionModel = types
 
       return sortByCreatedAt(self.contacts)[0]
     },
+    get requiredStepsByTemplate() {
+      return self.jurisdictionTemplateRequiredSteps.reduce((result, jtrs) => {
+        const templateId = jtrs.requirementTemplateId
+
+        // If the category doesn't exist in the result object, create an array for it
+        if (!result[templateId]) {
+          result[templateId] = []
+        }
+
+        // Push the current item to the appropriate category array
+        result[templateId].push(jtrs)
+
+        // Return the result object for the next iteration
+        return result
+      }, {})
+    },
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
     },
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)
     },
-    get zeroCarbonLevelTranslation() {
+    energyStepRequiredTranslation(energyStepRequired: number) {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
       // @ts-ignore
-      return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${self.zeroCarbonStepRequired}`)
+      return t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
+    },
+    zeroCarbonLevelTranslation(zeroCarbonStepRequired: number) {
+      const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
+      // @ts-ignore
+      return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
     },
   }))
   .actions((self) => ({

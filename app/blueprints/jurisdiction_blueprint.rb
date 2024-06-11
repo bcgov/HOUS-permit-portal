@@ -17,8 +17,6 @@ class JurisdictionBlueprint < Blueprinter::Base
            :permit_applications_size,
            :map_position,
            :map_zoom,
-           :energy_step_required,
-           :zero_carbon_step_required,
            :regional_district_name,
            :created_at,
            :updated_at,
@@ -27,6 +25,7 @@ class JurisdictionBlueprint < Blueprinter::Base
 
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
+    association :jurisdiction_template_required_steps, blueprint: JurisdictionTemplateRequiredStepBlueprint
   end
 
   view :minimal do

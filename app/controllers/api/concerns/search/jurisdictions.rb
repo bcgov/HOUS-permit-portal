@@ -19,7 +19,7 @@ module Api::Concerns::Search::Jurisdictions
     # Conditionally add the `where` clause
     search_params[:where] = jurisdiction_where_clause unless jurisdiction_where_clause.nil?
 
-    @search = Jurisdiction.search(jurisdiction_query, **search_params)
+    @search = Jurisdiction.includes(Jurisdiction::BASE_INCLUDES).search(jurisdiction_query, **search_params)
   end
 
   private
