@@ -20,6 +20,8 @@ import { useTranslation } from "react-i18next"
 
 interface IControlsProps {
   CustomEditableControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
+  CustomEditModeControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
+  CustomPreviewModeControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
   saveButtonProps?: Partial<ButtonProps> & { textContent?: string }
   cancelButtonProps?: Partial<ButtonProps> & { textContent?: string }
   iconButtonProps?: Partial<IconButtonProps>
@@ -35,6 +37,8 @@ export interface IEditableInputWithControlsProps extends EditableProps {
 
 function EditableControls({
   CustomEditableControls,
+  CustomPreviewModeControls,
+  CustomEditModeControls,
   saveButtonProps = {},
   cancelButtonProps = {},
   iconButtonProps,
@@ -49,15 +53,23 @@ function EditableControls({
     return <CustomEditableControls {...editableControls} />
   }
 
-  return isEditing ? (
-    <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
-      <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
-        {saveTextContent}
-      </Button>
-      <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
-        {cancelTextContent}
-      </Button>
-    </ButtonGroup>
+  if (isEditing) {
+    return CustomEditModeControls ? (
+      <CustomEditModeControls {...editableControls} />
+    ) : (
+      <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
+        <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
+          {saveTextContent}
+        </Button>
+        <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
+          {cancelTextContent}
+        </Button>
+      </ButtonGroup>
+    )
+  }
+
+  return CustomPreviewModeControls ? (
+    <CustomPreviewModeControls {...editableControls} />
   ) : (
     <IconButton
       ml={1}

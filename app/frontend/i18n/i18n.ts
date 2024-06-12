@@ -1311,6 +1311,10 @@ const options = {
                 templateField: "Map to <1>requirement code</1> in template",
                 requirementDetail: "Field in template",
               },
+              localFieldEdit: {
+                addMapping: "Add local mapping",
+                addMappingLabel: "Local mapping",
+              },
             },
           },
         },

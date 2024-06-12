@@ -229,18 +229,6 @@ export interface ITemplateCustomization {
   requirementBlockChanges?: Record<string, IRequirementBlockCustomization>
 }
 
-export interface IRequirementsMapping {
-  [requirementBlockSku: string]: {
-    id: string
-    requirements: {
-      [requirementSku: string]: {
-        id: string
-        localSystemMapping: string
-      }
-    }
-  }
-}
-
 export interface IDownloadableFile {
   fileUrl: string
   fileName: string
@@ -401,10 +389,15 @@ export interface ITemplateVersionDiff {
   changed: IRequirement[]
 }
 
-type TLocalSystemMapping = string
+export type TLocalSystemMapping = string
 
 export interface ISimplifiedRequirementsMap {
   [requirementBlockSku: string]: {
     [requirementCode: string]: TLocalSystemMapping
   }
+}
+
+export interface IRequirementMap {
+  id: string
+  local_system_mapping?: TLocalSystemMapping
 }

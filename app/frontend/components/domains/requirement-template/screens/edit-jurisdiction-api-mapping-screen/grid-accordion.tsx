@@ -5,22 +5,31 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
+  Button,
+  ButtonGroup,
+  IconButton,
   Stack,
   Text,
   UseAccordionProps,
 } from "@chakra-ui/react"
+import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import pluck from "ramda/src/pluck"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
+import { useController, useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { IRequirementBlockMapping } from "../../../../../models/requirement-block-mapping"
 import { ITemplateVersion } from "../../../../../models/template-version"
-import { IRequirementsMapping } from "../../../../../types/types"
+import { IRequirementMap, ISimplifiedRequirementsMap } from "../../../../../types/types"
 import { isStepCodePackageFileRequirementCode } from "../../../../../utils/utility-functions"
+import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
 import { RequirementFieldDisplay } from "../../../requirements-library/requirement-field-display"
 
 interface IProps {
-  requirementBlockMapping: IRequirementsMapping[keyof IRequirementsMapping]
+  requirementBlockMapping: IRequirementBlockMapping
   templateVersion: ITemplateVersion
+  onSaveLocalMapping: (simplifiedRequirementsMapping: ISimplifiedRequirementsMap) => Promise<void | boolean>
 }
 
 const searchGridItemProps = {
@@ -30,10 +39,21 @@ const searchGridItemProps = {
   borderColor: "border.light",
   fontSize: "sm",
 }
-export const GridAccordion = observer(function GridAccordion({ requirementBlockMapping, templateVersion }: IProps) {
+
+interface IMappingForm {
+  localSystemMapping?: string
+}
+
+export const GridAccordion = observer(function GridAccordion({
+  requirementBlockMapping,
+  templateVersion,
+  onSaveLocalMapping,
+}: IProps) {
+  const { t } = useTranslation()
   const [expandedIndex, setExpandedIndex] = useState(0)
   const requirementBlockJson = templateVersion.getRequirementBlockJsonById(requirementBlockMapping.id)
   const isExpanded = expandedIndex === 0
+
   return (
     <Box display={"contents"}>
       <Accordion
@@ -74,10 +94,17 @@ export const GridAccordion = observer(function GridAccordion({ requirementBlockM
               return (
                 <Box key={requirementJson.id} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                    {requirementBlockMapping?.requirements?.[requirementJson.requirementCode]?.localSystemMapping}
+                    <EditableLocalSystemMapping
+                      requirementMapping={requirementBlockMapping.requirements.get(requirementJson.requirementCode)}
+                      onSave={async (localSystemMapping) =>
+                        onSaveLocalMapping({
+                          [requirementBlockJson.sku]: { [requirementJson.requirementCode]: localSystemMapping },
+                        })
+                      }
+                    />
                   </SearchGridItem>
                   <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                    {requirementJson.requirementCode}
+                    <Text maxW={"full"}>{requirementJson.requirementCode}</Text>
                   </SearchGridItem>
                   <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
                     <Stack color={"text.secondary"}>
@@ -111,5 +138,69 @@ export const GridAccordion = observer(function GridAccordion({ requirementBlockM
         </AccordionItem>
       </Accordion>
     </Box>
+  )
+})
+
+const EditableLocalSystemMapping = observer(function EditableLocalSystemMapping({
+  requirementMapping,
+  onSave,
+}: {
+  requirementMapping: IRequirementMap
+  onSave: (localSystemMapping: string) => Promise<void | boolean>
+}) {
+  const { t } = useTranslation()
+  const modelLocalSystemMapping = requirementMapping?.local_system_mapping
+  const { handleSubmit, control, reset } = useForm<IMappingForm>({
+    defaultValues: { localSystemMapping: modelLocalSystemMapping },
+  })
+
+  const {
+    field: { value, onChange },
+    formState: { isSubmitting, isSubmitted },
+  } = useController({ control, name: "localSystemMapping" })
+
+  const onSubmit = handleSubmit(async (data) => onSave(data.localSystemMapping?.trim()))
+
+  const resetToModelValue = () => {
+    reset({ localSystemMapping: modelLocalSystemMapping })
+  }
+
+  useEffect(() => {
+    if (modelLocalSystemMapping === value) {
+      return
+    }
+
+    resetToModelValue()
+  }, [modelLocalSystemMapping])
+
+  useEffect(() => {
+    if (isSubmitted && modelLocalSystemMapping !== value) {
+      resetToModelValue()
+    }
+  }, [isSubmitted, modelLocalSystemMapping])
+
+  return (
+    <EditableInputWithControls
+      controlsProps={{
+        CustomEditModeControls: ({ getSubmitButtonProps, getCancelButtonProps }) => (
+          <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4} isDisabled={isSubmitting}>
+            <Button {...getSubmitButtonProps()} variant={"primary"} isLoading={isSubmitting}>
+              {t("ui.onlySave")}
+            </Button>
+            <IconButton variant={"ghost"} icon={<X />} aria-label={t("ui.cancel")} {...getCancelButtonProps()} />
+          </ButtonGroup>
+        ),
+        iconButtonProps: { isDisabled: isSubmitting, isLoading: isSubmitting },
+      }}
+      initialHint={t("apiMappingsSetup.edit.table.localFieldEdit.addMapping")}
+      w={"full"}
+      editablePreviewProps={{ maxW: "full", flex: 1 }}
+      value={value}
+      onChange={onChange}
+      onCancel={() => resetToModelValue()}
+      onSubmit={(_) => onSubmit()}
+      submitOnBlur={false}
+      isDisabled={isSubmitting}
+    />
   )
 })

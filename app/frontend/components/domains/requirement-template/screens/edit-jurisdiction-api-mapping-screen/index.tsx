@@ -1,4 +1,4 @@
-import { Box, Flex } from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -62,10 +62,15 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
   return (
-    <Box as="main" id="jurisdiction-edit-permit-template">
+    <Flex flexDir={"column"} alignItems={"center"} as="main" id="jurisdiction-edit-permit-template">
       <Header templateVersion={templateVersion} />
 
-      <SearchGrid templateColumns="repeat(2, 1fr) 3fr" pos={"relative"}>
+      <SearchGrid
+        maxW={"1320px"}
+        w={"full"}
+        templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)"
+        pos={"relative"}
+      >
         <GridHeaders />
 
         {!integrationMapping ? (
@@ -73,17 +78,18 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
             <SharedSpinner />
           </Flex>
         ) : (
-          Object.values(integrationMapping.requirementsMapping).map((requirementBlockMapping) => {
+          Array.from(integrationMapping.requirementsMapping.values()).map((requirementBlockMapping) => {
             return (
               <GridAccordion
                 key={requirementBlockMapping.id}
                 requirementBlockMapping={requirementBlockMapping}
                 templateVersion={templateVersion}
+                onSaveLocalMapping={integrationMapping.updateRequirementsMapping}
               />
             )
           })
         )}
       </SearchGrid>
-    </Box>
+    </Flex>
   )
 })
