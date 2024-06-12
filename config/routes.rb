@@ -18,7 +18,8 @@ Rails.application.routes.draw do
   end
 
   mount Sidekiq::Web => "/sidekiq"
-
+  mount Rswag::Ui::Engine => "/integrations/api_docs"
+  mount Rswag::Api::Engine => "/integrations/api_docs"
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", :as => :rails_health_check
@@ -131,6 +132,7 @@ Rails.application.routes.draw do
 
     resources :step_codes, only: %i[index create destroy], shallow: true do
       resources :step_code_checklists, only: %i[index show update]
+      get "download_step_code_summary_csv", on: :collection, to: "step_codes#download_step_code_summary_csv"
     end
 
     post "tags/search", to: "tags#index", as: :tags_search
@@ -151,8 +153,10 @@ Rails.application.routes.draw do
   end
 
   scope module: :external_api, path: :external_api do
-    resources :permit_applications, only: %i[show] do
-      post "search", on: :collection, to: "permit_applications#index"
+    namespace :v1 do
+      resources :permit_applications, only: %i[show] do
+        post "search", on: :collection, to: "permit_applications#index"
+      end
     end
   end
 

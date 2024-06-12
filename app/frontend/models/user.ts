@@ -27,6 +27,7 @@ export const UserModel = types
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
     invitedByEmail: types.maybeNull(types.string),
+    preference: types.frozen<IPreference>(),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -39,6 +40,9 @@ export const UserModel = types
     },
     get isReviewManager() {
       return self.role == EUserRoles.reviewManager
+    },
+    get isManager() {
+      return self.role == EUserRoles.regionalReviewManager || self.role == EUserRoles.reviewManager
     },
     get isReviewer() {
       return self.role == EUserRoles.reviewer
@@ -67,6 +71,9 @@ export const UserModel = types
         self.jurisdictions.find((j) => j.id == self.rootStore.uiStore.currentlySelectedJurisdictionId) ||
         self.jurisdictions[0]
       )
+    },
+    get shouldSeeApplicationDiff() {
+      return self.role == EUserRoles.submitter
     },
   }))
   .actions((self) => ({
@@ -111,3 +118,10 @@ export const UserModel = types
   }))
 
 export interface IUser extends Instance<typeof UserModel> {}
+
+export interface IPreference {
+  enableInAppNewTemplateVersionPublishNotification: boolean
+  enableEmailNewTemplateVersionPublishNotification: boolean
+  enableInAppCustomizationUpdateNotification: boolean
+  enableEmailCustomizationUpdateNotification: boolean
+}

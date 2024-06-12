@@ -66,14 +66,14 @@ export interface IOption<TValue = string> {
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
 
-export type TSearchParams<IModelSortFields> = {
+export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   sort?: ISort<IModelSortFields>
   query?: string
   page?: number
   perPage?: number
   showArchived?: boolean
   statusFilter?: string
-}
+} & IModelFilterFields
 
 export type TComputedCompliance = {
   module: EAutoComplianceModule
@@ -244,6 +244,9 @@ export interface IPermitApplicationUpdate {
 
 export interface INotificationObjectData {
   templateVersionId?: string
+  previousTemplateVersionId?: string
+  requirementTemplateId?: string
+  recentPermitApplicationId?: string
   // Add future notification data here
 }
 
@@ -364,6 +367,9 @@ export interface IJurisdictionFilters {
   name?: string
   type?: EJurisdictionTypes
   userId?: string
+}
+export interface IJurisdictionSearchFilters {
+  submissionInboxSetUp?: boolean
 }
 
 export interface ITemplateVersionDiff {

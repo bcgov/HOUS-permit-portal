@@ -3,7 +3,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   def index?
     if user.super_admin? || record.submitter == user
       true
-    elsif user.review_manager? || user.reviewer?
+    elsif user.review_staff?
       user.jurisdictions.find(record.jurisdiction.id).present?
     end
   end
@@ -17,11 +17,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def mark_as_viewed?
-    user.review_manager? || user.reviewer?
+    user.review_staff?
   end
 
   def update?
-    record.draft? ? record.submitter == user : (user.review_manager? || user.reviewer?)
+    record.draft? ? record.submitter == user : user.review_staff?
   end
 
   def update_version?

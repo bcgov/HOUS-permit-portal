@@ -70,7 +70,7 @@ export function CalloutBanner({ type, title, body, ...rest }: IProps) {
           <Text fontSize={"md"} fontWeight={700}>
             {title}
           </Text>
-          <Text>{body}</Text>
+          {typeof body === "string" ? <Text>{body}</Text> : body}
         </Stack>
       ) : (
         <Text>{title}</Text>

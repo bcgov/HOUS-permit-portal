@@ -2,7 +2,7 @@ import { Box, Container, Flex, Heading, Link, StackProps, VStack } from "@chakra
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { Outlet } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
@@ -77,6 +77,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
             }
           />
         )}
+
         <SearchGrid templateColumns="repeat(6, 1fr) 85px" pos={"relative"}>
           <GridHeaders />
 
@@ -117,6 +118,27 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
           )}
         </SearchGrid>
       </VStack>
+      <CalloutBanner
+        type={"info"}
+        title={t("externalApiKey.index.apiKeyInfo.title")}
+        body={
+          <Trans
+            i18nKey={"externalApiKey.index.apiKeyInfo.body"}
+            components={{
+              1: (
+                <Link
+                  style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
+                  href={"/integrations/api_docs"}
+                  target={"_blank"}
+                  rel="noopener noreferrer"
+                >
+                  Access the API Documentation
+                </Link>
+              ),
+            }}
+          />
+        }
+      />
     </Container>
   )
 })

@@ -74,6 +74,9 @@ gem "rdoc", ">= 6.6.3.1"
 gem "rack", ">= 3.0.9.1"
 gem "uppy-s3_multipart", "~> 1.2"
 gem "simple-feed", "~> 3.1.2"
+# For external api docs
+gem "rswag-api", "~> 2.13"
+gem "rswag-ui", "~> 2.13"
 
 # brew install geos
 # bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
@@ -86,6 +89,7 @@ group :development, :test do
   gem "debug", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
   gem "rspec-rails", "~> 6.1.0"
+  gem "rswag-specs", "~> 2.13"
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"

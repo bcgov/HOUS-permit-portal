@@ -6,8 +6,6 @@ class Jurisdiction < ApplicationRecord
   searchkick searchable: %i[name reverse_qualified_name qualified_name],
              word_start: %i[name reverse_qualified_name qualified_name],
              text_start: %i[name reverse_qualified_name qualified_name]
-  #  word_middle: %i[reverse_qualified_name qualified_name],
-  #  word_end: %i[reverse_qualified_name qualified_name]
 
   # Associations
   has_many :permit_applications
@@ -92,6 +90,7 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
+      submission_inbox_set_up: submission_inbox_set_up,
     }
   end
 
@@ -127,6 +126,14 @@ class Jurisdiction < ApplicationRecord
     permit_applications.unviewed
   end
 
+  def submission_inbox_set_up
+    # preload all of the permit_types and contacts for efficiency
+    permit_types = PermitType.all.to_a
+    contacts = permit_type_submission_contacts.where.not(email: nil).where.not(confirmed_at: nil).to_a
+
+    permit_types.all? { |permit_type| contacts.any? { |contact| contact.permit_type_id == permit_type.id } }
+  end
+
   def self.class_for_locality_type(locality_type)
     if locality_type == RegionalDistrict.locality_type
       RegionalDistrict
@@ -137,6 +144,16 @@ class Jurisdiction < ApplicationRecord
 
   def active_external_api_keys
     external_api_keys.active
+  end
+
+  def energy_step_required(activit = nil, permit_type = nil)
+    # TODO: Revisit this after per-type step code requirements implemented
+    self[:energy_step_required]
+  end
+
+  def zero_carbon_step_required(activity = nil, permit_type = nil)
+    # TODO: Revisit this after per-type step code requirements implemented
+    self[:zero_carbon_step_required]
   end
 
   private

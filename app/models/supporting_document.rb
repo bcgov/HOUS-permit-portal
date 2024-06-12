@@ -72,6 +72,10 @@ class SupportingDocument < ApplicationRecord
     file_data.dig("metadata", "filename")
   end
 
+  def file_type
+    file_data.dig("metadata", "mime_type")
+  end
+
   def file_url
     file&.url(
       public: false,

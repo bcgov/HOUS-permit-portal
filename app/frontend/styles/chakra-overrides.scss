@@ -69,3 +69,7 @@
 #sections-sidebar-reordering + #editing-permit-requirements-form {
   display: none;
 }
+
+.chakra-popover__popper {
+  z-index: 20 !important;
+}

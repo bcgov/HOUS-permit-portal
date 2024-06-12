@@ -30,6 +30,8 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
   has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
+  has_one :preference, dependent: :destroy
+  accepts_nested_attributes_for :preference
 
   # Validations
   validate :jurisdiction_must_belong_to_correct_roles
@@ -39,6 +41,7 @@ class User < ApplicationRecord
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
+  before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -106,6 +109,17 @@ class User < ApplicationRecord
   end
 
   private
+
+  def create_default_preference
+    return unless preference.blank?
+
+    build_preference(
+      enable_in_app_new_template_version_publish_notification: true,
+      enable_email_new_template_version_publish_notification: true,
+      enable_in_app_customization_update_notification: true,
+      enable_email_customization_update_notification: true,
+    ).save
+  end
 
   def reindex_jurisdiction_user_size
     return unless jurisdictions.any?

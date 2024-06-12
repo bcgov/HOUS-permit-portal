@@ -5,6 +5,7 @@ class TemplateVersion < ApplicationRecord
 
   has_many :jurisdiction_template_version_customizations
   has_many :permit_applications
+  has_many :submitters, through: :permit_applications
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
@@ -45,19 +46,26 @@ class TemplateVersion < ApplicationRecord
     json_requirements
   end
 
-  def publish_event_notification_data
+  def publish_event_notification_data(recent_permit_application = nil)
     {
       "id" => SecureRandom.uuid,
       "action_type" => Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
       "action_text" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
       "object_data" => {
         "template_version_id" => id,
+        "previous_template_version_id" => previous_version.id,
+        "requirement_template_id" => requirement_template_id,
+        "recent_permit_application_id" => recent_permit_application&.id,
       },
     }
   end
 
   def previous_version
     TemplateVersioningService.previous_published_version(self)
+  end
+
+  def latest_version
+    TemplateVersioningService.latest_published_version(self)
   end
 
   def compare_requirements(before_version)

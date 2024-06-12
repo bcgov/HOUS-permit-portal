@@ -27,8 +27,7 @@ const options = {
             heading: "Which BCeID should I use?",
             basic: {
               title: "Basic BCeID",
-              description:
-                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              description: "Use when accessing a service in a personal capacity.",
               homeownerAgent: "homeowner, agent",
               architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
               register: "Register for Basic BCeID",
@@ -74,7 +73,7 @@ const options = {
           bestPractices: "Standardized requirements across participating jurisdictions",
           easyToFollow: "Easy to follow instructions to help you submit a building permit application",
           accessMyPermits: "Access my building permits",
-          accessExplanation: "Use your BCeID account to log or register for the Building Permit Hub.",
+          accessExplanation: "Use your BCeID account to log in or register for the Building Permit Hub.",
           whoForTitle: "Who is this for?",
           whoFor: [
             "I want to build housing",
@@ -123,6 +122,7 @@ const options = {
           adminPanel: "admin panel",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
+          andMore: "...and more",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the New construction checklist for 1 - 4 Dwelling Units",
@@ -185,11 +185,13 @@ const options = {
           submit: "Submit",
           select: "Select",
           notAvailable: "Not available yet",
+          notApplicable: "Not applicable",
           isRequired: "{{field}} is required",
           notSupported: "Not supported",
           use: "Use",
           publish: "Publish",
           neverMind: "Never mind",
+          open: "Open",
           download: "Download",
           expandAll: "Expand all",
           collapseAll: "Collapse all",
@@ -304,6 +306,7 @@ const options = {
             templatesUsed: "Templates used",
             mapPosition: "Map position",
             regionalDistrictName: "Regional district",
+            submissionInboxSetUp: "Accepting submissions",
           },
           submissionEmailConfirmed: {
             heading: "Email confirmed!",
@@ -312,6 +315,7 @@ const options = {
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
+          notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
           checklist: "Checklist",
           lookOut: "Things to look out for",
           startApplication: "Start a permit application",
@@ -451,6 +455,7 @@ const options = {
             downloadZip: "Download attached files",
             downloadForm: "Download application form",
             downloadStepCode: "Download step code checklist",
+            backToInbox: "Back to inbox",
           },
         },
         requirementsLibrary: {
@@ -1126,8 +1131,16 @@ const options = {
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
+          notifications: {
+            essential: "Essential communications (cannot disable)",
+            event: "Event",
+            enableNotification: "Enable notification",
+            templateChanged: "Changes to permit requirements",
+            templateCustomized: "Jurisdiction customizations to permit requirements",
+          },
+          inApp: "In-App",
+          email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
-
           roles: {
             submitter: "submitter",
             regional_review_manager: "regional review manager",
@@ -1206,6 +1219,7 @@ const options = {
               updateToNewVersion: "See new",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
+            goToLatest: "Go to latest",
           },
           fields: {
             status: "Status",
@@ -1343,12 +1357,19 @@ const options = {
         reporting: {
           title: "Reporting",
           tableHeading: "Available reports",
-          open: "Open",
           filterPlaceholder: "Filter reports by name",
-          templateSummaryName: "Template summary",
-          templateSummaryDescription: "A summary of template usage by jurisdictions",
-          exportTemplateSummary: {
+          stepCodeSummaryName: "Step code summary",
+          stepCodeSummaryDescription: "Step code summary",
+          templateSummary: {
+            name: "Template summary",
+            description: "A summary of template usage by jurisdictions",
             title: "Export Template Summary",
+          },
+          stepCodeSummary: {
+            name: "Step code summary",
+            description: "A summary of step code requirements by jurisdictions",
+            title: "Export Step Code Summary",
+            filename: "Step Code Summary",
           },
           columnHeaders: {
             name: "Name",
@@ -1362,6 +1383,10 @@ const options = {
             disabled: "Disabled",
             table: {
               heading: "API keys",
+            },
+            apiKeyInfo: {
+              title: "Generate API Keys for Third-Party Integrators",
+              body: "Use this screen to generate API keys for third-party integrations. For technical details on using the API, refer to our documentation site.<1>Access the API Documentation</1> Share the above link with developers or technical team members needing detailed integration information.",
             },
             disabledWarningTitle:
               "API keys for this jurisdiction have not been enabled. To enable them, please contact" + " us at",
@@ -1462,6 +1487,7 @@ const options = {
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
           breadcrumb: {
+            latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
             new: "Create new",

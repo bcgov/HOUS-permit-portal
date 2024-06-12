@@ -1,43 +1,47 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Input,
-  Menu,
-  MenuButton,
-  MenuList,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, Input, Menu, MenuButton, MenuList, VStack } from "@chakra-ui/react"
 import { FileCsv } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
-import { ManageMenuItem } from "../../../shared/base/manage-menu-item"
+import { ManageMenuItem, ManageMenuItemButton } from "../../../shared/base/manage-menu-item"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { GridHeaders } from "./grid-header"
 
 export const ReportingScreen = observer(() => {
   const { t } = useTranslation()
-  const {} = useMst()
+  const { stepCodeStore } = useMst()
+  const { downloadStepCodeSummary } = stepCodeStore
 
   const [filter, setFilter] = useState("")
 
-  interface IReport {
+  interface IReportBase {
     name: string
     description: string
-    href: string
   }
 
-  const reportTypes: IReport[] = [
+  interface IReportWithHref extends IReportBase {
+    href: string
+    onClick?: never
+  }
+
+  interface IReportWithOnClick extends IReportBase {
+    href?: never
+    onClick: () => any
+  }
+
+  type TReport = IReportWithHref | IReportWithOnClick
+  const reportTypes: TReport[] = [
     {
-      name: t("reporting.templateSummaryName"),
-      description: t("reporting.templateSummaryDescription"),
+      name: t("reporting.templateSummary.name"),
+      description: t("reporting.templateSummary.description"),
       href: "export-template-summary",
+    },
+    {
+      name: t("reporting.stepCodeSummary.name"),
+      description: t("reporting.stepCodeSummary.description"),
+      onClick: downloadStepCodeSummary,
     },
   ]
 
@@ -79,9 +83,15 @@ export const ReportingScreen = observer(() => {
                         {t("ui.manage")}
                       </MenuButton>
                       <MenuList>
-                        <ManageMenuItem icon={<FileCsv size={24} />} to={reportType.href}>
-                          <Text as={"span"}>{t("reporting.open")}</Text>
-                        </ManageMenuItem>
+                        {reportType.onClick ? (
+                          <ManageMenuItemButton leftIcon={<FileCsv size={24} />} onClick={reportType.onClick}>
+                            {t("ui.download")}
+                          </ManageMenuItemButton>
+                        ) : (
+                          <ManageMenuItem icon={<FileCsv size={24} />} to={reportType.href}>
+                            {t("ui.open")}
+                          </ManageMenuItem>
+                        )}
                       </MenuList>
                     </Menu>
                   }

@@ -21,20 +21,27 @@ class NotificationService
     }
   end
 
-  def self.publish_to_user_feeds(notification_data, user_ids_to_publish_to)
-    activity = SimpleFeed.user_feed.activity(user_ids_to_publish_to)
+  def self.publish_to_user_feeds(notification_user_hash)
+    # Please provide a notification_user_hash where the keys are the users to send to
+    # and the values are the user specific notification data
+
+    user_ids_to_publish_to = notification_user_hash.keys
 
     # send this to the redis store
-    activity.store(event: SimpleFeed::Event.new(notification_data.to_json, Time.now))
-
     # push to specific users
     # we need to calculate page metadata for each user individually
     payloads = {}
     user_ids_to_publish_to.each do |user_id|
+      # Create a new event for each user with their respective notification_data
+      event = SimpleFeed::Event.new(notification_user_hash[user_id].to_json, Time.now)
+
+      # Get the user's feed and store the event
+      activity = SimpleFeed.user_feed.activity(user_id)
+      activity.store(event: event)
       payloads[user_id] = {
         domain: Constants::SocketTypes::Domain::NOTIFICATION,
         event_type: Constants::SocketTypes::Event::NEW,
-        data: notification_data,
+        data: notification_user_hash[user_id],
         meta: {
           total_pages:
             total_page_count(
@@ -50,38 +57,71 @@ class NotificationService
   end
 
   def self.publish_new_template_version_publish_event(template_version)
-    review_manager_ids = User.review_manager.pluck(:id)
-    relevant_submitter_ids =
+    manager_ids =
+      User
+        .joins(:preference)
+        .where(role: %i[review_manager regional_review_manager])
+        .where(users: { preferences: { enable_in_app_new_template_version_publish_notification: true } })
+        .pluck(:id)
+
+    relevant_permit_applications =
       PermitApplication
+        .select("DISTINCT ON (submitter_id) permit_applications.*")
         .joins(:template_version)
+        .joins(submitter: :preference)
         .where(
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
           status: "draft",
+          users: {
+            preferences: {
+              enable_in_app_new_template_version_publish_notification: true,
+            },
+          },
         )
-        .pluck(:submitter_id)
+        .order("submitter_id, updated_at DESC")
 
-    NotificationPushJob.perform_async(
-      template_version.publish_event_notification_data,
-      review_manager_ids + relevant_submitter_ids,
-    )
+    notification_submitter_hash =
+      relevant_permit_applications.each_with_object({}) do |permit_application, hash|
+        submitter_id = permit_application.submitter_id
+        hash[submitter_id] = template_version.publish_event_notification_data(permit_application)
+      end
+
+    notification_manager_hash =
+      manager_ids.each_with_object({}) do |manager_id, hash|
+        hash[manager_id] = template_version.publish_event_notification_data
+      end
+
+    NotificationPushJob.perform_async({ **notification_manager_hash, **notification_submitter_hash })
   end
 
-  def self.publish_customization_create_update_event(customization)
+  def self.publish_customization_update_event(customization)
     template_version = customization.template_version
     relevant_submitter_ids =
       PermitApplication
         .joins(:template_version)
+        .joins(submitter: :preference)
         .where(
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
           status: "draft",
+          users: {
+            preferences: {
+              enable_in_app_customization_update_notification: true,
+            },
+          },
         )
         .pluck(:submitter_id)
+        .uniq
 
-    NotificationPushJob.perform_async(customization.create_update_event_notification_data, relevant_submitter_ids)
+    notification_user_hash =
+      relevant_submitter_ids.each_with_object({}) do |submitter_id, hash|
+        hash[submitter_id] = customization.update_event_notification_data
+      end
+
+    NotificationPushJob.perform_async(notification_user_hash)
   end
 
   private
@@ -90,7 +130,7 @@ class NotificationService
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object
   def self.activity_metadata(user_id, activity_obj, method)
-    metadata = activity_obj.send(method).result
+    metadata = activity_obj.send(method)
     metadata.is_a?(Hash) ? metadata[user_id] : metadata
   end
 end

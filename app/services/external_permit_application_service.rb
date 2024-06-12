@@ -81,6 +81,8 @@ class ExternalPermitApplicationService
         formatted_value =
           if submitted_field_key.to_s.ends_with?("multi_contact")
             get_formatted_multi_contact_submission_value(submitted_value)
+          elsif requirement["input_type"] == "file"
+            get_file_urls_from_submission_value(submitted_value)
           else
             submitted_value
           end
@@ -97,11 +99,38 @@ class ExternalPermitApplicationService
       end
     end
 
+    remaining_energy_step_code_submission = form_remaining_energy_step_code_submission_data
+
+    if remaining_energy_step_code_submission.present?
+      formatted_submission_data.merge!(remaining_energy_step_code_submission)
+    end
+
     formatted_submission_data
   end
 
   def get_requirement_block_json(requirement_block_id)
     self.permit_application.template_version.requirement_blocks_json[requirement_block_id]
+  end
+
+  def get_raw_h2k_files
+    return nil unless permit_application.step_code.present? && !permit_application.step_code.data_entries.empty?
+
+    permit_application
+      .step_code
+      .data_entries
+      .map do |data_entry|
+        url = data_entry.h2k_file_url
+        next unless url.present?
+
+        {
+          id: data_entry.id,
+          name: data_entry.h2k_file_name,
+          type: data_entry.h2k_file_type,
+          size: data_entry.h2k_file_size,
+          url: data_entry.h2k_file_url,
+        }
+      end
+      .compact
   end
 
   private
@@ -180,5 +209,69 @@ class ExternalPermitApplicationService
 
       formatted_contact_value
     end
+  end
+
+  def get_file_urls_from_submission_value(submitted_value)
+    return nil unless submitted_value.present? && submitted_value.is_a?(Array)
+
+    submitted_value
+      .map do |file_data|
+        file_model_name = file_data["model"]
+        file_model_id = file_data["model_id"]
+        next unless file_model_name.present? && file_model_id.present?
+
+        file_model = file_model_name.constantize.find_by(id: file_model_id)
+
+        next unless file_model.present?
+
+        {
+          id: file_model_id,
+          name: file_data&.dig("metadata", "filename"),
+          type: file_data["type"],
+          size: file_data["size"],
+          url: file_model.file_url,
+        }
+      end
+      .compact
+  end
+
+  def form_remaining_energy_step_code_submission_data
+    return nil unless permit_application.present?
+
+    checklist_document =
+      permit_application.supporting_documents.find_by(data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY)
+
+    return nil unless checklist_document.present?
+
+    url = checklist_document.file_url
+
+    return nil unless url.present?
+
+    # These is originally not part of the requirement model, but to keep a unified structure, we will format it as such.
+    file_values = [
+      {
+        id: checklist_document.id,
+        name: checklist_document.file_name,
+        type: checklist_document.file_type,
+        size: checklist_document.file_size,
+        url: checklist_document.file_url,
+      },
+    ]
+
+    {
+      id: "energy_step_code_tool",
+      requirement_block_code: "energy_step_code_tool",
+      name: "Energy step code",
+      description: "",
+      requirement: [
+        {
+          id: "energy_step_code_documents",
+          name: "Energy step code documents",
+          requirement_code: "energy_step_code_documents",
+          type: :file,
+          value: file_values,
+        },
+      ],
+    }
   end
 end

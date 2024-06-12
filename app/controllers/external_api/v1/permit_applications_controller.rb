@@ -1,4 +1,4 @@
-class ExternalApi::PermitApplicationsController < ExternalApi::ApplicationController
+class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationController
   include ExternalApi::Concerns::Search::PermitApplications
 
   before_action :set_permit_application, only: :show

@@ -49,17 +49,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :external_api do
     identifier :id
-    fields :nickname,
-           :status,
-           :number,
-           :full_address,
-           :pid,
-           :pin,
-           :zipfile_size,
-           :zipfile_name,
-           :zipfile_url,
-           :reference_number,
-           :submitted_at
+    fields :status, :number, :full_address, :pid, :pin, :reference_number, :submitted_at
 
     field :submission_data do |pa, _options|
       pa.formatted_submission_data_for_external_use
@@ -69,6 +59,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_permit_classifications
     end
 
+    field :raw_h2k_files do |pa, _options|
+      pa.formatted_raw_h2k_files_for_external_use
+    end
+
+    association :submitter, blueprint: UserBlueprint, view: :external_api
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
   end

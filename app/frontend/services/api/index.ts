@@ -37,7 +37,15 @@ import {
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { IContact, ISiteConfiguration, ITemplateVersionDiff, TSearchParams } from "../../types/types"
+import {
+  IContact,
+  IJurisdictionFilters,
+  IJurisdictionSearchFilters,
+  ISiteConfiguration,
+  ITemplateVersionDiff,
+  TAutoComplianceModuleConfigurations,
+  TSearchParams,
+} from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -92,7 +100,7 @@ export class Api {
     return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
   }
 
-  async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
+  async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields, IJurisdictionSearchFilters>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
 
@@ -362,6 +370,10 @@ export class Api {
 
   async deleteStepCode(id: string) {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+  }
+
+  async downloadStepCodeSummaryCsv() {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
   }
 
   async fetchStepCodeChecklist(id: string) {
