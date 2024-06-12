@@ -998,9 +998,9 @@ const options = {
               description: "Specify email addresses that should receive applications.",
               permitTypes: {
                 label: "Send permit applications for",
-                low_residential: "Low density - Residential",
-                medium_residential: "Medium density - Residential",
-                high_residential: "High density - Residential",
+                low_residential: "1-4 Unit detached housing",
+                medium_residential: "4+ Unit housing",
+                high_residential: "High density appartment buildings",
                 new_construction: "New construction",
                 addition_alteration_renovation: "Addition, alteration, or renovation",
                 site_alteration: "Site alteration",
