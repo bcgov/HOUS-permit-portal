@@ -12,6 +12,7 @@ import {
   EJurisdictionTypes,
   ENotificationActionType,
   ENumberUnit,
+  EPermitApplicationStatus,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -72,8 +73,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
-  statusFilter?: string
-} & IModelFilterFields
+  filters?: IModelFilterFields
+}
 
 export type TComputedCompliance = {
   module: EAutoComplianceModule
@@ -370,6 +371,12 @@ export interface IJurisdictionFilters {
 }
 export interface IJurisdictionSearchFilters {
   submissionInboxSetUp?: boolean
+}
+
+export interface IPermitApplicationSearchFilters {
+  requirementTemplateId?: string
+  templateVersionId?: string
+  status?: EPermitApplicationStatus
 }
 
 export interface ITemplateVersionDiff {
