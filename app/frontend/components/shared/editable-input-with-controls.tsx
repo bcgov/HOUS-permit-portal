@@ -33,6 +33,11 @@ export interface IEditableInputWithControlsProps extends EditableProps {
   initialHint?: string
   getStateBasedEditableProps?: (isEditing: boolean) => Partial<EditableProps>
   controlsProps?: IControlsProps
+  renderCustomPreview?: (props: {
+    isEditing: boolean
+    setIsInEditMode: (boolean) => void
+    initialHint?: string
+  }) => JSX.Element
 }
 
 function EditableControls({
@@ -94,6 +99,8 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   onBlur,
   controlsProps,
   getStateBasedEditableProps,
+  borderEndEndRadius,
+  renderCustomPreview,
   ...editableProps
 }: IEditableInputWithControlsProps) {
   const [isInEditMode, setIsInEditMode] = useState(false)
@@ -118,7 +125,8 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
       {...editableProps}
       {...getStateBasedEditableProps?.(isInEditMode)}
     >
-      <EditablePreview {...editablePreviewProps} />
+      {!isInEditMode && renderCustomPreview?.({ isEditing: isInEditMode, setIsInEditMode, initialHint })}
+      <EditablePreview display={renderCustomPreview ? "none" : undefined} {...editablePreviewProps} />
       <EditableInput {...editableInputProps} />
       <EditableControls {...controlsProps} />
     </Editable>

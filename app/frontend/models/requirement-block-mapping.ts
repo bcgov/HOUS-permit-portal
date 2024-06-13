@@ -1,6 +1,5 @@
-import Fuse, { IFuseOptions } from "fuse.js"
-import { getParent, Instance, types } from "mobx-state-tree"
-import pluck from "ramda/src/pluck"
+import Fuse, { FuseResult, IFuseOptions } from "fuse.js"
+import { Instance, getParent, types } from "mobx-state-tree"
 import { IDenormalizedRequirement, IRequirementMap } from "../types/types"
 import { IIntegrationMapping } from "./integration-mapping"
 
@@ -29,25 +28,42 @@ const RequirementBlockMappingModel = types
     },
   }))
   .views((self) => ({
-    get tableRequirements() {
-      return self.integrationMapping?.query
-        ? pluck("item", self.fuseInstance.search(self.integrationMapping?.query))
-        : self.requirementsList
+    get fuseSearchResults() {
+      return self.fuseInstance.search(self.integrationMapping?.query ?? "")
     },
-  }))
-  .views((self) => ({
-    getTableRequirementsJson(requirementsJson: IDenormalizedRequirement[]) {
-      // console.log("xyd", JSON.stringify(self.fuseInstance.search(self.integrationMapping?.query ?? ""), null, 2))
-      return requirementsJson?.filter((r) =>
-        self.tableRequirements.find((tr) => tr?.requirementCode === r.requirementCode)
-      )
+
+    get hasQuery() {
+      return !!self.integrationMapping?.query?.trim()
     },
   }))
   .views((self) => ({
     get hasAnyMatchesAfterQuery() {
-      if (!self.integrationMapping?.query) {
+      if (!self.hasQuery) {
         return true
       }
+
+      return self.fuseSearchResults.length > 0
+    },
+  }))
+  .views((self) => ({
+    getTableRequirementsJson(requirementsJson: IDenormalizedRequirement[]): (IDenormalizedRequirement & {
+      matches?: FuseResult<IRequirementMap>["matches"]
+    })[] {
+      if (!self.hasQuery) {
+        return requirementsJson
+      }
+
+      return requirementsJson?.reduce((acc, requirementJson) => {
+        const requirementMapSearchItem = self.fuseSearchResults.find(
+          (result) => result.item.requirementCode === requirementJson?.requirementCode
+        )
+
+        if (requirementMapSearchItem) {
+          acc.push({ ...requirementJson, matches: requirementMapSearchItem.matches })
+        }
+
+        return acc
+      }, [])
     },
   }))
   .actions((self) => ({

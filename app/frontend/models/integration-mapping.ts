@@ -2,7 +2,7 @@ import { flow } from "mobx"
 import { Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { IRequirementMap, ISimplifiedRequirementsMap } from "../types/types"
-import { RequirementsMapping } from "./requirement-block-mapping"
+import { IRequirementBlockMapping, RequirementsMapping } from "./requirement-block-mapping"
 import { TemplateVersionModel } from "./template-version"
 
 type TRawRequirementsMapping = Record<string, { id: string; requirements: Record<string, IRequirementMap> }>
@@ -23,7 +23,9 @@ export const IntegrationMappingModel = types.snapshotProcessor(
 
     .views((self) => ({
       get tableRequirementsMapping() {
-        return Array.from(self.requirementsMapping.values())
+        return (Array.from(self.requirementsMapping.values()) as IRequirementBlockMapping[]).filter(
+          (r) => r.hasAnyMatchesAfterQuery
+        )
       },
     }))
     .actions((self) => ({

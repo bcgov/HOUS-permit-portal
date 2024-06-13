@@ -24,6 +24,7 @@ import { IRequirementMap, ISimplifiedRequirementsMap } from "../../../../../type
 import { isStepCodePackageFileRequirementCode } from "../../../../../utils/utility-functions"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
+import { HighlightedText } from "../../../../shared/highlighted-text"
 import { RequirementFieldDisplay } from "../../../requirements-library/requirement-field-display"
 
 interface IProps {
@@ -92,6 +93,13 @@ export const GridAccordion = observer(function GridAccordion({
           <AccordionPanel pb={4} bg={"red"} sx={{ display: "contents" }}>
             {(requirementBlockMapping.getTableRequirementsJson(requirementBlockJson.requirements) ?? []).map(
               (requirementJson) => {
+                const localMappingSearchMatchIndicies = requirementJson?.matches?.find(
+                  (match) => match.key === "local_system_mapping"
+                )?.indices
+                const requirementCodeSearchMatchIndicies = requirementJson?.matches?.find(
+                  (match) => match.key === "requirementCode"
+                )?.indices
+
                 return (
                   <Box key={requirementJson.id} role={"row"} display={"contents"}>
                     <SearchGridItem fontWeight={700} {...searchGridItemProps}>
@@ -102,10 +110,16 @@ export const GridAccordion = observer(function GridAccordion({
                             [requirementBlockJson.sku]: { [requirementJson.requirementCode]: localSystemMapping },
                           })
                         }
+                        searchMatchIndices={localMappingSearchMatchIndicies}
                       />
                     </SearchGridItem>
                     <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                      <Text maxW={"full"}>{requirementJson.requirementCode}</Text>
+                      <Text maxW={"full"}>
+                        <HighlightedText
+                          text={requirementJson?.requirementCode ?? ""}
+                          indices={requirementCodeSearchMatchIndicies ?? []}
+                        />
+                      </Text>
                     </SearchGridItem>
                     <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
                       <Stack color={"text.secondary"}>
@@ -146,9 +160,11 @@ export const GridAccordion = observer(function GridAccordion({
 const EditableLocalSystemMapping = observer(function EditableLocalSystemMapping({
   requirementMapping,
   onSave,
+  searchMatchIndices,
 }: {
   requirementMapping: IRequirementMap
   onSave: (localSystemMapping: string) => Promise<void | boolean>
+  searchMatchIndices?: readonly [number, number][]
 }) {
   const { t } = useTranslation()
   const modelLocalSystemMapping = requirementMapping?.local_system_mapping
@@ -203,6 +219,11 @@ const EditableLocalSystemMapping = observer(function EditableLocalSystemMapping(
       onSubmit={(_) => onSubmit()}
       submitOnBlur={false}
       isDisabled={isSubmitting}
+      renderCustomPreview={({ setIsInEditMode, initialHint }) => (
+        <Text onClick={() => setIsInEditMode(true)} flex={1}>
+          {value ? <HighlightedText text={value} indices={searchMatchIndices} /> : initialHint}
+        </Text>
+      )}
     />
   )
 })

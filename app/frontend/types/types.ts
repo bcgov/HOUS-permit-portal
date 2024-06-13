@@ -1,3 +1,4 @@
+import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
@@ -402,3 +403,5 @@ export interface IRequirementMap {
   requirementCode: string
   local_system_mapping?: TLocalSystemMapping
 }
+
+export type TChakraColor = keyof Theme["colors"]
