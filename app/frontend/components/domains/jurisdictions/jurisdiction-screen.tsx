@@ -404,7 +404,7 @@ const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) =
             </Td>
             <Td textAlign="center">{currentJurisdiction.energyStepRequired}</Td>
             <Td textAlign="center" textTransform="lowercase" fontStyle="italic">
-              {t("ui.or")}
+              {t("ui.and")}
             </Td>
             <Td textAlign="center">{currentJurisdiction.zeroCarbonLevelTranslation}</Td>
           </Tr>
