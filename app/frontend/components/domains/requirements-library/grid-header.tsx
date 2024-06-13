@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { ERequirementLibrarySortFields } from "../../../types/enums"
-import { SearchInput } from "../../shared/base/search-input"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
@@ -27,7 +27,7 @@ export const GridHeaders = observer(function GridHeaders() {
           align="center"
         >
           <Text role={"heading"}>{t("requirementsLibrary.index.tableHeading")}</Text>
-          <SearchInput
+          <ModelSearchInput
             inputGroupProps={{
               position: "sticky",
               right: 6,

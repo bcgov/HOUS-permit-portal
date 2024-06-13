@@ -1,11 +1,25 @@
 import { Box, Flex, GridItem, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useCallback, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { IIntegrationMapping } from "../../../../../models/integration-mapping"
+import { debounce } from "../../../../../utils/utility-functions"
+import { SearchInput } from "../../../../shared/base/search-input"
 import { GridHeader } from "../../../../shared/grid/grid-header"
 
-export const GridHeaders = observer(function GridHeaders() {
+export const GridHeaders = observer(function GridHeaders({
+  integrationMapping,
+}: {
+  integrationMapping: IIntegrationMapping
+}) {
   const { t } = useTranslation()
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const debouncedSetQuery = useCallback(debounce(integrationMapping.setQuery, 500), [integrationMapping.setQuery])
+
+  const onQueryChange = (query: string) => {
+    setSearchQuery(query)
+    debouncedSetQuery(query)
+  }
 
   const headers = [
     {
@@ -40,11 +54,12 @@ export const GridHeaders = observer(function GridHeaders() {
           <Text role={"heading"} fontSize={"sm"} as={"h2"}>
             {t("apiMappingsSetup.edit.table.title")}
           </Text>
-          {/*<SearchInput searchModel={requirementTemplateStore} />*/}
+          <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"} w={"full"}>
         {headers.map((header) => (
+          // @ts-ignore
           <GridHeader key={header.title} role={"columnheader"}>
             <Flex
               w={"full"}

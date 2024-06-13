@@ -45,7 +45,6 @@ export const Header = observer(function Header({ templateVersion }: IProps) {
         h={"fit-content"}
         w={"fit-content"}
       />
-
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
         <Heading as="h1" mb={0}>
           <Trans

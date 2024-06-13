@@ -4,7 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EPermitApplicationReviewerSortFields, EPermitApplicationSortFields } from "../../../../types/enums"
-import { SearchInput } from "../../../shared/base/search-input"
+import { ModelSearchInput } from "../../../shared/base/model-search-input"
 import { GridHeader } from "../../../shared/grid/grid-header"
 import { SortIcon } from "../../../shared/sort-icon"
 
@@ -29,7 +29,7 @@ export const GridHeaders = observer(function GridHeaders() {
           align="center"
         >
           <Text role={"heading"}>{t("permitApplication.submissionInbox.tableHeading")}</Text>
-          <SearchInput searchModel={permitApplicationStore} />
+          <ModelSearchInput searchModel={permitApplicationStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>

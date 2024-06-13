@@ -399,5 +399,6 @@ export interface ISimplifiedRequirementsMap {
 
 export interface IRequirementMap {
   id: string
+  requirementCode: string
   local_system_mapping?: TLocalSystemMapping
 }

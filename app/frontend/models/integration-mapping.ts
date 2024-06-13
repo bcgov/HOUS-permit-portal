@@ -3,6 +3,7 @@ import { Instance, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { IRequirementMap, ISimplifiedRequirementsMap } from "../types/types"
 import { RequirementsMapping } from "./requirement-block-mapping"
+import { TemplateVersionModel } from "./template-version"
 
 type TRawRequirementsMapping = Record<string, { id: string; requirements: Record<string, IRequirementMap> }>
 
@@ -13,12 +14,22 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       // this needs to be string as the IntegrationMappingModel needs to be stored in
       // a map where the key is not it's own id
       id: types.string,
+      templateVersion: types.reference(types.late(() => TemplateVersionModel)),
       jurisdictionId: types.string,
-      templateVersionId: types.string,
       requirementsMapping: RequirementsMapping,
+      query: types.maybeNull(types.string),
     })
     .extend(withEnvironment())
+
+    .views((self) => ({
+      get tableRequirementsMapping() {
+        return Array.from(self.requirementsMapping.values())
+      },
+    }))
     .actions((self) => ({
+      setQuery(query: string | null) {
+        self.query = query?.trim()
+      },
       /**
        * Merges existing requirements mapping model with an updated raw requirements mapping from the api.
        *
@@ -83,6 +94,7 @@ export const IntegrationMappingModel = types.snapshotProcessor(
 
         return true
       }),
+      dummyFetch() {},
     })),
   {
     preProcessor,
@@ -90,12 +102,25 @@ export const IntegrationMappingModel = types.snapshotProcessor(
 )
 
 function preProcessor(snapshot) {
+  let requirementsMapping = snapshot.requirementsMappingJson
+    ? JSON.parse(snapshot.requirementsMappingJson)
+    : snapshot.requirementsMapping
+
+  for (let [sku, requirementBlockMapping] of Object.entries(requirementsMapping)) {
+    ;(requirementBlockMapping as any).sku = sku
+
+    Object.entries((requirementBlockMapping as any)?.requirements ?? {}).forEach(
+      ([requirementCode, requirementMapping]) => {
+        ;(requirementMapping as any).requirementCode = requirementCode
+      }
+    )
+  }
+
   return {
     ...snapshot,
     // hack so to get uncamelized codes
-    requirementsMapping: snapshot.requirementsMappingJson
-      ? JSON.parse(snapshot.requirementsMappingJson)
-      : snapshot.requirementsMapping,
+    requirementsMapping,
+    templateVersion: snapshot.templateVersionId,
   }
 }
 

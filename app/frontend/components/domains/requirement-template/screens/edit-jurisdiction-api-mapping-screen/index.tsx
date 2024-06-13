@@ -62,7 +62,7 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
   return (
-    <Flex flexDir={"column"} alignItems={"center"} as="main" id="jurisdiction-edit-permit-template">
+    <Flex flexDir={"column"} alignItems={"center"} pb={8} as="main" id="jurisdiction-edit-permit-template">
       <Header templateVersion={templateVersion} />
 
       <SearchGrid
@@ -71,14 +71,14 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
         templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)"
         pos={"relative"}
       >
-        <GridHeaders />
+        {integrationMapping && <GridHeaders integrationMapping={integrationMapping} />}
 
         {!integrationMapping ? (
           <Flex py={50} gridColumn={"1/-1"}>
             <SharedSpinner />
           </Flex>
         ) : (
-          Array.from(integrationMapping.requirementsMapping.values()).map((requirementBlockMapping) => {
+          integrationMapping.tableRequirementsMapping.map((requirementBlockMapping) => {
             return (
               <GridAccordion
                 key={requirementBlockMapping.id}

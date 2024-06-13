@@ -90,50 +90,52 @@ export const GridAccordion = observer(function GridAccordion({
             </AccordionButton>
           </Text>
           <AccordionPanel pb={4} bg={"red"} sx={{ display: "contents" }}>
-            {(requirementBlockJson.requirements ?? []).map((requirementJson) => {
-              return (
-                <Box key={requirementJson.id} role={"row"} display={"contents"}>
-                  <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                    <EditableLocalSystemMapping
-                      requirementMapping={requirementBlockMapping.requirements.get(requirementJson.requirementCode)}
-                      onSave={async (localSystemMapping) =>
-                        onSaveLocalMapping({
-                          [requirementBlockJson.sku]: { [requirementJson.requirementCode]: localSystemMapping },
-                        })
-                      }
-                    />
-                  </SearchGridItem>
-                  <SearchGridItem fontWeight={700} {...searchGridItemProps}>
-                    <Text maxW={"full"}>{requirementJson.requirementCode}</Text>
-                  </SearchGridItem>
-                  <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
-                    <Stack color={"text.secondary"}>
-                      <RequirementFieldDisplay
-                        matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
-                          requirementJson.requirementCode
-                        )}
-                        requirementType={requirementJson.inputType}
-                        label={requirementJson.label}
-                        helperText={requirementJson.hint}
-                        unit={requirementJson?.inputOptions?.numberUnit}
-                        options={pluck("label", requirementJson.inputOptions?.valueOptions ?? [])}
-                        selectProps={{
-                          maxW: "339px",
-                        }}
-                        addMultipleContactProps={{
-                          shouldRender: true,
-                          formControlProps: { isDisabled: true },
-                          switchProps: {
-                            isChecked: requirementJson?.inputOptions?.canAddMultipleContacts,
-                          },
-                        }}
-                        required={requirementJson?.required}
+            {(requirementBlockMapping.getTableRequirementsJson(requirementBlockJson.requirements) ?? []).map(
+              (requirementJson) => {
+                return (
+                  <Box key={requirementJson.id} role={"row"} display={"contents"}>
+                    <SearchGridItem fontWeight={700} {...searchGridItemProps}>
+                      <EditableLocalSystemMapping
+                        requirementMapping={requirementBlockMapping.requirements.get(requirementJson.requirementCode)}
+                        onSave={async (localSystemMapping) =>
+                          onSaveLocalMapping({
+                            [requirementBlockJson.sku]: { [requirementJson.requirementCode]: localSystemMapping },
+                          })
+                        }
                       />
-                    </Stack>
-                  </SearchGridItem>
-                </Box>
-              )
-            })}
+                    </SearchGridItem>
+                    <SearchGridItem fontWeight={700} {...searchGridItemProps}>
+                      <Text maxW={"full"}>{requirementJson.requirementCode}</Text>
+                    </SearchGridItem>
+                    <SearchGridItem {...searchGridItemProps} justifyContent={"flex-start"} alignItems={"flex-start"}>
+                      <Stack color={"text.secondary"}>
+                        <RequirementFieldDisplay
+                          matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
+                            requirementJson.requirementCode
+                          )}
+                          requirementType={requirementJson.inputType}
+                          label={requirementJson.label}
+                          helperText={requirementJson.hint}
+                          unit={requirementJson?.inputOptions?.numberUnit}
+                          options={pluck("label", requirementJson.inputOptions?.valueOptions ?? [])}
+                          selectProps={{
+                            maxW: "339px",
+                          }}
+                          addMultipleContactProps={{
+                            shouldRender: true,
+                            formControlProps: { isDisabled: true },
+                            switchProps: {
+                              isChecked: requirementJson?.inputOptions?.canAddMultipleContacts,
+                            },
+                          }}
+                          required={requirementJson?.required}
+                        />
+                      </Stack>
+                    </SearchGridItem>
+                  </Box>
+                )
+              }
+            )}
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
