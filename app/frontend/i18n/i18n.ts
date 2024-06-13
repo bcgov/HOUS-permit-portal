@@ -1367,18 +1367,18 @@ const options = {
           title: "Reporting",
           tableHeading: "Available reports",
           filterPlaceholder: "Filter reports by name",
-          stepCodeSummaryName: "Step code summary",
-          stepCodeSummaryDescription: "Step code summary",
+          stepCodeSummaryName: "Energy step code configuration by jurisdiction",
+          stepCodeSummaryDescription: "Energy step code configuration by jurisdiction",
           templateSummary: {
             name: "Template summary",
             description: "A summary of template usage by jurisdictions",
             title: "Export Template Summary",
           },
           stepCodeSummary: {
-            name: "Step code summary",
+            name: "Energy step code configuration by jurisdiction",
             description: "A summary of step code requirements by jurisdictions",
-            title: "Export Step Code Summary",
-            filename: "Step Code Summary",
+            title: "Export energy step code configuration by jurisdiction",
+            filename: "Energy step code configuration by jurisdiction",
           },
           columnHeaders: {
             name: "Name",
