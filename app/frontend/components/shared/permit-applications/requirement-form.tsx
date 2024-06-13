@@ -82,7 +82,7 @@ export const RequirementForm = observer(
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
-    const usesPublishedTemplateVersion = permitApplication?.usesPublishedTemplateVersion
+    const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
     const infoBoxData = permitApplication.diffToInfoBoxData
 
@@ -90,10 +90,10 @@ export const RequirementForm = observer(
     const { currentUser } = userStore
 
     useEffect(() => {
-      if (!usesPublishedTemplateVersion && isEditing) {
+      if (!usingCurrentTemplateVersion && isEditing) {
         permitApplication.fetchDiff()
       }
-    }, [usesPublishedTemplateVersion])
+    }, [usingCurrentTemplateVersion])
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed

@@ -70,8 +70,15 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
+      template_version_id: template_version.id,
+      requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
+      using_current_template_version: using_current_template_version,
     }
+  end
+
+  def indexed_using_current_template_version
+    self.class.searchkick_index.retrieve(self)["using_current_template_version"]
   end
 
   def formatted_permit_classifications

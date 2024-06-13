@@ -41,6 +41,7 @@ import {
   IContact,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IPermitApplicationSearchFilters,
   ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
@@ -185,7 +186,10 @@ export class Api {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
-  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchJurisdictionPermitApplications(
+    jurisdictionId,
+    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+  ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
       params

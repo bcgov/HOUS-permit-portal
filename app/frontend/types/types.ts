@@ -12,6 +12,7 @@ import {
   EJurisdictionTypes,
   ENotificationActionType,
   ENumberUnit,
+  EPermitApplicationStatus,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -370,6 +371,12 @@ export interface IJurisdictionFilters {
 }
 export interface IJurisdictionSearchFilters {
   submissionInboxSetUp?: boolean
+}
+
+export interface IPermitApplicationSearchFilters {
+  requirementTemplateId?: string
+  templateVersionId?: string
+  status?: EPermitApplicationStatus
 }
 
 export interface ITemplateVersionDiff {

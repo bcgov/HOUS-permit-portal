@@ -28,7 +28,7 @@ export const RequirementBlockStoreModel = types
       isAutoComplianceModuleOptionsLoading: types.optional(types.boolean, false),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
     }),
-    createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks")
+    createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks", "setRequirementBlockFilters")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -123,6 +123,10 @@ export const RequirementBlockStoreModel = types
       }
       return response.ok
     }),
+    setRequirementBlockFilters(queryParams) {
+      // Set filters here once necessary
+      // See permit-application-store.ts for example
+    },
   }))
   .actions((self) => ({
     createRequirementBlock: flow(function* (requirementParams: IRequirementBlockParams) {

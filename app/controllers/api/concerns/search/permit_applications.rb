@@ -17,8 +17,17 @@ module Api::Concerns::Search::PermitApplications
     }
 
     search_conditions.merge!({ where: {} })
-    if permit_application_search_params[:status_filter].present?
-      search_conditions[:where][:status] = permit_application_search_params[:status_filter]
+
+    if permit_application_search_params[:status].present?
+      search_conditions[:where][:status] = permit_application_search_params[:status]
+    end
+
+    if permit_application_search_params[:requirement_template_id].present?
+      search_conditions[:where][:requirement_template_id] = permit_application_search_params[:requirement_template_id]
+    end
+
+    if permit_application_search_params[:template_version_id].present?
+      search_conditions[:where][:template_version_id] = permit_application_search_params[:template_version_id]
     end
 
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
@@ -39,7 +48,15 @@ module Api::Concerns::Search::PermitApplications
   private
 
   def permit_application_search_params
-    params.permit(:query, :page, :per_page, :status_filter, sort: %i[field direction])
+    params.permit(
+      :query,
+      :page,
+      :per_page,
+      :status,
+      :template_version_id,
+      :requirement_template_id,
+      sort: %i[field direction],
+    )
   end
 
   def permit_application_query

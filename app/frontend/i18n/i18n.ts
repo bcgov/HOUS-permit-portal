@@ -221,6 +221,8 @@ const options = {
           all: "All",
           and: "and",
           or: "or",
+          actionRequired: "Action required",
+          resetFilters: "Reset filters",
         },
         notification: {
           title: "Notifications",
@@ -343,6 +345,7 @@ const options = {
         },
         permitApplication: {
           updateToNewVersion: "Update my application",
+          newVersionPublished: "New verson of template has been published - please review changes",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",

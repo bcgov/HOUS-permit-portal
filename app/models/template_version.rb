@@ -20,7 +20,7 @@ class TemplateVersion < ApplicationRecord
 
   before_validation :set_default_deprecation_reason
 
-  after_save :reindex_requirement_template_if_published, if: :status_changed?
+  after_save :reindex_models_if_published, if: :saved_change_to_status?
 
   def label
     "#{permit_type.name} #{activity.name} (#{version_date.to_s})"
@@ -80,11 +80,9 @@ class TemplateVersion < ApplicationRecord
     self.deprecation_reason = "new_publish"
   end
 
-  def reindex_requirement_template_if_published
-    reindex_requirement_template if published?
-  end
-
-  def reindex_requirement_template
-    requirement_template.reindex
+  def reindex_models_if_published
+    requirement_template&.reindex if published?
+    permit_applications&.reindex if published?
+    previous_version&.permit_applications&.reindex if published?
   end
 end
