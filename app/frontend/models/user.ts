@@ -98,6 +98,13 @@ export const UserModel = types
       }
       return response.ok
     }),
+    reinvite: flow(function* () {
+      const response = yield self.environment.api.reinviteUser(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
+      return response.ok
+    }),
   }))
 
 export interface IUser extends Instance<typeof UserModel> {}

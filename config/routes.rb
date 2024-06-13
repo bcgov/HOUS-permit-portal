@@ -104,6 +104,7 @@ Rails.application.routes.draw do
       patch "accept_eula", on: :member
       post "search", on: :collection, to: "users#index"
       post "resend_confirmation", on: :member
+      post "reinvite", on: :member
     end
 
     resources :end_user_license_agreement, only: %i[index]

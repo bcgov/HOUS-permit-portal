@@ -66,6 +66,10 @@ export class Api {
     return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
+  async reinviteUser(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/reinvite`)
+  }
+
   async logout() {
     return this.client.delete("/logout")
   }
