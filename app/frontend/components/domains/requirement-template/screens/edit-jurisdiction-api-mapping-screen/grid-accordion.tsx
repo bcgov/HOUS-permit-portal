@@ -212,18 +212,19 @@ const EditableLocalSystemMapping = observer(function EditableLocalSystemMapping(
       }}
       initialHint={t("apiMappingsSetup.edit.table.localFieldEdit.addMapping")}
       w={"full"}
-      editablePreviewProps={{ maxW: "full", flex: 1 }}
       value={value}
       onChange={onChange}
       onCancel={() => resetToModelValue()}
       onSubmit={(_) => onSubmit()}
       submitOnBlur={false}
       isDisabled={isSubmitting}
-      renderCustomPreview={({ setIsInEditMode, initialHint }) => (
-        <Text onClick={() => setIsInEditMode(true)} flex={1}>
-          {value ? <HighlightedText text={value} indices={searchMatchIndices} /> : initialHint}
-        </Text>
-      )}
+      editablePreviewProps={{
+        renderCustomPreview: ({ isEditing, onClick, initialHint }) => (
+          <Text display={isEditing ? "none" : "initial"} onClick={onClick} flex={1} maxW={"full"}>
+            {value ? <HighlightedText text={value} indices={searchMatchIndices} /> : initialHint}
+          </Text>
+        ),
+      }}
     />
   )
 })

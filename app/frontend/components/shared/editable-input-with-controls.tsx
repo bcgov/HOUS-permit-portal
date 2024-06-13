@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { MouseEventHandler, forwardRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 interface IControlsProps {
@@ -27,17 +27,22 @@ interface IControlsProps {
   iconButtonProps?: Partial<IconButtonProps>
 }
 
+interface ICustomEditablePreviewProps extends Partial<EditablePreviewProps> {
+  renderCustomPreview?: (
+    props: {
+      isEditing: boolean
+      onClick: MouseEventHandler
+      initialHint?: string
+    } & Partial<EditablePreviewProps>
+  ) => JSX.Element
+  initialHint?: string
+}
+
 export interface IEditableInputWithControlsProps extends EditableProps {
-  editablePreviewProps?: Partial<EditablePreviewProps>
+  editablePreviewProps?: Omit<ICustomEditablePreviewProps, "initialHint">
   editableInputProps?: Partial<EditableInputProps>
   initialHint?: string
-  getStateBasedEditableProps?: (isEditing: boolean) => Partial<EditableProps>
   controlsProps?: IControlsProps
-  renderCustomPreview?: (props: {
-    isEditing: boolean
-    setIsInEditMode: (boolean) => void
-    initialHint?: string
-  }) => JSX.Element
 }
 
 function EditableControls({
@@ -89,6 +94,23 @@ function EditableControls({
   )
 }
 
+const CustomEditablePreview = observer(
+  forwardRef<any, ICustomEditablePreviewProps>(function CustomEditablePreview({
+    renderCustomPreview,
+    initialHint,
+    ...rest
+  }) {
+    const editableControls = useEditableControls()
+    const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
+
+    return renderCustomPreview ? (
+      renderCustomPreview({ ...rest, initialHint, isEditing, onClick: getEditButtonProps()?.onClick })
+    ) : (
+      <EditablePreview {...rest} />
+    )
+  })
+)
+
 export const EditableInputWithControls = observer(function EditableInputWithControls({
   initialHint,
   placeholder,
@@ -98,9 +120,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   onCancel,
   onBlur,
   controlsProps,
-  getStateBasedEditableProps,
   borderEndEndRadius,
-  renderCustomPreview,
   ...editableProps
 }: IEditableInputWithControlsProps) {
   const [isInEditMode, setIsInEditMode] = useState(false)
@@ -122,11 +142,13 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
         setIsInEditMode(false)
         onBlur?.(e)
       }}
+      onSubmit={(e) => {
+        setIsInEditMode(false)
+        editableProps.onSubmit?.(e)
+      }}
       {...editableProps}
-      {...getStateBasedEditableProps?.(isInEditMode)}
     >
-      {!isInEditMode && renderCustomPreview?.({ isEditing: isInEditMode, setIsInEditMode, initialHint })}
-      <EditablePreview display={renderCustomPreview ? "none" : undefined} {...editablePreviewProps} />
+      <CustomEditablePreview initialHint={initialHint} {...editablePreviewProps} />
       <EditableInput {...editableInputProps} />
       <EditableControls {...controlsProps} />
     </Editable>
