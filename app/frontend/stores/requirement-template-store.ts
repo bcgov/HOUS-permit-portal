@@ -18,7 +18,7 @@ export const RequirementTemplateStoreModel = types
       requirementTemplateMap: types.map(RequirementTemplateModel),
       tableRequirementTemplates: types.array(types.safeReference(RequirementTemplateModel)),
     }),
-    createSearchModel<ERequirementTemplateSortFields>("fetchRequirementTemplates", "setRequirementTemplateFilters")
+    createSearchModel<ERequirementTemplateSortFields>("fetchRequirementTemplates")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -79,10 +79,6 @@ export const RequirementTemplateStoreModel = types
       }
       return response.ok
     }),
-    setRequirementTemplateFilters(queryParams) {
-      // Set filters here once necessary
-      // See permit-application-store.ts for example
-    },
     fetchRequirementTemplate: flow(function* (id: string) {
       const response = yield* toGenerator(self.environment.api.fetchRequirementTemplate(id))
 

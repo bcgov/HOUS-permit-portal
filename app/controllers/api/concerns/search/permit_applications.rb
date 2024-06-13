@@ -5,6 +5,7 @@ module Api::Concerns::Search::PermitApplications
     search_conditions = {
       order: permit_application_order,
       match: :word_start,
+      where: permit_application_where_clause,
       page: permit_application_search_params[:page],
       per_page:
         (
@@ -16,32 +17,6 @@ module Api::Concerns::Search::PermitApplications
         ),
     }
 
-    search_conditions.merge!({ where: {} })
-
-    if permit_application_search_params[:status].present?
-      search_conditions[:where][:status] = permit_application_search_params[:status]
-    end
-
-    if permit_application_search_params[:requirement_template_id].present?
-      search_conditions[:where][:requirement_template_id] = permit_application_search_params[:requirement_template_id]
-    end
-
-    if permit_application_search_params[:template_version_id].present?
-      search_conditions[:where][:template_version_id] = permit_application_search_params[:template_version_id]
-    end
-
-    # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
-    # Only add the jurisdiction_id condition if @jurisdiction is present
-    if @jurisdiction
-      search_conditions[:where] = {
-        jurisdiction_id: @jurisdiction.id,
-        # Overrides status filter, reorder the code if necessary
-        status: %i[submitted],
-      }
-    else
-      search_conditions[:where] = search_conditions[:where].merge({ submitter_id: current_user.id })
-    end
-
     @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
   end
 
@@ -52,9 +27,7 @@ module Api::Concerns::Search::PermitApplications
       :query,
       :page,
       :per_page,
-      :status,
-      :template_version_id,
-      :requirement_template_id,
+      filters: %i[status template_version_id requirement_template_id],
       sort: %i[field direction],
     )
   end
@@ -71,5 +44,26 @@ module Api::Concerns::Search::PermitApplications
     else
       { number: { order: :desc, unmapped_type: "long" } }
     end
+  end
+
+  def permit_application_where_clause
+    filters = permit_application_search_params[:filters]
+    where = {}
+
+    # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
+    # Only add the jurisdiction_id condition if @jurisdiction is present
+    if @jurisdiction
+      where = {
+        jurisdiction_id: @jurisdiction.id,
+        # Overrides status filter, reorder the code if necessary
+        status: %i[submitted],
+      }
+    else
+      where = { submitter_id: current_user.id }
+    end
+
+    where.merge!(filters.to_h.deep_symbolize_keys.compact) if filters.present?
+
+    where
   end
 end

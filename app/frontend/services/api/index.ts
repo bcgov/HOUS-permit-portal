@@ -182,7 +182,7 @@ export class Api {
     return this.client.post<IUsersResponse>(`/users/search`, params)
   }
 
-  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 

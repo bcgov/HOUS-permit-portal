@@ -75,7 +75,9 @@ export const JurisdictionStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
-          submissionInboxSetUp,
+          filters: {
+            submissionInboxSetUp,
+          },
         })
       )
       if (response.ok) {

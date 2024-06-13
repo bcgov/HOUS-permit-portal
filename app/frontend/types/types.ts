@@ -73,8 +73,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
-  statusFilter?: string
-} & IModelFilterFields
+  filters?: IModelFilterFields
+}
 
 export type TComputedCompliance = {
   module: EAutoComplianceModule

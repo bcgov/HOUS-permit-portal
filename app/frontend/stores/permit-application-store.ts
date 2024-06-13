@@ -15,7 +15,12 @@ import {
   EPermitApplicationStatus,
   ESocketEventTypes,
 } from "../types/enums"
-import { IPermitApplicationUpdate, IUserPushPayload } from "../types/types"
+import {
+  IPermitApplicationSearchFilters,
+  IPermitApplicationUpdate,
+  IUserPushPayload,
+  TSearchParams,
+} from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
 const filterableStatuses = Object.values(EPermitApplicationStatus)
@@ -162,10 +167,13 @@ export const PermitApplicationStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
-        status: self.statusFilter,
-        templateVersionId: self.templateVersionIdFilter,
-        requirementTemplateId: self.requirementTemplateIdFilter,
-      }
+        filters: {
+          status: self.statusFilter,
+          templateVersionId: self.templateVersionIdFilter,
+          requirementTemplateId: self.requirementTemplateIdFilter,
+        },
+      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+
       const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
 
       const response = currentJurisdictionId

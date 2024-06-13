@@ -32,7 +32,11 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     const sortField = queryParams.get("sortField")
 
     if (query) searchModel.setQuery(decodeURIComponent(query))
-    if (currentPage) searchModel.setCurrentPage(parseInt(decodeURIComponent(currentPage)))
+    if (currentPage) {
+      searchModel.setCurrentPage(parseInt(decodeURIComponent(currentPage)))
+    } else {
+      searchModel.setCurrentPage(1)
+    }
     if (countPerPage) searchModel.setCountPerPage(parseInt(decodeURIComponent(countPerPage)))
     if (showArchived) searchModel.setShowArchived(parseBoolean(showArchived))
     if (sortDirection && sortField) {

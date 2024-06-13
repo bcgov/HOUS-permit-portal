@@ -22,7 +22,7 @@ export const UserStoreModel = types
       eula: types.maybeNull(types.frozen<IEULA>()),
       tableUsers: types.array(types.reference(UserModel)),
     }),
-    createSearchModel<EUserSortFields>("searchUsers", "setUserFilters")
+    createSearchModel<EUserSortFields>("searchUsers")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -142,10 +142,6 @@ export const UserStoreModel = types
       }
       return response.ok
     }),
-    setUserFilters(queryParams) {
-      // Set filters here once necessary
-      // See permit-application-store.ts for example
-    },
   }))
 
 export interface IUserStore extends Instance<typeof UserStoreModel> {}

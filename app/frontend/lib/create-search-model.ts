@@ -11,7 +11,7 @@ interface IFetchOptions {
 
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string,
-  setFiltersName: string
+  setFiltersName?: string
 ) =>
   types
     .model()
@@ -61,7 +61,6 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         if (setFiltersName in self) {
           return self[setFiltersName](queryParams)
         }
-        throw new Error("set filters must be implemented in the derived model for filters to work")
       },
     }))
     .actions((self) => ({
