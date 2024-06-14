@@ -19,6 +19,7 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       requirementsMapping: RequirementsMapping,
       query: types.maybeNull(types.string),
       showOnlyUnmapped: types.optional(types.boolean, false),
+      isAllAccordionCollapsed: types.optional(types.boolean, false),
     })
     .extend(withEnvironment())
     .views((self) => ({
@@ -35,6 +36,9 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
+      setIsAllAccordionCollapsed(isCollapsed: boolean) {
+        self.isAllAccordionCollapsed = isCollapsed
+      },
       setShowOnlyUnmapped(showOnlyUnmapped: boolean) {
         self.showOnlyUnmapped = showOnlyUnmapped
       },

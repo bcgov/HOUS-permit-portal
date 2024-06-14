@@ -67,10 +67,6 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
     }
   }, [isCollapsedAll])
 
-  const onClickToggle = () => {
-    onToggle()
-  }
-
   return (
     <Accordion
       as={"section"}
@@ -94,7 +90,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             pr={3}
             display={"flex"}
             justifyContent={"space-between"}
-            onClick={onClickToggle}
+            onClick={onToggle}
           >
             <HStack spacing={1}>
               <Box fontWeight={700} fontSize={"base"}>

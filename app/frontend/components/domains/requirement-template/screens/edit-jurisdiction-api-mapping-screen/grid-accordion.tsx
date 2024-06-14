@@ -55,6 +55,9 @@ export const GridAccordion = observer(function GridAccordion({
   const requirementBlockJson = templateVersion.getRequirementBlockJsonById(requirementBlockMapping.id)
   const isExpanded = expandedIndex === 0
 
+  useEffect(() => {
+    setExpandedIndex(requirementBlockMapping?.integrationMapping?.isAllAccordionCollapsed ? -1 : 0)
+  }, [requirementBlockMapping?.integrationMapping?.isAllAccordionCollapsed])
   return (
     <Box display={"contents"}>
       <Accordion

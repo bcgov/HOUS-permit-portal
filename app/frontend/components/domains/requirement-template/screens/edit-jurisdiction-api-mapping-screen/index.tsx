@@ -11,6 +11,7 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../../shared/grid/search-grid"
+import { FloatingButtons } from "./floating-buttons"
 import { GridAccordion } from "./grid-accordion"
 import { GridHeaders } from "./grid-headers"
 import { Header } from "./header"
@@ -39,6 +40,8 @@ function formFormDefaults(
   }
 }
 
+export const TABLE_MAX_WIDTH_PX = 1320
+
 export const EditJurisdictionApiMappingScreen = observer(function EditJurisdictionApiMappingScreen() {
   const { t } = useTranslation()
   const { userStore } = useMst()
@@ -62,14 +65,20 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
   if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
 
   return (
-    <Flex flexDir={"column"} alignItems={"center"} pb={8} as="main" id="jurisdiction-edit-permit-template">
+    <Flex
+      flexDir={"column"}
+      alignItems={"center"}
+      pb={8}
+      as="main"
+      id="jurisdiction-edit-permit-template"
+      pos={"relative"}
+    >
       <Header templateVersion={templateVersion} />
 
       <SearchGrid
-        maxW={"1320px"}
+        maxW={TABLE_MAX_WIDTH_PX}
         w={"full"}
         templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)"
-        pos={"relative"}
       >
         {integrationMapping && <GridHeaders integrationMapping={integrationMapping} />}
 
@@ -78,16 +87,22 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
             <SharedSpinner />
           </Flex>
         ) : (
-          integrationMapping.tableRequirementsMapping.map((requirementBlockMapping) => {
-            return (
-              <GridAccordion
-                key={requirementBlockMapping.id}
-                requirementBlockMapping={requirementBlockMapping}
-                templateVersion={templateVersion}
-                onSaveLocalMapping={integrationMapping.updateRequirementsMapping}
-              />
-            )
-          })
+          <>
+            {integrationMapping.tableRequirementsMapping.map((requirementBlockMapping) => {
+              return (
+                <GridAccordion
+                  key={requirementBlockMapping.id}
+                  requirementBlockMapping={requirementBlockMapping}
+                  templateVersion={templateVersion}
+                  onSaveLocalMapping={integrationMapping.updateRequirementsMapping}
+                />
+              )
+            })}
+            <FloatingButtons
+              isCollapsedAll={integrationMapping?.isAllAccordionCollapsed}
+              setIsCollapsedAll={integrationMapping?.setIsAllAccordionCollapsed}
+            />
+          </>
         )}
       </SearchGrid>
     </Flex>

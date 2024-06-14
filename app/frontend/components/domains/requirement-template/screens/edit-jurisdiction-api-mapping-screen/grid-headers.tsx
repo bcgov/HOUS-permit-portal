@@ -52,10 +52,10 @@ export const GridHeaders = observer(function GridHeaders({
           justifyContent={"space-between"}
           align="center"
         >
-          <Text role={"heading"} fontSize={"sm"} as={"h2"}>
-            {t("apiMappingsSetup.edit.table.title")}
-          </Text>
           <HStack>
+            <Text role={"heading"} fontSize={"sm"} as={"h2"}>
+              {t("apiMappingsSetup.edit.table.title")}
+            </Text>
             <FormSwitch
               switchIdForAccessibility={"integrationMappingShowOnlyUnmappedSwitch"}
               isChecked={integrationMapping?.showOnlyUnmapped}
@@ -63,8 +63,9 @@ export const GridHeaders = observer(function GridHeaders({
               checkedText={t("apiMappingsSetup.edit.table.filter.showAll")}
               uncheckedText={t("apiMappingsSetup.edit.table.filter.showOnlyUnmapped")}
             />
-            <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
           </HStack>
+
+          <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"} w={"full"}>
