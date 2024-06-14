@@ -1,4 +1,5 @@
 import { Box, Flex, GridItem, HStack, Text } from "@chakra-ui/react"
+import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -7,6 +8,7 @@ import { debounce } from "../../../../../utils/utility-functions"
 import { SearchInput } from "../../../../shared/base/search-input"
 import { FormSwitch } from "../../../../shared/form-switch"
 import { GridHeader } from "../../../../shared/grid/grid-header"
+import { IconLink } from "../../../../shared/icon-link"
 
 export const GridHeaders = observer(function GridHeaders({
   integrationMapping,
@@ -25,8 +27,16 @@ export const GridHeaders = observer(function GridHeaders({
   const headers = [
     {
       title: t("apiMappingsSetup.edit.table.headers.localField"),
-
-      info: "Some info",
+      info: (
+        <IconLink
+          accessibleText={t("apiMappingsSetup.edit.table.headers.localFieldInfo")}
+          Icon={Info}
+          href={"/integrations/api_docs"}
+          target={"_blank"}
+          rel="noopener noreferrer"
+          color={"greys.grey90"}
+        />
+      ),
     },
     {
       title: (
@@ -76,6 +86,7 @@ export const GridHeaders = observer(function GridHeaders({
               w={"full"}
               h={"full"}
               alignItems={"center"}
+              justifyContent={"space-between"}
               borderY={"none"}
               borderX={"none"}
               borderRight={"1px solid"}
@@ -84,6 +95,7 @@ export const GridHeaders = observer(function GridHeaders({
               px={4}
             >
               {header.title}
+              {header?.info}
             </Flex>
           </GridHeader>
         ))}

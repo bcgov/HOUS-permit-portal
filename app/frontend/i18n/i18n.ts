@@ -1312,6 +1312,7 @@ const options = {
               title: "API mappings",
               headers: {
                 localField: "Your local field name",
+                localFieldInfo: "Local field mapping info",
                 templateField: "Map to <1>requirement code</1> in template",
                 requirementDetail: "Field in template",
               },
