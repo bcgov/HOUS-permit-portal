@@ -12,8 +12,8 @@ class StepCodeExportService
             jurisdiction_name = j.qualified_name
             permit_type = pt.name
             work_type = a.name
-            jurisdiction_template_required_steps = j.jurisdiction_template_required_steps_by_classification(a, pt)
-            jurisdiction_template_required_steps.each do |jtsc|
+            permit_type_required_steps = j.permit_type_required_steps_by_classification(a, pt)
+            permit_type_required_steps.each do |jtsc|
               energy_step_required = jtsc.energy_step_required
               zero_carbon_step_required = jtsc.zero_carbon_step_required
               enabled = energy_step_required.positive? || zero_carbon_step_required.positive?

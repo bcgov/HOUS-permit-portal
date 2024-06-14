@@ -5,6 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IStepCode, StepCodeModel } from "../models/step-code"
+import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
 import { IStepCodeSelectOptions } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 
@@ -24,6 +25,14 @@ export const StepCodeStoreModel = types
     },
     getStepCode(id: string) {
       return self.stepCodesMap.get(id)
+    },
+    getEnergyStepOptions(allowZero: boolean = false): EEnergyStep[] {
+      const { energySteps } = self.selectOptions
+      return [...energySteps, allowZero && "0"].filter((outFalsy) => outFalsy) as EEnergyStep[]
+    },
+    getZeroCarbonStepOptions(allowZero: boolean = false): EZeroCarbonStep[] {
+      const { zeroCarbonSteps } = self.selectOptions
+      return [...zeroCarbonSteps, allowZero && "0"].filter((outFalsy) => outFalsy) as EZeroCarbonStep[]
     },
   }))
   .actions((self) => ({

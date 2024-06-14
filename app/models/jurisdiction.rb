@@ -2,7 +2,7 @@ class Jurisdiction < ApplicationRecord
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
 
-  BASE_INCLUDES = %i[permit_type_submission_contacts contacts jurisdiction_template_required_steps]
+  BASE_INCLUDES = %i[permit_type_submission_contacts contacts permit_type_required_steps]
 
   include ActionView::Helpers::SanitizeHelper
   searchkick searchable: %i[name reverse_qualified_name qualified_name],
@@ -21,7 +21,7 @@ class Jurisdiction < ApplicationRecord
   has_many :permit_type_submission_contacts
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
-  has_many :jurisdiction_template_required_steps, dependent: :destroy
+  has_many :permit_type_required_steps, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -37,6 +37,14 @@ class Jurisdiction < ApplicationRecord
   accepts_nested_attributes_for :permit_type_submission_contacts,
                                 allow_destroy: true,
                                 reject_if: proc { |attributes| attributes["email"].blank? }
+
+  accepts_nested_attributes_for :permit_type_required_steps,
+                                allow_destroy: true,
+                                reject_if:
+                                  proc { |attributes|
+                                    attributes["energy_step_required"].blank? ||
+                                      attributes["zero_carbon_step_required"].blank?
+                                  }
 
   before_create :assign_unique_prefix
 
@@ -152,14 +160,14 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
-  def jurisdiction_template_required_steps_by_classification(activity = nil, permit_type = nil)
+  def permit_type_required_steps_by_classification(activity = nil, permit_type = nil)
     return JurisdictionTemplateStepCode.none unless activity && permit_type
 
     requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type, discarded_at: nil)
 
     return JurisdictionTemplateStepCode.none unless requirement_template
 
-    jurisdiction_template_required_steps.where(requirement_template: requirement_template)
+    permit_type_required_steps.where(requirement_template: requirement_template)
   end
 
   def create_integration_mappings
