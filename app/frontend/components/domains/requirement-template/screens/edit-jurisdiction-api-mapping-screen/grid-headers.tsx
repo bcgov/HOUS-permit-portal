@@ -1,10 +1,11 @@
-import { Box, Flex, GridItem, Text } from "@chakra-ui/react"
+import { Box, Flex, GridItem, HStack, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useCallback, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { IIntegrationMapping } from "../../../../../models/integration-mapping"
 import { debounce } from "../../../../../utils/utility-functions"
 import { SearchInput } from "../../../../shared/base/search-input"
+import { FormSwitch } from "../../../../shared/form-switch"
 import { GridHeader } from "../../../../shared/grid/grid-header"
 
 export const GridHeaders = observer(function GridHeaders({
@@ -54,7 +55,16 @@ export const GridHeaders = observer(function GridHeaders({
           <Text role={"heading"} fontSize={"sm"} as={"h2"}>
             {t("apiMappingsSetup.edit.table.title")}
           </Text>
-          <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
+          <HStack>
+            <FormSwitch
+              switchIdForAccessibility={"integrationMappingShowOnlyUnmappedSwitch"}
+              isChecked={integrationMapping?.showOnlyUnmapped}
+              onChange={(e) => integrationMapping?.setShowOnlyUnmapped(!!e.target.checked)}
+              checkedText={t("apiMappingsSetup.edit.table.filter.showAll")}
+              uncheckedText={t("apiMappingsSetup.edit.table.filter.showOnlyUnmapped")}
+            />
+            <SearchInput query={searchQuery} onQueryChange={onQueryChange} />
+          </HStack>
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"} w={"full"}>

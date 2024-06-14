@@ -22,16 +22,25 @@ export function HighlightedText({ text, indices, highlightColor = "yellow.200" }
   sortedIndices.forEach(([start, end]) => {
     const normal = text.slice(lastEndIndex, start)
     const highlighted = text.slice(start, end + 1)
-    parts.push(<Text as="span">{normal}</Text>)
     parts.push(
-      <Text as="span" bg={highlightColor}>
+      <Text key={`${normal}-${start + end}`} as="span">
+        {normal}
+      </Text>
+    )
+    parts.push(
+      <Text key={`${highlighted}-${start + end}`} bg={highlightColor} as={"span"}>
         {highlighted}
       </Text>
     )
     lastEndIndex = end + 1
   })
 
-  parts.push(<Text as="span">{text.slice(lastEndIndex)}</Text>)
+  let lastPart = text.slice(lastEndIndex)
+  parts.push(
+    <Text key={`${lastPart}-${lastEndIndex}`} as="span">
+      {lastPart}
+    </Text>
+  )
 
   return <>{parts}</>
 }

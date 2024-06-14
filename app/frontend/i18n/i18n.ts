@@ -1305,6 +1305,10 @@ const options = {
             seeApiDoc: "See API documentation",
             heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
             table: {
+              filter: {
+                showAll: "Show all",
+                showOnlyUnmapped: "Show only unmapped",
+              },
               title: "API mappings",
               headers: {
                 localField: "Your local field name",

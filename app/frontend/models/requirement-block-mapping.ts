@@ -3,6 +3,10 @@ import { Instance, getParent, types } from "mobx-state-tree"
 import { IDenormalizedRequirement, IRequirementMap } from "../types/types"
 import { IIntegrationMapping } from "./integration-mapping"
 
+function shouldShowRequirementByFilter(requirementMap: IRequirementMap, showOnlyUnmapped: boolean) {
+  return !showOnlyUnmapped || !requirementMap.local_system_mapping?.trim()
+}
+
 const RequirementBlockMappingModel = types
   .model("RequirementBlockMappingModel")
   .props({
@@ -49,11 +53,18 @@ const RequirementBlockMappingModel = types
     getTableRequirementsJson(requirementsJson: IDenormalizedRequirement[]): (IDenormalizedRequirement & {
       matches?: FuseResult<IRequirementMap>["matches"]
     })[] {
+      const showOnlyUnmapped = self.integrationMapping.showOnlyUnmapped
+      const filteredRequirementsJson = showOnlyUnmapped
+        ? requirementsJson.filter((r) =>
+            shouldShowRequirementByFilter(self.requirements.get(r.requirementCode), showOnlyUnmapped)
+          )
+        : requirementsJson
+
       if (!self.hasQuery) {
-        return requirementsJson
+        return filteredRequirementsJson
       }
 
-      return requirementsJson?.reduce((acc, requirementJson) => {
+      return filteredRequirementsJson?.reduce((acc, requirementJson) => {
         const requirementMapSearchItem = self.fuseSearchResults.find(
           (result) => result.item.requirementCode === requirementJson?.requirementCode
         )
@@ -62,7 +73,9 @@ const RequirementBlockMappingModel = types
           acc.push({ ...requirementJson, matches: requirementMapSearchItem.matches })
         }
 
-        return acc
+        return acc.filter((r) =>
+          shouldShowRequirementByFilter(self.requirements.get(r.requirementCode), showOnlyUnmapped)
+        )
       }, [])
     },
   }))

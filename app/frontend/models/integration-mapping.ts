@@ -18,9 +18,9 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       jurisdictionId: types.string,
       requirementsMapping: RequirementsMapping,
       query: types.maybeNull(types.string),
+      showOnlyUnmapped: types.optional(types.boolean, false),
     })
     .extend(withEnvironment())
-
     .views((self) => ({
       get tableRequirementsMapping() {
         return (Array.from(self.requirementsMapping.values()) as IRequirementBlockMapping[]).filter(
@@ -29,6 +29,9 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
+      setShowOnlyUnmapped(showOnlyUnmapped: boolean) {
+        self.showOnlyUnmapped = showOnlyUnmapped
+      },
       setQuery(query: string | null) {
         self.query = query?.trim()
       },
