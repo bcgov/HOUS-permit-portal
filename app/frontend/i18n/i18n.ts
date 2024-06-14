@@ -222,6 +222,7 @@ const options = {
           or: "or",
           actionRequired: "Action required",
           resetFilters: "Reset filters",
+          customize: "Customize",
         },
         notification: {
           title: "Notifications",
@@ -285,7 +286,7 @@ const options = {
             stepCode: {
               title: "Step code requirements",
               description: "Below are the step code requirements for each permit template",
-              permitTemplate: "Permit template",
+              permitType: "Permit type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
               helpLinkText: "What does each step code level mean?",
@@ -662,6 +663,9 @@ const options = {
           title: "Step code auto-compliance tool",
           subTitle: "Automatically generate your BC Energy Step Code compliance report",
           checklistGuide: "See checklist guide",
+          helpLink:
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065",
+          helpLinkText: "What does each step code level mean?",
           saveAndGoBack: "Save and go back",
           markAsComplete: "Mark as complete",
           back: "Back to permit application",
@@ -1042,21 +1046,29 @@ const options = {
             stepCodeRequirements: {
               title: "Energy Step Code requirements",
               description: "Define step code requirements.",
+              setMinimum:
+                "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for each permit type below:",
               part9Building: "Part 9 Building",
+              addStep: "Add another requirement combination",
+              deleteCustomization: "Delete customization",
+              overriddenWarning: "This was overridden by your customized requirements below.",
               stepRequired: {
+                permitTypeHeading: "PERMIT TYPE",
+                standardToPass: "Standard Step Code compliance to pass",
+                customizedMinimum: "Customized minimum requirement for submission",
                 energy: {
-                  title: "Energy Step required",
+                  title: "Energy Step Code Level",
                   options: {
-                    "0": "N/A",
+                    "0": "Not required",
                     "3": "3",
                     "4": "4",
                     "5": "5",
                   },
                 },
                 zeroCarbon: {
-                  title: "Zero Carbon Step Code Level required",
+                  title: "Zero Carbon Step Code Level",
                   options: {
-                    "0": "N/A",
+                    "0": "Not required",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",
                     "3": "EL 3 - Strong",

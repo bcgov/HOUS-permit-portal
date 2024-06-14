@@ -25,7 +25,7 @@ class JurisdictionBlueprint < Blueprinter::Base
 
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
-    association :jurisdiction_template_required_steps, blueprint: JurisdictionTemplateRequiredStepBlueprint
+    association :permit_type_required_steps, blueprint: PermitTypeRequiredStepBlueprint
   end
 
   view :minimal do

@@ -1,12 +1,9 @@
-class JurisdictionTemplateRequiredStepSeeder
+class PermitTypeRequiredStepSeeder
   def self.seed
     Jurisdiction.find_each do |jurisdiction|
-      RequirementTemplate.find_each do |requirement_template|
-        JurisdictionTemplateRequiredStep.find_or_create_by!(
-          jurisdiction: jurisdiction,
-          requirement_template: requirement_template,
-        ) do |jtr_step|
-          jtr_step.energy_step_required =
+      PermitType.find_each do |permit_type|
+        PermitTypeRequiredStep.find_or_create_by!(jurisdiction: jurisdiction, permit_type: permit_type) do |ptr_step|
+          ptr_step.energy_step_required =
             (
               if jurisdiction.respond_to?(:energy_step_required)
                 jurisdiction.energy_step_required || 0
@@ -14,7 +11,7 @@ class JurisdictionTemplateRequiredStepSeeder
                 ENV["MIN_ENERGY_STEP"].to_i
               end
             )
-          jtr_step.zero_carbon_step_required =
+          ptr_step.zero_carbon_step_required =
             (
               if jurisdiction.respond_to?(:zero_carbon_step_required)
                 jurisdiction.zero_carbon_step_required || 0

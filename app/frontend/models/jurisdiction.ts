@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { IContact, IJurisdictionTemplateRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 
@@ -38,7 +38,7 @@ export const JurisdictionModel = types
     mapZoom: types.maybeNull(types.number),
     externalApiEnabled: types.optional(types.boolean, false),
     submissionInboxSetUp: types.boolean,
-    jurisdictionTemplateRequiredSteps: types.array(types.frozen<IJurisdictionTemplateRequiredStep>()),
+    permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -55,9 +55,9 @@ export const JurisdictionModel = types
 
       return sortByCreatedAt(self.contacts)[0]
     },
-    get requiredStepsByTemplate() {
-      return self.jurisdictionTemplateRequiredSteps.reduce((result, jtrs) => {
-        const templateId = jtrs.requirementTemplateId
+    get requiredStepsByPermitType() {
+      return self.permitTypeRequiredSteps.reduce((result, jtrs) => {
+        const templateId = jtrs.permitTypeId
 
         // If the category doesn't exist in the result object, create an array for it
         if (!result[templateId]) {
@@ -73,6 +73,9 @@ export const JurisdictionModel = types
     },
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
+    },
+    getRequiredStep(id: string): IPermitTypeRequiredStep {
+      return self.permitTypeRequiredSteps.find((rs) => rs.id == id)
     },
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)

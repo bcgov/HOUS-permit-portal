@@ -7,12 +7,12 @@ import {
   PopoverContent,
   PopoverTrigger,
   Portal,
-  StackDivider,
   VStack,
 } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React from "react"
 import { useMst } from "../../../../../../../setup/root"
 import { EEnergyStep } from "../../../../../../../types/enums"
@@ -22,13 +22,21 @@ interface IProps {
   onChange: (event: any) => void
   value: EEnergyStep
   isDisabled?: boolean
+  allowZero?: boolean
+  showFirstOnly?: boolean
 }
 
-export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled }: IProps) {
+export const EnergyStepSelect = observer(function EnergyStepSelect({
+  showFirstOnly,
+  onChange,
+  value,
+  isDisabled,
+  allowZero,
+}: IProps) {
   const {
-    stepCodeStore: { selectOptions },
+    stepCodeStore: { getEnergyStepOptions },
   } = useMst()
-
+  const options = getEnergyStepOptions(allowZero)
   return (
     <Popover placement="bottom-end">
       {({ onClose }) => (
@@ -46,15 +54,17 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {value ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`ui.selectPlaceholder`)}
+                {!R.isNil(value)
+                  ? t(`${i18nPrefix}.stepRequired.energy.options.${showFirstOnly ? options[0] : value}`)
+                  : t(`ui.selectPlaceholder`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
           <Portal>
             <PopoverContent>
-              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-                {selectOptions.energySteps.map((value) => (
+              <VStack align="start" spacing={0}>
+                {options.map((value, i) => (
                   <Flex
                     key={value}
                     onClick={() => {
@@ -64,6 +74,8 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                     px={2}
                     py={1.5}
                     w="full"
+                    borderTop={i === options.length - 1 ? "1px solid" : undefined}
+                    borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >

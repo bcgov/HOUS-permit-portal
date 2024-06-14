@@ -9,6 +9,7 @@ import {
   HStack,
   Heading,
   Input,
+  Link,
   ListItem,
   OrderedList,
   Show,
@@ -21,6 +22,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -184,11 +186,10 @@ export const JurisdictionScreen = observer(() => {
                 <Flex direction="column" p={6} gap={9}>
                   <Flex direction="column" gap={2}>
                     <Text>{t("jurisdiction.edit.stepCode.description")}</Text>
-                    {/* TODO: Add step code help link href */}
-                    {/* <Link href={"#"} isExternal>
-                      {t("jurisdiction.edit.stepCode.helpLinkText")}
+                    <Link href={t("stepCode.helpLink")} isExternal fontWeight="normal">
+                      {t("stepCode.helpLinkText")}
                       <ArrowSquareOut />
-                    </Link> */}
+                    </Link>
                   </Flex>
                   <StepCodeTable currentJurisdiction={currentJurisdiction} />
                 </Flex>
@@ -385,50 +386,52 @@ interface IStepCodeTableProps {
 
 const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) => {
   const { t } = useTranslation()
-  const requiredStepsByTemplate = currentJurisdiction.requiredStepsByTemplate
+  const requiredStepsByPermitType = currentJurisdiction.requiredStepsByPermitType
   return (
     <TableContainer>
       <Table variant="simple">
         <Thead>
           <Tr>
-            <Th textAlign="left">{t("jurisdiction.edit.stepCode.permitTemplate")}</Th>
+            <Th textAlign="left">{t("jurisdiction.edit.stepCode.permitType")}</Th>
             <Th textAlign="center">{t("jurisdiction.edit.stepCode.energyStepRequired")}</Th>
             <Th textAlign="center"></Th>
             <Th textAlign="right">{t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {Object.keys(requiredStepsByTemplate).map((templateId) => {
+          {Object.keys(requiredStepsByPermitType).map((permitTypeId) => {
             return (
               <>
-                {requiredStepsByTemplate[templateId].map((jtrs, i) => (
+                {requiredStepsByPermitType[permitTypeId].map((ptrs, i) => (
                   <>
                     <Tr>
                       <Td textAlign="left" fontWeight="bold">
-                        {jtrs.requirementTemplateLabel}
+                        {ptrs.permitTypeName}
                       </Td>
                       <Td textAlign="center">
-                        {currentJurisdiction.energyStepRequiredTranslation(jtrs.energyStepRequired)}
+                        {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
                       </Td>
                       <Td textAlign="center" textTransform="lowercase" fontStyle="italic">
                         {t("ui.and")}
                       </Td>
                       <Td textAlign="right">
-                        {currentJurisdiction.zeroCarbonLevelTranslation(jtrs.zeroCarbonStepRequired)}
+                        {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}
                       </Td>
                     </Tr>
-                    {i !== requiredStepsByTemplate[templateId].length - 1 && (
+                    {i !== requiredStepsByPermitType[permitTypeId].length - 1 && (
                       <Tr>
                         <Td colSpan={4}>
-                          <Center>{t("ui.or")}</Center>
+                          <Center h={0} fontWeight="bold">
+                            {t("ui.or")}
+                          </Center>
                         </Td>
                       </Tr>
                     )}
                   </>
                 ))}
-                <Tr>
-                  <Td colSpan={4}>
-                    <Box borderTop="2px" borderColor="greys.grey02" />
+                <Tr p={0}>
+                  <Td colSpan={4} p={0}>
+                    <Box borderTop="1px" borderColor="greys.grey01" my={8} />
                   </Td>
                 </Tr>
               </>

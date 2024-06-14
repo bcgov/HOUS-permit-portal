@@ -20,8 +20,7 @@ module Api::Concerns::Search::Jurisdictions
     unless jurisdiction_search_params[:submission_inbox_set_up].nil?
       search_params[:where] = { submission_inbox_set_up: jurisdiction_search_params[:submission_inbox_set_up] }
     end
-
-    @search = Jurisdiction.includes(Jurisdiction::BASE_INCLUDES).search(jurisdiction_query, **search_params)
+    @search = Jurisdiction.search(jurisdiction_query, **search_params, includes: Jurisdiction::BASE_INCLUDES)
   end
 
   private

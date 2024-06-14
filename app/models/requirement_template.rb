@@ -14,7 +14,7 @@ class RequirementTemplate < ApplicationRecord
            -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
            class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
-  has_many :jurisdiction_template_required_steps, dependent: :destroy
+  has_many :permit_type_required_steps, dependent: :destroy
 
   has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
 
