@@ -158,24 +158,24 @@ export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => 
   return formJson
 }
 
-export const combineRevisionButtons = (formJson: IFormJson) => {
-  const convertToRevisionButton = (requirement: IFormIORequirement) => {
-    return {
-      id: requirement.id + "-revision-button",
-      key: requirement.key + "-revision-button",
-      type: "button",
-      label: "",
-      title: "Revision Button",
-      input: true,
-      action: "custom",
-      custom: `console.log("${requirement.key} says hello")`,
-      customClass: "revision-button",
-      hideLabel: true,
-      customConditional: requirement.customConditional,
-      conditional: requirement.conditional,
-    } as IFormIORequirement
-  }
+const convertToRevisionButton = (requirement: IFormIORequirement) => {
+  return {
+    id: requirement.id + "-revision-button",
+    key: requirement.key + "-revision-button",
+    type: "button",
+    label: "",
+    title: "Revision Button",
+    input: true,
+    action: "custom",
+    custom: `console.log("${requirement.key} says hello")`,
+    customClass: "revision-button",
+    hideLabel: true,
+    customConditional: requirement.customConditional,
+    conditional: requirement.conditional,
+  } as IFormIORequirement
+}
 
+export const combineRevisionButtons = (formJson: IFormJson) => {
   formJson.components.forEach((section: IFormIOSection) => {
     if (section.id === COMPLETTION_SECTION_ID) return
 
