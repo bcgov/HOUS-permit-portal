@@ -30,9 +30,9 @@ export const PermitApplicationModel = types
     id: types.identifier,
     nickname: types.string,
     number: types.string,
-    fullAddress: types.maybeNull(types.string), //for now some seeds will not have this
-    pin: types.maybeNull(types.string), //for now some seeds will not have this
-    pid: types.maybeNull(types.string), //for now some seeds will not have this
+    fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
+    pin: types.maybeNull(types.string), // for now some seeds will not have this
+    pid: types.maybeNull(types.string), // for now some seeds will not have this
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
