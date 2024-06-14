@@ -148,7 +148,7 @@ const options = {
           export: "Export",
           preview: "Preview",
           back: "Back",
-          backHome: "Back to home",
+          backHome: "Back to inbox",
           yes: "Yes",
           no: "No",
           show: "Show",
