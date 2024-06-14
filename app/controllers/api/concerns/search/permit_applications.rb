@@ -61,8 +61,7 @@ module Api::Concerns::Search::PermitApplications
     else
       where = { submitter_id: current_user.id }
     end
-
-    where.merge!(filters.to_h.deep_symbolize_keys.compact) if filters.present?
+    (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
 
     where
   end

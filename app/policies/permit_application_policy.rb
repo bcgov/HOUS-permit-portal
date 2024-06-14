@@ -4,7 +4,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     if user.super_admin? || record.submitter == user
       true
     elsif user.review_staff?
-      user.jurisdictions.find(record.jurisdiction.id).present?
+      user.jurisdictions.find(record.jurisdiction.id).present? && record.submitted?
     end
   end
 
