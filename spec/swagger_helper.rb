@@ -161,6 +161,8 @@ in this document.
               },
               permit_classifications: {
                 type: :string,
+                description:
+                  "This is the combined permit type and activity type of the permit application. This is derived as `${permit_type.name} - ${activity_type.name}` e.g. '4+ Unit housing - New Construction'",
               },
               permit_type: {
                 "$ref" => "#/components/schemas/PermitClassification",
@@ -170,6 +172,9 @@ in this document.
               },
               submitter: {
                 "$ref" => "#/components/schemas/Submitter",
+              },
+              version: {
+                "$ref" => "#/components/schemas/Version",
               },
               submission_data: {
                 "$ref" => "#/components/schemas/SubmissionData",
@@ -246,6 +251,7 @@ in this document.
           },
           PermitClassification: {
             type: :object,
+            description: "This object represents a permit classification. e.g. a permit type or activity type.",
             properties: {
               id: {
                 type: :string,
@@ -263,10 +269,32 @@ in this document.
               },
             },
           },
+          Version: {
+            type: :object,
+            description: "The object represents the permit application version.",
+            properties: {
+              id: {
+                type: :string,
+                description:
+                  "The ID of the version. This can be used to retrieve the integration mapping of the Jurisdiction for this version.",
+              },
+              version_date: {
+                type: :integer,
+                format: :int64,
+                description:
+                  "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST.",
+              },
+              status: {
+                type: :string,
+                enum: %w[published deprecated],
+                description: "The status of the version.",
+              },
+            },
+          },
           MultiOptionSubmissionValue: {
             type: :object,
             description:
-              "The submission value for requirement input types, which are limited to a set of options. e.g. an option from a select drop down, or checkboxes",
+              "The submission value for requirement input types, which are limited to a set of options. e.g. an option from a select drop down, or checkboxes.",
             additionalProperties: {
               type: :boolean,
               description:
@@ -275,7 +303,7 @@ in this document.
           },
           ContactSubmissionValue: {
             type: :array,
-            description: "The contact submission value. It is an array of contact objects",
+            description: "The contact submission value. It is an array of contact objects.",
             items: {
               type: :object,
               properties: {
@@ -312,7 +340,7 @@ in this document.
           },
           FileSubmissionValue: {
             description:
-              "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour .",
+              "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour.",
             type: :array,
             items: {
               "$ref" => "#/components/schemas/File",
@@ -356,6 +384,14 @@ in this document.
                 type: :string,
                 description: "The email of the submitter.",
               },
+              first_name: {
+                type: :string,
+                description: "The first name of the submitter.",
+              },
+              last_name: {
+                type: :string,
+                description: "The last name of the submitter.",
+              },
             },
           },
           ResponseError: {
@@ -387,19 +423,20 @@ in this document.
               event: {
                 type: :string,
                 enum: %w[permit_submitted],
-                description: "The event type",
+                description: "The event type.",
               },
               payload: {
                 type: :object,
                 properties: {
                   permit_id: {
                     type: :string,
-                    description: "The permit application ID",
+                    description: "The permit application ID.",
                   },
                   submitted_at: {
-                    type: :string,
-                    format: "date-time",
-                    description: "The date and time the permit application was submitted",
+                    type: :integer,
+                    format: "int64",
+                    description:
+                      "The timestamp of when the permit application was submitted. This is in milliseconds since the epoch (UNIX time).",
                   },
                 },
               },

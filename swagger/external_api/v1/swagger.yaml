@@ -236,12 +236,17 @@ components:
           description: Datetime in milliseconds since the epoch (Unix time)
         permit_classifications:
           type: string
+          description: This is the combined permit type and activity type of the permit
+            application. This is derived as `${permit_type.name} - ${activity_type.name}`
+            e.g. '4+ Unit housing - New Construction'
         permit_type:
           "$ref": "#/components/schemas/PermitClassification"
         activity:
           "$ref": "#/components/schemas/PermitClassification"
         submitter:
           "$ref": "#/components/schemas/Submitter"
+        version:
+          "$ref": "#/components/schemas/Version"
         submission_data:
           "$ref": "#/components/schemas/SubmissionData"
         raw_h2k_files:
@@ -324,6 +329,8 @@ components:
         - requirements
     PermitClassification:
       type: object
+      description: This object represents a permit classification. e.g. a permit type
+        or activity type.
       properties:
         id:
           type: string
@@ -335,17 +342,36 @@ components:
         code:
           type: string
           description: The code of the permit classification.
+    Version:
+      type: object
+      description: The object represents the permit application version.
+      properties:
+        id:
+          type: string
+          description: The ID of the version. This can be used to retrieve the integration
+            mapping of the Jurisdiction for this version.
+        version_date:
+          type: integer
+          format: int64
+          description: The version date in milliseconds since the epoch (UNIX time).
+            This is meant to be parsed as PST.
+        status:
+          type: string
+          enum:
+          - published
+          - deprecated
+          description: The status of the version.
     MultiOptionSubmissionValue:
       type: object
       description: The submission value for requirement input types, which are limited
-        to a set of options. e.g. an option from a select drop down, or checkboxes
+        to a set of options. e.g. an option from a select drop down, or checkboxes.
       additionalProperties:
         type: boolean
         description: The key is the option value, and the value is a boolean indicating
           if the option was selected.
     ContactSubmissionValue:
       type: array
-      description: The contact submission value. It is an array of contact objects
+      description: The contact submission value. It is an array of contact objects.
       items:
         type: object
         properties:
@@ -372,7 +398,7 @@ components:
             description: The organization of the contact.
     FileSubmissionValue:
       description: 'The file submission value. It is an array of file objects. Note:
-        the urls are signed and will expire after 1 hour .'
+        the urls are signed and will expire after 1 hour.'
       type: array
       items:
         "$ref": "#/components/schemas/File"
@@ -405,6 +431,12 @@ components:
         email:
           type: string
           description: The email of the submitter.
+        first_name:
+          type: string
+          description: The first name of the submitter.
+        last_name:
+          type: string
+          description: The last name of the submitter.
     ResponseError:
       type: object
       properties:
@@ -428,17 +460,18 @@ components:
           type: string
           enum:
           - permit_submitted
-          description: The event type
+          description: The event type.
         payload:
           type: object
           properties:
             permit_id:
               type: string
-              description: The permit application ID
+              description: The permit application ID.
             submitted_at:
-              type: string
-              format: date-time
-              description: The date and time the permit application was submitted
+              type: integer
+              format: int64
+              description: The timestamp of when the permit application was submitted.
+                This is in milliseconds since the epoch (UNIX time).
 formats:
 - json
 - yaml
