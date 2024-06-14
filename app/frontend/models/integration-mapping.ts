@@ -23,9 +23,15 @@ export const IntegrationMappingModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .views((self) => ({
       get tableRequirementsMapping() {
-        return (Array.from(self.requirementsMapping.values()) as IRequirementBlockMapping[]).filter(
-          (r) => r.hasAnyMatchesAfterQuery
-        )
+        const filteredRequirementsMapping = (
+          Array.from(self.requirementsMapping.values()) as IRequirementBlockMapping[]
+        ).filter((r) => r.hasAnyMatchesAfterQuery)
+
+        if (!self.query?.trim()) {
+          return filteredRequirementsMapping
+        }
+
+        return filteredRequirementsMapping.sort((a, b) => a.bestSearchScore - b.bestSearchScore)
       },
     }))
     .actions((self) => ({

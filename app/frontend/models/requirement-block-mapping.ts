@@ -26,6 +26,8 @@ const RequirementBlockMappingModel = types
     get fuseInstance() {
       const fuseOptions: IFuseOptions<IRequirementMap> = {
         includeMatches: true,
+        includeScore: true,
+        ignoreLocation: true,
         keys: ["requirementCode", "local_system_mapping"],
       }
       return new Fuse(self.requirementsList, fuseOptions)
@@ -41,6 +43,10 @@ const RequirementBlockMappingModel = types
     },
   }))
   .views((self) => ({
+    // Note: a lower score is better. Perfect match is 0
+    get bestSearchScore() {
+      return self.fuseSearchResults?.[0]?.score
+    },
     get hasAnyMatchesAfterQuery() {
       if (!self.hasQuery) {
         return true
@@ -53,6 +59,7 @@ const RequirementBlockMappingModel = types
     getTableRequirementsJson(requirementsJson: IDenormalizedRequirement[]): (IDenormalizedRequirement & {
       matches?: FuseResult<IRequirementMap>["matches"]
     })[] {
+      console.log("requirementsJson", self.fuseSearchResults)
       const showOnlyUnmapped = self.integrationMapping.showOnlyUnmapped
       const filteredRequirementsJson = showOnlyUnmapped
         ? requirementsJson.filter((r) =>
@@ -63,19 +70,15 @@ const RequirementBlockMappingModel = types
       if (!self.hasQuery) {
         return filteredRequirementsJson
       }
+      return self.fuseSearchResults?.reduce((acc, fuseResult) => {
+        const requirementMapping = fuseResult.item
+        const requirementJson = requirementsJson.find((r) => r.requirementCode === requirementMapping.requirementCode)
 
-      return filteredRequirementsJson?.reduce((acc, requirementJson) => {
-        const requirementMapSearchItem = self.fuseSearchResults.find(
-          (result) => result.item.requirementCode === requirementJson?.requirementCode
-        )
-
-        if (requirementMapSearchItem) {
-          acc.push({ ...requirementJson, matches: requirementMapSearchItem.matches })
+        if (requirementJson && shouldShowRequirementByFilter(requirementMapping, showOnlyUnmapped)) {
+          acc.push({ ...requirementJson, matches: fuseResult.matches })
         }
 
-        return acc.filter((r) =>
-          shouldShowRequirementByFilter(self.requirements.get(r.requirementCode), showOnlyUnmapped)
-        )
+        return acc
       }, [])
     },
   }))
