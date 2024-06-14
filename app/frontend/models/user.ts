@@ -16,7 +16,6 @@ export const UserModel = types
     omniauthProvider: types.maybeNull(types.enumeration(Object.values(EOmniauthProvider))),
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
-    nickname: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),

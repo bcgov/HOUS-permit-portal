@@ -23,7 +23,6 @@ namespace :db do
         first_name: row["first_name"],
         last_name: row["last_name"],
         email: row["bceid_email"],
-        nickname: row["bceid_username"],
         role: row["role"],
         password: Devise.friendly_token[0, 20],
         jurisdiction: j,
