@@ -173,8 +173,8 @@ in this document.
               submitter: {
                 "$ref" => "#/components/schemas/Submitter",
               },
-              version: {
-                "$ref" => "#/components/schemas/Version",
+              permit_version: {
+                "$ref" => "#/components/schemas/PermitVersion",
               },
               submission_data: {
                 "$ref" => "#/components/schemas/SubmissionData",
@@ -198,15 +198,19 @@ in this document.
               properties: {
                 id: {
                   type: :string,
+                  description: "The ID of the requirement block.",
                 },
                 requirement_block_code: {
                   type: :string,
+                  description: "The code of the requirement block. This is unique within the permit application.",
                 },
                 name: {
                   type: :string,
+                  description: "The name/label of the requirement block.",
                 },
                 description: {
                   type: :string,
+                  description: "The description of the requirement block.",
                   nullable: true,
                 },
                 requirements: {
@@ -217,13 +221,16 @@ in this document.
                     properties: {
                       id: {
                         type: :string,
+                        description: "The ID of the requirement.",
                       },
                       name: {
                         type: :string,
+                        description: "The name/label of the requirement.",
                       },
                       requirement_code: {
                         type: :string,
-                        description: "The requirement code for this requirement.",
+                        description:
+                          "The requirement code for this requirement. This is unique within the requirement block.",
                       },
                       type: {
                         type: :string,
@@ -269,9 +276,9 @@ in this document.
               },
             },
           },
-          Version: {
+          PermitVersion: {
             type: :object,
-            description: "The object represents the permit application version.",
+            description: "The object represents the permit version.",
             properties: {
               id: {
                 type: :string,
@@ -289,6 +296,58 @@ in this document.
                 enum: %w[published deprecated],
                 description: "The status of the version.",
               },
+            },
+          },
+          IntegrationMapping: {
+            type: :object,
+            description: "The integration mapping of the jurisdiction for a specific permit version.",
+            properties: {
+              id: {
+                type: :string,
+                description: "The ID of the integration mapping.",
+              },
+              permit_version: {
+                "$ref" => "#/components/schemas/PermitVersion",
+              },
+              requirements_mapping: {
+                "$ref" => "#/components/schemas/RequirementsMapping",
+              },
+            },
+          },
+          RequirementsMapping: {
+            type: :object,
+            description:
+              "The mapping of the requirements between the Building Permit Hub system and local jurisdiction integration system. Note: the top level keys are the requirement block codes.",
+            additionalProperties: {
+              type: :object,
+              description:
+                "The requirement block mapping. This contains a requirements hash, where the keys are the requirement codes and the value is another hash containing the field mapping to the local jurisdiction system.",
+              properties: {
+                id: {
+                  type: :string,
+                  description: "The ID of the requirement block.",
+                },
+                requirements: {
+                  type: :object,
+                  description: "A hash of the requirement code to the local jurisdiction system field mapping.",
+                  additionalProperties: {
+                    type: :object,
+                    properties: {
+                      id: {
+                        type: :string,
+                        description: "The ID of the requirement.",
+                      },
+                      local_system_mapping: {
+                        type: :string,
+                        description:
+                          "The local jurisdiction integration system field mapping for this requirement. This should be the field name of the requirement in your system.",
+                      },
+                    },
+                    required: %w[id local_system_mapping],
+                  },
+                },
+              },
+              required: %w[id requirements],
             },
           },
           MultiOptionSubmissionValue: {

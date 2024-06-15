@@ -160,4 +160,59 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
       end
     end
   end
+
+  path "/permit_applications/versions/{version_id}/integration_mapping" do
+    parameter name: "version_id",
+              in: :path,
+              type: :string,
+              description:
+                "The id of the permit application version. Note: this is different from the permit application id."
+
+    let(:version_id) { submitted_permit_applications.first.template_version.id }
+
+    get(
+      "This endpoint retrieves the integration mapping between the Building Permit Hub system and the local jurisdiction integration system using a permit version unique identifier (ID). Please note that requests to this endpoint are subject to rate limiting to ensure optimal performance and fair usage.",
+    ) do
+      tags "Permit applications"
+      consumes "application/json"
+      produces "application/json"
+      response(200, "Successful") do
+        schema type: :object,
+               properties: {
+                 data: {
+                   "$ref" => "#/components/schemas/IntegrationMapping",
+                 },
+               },
+               required: %w[data]
+
+        run_test! do |res|
+          data = JSON.parse(res.body)
+
+          expect(data.dig("data", "id")).to eq(
+            IntegrationMapping.find_by(jurisdiction: external_api_key.jurisdiction, template_version_id: version_id).id,
+          )
+        end
+      end
+
+      response(404, "Accessing a integration mapping which does not exist") do
+        let(:version_id) { "does_not_exist" }
+        run_test! { |response| expect(response.status).to eq(404) }
+      end
+
+      response(429, "Rate limit exceeded") do
+        schema "$ref" => "#/components/schemas/ResponseError"
+        around { |example| with_temporary_rate_limit("external_api/ip", limit: 3, period: 1.minute) { example.run } }
+        before do
+          5.times do
+            get "/external_api/v1/permit_applications/versions/#{version_id}/integration_mapping",
+                headers: {
+                  Authorization: "Bearer #{token}",
+                }
+          end
+        end
+
+        run_test! { |response| expect(response.status).to eq(429) }
+      end
+    end
+  end
 end

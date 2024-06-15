@@ -186,6 +186,42 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
+  "/permit_applications/versions/{version_id}/integration_mapping":
+    parameters:
+    - name: version_id
+      in: path
+      description: 'The id of the permit application version. Note: this is different
+        from the permit application id.'
+      required: true
+      schema:
+        type: string
+    get:
+      summary: This endpoint retrieves the integration mapping between the Building
+        Permit Hub system and the local jurisdiction integration system using a permit
+        version unique identifier (ID). Please note that requests to this endpoint
+        are subject to rate limiting to ensure optimal performance and fair usage.
+      tags:
+      - Permit applications
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/IntegrationMapping"
+                required:
+                - data
+        '404':
+          description: Accessing a integration mapping which does not exist
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ResponseError"
 servers:
 - url: "/external_api/v1"
   description: Current environment server
@@ -245,8 +281,8 @@ components:
           "$ref": "#/components/schemas/PermitClassification"
         submitter:
           "$ref": "#/components/schemas/Submitter"
-        version:
-          "$ref": "#/components/schemas/Version"
+        permit_version:
+          "$ref": "#/components/schemas/PermitVersion"
         submission_data:
           "$ref": "#/components/schemas/SubmissionData"
         raw_h2k_files:
@@ -265,12 +301,17 @@ components:
         properties:
           id:
             type: string
+            description: The ID of the requirement block.
           requirement_block_code:
             type: string
+            description: The code of the requirement block. This is unique within
+              the permit application.
           name:
             type: string
+            description: The name/label of the requirement block.
           description:
             type: string
+            description: The description of the requirement block.
             nullable: true
           requirements:
             type: array
@@ -281,11 +322,14 @@ components:
               properties:
                 id:
                   type: string
+                  description: The ID of the requirement.
                 name:
                   type: string
+                  description: The name/label of the requirement.
                 requirement_code:
                   type: string
-                  description: The requirement code for this requirement.
+                  description: The requirement code for this requirement. This is
+                    unique within the requirement block.
                 type:
                   type: string
                   enum:
@@ -342,9 +386,9 @@ components:
         code:
           type: string
           description: The code of the permit classification.
-    Version:
+    PermitVersion:
       type: object
-      description: The object represents the permit application version.
+      description: The object represents the permit version.
       properties:
         id:
           type: string
@@ -361,6 +405,53 @@ components:
           - published
           - deprecated
           description: The status of the version.
+    IntegrationMapping:
+      type: object
+      description: The integration mapping of the jurisdiction for a specific permit
+        version.
+      properties:
+        id:
+          type: string
+          description: The ID of the integration mapping.
+        permit_version:
+          "$ref": "#/components/schemas/PermitVersion"
+        requirements_mapping:
+          "$ref": "#/components/schemas/RequirementsMapping"
+    RequirementsMapping:
+      type: object
+      description: 'The mapping of the requirements between the Building Permit Hub
+        system and local jurisdiction integration system. Note: the top level keys
+        are the requirement block codes.'
+      additionalProperties:
+        type: object
+        description: The requirement block mapping. This contains a requirements hash,
+          where the keys are the requirement codes and the value is another hash containing
+          the field mapping to the local jurisdiction system.
+        properties:
+          id:
+            type: string
+            description: The ID of the requirement block.
+          requirements:
+            type: object
+            description: A hash of the requirement code to the local jurisdiction
+              system field mapping.
+            additionalProperties:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: The ID of the requirement.
+                local_system_mapping:
+                  type: string
+                  description: The local jurisdiction integration system field mapping
+                    for this requirement. This should be the field name of the requirement
+                    in your system.
+              required:
+              - id
+              - local_system_mapping
+        required:
+        - id
+        - requirements
     MultiOptionSubmissionValue:
       type: object
       description: The submission value for requirement input types, which are limited

@@ -160,6 +160,11 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
+        collection do
+          resources :versions, as: "template_versions", only: [] do
+            get "integration_mapping", to: "permit_applications#show_integration_mapping"
+          end
+        end
       end
     end
   end

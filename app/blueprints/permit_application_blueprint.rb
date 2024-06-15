@@ -56,8 +56,6 @@ class PermitApplicationBlueprint < Blueprinter::Base
     identifier :id
     fields :status, :number, :full_address, :pid, :pin, :reference_number, :submitted_at
 
-    association :template_version, blueprint: TemplateVersionBlueprint, view: :external_api, name: :version
-
     field :submission_data do |pa, _options|
       pa.formatted_submission_data_for_external_use
     end
@@ -70,6 +68,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_raw_h2k_files_for_external_use
     end
 
+    association :template_version, blueprint: TemplateVersionBlueprint, view: :external_api, name: :permit_version
     association :submitter, blueprint: UserBlueprint, view: :external_api
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint, name: :activity_type

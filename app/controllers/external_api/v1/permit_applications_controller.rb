@@ -2,6 +2,7 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
   include ExternalApi::Concerns::Search::PermitApplications
 
   before_action :set_permit_application, only: :show
+  before_action :set_template_version, only: :show_integration_mapping
 
   def index
     perform_permit_application_search
@@ -29,9 +30,28 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
                    { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :external_api } }
   end
 
+  def show_integration_mapping
+    @integration_mapping =
+      @template_version.integration_mappings.find_by(jurisdiction: current_external_api_key.jurisdiction)
+
+    authorize @integration_mapping, policy_class: ExternalApi::PermitApplicationPolicy
+
+    if @integration_mapping.present?
+      render_success @integration_mapping,
+                     nil,
+                     { blueprint: IntegrationMappingBlueprint, blueprint_opts: { view: :external_api } }
+    else
+      render_error "integration_mapping.not_found_error", status: 404
+    end
+  end
+
   private
 
   def set_permit_application
     @permit_application = PermitApplication.find(params[:id])
+  end
+
+  def set_template_version
+    @template_version = TemplateVersion.find(params[:template_version_id])
   end
 end
