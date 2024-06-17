@@ -110,7 +110,8 @@ paths:
                 - data
                 - meta
         '429':
-          description: Rate limit exceeded
+          description: 'Rate limit exceeded. Note: The rate limit is 100 requests
+            per minute per API key and 300 requests per IP in a 3 minute interval'
           content:
             application/json:
               schema:
@@ -190,16 +191,16 @@ paths:
     parameters:
     - name: version_id
       in: path
-      description: 'The id of the permit application version. Note: this is different
-        from the permit application id.'
+      description: This identifier corresponds to a specific version of the permit
+        template, distinct from the permit application ID, which uniquely identifies
+        an individual permit application.
       required: true
       schema:
         type: string
     get:
       summary: This endpoint retrieves the integration mapping between the Building
-        Permit Hub system and the local jurisdiction integration system using a permit
-        version unique identifier (ID). Please note that requests to this endpoint
-        are subject to rate limiting to ensure optimal performance and fair usage.
+        Permit Hub system and the local jurisdiction’s integration system. It uses
+        a unique ID associated with a specific version of the permit template.
       tags:
       - Permit applications
       responses:
@@ -217,7 +218,8 @@ paths:
         '404':
           description: Accessing a integration mapping which does not exist
         '429':
-          description: Rate limit exceeded
+          description: 'Rate limit exceeded. Note: The rate limit is 100 requests
+            per minute per API key and 300 requests per IP in a 3 minute interval'
           content:
             application/json:
               schema:
@@ -272,15 +274,15 @@ components:
           description: Datetime in milliseconds since the epoch (Unix time)
         permit_classifications:
           type: string
-          description: This is the combined permit type and activity type of the permit
-            application. This is derived as `${permit_type.name} - ${activity_type.name}`
+          description: This is the combined permit type and activity (work) type of
+            the permit application. This is derived as `${permit_type.name} - ${activity_type.name}`
             e.g. '4+ Unit housing - New Construction'
         permit_type:
           "$ref": "#/components/schemas/PermitClassification"
         activity:
           "$ref": "#/components/schemas/PermitClassification"
-        submitter:
-          "$ref": "#/components/schemas/Submitter"
+        account_holder:
+          "$ref": "#/components/schemas/AccountHolder"
         permit_version:
           "$ref": "#/components/schemas/PermitVersion"
         submission_data:
@@ -328,8 +330,8 @@ components:
                   description: The name/label of the requirement.
                 requirement_code:
                   type: string
-                  description: The requirement code for this requirement. This is
-                    unique within the requirement block.
+                  description: The requirement code for this requirement field. This
+                    is unique within the requirement block.
                 type:
                   type: string
                   enum:
@@ -374,7 +376,7 @@ components:
     PermitClassification:
       type: object
       description: This object represents a permit classification. e.g. a permit type
-        or activity type.
+        or activity (work) type.
       properties:
         id:
           type: string
@@ -512,22 +514,22 @@ components:
           type: string
           format: url
           description: The signed URL to download the file.
-    Submitter:
+    AccountHolder:
       type: object
-      description: The submitter of the permit application.
+      description: The account holder of the permit application.
       properties:
         id:
           type: string
-          description: The ID of the submitter.
+          description: The ID of the account holder.
         email:
           type: string
-          description: The email of the submitter.
+          description: The email of the account holder.
         first_name:
           type: string
-          description: The first name of the submitter.
+          description: The first name of the account holder.
         last_name:
           type: string
-          description: The last name of the submitter.
+          description: The last name of the account holder.
     ResponseError:
       type: object
       properties:

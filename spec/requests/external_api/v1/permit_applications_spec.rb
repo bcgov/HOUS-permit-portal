@@ -104,7 +104,10 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
         end
       end
 
-      response(429, "Rate limit exceeded") do
+      response(
+        429,
+        "Rate limit exceeded. Note: The rate limit is 100 requests per minute per API key and 300 requests per IP in a 3 minute interval",
+      ) do
         schema "$ref" => "#/components/schemas/ResponseError"
         around { |example| with_temporary_rate_limit("external_api/ip", limit: 3, period: 1.minute) { example.run } }
         before { 5.times { get search_v1_permit_applications_path, headers: { Authorization: "Bearer #{token}" } } }
@@ -166,12 +169,12 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
               in: :path,
               type: :string,
               description:
-                "The id of the permit application version. Note: this is different from the permit application id."
+                "This identifier corresponds to a specific version of the permit template, distinct from the permit application ID, which uniquely identifies an individual permit application."
 
     let(:version_id) { submitted_permit_applications.first.template_version.id }
 
     get(
-      "This endpoint retrieves the integration mapping between the Building Permit Hub system and the local jurisdiction integration system using a permit version unique identifier (ID). Please note that requests to this endpoint are subject to rate limiting to ensure optimal performance and fair usage.",
+      "This endpoint retrieves the integration mapping between the Building Permit Hub system and the local jurisdiction’s integration system. It uses a unique ID associated with a specific version of the permit template.",
     ) do
       tags "Permit applications"
       consumes "application/json"
@@ -199,7 +202,10 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
         run_test! { |response| expect(response.status).to eq(404) }
       end
 
-      response(429, "Rate limit exceeded") do
+      response(
+        429,
+        "Rate limit exceeded. Note: The rate limit is 100 requests per minute per API key and 300 requests per IP in a 3 minute interval",
+      ) do
         schema "$ref" => "#/components/schemas/ResponseError"
         around { |example| with_temporary_rate_limit("external_api/ip", limit: 3, period: 1.minute) { example.run } }
         before do

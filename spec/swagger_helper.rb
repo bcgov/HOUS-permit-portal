@@ -162,7 +162,7 @@ in this document.
               permit_classifications: {
                 type: :string,
                 description:
-                  "This is the combined permit type and activity type of the permit application. This is derived as `${permit_type.name} - ${activity_type.name}` e.g. '4+ Unit housing - New Construction'",
+                  "This is the combined permit type and activity (work) type of the permit application. This is derived as `${permit_type.name} - ${activity_type.name}` e.g. '4+ Unit housing - New Construction'",
               },
               permit_type: {
                 "$ref" => "#/components/schemas/PermitClassification",
@@ -170,8 +170,8 @@ in this document.
               activity: {
                 "$ref" => "#/components/schemas/PermitClassification",
               },
-              submitter: {
-                "$ref" => "#/components/schemas/Submitter",
+              account_holder: {
+                "$ref" => "#/components/schemas/AccountHolder",
               },
               permit_version: {
                 "$ref" => "#/components/schemas/PermitVersion",
@@ -230,7 +230,7 @@ in this document.
                       requirement_code: {
                         type: :string,
                         description:
-                          "The requirement code for this requirement. This is unique within the requirement block.",
+                          "The requirement code for this requirement field. This is unique within the requirement block.",
                       },
                       type: {
                         type: :string,
@@ -258,7 +258,7 @@ in this document.
           },
           PermitClassification: {
             type: :object,
-            description: "This object represents a permit classification. e.g. a permit type or activity type.",
+            description: "This object represents a permit classification. e.g. a permit type or activity (work) type.",
             properties: {
               id: {
                 type: :string,
@@ -431,25 +431,25 @@ in this document.
               },
             },
           },
-          Submitter: {
+          AccountHolder: {
             type: :object,
-            description: "The submitter of the permit application.",
+            description: "The account holder of the permit application.",
             properties: {
               id: {
                 type: :string,
-                description: "The ID of the submitter.",
+                description: "The ID of the account holder.",
               },
               email: {
                 type: :string,
-                description: "The email of the submitter.",
+                description: "The email of the account holder.",
               },
               first_name: {
                 type: :string,
-                description: "The first name of the submitter.",
+                description: "The first name of the account holder.",
               },
               last_name: {
                 type: :string,
-                description: "The last name of the submitter.",
+                description: "The last name of the account holder.",
               },
             },
           },

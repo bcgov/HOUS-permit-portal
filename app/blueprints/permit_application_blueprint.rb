@@ -69,7 +69,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
 
     association :template_version, blueprint: TemplateVersionBlueprint, view: :external_api, name: :permit_version
-    association :submitter, blueprint: UserBlueprint, view: :external_api
+    association :submitter, blueprint: UserBlueprint, view: :external_api, name: :account_holder
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint, name: :activity_type
   end
