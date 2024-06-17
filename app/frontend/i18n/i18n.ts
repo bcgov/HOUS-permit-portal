@@ -1082,6 +1082,7 @@ const options = {
           fetchOptions: "Something went wrong fetching options",
           fetchJurisdictionTemplateVersionCustomization:
             "Something went wrong fetching jurisdiction template version customization",
+          fetchIntegrationMapping: "Something went wrong fetching jurisdiction integration requirements mapping",
         },
         user: {
           fields: {
@@ -1292,6 +1293,35 @@ const options = {
             templateSummaryFilename: "Template Summary",
             downloadCustomizationCsv: "Download Customizations CSV",
             downloadCustomizationJson: "Download Customizations JSON",
+          },
+        },
+        apiMappingsSetup: {
+          title: "API mappings setup",
+          index: {
+            helperSubtitle: "See details of how fields are mapped to the API.",
+          },
+          edit: {
+            permitTemplate: "Permit template",
+            seeApiDoc: "See API documentation",
+            heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
+            table: {
+              blockAccordionButton: "{{blockName}} <1>requirement block code: {{blockCode}}</1>",
+              filter: {
+                showAll: "Show all",
+                showOnlyUnmapped: "Show only unmapped",
+              },
+              title: "API mappings",
+              headers: {
+                localField: "Your local field name",
+                localFieldInfo: "Local field mapping info",
+                templateField: "Map to <1>requirement code</1> in template",
+                requirementDetail: "Field in template",
+              },
+              localFieldEdit: {
+                addMapping: "Add local mapping",
+                addMappingLabel: "Local mapping",
+              },
+            },
           },
         },
         digitalBuildingPermits: {
@@ -1530,6 +1560,8 @@ const options = {
             reporting: "Reporting",
             exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
+            apiMappings: "API mappings",
+            manageMapping: "Manage mapping",
           },
         },
         automatedCompliance: {

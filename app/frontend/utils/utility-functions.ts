@@ -178,3 +178,7 @@ export function isOptionsMapperModuleConfiguration(moduleConfiguration?: TAutoCo
 export function removePrefix(str: string, prefix: string) {
   return str.startsWith(prefix) ? str.slice(prefix.length) : str
 }
+
+export async function delay(seconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+}

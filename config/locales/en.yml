@@ -403,6 +403,16 @@ en:
       update_error:
         title: Error
         message: "Something went wrong updating Jurisdiction Customization"
+    integration_mapping:
+      update_success:
+        title: ""
+        message: "integrations mapping updated!"
+      update_error:
+        title: Error
+        message: "Something went wrong updating integration requirements mapping"
+      not_found_error:
+        title: "Error"
+        message: 404 - The requested resource could not be found
   services:
     auto_compliance_configuration:
       digital_seal_validator:

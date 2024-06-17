@@ -6,6 +6,7 @@ class TemplateVersion < ApplicationRecord
   has_many :jurisdiction_template_version_customizations
   has_many :permit_applications
   has_many :submitters, through: :permit_applications
+  has_many :integration_mappings
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template
@@ -21,6 +22,7 @@ class TemplateVersion < ApplicationRecord
   before_validation :set_default_deprecation_reason
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
+  after_save :create_integration_mappings
 
   def label
     "#{permit_type.name} #{activity.name} (#{version_date.to_s})"
@@ -73,6 +75,18 @@ class TemplateVersion < ApplicationRecord
   end
 
   private
+
+  def create_integration_mappings
+    return unless published? && saved_change_to_status?
+
+    api_enabled_jurisdictions = Jurisdiction.where(external_api_enabled: true)
+
+    existing_mapping_jurisdiction_ids = integration_mappings.pluck(:jurisdiction_id)
+
+    jurisdictions_without_mappings = api_enabled_jurisdictions.where.not(id: existing_mapping_jurisdiction_ids)
+
+    jurisdictions_without_mappings.each { |jurisdiction| integration_mappings.create(jurisdiction: jurisdiction) }
+  end
 
   def set_default_deprecation_reason
     return unless deprecated? && deprecation_reason.nil?

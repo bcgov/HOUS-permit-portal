@@ -4,7 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { EJurisdictionSortFields } from "../../../types/enums"
-import { SearchInput } from "../../shared/base/search-input"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { SortIcon } from "../../shared/sort-icon"
 
@@ -31,7 +31,7 @@ export const GridHeaders = observer(function GridHeaders({ columns, span, includ
           align="center"
         >
           <Text role={"heading"}>{t("jurisdiction.index.tableHeading")}</Text>
-          <SearchInput searchModel={jurisdictionStore} />
+          <ModelSearchInput searchModel={jurisdictionStore} />
         </GridItem>
       </Box>
       <Box display={"contents"} role={"row"}>

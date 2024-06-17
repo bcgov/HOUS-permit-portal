@@ -3,7 +3,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   before_action :set_jurisdiction_template_version_customization,
                 only: %i[
-                  show_jurisdiction_template_version_cutomization
+                  show_jurisdiction_template_version_customization
+                  show_integration_mapping
                   download_customization_csv
                   download_customization_json
                 ]
@@ -25,7 +26,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     render_success @template_version, nil, { blueprint: TemplateVersionBlueprint, blueprint_opts: { view: :extended } }
   end
 
-  def show_jurisdiction_template_version_cutomization
+  def show_jurisdiction_template_version_customization
     authorize @template_version, :show?
 
     return head :not_found if @jurisdiction_template_version_customization.blank?
@@ -35,7 +36,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
     render_success @jurisdiction_template_version_customization
   end
 
-  def create_or_update_jurisdiction_template_version_cutomization
+  def create_or_update_jurisdiction_template_version_customization
     authorize @template_version, :show?
 
     @jurisdiction_template_version_customization =
@@ -57,6 +58,22 @@ class Api::TemplateVersionsController < Api::ApplicationController
                        error_message: @jurisdiction_template_version_customization.errors.full_messages.join(", "),
                      }
       end
+    end
+  end
+
+  def show_integration_mapping
+    authorize @template_version, :show?
+
+    @integration_mapping = @template_version.integration_mappings.find_by(jurisdiction_id: params[:jurisdiction_id])
+
+    authorize @integration_mapping, policy_class: TemplateVersionPolicy
+
+    if @integration_mapping.present?
+      render_success @integration_mapping,
+                     nil,
+                     { blueprint: IntegrationMappingBlueprint, blueprint_opts: { view: :base } }
+    else
+      render_error "integration_mapping.not_found_error", status: 404
     end
   end
 
