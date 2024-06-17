@@ -7,7 +7,9 @@ class Api::IntegrationMappingsController < Api::ApplicationController
     authorize @integration_mapping
 
     if @integration_mapping.update_requirements_mapping(integration_mapping_params.to_h[:simplified_map])
-      render_success @integration_mapping, "integration_mapping.update_success"
+      render_success @integration_mapping,
+                     "integration_mapping.update_success",
+                     { blueprint: IntegrationMappingBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "integration_mapping.update_error"
     end

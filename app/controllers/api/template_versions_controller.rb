@@ -69,7 +69,9 @@ class Api::TemplateVersionsController < Api::ApplicationController
     authorize @integration_mapping, policy_class: TemplateVersionPolicy
 
     if @integration_mapping.present?
-      render_success @integration_mapping
+      render_success @integration_mapping,
+                     nil,
+                     { blueprint: IntegrationMappingBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "integration_mapping.not_found_error", status: 404
     end
