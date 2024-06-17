@@ -1,5 +1,7 @@
 FactoryBot.define do
   factory :user do
+    transient { confirmed { true } }
+
     first_name { Faker::Name.first_name }
     last_name { Faker::Name.last_name }
     nickname { "#{first_name}-#{last_name.first}-#{[0..999].sample}" }
@@ -12,12 +14,12 @@ FactoryBot.define do
 
     trait :review_manager do
       role { :review_manager }
-      association :jurisdiction
+      association :jurisdiction, factory: :sub_district
     end
 
     trait :reviewer do
       role { :reviewer }
-      association :jurisdiction
+      association :jurisdiction, factory: :sub_district
     end
 
     trait :super_admin do
@@ -25,9 +27,11 @@ FactoryBot.define do
       password { "P@ssword1" }
     end
 
-    after(:build) do |user|
-      user.skip_confirmation_notification!
-      user.confirm
+    after(:build) do |user, evaluator|
+      if evaluator.confirmed
+        user.skip_confirmation_notification!
+        user.confirm
+      end
     end
   end
 end
