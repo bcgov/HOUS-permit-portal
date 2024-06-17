@@ -7,6 +7,8 @@ import { useActivityOptions } from "../../../../hooks/resources/use-activity-opt
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { RouterLink } from "../../../shared/navigation/router-link"
+import { SubNavBar } from "../../navigation/sub-nav-bar"
 import { ActivityTabSwitcher } from "../activity-tab-switcher"
 import { DigitalBuildingPermitsList } from "../digital-building-permits-list"
 
@@ -20,6 +22,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   const [searchParams, setSearchParams] = useSearchParams()
   const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
   const activityId = searchParams.get("activityId")
+  const currentJurisdiction = currentUser?.jurisdiction
 
   const navigateToActivityTab = (activityId: string, replace?: boolean) => {
     setSearchParams({ activityId }, { replace })
@@ -44,9 +47,25 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
     return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
   }
 
+  const breadCrumbs = [
+    {
+      href: `/jurisdictions/${currentJurisdiction?.id}/configuration-management`,
+      title: t("site.breadcrumb.configurationManagement"),
+    },
+    {
+      href: `/jurisdictions/${currentJurisdiction?.id}/api-settings`,
+      title: t("site.breadcrumb.apiSettings"),
+    },
+    {
+      href: "/api-settings/api-mappings",
+      title: t("site.breadcrumb.apiMappings"),
+    },
+  ]
+
   return (
-    <Container maxW="container.lg" w="full" p={8} as="main">
-      <Box w="full" px={8}>
+    <Container maxW="container.lg" w="full" as="main">
+      <SubNavBar staticBreadCrumbs={breadCrumbs} borderBottom={"none"} h={"fit-content"} w={"fit-content"} />
+      <Box w="full" p={8}>
         <Heading as="h1" size="2xl">
           {t("apiMappingsSetup.title")}
         </Heading>
@@ -66,8 +85,15 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
             <TabPanel key={activityOption.value.id} w="100%" pt={0}>
               <DigitalBuildingPermitsList
                 activityId={activityOption.value.id}
-                renderButton={(_) => (
-                  <Button isDisabled variant={"primary"} ml={4} alignSelf={"center"}>
+                renderButton={(templateVersion) => (
+                  <Button
+                    as={RouterLink}
+                    to={`/api-settings/api-mappings/digital-building-permits/${templateVersion.id}/edit`}
+                    isDisabled={!currentUser?.jurisdiction?.externalApiEnabled}
+                    variant={"primary"}
+                    ml={4}
+                    alignSelf={"center"}
+                  >
                     {t("ui.manage")}
                   </Button>
                 )}

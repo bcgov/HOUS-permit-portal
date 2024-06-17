@@ -11,7 +11,7 @@ import { EPermitApplicationStatus, EPermitApplicationSubmitterSortFields } from 
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
-import { SearchInput } from "../../shared/base/search-input"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
@@ -68,7 +68,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
               )}
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
-                <SearchInput searchModel={permitApplicationStore} />
+                <ModelSearchInput searchModel={permitApplicationStore} />
               </FormControl>
               <SortSelect
                 searchModel={permitApplicationStore}

@@ -1,5 +1,5 @@
-class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
-  # The JurisdictionIntegrationRequirementsMapping model represents the mapping
+class IntegrationMapping < ApplicationRecord
+  # The IntegrationMapping model represents the mapping
   # between jurisdictions local system fields and template versions fields.
 
   # The schema of the request_mapping is as follows:
@@ -36,8 +36,7 @@ class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
   # @return [Boolean] true if the update was successful, false otherwise
   def update_requirements_mapping(simplified_map, skip_sync = false)
     self.with_lock do
-      new_requirements_mapping =
-        JurisdictionIntegrationRequirementsMappingService.new(self).get_updated_requirements_mapping(simplified_map)
+      new_requirements_mapping = IntegrationMappingService.new(self).get_updated_requirements_mapping(simplified_map)
 
       # nothing to update, so returns true
       return true if self.requirements_mapping == new_requirements_mapping
@@ -61,19 +60,15 @@ class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
   # @param requirement_block_sku [String] the sku of the requirement block
   # @param requirement_code [String] the code of the requirement
   #
-  # @return [JurisdictionIntegrationRequirementsMapping] the copyable record with existing mapping
-
+  # @return [IntegrationMapping] the copyable record with existing mapping
   def copyable_record_with_existing_mapping(requirement_block_sku, requirement_code)
-    JurisdictionIntegrationRequirementsMappingService.new(self).copyable_record_with_existing_mapping(
-      requirement_block_sku,
-      requirement_code,
-    )
+    IntegrationMappingService.new(self).copyable_record_with_existing_mapping(requirement_block_sku, requirement_code)
   end
 
   private
 
   def initialize_requirements_mapping
-    JurisdictionIntegrationRequirementsMappingService.new(self).initialize_requirements_mapping!
+    IntegrationMappingService.new(self).initialize_requirements_mapping!
   end
 
   # Synchronizes changes with other currently active mappings for published template versions.
@@ -90,7 +85,7 @@ class JurisdictionIntegrationRequirementsMapping < ApplicationRecord
     return unless simplified_map_to_sync.present? && simplified_map_to_sync.is_a?(Hash)
 
     active_mappings =
-      JurisdictionIntegrationRequirementsMapping
+      IntegrationMapping
         .joins(:template_version)
         .where(jurisdiction_id: jurisdiction_id, template_versions: { status: "published" })
         .where.not(id: id)

@@ -15,26 +15,40 @@ import {
 } from "@chakra-ui/react"
 import { Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useState } from "react"
+import React, { MouseEventHandler, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 interface IControlsProps {
   CustomEditableControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
+  CustomEditModeControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
+  CustomPreviewModeControls?: (props: ReturnType<typeof useEditableControls>) => JSX.Element
   saveButtonProps?: Partial<ButtonProps> & { textContent?: string }
   cancelButtonProps?: Partial<ButtonProps> & { textContent?: string }
   iconButtonProps?: Partial<IconButtonProps>
 }
 
+interface ICustomEditablePreviewProps extends Partial<EditablePreviewProps> {
+  renderCustomPreview?: (
+    props: {
+      isEditing: boolean
+      onClick: MouseEventHandler
+      initialHint?: string
+    } & Partial<EditablePreviewProps>
+  ) => JSX.Element
+  initialHint?: string
+}
+
 export interface IEditableInputWithControlsProps extends EditableProps {
-  editablePreviewProps?: Partial<EditablePreviewProps>
+  editablePreviewProps?: Omit<ICustomEditablePreviewProps, "initialHint">
   editableInputProps?: Partial<EditableInputProps>
   initialHint?: string
-  getStateBasedEditableProps?: (isEditing: boolean) => Partial<EditableProps>
   controlsProps?: IControlsProps
 }
 
 function EditableControls({
   CustomEditableControls,
+  CustomPreviewModeControls,
+  CustomEditModeControls,
   saveButtonProps = {},
   cancelButtonProps = {},
   iconButtonProps,
@@ -49,15 +63,23 @@ function EditableControls({
     return <CustomEditableControls {...editableControls} />
   }
 
-  return isEditing ? (
-    <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
-      <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
-        {saveTextContent}
-      </Button>
-      <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
-        {cancelTextContent}
-      </Button>
-    </ButtonGroup>
+  if (isEditing) {
+    return CustomEditModeControls ? (
+      <CustomEditModeControls {...editableControls} />
+    ) : (
+      <ButtonGroup justifyContent="center" size="sm" spacing={2} ml={4}>
+        <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
+          {saveTextContent}
+        </Button>
+        <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
+          {cancelTextContent}
+        </Button>
+      </ButtonGroup>
+    )
+  }
+
+  return CustomPreviewModeControls ? (
+    <CustomPreviewModeControls {...editableControls} />
   ) : (
     <IconButton
       ml={1}
@@ -72,6 +94,21 @@ function EditableControls({
   )
 }
 
+const CustomEditablePreview = observer(function CustomEditablePreview({
+  renderCustomPreview,
+  initialHint,
+  ...rest
+}: ICustomEditablePreviewProps) {
+  const editableControls = useEditableControls()
+  const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
+
+  return renderCustomPreview ? (
+    renderCustomPreview({ ...rest, initialHint, isEditing, onClick: getEditButtonProps()?.onClick })
+  ) : (
+    <EditablePreview {...rest} />
+  )
+})
+
 export const EditableInputWithControls = observer(function EditableInputWithControls({
   initialHint,
   placeholder,
@@ -81,7 +118,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   onCancel,
   onBlur,
   controlsProps,
-  getStateBasedEditableProps,
+  borderEndEndRadius,
   ...editableProps
 }: IEditableInputWithControlsProps) {
   const [isInEditMode, setIsInEditMode] = useState(false)
@@ -103,10 +140,13 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
         setIsInEditMode(false)
         onBlur?.(e)
       }}
+      onSubmit={(e) => {
+        setIsInEditMode(false)
+        editableProps.onSubmit?.(e)
+      }}
       {...editableProps}
-      {...getStateBasedEditableProps?.(isInEditMode)}
     >
-      <EditablePreview {...editablePreviewProps} />
+      <CustomEditablePreview initialHint={initialHint} {...editablePreviewProps} />
       <EditableInput {...editableInputProps} />
       <EditableControls {...controlsProps} />
     </Editable>

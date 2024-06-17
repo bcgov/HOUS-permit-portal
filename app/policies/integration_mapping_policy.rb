@@ -1,4 +1,4 @@
-class JurisdictionIntegrationRequirementsMappingPolicy < ApplicationPolicy
+class IntegrationMappingPolicy < ApplicationPolicy
   def update?
     (
       (user.review_manager? || user.regional_review_manager?) && record.jurisdiction.external_api_enabled? &&

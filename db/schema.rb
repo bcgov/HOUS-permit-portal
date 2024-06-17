@@ -99,7 +99,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
-  create_table "jurisdiction_integration_requirements_mappings",
+  create_table "integration_mappings",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
@@ -108,9 +108,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
     t.uuid "template_version_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_e287ac2c12"
+    t.index ["jurisdiction_id"],
+            name: "index_integration_mappings_on_jurisdiction_id"
     t.index ["template_version_id"],
-            name: "idx_on_template_version_id_a52f2ccce5"
+            name: "index_integration_mappings_on_template_version_id"
   end
 
   create_table "jurisdiction_memberships",
@@ -726,10 +727,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "external_api_keys", "jurisdictions"
-  add_foreign_key "jurisdiction_integration_requirements_mappings",
-                  "jurisdictions"
-  add_foreign_key "jurisdiction_integration_requirements_mappings",
-                  "template_versions"
+  add_foreign_key "integration_mappings", "jurisdictions"
+  add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_required_steps", "jurisdictions"

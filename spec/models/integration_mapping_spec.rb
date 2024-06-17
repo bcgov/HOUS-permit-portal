@@ -1,8 +1,8 @@
 require "rails_helper"
 
-RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
+RSpec.describe IntegrationMapping, type: :model do
   let(:jurisdiction) { create(:sub_district) }
-  let(:mapping) { create(:jurisdiction_integration_requirements_mapping, jurisdiction: jurisdiction) }
+  let(:mapping) { create(:integration_mapping, jurisdiction: jurisdiction) }
   let(:mock_requirements_mapping_json) do
     {
       "sku" => {
@@ -27,14 +27,14 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
     context "when there are existing mappings but none are published" do
       let!(:existing_mapping) do
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: mock_requirements_mapping_json,
           template_version:
             create(:template_version, status: "deprecated", deprecation_reason: "new_publish", version_date: Time.now),
         )
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: mock_requirements_mapping_json,
           template_version:
@@ -47,7 +47,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
         )
       end
       let!(:same_mapping_different_jurisdiction) do
-        create(:jurisdiction_integration_requirements_mapping, requirements_mapping: mock_requirements_mapping_json)
+        create(:integration_mapping, requirements_mapping: mock_requirements_mapping_json)
       end
 
       it "returns the latest version existing mapping for the jurisdiction" do
@@ -57,15 +57,11 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
 
     context "when there are existing mappings and some are published" do
       let!(:published_mapping) do
-        create(
-          :jurisdiction_integration_requirements_mapping,
-          jurisdiction: jurisdiction,
-          requirements_mapping: mock_requirements_mapping_json,
-        )
+        create(:integration_mapping, jurisdiction: jurisdiction, requirements_mapping: mock_requirements_mapping_json)
       end
       let!(:existing_mapping) do
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: mock_requirements_mapping_json,
           template_version: create(:template_version, status: "deprecated", deprecation_reason: "new_publish"),
@@ -81,8 +77,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
   describe "#initialize_requirements_mapping" do
     context "when requirements_mapping is not empty" do
       it "does not change requirements_mapping" do
-        mapping =
-          create(:jurisdiction_integration_requirements_mapping, requirements_mapping: mock_requirements_mapping_json)
+        mapping = create(:integration_mapping, requirements_mapping: mock_requirements_mapping_json)
         expect(mapping.requirements_mapping).to eq(mock_requirements_mapping_json)
       end
     end
@@ -139,7 +134,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
             },
           },
         }
-        mapping = create(:jurisdiction_integration_requirements_mapping, template_version: template_version)
+        mapping = create(:integration_mapping, template_version: template_version)
 
         expect(mapping.requirements_mapping).to eq(expected_requirements_mapping_json)
       end
@@ -183,7 +178,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
       # mapping of a deprecated template version
       let!(:existing_mapping_deprecated_ver) do
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: {
             "sku" => {
@@ -226,7 +221,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
       # mapping of a deprecated template version from same requirement template
       let!(:existing_mapping_deprecated_same_req_template_ver) do
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: {
             "sku" => {
@@ -265,7 +260,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
       # mapping of a published template version
       let!(:existing_mapping_published_ver) do
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: {
             "sku2" => {
@@ -288,7 +283,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
       # mapping of a published template version from same requirement template
       let!(:existing_mapping_published_same_req_template_ver) do
         create(
-          :jurisdiction_integration_requirements_mapping,
+          :integration_mapping,
           jurisdiction: jurisdiction,
           requirements_mapping: {
             "sku2" => {
@@ -306,11 +301,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
       end
 
       let!(:new_mapping) do
-        create(
-          :jurisdiction_integration_requirements_mapping,
-          template_version: template_version,
-          jurisdiction: jurisdiction,
-        )
+        create(:integration_mapping, template_version: template_version, jurisdiction: jurisdiction)
       end
 
       it "initializes requirements_mapping and successfully copies mapping from current published template from same requirement template" do
@@ -341,11 +332,7 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
   describe "#update_requirements_mapping" do
     let(:jurisdiction) { create(:sub_district) }
     let(:mapping) do
-      create(
-        :jurisdiction_integration_requirements_mapping,
-        requirements_mapping: mock_requirements_mapping_json,
-        jurisdiction: jurisdiction,
-      )
+      create(:integration_mapping, requirements_mapping: mock_requirements_mapping_json, jurisdiction: jurisdiction)
     end
     let(:simplified_map) { { "sku" => { "code" => "updated_field" } } }
 
@@ -390,16 +377,12 @@ RSpec.describe JurisdictionIntegrationRequirementsMapping, type: :model do
           },
         }
         published_mapping_same_jurisdiction =
-          create(
-            :jurisdiction_integration_requirements_mapping,
-            requirements_mapping: diff_requirements_mapping_json,
-            jurisdiction: jurisdiction,
-          )
+          create(:integration_mapping, requirements_mapping: diff_requirements_mapping_json, jurisdiction: jurisdiction)
         published_mapping_diff_jurisdiction =
-          create(:jurisdiction_integration_requirements_mapping, requirements_mapping: diff_requirements_mapping_json)
+          create(:integration_mapping, requirements_mapping: diff_requirements_mapping_json)
         deprecated_mapping_same_jurisdiction =
           create(
-            :jurisdiction_integration_requirements_mapping,
+            :integration_mapping,
             template_version: create(:template_version, status: "deprecated"),
             requirements_mapping: diff_requirements_mapping_json,
             jurisdiction: jurisdiction,

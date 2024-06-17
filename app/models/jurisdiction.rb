@@ -18,7 +18,7 @@ class Jurisdiction < ApplicationRecord
   has_many :requirement_templates, through: :template_versions
   has_many :permit_type_submission_contacts
   has_many :external_api_keys, dependent: :destroy
-  has_many :jurisdiction_integration_requirements_mappings
+  has_many :integration_mappings
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -28,7 +28,7 @@ class Jurisdiction < ApplicationRecord
   before_validation :set_type_based_on_locality
   before_save :sanitize_html_fields
 
-  after_save :create_integration_requirements_mappings, if: :saved_change_to_external_api_enabled?
+  after_save :create_integration_mappings, if: :saved_change_to_external_api_enabled?
 
   accepts_nested_attributes_for :contacts
   accepts_nested_attributes_for :permit_type_submission_contacts,
@@ -159,7 +159,7 @@ class Jurisdiction < ApplicationRecord
     self[:zero_carbon_step_required]
   end
 
-  def create_integration_requirements_mappings
+  def create_integration_mappings
     return unless external_api_enabled?
 
     relevant_template_versions =
@@ -168,12 +168,12 @@ class Jurisdiction < ApplicationRecord
         .or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
         .order(version_date: :asc)
 
-    existing_mapping_template_ids = jurisdiction_integration_requirements_mappings.pluck(:template_version_id)
+    existing_mapping_template_ids = integration_mappings.pluck(:template_version_id)
 
     templates_without_mappings = relevant_template_versions.where.not(id: existing_mapping_template_ids)
 
     templates_without_mappings.each do |template_version|
-      jurisdiction_integration_requirements_mappings.create(template_version: template_version)
+      integration_mappings.create(template_version: template_version)
     end
   end
 

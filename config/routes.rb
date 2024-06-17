@@ -86,13 +86,12 @@ Rails.application.routes.draw do
                to: "template_versions#create_or_update_jurisdiction_template_version_customization"
           get "download_customization_csv", to: "template_versions#download_customization_csv"
           get "download_customization_json", to: "template_versions#download_customization_json"
-          get "integration_requirements_mapping",
-              to: "template_versions#show_jurisdiction_integration_requirements_mapping"
+          get "integration_mapping", to: "template_versions#show_integration_mapping"
         end
       end
     end
 
-    resources :jurisdiction_integration_requirements_mappings, only: [:update]
+    resources :integration_mappings, only: [:update]
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
@@ -161,6 +160,11 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
+        collection do
+          resources :versions, as: "template_versions", only: [] do
+            get "integration_mapping", to: "permit_applications#show_integration_mapping"
+          end
+        end
       end
     end
   end
