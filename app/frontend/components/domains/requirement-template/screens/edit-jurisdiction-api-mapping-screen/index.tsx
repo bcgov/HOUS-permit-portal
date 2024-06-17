@@ -72,14 +72,11 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
       as="main"
       id="jurisdiction-edit-permit-template"
       pos={"relative"}
+      px={{ base: 0, md: "3.75rem" }}
     >
       <Header templateVersion={templateVersion} />
 
-      <SearchGrid
-        maxW={TABLE_MAX_WIDTH_PX}
-        w={"full"}
-        templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)"
-      >
+      <SearchGrid w={"full"} templateColumns="minmax(300px, 510px) minmax(100px, 300px) minmax(100px, auto)">
         {integrationMapping && <GridHeaders integrationMapping={integrationMapping} />}
 
         {!integrationMapping ? (
