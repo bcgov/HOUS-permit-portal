@@ -1305,6 +1305,7 @@ const options = {
             seeApiDoc: "See API documentation",
             heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
             table: {
+              blockAccordionButton: "{{blockName}} <1>requirement block code: {{blockCode}}</1>",
               filter: {
                 showAll: "Show all",
                 showOnlyUnmapped: "Show only unmapped",

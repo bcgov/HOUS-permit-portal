@@ -17,7 +17,7 @@ import { observer } from "mobx-react-lite"
 import pluck from "ramda/src/pluck"
 import React, { useEffect, useState } from "react"
 import { useController, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { IRequirementBlockMapping } from "../../../../../models/requirement-block-mapping"
 import { ITemplateVersion } from "../../../../../models/template-version"
 import { IRequirementMap, ISimplifiedRequirementsMap } from "../../../../../types/types"
@@ -85,10 +85,14 @@ export const GridAccordion = observer(function GridAccordion({
               }}
             >
               <Box flex="1" textAlign="left">
-                {requirementBlockJson?.name}{" "}
-                <Text as={"span"} fontWeight={700} fontSize={"sm"}>
-                  requirement block code: {requirementBlockJson?.sku}
-                </Text>
+                <Trans
+                  i18nKey={"apiMappingsSetup.edit.table.blockAccordionButton"}
+                  values={{
+                    blockName: requirementBlockJson?.name,
+                    blockCode: requirementBlockJson?.sku,
+                  }}
+                  components={{ 1: <Text as={"span"} fontWeight={700} fontSize={"sm"} /> }}
+                />
               </Box>
               <AccordionIcon />
             </AccordionButton>

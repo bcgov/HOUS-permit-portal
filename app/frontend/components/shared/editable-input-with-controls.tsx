@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { MouseEventHandler, forwardRef, useState } from "react"
+import React, { MouseEventHandler, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 interface IControlsProps {
@@ -94,22 +94,20 @@ function EditableControls({
   )
 }
 
-const CustomEditablePreview = observer(
-  forwardRef<any, ICustomEditablePreviewProps>(function CustomEditablePreview({
-    renderCustomPreview,
-    initialHint,
-    ...rest
-  }) {
-    const editableControls = useEditableControls()
-    const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
+const CustomEditablePreview = observer(function CustomEditablePreview({
+  renderCustomPreview,
+  initialHint,
+  ...rest
+}: ICustomEditablePreviewProps) {
+  const editableControls = useEditableControls()
+  const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = editableControls
 
-    return renderCustomPreview ? (
-      renderCustomPreview({ ...rest, initialHint, isEditing, onClick: getEditButtonProps()?.onClick })
-    ) : (
-      <EditablePreview {...rest} />
-    )
-  })
-)
+  return renderCustomPreview ? (
+    renderCustomPreview({ ...rest, initialHint, isEditing, onClick: getEditButtonProps()?.onClick })
+  ) : (
+    <EditablePreview {...rest} />
+  )
+})
 
 export const EditableInputWithControls = observer(function EditableInputWithControls({
   initialHint,

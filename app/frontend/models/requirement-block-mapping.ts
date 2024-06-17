@@ -59,7 +59,6 @@ const RequirementBlockMappingModel = types
     getTableRequirementsJson(requirementsJson: IDenormalizedRequirement[]): (IDenormalizedRequirement & {
       matches?: FuseResult<IRequirementMap>["matches"]
     })[] {
-      console.log("requirementsJson", self.fuseSearchResults)
       const showOnlyUnmapped = self.integrationMapping.showOnlyUnmapped
       const filteredRequirementsJson = showOnlyUnmapped
         ? requirementsJson.filter((r) =>
