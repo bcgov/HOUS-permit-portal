@@ -151,18 +151,18 @@ paths:
                       description: 'Less than or equal to: submitted date is less
                         than or equal to this date'
   "/permit_applications/{id}":
-    parameters:
-    - name: id
-      in: path
-      description: Submitted permit application id
-      required: true
-      schema:
-        type: string
     get:
       summary: This endpoint retrieves detailed information about a specific permit
         application using its unique identifier (ID). Please note that requests to
         this endpoint are subject to rate limiting to ensure optimal performance and
         fair usage.
+      parameters:
+      - name: id
+        in: path
+        description: Submitted permit application id
+        required: true
+        schema:
+          type: string
       tags:
       - Permit applications
       responses:
@@ -188,19 +188,19 @@ paths:
               schema:
                 "$ref": "#/components/schemas/ResponseError"
   "/permit_applications/versions/{version_id}/integration_mapping":
-    parameters:
-    - name: version_id
-      in: path
-      description: This identifier corresponds to a specific version of the permit
-        template, distinct from the permit application ID, which uniquely identifies
-        an individual permit application.
-      required: true
-      schema:
-        type: string
     get:
       summary: This endpoint retrieves the integration mapping between the Building
         Permit Hub system and the local jurisdiction’s integration system. It uses
         a unique ID associated with a specific version of the permit template.
+      parameters:
+      - name: version_id
+        in: path
+        description: This identifier corresponds to a specific version of the permit
+          template, distinct from the permit application ID, which uniquely identifies
+          an individual permit application.
+        required: true
+        schema:
+          type: string
       tags:
       - Permit applications
       responses:

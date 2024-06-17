@@ -118,16 +118,16 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
   end
 
   path "/permit_applications/{id}" do
-    parameter name: "id", in: :path, type: :string, description: "Submitted permit application id"
-
-    let(:id) { submitted_permit_applications.first.id }
-
     get(
       "This endpoint retrieves detailed information about a specific permit application using its unique identifier (ID). Please note that requests to this endpoint are subject to rate limiting to ensure optimal performance and fair usage.",
     ) do
+      parameter name: "id", in: :path, type: :string, description: "Submitted permit application id"
       tags "Permit applications"
       consumes "application/json"
       produces "application/json"
+
+      let(:id) { submitted_permit_applications.first.id }
+
       response(200, "Successful") do
         schema type: :object,
                properties: {
@@ -165,20 +165,20 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
   end
 
   path "/permit_applications/versions/{version_id}/integration_mapping" do
-    parameter name: "version_id",
-              in: :path,
-              type: :string,
-              description:
-                "This identifier corresponds to a specific version of the permit template, distinct from the permit application ID, which uniquely identifies an individual permit application."
-
-    let(:version_id) { submitted_permit_applications.first.template_version.id }
-
     get(
       "This endpoint retrieves the integration mapping between the Building Permit Hub system and the local jurisdiction’s integration system. It uses a unique ID associated with a specific version of the permit template.",
     ) do
+      parameter name: "version_id",
+                in: :path,
+                type: :string,
+                description:
+                  "This identifier corresponds to a specific version of the permit template, distinct from the permit application ID, which uniquely identifies an individual permit application."
+
       tags "Permit applications"
       consumes "application/json"
       produces "application/json"
+
+      let(:version_id) { submitted_permit_applications.first.template_version.id }
       response(200, "Successful") do
         schema type: :object,
                properties: {
