@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../../../models/step-code-energy-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../energy-step-code-compliance/i18n-prefix"
 import { Divider } from "../../shared/divider"
@@ -12,9 +12,9 @@ import { RequirementsMetTag } from "../../shared/requirements-met-tag"
 import { VStack } from "../../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeEnergyComplianceReport
 }
-export function MEUI({ checklist }: IProps) {
+export function MEUI({ report }: IProps) {
   return (
     <>
       <HStack
@@ -41,7 +41,7 @@ export function MEUI({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.meuiRequirement}
+                value={report.meuiRequirement}
                 hint={t(`${i18nPrefix}.max`)}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
@@ -59,7 +59,7 @@ export function MEUI({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.meui}
+                value={report.meui}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <VStack style={{ gap: 1.5 }}>
@@ -81,7 +81,7 @@ export function MEUI({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.meuiPercentImprovementRequirement}
+                value={report.meuiPercentImprovementRequirement}
                 hint={t(`${i18nPrefix}.min`)}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={<Text style={{ textAlign: "center", color: theme.colors.text.secondary }}>%</Text>}
@@ -89,7 +89,7 @@ export function MEUI({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.meuiPercentImprovement}
+                value={report.meuiPercentImprovement}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={<Text style={{ textAlign: "center", color: theme.colors.text.secondary }}>%</Text>}
               />
@@ -98,7 +98,7 @@ export function MEUI({ checklist }: IProps) {
         </VStack>
 
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center", borderRightWidth: 0 }}>
-          <RequirementsMetTag success={checklist.meuiPassed} />
+          <RequirementsMetTag success={report.meuiPassed} />
         </GridItem>
       </HStack>
     </>

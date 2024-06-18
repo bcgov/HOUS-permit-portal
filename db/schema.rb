@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_28_000519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -153,8 +153,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
     t.text "contact_summary_html"
     t.jsonb "map_position"
     t.string "prefix", null: false
-    t.integer "energy_step_required", default: 3
-    t.integer "zero_carbon_step_required", default: 1
     t.string "slug"
     t.integer "map_zoom"
     t.boolean "external_api_enabled", default: false
@@ -467,8 +465,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
     t.boolean "codeco"
     t.integer "status", default: 0, null: false
     t.string "builder"
+    t.uuid "step_requirement_id"
     t.index ["status"], name: "index_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
+    t.index ["step_requirement_id"],
+            name: "index_step_code_checklists_on_step_requirement_id"
   end
 
   create_table "step_code_data_entries",
@@ -758,6 +759,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
+  add_foreign_key "step_code_checklists",
+                  "permit_type_required_steps",
+                  column: "step_requirement_id"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"

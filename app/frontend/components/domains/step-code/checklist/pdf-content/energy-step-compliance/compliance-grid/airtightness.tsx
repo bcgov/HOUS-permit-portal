@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../../../models/step-code-energy-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../energy-step-code-compliance/i18n-prefix"
 import { Divider } from "../../shared/divider"
@@ -12,9 +12,9 @@ import { RequirementsMetTag } from "../../shared/requirements-met-tag"
 import { VStack } from "../../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeEnergyComplianceReport
 }
-export function Airtightness({ checklist }: IProps) {
+export function Airtightness({ report }: IProps) {
   return (
     <>
       <HStack
@@ -41,7 +41,7 @@ export function Airtightness({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.achRequirement || "-"}
+                value={report.achRequirement || "-"}
                 hint={t(`${i18nPrefix}.max`)}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
@@ -59,7 +59,7 @@ export function Airtightness({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.ach || "-"}
+                value={report.ach || "-"}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <VStack style={{ gap: 1.5 }}>
@@ -82,7 +82,7 @@ export function Airtightness({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.nlaRequirement || "-"}
+                value={report.nlaRequirement || "-"}
                 hint={t(`${i18nPrefix}.max`)}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
@@ -100,7 +100,7 @@ export function Airtightness({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.nla || "-"}
+                value={report.nla || "-"}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <VStack style={{ gap: 1.5 }}>
@@ -123,7 +123,7 @@ export function Airtightness({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.nlrRequirement || "-"}
+                value={report.nlrRequirement || "-"}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <Text style={{ fontSize: 8.25, color: theme.colors.text.secondary }}>
@@ -134,7 +134,7 @@ export function Airtightness({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.nlr || "-"}
+                value={report.nlr || "-"}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <Text style={{ fontSize: 8.25, color: theme.colors.text.secondary }}>
@@ -147,7 +147,7 @@ export function Airtightness({ checklist }: IProps) {
         </VStack>
 
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center", borderRightWidth: 0 }}>
-          <RequirementsMetTag success={checklist.meuiPassed} />
+          <RequirementsMetTag success={report.meuiPassed} />
         </GridItem>
       </HStack>
     </>
