@@ -41,8 +41,8 @@ export const PDFContent = function StepCodeChecklistPDFContent({
         <CompletedBy checklist={checklist} />
         <BuildingCharacteristicsSummary checklist={checklist} />
         <EnergyPerformanceCompliance checklist={checklist} />
-        <EnergyStepCompliance checklist={checklist} />
-        <ZeroCarbonStepCompliance checklist={checklist} />
+        <EnergyStepCompliance report={checklist.selectedReport.energy} />
+        <ZeroCarbonStepCompliance report={checklist.selectedReport.zeroCarbon} />
         <Footer permitApplication={permitApplication} />
       </Page>
     </PDFDocument>

@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../../models/step-code-energy-compliance-report"
 import { theme } from "../../../../../../styles/theme"
 import { i18nPrefix } from "../../energy-step-code-compliance/i18n-prefix"
 import { GridItem } from "../shared/grid-item"
@@ -9,9 +9,9 @@ import { HStack } from "../shared/h-stack"
 import { VStack } from "../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeEnergyComplianceReport
 }
-export function OtherData({ checklist }: IProps) {
+export function OtherData({ report }: IProps) {
   return (
     <VStack style={{ width: "100%", borderWidth: 0.75, borderColor: theme.colors.border.light, gap: 0 }} wrap={false}>
       <HStack
@@ -29,15 +29,15 @@ export function OtherData({ checklist }: IProps) {
         </GridItem>
       </HStack>
 
-      <Row label={t(`${i18nPrefix}.otherData.software`)} value={checklist.softwareName} />
-      <Row label={t(`${i18nPrefix}.otherData.softwareVersion`)} value={checklist.softwareVersion} />
-      <Row label={t(`${i18nPrefix}.otherData.heatedFloorArea`)} value={checklist.totalHeatedFloorArea} />
-      <Row label={t(`${i18nPrefix}.otherData.volume`)} value={checklist.volume} />
-      <Row label={t(`${i18nPrefix}.otherData.surfaceArea`)} value={checklist.surfaceArea} />
-      <Row label={t(`${i18nPrefix}.otherData.fwdr`)} value={checklist.fwdr} />
-      <Row label={t(`${i18nPrefix}.otherData.climateLocation`)} value={checklist.location} />
-      <Row label={t(`${i18nPrefix}.otherData.hdd`)} value={checklist.heatingDegreeDays} />
-      <Row label={t(`${i18nPrefix}.otherData.spaceCooled`)} value={checklist.conditionedPercent} isLast />
+      <Row label={t(`${i18nPrefix}.otherData.software`)} value={report.softwareName} />
+      <Row label={t(`${i18nPrefix}.otherData.softwareVersion`)} value={report.softwareVersion} />
+      <Row label={t(`${i18nPrefix}.otherData.heatedFloorArea`)} value={report.totalHeatedFloorArea} />
+      <Row label={t(`${i18nPrefix}.otherData.volume`)} value={report.volume} />
+      <Row label={t(`${i18nPrefix}.otherData.surfaceArea`)} value={report.surfaceArea} />
+      <Row label={t(`${i18nPrefix}.otherData.fwdr`)} value={report.fwdr} />
+      <Row label={t(`${i18nPrefix}.otherData.climateLocation`)} value={report.location} />
+      <Row label={t(`${i18nPrefix}.otherData.hdd`)} value={report.heatingDegreeDays} />
+      <Row label={t(`${i18nPrefix}.otherData.spaceCooled`)} value={report.conditionedPercent} isLast />
     </VStack>
   )
 }
