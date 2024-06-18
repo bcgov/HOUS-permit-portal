@@ -80,9 +80,9 @@ gem "rswag-ui", "~> 2.13"
 
 # brew install geos
 # bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
-gem "rgeo"
+gem "rgeo", "~> 3.0.1"
 # brew install proj
-gem "rgeo-proj4"
+gem "rgeo-proj4", "~> 4.0.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
