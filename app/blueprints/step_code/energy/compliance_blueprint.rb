@@ -4,10 +4,10 @@ class StepCode::Energy::ComplianceBlueprint < Blueprinter::Base
   transform StepCode::Energy::AirtightnessTransformer
   transform RoundDecimalsTransformer
 
-  field :step, name: :proposed_energy_step
-  field :min_required_step, name: :required_energy_step
-  field :min_step, name: :min_energy_step
-  field :max_step, name: :max_energy_step
+  field :step, name: :proposed_step
+  field :min_required_step, name: :required_step
+  field :min_required_step, name: :min_step
+  field :max_step
 
   field :fwdr do |compliance, _options|
     compliance.checklist.data_entries.sum(:fwdr)

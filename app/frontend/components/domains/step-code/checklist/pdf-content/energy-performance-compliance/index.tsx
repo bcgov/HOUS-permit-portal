@@ -17,6 +17,7 @@ interface IProps {
 export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPerformanceCompliance({
   checklist,
 }: IProps) {
+  const report = checklist.selectedReport.energy
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
       <Text style={{ fontSize: 12, fontWeight: 700 }}>{t(`${i18nPrefix}.proposedHouseEnergyConsumption`)}</Text>
@@ -44,7 +45,7 @@ export const EnergyPerformanceCompliance = function StepCodeChecklistPDFEnergyPe
         value={t(`${i18nPrefix}.airtightnessValue.options.${checklist.epcCalculationAirtightness}`)}
       />
       <HStack style={{ width: "100%", alignItems: "flex-end" }}>
-        <Field label={t(`${i18nPrefix}.calculationTestingTarget`)} value={checklist.ach} />
+        <Field label={t(`${i18nPrefix}.calculationTestingTarget`)} value={report.ach} />
         <Field value={t(`${i18nPrefix}.epcTestingTargetType.options.${checklist.epcCalculationTestingTargetType}`)} />
       </HStack>
       <HStack style={{ width: "100%", gap: 3.5 }}>

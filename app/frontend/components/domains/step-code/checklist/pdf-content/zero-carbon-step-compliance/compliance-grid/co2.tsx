@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../zero-carbon-step-code-compliance/i18n-prefix"
 import { Divider } from "../../shared/divider"
@@ -12,10 +12,10 @@ import { RequirementsMetTag } from "../../shared/requirements-met-tag"
 import { VStack } from "../../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeZeroCarbonComplianceReport
 }
 
-export function CO2({ checklist }: IProps) {
+export function CO2({ report }: IProps) {
   return (
     <>
       <HStack
@@ -56,7 +56,7 @@ export function CO2({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.meuiRequirement}
+                value={report.co2Requirement}
                 hint={t(`${i18nPrefix}.max`)}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
@@ -74,7 +74,7 @@ export function CO2({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.co2 || "-"}
+                value={report.co2 || "-"}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <VStack style={{ gap: 1.5 }}>
@@ -96,7 +96,7 @@ export function CO2({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={checklist.co2MaxRequirement || "-"}
+                value={report.co2MaxRequirement || "-"}
                 hint={t(`${i18nPrefix}.max`)}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
@@ -108,7 +108,7 @@ export function CO2({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={checklist.totalGhg || "-"}
+                value={report.totalGhg || "-"}
                 inputStyle={{ justifyContent: "center" }}
                 rightElement={
                   <Text style={{ fontSize: 8.25, color: theme.colors.text.secondary }}>
@@ -121,7 +121,7 @@ export function CO2({ checklist }: IProps) {
         </VStack>
 
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center", borderRightWidth: 0 }}>
-          <RequirementsMetTag success={checklist.co2Passed} />
+          <RequirementsMetTag success={report.co2Passed} />
         </GridItem>
       </HStack>
     </>
