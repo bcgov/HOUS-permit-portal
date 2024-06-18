@@ -35,43 +35,45 @@ FactoryBot.define do
             create(:template_section_block, requirement_template_section: section, requirement_block: block)
             create(
               :requirement,
-              requirement_code: "municipality",
+              requirement_code: "municipality_feature_sqm",
               requirement_block: block,
               input_type: :text,
               input_options: {
                 computed_compliance: {
                   module: "ParcelInfoExtractor",
-                  value: "MUNICIPALITY",
+                  value: "FEATURE_AREA_SQM",
                 },
               },
             )
             create(
               :requirement,
-              requirement_code: "regional_district",
+              requirement_code: "regional_district_feature_sqm",
               requirement_block: block,
               input_type: :text,
               input_options: {
                 computed_compliance: {
                   module: "ParcelInfoExtractor",
-                  value: "REGIONAL_DISTRICT",
+                  value: "FEATURE_AREA_SQM",
                 },
               },
             )
             create(:requirement, requirement_code: "no_compliance", requirement_block: block, input_type: :text)
             create(
               :requirement,
-              requirement_code: "seal_test",
+              requirement_code: "seal_test_file",
               requirement_block: block,
-              input_type: :text,
+              input_type: :file,
               input_options: {
                 computed_compliance: {
                   module: "DigitalSealValidator",
+                  trigger: "on_save",
+                  value_on: "compliance_data",
                 },
               },
             )
           end
         end
-        #publish a template_version
+        # publish a template_version
         create(:template_version, requirement_template: template, form_json: template.to_form_json, status: "published")
         template.reload
       end
@@ -86,18 +88,21 @@ FactoryBot.define do
               :requirement,
               requirement_code: "heritage_resource",
               requirement_block: block,
-              input_type: :checkbox,
+              input_type: :select,
               input_options: {
                 value_options: [{ value: "true", label: "Yes" }, { value: "false", label: "No" }],
                 computed_compliance: {
                   module: "HistoricSite",
                   value: "HISTORIC_SITE_IND",
+                  options_map: {
+                    "Y" => "true",
+                  },
                 },
               },
             )
           end
         end
-        #publish a template version
+        # publish a template version
         create(:template_version, requirement_template: template, form_json: template.to_form_json, status: "published")
         template.reload
       end

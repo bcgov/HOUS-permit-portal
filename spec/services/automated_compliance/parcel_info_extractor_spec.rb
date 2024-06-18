@@ -34,10 +34,10 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
         # expect(permit_application.compliance_data.dig("plan_number")).to eq("EPP115443")
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[0]),
-        ).to eq("Vancouver, City of")
+        ).to eq(6244.2759)
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[1]),
-        ).to eq("Metro Vancouver Regional District")
+        ).to eq(6244.2759)
         expect(permit_application.compliance_data.dig("unedited")).to eq("previous_data")
       end
     end
@@ -47,10 +47,10 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
         AutomatedCompliance::ParcelInfoExtractor.new.call(permit_application)
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[0]),
-        ).to eq("Vancouver, City of")
+        ).to eq(6244.2759)
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[1]),
-        ).to eq("Metro Vancouver Regional District")
+        ).to eq(6244.2759)
       end
     end
   end
@@ -83,10 +83,10 @@ RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
         ).to_not eq("previous_data")
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[0]),
-        ).to eq("North Vancouver, The Corporation of the District of")
+        ).to eq(1120116.7031)
         expect(
           permit_application.compliance_data.dig(permit_application.automated_compliance_requirements.keys[1]),
-        ).to eq("Metro Vancouver Regional District")
+        ).to eq(1120116.7031)
         expect(permit_application.compliance_data.dig("unedited")).to eq("previous_data")
       end
     end
