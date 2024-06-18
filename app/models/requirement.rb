@@ -279,6 +279,8 @@ class Requirement < ApplicationRecord
       # camelize the value
       # this is a two step process as camelize only camelizes individual words and ignores spaces
 
+      return option_json unless option_json.is_a?(Hash) && option_json["value"].is_a?(String)
+
       # remove spaces to make one word and capitalize each word
       value = option_json["value"]
       words = value.split(" ").map(&:capitalize)

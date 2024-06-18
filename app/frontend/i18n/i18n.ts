@@ -50,7 +50,6 @@ const options = {
           bceid_login: "Login with BCeID",
           idir_login: "Login with IDIR",
           role: "Role",
-          nicknameLabel: "Nickname",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
           userLastNameLabel: "Last name",

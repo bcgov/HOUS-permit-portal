@@ -16,7 +16,6 @@ export const UserModel = types
     omniauthProvider: types.maybeNull(types.enumeration(Object.values(EOmniauthProvider))),
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
-    nickname: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
     organization: types.maybeNull(types.string),
     jurisdiction: types.maybeNull(types.reference(types.late(() => JurisdictionModel))),
@@ -93,6 +92,13 @@ export const UserModel = types
     }),
     resendConfirmation: flow(function* () {
       const response = yield self.environment.api.resendConfirmation(self.id)
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
+      return response.ok
+    }),
+    reinvite: flow(function* () {
+      const response = yield self.environment.api.reinviteUser(self.id)
       if (response.ok) {
         self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
       }

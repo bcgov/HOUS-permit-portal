@@ -40,11 +40,10 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
 
   const getDefaults = () => {
-    const { firstName, lastName, nickname, certified, organization } = currentUser
+    const { firstName, lastName, certified, organization } = currentUser
     return {
       firstName,
       lastName,
-      nickname,
       certified,
       organization,
     }
