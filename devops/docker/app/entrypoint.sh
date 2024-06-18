@@ -5,6 +5,9 @@
 # -o pipefail : prevents errors in a pipeline from being masked. If any command in a pipeline fails, 
 #               that return code will be used as the return code of the whole pipeline.
 
+# Increase file descriptor limit for Vite precompile later
+ulimit -n 65536
+
 set -euo pipefail 
 
 # shellcheck disable=SC1091
