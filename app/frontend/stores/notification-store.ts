@@ -31,7 +31,7 @@ export const NotificationStoreModel = types
       const currentUser = self.rootStore.userStore.currentUser
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
         if (currentUser.isManager) {
-          return `/digital-building-permits/${notification.objectData.templateVersionId}/edit?compare=true`
+          return `/digital-building-permits/${notification.objectData.previousTemplateVersionId}/edit?compare=true`
         }
         if (currentUser.isSubmitter) {
           return `/?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft`
