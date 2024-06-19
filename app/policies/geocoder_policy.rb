@@ -14,4 +14,8 @@ class GeocoderPolicy < ApplicationPolicy
   def pin?
     site_options?
   end
+
+  def pid_details?
+    site_options?
+  end
 end

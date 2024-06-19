@@ -115,6 +115,7 @@ Rails.application.routes.draw do
       get "pids", on: :collection
       get "jurisdiction", on: :collection
       get "pin", on: :collection
+      get "pid_details", on: :collection
     end
 
     resources :permit_applications, only: %i[create update show] do

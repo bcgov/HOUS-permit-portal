@@ -12,12 +12,31 @@ class Api::GeocoderController < Api::ApplicationController
         wrapper = Wrappers::Geocoder.new
         options = wrapper.site_options(geocoder_params[:address])
         render_success options, nil, { blueprint: OptionBlueprint }
-      elsif geocoder_params[:pid].present?
-        coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
-        wrapper = Wrappers::Geocoder.new
-        options = wrapper.site_options(nil, coordinates)
-        render_success options, nil, { blueprint: OptionBlueprint }
+      else
+        render_success [], nil, { blueprint: OptionBlueprint }
       end
+    rescue StandardError => e
+      render_error "geocoder.site_options_error", {}, e and return
+    end
+  end
+
+  def pid_details #get site details if a pid is supplied instead
+    authorize :geocoder, :pid_details?
+    begin
+      coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+      wrapper = Wrappers::Geocoder.new
+
+      options = wrapper.site_options(nil, coordinates)
+      options.each do |option|
+        if wrapper.pids(option[:value]).include?(geocoder_params[:pid])
+          render_success option, nil, { blueprint: OptionBlueprint }
+          return
+        end
+      end
+      #for options that come back, check if there are pids against that site
+      #if the pid matches, get the addsress string and return, else nothing
+
+      render_success nil, nil, { blueprint: OptionBlueprint }
     rescue StandardError => e
       render_error "geocoder.site_options_error", {}, e and return
     end
@@ -71,7 +90,7 @@ class Api::GeocoderController < Api::ApplicationController
   end
 
   def geocoder_params
-    params.permit(:address, :site_id, :pid)
+    params.permit(:address, :site_id, :pid, :coordinates)
   end
 
   def pin_params

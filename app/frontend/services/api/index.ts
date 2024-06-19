@@ -302,8 +302,9 @@ export class Api {
     )
   }
 
-  async fetchSiteOptions(address: string, pid: string = null) {
-    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
+  async fetchSiteOptions(address: string) {
+    //fetch list of locations, returns siteIds (in some cases blank)
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
   async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
@@ -312,6 +313,10 @@ export class Api {
 
   async fetchPids(siteId: string) {
     return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
+  }
+
+  async fetchSiteDetailsFromPid(pid: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pid_details`, { pid })
   }
 
   async fetchPin(pin: string) {

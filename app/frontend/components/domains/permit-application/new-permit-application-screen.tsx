@@ -61,7 +61,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const { handleSubmit, formState, control, watch, register, setValue } = formMethods
   const { isSubmitting } = formState
   const { permitClassificationStore, permitApplicationStore, geocoderStore } = useMst()
-  const { fetchGeocodedJurisdiction, fetchingPids } = geocoderStore
+  const { fetchGeocodedJurisdiction, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions } = permitClassificationStore
   const navigate = useNavigate()
 
@@ -99,6 +99,14 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
         setValue("jurisdiction", jurisdiction)
+
+        if (R.isNil(siteWatch?.value && pidWatch)) {
+          //the pid is valid, lets try to fill in the address based on the PID
+          const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
+          if (siteDetails) {
+            setValue("site", siteDetails)
+          }
+        }
       } else {
         setPinMode(true)
         setValue("jurisdiction", null)
