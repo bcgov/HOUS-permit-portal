@@ -63,7 +63,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git-lfs libproj-dev proj-bin
+          sudo apt-get install -y git-lfs libproj-dev libgeos-dev proj-bin
           git lfs install
       - name: Checkout Code
         uses: actions/checkout@v3
