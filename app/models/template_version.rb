@@ -52,7 +52,7 @@ class TemplateVersion < ApplicationRecord
     {
       "id" => SecureRandom.uuid,
       "action_type" => Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
-      "action_text" => "#{label} - #{I18n.t("notification.template_version.new_version_notification")}",
+      "action_text" => "#{I18n.t("notification.template_version.new_version_notification", template_label: label)}",
       "object_data" => {
         "template_version_id" => id,
         "previous_template_version_id" => previous_version.id,
