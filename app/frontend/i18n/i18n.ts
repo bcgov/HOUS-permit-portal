@@ -415,6 +415,7 @@ const options = {
             submittingTo: "You're applying to the {{ jurisdictionName }}",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
+            fetchingMissingPdf: "Fetching {{missingPdf}}...",
             contactSummaryHeading: "List of all contacts on this application",
             downloadHeading: "Download application",
             downloadPrompt: "Choose specific files or entire package:",

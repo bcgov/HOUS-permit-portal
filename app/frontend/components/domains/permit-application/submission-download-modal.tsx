@@ -160,12 +160,13 @@ const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size 
 }
 
 function MissingPdf({ pdfKey }: { pdfKey: "permit_application_pdf" }) {
+  const { t } = useTranslation()
   return (
     <Flex w="full" align="center" justify="space-between" pl={1}>
       <HStack spacing={3}>
         <FileArrowDown size={16} />
         <Text as={"span"} color={"semantic.error"}>
-          Generating {missingPdfKeyToLabel[pdfKey] || pdfKey}...
+          {t("permitApplication.show.fetchingMissingPdf", { missingPdf: missingPdfKeyToLabel[pdfKey] || pdfKey })}
         </Text>
       </HStack>
 
