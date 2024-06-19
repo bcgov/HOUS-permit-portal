@@ -4,6 +4,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 
+import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
 import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
@@ -38,6 +39,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
   } = permitApplicationStore
 
   useSearch(permitApplicationStore, [])
+  useFlashQueryParam()
   const resetQueryParams = useResetQueryParams()
 
   return (

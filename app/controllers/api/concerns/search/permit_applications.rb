@@ -62,7 +62,5 @@ module Api::Concerns::Search::PermitApplications
       where = { submitter_id: current_user.id }
     end
     (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
-
-    where
   end
 end

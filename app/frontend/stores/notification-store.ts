@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
@@ -34,7 +35,7 @@ export const NotificationStoreModel = types
           return `/digital-building-permits/${notification.objectData.previousTemplateVersionId}/edit?compare=true`
         }
         if (currentUser.isSubmitter) {
-          return `/?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft`
+          return `/?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(JSON.stringify({ type: "success", title: t("permitApplication.reviewOutdatedTitle"), message: t("permitApplication.reviewOutdatedMessage") }))}`
         }
 
         return "/permit-applications"
