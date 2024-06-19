@@ -4,8 +4,20 @@ require "fileutils"
 
 class PdfGenerationJob
   include Sidekiq::Worker
+  sidekiq_options lock: :until_and_while_executing,
+                  queue: :pdf_generation,
+                  on_conflict: {
+                    client: :log,
+                    server: :reject,
+                  }
 
-  def perform(permit_application_id)
+  def self.lock_args(args)
+    ## only lock on the first argument, which is the permit application id
+    ## this will prevent multiple jobs from running for the same permit application
+    [args[0]]
+  end
+
+  def perform(permit_application_id, regenerate_all = true)
     permit_application = PermitApplication.find(permit_application_id)
     return if permit_application.blank?
 
@@ -61,18 +73,31 @@ class PdfGenerationJob
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
-          pdfs = [{ fname: application_filename, key: :permit_application_pdf }]
-          pdfs << { fname: step_code_filename, key: :step_code_checklist_pdf } if checklist
+          pdfs = [{ fname: application_filename, key: SupportingDocument::APPLICATION_PDF_DATA_KEY }]
+          pdfs << { fname: step_code_filename, key: SupportingDocument::CHECKLIST_PDF_DATA_KEY } if checklist
           pdfs.each do |pdf|
             path = "#{generation_directory_path}/#{pdf[:fname]}"
             file = File.open(path)
             # build first to ensure permit_application_id is set (required by file uploader)
             doc = permit_application.supporting_documents.where(data_key: pdf[:key]).first_or_initialize
-            doc.update!(data_key: pdf[:key], file:)
+
+            doc.update!(data_key: pdf[:key], file:) if doc.file.blank? || regenerate_all
+
             File.delete(path)
           end
+
+          WebsocketBroadcaster.push_update_to_relevant_users(
+            permit_application.collaborators,
+            Constants::Websockets::Events::PermitApplication::DOMAIN,
+            Constants::Websockets::Events::PermitApplication::TYPES[:update_supporting_documents],
+            PermitApplicationBlueprint.render_as_hash(permit_application.reload, { view: :supporting_docs_update }),
+          )
         else
-          Rails.logger.error "Pdf generation process failed: #{exit_status}"
+          err = "Pdf generation process failed: #{exit_status}"
+          Rails.logger.error err
+
+          # this will raise an error and retry the job
+          raise err
         end
       end
   end

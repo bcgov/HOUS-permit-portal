@@ -1,6 +1,7 @@
 import {
   Button,
   Flex,
+  HStack,
   Heading,
   Link,
   Modal,
@@ -14,7 +15,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Download, FileArrowDown, FileZip } from "@phosphor-icons/react"
+import { Download, FileArrowDown, FileZip, Gear } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -22,11 +23,16 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { formatBytes } from "../../../utils/utility-functions"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { LoadingIcon } from "../../shared/loading-icon"
+
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
   renderTrigger?: (onOpen: () => void) => React.ReactNode
 }
 
+const missingPdfKeyToLabel = {
+  permit_application_pdf: "permit application pdf",
+}
 export const SubmissionDownloadModal = observer(
   ({ permitApplication, renderTrigger }: ISubmissionDownloadModalProps) => {
     const { t } = useTranslation()
@@ -48,6 +54,18 @@ export const SubmissionDownloadModal = observer(
       const fetch = async () => await checklist.load()
       checklist && !checklist.isLoaded && fetch()
     }, [checklist?.isLoaded])
+
+    useEffect(() => {
+      if (!permitApplication?.isFullyLoaded || (checklist && !checklist?.isLoaded)) {
+        return
+      }
+
+      if (!permitApplication.isSubmitted || !permitApplication.missingPdfs.length) {
+        return
+      }
+
+      permitApplication.generateMissingPdfs()
+    }, [permitApplication?.isFullyLoaded, permitApplication?.missingPdfs, checklist?.isLoaded])
 
     return (
       <>
@@ -84,6 +102,9 @@ export const SubmissionDownloadModal = observer(
                 <ModalBody>
                   <Flex direction="column" gap={3} borderRadius="lg" borderWidth={1} borderColor="border.light" p={4}>
                     <VStack align="flex-start" w="full">
+                      {permitApplication.missingPdfs.map((pdfKey) => (
+                        <MissingPdf key={pdfKey} pdfKey={pdfKey} />
+                      ))}
                       {supportingDocuments.map((doc) => (
                         <FileDownloadLink key={doc.fileUrl} url={doc.fileUrl} name={doc.fileName} size={doc.fileSize} />
                       ))}
@@ -134,6 +155,21 @@ const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size 
       <Text color="greys.grey01" textAlign="right" fontSize="xs">
         {formatBytes(size)}
       </Text>
+    </Flex>
+  )
+}
+
+function MissingPdf({ pdfKey }: { pdfKey: "permit_application_pdf" }) {
+  return (
+    <Flex w="full" align="center" justify="space-between" pl={1}>
+      <HStack spacing={3}>
+        <FileArrowDown size={16} />
+        <Text as={"span"} color={"semantic.error"}>
+          Generating {missingPdfKeyToLabel[pdfKey] || pdfKey}...
+        </Text>
+      </HStack>
+
+      <LoadingIcon icon={<Gear />} />
     </Flex>
   )
 }

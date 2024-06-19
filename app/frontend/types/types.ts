@@ -9,6 +9,7 @@ import {
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
   ENumberUnit,
+  EPermitApplicationSocketEventTypes,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -222,16 +223,22 @@ export interface INotification {
   at: string
 }
 
-export interface IPermitApplicationUpdate {
-  id
+export interface IPermitApplicationComplianceUpdate {
+  id: string
   frontEndFormUpdate: Object
   formattedComplianceData: Object
 }
 
+export interface IPermitApplicationSupportingDocumentsUpdate {
+  id: string
+  supportingDocuments: IPermitApplication["supportingDocuments"]
+  missingPdfs: string[]
+}
+
 export interface IUserPushPayload {
   domain: ESocketDomainTypes
-  eventType: ESocketEventTypes
-  data: INotification | IPermitApplicationUpdate
+  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes
+  data: INotification | IPermitApplicationComplianceUpdate
 }
 
 export interface ISiteConfiguration {

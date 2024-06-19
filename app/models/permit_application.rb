@@ -97,8 +97,16 @@ class PermitApplication < ApplicationRecord
   end
 
   def collaborators
-    #eventually will add editors.  For compliance related items (it is before submit, it should target collaborators)
-    [submitter]
+    relevant_collaborators = [submitter]
+
+    if submitted?
+      # TODO: add region managers when merged back to dev
+      relevant_collaborators =
+        relevant_collaborators + jurisdiction.review_managers if jurisdiction.review_managers.present?
+      relevant_collaborators = relevant_collaborators + jurisdiction.reviewers if jurisdiction.reviewers.present?
+    end
+
+    relevant_collaborators
   end
 
   def set_template_version
@@ -143,6 +151,23 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+  end
+
+  def missing_pdfs
+    return [] unless submitted?
+
+    missing_pdfs = []
+
+    application_pdf = supporting_documents.find_by(data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY)
+
+    missing_pdfs << SupportingDocument::APPLICATION_PDF_DATA_KEY if application_pdf.blank?
+
+    return missing_pdfs unless step_code&.pre_construction_checklist
+
+    checklist_pdf = supporting_documents.find_by(data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY)
+    missing_pdfs << SupportingDocument::CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
+
+    missing_pdfs
   end
 
   private

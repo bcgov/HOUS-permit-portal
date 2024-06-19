@@ -1,7 +1,7 @@
 class WebsocketBroadcaster
   # Current data is passed via the CurrentAttributes on AcitveSupport
   def self.user_channel(user_id)
-    "#{Constants::Channels::USER_CHANNEL_PREFIX}-#{user_id}"
+    "#{Constants::Websockets::Channels::USER_CHANNEL_PREFIX}-#{user_id}"
   end
 
   def self.broadcast_ready?

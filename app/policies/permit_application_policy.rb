@@ -32,6 +32,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     update?
   end
 
+  def generate_missing_pdfs?
+    true
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope

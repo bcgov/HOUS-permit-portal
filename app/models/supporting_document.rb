@@ -7,6 +7,9 @@ class SupportingDocument < ApplicationRecord
   scope :file_ids_with_regex, ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
   scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data IS NULL") }
 
+  APPLICATION_PDF_DATA_KEY = :permit_application_pdf
+  CHECKLIST_PDF_DATA_KEY = :step_code_checklist_pdf
+
   def last_signer
     if compliance_data["result"] &&
          signer = compliance_data["result"].sort_by { |signer| signer.dig("signatureTimestamp", "date") }&.last
