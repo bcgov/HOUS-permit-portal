@@ -225,6 +225,15 @@ class TemplateVersioningService
       .first
   end
 
+  def self.latest_published_version(template_version)
+    template_version
+      .requirement_template
+      .template_versions
+      .where(status: TemplateVersion.statuses[:published])
+      .order(version_date: :desc, created_at: :desc)
+      .last
+  end
+
   private
 
   def self.copy_jurisdiction_customizations_to_template_version(

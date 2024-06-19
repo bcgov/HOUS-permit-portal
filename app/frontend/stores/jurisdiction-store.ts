@@ -8,7 +8,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
 import { IJurisdictionFilters } from "../types/types"
-import { isUUID, toCamelCase } from "../utils/utility-functions"
+import { isUUID, setQueryParam, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
   .compose(
@@ -133,7 +133,9 @@ export const JurisdictionStoreModel = types
   }))
   .actions((self) => ({
     searchEnabledJurisdictions: flow(function* (countPerPage: number = 10) {
-      return self.searchJurisdictions({ reset: true, page: 1, countPerPage }, true)
+      const result = self.searchJurisdictions({ reset: true, page: 1, countPerPage }, true)
+      setQueryParam("currentPage", null)
+      return result
     }),
   }))
 
