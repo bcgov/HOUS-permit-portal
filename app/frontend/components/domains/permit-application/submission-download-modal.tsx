@@ -30,9 +30,6 @@ export interface ISubmissionDownloadModalProps {
   renderTrigger?: (onOpen: () => void) => React.ReactNode
 }
 
-const missingPdfKeyToLabel = {
-  permit_application_pdf: "permit application pdf",
-}
 export const SubmissionDownloadModal = observer(
   ({ permitApplication, renderTrigger }: ISubmissionDownloadModalProps) => {
     const { t } = useTranslation()
@@ -56,7 +53,7 @@ export const SubmissionDownloadModal = observer(
     }, [checklist?.isLoaded])
 
     useEffect(() => {
-      if (!permitApplication?.isFullyLoaded || (checklist && !checklist?.isLoaded)) {
+      if (!permitApplication?.isFullyLoaded) {
         return
       }
 
@@ -162,6 +159,11 @@ const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size 
 
 function MissingPdf({ pdfKey }: { pdfKey: "permit_application_pdf" }) {
   const { t } = useTranslation()
+
+  const missingPdfKeyToLabel = {
+    permit_application_pdf: t("permitApplication.show.missingPdfLabels.permitApplication"),
+    step_code_checklist_pdf: t("permitApplication.show.missingPdfLabels.stepCode"),
+  }
   return (
     <Flex w="full" align="center" justify="space-between" pl={1}>
       <HStack spacing={3}>
