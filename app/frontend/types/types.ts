@@ -233,6 +233,9 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
   missingPdfs: string[]
+  zipfileSize: null | number
+  zipfileName: null | string
+  zipfileUrl: null | string
 }
 
 export interface IUserPushPayload {

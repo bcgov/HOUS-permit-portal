@@ -121,6 +121,7 @@ export const SubmissionDownloadModal = observer(
                       download={zipfileName}
                       textDecoration="none"
                       leftIcon={<FileZip />}
+                      isDisabled={!zipfileUrl}
                       _hover={{ textDecoration: "none" }}
                     >
                       {t("permitApplication.show.downloadZip")}

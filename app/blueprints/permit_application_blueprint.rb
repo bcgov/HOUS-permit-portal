@@ -49,7 +49,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :supporting_docs_update do
     identifier :id
 
-    field :missing_pdfs
+    fields :missing_pdfs, :zipfile_size, :zipfile_name, :zipfile_url
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
   end

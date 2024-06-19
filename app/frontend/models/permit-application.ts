@@ -350,6 +350,9 @@ export const PermitApplicationModel = types
     handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
       self.missingPdfs = cast(data.missingPdfs)
       self.supportingDocuments = data.supportingDocuments
+      self.zipfileSize = data.zipfileSize
+      self.zipfileName = data.zipfileName
+      self.zipfileUrl = data.zipfileUrl
     },
   }))
 

@@ -5,7 +5,7 @@ require "fileutils"
 class PdfGenerationJob
   include Sidekiq::Worker
   sidekiq_options lock: :until_and_while_executing,
-                  queue: :pdf_generation,
+                  queue: :file_processing,
                   on_conflict: {
                     client: :log,
                     server: :reject,
@@ -85,13 +85,6 @@ class PdfGenerationJob
 
             File.delete(path)
           end
-
-          WebsocketBroadcaster.push_update_to_relevant_users(
-            permit_application.collaborators,
-            Constants::Websockets::Events::PermitApplication::DOMAIN,
-            Constants::Websockets::Events::PermitApplication::TYPES[:update_supporting_documents],
-            PermitApplicationBlueprint.render_as_hash(permit_application.reload, { view: :supporting_docs_update }),
-          )
         else
           err = "Pdf generation process failed: #{exit_status}"
           Rails.logger.error err
