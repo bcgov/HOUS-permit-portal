@@ -10,7 +10,11 @@ import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
 import { ECustomEvents, EPermitApplicationSocketEventTypes, EPermitApplicationSortFields } from "../types/enums"
-import { IPermitApplicationComplianceUpdate, IUserPushPayload } from "../types/types"
+import {
+  IPermitApplicationComplianceUpdate,
+  IPermitApplicationSupportingDocumentsUpdate,
+  IUserPushPayload,
+} from "../types/types"
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -176,7 +180,7 @@ export const PermitApplicationStoreModel = types
           document.dispatchEvent(event)
           break
         case EPermitApplicationSocketEventTypes.updateSupportingDocuments:
-          payloadData = payload.data as IPermitApplicationComplianceUpdate
+          payloadData = payload.data as IPermitApplicationSupportingDocumentsUpdate
 
           self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
           break

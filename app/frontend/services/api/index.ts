@@ -229,7 +229,9 @@ export class Api {
   }
 
   async submitPermitApplication(id, params) {
-    return this.client.post(`/permit_applications/${id}/submit`)
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
+      permitApplication: params,
+    })
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
