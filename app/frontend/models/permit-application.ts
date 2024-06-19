@@ -30,9 +30,9 @@ export const PermitApplicationModel = types
     id: types.identifier,
     nickname: types.string,
     number: types.string,
-    fullAddress: types.maybeNull(types.string), //for now some seeds will not have this
-    pin: types.maybeNull(types.string), //for now some seeds will not have this
-    pid: types.maybeNull(types.string), //for now some seeds will not have this
+    fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
+    pin: types.maybeNull(types.string), // for now some seeds will not have this
+    pid: types.maybeNull(types.string), // for now some seeds will not have this
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
@@ -58,12 +58,17 @@ export const PermitApplicationModel = types
     isFullyLoaded: types.optional(types.boolean, false),
     isDirty: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
+    indexedUsingCurrentTemplateVersion: types.maybeNull(types.boolean),
     showingCompareAfter: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    get usingCurrentTemplateVersion() {
+      if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
+      return self.indexedUsingCurrentTemplateVersion
+    },
     get jurisdictionName() {
       return self.jurisdiction.name
     },
@@ -103,9 +108,6 @@ export const PermitApplicationModel = types
     get isViewed() {
       return self.viewedAt !== null
     },
-    get usesPublishedTemplateVersion() {
-      return self.templateVersion.id === self.publishedTemplateVersion.id
-    },
     get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
       if (!self.diff) return null
 
@@ -140,7 +142,7 @@ export const PermitApplicationModel = types
   }))
   .views((self) => ({
     shouldShowApplicationDiff(isEditing: boolean) {
-      return isEditing && (!self.usesPublishedTemplateVersion || self.showingCompareAfter)
+      return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
     },
     get formDiffKey() {
       return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`

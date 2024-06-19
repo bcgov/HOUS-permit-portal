@@ -4,6 +4,7 @@ import { TCreateRequirementTemplateFormData } from "../../components/domains/req
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -15,6 +16,7 @@ import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import {
   IExternalApiKeyParams,
+  IIntegrationMappingUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -41,6 +43,7 @@ import {
   IContact,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IPermitApplicationSearchFilters,
   ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
@@ -181,11 +184,14 @@ export class Api {
     return this.client.post<IUsersResponse>(`/users/search`, params)
   }
 
-  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
-  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchJurisdictionPermitApplications(
+    jurisdictionId,
+    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+  ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
       params
@@ -341,6 +347,18 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`
     )
+  }
+
+  async fetchIntegrationMapping(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IIntegrationMapping>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/integration_mapping`
+    )
+  }
+
+  async updateIntegrationMapping(id: string, params: IIntegrationMappingUpdateParams) {
+    return this.client.patch<ApiResponse<IIntegrationMapping>>(`/integration_mappings/${id}`, {
+      integrationMapping: params,
+    })
   }
 
   async createOrUpdateJurisdictionTemplateVersionCustomization(

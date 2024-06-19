@@ -57,6 +57,7 @@
     "follow-redirects": ">=1.15.6",
     "formiojs": "^4.17.4",
     "framer-motion": "^10.16.5",
+    "fuse.js": "^7.0.0",
     "humps": "^2.0.1",
     "i18next": "^23.7.6",
     "leaflet": "^1.9.4",

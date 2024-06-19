@@ -1,5 +1,5 @@
 import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
-import { ArrowSquareOut, CaretRight, Pencil } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretRight, Pencil, Warning } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -16,12 +16,15 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
   const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt } = permitApplication
   const { t } = useTranslation()
 
+  const isCurrent = permitApplication.usingCurrentTemplateVersion
+
   return (
     <Flex
+      bg={isCurrent ? "greys.white" : "semantic.warningLight"}
       direction="column"
       borderRadius="lg"
       border="1px solid"
-      borderColor="border.light"
+      borderColor={isCurrent ? "border.light" : "semantic.warning"}
       p={6}
       align="center"
       gap={4}
@@ -57,7 +60,19 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             <PermitApplicationStatusTag permitApplication={permitApplication} />
           </Flex>
         </Show>
-        <Flex direction="column" gap={2} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "50%" }}>
+        <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
+          {!isCurrent && (
+            <Flex p={1} px={2} bg="semantic.warning" align="center" gap={2} w="fit-content" borderRadius="sm">
+              <Warning size={24} />
+              <Text noOfLines={2}>
+                <Text as="span" fontWeight="bold">
+                  {t("ui.actionRequired")}
+                </Text>
+                {": "}
+                {t("permitApplication.newVersionPublished")}
+              </Text>
+            </Flex>
+          )}
           <RouterLinkButton
             variant="link"
             whiteSpace="normal"
@@ -115,7 +130,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             </Link>
           </Flex>
         </Flex>
-        <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "30%" }}>
+        <Flex direction="column" align="flex-end" gap={4} flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "25%" }}>
           <Show above="md">
             <PermitApplicationStatusTag permitApplication={permitApplication} />
             <Box>

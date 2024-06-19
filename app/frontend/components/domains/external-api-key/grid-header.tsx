@@ -1,8 +1,9 @@
-import { Box, Flex, FormControl, FormLabel, GridItem, Switch, Text, Tooltip } from "@chakra-ui/react"
+import { Box, Flex, GridItem, Text, Tooltip } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { FormSwitch } from "../../shared/form-switch"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { RemoveConfirmationModal } from "../../shared/remove-confirmation-modal"
 
@@ -110,20 +111,19 @@ const ExternalApiEnabledSwitch = observer(
   }: {
     isDisabled?: boolean
     externalApiEnabled: boolean
-    onChange?: (isChecked?: boolean) => void
+    onChange?: () => void
   }) => {
     const { t } = useTranslation()
 
     return (
-      <FormControl display="flex" alignItems="center" w="fit-content" gap={2} isDisabled={isDisabled}>
-        <Switch id="enableJurisdictionExternalApiKey" isChecked={externalApiEnabled} onChange={onChange} />
-        <FormLabel
-          htmlFor="enableJurisdictionExternalApiKey"
-          _hover={{ cursor: isDisabled ? "not-allowed" : undefined }}
-        >
-          {externalApiEnabled ? t("externalApiKey.index.enabled") : t("externalApiKey.index.disabled")}
-        </FormLabel>
-      </FormControl>
+      <FormSwitch
+        switchIdForAccessibility={"enableJurisdictionExternalApiKey"}
+        isChecked={externalApiEnabled}
+        onChange={onChange}
+        isDisabled={isDisabled}
+        checkedText={t("externalApiKey.index.enabled")}
+        uncheckedText={t("externalApiKey.index.disabled")}
+      />
     )
   }
 )

@@ -3,23 +3,23 @@ class PermitClassificationSeeder
     # Define Classification data
     classifications = [
       {
-        name: "Low Density Residential",
+        name: "1-4 Unit detached housing",
         code: "low_residential",
         description: "1-4 units: Detatched dwellings, duplexes",
         enabled: true,
         type: "PermitType",
       },
       {
-        name: "Medium Density Residential",
+        name: "4+ Unit housing",
         code: "medium_residential",
-        description: "Lorem ipsum medium residential",
+        description: "Part 9 townhouses, small apartment buildings",
         enabled: false,
         type: "PermitType",
       },
       {
-        name: "High Density Residential",
+        name: "High density appartment buildings",
         code: "high_residential",
-        description: "Lorem ipsum high residential",
+        description: "Highest density residential structures",
         enabled: false,
         type: "PermitType",
       },

@@ -17,6 +17,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :submitted_at
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
+
+    field :indexed_using_current_template_version do |pa, options|
+      # Indexed data is used to prevent N extra queries on every search
+      pa.indexed_using_current_template_version
+    end
   end
 
   view :jurisdiction_review_inbox do
@@ -63,8 +68,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_raw_h2k_files_for_external_use
     end
 
-    association :submitter, blueprint: UserBlueprint, view: :external_api
+    association :template_version, blueprint: TemplateVersionBlueprint, view: :external_api, name: :permit_version
+    association :submitter, blueprint: UserBlueprint, view: :external_api, name: :account_holder
     association :permit_type, blueprint: PermitClassificationBlueprint
-    association :activity, blueprint: PermitClassificationBlueprint
+    association :activity, blueprint: PermitClassificationBlueprint, name: :activity_type
   end
 end

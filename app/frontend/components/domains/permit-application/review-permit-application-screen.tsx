@@ -122,8 +122,11 @@ export const ReviewPermitApplicationScreen = observer(() => {
             {t("permitApplication.show.contactsSummary")}
           </Button>
           <SubmissionDownloadModal permitApplication={currentPermitApplication} />
-          <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-            {t("ui.backHome")}
+          <Button
+            rightIcon={<CaretRight />}
+            onClick={() => navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)}
+          >
+            {t("ui.backToInbox")}
           </Button>
         </Stack>
       </Flex>

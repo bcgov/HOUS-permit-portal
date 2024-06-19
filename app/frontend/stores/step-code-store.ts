@@ -77,7 +77,7 @@ export const StepCodeStoreModel = types
         return response
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.error(`Failed to download step code summary:`, error)
+          console.error(`Failed to download energy step code configuration by jurisdiction:`, error)
         }
         throw error
       }

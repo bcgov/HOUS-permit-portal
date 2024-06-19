@@ -22,7 +22,7 @@ class UserBlueprint < Blueprinter::Base
   end
 
   view :external_api do
-    fields :email
+    fields :email, :first_name, :last_name
   end
 
   view :current_user do
