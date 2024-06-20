@@ -51,11 +51,14 @@ export const SitesSelect = observer(function ({
     onChange(option)
     setValue(pidName, null)
     if (option) {
+      //set the label for the address?
       fetchPids(option.value).then((pids: string[]) => {
-        setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
-        const selectControl = pidSelectRef?.current?.controlRef
-        if (selectControl && !R.isEmpty(pids)) {
-          selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+        if (pids) {
+          setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
+          const selectControl = pidSelectRef?.current?.controlRef
+          if (selectControl && !R.isEmpty(pids)) {
+            selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
+          }
         }
       })
     }

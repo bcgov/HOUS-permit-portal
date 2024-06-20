@@ -454,6 +454,8 @@ const options = {
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
             pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
+            pinVerified: "PIN is verified.",
+            pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
           },
           edit: {
             saveDraft: "Save and finish later",

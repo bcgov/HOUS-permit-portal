@@ -1,4 +1,5 @@
 import { Instance, flow, types } from "mobx-state-tree"
+import { isNil } from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 
@@ -12,8 +13,8 @@ export const GeocoderStoreModel = types
   .extend(withEnvironment())
   .views((self) => ({}))
   .actions((self) => ({
-    fetchSiteOptions: flow(function* (address: string, pid: string = null) {
-      const response: any = yield self.environment.api.fetchSiteOptions(address, pid)
+    fetchSiteOptions: flow(function* (address: string) {
+      const response: any = yield self.environment.api.fetchSiteOptions(address)
       if (response.ok) {
         let responseData = response.data.data
         return responseData
@@ -39,6 +40,26 @@ export const GeocoderStoreModel = types
       if (response.ok) {
         self.rootStore.jurisdictionStore.addJurisdiction(responseData)
         return responseData
+      }
+    }),
+    fetchSiteDetailsFromPid: flow(function* (pid: string) {
+      self.fetchingJurisdiction = true
+      const response: any = yield self.environment.api.fetchSiteDetailsFromPid(pid)
+      let responseData = response?.data?.data
+      self.fetchingJurisdiction = false
+      if (response.ok) {
+        return responseData
+      }
+    }),
+    fetchPinVerification: flow(function* (pin: string) {
+      self.fetchingPids = true
+      const response: any = yield self.environment.api.fetchPin(pin)
+      if (response.ok && !isNil(response?.data?.pin)) {
+        self.fetchingPids = false
+        return true
+      } else {
+        self.fetchingPids = false
+        return false
       }
     }),
   }))
