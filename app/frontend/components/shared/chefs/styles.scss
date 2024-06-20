@@ -401,21 +401,20 @@
   .card-body {
     padding: var(--chakra-space-6) !important;
 
+    .col-form-label {
+      font-weight: bold;
+    }
+
     > .form-group:not(:empty) {
       // each form field inside a block
       margin-bottom: var(--chakra-space-6);
-      max-width: var(--chakra-sizes-container-sm);
+      &.formio-component-select .form-group,
+      input {
+        max-width: var(--chakra-sizes-container-sm);
+      }
 
       a {
         text-decoration: underline;
-      }
-
-      &:not(.contact-field-set):focus-within label:not(.form-check-label) {
-        font-weight: bold;
-      }
-
-      &.contact-field-set .form-group:focus-within .col-form-label {
-        font-weight: bold;
       }
     }
   }
