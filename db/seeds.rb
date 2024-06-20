@@ -47,7 +47,7 @@ User.find_or_create_by(omniauth_username: "review_manager") do |user|
   user.omniauth_email = "review_manager@example.com"
 end
 
-User.find_or_create_by(nickname: "regional_review_manager") do |user|
+User.find_or_create_by(omniauth_username: "regional_review_manager") do |user|
   user.role = :regional_review_manager
   user.first_name = "RegionalReviewManager"
   user.last_name = "McUser"
