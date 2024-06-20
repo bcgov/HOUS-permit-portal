@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
@@ -85,9 +84,6 @@ export const RequirementForm = observer(
     const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
     const infoBoxData = permitApplication.diffToInfoBoxData
-
-    const { userStore } = useMst()
-    const { currentUser } = userStore
 
     useEffect(() => {
       if (!usingCurrentTemplateVersion && isEditing) {
@@ -414,7 +410,7 @@ export const RequirementForm = observer(
             onClose={onContactsClose}
             autofillContactKey={autofillContactKey}
             permitApplication={permitApplication}
-            submissionState={clonedSubmissionData}
+            submissionState={submissionData}
           />
         )}
       </>
