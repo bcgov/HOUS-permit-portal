@@ -178,6 +178,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.string "prefix", null: false
     t.string "slug"
     t.integer "map_zoom"
+    t.boolean "external_api_enabled", default: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
