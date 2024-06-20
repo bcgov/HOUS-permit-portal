@@ -1,8 +1,8 @@
 name: Deploy a branch to DEV
 
 on:
-  push:
-    branches: ["develop"]
+  # push:
+  #   branches: ["develop"]
   workflow_dispatch:
     inputs:
       branch:
