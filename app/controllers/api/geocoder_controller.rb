@@ -23,8 +23,8 @@ class Api::GeocoderController < Api::ApplicationController
   def pid_details #get site details if a pid is supplied instead
     authorize :geocoder, :pid_details?
     begin
-      if geocoder_params[:pid]
-        coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+      coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+      if coordinates
         wrapper = Wrappers::Geocoder.new
 
         options = wrapper.site_options(nil, coordinates)

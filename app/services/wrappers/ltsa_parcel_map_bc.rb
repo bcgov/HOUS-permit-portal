@@ -110,13 +110,23 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
   end
 
   def get_coordinates_by_pid(pid)
-    response = get_details_by_pid(pid: pid)
-    get_coordinates_from_ltsa_response(response)
+    return nil if pid.blank?
+    begin
+      response = get_details_by_pid(pid: pid)
+      get_coordinates_from_ltsa_response(response)
+    rescue Errors::FeatureAttributesRetrievalError => e
+      nil
+    end
   end
 
   def get_coordinates_by_pin(pin)
-    response = get_details_by_pin(pin: pin)
-    get_coordinates_from_ltsa_response(response)
+    return nil if pin.blank?
+    begin
+      response = get_details_by_pin(pin: pin)
+      get_coordinates_from_ltsa_response(response)
+    rescue Errors::FeatureAttributesRetrievalError => e
+      nil
+    end
   end
 
   def get_coordinates_from_ltsa_response(response)
