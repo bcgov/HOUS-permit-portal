@@ -405,3 +405,8 @@ export interface IRequirementMap {
 }
 
 export type TChakraColor = keyof Theme["colors"]
+
+export interface ILinkData {
+  text: string
+  href: string
+}

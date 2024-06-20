@@ -345,8 +345,13 @@ const options = {
         },
         permitApplication: {
           updateToNewVersion: "Update my application",
+          reviewOutdatedSubmissionLink: "View draft applications",
+          reviewOutdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
+          reviewCustomizedSubmissionLink: "View draft applications",
+          reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
+          reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
           newVersionPublished: "New verson of template has been published - please review changes",
           referenceNumber: "Reference #",
           pdf: {
