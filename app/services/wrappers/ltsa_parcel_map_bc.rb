@@ -130,24 +130,28 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
       geometry_coords = parsed_response.dig("features", 0, "geometry", "rings", 0)
 
-      #cartesians system for 102190 OR 3005 #{"wkid"=>, "latestWkid"=>3005}
-      #https://epsg.io/102190.proj4
-      factory = wkid_factory_lookup(wkid || 102_190)
+      if (geometry_coords)
+        #cartesians system for 102190 OR 3005 #{"wkid"=>, "latestWkid"=>3005}
+        #https://epsg.io/102190.proj4
+        factory = wkid_factory_lookup(wkid || 102_190)
 
-      # Create an array of RGeo points
-      points = geometry_coords.map { |xy| factory.point(xy[0], xy[1]) }
+        # Create an array of RGeo points
+        points = geometry_coords.map { |xy| factory.point(xy[0], xy[1]) }
 
-      # Create a polygon from the points
-      polygon = factory.polygon(factory.linear_ring(points))
+        # Create a polygon from the points
+        polygon = factory.polygon(factory.linear_ring(points))
 
-      # Calculate the centroid
-      centroid = polygon.centroid
+        # Calculate the centroid
+        centroid = polygon.centroid
 
-      target_factory = wkid_factory_lookup(4326) #default bc geo utilizes 4326
+        target_factory = wkid_factory_lookup(4326) #default bc geo utilizes 4326
 
-      transformed_centroid = RGeo::Feature.cast(centroid, factory: target_factory, project: true)
+        transformed_centroid = RGeo::Feature.cast(centroid, factory: target_factory, project: true)
 
-      [transformed_centroid.x, transformed_centroid.y]
+        [transformed_centroid.x, transformed_centroid.y]
+      else
+        raise Errors::FeatureAttributesRetrievalError
+      end
     else
       raise Errors::FeatureAttributesRetrievalError
     end

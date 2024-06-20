@@ -23,14 +23,16 @@ class Api::GeocoderController < Api::ApplicationController
   def pid_details #get site details if a pid is supplied instead
     authorize :geocoder, :pid_details?
     begin
-      coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
-      wrapper = Wrappers::Geocoder.new
+      if geocoder_params[:pid]
+        coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+        wrapper = Wrappers::Geocoder.new
 
-      options = wrapper.site_options(nil, coordinates)
-      options.each do |option|
-        if wrapper.pids(option[:value]).include?(geocoder_params[:pid])
-          render_success option, nil, { blueprint: OptionBlueprint }
-          return
+        options = wrapper.site_options(nil, coordinates)
+        options.each do |option|
+          if wrapper.pids(option[:value]).include?(geocoder_params[:pid])
+            render_success option, nil, { blueprint: OptionBlueprint }
+            return
+          end
         end
       end
       #for options that come back, check if there are pids against that site
