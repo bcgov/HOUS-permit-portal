@@ -224,6 +224,10 @@ export class Api {
     })
   }
 
+  async generatePermitApplicationMissingPdfs(id: string) {
+    return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
+  }
+
   async submitPermitApplication(id, params) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,

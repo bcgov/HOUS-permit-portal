@@ -415,6 +415,11 @@ const options = {
             submittingTo: "You're applying to the {{ jurisdictionName }}",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
+            fetchingMissingPdf: "Fetching {{missingPdf}}...",
+            missingPdfLabels: {
+              permitApplication: "permit application pdf",
+              stepCode: "step code checklist pdf",
+            },
             contactSummaryHeading: "List of all contacts on this application",
             downloadHeading: "Download application",
             downloadPrompt: "Choose specific files or entire package:",

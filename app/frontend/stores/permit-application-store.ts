@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, flow, types } from "mobx-state-tree"
+import { flow, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { TCreatePermitApplicationFormData } from "../components/domains/permit-application/new-permit-application-screen"
 import { createSearchModel } from "../lib/create-search-model"
@@ -9,8 +9,12 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
-import { ECustomEvents, EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
-import { IPermitApplicationUpdate, IUserPushPayload } from "../types/types"
+import { ECustomEvents, EPermitApplicationSocketEventTypes, EPermitApplicationSortFields } from "../types/enums"
+import {
+  IPermitApplicationComplianceUpdate,
+  IPermitApplicationSupportingDocumentsUpdate,
+  IUserPushPayload,
+} from "../types/types"
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -164,15 +168,21 @@ export const PermitApplicationStoreModel = types
     },
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
       //based on the eventType do stuff
-      switch (payload.eventType) {
-        case ESocketEventTypes.update:
-          const payloadData = payload.data as IPermitApplicationUpdate
+      let payloadData
+      switch (payload.eventType as EPermitApplicationSocketEventTypes) {
+        case EPermitApplicationSocketEventTypes.updateCompliance:
+          payloadData = payload.data as IPermitApplicationComplianceUpdate
           const event = new CustomEvent(ECustomEvents.handlePermitApplicationUpdate, { detail: payloadData })
 
           self.permitApplicationMap
             .get(payloadData?.id)
             ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
           document.dispatchEvent(event)
+          break
+        case EPermitApplicationSocketEventTypes.updateSupportingDocuments:
+          payloadData = payload.data as IPermitApplicationSupportingDocumentsUpdate
+
+          self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
           break
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)

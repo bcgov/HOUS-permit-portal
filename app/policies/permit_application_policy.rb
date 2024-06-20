@@ -32,6 +32,12 @@ class PermitApplicationPolicy < ApplicationPolicy
     update?
   end
 
+  def generate_missing_pdfs?
+    # TODO: update this when remerged into develop, as there is a change roles and jurisdiction to support regional managers
+    user.super_admin? || (user.submitter? && record.submitter == user) ||
+      ((user.review_manager? || user.reviewer?) && record.jurisdiction == user.jurisdiction)
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope

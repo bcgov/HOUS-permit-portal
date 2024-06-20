@@ -92,6 +92,7 @@ Rails.application.routes.draw do
     end
 
     resources :permit_applications, only: %i[create update show] do
+      post "generate_missing_pdfs", on: :member, to: "permit_applications#generate_missing_pdfs"
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       post "mark_as_viewed", on: :member

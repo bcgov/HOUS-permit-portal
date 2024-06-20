@@ -14,7 +14,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :zipfile_name,
            :zipfile_url,
            :reference_number,
-           :submitted_at
+           :submitted_at,
+           :missing_pdfs
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
   end
@@ -43,5 +44,13 @@ class PermitApplicationBlueprint < Blueprinter::Base
   view :compliance_update do
     identifier :id
     fields :formatted_compliance_data, :front_end_form_update
+  end
+
+  view :supporting_docs_update do
+    identifier :id
+
+    fields :missing_pdfs, :zipfile_size, :zipfile_name, :zipfile_url
+
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint
   end
 end
