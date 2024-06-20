@@ -32,8 +32,8 @@ export const CustomMessageBox = ({ title, description, status, children }: ICust
             </Heading>
           )}
           {description && <Text>{description}</Text>}
+          {children}
         </Flex>
-        {children}
       </Flex>
     </Flex>
   )

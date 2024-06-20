@@ -101,4 +101,6 @@ Rails.application.configure do
   config.logger = MultiLogger.new(stdout_logger, file_logger)
   # Ensure ActiveRecord uses the same logger
   ActiveRecord::Base.logger = config.logger
+
+  config.log_tags = [:request_id]
 end
