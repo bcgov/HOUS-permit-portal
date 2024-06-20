@@ -84,7 +84,7 @@ class User < ApplicationRecord
     case role
     when "super_admin"
       %w[reviewer review_manager super_admin regional_review_manager]
-    when "reviewer", "review_manager", "regional_review_manager"
+    when "review_manager", "regional_review_manager"
       %w[reviewer review_manager]
     else
       []

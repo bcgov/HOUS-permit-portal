@@ -49,6 +49,12 @@ RSpec.describe Jurisdiction::UserInviter, type: :service do
     let(:email) { existing_reviewer.email }
 
     before :each do
+      # TODO: This is flaky, as any new associations will break the spec
+      # Rewrite spec to use a different approach
+      submitter.preference.destroy
+      existing_reviewer.preference.destroy
+      existing_reviewer.jurisdiction_memberships.destroy_all
+
       # Update UUIDs so the submitter is retrieved first
       submitter.update_column(:id, "aa99da14-89bc-475b-bfb3-cfd925655339")
       existing_reviewer.update_column(:id, "abb9760b-8fbb-4b1a-aa16-b65830816060")

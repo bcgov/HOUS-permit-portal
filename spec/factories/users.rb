@@ -32,7 +32,7 @@ FactoryBot.define do
     end
 
     after(:build) do |user, context|
-      if evaluator.confirmed
+      if context.confirmed
         user.skip_confirmation_notification!
         user.confirm
       end

@@ -42,7 +42,7 @@ RSpec.describe User, type: :model do
   describe "invitable roles" do
     it "a super admin can invite reviewers, review managers, super admins" do
       inviter = build(:user, :super_admin)
-      expect(inviter.invitable_roles).to match_array(%w[reviewer review_manager super_admin])
+      expect(inviter.invitable_roles).to match_array(%w[reviewer review_manager regional_review_manager super_admin])
     end
     it "a review manager can invite reviewers and review managers" do
       inviter = build(:user, :review_manager)
