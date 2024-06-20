@@ -4,7 +4,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { ENotificationActionType } from "../types/enums"
-import { INotification, IUserPushPayload } from "../types/types"
+import { ILinkData, INotification, IUserPushPayload } from "../types/types"
 
 export const NotificationStoreModel = types
   .model("NotificationStoreModel")
@@ -28,20 +28,43 @@ export const NotificationStoreModel = types
     get hasMorePages() {
       return self.totalPages > self.page
     },
-    generateSpecificHref(notification: INotification) {
+    generateSpecificLinkData(notification: INotification): ILinkData[] {
       const currentUser = self.rootStore.userStore.currentUser
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
+        const linkData = [
+          {
+            text: t("permitApplication.reviewOutdatedSubmissionLink"),
+            href: `/permit-applications?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
+              JSON.stringify({
+                type: "success",
+                title: t("permitApplication.reviewOutdatedTitle"),
+                message: t("permitApplication.reviewOutdatedMessage"),
+              })
+            )}`,
+          },
+        ]
         if (currentUser.isManager) {
-          return `/digital-building-permits/${notification.objectData.previousTemplateVersionId}/edit?compare=true`
-        }
-        if (currentUser.isSubmitter) {
-          return `/?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(JSON.stringify({ type: "success", title: t("permitApplication.reviewOutdatedTitle"), message: t("permitApplication.reviewOutdatedMessage") }))}`
+          linkData.push({
+            text: t("permitApplication.reviewOutdatedEditLink"),
+            href: `/digital-building-permits/${notification.objectData.previousTemplateVersionId}/edit?compare=true`,
+          })
         }
 
-        return "/permit-applications"
+        return linkData
       }
       if (notification.actionType === ENotificationActionType.customizationUpdate) {
-        return `/`
+        return [
+          {
+            text: t("permitApplication.reviewCustomizedSubmissionLink"),
+            href: `/permit-applications?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
+              JSON.stringify({
+                type: "success",
+                title: t("permitApplication.reviewCustomizedTitle"),
+                message: t("permitApplication.reviewCustomizedMessage"),
+              })
+            )}`,
+          },
+        ]
       }
     },
   }))

@@ -6,6 +6,7 @@ import {
   Heading,
   IconButton,
   IconButtonProps,
+  ListItem,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -16,6 +17,7 @@ import {
   PopoverTrigger,
   Portal,
   Text,
+  UnorderedList,
   useDisclosure,
 } from "@chakra-ui/react"
 import { Bell, BellRinging, CaretDown, CaretRight } from "@phosphor-icons/react"
@@ -39,7 +41,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
     anyUnread,
     unreadNotificationsCount,
     markAllAsRead,
-    generateSpecificHref,
+    generateSpecificLinkData,
   } = notificationStore
 
   const [numberJustRead, setNumberJustRead] = useState<number>()
@@ -116,15 +118,21 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
               ) : (
                 notificationsToShow.map((n) => (
                   <CustomMessageBox status="info" description={n.actionText} key={n.id}>
-                    <RouterLinkButton
-                      variant="link"
-                      rightIcon={<CaretRight />}
-                      to={generateSpecificHref(n)}
-                      color="text.primary"
-                      onClick={onClose}
-                    >
-                      {t("ui.go")}
-                    </RouterLinkButton>
+                    <UnorderedList pl={0}>
+                      {generateSpecificLinkData(n).map((link) => (
+                        <ListItem>
+                          <RouterLinkButton
+                            variant="link"
+                            rightIcon={<CaretRight />}
+                            to={link.href}
+                            color="text.primary"
+                            onClick={onClose}
+                          >
+                            {link.text}
+                          </RouterLinkButton>
+                        </ListItem>
+                      ))}
+                    </UnorderedList>
                   </CustomMessageBox>
                 ))
               )}
