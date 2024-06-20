@@ -169,7 +169,6 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
-    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
   end
 
   def formatted_submission_data_for_external_use
