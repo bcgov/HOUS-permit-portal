@@ -1,7 +1,7 @@
 class Api::UsersController < Api::ApplicationController
   include Api::Concerns::Search::AdminUsers
 
-  before_action :find_user, only: %i[destroy restore accept_eula update]
+  before_action :find_user, only: %i[destroy restore accept_eula update reinvite]
   skip_after_action :verify_policy_scoped, only: %i[index]
   skip_before_action :require_confirmation, only: %i[profile]
   skip_before_action :require_confirmation, only: %i[accept_eula resend_confirmation]
@@ -98,6 +98,12 @@ class Api::UsersController < Api::ApplicationController
     authorize current_user
     current_user.resend_confirmation_instructions
     render_success(current_user, "user.reconfirmation_sent", { blueprint_opts: { view: :current_user } })
+  end
+
+  def reinvite
+    authorize @user
+    @user.invite!(current_user)
+    render_success(@user, "user.reinvited", { blueprint_opts: { view: :invited_user } })
   end
 
   private

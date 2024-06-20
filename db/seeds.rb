@@ -21,7 +21,7 @@ north_van = Jurisdiction.find_by(name: "North Vancouver")
 van = Jurisdiction.find_by(name: "Vancouver")
 
 puts "Seeding users..."
-User.find_or_create_by(nickname: "super_admin") do |user|
+User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.role = :super_admin
   user.first_name = "SuperAdmin"
   user.last_name = "McUser"
@@ -34,7 +34,7 @@ User.find_or_create_by(nickname: "super_admin") do |user|
   user.omniauth_username = "super_admin"
 end
 
-User.find_or_create_by(nickname: "review_manager") do |user|
+User.find_or_create_by(omniauth_username: "review_manager") do |user|
   user.role = :review_manager
   user.first_name = "ReviewManager"
   user.last_name = "McUser"
@@ -45,7 +45,6 @@ User.find_or_create_by(nickname: "review_manager") do |user|
   user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "review_manager@example.com"
-  user.omniauth_username = "review_manager"
 end
 
 User.find_or_create_by(nickname: "regional_review_manager") do |user|
@@ -62,7 +61,7 @@ User.find_or_create_by(nickname: "regional_review_manager") do |user|
   user.omniauth_username = "regional_rm"
 end
 
-User.find_or_create_by(nickname: "reviewer") do |user|
+User.find_or_create_by(omniauth_username: "reviewer") do |user|
   user.role = :reviewer
   user.first_name = "Reviewer"
   user.last_name = "McUser"
@@ -73,10 +72,9 @@ User.find_or_create_by(nickname: "reviewer") do |user|
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "reviewer@example.com"
-  user.omniauth_username = "reviewer"
 end
 
-User.find_or_create_by(nickname: "submitter") do |user|
+User.find_or_create_by(omniauth_username: "submitter") do |user|
   user.role = :submitter
   user.first_name = "Submitter"
   user.last_name = "McUser"
@@ -86,7 +84,6 @@ User.find_or_create_by(nickname: "submitter") do |user|
   user.omniauth_uid = "C2E3AA0067514FFEB587C11038E437E2"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "submitter@example.com"
-  user.omniauth_username = "submitter"
 end
 
 User.reindex

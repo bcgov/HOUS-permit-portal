@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -12,6 +12,7 @@ import {
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
+  IPermitApplicationSupportingDocumentsUpdate,
   ISubmissionData,
   ITemplateCustomization,
   ITemplateVersionDiff,
@@ -55,6 +56,7 @@ export const PermitApplicationModel = types
     zipfileName: types.maybeNull(types.string),
     zipfileUrl: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
+    missingPdfs: types.maybeNull(types.array(types.string)),
     isFullyLoaded: types.optional(types.boolean, false),
     isDirty: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
@@ -422,6 +424,19 @@ export const PermitApplicationModel = types
         },
       }
       self.setSubmissionData(newData)
+    },
+    generateMissingPdfs: flow(function* () {
+      const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
+      self.missingPdfs = cast(data.missingPdfs)
+      self.supportingDocuments = data.supportingDocuments
+      self.zipfileSize = data.zipfileSize
+      self.zipfileName = data.zipfileName
+      self.zipfileUrl = data.zipfileUrl
     },
   }))
 

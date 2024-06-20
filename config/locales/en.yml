@@ -195,6 +195,9 @@ en:
       reconfirmation_sent:
         title: Confirmation email sent
         message: Please click the link in your email inbox.
+      reinvited:
+        title: Invitation email sent
+        message: ""
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed
