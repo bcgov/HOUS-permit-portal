@@ -427,12 +427,12 @@ const AppRoutes = observer(() => {
           {reviewManagerOnlyRoutes}
         </Route>
 
-        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/not-found" />}>
+        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/" />}>
           <Route path="/login" element={<LoginScreen />} />
-          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/admin" element={<LoginScreen isAdmin />} />
         </Route>
         {/* Public Routes */}
+        <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
