@@ -83,6 +83,10 @@ export class Api {
     return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
+  async reinviteUser(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/reinvite`)
+  }
+
   async logout() {
     return this.client.delete("/logout")
   }
@@ -248,6 +252,10 @@ export class Api {
 
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
+  }
+
+  async generatePermitApplicationMissingPdfs(id: string) {
+    return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
   }
 
   async submitPermitApplication(id, params) {

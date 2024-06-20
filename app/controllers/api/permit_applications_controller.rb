@@ -2,7 +2,15 @@ class Api::PermitApplicationsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
   before_action :set_permit_application,
-                only: %i[show update submit upload_supporting_document mark_as_viewed update_version]
+                only: %i[
+                  show
+                  update
+                  submit
+                  upload_supporting_document
+                  mark_as_viewed
+                  update_version
+                  generate_missing_pdfs
+                ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -130,6 +138,14 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      error_message: @permit_application.errors.full_messages.join(", "),
                    }
     end
+  end
+
+  def generate_missing_pdfs
+    authorize @permit_application
+
+    ZipfileJob.perform_async(@permit_application.id, false)
+
+    head :ok
   end
 
   private

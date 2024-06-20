@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -178,7 +178,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
     t.string "prefix", null: false
     t.string "slug"
     t.integer "map_zoom"
-    t.boolean "external_api_enabled", default: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -672,7 +671,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.string "email"
-    t.string "nickname"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -716,7 +714,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_12_213910) do
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
-    t.index ["nickname"], name: "index_users_on_nickname", unique: true
     t.index %w[omniauth_provider omniauth_uid],
             name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true

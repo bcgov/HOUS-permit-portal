@@ -1,6 +1,6 @@
 class User < ApplicationRecord
   PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}\z/
-  searchkick searchable: %i[first_name last_name nickname email], word_start: %i[first_name last_name nickname email]
+  searchkick searchable: %i[first_name last_name email], word_start: %i[first_name last_name email]
 
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
@@ -73,7 +73,6 @@ class User < ApplicationRecord
       role: role,
       first_name: first_name,
       last_name: last_name,
-      nickname: nickname,
       email: email,
       jurisdiction_ids: jurisdictions.pluck(:id),
       discarded: discarded_at.present?,

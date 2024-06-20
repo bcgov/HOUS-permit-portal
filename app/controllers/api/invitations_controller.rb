@@ -60,7 +60,7 @@ class Api::InvitationsController < Devise::InvitationsController
   end
 
   def user_params
-    params.require(:user).permit(:nickname, :first_name, :last_name)
+    params.require(:user).permit(:first_name, :last_name)
   end
 
   def render_accept_invite_error(resource)

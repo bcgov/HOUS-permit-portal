@@ -36,6 +36,11 @@ class PermitApplicationPolicy < ApplicationPolicy
     update?
   end
 
+  def generate_missing_pdfs?
+    user.super_admin? || (user.submitter? && record.submitter == user) ||
+      ((user.review_staff?) && user.jurisdictions.find(record.jurisdiction_id))
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
