@@ -51,4 +51,11 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   config.active_job.queue_adapter = :test
+
+  config.action_mailer.delivery_method = :test
+  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "http" }
+
+  config.after_initialize do
+    Rails.application.routes.default_url_options = Rails.application.config.action_mailer.default_url_options
+  end
 end

@@ -17,8 +17,8 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
   end
 
   before do
-    Jurisdiction.search_index.refresh
-    PermitApplication.search_index.refresh
+    Jurisdiction.reindex
+    PermitApplication.reindex
   end
 
   path "/permit_applications/search" do

@@ -11,8 +11,8 @@ class AutomatedCompliance::DigitalSealValidatorJob
 
     WebsocketBroadcaster.push_update_to_relevant_users(
       permit_application.collaborators.pluck(:id),
-      Constants::SocketTypes::Domain::PERMIT_APPLICATION,
-      Constants::SocketTypes::Event::UPDATE,
+      Constants::Websockets::Events::PermitApplication::DOMAIN,
+      Constants::Websockets::Events::PermitApplication::TYPES[:update_compliance],
       PermitApplicationBlueprint.render_as_hash(permit_application, { view: :compliance_update }),
     )
   end

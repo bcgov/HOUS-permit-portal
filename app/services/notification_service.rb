@@ -39,8 +39,8 @@ class NotificationService
       activity = SimpleFeed.user_feed.activity(user_id)
       activity.store(event: event)
       payloads[user_id] = {
-        domain: Constants::SocketTypes::Domain::NOTIFICATION,
-        event_type: Constants::SocketTypes::Event::NEW,
+        domain: Constants::Websockets::Events::NOTIFICATION::DOMAIN,
+        event_type: Constants::Websockets::Events::NOTIFICATION::TYPES[:update],
         data: notification_user_hash[user_id],
         meta: {
           total_pages:

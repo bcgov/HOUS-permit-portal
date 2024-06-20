@@ -28,20 +28,19 @@ class Jurisdiction::UserInviter
         self.results[:invited] << user
       else
         reinvited = user.present?
-        user =
-          User.invite!(email: user_params[:email]) do |u|
-            u.skip_confirmation_notification!
-            u.role = user_params[:role] if inviter.invitable_roles.include?(user_params[:role])
-            u.email = user_params[:email]
-            u.nickname = user_params[:email]
-            u.first_name = user_params[:first_name]
-            u.last_name = user_params[:last_name]
-            u.discarded_at = nil
-            u.invited_by = inviter
-            u.jurisdiction_ids = [user_params[:jurisdiction_id]]
-            u.save
-          end
-        reinvited ? self.results[:reinvited] << user : self.results[:invited] << user
+        if reinvited
+          user.skip_confirmation_notification!
+          user.invite!(inviter)
+          self.results[:reinvited] << user
+        elsif inviter.invitable_roles.include?(user_params[:role].to_s)
+          jurisdiction_id = user_params[:jurisdiction_id] || inviter.jurisdiction&.id
+          user = User.new(user_params.merge({ discarded_at: nil, jurisdiction_id: }))
+          user.skip_confirmation_notification!
+          user.save!
+          user.invite!(inviter)
+
+          self.results[:invited] << user
+        end
       end
     end
   end

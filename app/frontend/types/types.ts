@@ -13,6 +13,7 @@ import {
   EJurisdictionTypes,
   ENotificationActionType,
   ENumberUnit,
+  EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
   ERequirementType,
   ESZeroCarbonStep,
@@ -240,8 +241,14 @@ export interface IEULA {
   content: string
 }
 
-export interface IPermitApplicationUpdate {
-  id
+export interface INotification {
+  title: string
+  description: string
+  at: string
+}
+
+export interface IPermitApplicationComplianceUpdate {
+  id: string
   frontEndFormUpdate: Object
   formattedComplianceData: Object
 }
@@ -261,12 +268,24 @@ export interface INotification {
   objectData?: INotificationObjectData
 }
 
-export type TSocketEventData = IPermitApplication | INotification
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | INotification
+
+export interface IPermitApplicationSupportingDocumentsUpdate {
+  id: string
+  supportingDocuments: IPermitApplication["supportingDocuments"]
+  missingPdfs: string[]
+  zipfileSize: null | number
+  zipfileName: null | string
+  zipfileUrl: null | string
+}
 
 export interface IUserPushPayload {
   data: TSocketEventData
   domain: ESocketDomainTypes
-  eventType: ESocketEventTypes
+  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes
   meta: {
     lastReadAt: number
     totalPages: number

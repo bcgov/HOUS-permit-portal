@@ -1,9 +1,9 @@
 // modified from https://stackoverflow.com/questions/43001679/how-do-you-create-custom-event-in-typescript
 import { ECustomEvents } from "./enums"
-import { IPermitApplicationUpdate } from "./types"
+import { IPermitApplicationComplianceUpdate } from "./types"
 
 export interface ICustomEventMap {
-  [ECustomEvents.handlePermitApplicationUpdate]: CustomEvent<IPermitApplicationUpdate>
+  [ECustomEvents.handlePermitApplicationUpdate]: CustomEvent<IPermitApplicationComplianceUpdate>
 }
 
 declare global {

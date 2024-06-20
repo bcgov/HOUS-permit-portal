@@ -1,9 +1,9 @@
 import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
 import { Archive, ArrowsLeftRight, ClockClockwise, PaperPlaneTilt } from "@phosphor-icons/react"
+import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
 import { ISearch } from "../../../lib/create-search-model"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
@@ -32,13 +32,6 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
     if (await user.changeRole()) searchModel?.search()
   }
 
-  const handleReinvite = async () => {
-    navigate(`invite?role=${user.role}&email=${user.email}&firstName=${user.firstName}&lastName=${user.lastName}`)
-  }
-
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-
   const {
     jurisdictionStore: { currentJurisdiction },
     userStore: { currentUser },
@@ -65,11 +58,7 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
               </ManageMenuItemButton>
             </Can>
           )}
-          {(user.isUnconfirmed || user.isDiscarded) && (
-            <ManageMenuItemButton color="text.primary" onClick={handleReinvite} leftIcon={<PaperPlaneTilt size={16} />}>
-              {t("user.reinvite")}
-            </ManageMenuItemButton>
-          )}
+          {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
           {user.isDiscarded ? (
             <ManageMenuItemButton
               color="semantic.success"
@@ -93,3 +82,27 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
     </Can>
   )
 })
+
+interface IFormProps {
+  user: IUser
+}
+const ReinviteUserForm = function ReinviteUserForm({ user }: IFormProps) {
+  const { handleSubmit, formState } = useForm()
+  const { isSubmitting } = formState
+
+  const onSubmit = async () => await user.reinvite()
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <ManageMenuItemButton
+        color="text.primary"
+        type="submit"
+        leftIcon={<PaperPlaneTilt size={16} />}
+        isLoading={isSubmitting}
+        isDisabled={isSubmitting}
+      >
+        {t("user.reinvite")}
+      </ManageMenuItemButton>
+    </form>
+  )
+}
