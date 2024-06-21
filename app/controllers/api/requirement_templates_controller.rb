@@ -157,7 +157,16 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   private
 
   def set_requirement_template
-    @requirement_template = RequirementTemplate.find(params[:id])
+    # eager loading of associations as most of the time we return the extended view
+    @requirement_template =
+      RequirementTemplate.includes(
+        :activity,
+        :permit_type,
+        :published_template_version,
+        :last_three_deprecated_template_versions,
+        :scheduled_template_versions,
+        requirement_template_sections: [template_section_blocks: [requirement_block: :requirements]],
+      ).find(params[:id])
   end
 
   def set_template_version
@@ -182,7 +191,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     # This is a workaround needed to validate step code related errors
     if permitted_params[:requirement_template_sections_attributes].present?
       permitted_params[:requirement_template_sections_attributes_copy] = permitted_params[
-        :requirement_template_sections_attributes
+        requirement_template_sections_attributes: :requirements
       ].deep_dup
     end
 
