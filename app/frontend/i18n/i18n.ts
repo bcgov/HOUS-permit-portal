@@ -351,7 +351,7 @@ const options = {
           reviewCustomizedSubmissionLink: "View draft applications",
           reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
           reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
-          newVersionPublished: "New verson of template has been published - please review changes",
+          newVersionPublished: "New version of template has been published - please review changes",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
