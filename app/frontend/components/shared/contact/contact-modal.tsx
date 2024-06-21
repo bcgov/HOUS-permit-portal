@@ -8,10 +8,13 @@ import {
   ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react"
+import * as R from "ramda"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
+import { INPUT_CONTACT_KEYS } from "../../../stores/contact-store"
 import { IContact, IOption } from "../../../types/types"
+import { convertPhoneNumberToFormioFormat } from "../../../utils/utility-functions"
 import { ContactSelect } from "../select/selectors/contact-select"
 
 export interface IContactModalProps extends Partial<ReturnType<typeof useDisclosure>> {
@@ -19,6 +22,7 @@ export interface IContactModalProps extends Partial<ReturnType<typeof useDisclos
   autofillContactKey?: string
   onContactChange?: (option: IOption<IContact>) => void
   submissionState: any
+  setSubmissionState: (any) => void
 }
 
 export const ContactModal: React.FC<IContactModalProps> = ({
@@ -29,6 +33,7 @@ export const ContactModal: React.FC<IContactModalProps> = ({
   autofillContactKey,
   onContactChange,
   submissionState,
+  setSubmissionState,
 }) => {
   const { t } = useTranslation()
 
@@ -39,7 +44,6 @@ export const ContactModal: React.FC<IContactModalProps> = ({
     if (onContactChange) {
       onContactChange(option)
     } else if (autofillContactKey && permitApplication) {
-      const { updateContactInSubmissionSection, updateContactInSubmissionDatagrid } = permitApplication
       const parts = autofillContactKey.split("|")
       const position = parts.slice(-1)[0]
 
@@ -52,8 +56,61 @@ export const ContactModal: React.FC<IContactModalProps> = ({
         updateContactInSubmissionDatagrid(requirementPrefix, index, option.value)
       }
     }
-
     onClose()
+  }
+
+  const updateContactInSubmissionSection = (requirementKey: string, contact: IContact) => {
+    const sectionKey = requirementKey.split("|")[0].slice(21, 64)
+    const newSectionFields = {}
+    INPUT_CONTACT_KEYS.forEach((contactField) => {
+      let newValue = ["cell", "phone"].includes(contactField)
+        ? // The normalized phone number starts with +1... (country code)
+          convertPhoneNumberToFormioFormat(contact[contactField] as string)
+        : contact[contactField] || ""
+      newSectionFields[`${requirementKey}|${contactField}`] = newValue
+    })
+
+    const newData = {
+      data: {
+        ...submissionState.data,
+        [sectionKey]: {
+          ...submissionState.data[sectionKey],
+          ...newSectionFields,
+        },
+      },
+    }
+    setSubmissionState(newData)
+  }
+
+  const updateContactInSubmissionDatagrid = (requirementPrefix: string, index: number, contact: IContact) => {
+    const parts = requirementPrefix.split("|")
+    const contactType = parts[parts.length - 1]
+    const requirementKey = parts.slice(0, -1).join("|")
+    const sectionKey = requirementKey.split("|")[0].slice(21, 64)
+
+    const newContactElement = {}
+    INPUT_CONTACT_KEYS.forEach((contactField) => {
+      // The normalized phone number starts with +1... (country code)
+      let newValue = ["cell", "phone"].includes(contactField)
+        ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
+        : contact[contactField]
+      newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
+    })
+    const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
+    clonedArray[index] = newContactElement
+    const newSectionFields = {
+      [requirementKey]: clonedArray,
+    }
+    const newData = {
+      data: {
+        ...submissionState.data,
+        [sectionKey]: {
+          ...submissionState.data[sectionKey],
+          ...newSectionFields,
+        },
+      },
+    }
+    setSubmissionState(newData)
   }
 
   return (
