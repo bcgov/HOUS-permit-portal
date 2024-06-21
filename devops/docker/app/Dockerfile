@@ -36,7 +36,7 @@ RUN gem install bundler:2.5.4 && \
 
 # Install npm and node modules
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps --maxsockets=50
 
 # Copy application code
 COPY . .
