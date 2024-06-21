@@ -135,7 +135,7 @@ export const PermitApplicationModel = types
       self.isDirty = true
     },
     setIsDirty(isDirty: boolean) {
-      self.isDirty = true
+      self.isDirty = isDirty
     },
     resetDiff() {
       self.showingCompareAfter = false
@@ -368,7 +368,7 @@ export const PermitApplicationModel = types
       self.showingCompareAfter = false
     },
 
-    updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
+    updateContactInSubmissionSection: (requirementKey: string, contact: IContact) => {
       const sectionKey = requirementKey.split("|")[0].slice(21, 64)
       const newSectionFields = {}
       INPUT_CONTACT_KEYS.forEach((contactField) => {
@@ -381,21 +381,16 @@ export const PermitApplicationModel = types
 
       const newData = {
         data: {
-          ...submissionState.data,
+          ...self.submissionData.data,
           [sectionKey]: {
-            ...submissionState.data[sectionKey],
+            ...self.submissionData.data[sectionKey],
             ...newSectionFields,
           },
         },
       }
       self.setSubmissionData(newData)
     },
-    updateContactInSubmissionDatagrid: (
-      requirementPrefix: string,
-      index: number,
-      contact: IContact,
-      submissionState: any
-    ) => {
+    updateContactInSubmissionDatagrid: (requirementPrefix: string, index: number, contact: IContact) => {
       const parts = requirementPrefix.split("|")
       const contactType = parts[parts.length - 1]
       const requirementKey = parts.slice(0, -1).join("|")
@@ -409,16 +404,16 @@ export const PermitApplicationModel = types
           : contact[contactField]
         newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
       })
-      const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
+      const clonedArray = R.clone(self.submissionData.data?.[sectionKey]?.[requirementKey] ?? [])
       clonedArray[index] = newContactElement
       const newSectionFields = {
         [requirementKey]: clonedArray,
       }
       const newData = {
         data: {
-          ...submissionState.data,
+          ...self.submissionData.data,
           [sectionKey]: {
-            ...submissionState.data[sectionKey],
+            ...self.submissionData.data[sectionKey],
             ...newSectionFields,
           },
         },

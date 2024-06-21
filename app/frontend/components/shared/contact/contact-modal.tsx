@@ -45,11 +45,11 @@ export const ContactModal: React.FC<IContactModalProps> = ({
 
       if (position === "in_section") {
         const requirementKey = parts.slice(0, -1).join("|")
-        updateContactInSubmissionSection(requirementKey, option.value, submissionState)
+        updateContactInSubmissionSection(requirementKey, option.value)
       } else {
         const requirementPrefix = parts.slice(0, -1).join("|")
         const index = parseInt(position)
-        updateContactInSubmissionDatagrid(requirementPrefix, index, option.value, submissionState)
+        updateContactInSubmissionDatagrid(requirementPrefix, index, option.value)
       }
     }
 
