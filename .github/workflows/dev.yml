@@ -27,9 +27,6 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           lfs: true
-      - name: Increase file descriptor limit
-        run: |
-          sudo prlimit --pid $$ --nofile=65536:65536
       - name: Build Docker Image
         uses: redhat-actions/buildah-build@v2
         with:
