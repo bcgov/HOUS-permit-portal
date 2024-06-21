@@ -70,7 +70,7 @@ export const RequirementForm = observer(
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
-    const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(R.clone(submissionData))
+    const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
 
     const handleSetUnsavedSubmissionData = (data) => {
       permitApplication.setIsDirty(true)
