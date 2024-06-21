@@ -20,8 +20,8 @@ class OmniauthUserResolver
 
   def resolve_user
     if should_promote_user?
-      result = MergeSubmitterWithInvitedUser.new(submitter: existing_user, invited_user:).call
-      self.invited_user = result.submitter
+      result = PromoteUser.new(existing_user:, invited_user:).call
+      self.invited_user = result.existing_user
     end
 
     accept_invitation_with_omniauth if invited_user.present?
@@ -31,8 +31,12 @@ class OmniauthUserResolver
   end
 
   def should_promote_user?
-    return unless existing_user&.submitter? && invited_user.present?
+    return unless promotable_user?
     existing_user.id != invited_user.id
+  end
+
+  def promotable_user?
+    (existing_user&.submitter? && invited_user.present?) || invited_user&.regional_review_manager?
   end
 
   def create_user

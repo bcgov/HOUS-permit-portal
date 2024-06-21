@@ -78,12 +78,6 @@ export const UserStoreModel = types
       self.invitationResponse = response.data
       return response.ok
     }),
-    acceptInvitation: flow(function* (params) {
-      const { ok, data: response } = yield* toGenerator(self.environment.api.acceptInvitation(params))
-      if (ok) {
-        window.location.replace(response.meta.redirectUrl)
-      }
-    }),
     fetchInvitedUser: flow(function* (token: string) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.fetchInvitedUser(token))
       if (ok) {

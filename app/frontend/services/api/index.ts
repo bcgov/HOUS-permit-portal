@@ -99,8 +99,8 @@ export class Api {
     return this.client.post("/invitation", params)
   }
 
-  async acceptInvitation(params) {
-    return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
+  async acceptInvitation(userId: string, params) {
+    return this.client.post<IAcceptInvitationResponse>(`/users/${userId}/accept_invitation`, params)
   }
 
   async fetchInvitedUser(token: string) {
