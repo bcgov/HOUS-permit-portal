@@ -5,6 +5,13 @@ module Api::Concerns::Search::RequirementTemplates
     @search =
       RequirementTemplate.search(
         query,
+        includes: %i[
+          activity
+          permit_type
+          last_three_deprecated_template_versions
+          scheduled_template_versions
+          published_template_version
+        ],
         order: order,
         where: {
           discarded: discarded,
