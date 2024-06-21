@@ -146,6 +146,9 @@ export const PermitApplicationModel = types
     shouldShowApplicationDiff(isEditing: boolean) {
       return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
     },
+    get shouldShowNewVersionWarning() {
+      return !self.usingCurrentTemplateVersion && self.isDraft
+    },
     get formDiffKey() {
       return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
     },
