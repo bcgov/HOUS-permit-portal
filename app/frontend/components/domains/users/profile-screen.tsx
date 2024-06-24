@@ -51,7 +51,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     return {
       firstName,
       lastName,
-      nickname,
       certified,
       organization,
       preferenceAttributes: preference,

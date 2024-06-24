@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, flow, types } from "mobx-state-tree"
+import { flow, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { TCreatePermitApplicationFormData } from "../components/domains/permit-application/new-permit-application-screen"
 import { createSearchModel } from "../lib/create-search-model"
@@ -9,8 +9,23 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
-import { ECustomEvents, EPermitApplicationSortFields, ESocketEventTypes } from "../types/enums"
-import { IPermitApplicationUpdate, IUserPushPayload } from "../types/types"
+import {
+  ECustomEvents,
+  EPermitApplicationSocketEventTypes,
+  EPermitApplicationSortFields,
+  EPermitApplicationStatus,
+} from "../types/enums"
+import {
+  IPermitApplicationComplianceUpdate,
+  IPermitApplicationSearchFilters,
+  IPermitApplicationSupportingDocumentsUpdate,
+  IUserPushPayload,
+  TSearchParams,
+} from "../types/types"
+import { setQueryParam } from "../utils/utility-functions"
+
+const filterableStatuses = Object.values(EPermitApplicationStatus)
+export type TFilterableStatus = (typeof filterableStatuses)[number]
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -18,8 +33,11 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
+      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
+      templateVersionIdFilter: types.maybeNull(types.string),
+      requirementTemplateIdFilter: types.maybeNull(types.string),
     }),
-    createSearchModel<EPermitApplicationSortFields>("searchPermitApplications")
+    createSearchModel<EPermitApplicationSortFields>("searchPermitApplications", "setPermitApplicationFilters")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -33,11 +51,13 @@ export const PermitApplicationStoreModel = types
     getPermitApplicationById(id: string) {
       return self.permitApplicationMap.get(id)
     },
-
     // View to get all permitapplications as an array
     get permitApplications() {
       // TODO: UNSTUB APPLICATIONS
       return Array.from(self.permitApplicationMap.values())
+    },
+    get hasResetableFilters() {
+      return !R.isNil(self.templateVersionIdFilter) || !R.isNil(self.requirementTemplateIdFilter)
     },
   }))
   .actions((self) => ({
@@ -118,6 +138,12 @@ export const PermitApplicationStoreModel = types
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
     },
+    setStatusFilter(status: TFilterableStatus) {
+      if (!status) return
+
+      setQueryParam("status", status)
+      self.statusFilter = status
+    },
   }))
   .actions((self) => ({
     createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
@@ -142,8 +168,13 @@ export const PermitApplicationStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
-        statusFilter: self.statusFilter,
-      }
+        filters: {
+          status: self.statusFilter,
+          templateVersionId: self.templateVersionIdFilter,
+          requirementTemplateId: self.requirementTemplateIdFilter,
+        },
+      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+
       const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
 
       const response = currentJurisdictionId
@@ -175,6 +206,17 @@ export const PermitApplicationStoreModel = types
         return permitApplication
       }
     }),
+
+    setPermitApplicationFilters(queryParams: URLSearchParams) {
+      const statusFilter = queryParams.get("status") as TFilterableStatus
+      const templateVersionIdFilter = queryParams.get("templateVersionId")
+      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
+
+      self.setStatusFilter(statusFilter)
+      self.requirementTemplateIdFilter = requirementTemplateIdFilter
+      self.templateVersionIdFilter = templateVersionIdFilter
+    },
+
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
       self.currentPermitApplication &&
@@ -186,15 +228,21 @@ export const PermitApplicationStoreModel = types
     },
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
       //based on the eventType do stuff
-      switch (payload.eventType) {
-        case ESocketEventTypes.update:
-          const payloadData = payload.data as IPermitApplicationUpdate
+      let payloadData
+      switch (payload.eventType as EPermitApplicationSocketEventTypes) {
+        case EPermitApplicationSocketEventTypes.updateCompliance:
+          payloadData = payload.data as IPermitApplicationComplianceUpdate
           const event = new CustomEvent(ECustomEvents.handlePermitApplicationUpdate, { detail: payloadData })
 
           self.permitApplicationMap
             .get(payloadData?.id)
             ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
           document.dispatchEvent(event)
+          break
+        case EPermitApplicationSocketEventTypes.updateSupportingDocuments:
+          payloadData = payload.data as IPermitApplicationSupportingDocumentsUpdate
+
+          self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
           break
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)

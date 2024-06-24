@@ -4,7 +4,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     if user.super_admin? || record.submitter == user
       true
     elsif user.review_staff?
-      user.jurisdictions.find(record.jurisdiction.id).present?
+      user.jurisdictions.find(record.jurisdiction.id).present? && record.submitted?
     end
   end
 
@@ -34,6 +34,11 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   def submit?
     update?
+  end
+
+  def generate_missing_pdfs?
+    user.super_admin? || (user.submitter? && record.submitter == user) ||
+      ((user.review_staff?) && user.jurisdictions.find(record.jurisdiction_id))
   end
 
   # we may want to separate an admin update to a secondary policy

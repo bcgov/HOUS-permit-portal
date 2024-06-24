@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
@@ -60,6 +61,11 @@ export const JurisdictionModel = types
     },
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)
+    },
+    get zeroCarbonLevelTranslation() {
+      const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
+      // @ts-ignore
+      return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${self.zeroCarbonStepRequired}`)
     },
   }))
   .actions((self) => ({

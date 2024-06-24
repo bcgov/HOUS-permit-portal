@@ -97,4 +97,19 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
   config.before(:each) { Sidekiq::Worker.respond_to?(:clear_all) && Sidekiq::Worker.clear_all }
+
+  config.before(:suite) do
+    # reindex models
+    Jurisdiction.reindex
+    PermitApplication.reindex
+    RequirementBlock.reindex
+    RequirementTemplate.reindex
+    User.reindex
+    Contact.reindex
+
+    # and disable callbacks
+    Searchkick.disable_callbacks
+  end
+
+  config.around(:each, search: true) { |example| Searchkick.callbacks(nil) { example.run } }
 end

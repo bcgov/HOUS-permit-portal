@@ -18,7 +18,7 @@ import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
 import * as R from "ramda"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../../hooks/use-mount-status"
@@ -42,16 +42,11 @@ interface IRequirementFormProps {
   formRef: any
   triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
   showHelpButton?: boolean
+  isEditing?: boolean
 }
 
 export const RequirementForm = observer(
-  ({
-    permitApplication,
-    onCompletedBlocksChange,
-    formRef,
-    triggerSave,
-    showHelpButton = true,
-  }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave, isEditing = false }: IRequirementFormProps) => {
     const {
       jurisdiction,
       submissionData,
@@ -80,20 +75,25 @@ export const RequirementForm = observer(
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
     const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
 
-    const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
+    const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
+
+    const handleSetUnsavedSubmissionData = (data) => {
+      permitApplication.setIsDirty(true)
+      setUnsavedSubmissionData(data)
+    }
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
     const { isOpen: isRevisionsOpen, onOpen: onRevisionsOpen, onClose: onRevisionsClose } = useDisclosure()
 
-    const usesPublishedTemplateVersion = permitApplication?.usesPublishedTemplateVersion
+    const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (!usesPublishedTemplateVersion && currentUser.shouldSeeApplicationDiff) {
+      if (!usingCurrentTemplateVersion && isEditing && currentUser.shouldSeeApplicationDiff) {
         permitApplication.fetchDiff()
       }
-    }, [usesPublishedTemplateVersion])
+    }, [usingCurrentTemplateVersion])
 
     useEffect(() => {
       // The box observers need to be re-registered whenever a panel is collapsed
@@ -262,7 +262,9 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? {} : { readOnly: !permitApplication.revisionMode }),
+      ...(isDraft
+        ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) }
+        : { readOnly: !permitApplication.revisionMode }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -270,7 +272,7 @@ export const RequirementForm = observer(
     }
 
     const handleUpdatePermitApplicationVersion = () => {
-      if (permitApplication.showCompareAfter) {
+      if (permitApplication.showingCompareAfter) {
         permitApplication.resetCompareAfter()
       } else {
         permitApplication.updateVersion()
@@ -305,15 +307,16 @@ export const RequirementForm = observer(
             </Center>
           )}
           <ErrorsBox data={errorBoxData} />
-          {permitApplication.shouldShowApplicationDiff &&
+          {permitApplication.shouldShowApplicationDiff(isEditing) &&
             (permitApplication.diff ? (
               <CompareRequirementsBox
                 data={infoBoxData}
                 handleUpdatePermitApplicationVersion={handleUpdatePermitApplicationVersion}
-                showCompareAfter={permitApplication.showCompareAfter}
+                showingCompareAfter={permitApplication.showingCompareAfter}
                 handleClickDismiss={() => {
                   permitApplication.resetDiff()
                 }}
+                isUpdatable
               />
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
@@ -346,7 +349,7 @@ export const RequirementForm = observer(
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
             can't be mutated*/
-            submission={clonedSubmissionData}
+            submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
             onBlur={onBlur}
@@ -399,7 +402,8 @@ export const RequirementForm = observer(
             onClose={onContactsClose}
             autofillContactKey={autofillContactKey}
             permitApplication={permitApplication}
-            submissionState={clonedSubmissionData}
+            submissionState={unsavedSubmissionData}
+            setSubmissionState={handleSetUnsavedSubmissionData}
           />
         )}
 

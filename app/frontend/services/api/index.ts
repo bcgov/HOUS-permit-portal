@@ -4,6 +4,7 @@ import { TCreateRequirementTemplateFormData } from "../../components/domains/req
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
+import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -15,6 +16,7 @@ import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import {
   IExternalApiKeyParams,
+  IIntegrationMappingUpdateParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -41,6 +43,7 @@ import {
   IContact,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  IPermitApplicationSearchFilters,
   ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
@@ -80,6 +83,10 @@ export class Api {
     return this.client.post<ApiResponse<IUser>>(`/users/${userId}/resend_confirmation`)
   }
 
+  async reinviteUser(userId: string) {
+    return this.client.post<ApiResponse<IUser>>(`/users/${userId}/reinvite`)
+  }
+
   async logout() {
     return this.client.delete("/logout")
   }
@@ -92,8 +99,8 @@ export class Api {
     return this.client.post("/invitation", params)
   }
 
-  async acceptInvitation(params) {
-    return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
+  async acceptInvitation(userId: string, params) {
+    return this.client.post<IAcceptInvitationResponse>(`/users/${userId}/accept_invitation`, params)
   }
 
   async fetchInvitedUser(token: string) {
@@ -181,11 +188,14 @@ export class Api {
     return this.client.post<IUsersResponse>(`/users/search`, params)
   }
 
-  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
-  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchJurisdictionPermitApplications(
+    jurisdictionId,
+    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+  ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
       params
@@ -244,6 +254,10 @@ export class Api {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
   }
 
+  async generatePermitApplicationMissingPdfs(id: string) {
+    return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
+  }
+
   async submitPermitApplication(id, params) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,
@@ -296,8 +310,9 @@ export class Api {
     )
   }
 
-  async fetchSiteOptions(address: string, pid: string = null) {
-    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
+  async fetchSiteOptions(address: string) {
+    //fetch list of locations, returns siteIds (in some cases blank)
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
   async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
@@ -306,6 +321,14 @@ export class Api {
 
   async fetchPids(siteId: string) {
     return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
+  }
+
+  async fetchSiteDetailsFromPid(pid: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pid_details`, { pid })
+  }
+
+  async fetchPin(pin: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pin`, { pin })
   }
 
   async destroyRequirementTemplate(id) {
@@ -337,6 +360,18 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`
     )
+  }
+
+  async fetchIntegrationMapping(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IIntegrationMapping>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/integration_mapping`
+    )
+  }
+
+  async updateIntegrationMapping(id: string, params: IIntegrationMappingUpdateParams) {
+    return this.client.patch<ApiResponse<IIntegrationMapping>>(`/integration_mappings/${id}`, {
+      integrationMapping: params,
+    })
   }
 
   async createOrUpdateJurisdictionTemplateVersionCustomization(

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_07_170547) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -97,6 +97,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_170547) do
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
+  end
+
+  create_table "integration_mappings",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.jsonb "requirements_mapping", default: {}, null: false
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "template_version_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_integration_mappings_on_jurisdiction_id"
+    t.index ["template_version_id"],
+            name: "index_integration_mappings_on_template_version_id"
   end
 
   create_table "jurisdiction_memberships",
@@ -656,7 +671,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_170547) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.string "email"
-    t.string "nickname"
     t.string "organization"
     t.boolean "certified", default: false, null: false
     t.string "encrypted_password", default: "", null: false
@@ -700,7 +714,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_170547) do
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
     t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
-    t.index ["nickname"], name: "index_users_on_nickname", unique: true
     t.index %w[omniauth_provider omniauth_uid],
             name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true
@@ -711,6 +724,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_07_170547) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "integration_mappings", "jurisdictions"
+  add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",

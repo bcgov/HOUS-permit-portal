@@ -61,6 +61,11 @@ function isPermitApplicationEditPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isApiMappingPath(path: string): boolean {
+  const regex = /^\/api-settings\/api-mappings.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -69,6 +74,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationEditPath,
     isPermitApplicationPath,
     isDigitalPermitEditPath,
+    isApiMappingPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -324,11 +330,10 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
 interface INavMenuItemProps extends MenuItemProps {
   label: string
   to?: string
-  variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps) => {
+const NavMenuItem = ({ label, to, onClick, ...rest }: INavMenuItemProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -337,7 +342,7 @@ const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps
   }
 
   return (
-    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick} {...rest}>
+    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} {...rest}>
       <Text textAlign="left" w="full">
         {label}
       </Text>
@@ -349,11 +354,10 @@ const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps
 interface INavMenuItemCTAProps {
   label: string
   to?: string
-  variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) => {
+const NavMenuItemCTA = ({ label, to, onClick }: INavMenuItemCTAProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -363,10 +367,8 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
 
   return (
     <MenuItem
-      as={Button}
+      as={"a"}
       flex={1}
-      variant={variant || "primary"}
-      size="sm"
       onClick={handleClick}
       style={{
         color: "var(--chakra-colors-greys-white)",
@@ -374,6 +376,8 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
         borderRadius: "var(--chakra-radii-sm)",
         width: "auto",
       }}
+      display={"flex"}
+      justifyContent={"center"}
       _hover={{
         bg: "var(--chakra-colors-theme-blueAlt) !important",
         boxShadow: "none",

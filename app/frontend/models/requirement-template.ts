@@ -1,10 +1,10 @@
 import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
+import pluck from "ramda/src/pluck"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ETemplateVersionStatus } from "../types/enums"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
@@ -15,20 +15,22 @@ function preProcessor(snapshot) {
     publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
   }
 
-  if (Array.isArray(snapshot.templateVersions)) {
-    const statusToTemplateVersions =
-      snapshot.templateVersions.reduce((acc, version) => {
-        if (!acc[version.status]) {
-          acc[version.status] = []
-        }
+  if (Array.isArray(snapshot.scheduledTemplateVersions)) {
+    processedSnapShot.scheduledTemplateVersions = pluck(
+      "id",
+      snapshot.scheduledTemplateVersions as Array<{
+        id: "string"
+      }>
+    )
+  }
 
-        acc[version.status].push(version.id)
-
-        return acc
-      }, {}) ?? {}
-
-    processedSnapShot.scheduledTemplateVersions = statusToTemplateVersions[ETemplateVersionStatus.scheduled]
-    processedSnapShot.deprecatedTemplateVersions = statusToTemplateVersions[ETemplateVersionStatus.deprecated]
+  if (Array.isArray(snapshot.deprecatedTemplateVersions)) {
+    processedSnapShot.deprecatedTemplateVersions = pluck(
+      "id",
+      snapshot.deprecatedTemplateVersions as Array<{
+        id: "string"
+      }>
+    )
   }
 
   if (snapshot.requirementTemplateSections) {

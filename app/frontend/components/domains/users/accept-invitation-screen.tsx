@@ -2,8 +2,9 @@ import { Button, Container, Divider, Flex, Heading, Text, VStack } from "@chakra
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { IUser } from "../../../models/user"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
@@ -40,7 +41,10 @@ export const AcceptInvitationScreen = observer(() => {
 interface IProps {
   invitedUser: IUser
 }
-function Content({ invitedUser }: Readonly<IProps>) {
+const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
+  const { sessionStore } = useMst()
+  const { loggedIn } = sessionStore
+
   const { invitedByEmail, jurisdiction, isSuperAdmin, email, role } = invitedUser
 
   return (
@@ -83,20 +87,26 @@ function Content({ invitedUser }: Readonly<IProps>) {
 
         <Divider my={4} />
 
-        <Heading as="h3" textAlign="center">
-          {t("user.createAccount")}
-        </Heading>
-        <form action={`/api/auth/keycloak`} method="post">
-          <input type="hidden" name="kc_idp_hint" value={isSuperAdmin ? "idir" : "bceidboth"} />
-          <input
-            type="hidden"
-            name="authenticity_token"
-            value={(document.querySelector("[name=csrf-token]") as HTMLMetaElement).content}
-          />
-          <Button variant="primary" w="full" type="submit">
-            {isSuperAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
-          </Button>
-        </form>
+        {loggedIn ? (
+          <AcceptInviteForm />
+        ) : (
+          <>
+            <Heading as="h3" textAlign="center">
+              {t("user.createAccount")}
+            </Heading>
+            <form action={`/api/auth/keycloak`} method="post">
+              <input type="hidden" name="kc_idp_hint" value={isSuperAdmin ? "idir" : "bceidboth"} />
+              <input
+                type="hidden"
+                name="authenticity_token"
+                value={(document.querySelector("[name=csrf-token]") as HTMLMetaElement).content}
+              />
+              <Button variant="primary" w="full" type="submit">
+                {isSuperAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
+              </Button>
+            </form>
+          </>
+        )}
 
         {!isSuperAdmin && (
           <>
@@ -115,7 +125,7 @@ function Content({ invitedUser }: Readonly<IProps>) {
       </Flex>
     </CenterContainer>
   )
-}
+})
 
 function InvalidTokenMessage() {
   return (
@@ -135,3 +145,24 @@ function InvalidTokenMessage() {
     </Container>
   )
 }
+
+const AcceptInviteForm = observer(function AcceptInviteForm() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { userStore } = useMst()
+  const { currentUser } = userStore
+  const { handleSubmit, formState } = useForm()
+  const { isSubmitting } = formState
+
+  const onSubmit = async () => {
+    await currentUser.acceptInvitation(searchParams.get("invitation_token"))
+    navigate("/")
+  }
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Button variant="primary" w="full" type="submit" isDisabled={isSubmitting}>
+        {t("user.acceptInvitation")}
+      </Button>
+    </form>
+  )
+})

@@ -40,6 +40,10 @@ class UserPolicy < ApplicationPolicy
     profile?
   end
 
+  def accept_invitation?
+    profile?
+  end
+
   def resend_confirmation?
     profile?
   end
@@ -48,6 +52,9 @@ class UserPolicy < ApplicationPolicy
     user.jurisdictions.pluck(:id).intersect?(record.jurisdictions.pluck(:id))
   end
 
+  def reinvite?
+    invite?
+  end
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     # def resolve

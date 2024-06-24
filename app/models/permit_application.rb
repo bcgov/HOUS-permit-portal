@@ -70,8 +70,15 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
+      template_version_id: template_version.id,
+      requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
+      using_current_template_version: using_current_template_version,
     }
+  end
+
+  def indexed_using_current_template_version
+    self.class.searchkick_index.retrieve(self)["using_current_template_version"]
   end
 
   def formatted_permit_classifications
@@ -107,8 +114,17 @@ class PermitApplication < ApplicationRecord
   end
 
   def collaborators
-    # eventually will add editors.  For compliance related items (it is before submit, it should target collaborators)
-    [submitter]
+    relevant_collaborators = [submitter]
+
+    if submitted?
+      relevant_collaborators =
+        relevant_collaborators + jurisdiction.review_managers if jurisdiction.review_managers.present?
+      relevant_collaborators =
+        relevant_collaborators + jurisdiction.regional_review_managers if jurisdiction.regional_review_managers.present?
+      relevant_collaborators = relevant_collaborators + jurisdiction.reviewers if jurisdiction.reviewers.present?
+    end
+
+    relevant_collaborators
   end
 
   def set_template_version
@@ -153,7 +169,6 @@ class PermitApplication < ApplicationRecord
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
-    jurisdiction.users.each { |user| PermitHubMailer.notify_reviewer_application_received(user, self).deliver_later }
   end
 
   def formatted_submission_data_for_external_use
@@ -171,6 +186,23 @@ class PermitApplication < ApplicationRecord
       .active_external_api_keys
       .where.not(webhook_url: [nil, ""]) # Only send webhooks to keys with a webhook URL
       .each { |external_api_key| PermitWebhookJob.perform_async(external_api_key.id, "permit_submitted", id) }
+  end
+
+  def missing_pdfs
+    return [] unless submitted?
+
+    missing_pdfs = []
+
+    application_pdf = supporting_documents.find_by(data_key: PERMIT_APP_PDF_DATA_KEY)
+
+    missing_pdfs << PERMIT_APP_PDF_DATA_KEY if application_pdf.blank?
+
+    return missing_pdfs unless step_code&.pre_construction_checklist
+
+    checklist_pdf = supporting_documents.find_by(data_key: CHECKLIST_PDF_DATA_KEY)
+    missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
+
+    missing_pdfs
   end
 
   private

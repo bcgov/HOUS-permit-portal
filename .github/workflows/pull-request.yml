@@ -2,7 +2,7 @@ name: Pull Request Workflow
 
 on:
   pull_request:
-    branches: ["develop"]
+    branches: ["main", "develop"]
   workflow_dispatch:
 
 jobs:
@@ -60,10 +60,10 @@ jobs:
           -e "xpack.security.enabled=false"
 
     steps:
-      - name: Install Git LFS
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install git-lfs
+          sudo apt-get install -y git-lfs libproj-dev libgeos-dev proj-bin
           git lfs install
       - name: Checkout Code
         uses: actions/checkout@v3

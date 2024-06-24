@@ -76,17 +76,22 @@ Rails.application.routes.draw do
 
     resources :template_versions, only: %i[index show] do
       get "compare_requirements", to: "template_versions#compare_requirements", on: :member
+      get "download_requirement_summary_csv", to: "template_versions#download_summary_csv", on: :member
+
+      member do
+        resources :jurisdictions, only: [] do
+          get "jurisdiction_template_version_customization",
+              to: "template_versions#show_jurisdiction_template_version_customization"
+          post "jurisdiction_template_version_customization",
+               to: "template_versions#create_or_update_jurisdiction_template_version_customization"
+          get "download_customization_csv", to: "template_versions#download_customization_csv"
+          get "download_customization_json", to: "template_versions#download_customization_json"
+          get "integration_mapping", to: "template_versions#show_integration_mapping"
+        end
+      end
     end
 
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
-          "template_versions#show_jurisdiction_template_version_cutomization"
-    post "template_versions/:id/jurisdictions/:jurisdiction_id/jurisdiction_template_version_customization" =>
-           "template_versions#create_or_update_jurisdiction_template_version_cutomization"
-    get "template_versions/:id/download_requirement_summary_csv" => "template_versions#download_summary_csv"
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_csv" =>
-          "template_versions#download_customization_csv"
-    get "template_versions/:id/jurisdictions/:jurisdiction_id/download_customization_json" =>
-          "template_versions#download_customization_json"
+    resources :integration_mappings, only: [:update]
 
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
@@ -109,9 +114,12 @@ Rails.application.routes.draw do
       get "site_options", on: :collection
       get "pids", on: :collection
       get "jurisdiction", on: :collection
+      get "pin", on: :collection
+      get "pid_details", on: :collection
     end
 
     resources :permit_applications, only: %i[create update show] do
+      post "generate_missing_pdfs", on: :member, to: "permit_applications#generate_missing_pdfs"
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
@@ -125,6 +133,8 @@ Rails.application.routes.draw do
       patch "accept_eula", on: :member
       post "search", on: :collection, to: "users#index"
       post "resend_confirmation", on: :member
+      post "reinvite", on: :member
+      post "accept_invitation", on: :member
     end
 
     resources :end_user_license_agreement, only: %i[index]
@@ -155,6 +165,11 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :permit_applications, only: %i[show] do
         post "search", on: :collection, to: "permit_applications#index"
+        collection do
+          resources :versions, as: "template_versions", only: [] do
+            get "integration_mapping", to: "permit_applications#show_integration_mapping"
+          end
+        end
       end
     end
   end

@@ -186,15 +186,18 @@ en:
       authorization_error:
         title: Not authorized.
         message: User is not authorized to perform this aciton.
-      invitation_accepted_success:
-        title: Welcome
-        message: You have successfully been onboarded onto BC Permit Hub and are now logged in.
+      invitation_accepted:
+        title: Invitation accepted
+        message: ""
       confirmation_sent:
         title: Success
         message: You need to confirm your new email address. Please check your new email inbox.
       reconfirmation_sent:
         title: Confirmation email sent
         message: Please click the link in your email inbox.
+      reinvited:
+        title: Invitation email sent
+        message: ""
       confirmation_success:
         title: Success
         message: Your email was successfully confirmed
@@ -403,6 +406,16 @@ en:
       update_error:
         title: Error
         message: "Something went wrong updating Jurisdiction Customization"
+    integration_mapping:
+      update_success:
+        title: ""
+        message: "integrations mapping updated!"
+      update_error:
+        title: Error
+        message: "Something went wrong updating integration requirements mapping"
+      not_found_error:
+        title: "Error"
+        message: 404 - The requested resource could not be found
   services:
     auto_compliance_configuration:
       digital_seal_validator:
@@ -466,7 +479,7 @@ en:
       enabled_elective_field_reason_incorrect: "Reason required when enabling a field and must be one of {accepted_reasons}"
   notification:
     template_version:
-      new_version_notification: "A new version of this template has been published"
+      new_version_notification: 'A new version of "%{template_label}" has been published'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"

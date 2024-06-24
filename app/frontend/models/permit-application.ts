@@ -1,24 +1,22 @@
 import { t } from "i18next"
-import { Instance, SnapshotIn, flow, types } from "mobx-state-tree"
+import { Instance, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
 import { EPermitApplicationStatus, ERequirementChangeAction, ERequirementType } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
-  IContact,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
+  IPermitApplicationSupportingDocumentsUpdate,
   IRevisionRequest,
   ISubmissionData,
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
 import { combineComplianceHints, combineDiff, combineRevisionButtons } from "../utils/formio-component-traversal"
-import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IRequirement } from "./requirement"
@@ -31,9 +29,9 @@ export const PermitApplicationModel = types
     id: types.identifier,
     nickname: types.string,
     number: types.string,
-    fullAddress: types.maybeNull(types.string), //for now some seeds will not have this
-    pin: types.maybeNull(types.string), //for now some seeds will not have this
-    pid: types.maybeNull(types.string), //for now some seeds will not have this
+    fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
+    pin: types.maybeNull(types.string), // for now some seeds will not have this
+    pid: types.maybeNull(types.string), // for now some seeds will not have this
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
@@ -56,10 +54,12 @@ export const PermitApplicationModel = types
     zipfileName: types.maybeNull(types.string),
     zipfileUrl: types.maybeNull(types.string),
     referenceNumber: types.maybeNull(types.string),
+    missingPdfs: types.maybeNull(types.array(types.string)),
     isFullyLoaded: types.optional(types.boolean, false),
     isDirty: types.optional(types.boolean, false),
     isLoading: types.optional(types.boolean, false),
-    showCompareAfter: types.optional(types.boolean, false),
+    indexedUsingCurrentTemplateVersion: types.maybeNull(types.boolean),
+    showingCompareAfter: types.optional(types.boolean, false),
     revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
     stagedRevisionRequests: types.optional(types.array(types.frozen<IRevisionRequest>()), []),
@@ -67,6 +67,10 @@ export const PermitApplicationModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    get usingCurrentTemplateVersion() {
+      if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
+      return self.indexedUsingCurrentTemplateVersion
+    },
     get jurisdictionName() {
       return self.jurisdiction.name
     },
@@ -107,9 +111,6 @@ export const PermitApplicationModel = types
     get isViewed() {
       return self.viewedAt !== null
     },
-    get usesPublishedTemplateVersion() {
-      return self.templateVersion.id === self.publishedTemplateVersion.id
-    },
     get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
       if (!self.diff) return null
 
@@ -130,27 +131,23 @@ export const PermitApplicationModel = types
     },
   }))
   .actions((self) => ({
-    setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
-      self.submissionData = newData
-      self.isDirty = true
-    },
     setRevisionMode(revisionMode: boolean) {
       self.revisionMode = revisionMode
     },
     setIsDirty(isDirty: boolean) {
-      self.isDirty = true
+      self.isDirty = isDirty
     },
     resetDiff() {
-      self.showCompareAfter = false
+      self.showingCompareAfter = false
       self.diff = null
     },
   }))
   .views((self) => ({
-    get shouldShowApplicationDiff() {
-      return (
-        self.rootStore.userStore.currentUser.shouldSeeApplicationDiff &&
-        (!self.usesPublishedTemplateVersion || self.showCompareAfter)
-      )
+    shouldShowApplicationDiff(isEditing: boolean) {
+      return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
+    },
+    get shouldShowNewVersionWarning() {
+      return !self.usingCurrentTemplateVersion && self.isDraft
     },
     get formFormatKey() {
       return (
@@ -347,7 +344,7 @@ export const PermitApplicationModel = types
         self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
       self.diff = retainedDiff
-      self.showCompareAfter = true
+      self.showingCompareAfter = true
       self.isLoading = false
       return response
     }),
@@ -374,65 +371,21 @@ export const PermitApplicationModel = types
     },
 
     resetCompareAfter: () => {
-      self.showCompareAfter = false
+      self.showingCompareAfter = false
     },
 
-    updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
-      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
-      const newSectionFields = {}
-      INPUT_CONTACT_KEYS.forEach((contactField) => {
-        let newValue = ["cell", "phone"].includes(contactField)
-          ? // The normalized phone number starts with +1... (country code)
-            convertPhoneNumberToFormioFormat(contact[contactField] as string)
-          : contact[contactField] || ""
-        newSectionFields[`${requirementKey}|${contactField}`] = newValue
-      })
-
-      const newData = {
-        data: {
-          ...submissionState.data,
-          [sectionKey]: {
-            ...submissionState.data[sectionKey],
-            ...newSectionFields,
-          },
-        },
-      }
-      self.setSubmissionData(newData)
-    },
-    updateContactInSubmissionDatagrid: (
-      requirementPrefix: string,
-      index: number,
-      contact: IContact,
-      submissionState: any
-    ) => {
-      const parts = requirementPrefix.split("|")
-      const contactType = parts[parts.length - 1]
-      const requirementKey = parts.slice(0, -1).join("|")
-      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
-
-      const newContactElement = {}
-      INPUT_CONTACT_KEYS.forEach((contactField) => {
-        // The normalized phone number starts with +1... (country code)
-        let newValue = ["cell", "phone"].includes(contactField)
-          ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
-          : contact[contactField]
-        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
-      })
-      const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
-      clonedArray[index] = newContactElement
-      const newSectionFields = {
-        [requirementKey]: clonedArray,
-      }
-      const newData = {
-        data: {
-          ...submissionState.data,
-          [sectionKey]: {
-            ...submissionState.data[sectionKey],
-            ...newSectionFields,
-          },
-        },
-      }
-      self.setSubmissionData(newData)
+    generateMissingPdfs: flow(function* () {
+      const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
+      self.missingPdfs = cast(data.missingPdfs)
+      self.supportingDocuments = data.supportingDocuments
+      self.zipfileSize = data.zipfileSize
+      self.zipfileName = data.zipfileName
+      self.zipfileUrl = data.zipfileUrl
     },
 
     stageRevisionRequest: (revisionRequest: IRevisionRequest) => {

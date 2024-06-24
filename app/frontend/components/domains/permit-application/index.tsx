@@ -1,16 +1,18 @@
-import { Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
+import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../hooks/use-search"
 
+import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
+import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { EPermitApplicationStatus, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
-import { SearchInput } from "../../shared/base/search-input"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
@@ -33,13 +35,16 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     handlePageChange,
     isSearching,
     statusFilter,
+    hasResetableFilters,
   } = permitApplicationStore
 
   useSearch(permitApplicationStore, [])
+  useFlashQueryParam()
+  const resetQueryParams = useResetQueryParams()
 
   return (
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
-      <PermitApplicationStatusTabs searchModel={permitApplicationStore} />
+      <PermitApplicationStatusTabs />
       <BlueTitleBar title={t("permitApplication.indexTitle")} />
       <Container maxW="container.lg" pb={4}>
         <Flex as="section" direction="column" p={6} gap={6} flex={1}>
@@ -58,9 +63,14 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
           >
             <Heading as="h2">{t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.draft}`)}</Heading>
             <Flex align="flex-end" gap={4}>
+              {hasResetableFilters && (
+                <Button variant="link" mb={2} onClick={resetQueryParams}>
+                  {t("ui.resetFilters")}
+                </Button>
+              )}
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
-                <SearchInput searchModel={permitApplicationStore} />
+                <ModelSearchInput searchModel={permitApplicationStore} />
               </FormControl>
               <SortSelect
                 searchModel={permitApplicationStore}

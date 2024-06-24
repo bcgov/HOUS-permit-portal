@@ -45,8 +45,8 @@ RSpec.describe PermitApplicationPolicy do
   context "for a review manager with correct jurisdiction" do
     let(:user) { FactoryBot.create(:user, :review_manager, jurisdiction:) }
 
-    it "permits search" do
-      expect(subject.index?).to be true
+    it "Does not permit search on draft" do
+      expect(subject.index?).to be false
     end
   end
 

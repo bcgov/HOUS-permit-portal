@@ -17,7 +17,7 @@ import {
   SwitchProps,
   Textarea,
 } from "@chakra-ui/react"
-import { CalendarBlank, Envelope, MapPin, Phone } from "@phosphor-icons/react"
+import { CalendarBlank, Envelope, FileCloud, LightningA, MapPin, Phone } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
@@ -174,7 +174,14 @@ const requirementsComponentMap = {
           mb: 0,
           order: 2,
         }}
-        inputDisplay={<Checkbox mr={2} order={1} alignItems="flex-start" pt="1.5" />}
+        inputDisplay={
+          // this is a hack needed to leverage form control, but still make the checkbox accessible
+          <CheckboxGroup>
+            <Checkbox sx={{ "span:last-child": { display: "none" } }} mr={2} order={1} alignItems="flex-start" pt="1.5">
+              Yes
+            </Checkbox>
+          </CheckboxGroup>
+        }
         editorContainerProps={{ order: 3, gridColumn: "span 2" }}
         {...genericDisplayProps}
       />
@@ -232,11 +239,11 @@ const requirementsComponentMap = {
   },
 
   [ERequirementType.file](props: TRequirementFieldDisplayProps) {
-    return <GenericFieldDisplay inputDisplay={<i className="fa fa-cloud-upload"></i>} {...props} />
+    return <GenericFieldDisplay inputDisplay={<DummyFileInput />} {...props} />
   },
 
   [ERequirementType.energyStepCode](props: TRequirementFieldDisplayProps) {
-    return <GenericFieldDisplay inputDisplay={<i className="fa fa-bolt"></i>} {...props} />
+    return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
   },
 
   [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {
@@ -297,4 +304,26 @@ export const RequirementFieldDisplay = observer(function RequirementFieldDisplay
 
 export function hasRequirementFieldDisplayComponent(requirementType: ERequirementType): boolean {
   return !!requirementsComponentMap[requirementType]
+}
+
+function DummyFileInput() {
+  return (
+    <InputGroup border={"1px solid var(--chakra-colors-border-light)"} borderRadius={"var(--input-border-radius)"}>
+      <InputLeftElement pointerEvents="none">
+        <FileCloud />
+      </InputLeftElement>
+      <Input bg={"white"} type={"file"} visibility={"hidden"} />
+    </InputGroup>
+  )
+}
+
+function DummyStepCodeInput() {
+  return (
+    <InputGroup border={"1px solid var(--chakra-colors-border-light)"} borderRadius={"var(--input-border-radius)"}>
+      <InputLeftElement pointerEvents="none">
+        <LightningA />
+      </InputLeftElement>
+      <Input bg={"white"} type={"file"} visibility={"hidden"} />
+    </InputGroup>
+  )
 }

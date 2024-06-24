@@ -1,3 +1,4 @@
+import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
@@ -12,6 +13,8 @@ import {
   EJurisdictionTypes,
   ENotificationActionType,
   ENumberUnit,
+  EPermitApplicationSocketEventTypes,
+  EPermitApplicationStatus,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -72,8 +75,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
-  statusFilter?: string
-} & IModelFilterFields
+  filters?: IModelFilterFields
+}
 
 export type TComputedCompliance = {
   module: EAutoComplianceModule
@@ -150,11 +153,13 @@ export interface IDenormalizedRequirement {
   hint?: string | null
   elective?: boolean
   required?: boolean
+  requirementCode: string
 }
 
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  sku: string
   formJson?: IFormIOBlock
   description?: string
   displayName: string
@@ -241,14 +246,23 @@ export interface IEULA {
   content: string
 }
 
-export interface IPermitApplicationUpdate {
-  id
+export interface INotification {
+  title: string
+  description: string
+  at: string
+}
+
+export interface IPermitApplicationComplianceUpdate {
+  id: string
   frontEndFormUpdate: Object
   formattedComplianceData: Object
 }
 
 export interface INotificationObjectData {
   templateVersionId?: string
+  previousTemplateVersionId?: string
+  requirementTemplateId?: string
+  recentPermitApplicationId?: string
   // Add future notification data here
 }
 
@@ -259,12 +273,24 @@ export interface INotification {
   objectData?: INotificationObjectData
 }
 
-export type TSocketEventData = IPermitApplication | INotification
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | INotification
+
+export interface IPermitApplicationSupportingDocumentsUpdate {
+  id: string
+  supportingDocuments: IPermitApplication["supportingDocuments"]
+  missingPdfs: string[]
+  zipfileSize: null | number
+  zipfileName: null | string
+  zipfileUrl: null | string
+}
 
 export interface IUserPushPayload {
   data: TSocketEventData
   domain: ESocketDomainTypes
-  eventType: ESocketEventTypes
+  eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes
   meta: {
     lastReadAt: number
     totalPages: number
@@ -365,13 +391,21 @@ export type TAutoComplianceModuleConfigurations = {
 
 export type TAutoComplianceModuleConfiguration =
   TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
+
 export interface IJurisdictionFilters {
   name?: string
   type?: EJurisdictionTypes
   userId?: string
 }
+
 export interface IJurisdictionSearchFilters {
   submissionInboxSetUp?: boolean
+}
+
+export interface IPermitApplicationSearchFilters {
+  requirementTemplateId?: string
+  templateVersionId?: string
+  status?: EPermitApplicationStatus
 }
 
 export interface ITemplateVersionDiff {
@@ -385,4 +419,25 @@ export interface IRevisionRequest {
   requirementKey: string
   reason: string
   comment?: string
+}
+
+export type TLocalSystemMapping = string
+
+export interface ISimplifiedRequirementsMap {
+  [requirementBlockSku: string]: {
+    [requirementCode: string]: TLocalSystemMapping
+  }
+}
+
+export interface IRequirementMap {
+  id: string
+  requirementCode: string
+  local_system_mapping?: TLocalSystemMapping
+}
+
+export type TChakraColor = keyof Theme["colors"]
+
+export interface ILinkData {
+  text: string
+  href: string
 }

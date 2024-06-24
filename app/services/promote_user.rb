@@ -1,8 +1,8 @@
-class MergeSubmitterWithInvitedUser
-  attr_accessor :submitter, :invited_user
+class PromoteUser
+  attr_accessor :existing_user, :invited_user
 
-  def initialize(submitter:, invited_user:)
-    @submitter = submitter
+  def initialize(existing_user:, invited_user:)
+    @existing_user = existing_user
     @invited_user = invited_user
   end
 
@@ -18,7 +18,6 @@ class MergeSubmitterWithInvitedUser
       invited_user.slice(
         %i[
           role
-          jurisdiction_ids
           invitation_token
           invitation_created_at
           invitation_sent_at
@@ -29,11 +28,12 @@ class MergeSubmitterWithInvitedUser
           invitations_count
         ],
       )
-    submitter.assign_attributes(invited_user_params)
-    if submitter.valid?
+    jurisdiction_ids = existing_user.jurisdiction_ids + invited_user.jurisdiction_ids
+    existing_user.assign_attributes(invited_user_params.merge({ jurisdiction_ids: }))
+    if existing_user.valid?
       ActiveRecord::Base.transaction do
         invited_user.destroy!
-        submitter.save!
+        existing_user.save!
       end
     end
   end

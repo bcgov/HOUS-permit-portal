@@ -4,7 +4,6 @@ class UserBlueprint < Blueprinter::Base
   view :base do
     fields :email,
            :unconfirmed_email,
-           :nickname,
            :role,
            :omniauth_username,
            :omniauth_email,
@@ -22,7 +21,7 @@ class UserBlueprint < Blueprinter::Base
   end
 
   view :external_api do
-    fields :email
+    fields :email, :first_name, :last_name
   end
 
   view :current_user do

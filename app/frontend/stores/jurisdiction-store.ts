@@ -8,7 +8,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
 import { EJurisdictionSortFields } from "../types/enums"
 import { IJurisdictionFilters } from "../types/types"
-import { isUUID, toCamelCase } from "../utils/utility-functions"
+import { isUUID, setQueryParam, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
   .compose(
@@ -16,8 +16,9 @@ export const JurisdictionStoreModel = types
       jurisdictionMap: types.map(JurisdictionModel),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
       currentJurisdiction: types.maybeNull(types.maybe(types.reference(JurisdictionModel))),
+      submissionInboxSetUpFilter: types.maybeNull(types.string),
     }),
-    createSearchModel<EJurisdictionSortFields>("searchJurisdictions")
+    createSearchModel<EJurisdictionSortFields>("searchJurisdictions", "setJurisdictionFilters")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -74,7 +75,9 @@ export const JurisdictionStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
-          submissionInboxSetUp,
+          filters: {
+            submissionInboxSetUp,
+          },
         })
       )
       if (response.ok) {
@@ -87,6 +90,13 @@ export const JurisdictionStoreModel = types
       }
       return response.ok
     }),
+    setJurisdictionFilters(queryParams) {
+      const submissionInboxSetUpFilter = queryParams.get("submissionInboxSetUp")
+
+      if (submissionInboxSetUpFilter) {
+        self.submissionInboxSetUpFilter = submissionInboxSetUpFilter
+      }
+    },
     fetchJurisdiction: flow(function* (id: string) {
       let jurisdiction = self.getJurisdictionById(id)
       if (!jurisdiction) {
@@ -123,7 +133,9 @@ export const JurisdictionStoreModel = types
   }))
   .actions((self) => ({
     searchEnabledJurisdictions: flow(function* (countPerPage: number = 10) {
-      return self.searchJurisdictions({ reset: true, page: 1, countPerPage }, true)
+      const result = self.searchJurisdictions({ reset: true, page: 1, countPerPage }, true)
+      setQueryParam("currentPage", null)
+      return result
     }),
   }))
 

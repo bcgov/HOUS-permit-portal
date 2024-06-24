@@ -4,7 +4,10 @@ class RequirementTemplateBlueprint < Blueprinter::Base
 
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
-  association :template_versions, blueprint: TemplateVersionBlueprint
+  association :last_three_deprecated_template_versions,
+              blueprint: TemplateVersionBlueprint,
+              name: :deprecated_template_versions
+  association :scheduled_template_versions, blueprint: TemplateVersionBlueprint
   association :published_template_version, blueprint: TemplateVersionBlueprint
 
   view :extended do

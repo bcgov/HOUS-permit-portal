@@ -114,7 +114,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
                   label={t("permitApplication.fields.number")}
                 />
                 <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
-                  <Text textTransform={"uppercase"}> {t("permitApplication.referenceNumber")}:</Text>
+                  <Text textTransform={"uppercase"}>{t("permitApplication.referenceNumber")}:</Text>
                   <EditableInputWithControls
                     size={"xs"}
                     value={referenceNumber}

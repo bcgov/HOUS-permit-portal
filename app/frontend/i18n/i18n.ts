@@ -27,8 +27,7 @@ const options = {
             heading: "Which BCeID should I use?",
             basic: {
               title: "Basic BCeID",
-              description:
-                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              description: "Use when accessing a service in a personal capacity.",
               homeownerAgent: "homeowner, agent",
               architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
               register: "Register for Basic BCeID",
@@ -50,7 +49,6 @@ const options = {
           bceid_login: "Login with BCeID",
           idir_login: "Login with IDIR",
           role: "Role",
-          nicknameLabel: "Nickname",
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
           userLastNameLabel: "Last name",
@@ -149,7 +147,7 @@ const options = {
           export: "Export",
           preview: "Preview",
           back: "Back",
-          backHome: "Back to home",
+          backToInbox: "Back to inbox",
           yes: "Yes",
           no: "No",
           show: "Show",
@@ -187,6 +185,7 @@ const options = {
           select: "Select",
           selected: "selected",
           notAvailable: "Not available yet",
+          notApplicable: "Not applicable",
           isRequired: "{{field}} is required",
           notSupported: "Not supported",
           use: "Use",
@@ -219,6 +218,11 @@ const options = {
           showOlder: "Show older",
           seeMore: "See more",
           go: "Go",
+          all: "All",
+          and: "and",
+          or: "or",
+          actionRequired: "Action required",
+          resetFilters: "Reset filters",
         },
         notification: {
           title: "Notifications",
@@ -279,6 +283,14 @@ const options = {
             ],
             editMapEnd:
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
+            stepCode: {
+              title: "Step code requirements",
+              description: "Below are the step code requirements for each permit template",
+              permitTemplate: "Permit template",
+              energyStepRequired: "Energy step code required",
+              zeroCarbonStepRequired: "Zero carbon step required",
+              helpLinkText: "What does each step code level mean?",
+            },
           },
           new: {
             title: "Create new jurisdiction",
@@ -333,6 +345,14 @@ const options = {
         },
         permitApplication: {
           updateToNewVersion: "Update my application",
+          reviewOutdatedSubmissionLink: "View draft applications",
+          reviewOutdatedEditLink: "View template",
+          reviewOutdatedTitle: "Filters applied to show applications that are outdated",
+          reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
+          reviewCustomizedSubmissionLink: "View draft applications",
+          reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
+          reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
+          newVersionPublished: "New version of template has been published - please review changes",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
@@ -434,6 +454,8 @@ const options = {
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
             pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
+            pinVerified: "PIN is verified.",
+            pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -448,6 +470,11 @@ const options = {
             submittingTo: "You're applying to the {{ jurisdictionName }}",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
+            fetchingMissingPdf: "Fetching {{missingPdf}}...",
+            missingPdfLabels: {
+              permitApplication: "permit application pdf",
+              stepCode: "step code checklist pdf",
+            },
             contactSummaryHeading: "List of all contacts on this application",
             downloadHeading: "Download application",
             downloadPrompt: "Choose specific files or entire package:",
@@ -480,6 +507,7 @@ const options = {
                 other: "Other",
               },
             },
+            backToInbox: "Back to inbox",
           },
         },
         requirementsLibrary: {
@@ -1024,9 +1052,9 @@ const options = {
               description: "Specify email addresses that should receive applications.",
               permitTypes: {
                 label: "Send permit applications for",
-                low_residential: "Low density - Residential",
-                medium_residential: "Medium density - Residential",
-                high_residential: "High density - Residential",
+                low_residential: "1-4 Unit detached housing",
+                medium_residential: "4+ Unit housing",
+                high_residential: "High density appartment buildings",
                 new_construction: "New construction",
                 addition_alteration_renovation: "Addition, alteration, or renovation",
                 site_alteration: "Site alteration",
@@ -1094,6 +1122,7 @@ const options = {
           fetchOptions: "Something went wrong fetching options",
           fetchJurisdictionTemplateVersionCustomization:
             "Something went wrong fetching jurisdiction template version customization",
+          fetchIntegrationMapping: "Something went wrong fetching jurisdiction integration requirements mapping",
         },
         user: {
           fields: {
@@ -1243,6 +1272,7 @@ const options = {
               updateToNewVersion: "See new",
             },
             duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
+            goToLatest: "Go to latest",
           },
           fields: {
             status: "Status",
@@ -1303,6 +1333,35 @@ const options = {
             templateSummaryFilename: "Template Summary",
             downloadCustomizationCsv: "Download Customizations CSV",
             downloadCustomizationJson: "Download Customizations JSON",
+          },
+        },
+        apiMappingsSetup: {
+          title: "API mappings setup",
+          index: {
+            helperSubtitle: "See details of how fields are mapped to the API.",
+          },
+          edit: {
+            permitTemplate: "Permit template",
+            seeApiDoc: "See API documentation",
+            heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
+            table: {
+              blockAccordionButton: "{{blockName}} <1>requirement block code: {{blockCode}}</1>",
+              filter: {
+                showAll: "Show all",
+                showOnlyUnmapped: "Show only unmapped",
+              },
+              title: "API mappings",
+              headers: {
+                localField: "Your local field name",
+                localFieldInfo: "Local field mapping info",
+                templateField: "Map to <1>requirement code</1> in template",
+                requirementDetail: "Field in template",
+              },
+              localFieldEdit: {
+                addMapping: "Add local mapping",
+                addMappingLabel: "Local mapping",
+              },
+            },
           },
         },
         digitalBuildingPermits: {
@@ -1381,18 +1440,18 @@ const options = {
           title: "Reporting",
           tableHeading: "Available reports",
           filterPlaceholder: "Filter reports by name",
-          stepCodeSummaryName: "Step code summary",
-          stepCodeSummaryDescription: "Step code summary",
+          stepCodeSummaryName: "Energy step code configuration by jurisdiction",
+          stepCodeSummaryDescription: "Energy step code configuration by jurisdiction",
           templateSummary: {
             name: "Template summary",
             description: "A summary of template usage by jurisdictions",
             title: "Export Template Summary",
           },
           stepCodeSummary: {
-            name: "Step code summary",
+            name: "Energy step code configuration by jurisdiction",
             description: "A summary of step code requirements by jurisdictions",
-            title: "Export Step Code Summary",
-            filename: "Step Code Summary",
+            title: "Export energy step code configuration by jurisdiction",
+            filename: "Energy step code configuration by jurisdiction",
           },
           columnHeaders: {
             name: "Name",
@@ -1510,6 +1569,7 @@ const options = {
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
           breadcrumb: {
+            latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
             new: "Create new",
@@ -1540,6 +1600,8 @@ const options = {
             reporting: "Reporting",
             exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
+            apiMappings: "API mappings",
+            manageMapping: "Manage mapping",
           },
         },
         automatedCompliance: {

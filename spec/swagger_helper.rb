@@ -161,6 +161,8 @@ in this document.
               },
               permit_classifications: {
                 type: :string,
+                description:
+                  "This is the combined permit type and activity (work) type of the permit application. This is derived as `${permit_type.name} - ${activity_type.name}` e.g. '4+ Unit housing - New Construction'",
               },
               permit_type: {
                 "$ref" => "#/components/schemas/PermitClassification",
@@ -168,8 +170,11 @@ in this document.
               activity: {
                 "$ref" => "#/components/schemas/PermitClassification",
               },
-              submitter: {
-                "$ref" => "#/components/schemas/Submitter",
+              account_holder: {
+                "$ref" => "#/components/schemas/AccountHolder",
+              },
+              permit_version: {
+                "$ref" => "#/components/schemas/PermitVersion",
               },
               submission_data: {
                 "$ref" => "#/components/schemas/SubmissionData",
@@ -193,15 +198,19 @@ in this document.
               properties: {
                 id: {
                   type: :string,
+                  description: "The ID of the requirement block.",
                 },
                 requirement_block_code: {
                   type: :string,
+                  description: "The code of the requirement block. This is unique within the permit application.",
                 },
                 name: {
                   type: :string,
+                  description: "The name/label of the requirement block.",
                 },
                 description: {
                   type: :string,
+                  description: "The description of the requirement block.",
                   nullable: true,
                 },
                 requirements: {
@@ -212,13 +221,16 @@ in this document.
                     properties: {
                       id: {
                         type: :string,
+                        description: "The ID of the requirement.",
                       },
                       name: {
                         type: :string,
+                        description: "The name/label of the requirement.",
                       },
                       requirement_code: {
                         type: :string,
-                        description: "The requirement code for this requirement.",
+                        description:
+                          "The requirement code for this requirement field. This is unique within the requirement block.",
                       },
                       type: {
                         type: :string,
@@ -246,6 +258,7 @@ in this document.
           },
           PermitClassification: {
             type: :object,
+            description: "This object represents a permit classification. e.g. a permit type or activity (work) type.",
             properties: {
               id: {
                 type: :string,
@@ -263,10 +276,84 @@ in this document.
               },
             },
           },
+          PermitVersion: {
+            type: :object,
+            description: "The object represents the permit version.",
+            properties: {
+              id: {
+                type: :string,
+                description:
+                  "The ID of the version. This can be used to retrieve the integration mapping of the Jurisdiction for this version.",
+              },
+              version_date: {
+                type: :integer,
+                format: :int64,
+                description:
+                  "The version date in milliseconds since the epoch (UNIX time). This is meant to be parsed as PST.",
+              },
+              status: {
+                type: :string,
+                enum: %w[published deprecated],
+                description: "The status of the version.",
+              },
+            },
+          },
+          IntegrationMapping: {
+            type: :object,
+            description: "The integration mapping of the jurisdiction for a specific permit version.",
+            properties: {
+              id: {
+                type: :string,
+                description: "The ID of the integration mapping.",
+              },
+              permit_version: {
+                "$ref" => "#/components/schemas/PermitVersion",
+              },
+              requirements_mapping: {
+                "$ref" => "#/components/schemas/RequirementsMapping",
+              },
+            },
+          },
+          RequirementsMapping: {
+            type: :object,
+            description:
+              "The mapping of the requirements between the Building Permit Hub system and local jurisdiction integration system. Note: the top level keys are the requirement block codes.",
+            additionalProperties: {
+              type: :object,
+              description:
+                "The requirement block mapping. This contains a requirements hash, where the keys are the requirement codes and the value is another hash containing the field mapping to the local jurisdiction system.",
+              properties: {
+                id: {
+                  type: :string,
+                  description: "The ID of the requirement block.",
+                },
+                requirements: {
+                  type: :object,
+                  description: "A hash of the requirement code to the local jurisdiction system field mapping.",
+                  additionalProperties: {
+                    type: :object,
+                    properties: {
+                      id: {
+                        type: :string,
+                        description: "The ID of the requirement.",
+                      },
+                      local_system_mapping: {
+                        type: :string,
+                        description:
+                          "The local jurisdiction integration system field mapping for this requirement. This should be the field name of the requirement in your system.",
+                      },
+                    },
+                    required: %w[id local_system_mapping],
+                  },
+                },
+              },
+              required: %w[id requirements],
+            },
+          },
           MultiOptionSubmissionValue: {
             type: :object,
             description:
-              "The submission value for requirement input types, which are limited to a set of options. e.g. an option from a select drop down, or checkboxes",
+              "The submission value for requirement input types, which are limited to a set of options. e.g. an option from a select drop down, or checkboxes.",
             additionalProperties: {
               type: :boolean,
               description:
@@ -275,7 +362,7 @@ in this document.
           },
           ContactSubmissionValue: {
             type: :array,
-            description: "The contact submission value. It is an array of contact objects",
+            description: "The contact submission value. It is an array of contact objects.",
             items: {
               type: :object,
               properties: {
@@ -312,7 +399,7 @@ in this document.
           },
           FileSubmissionValue: {
             description:
-              "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour .",
+              "The file submission value. It is an array of file objects. Note: the urls are signed and will expire after 1 hour.",
             type: :array,
             items: {
               "$ref" => "#/components/schemas/File",
@@ -344,17 +431,25 @@ in this document.
               },
             },
           },
-          Submitter: {
+          AccountHolder: {
             type: :object,
-            description: "The submitter of the permit application.",
+            description: "The account holder of the permit application.",
             properties: {
               id: {
                 type: :string,
-                description: "The ID of the submitter.",
+                description: "The ID of the account holder.",
               },
               email: {
                 type: :string,
-                description: "The email of the submitter.",
+                description: "The email of the account holder.",
+              },
+              first_name: {
+                type: :string,
+                description: "The first name of the account holder.",
+              },
+              last_name: {
+                type: :string,
+                description: "The last name of the account holder.",
               },
             },
           },
@@ -387,19 +482,20 @@ in this document.
               event: {
                 type: :string,
                 enum: %w[permit_submitted],
-                description: "The event type",
+                description: "The event type.",
               },
               payload: {
                 type: :object,
                 properties: {
                   permit_id: {
                     type: :string,
-                    description: "The permit application ID",
+                    description: "The permit application ID.",
                   },
                   submitted_at: {
-                    type: :string,
-                    format: "date-time",
-                    description: "The date and time the permit application was submitted",
+                    type: :integer,
+                    format: "int64",
+                    description:
+                      "The timestamp of when the permit application was submitted. This is in milliseconds since the epoch (UNIX time).",
                   },
                 },
               },
