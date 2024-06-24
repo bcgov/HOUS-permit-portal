@@ -37,8 +37,8 @@ class Jurisdiction::UserInviter
           user.invite!(inviter)
           self.results[:reinvited] << user
         elsif inviter.invitable_roles.include?(user_params[:role].to_s)
-          jurisdiction_id = user_params[:jurisdiction_id] || inviter.jurisdiction&.id
-          user = User.new(user_params.merge({ discarded_at: nil, jurisdiction_id: }))
+          jurisdiction_id = user_params.delete(:jurisdiction_id) || inviter.jurisdictions.pluck(:id)
+          user = User.new(user_params.merge({ discarded_at: nil, jurisdiction_ids: [jurisdiction_id].flatten }))
           user.skip_confirmation_notification!
           user.save!
           user.invite!(inviter)
