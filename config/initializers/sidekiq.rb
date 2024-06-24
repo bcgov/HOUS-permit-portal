@@ -16,7 +16,7 @@ if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip th
 
   Sidekiq.configure_server do |config|
     config.redis = redis_cfg
-    config.queues = %w[file_processing webhooks websocket default]
+    config.queues = %w[file_processing webhooks websocket model_callbacks default]
     config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
 
     config.client_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Client }

@@ -74,10 +74,8 @@ class TemplateVersion < ApplicationRecord
     TemplateVersioningService.produce_diff_hash(before_version, self)
   end
 
-  private
-
   def create_integration_mappings
-    return unless published? && saved_change_to_status?
+    return unless published?
 
     api_enabled_jurisdictions = Jurisdiction.where(external_api_enabled: true)
 
@@ -86,6 +84,18 @@ class TemplateVersion < ApplicationRecord
     jurisdictions_without_mappings = api_enabled_jurisdictions.where.not(id: existing_mapping_jurisdiction_ids)
 
     jurisdictions_without_mappings.each { |jurisdiction| integration_mappings.create(jurisdiction: jurisdiction) }
+  end
+
+  private
+
+  def create_integration_mappings_async
+    return unless published? && saved_change_to_status?
+
+    if Rails.env.test?
+      ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
+    else
+      ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
+    end
   end
 
   def set_default_deprecation_reason
