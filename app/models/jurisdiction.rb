@@ -28,7 +28,7 @@ class Jurisdiction < ApplicationRecord
   before_validation :set_type_based_on_locality
   before_save :sanitize_html_fields
 
-  after_save :create_integration_mappings, if: :saved_change_to_external_api_enabled?
+  after_save :create_integration_mappings_async, if: :saved_change_to_external_api_enabled?
 
   accepts_nested_attributes_for :contacts
   accepts_nested_attributes_for :permit_type_submission_contacts,
@@ -162,22 +162,31 @@ class Jurisdiction < ApplicationRecord
   def create_integration_mappings
     return unless external_api_enabled?
 
+    existing_mapping_template_ids = integration_mappings.pluck(:template_version_id)
+
     relevant_template_versions =
       TemplateVersion
         .published
         .or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
+        .where.not(id: existing_mapping_template_ids)
         .order(version_date: :asc)
 
-    existing_mapping_template_ids = integration_mappings.pluck(:template_version_id)
-
-    templates_without_mappings = relevant_template_versions.where.not(id: existing_mapping_template_ids)
-
-    templates_without_mappings.each do |template_version|
+    relevant_template_versions.each do |template_version|
       integration_mappings.create(template_version: template_version)
     end
   end
 
   private
+
+  def create_integration_mappings_async
+    return unless external_api_enabled?
+
+    if Rails.env.test?
+      ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
+    else
+      ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
+    end
+  end
 
   def sanitize_html_fields
     attributes.each do |name, value|

@@ -18,7 +18,7 @@ class IntegrationMapping < ApplicationRecord
 
   before_create :initialize_requirements_mapping
 
-  after_save :sync_changes_with_other_currently_active_mappings
+  after_update :sync_changes_with_other_currently_active_mappings
 
   attr_accessor :simplified_map_to_sync
 
