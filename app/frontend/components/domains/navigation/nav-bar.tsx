@@ -21,7 +21,6 @@ import {
 } from "@chakra-ui/react"
 import { Envelope, Folders, List } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -80,7 +79,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   return matchers.some((matcher) => matcher(path))
 }
 
-export const NavBar = observer(() => {
+export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
   const { sessionStore, userStore } = useMst()
 
@@ -90,8 +89,6 @@ export const NavBar = observer(() => {
 
   const location = useLocation()
   const path = location.pathname
-
-  const isStepCode = R.test(/step-code/, path)
 
   return (
     <>
@@ -181,7 +178,7 @@ export const NavBar = observer(() => {
 
 interface INavBarMenuProps {}
 
-const NavBarMenu = observer(({}: INavBarMenuProps) => {
+const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { sessionStore, userStore } = useMst()
@@ -274,8 +271,8 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
-                      <MenuItem bg="greys.grey03">
-                        <Button variant="primary" onClick={(e) => navigate("/permit-applications/new")}>
+                      <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>
+                        <Button as={Box} variant="primary">
                           {t("site.newApplication")}
                         </Button>
                       </MenuItem>
