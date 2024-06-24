@@ -5,6 +5,7 @@ class CreatePermitTypeRequiredStep < ActiveRecord::Migration[7.1]
       t.references :permit_type, foreign_key: { to_table: :permit_classifications }, type: :uuid
       t.integer :energy_step_required
       t.integer :zero_carbon_step_required
+      t.boolean :default
 
       t.timestamps
     end

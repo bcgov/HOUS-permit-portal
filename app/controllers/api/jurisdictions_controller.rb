@@ -183,6 +183,7 @@ class Api::JurisdictionsController < Api::ApplicationController
       permit_type_required_steps_attributes: %i[
         id
         permit_type_id
+        default
         energy_step_required
         zero_carbon_step_required
         _destroy

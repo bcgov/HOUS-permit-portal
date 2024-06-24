@@ -432,8 +432,9 @@ export interface ILinkData {
 
 export interface IPermitTypeRequiredStep {
   id?: string
+  default: boolean
   permitTypeId: string
   permitTypeLabel?: string
-  energyStepRequired: number
-  zeroCarbonStepRequired: number
+  energyStepRequired: EEnergyStep
+  zeroCarbonStepRequired: EZeroCarbonStep
 }

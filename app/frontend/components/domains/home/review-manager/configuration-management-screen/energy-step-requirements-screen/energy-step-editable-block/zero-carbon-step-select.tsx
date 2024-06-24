@@ -23,7 +23,6 @@ interface IProps {
   value: EZeroCarbonStep
   isDisabled?: boolean
   allowZero?: boolean
-  showFirstOnly?: boolean
 }
 
 export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
@@ -31,7 +30,6 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   value,
   isDisabled,
   allowZero,
-  showFirstOnly,
 }: IProps) {
   const {
     stepCodeStore: { getZeroCarbonStepOptions },
@@ -57,7 +55,7 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                 isDisabled={isDisabled}
               >
                 {!R.isNil(value)
-                  ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${showFirstOnly ? options[0] : value}`)
+                  ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
                   : t(`ui.selectPlaceholder`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
@@ -76,12 +74,11 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                     px={2}
                     py={1.5}
                     w="full"
-                    borderTop={i === options.length - 1 ? "1px solid" : undefined}
+                    borderTopWidth={value == "0" ? 1 : undefined}
                     borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >
-                    {/* @ts-ignore */}
                     {t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
                   </Flex>
                 ))}

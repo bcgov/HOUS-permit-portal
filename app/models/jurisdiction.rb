@@ -38,13 +38,7 @@ class Jurisdiction < ApplicationRecord
                                 allow_destroy: true,
                                 reject_if: proc { |attributes| attributes["email"].blank? }
 
-  accepts_nested_attributes_for :permit_type_required_steps,
-                                allow_destroy: true,
-                                reject_if:
-                                  proc { |attributes|
-                                    attributes["energy_step_required"].blank? ||
-                                      attributes["zero_carbon_step_required"].blank?
-                                  }
+  accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
 
   before_create :assign_unique_prefix
 

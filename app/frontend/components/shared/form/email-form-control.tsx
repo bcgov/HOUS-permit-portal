@@ -52,11 +52,15 @@ export const EmailFormControl = ({
   return (
     <FormControl isInvalid={errorMessage && !inputProps?.isDisabled} {...rest}>
       <HStack gap={0}>
-        {!hideLabel && <FormLabel>{label || t("auth.emailLabel")}</FormLabel>}
-        {required && (
-          <Box color="semantic.error" ml={-2} mb={2}>
-            <AsteriskSimple />
-          </Box>
+        {!hideLabel && (
+          <>
+            <FormLabel>{label || t("auth.emailLabel")}</FormLabel>
+            {required && (
+              <Box color="semantic.error" ml={-2} mb={2}>
+                <AsteriskSimple />
+              </Box>
+            )}
+          </>
         )}
       </HStack>
       <Flex>
