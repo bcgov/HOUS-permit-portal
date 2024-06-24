@@ -23,16 +23,9 @@ interface IProps {
   value: EEnergyStep
   isDisabled?: boolean
   allowZero?: boolean
-  showFirstOnly?: boolean
 }
 
-export const EnergyStepSelect = observer(function EnergyStepSelect({
-  showFirstOnly,
-  onChange,
-  value,
-  isDisabled,
-  allowZero,
-}: IProps) {
+export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled, allowZero }: IProps) {
   const {
     stepCodeStore: { getEnergyStepOptions },
   } = useMst()
@@ -54,9 +47,7 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {!R.isNil(value)
-                  ? t(`${i18nPrefix}.stepRequired.energy.options.${showFirstOnly ? options[0] : value}`)
-                  : t(`ui.selectPlaceholder`)}
+                {!R.isNil(value) ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`ui.selectPlaceholder`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -74,7 +65,7 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({
                     px={2}
                     py={1.5}
                     w="full"
-                    borderTop={i === options.length - 1 ? "1px solid" : undefined}
+                    borderTopWidth={value === "0" ? 1 : undefined}
                     borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
