@@ -11,7 +11,7 @@ class TemplateVersionBlueprint < Blueprinter::Base
     fields :denormalized_template_json, :form_json, :requirement_blocks_json
 
     field :latest_version_id do |template_version|
-      template_version.latest_version.id
+      template_version.latest_version&.id
     end
   end
 
