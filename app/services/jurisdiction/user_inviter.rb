@@ -27,8 +27,10 @@ class Jurisdiction::UserInviter
         user
           .jurisdiction_memberships
           .where(jurisdiction_id:)
-          .first_or_create { |m| PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later }
-
+          .first_or_create do |m|
+            PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later if user.confirmed?
+          end
+        user.invite!(inviter) if !user.confirmed?
         self.results[:invited] << user
       else
         reinvited = user.present?
