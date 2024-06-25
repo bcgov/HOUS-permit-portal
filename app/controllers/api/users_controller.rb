@@ -97,9 +97,7 @@ class Api::UsersController < Api::ApplicationController
   def accept_invitation
     authorize @user
     invited_user = User.find_by_invitation_token(params[:invitation_token], true)
-    if invited_user&.regional_review_manager? && @user.id != invited_user.id
-      PromoteUser.new(existing_user: @user, invited_user:).call
-    end
+    PromoteUser.new(existing_user: @user, invited_user:).call if @user.id != invited_user.id
     @user.accept_invitation!
     render_success @user, "user.invitation_accepted", { blueprint_opts: { view: :extended } }
   end
