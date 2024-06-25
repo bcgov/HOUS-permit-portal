@@ -18,7 +18,7 @@ import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
-import { RequirementForm } from "../../shared/permit-applications/requirement-form/requirement-form"
+import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { SubmissionDownloadModal } from "./submission-download-modal"
@@ -273,7 +273,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} />
               <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                {t("permitApplication.show.backToInbox")}
+                {t("ui.backHome")}
               </Button>
             </Stack>
           ) : (

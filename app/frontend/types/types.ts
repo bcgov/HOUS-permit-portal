@@ -437,6 +437,7 @@ export interface ILinkData {
 }
 
 export interface IRevisionRequest {
+  id: string
   reasonCode: EReasonCode
   requirementJson: IFormIORequirement
   comment: string

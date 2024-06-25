@@ -16,8 +16,13 @@ import {
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
-import { combineComplianceHints, combineDiff, combineRevisionButtons } from "../utils/formio-component-traversal"
-import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
+import {
+  combineComplianceHints,
+  combineDiff,
+  combineRevisionAnnotations,
+  combineRevisionButtons,
+} from "../utils/formio-component-traversal"
+
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IRequirement } from "./requirement"
@@ -63,7 +68,7 @@ export const PermitApplicationModel = types
     showingCompareAfter: types.optional(types.boolean, false),
     revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
-    stagedRevisionRequests: types.optional(types.array(types.frozen<IRevisionRequest>()), []),
+    revisionRequests: types.optional(types.array(types.frozen<IRevisionRequest>()), []),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -87,9 +92,11 @@ export const PermitApplicationModel = types
         .filter((outNull) => outNull)
     },
     get formattedFormJson() {
+      const clonedFormJson = R.clone(self.formJson)
+      const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.revisionRequests)
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
       const complianceHintedFormJson = combineComplianceHints(
-        self.formJson,
+        revisionAnnotatedFormJson,
         self.formCustomizations,
         self.formattedComplianceData
       )
@@ -332,6 +339,20 @@ export const PermitApplicationModel = types
       self.isLoading = false
       return response
     }),
+    updateRevisionRequests: flow(function* (params) {
+      self.isLoading = true
+      const response = yield self.environment.api.updateRevisionRequests(self.id, params)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+
+        self.rootStore.permitApplicationStore.mergeUpdate(
+          { ...permitApplication, revisionMode: true },
+          "permitApplicationMap"
+        )
+      }
+      self.isLoading = false
+      return response
+    }),
     fetchDiff: flow(function* () {
       const diffData = yield self.publishedTemplateVersion.fetchTemplateVersionCompare(self.templateVersion.id)
       self.diff = diffData.data
@@ -387,10 +408,6 @@ export const PermitApplicationModel = types
       self.zipfileSize = data.zipfileSize
       self.zipfileName = data.zipfileName
       self.zipfileUrl = data.zipfileUrl
-    },
-
-    stageRevisionRequest: (revisionRequest: IRevisionRequest) => {
-      self.stagedRevisionRequests.push(revisionRequest)
     },
   }))
 

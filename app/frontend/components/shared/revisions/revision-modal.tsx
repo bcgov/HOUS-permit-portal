@@ -13,57 +13,90 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
+  Spacer,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react"
-import React from "react"
-import { useForm } from "react-hook-form"
+import { Trash } from "@phosphor-icons/react"
+import React, { useState } from "react"
+import { UseFieldArrayReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { IPermitApplication, reasonCodes } from "../../../models/permit-application"
-import { IFormIORequirement } from "../../../types/types"
+import { EReasonCode } from "../../../types/enums"
+import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
+import { IRevisionRequestForm } from "../../domains/permit-application/revision-sidebar"
 
 export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclosure>> {
-  permitApplication?: IPermitApplication
   requirementJson: IFormIORequirement
+  revisionRequest: IRevisionRequest
+  useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
+  onSave: () => Promise<void>
 }
 
 export const RevisionModal: React.FC<IRevisionModalProps> = ({
-  permitApplication,
   requirementJson,
   isOpen,
   onOpen,
   onClose,
+  revisionRequest,
+  useFieldArrayMethods,
+  onSave,
 }) => {
   const { t } = useTranslation()
+  const [reasonCode, setReasonCode] = useState<EReasonCode | "">(revisionRequest?.reasonCode ?? "")
+  const [comment, setComment] = useState<string>(revisionRequest?.comment ?? "")
 
-  interface IRequestRevisionFormData {
-    comment?: string
-    reasonCode: string
+  const { update, append, fields } = useFieldArrayMethods
+
+  const className = `formio-component-${requirementJson.key}`
+  const elements = document.getElementsByClassName(className)
+
+  const resetFields = () => {
+    setReasonCode("")
+    setComment("")
   }
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<IRequestRevisionFormData>()
+  const handleClose = () => {
+    resetFields()
+    onClose()
+  }
+  const index = fields.findIndex((field) => field.id === revisionRequest?.id)
 
-  const onSubmit = (formData: IRequestRevisionFormData) => {
-    permitApplication.stageRevisionRequest({
-      ...formData,
-      requirementJson,
-    })
+  const handleUpsert = () => {
+    if (reasonCode && requirementJson) {
+      const newItem = {
+        id: revisionRequest?.id,
+        reasonCode,
+        requirementJson,
+        comment,
+      }
+      if (revisionRequest) {
+        // Item exists, replace it
+        update(index, newItem)
+      } else {
+        // Item does not exist, append it
+        append(newItem)
+      }
 
-    const className = `formio-component-${requirementJson.key}`
-    const elements = document.getElementsByClassName(className)
-    if (elements.length > 0) {
-      elements[0].classList.add("revision-requested")
+      onSave().then(() => {
+        elements?.[0]?.classList?.add("revision-requested")
+        handleClose()
+      })
+    }
+  }
+
+  const handleDelete = () => {
+    if (revisionRequest?.id) {
+      update(index, { _destroy: true, id: revisionRequest.id })
     }
 
-    onClose()
+    onSave().then(() => {
+      elements?.[0]?.classList?.remove("revision-requested")
+      handleClose()
+    })
   }
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} size="sm">
+    <Modal onClose={handleClose} isOpen={isOpen} size="md">
       <ModalOverlay />
 
       <ModalContent mt={48}>
@@ -74,44 +107,49 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
           </Heading>
         </ModalHeader>
         <ModalBody>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Flex direction="column" gap={4}>
-              <FormControl>
-                <FormLabel>{t("permitApplication.show.revision.reasonFor")}</FormLabel>
-                <Select placeholder={t("ui.pleaseSelect")} {...register("reasonCode", { required: true })}>
-                  {reasonCodes.map((code) => (
-                    <option value={code} key={code}>
-                      {/* @ts-ignore */}
-                      {t(`permitApplication.show.revision.reasons.${code}`)}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl>
-                <FormLabel>{t("permitApplication.show.revision.comment")}</FormLabel>
-                <Textarea
-                  {...register("comment", {
-                    required: false,
-                    maxLength: {
-                      value: 350,
-                      message: t("permitApplication.show.revision.maxCharacters"),
-                    },
-                  })}
-                />
-                <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
-              </FormControl>
+          <Flex direction="column" gap={4}>
+            <FormControl>
+              <FormLabel>{t("permitApplication.show.revision.reasonFor")}</FormLabel>
+              <Select
+                placeholder={t("ui.pleaseSelect")}
+                value={reasonCode}
+                onChange={(e) => setReasonCode(e.target.value as EReasonCode)}
+              >
+                {Object.values(EReasonCode).map((value) => (
+                  <option value={value} key={value}>
+                    {t(`permitApplication.show.revision.reasons.${value}`)}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>{t("permitApplication.show.revision.comment")}</FormLabel>
+              <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder={t("permitApplication.show.revision.comment")}
+                maxLength={350}
+              />
+              <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
+            </FormControl>
+          </Flex>
+          <ModalFooter>
+            <Flex width="full" justify="center" gap={4}>
+              <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode}>
+                {t("permitApplication.show.revision.useButton")}
+              </Button>
+
+              <Button variant="secondary" onClick={onClose}>
+                {t("ui.cancel")}
+              </Button>
+              <Spacer />
+              {revisionRequest && (
+                <Button color="semantic.error" leftIcon={<Trash />} variant="link" onClick={handleDelete}>
+                  {t("ui.delete")}
+                </Button>
+              )}
             </Flex>
-            <ModalFooter>
-              <Flex width="full" justify="center" gap={4}>
-                <Button type="submit" variant="primary" isDisabled={!isValid}>
-                  {t("permitApplication.show.revision.useButton")}
-                </Button>
-                <Button variant="secondary" onClick={onClose}>
-                  {t("ui.cancel")}
-                </Button>
-              </Flex>
-            </ModalFooter>
-          </form>
+          </ModalFooter>
         </ModalBody>
       </ModalContent>
     </Modal>

@@ -28,6 +28,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     update?
   end
 
+  def update_revision_requests?
+    record.submitted? && user.review_staff?
+  end
+
   def upload_supporting_document?
     record.draft? && record.submitter == user
   end

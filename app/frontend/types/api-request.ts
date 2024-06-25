@@ -1,5 +1,5 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
-import { IOption, ISimplifiedRequirementsMap, TComputedCompliance } from "./types"
+import { IOption, IRevisionRequest, ISimplifiedRequirementsMap, TComputedCompliance } from "./types"
 
 export interface IFormConditional {
   when: string
@@ -48,6 +48,10 @@ export interface IRequirementTemplateSectionAttributes {
   position?: number
   templateSectionBlocksAttributes?: ITemplateSectionBlockAttributes[]
   _destroy?: boolean
+}
+
+export interface IrevisionRequestsAttributes extends Partial<IRevisionRequest> {
+  _destroy?: true
 }
 
 export interface IRequirementTemplateUpdateParams {

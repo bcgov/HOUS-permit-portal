@@ -1,6 +1,13 @@
 import { t } from "i18next"
 import { COMPLETTION_SECTION_ID } from "../constants"
-import { IFormIOBlock, IFormIORequirement, IFormIOSection, IFormJson, ITemplateVersionDiff } from "../types/types"
+import {
+  IFormIOBlock,
+  IFormIORequirement,
+  IFormIOSection,
+  IFormJson,
+  IRevisionRequest,
+  ITemplateVersionDiff,
+} from "../types/types"
 
 const findComponentsByType = (components, type) => {
   let foundComponents = []
@@ -128,34 +135,42 @@ export const combineComplianceHints = (
   return updatedJson
 }
 
-export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => {
-  const removedIds = diff?.removed?.map((req) => req.id) || []
-  const addedIds = diff?.added?.map((req) => req.id) || []
-  const changedIds = diff?.changed?.map((req) => req.id) || []
-
-  const updateClasses = (classes: string[], id: string, ids: string[], className: string) => {
-    const index = classes.indexOf(className)
-    if (ids.includes(id)) {
-      if (index === -1) classes.push(className)
-    } else {
-      if (index > -1) classes.splice(index, 1)
-    }
-  }
-
+const updateFormJsonClasses = (formJson: IFormJson, idsMap: { [key: string]: string[] }) => {
   formJson.components.forEach((section: IFormIOSection) => {
     section.components.forEach((block: IFormIOBlock) => {
       block.components.forEach((requirement: IFormIORequirement) => {
         const classes = requirement.customClass?.split(" ") || []
-
-        updateClasses(classes, requirement.id, removedIds, "removed-in-diff")
-        updateClasses(classes, requirement.id, addedIds, "added-in-diff")
-        updateClasses(classes, requirement.id, changedIds, "changed-in-diff")
+        Object.keys(idsMap).forEach((key) => {
+          const index = classes.indexOf(key)
+          if (idsMap[key].includes(requirement.id)) {
+            if (index === -1) classes.push(key)
+          } else {
+            if (index > -1) classes.splice(index, 1)
+          }
+        })
 
         requirement.customClass = classes.filter(Boolean).join(" ")
       })
     })
   })
   return formJson
+}
+
+export const combineRevisionAnnotations = (formJson: IFormJson, revisionRequests: IRevisionRequest[]) => {
+  const revisionIds = revisionRequests.map((rr) => rr.requirementJson.id)
+  return updateFormJsonClasses(formJson, { "revision-requested": revisionIds })
+}
+
+export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => {
+  const removedIds = diff?.removed?.map((req) => req.id) || []
+  const addedIds = diff?.added?.map((req) => req.id) || []
+  const changedIds = diff?.changed?.map((req) => req.id) || []
+
+  return updateFormJsonClasses(formJson, {
+    "removed-in-diff": removedIds,
+    "added-in-diff": addedIds,
+    "changed-in-diff": changedIds,
+  })
 }
 
 const convertToRevisionButton = (requirement: IFormIORequirement) => {

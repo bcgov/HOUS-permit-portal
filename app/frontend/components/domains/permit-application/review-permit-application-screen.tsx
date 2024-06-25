@@ -1,30 +1,17 @@
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Flex,
-  HStack,
-  Heading,
-  Spacer,
-  Stack,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Button, Divider, Flex, HStack, Heading, Spacer, Stack, Text, useDisclosure } from "@chakra-ui/react"
 import { CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
-import { FormProvider, useController, useForm } from "react-hook-form"
+import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
-import { IRevisionRequest } from "../../../types/types"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
-import { RequirementForm } from "../../shared/permit-applications/requirement-form/requirement-form"
+import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
@@ -44,22 +31,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
       referenceNumber: currentPermitApplication?.referenceNumber || "",
     },
   })
-
-  interface IRevisionRequestForm {
-    revisionRequests: IRevisionRequest[]
-  }
-
-  const revisionFormMethods = useForm<IRevisionRequestForm>({
-    defaultValues: {
-      revisionRequests: [] as IRevisionRequest[],
-    },
-  })
-
-  const { handleSubmit: revisionHandleSubmit } = revisionFormMethods
-
-  const onSubmitRevisions = (data: IRevisionRequestForm) => {
-    console.log(data)
-  }
 
   const {
     field: { value: referenceNumber, onChange: onReferenceNumberChange },
@@ -96,7 +67,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const { permitTypeAndActivity, formJson, number, revisionMode, setRevisionMode } = currentPermitApplication
+  const { permitTypeAndActivity, formattedFormJson, number, revisionMode, setRevisionMode } = currentPermitApplication
 
   const onSaveReferenceNumber = handleSubmit(async ({ referenceNumber: referenceNumberToSave }) => {
     if (referenceNumber === referenceNumberSnapshot) {
@@ -161,7 +132,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             </Button>
             <SubmissionDownloadModal permitApplication={currentPermitApplication} />
             <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-              {t("ui.backHome")}
+              {t("ui.backToInbox")}
             </Button>
           </Stack>
         </Flex>
@@ -195,41 +166,26 @@ export const ReviewPermitApplicationScreen = observer(() => {
               </Button>
               <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
             </Flex>
-            <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
-              <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
-                {t("permitApplication.show.contactsSummary")}
-              </Button>
-              <SubmissionDownloadModal permitApplication={currentPermitApplication} />
-              <Button
-                rightIcon={<CaretRight />}
-                onClick={() =>
-                  navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)
-                }
-              >
-                {t("ui.backToInbox")}
-              </Button>
-            </Stack>
           </Flex>
         )}
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         {revisionMode && !hideRevisionList ? (
-          <FormProvider {...revisionFormMethods}>
-            <form onSubmit={revisionHandleSubmit(onSubmitRevisions)}>
-              <RevisionSideBar permitApplication={currentPermitApplication} />
-            </form>
-          </FormProvider>
+          <RevisionSideBar permitApplication={currentPermitApplication} onCancel={() => setRevisionMode(false)} />
         ) : (
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         )}
-        {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
+        {formattedFormJson && (
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
             {!revisionMode && (
-              <Container maxWidth="container.lg" p={8}>
-                <Button variant="primary" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
-                  {t("permitApplication.show.requestRevisions")}
-                </Button>
-              </Container>
+              <Button
+                ml={{ lg: "8" }}
+                variant="callout"
+                leftIcon={<NotePencil />}
+                onClick={() => setRevisionMode(true)}
+              >
+                {t("permitApplication.show.requestRevisions")}
+              </Button>
             )}
             <RequirementForm
               formRef={formRef}

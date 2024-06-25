@@ -361,14 +361,14 @@ export enum ENotificationActionType {
 }
 
 export enum EReasonCode {
-  nonCompliant = 0,
-  conflictingInaccurate = 1,
-  insufficientDetail = 2,
-  incorrectFormat = 3,
-  missingDocumentation = 4,
-  outdated = 5,
-  inapplicable = 6,
-  missingSignatures = 7,
-  incorrectCalculations = 8,
-  other = 9,
+  nonCompliant = "non_compliant",
+  conflictingInaccurate = "conflicting_inaccurate",
+  insufficientDetail = "insufficient_detail",
+  incorrectFormat = "incorrect_format",
+  missingDocumentation = "missing_documentation",
+  outdated = "outdated",
+  inapplicable = "inapplicable",
+  missingSignatures = "missing_signatures",
+  incorrectCalculations = "incorrect_calculations",
+  other = "other",
 }

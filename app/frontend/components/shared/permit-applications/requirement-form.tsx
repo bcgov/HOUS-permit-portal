@@ -21,20 +21,18 @@ import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { useMountStatus } from "../../../../hooks/use-mount-status"
-import { IPermitApplication } from "../../../../models/permit-application"
-import { useMst } from "../../../../setup/root"
-import { IErrorsBoxData, IFormIORequirement } from "../../../../types/types"
-import { getCompletedBlocksFromForm } from "../../../../utils/formio-component-traversal"
-import { CompareRequirementsBox } from "../../../domains/permit-application/compare-requirements-box"
-import { ErrorsBox } from "../../../domains/permit-application/errors-box"
-import { BuilderBottomFloatingButtons } from "../../../domains/requirement-template/builder-bottom-floating-buttons"
-import { CustomMessageBox } from "../../base/custom-message-box"
-import { SharedSpinner } from "../../base/shared-spinner"
-import { Form, defaultOptions } from "../../chefs"
-import { ContactModal } from "../../contact/contact-modal"
-import { RevisionModal } from "../../revisions/revision-modal"
-import { useFormEventListeners } from "./use-form-event-listeners"
+import { useMountStatus } from "../../../hooks/use-mount-status"
+import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
+import { IErrorsBoxData } from "../../../types/types"
+import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
+import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
+import { ErrorsBox } from "../../domains/permit-application/errors-box"
+import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
+import { CustomMessageBox } from "../base/custom-message-box"
+import { SharedSpinner } from "../base/shared-spinner"
+import { Form, defaultOptions } from "../chefs"
+import { ContactModal } from "../contact/contact-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -73,7 +71,6 @@ export const RequirementForm = observer(
     const [autofillContactKey, setAutofillContactKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
-    const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
 
     const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
 
@@ -83,7 +80,6 @@ export const RequirementForm = observer(
     }
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
-    const { isOpen: isRevisionsOpen, onOpen: onRevisionsOpen, onClose: onRevisionsClose } = useDisclosure()
 
     const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
@@ -156,14 +152,24 @@ export const RequirementForm = observer(
       }
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
-    useFormEventListeners(
-      triggerSave,
-      setAutofillContactKey,
-      onContactsOpen,
-      onRevisionsOpen,
-      setRequirementForRevision,
-      permitApplication
-    )
+    const handleOpenStepCode = async (_event) => {
+      await triggerSave?.()
+      navigate("step-code", { state: { background: location } })
+    }
+
+    const handleOpenContactAutofill = async (_event) => {
+      setAutofillContactKey(_event.detail.key)
+      onContactsOpen()
+    }
+
+    useEffect(() => {
+      document.addEventListener("openStepCode", handleOpenStepCode)
+      document.addEventListener("openAutofillContact", handleOpenContactAutofill)
+      return () => {
+        document.removeEventListener("openStepCode", handleOpenStepCode)
+        document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
+      }
+    }, [])
 
     const setIsCollapsedAll = (isCollapsedAll: boolean) => {
       if (isCollapsedAll) {
@@ -300,7 +306,7 @@ export const RequirementForm = observer(
           }}
         >
           {permitApplication.isLoading && (
-            <Center position="absolute" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">
+            <Center position="fixed" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">
               <SharedSpinner h={24} w={24} />
             </Center>
           )}
@@ -402,16 +408,6 @@ export const RequirementForm = observer(
             permitApplication={permitApplication}
             submissionState={unsavedSubmissionData}
             setSubmissionState={handleSetUnsavedSubmissionData}
-          />
-        )}
-
-        {isRevisionsOpen && (
-          <RevisionModal
-            isOpen={isRevisionsOpen}
-            onOpen={onRevisionsOpen}
-            onClose={onRevisionsClose}
-            permitApplication={permitApplication}
-            requirementJson={requirementForRevision}
           />
         )}
       </>

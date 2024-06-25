@@ -134,6 +134,7 @@ const options = {
         ui: {
           delete: "Delete",
           confirmDelete: "Confirm delete",
+          confirmation: "Are you sure you want to proceed?",
           sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
           ok: "OK",
@@ -148,6 +149,7 @@ const options = {
           preview: "Preview",
           back: "Back",
           backToInbox: "Back to inbox",
+          backHome: "Back to home",
           yes: "Yes",
           no: "No",
           show: "Show",
@@ -481,7 +483,6 @@ const options = {
             downloadZip: "Download attached files",
             downloadForm: "Download application form",
             downloadStepCode: "Download step code checklist",
-            backToInbox: "Back to inbox",
             requestRevisions: "Request revisions",
             requestingRevisions: "Requesting revisions",
             showList: "Show list",
@@ -495,6 +496,8 @@ const options = {
               useButton: "Use this reason",
               maxCharacters: "Maximum 350 characters",
               send: "Send to submitter",
+              confirmHeader: "Send this list of revisions to the submitter?",
+              confirmMessage: "The submitter will receive a notification end email about the changes you've requested.",
               reasons: {
                 non_compliant: "Non-compliance with regulations",
                 conflicting_inaccurate: "Conflicting/inaccurate information",

@@ -840,26 +840,25 @@
   .card-body {
     padding-left: 45px !important;
   }
+}
+.formio-component-panel {
+  legend,
+  .form-group > label {
+    border-bottom: 2px solid;
+    border-color: var(--chakra-colors-theme-yellow);
+    margin-bottom: 8px;
+    max-width: fit-content;
+  }
+  .fieldset-body label {
+    border-bottom: 0;
+    margin-bottom: 0px;
+    background-color: transparent !important;
+  }
 
-  .formio-component-panel {
-    legend,
-    .form-group > label {
-      border-bottom: 2px solid;
-      border-color: var(--chakra-colors-theme-yellow);
-      margin-bottom: 8px;
-      max-width: fit-content;
-    }
-    .fieldset-body label {
-      border-bottom: 0;
-      margin-bottom: 0px;
-      background-color: transparent !important;
-    }
-
-    .revision-requested legend,
-    .form-group.revision-requested > label {
-      border-color: var(--chakra-colors-semantic-error);
-      background-color: var(--chakra-colors-semantic-warningLight);
-    }
+  .revision-requested legend,
+  .form-group.revision-requested > label {
+    border-color: var(--chakra-colors-semantic-error);
+    background-color: var(--chakra-colors-semantic-warningLight);
   }
 }
 
