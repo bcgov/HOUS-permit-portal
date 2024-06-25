@@ -51,5 +51,5 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
       page: searchModel.currentPage,
       countPerPage: searchModel.countPerPage,
     })
-  }, [...dependencyArray, location.search])
+  }, [...dependencyArray])
 }
