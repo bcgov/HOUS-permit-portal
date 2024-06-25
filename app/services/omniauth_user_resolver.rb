@@ -36,7 +36,8 @@ class OmniauthUserResolver
   end
 
   def promotable_user?
-    (existing_user&.submitter? && invited_user.present?) || invited_user&.regional_review_manager?
+    return unless existing_user.present? && invited_user.present?
+    existing_user.submitter? || invited_user.regional_review_manager?
   end
 
   def create_user
