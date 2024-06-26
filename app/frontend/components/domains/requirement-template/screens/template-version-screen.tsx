@@ -50,6 +50,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
         requirementTemplate={denormalizedTemplate}
         status={templateVersion.status}
         versionDate={templateVersion.versionDate}
+        latestVersionId={templateVersion.latestVersionId}
       />
       <Box borderTop={"1px solid"} borderColor={"border.base"}>
         <SectionsSidebar

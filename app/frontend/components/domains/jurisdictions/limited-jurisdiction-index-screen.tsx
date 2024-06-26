@@ -1,4 +1,5 @@
 import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { CheckCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -39,10 +40,14 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
           </Box>
         </Flex>
 
-        <SearchGrid templateColumns="3fr 3fr">
+        <SearchGrid templateColumns="4fr 4fr 2fr">
           <GridHeaders
-            span={2}
-            columns={[EJurisdictionSortFields.reverseQualifiedName, EJurisdictionSortFields.regionalDistrict]}
+            span={3}
+            columns={[
+              EJurisdictionSortFields.reverseQualifiedName,
+              EJurisdictionSortFields.regionalDistrict,
+              EJurisdictionSortFields.submissionInboxSetUp,
+            ]}
           />
 
           {isSearching ? (
@@ -57,6 +62,13 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
                     <RouterLink to={`/jurisdictions/${j.slug}`}>{j.reverseQualifiedName}</RouterLink>
                   </SearchGridItem>
                   <SearchGridItem>{j.regionalDistrictName}</SearchGridItem>
+                  <SearchGridItem>
+                    {j.submissionInboxSetUp && (
+                      <Flex gap={1}>
+                        <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} /> {t("ui.yes")}
+                      </Flex>
+                    )}
+                  </SearchGridItem>
                 </Box>
               )
             })

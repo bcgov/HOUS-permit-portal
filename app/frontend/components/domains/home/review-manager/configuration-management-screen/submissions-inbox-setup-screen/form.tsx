@@ -2,7 +2,7 @@ import { VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React from "react"
+import React, { useEffect } from "react"
 import { FormProvider, useFieldArray, useForm } from "react-hook-form"
 import { IJurisdiction } from "../../../../../../models/jurisdiction"
 import { useMst } from "../../../../../../setup/root"
@@ -38,7 +38,7 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
     mode: "onChange",
     defaultValues: getDefaultValues(),
   })
-  const { handleSubmit, reset, control } = formMethods
+  const { handleSubmit, reset, control, setValue } = formMethods
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: fieldArrayName,
@@ -53,6 +53,11 @@ export const Form = observer(function SubmissionInboxSetupForm({ jurisdiction }:
   const handleReset = () => {
     reset(getDefaultValues())
   }
+
+  useEffect(() => {
+    jurisdiction &&
+      setValue("permitTypeSubmissionContactsAttributes", [...jurisdiction.permitTypeSubmissionContacts, ...defaults()])
+  }, [jurisdiction?.id])
 
   return (
     <FormProvider {...formMethods}>

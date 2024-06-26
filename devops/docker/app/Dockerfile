@@ -15,7 +15,7 @@ ENV RAILS_ENV="production" \
 
 # Install packages needed for both building and running the application
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python libjemalloc2 postgresql-client netcat && \
+    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python libjemalloc2 postgresql-client libproj-dev libgeos-dev proj-bin netcat && \
     rm -rf /var/lib/apt/lists/*
 
 # Use jemalloc to improve memory management
@@ -36,7 +36,7 @@ RUN gem install bundler:2.5.4 && \
 
 # Install npm and node modules
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps --maxsockets=50
 
 # Copy application code
 COPY . .

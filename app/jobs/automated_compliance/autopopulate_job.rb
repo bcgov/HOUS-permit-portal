@@ -1,6 +1,6 @@
 class AutomatedCompliance::AutopopulateJob
   include Sidekiq::Worker
-  sidekiq_options queue: :default, lock: :until_executed
+  sidekiq_options queue: :websocket, lock: :until_executed
 
   def perform(permit_application_id)
     permit_application = PermitApplication.find(permit_application_id)
@@ -16,7 +16,7 @@ class AutomatedCompliance::AutopopulateJob
       permit_application.assign_attributes(front_end_form_update: permit_application.formatted_compliance_data)
 
       WebsocketBroadcaster.push_update_to_relevant_users(
-        permit_application.collaborators,
+        permit_application.collaborators.pluck(:id),
         Constants::Websockets::Events::PermitApplication::DOMAIN,
         Constants::Websockets::Events::PermitApplication::TYPES[:update_compliance],
         PermitApplicationBlueprint.render_as_hash(permit_application, { view: :compliance_update }),

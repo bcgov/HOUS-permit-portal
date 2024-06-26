@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -64,6 +64,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
             name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
+  end
+
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -73,6 +79,52 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "variant"
+  end
+
+  create_table "external_api_keys",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.string "token", limit: 510, null: false
+    t.datetime "expired_at"
+    t.datetime "revoked_at"
+    t.string "name", null: false
+    t.string "webhook_url"
+    t.uuid "jurisdiction_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "connecting_application", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_external_api_keys_on_jurisdiction_id"
+    t.index ["token"], name: "index_external_api_keys_on_token", unique: true
+  end
+
+  create_table "integration_mappings",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.jsonb "requirements_mapping", default: {}, null: false
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "template_version_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_integration_mappings_on_jurisdiction_id"
+    t.index ["template_version_id"],
+            name: "index_integration_mappings_on_template_version_id"
+  end
+
+  create_table "jurisdiction_memberships",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_jurisdiction_memberships_on_jurisdiction_id"
+    t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
   end
 
   create_table "jurisdiction_template_version_customizations",
@@ -198,6 +250,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
             name: "index_permit_type_submission_contacts_on_jurisdiction_id"
     t.index ["permit_type_id"],
             name: "index_permit_type_submission_contacts_on_permit_type_id"
+  end
+
+  create_table "preferences",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.boolean "enable_in_app_new_template_version_publish_notification",
+              default: true
+    t.boolean "enable_email_new_template_version_publish_notification",
+              default: true
+    t.boolean "enable_in_app_customization_update_notification", default: true
+    t.boolean "enable_email_customization_update_notification", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
   create_table "requirement_blocks",
@@ -541,6 +609,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.uuid "requirement_template_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "deprecation_reason"
+    t.uuid "deprecated_by_id"
+    t.index ["deprecated_by_id"],
+            name: "index_template_versions_on_deprecated_by_id"
     t.index ["requirement_template_id"],
             name: "index_template_versions_on_requirement_template_id"
   end
@@ -598,7 +670,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.integer "role", default: 0
     t.string "first_name"
     t.string "last_name"
-    t.uuid "jurisdiction_id"
     t.string "invitation_token"
     t.datetime "invitation_created_at"
     t.datetime "invitation_sent_at"
@@ -626,7 +697,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
             unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
-    t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
     t.index %w[omniauth_provider omniauth_uid],
             name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true
@@ -636,6 +706,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "integration_mappings", "jurisdictions"
+  add_foreign_key "integration_mappings", "template_versions"
+  add_foreign_key "jurisdiction_memberships", "jurisdictions"
+  add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",
@@ -656,6 +731,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
   add_foreign_key "permit_type_submission_contacts",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "preferences", "users"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates",
                   "permit_classifications",
@@ -674,9 +750,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"
   add_foreign_key "template_versions", "requirement_templates"
+  add_foreign_key "template_versions", "users", column: "deprecated_by_id"
   add_foreign_key "user_license_agreements",
                   "end_user_license_agreements",
                   column: "agreement_id"
   add_foreign_key "user_license_agreements", "users"
-  add_foreign_key "users", "jurisdictions"
 end

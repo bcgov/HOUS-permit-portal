@@ -34,6 +34,7 @@ class PermitApplication < ApplicationRecord
   delegate :energy_step_required, to: :jurisdiction, allow_nil: true
   delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
   delegate :form_json, to: :template_version
+  delegate :published_template_version, to: :template_version
 
   before_validation :assign_default_nickname, on: :create
   before_validation :assign_unique_number, on: :create
@@ -45,6 +46,7 @@ class PermitApplication < ApplicationRecord
   after_commit :reindex_jurisdiction_permit_application_size
   after_commit :notify_user_application_updated
   after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
+  after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
@@ -68,8 +70,23 @@ class PermitApplication < ApplicationRecord
       status: status,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
+      template_version_id: template_version.id,
+      requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
+      using_current_template_version: using_current_template_version,
     }
+  end
+
+  def indexed_using_current_template_version
+    self.class.searchkick_index.retrieve(self)["using_current_template_version"]
+  end
+
+  def formatted_permit_classifications
+    "#{permit_type.name} - #{activity.name}"
+  end
+
+  def using_current_template_version
+    self.template_version === current_published_template_version
   end
 
   def current_published_template_version
@@ -100,9 +117,10 @@ class PermitApplication < ApplicationRecord
     relevant_collaborators = [submitter]
 
     if submitted?
-      # TODO: add region managers when merged back to dev
       relevant_collaborators =
         relevant_collaborators + jurisdiction.review_managers if jurisdiction.review_managers.present?
+      relevant_collaborators =
+        relevant_collaborators + jurisdiction.regional_review_managers if jurisdiction.regional_review_managers.present?
       relevant_collaborators = relevant_collaborators + jurisdiction.reviewers if jurisdiction.reviewers.present?
     end
 
@@ -153,19 +171,36 @@ class PermitApplication < ApplicationRecord
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
   end
 
+  def formatted_submission_data_for_external_use
+    ExternalPermitApplicationService.new(self).formatted_submission_data_for_external_use
+  end
+
+  def formatted_raw_h2k_files_for_external_use
+    ExternalPermitApplicationService.new(self).get_raw_h2k_files
+  end
+
+  def send_submitted_webhook
+    return unless submitted?
+
+    jurisdiction
+      .active_external_api_keys
+      .where.not(webhook_url: [nil, ""]) # Only send webhooks to keys with a webhook URL
+      .each { |external_api_key| PermitWebhookJob.perform_async(external_api_key.id, "permit_submitted", id) }
+  end
+
   def missing_pdfs
     return [] unless submitted?
 
     missing_pdfs = []
 
-    application_pdf = supporting_documents.find_by(data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY)
+    application_pdf = supporting_documents.find_by(data_key: PERMIT_APP_PDF_DATA_KEY)
 
-    missing_pdfs << SupportingDocument::APPLICATION_PDF_DATA_KEY if application_pdf.blank?
+    missing_pdfs << PERMIT_APP_PDF_DATA_KEY if application_pdf.blank?
 
     return missing_pdfs unless step_code&.pre_construction_checklist
 
-    checklist_pdf = supporting_documents.find_by(data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY)
-    missing_pdfs << SupportingDocument::CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
+    checklist_pdf = supporting_documents.find_by(data_key: CHECKLIST_PDF_DATA_KEY)
+    missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
 
     missing_pdfs
   end
@@ -257,6 +292,12 @@ class PermitApplication < ApplicationRecord
   def set_submitted_at
     # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
     self.submitted_at = Time.current if submitted? && submitted_at.nil?
+  end
+
+  def submitter_must_have_role
+    unless submitter&.submitter?
+      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+    end
   end
 
   def jurisdiction_has_matching_submission_contact

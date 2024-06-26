@@ -73,8 +73,8 @@ class PdfGenerationJob
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
-          pdfs = [{ fname: application_filename, key: SupportingDocument::APPLICATION_PDF_DATA_KEY }]
-          pdfs << { fname: step_code_filename, key: SupportingDocument::CHECKLIST_PDF_DATA_KEY } if checklist
+          pdfs = [{ fname: application_filename, key: PermitApplication::PERMIT_APP_PDF_DATA_KEY }]
+          pdfs << { fname: step_code_filename, key: PermitApplication::CHECKLIST_PDF_DATA_KEY } if checklist
           pdfs.each do |pdf|
             path = "#{generation_directory_path}/#{pdf[:fname]}"
             file = File.open(path)

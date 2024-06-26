@@ -13,6 +13,9 @@ class RequirementTemplate < ApplicationRecord
   has_many :scheduled_template_versions,
            -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
            class_name: "TemplateVersion"
+  has_many :last_three_deprecated_template_versions,
+           -> { where(template_versions: { status: "deprecated" }).order(version_date: :desc).limit(3) },
+           class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
 
   has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
@@ -32,6 +35,10 @@ class RequirementTemplate < ApplicationRecord
   validate :unique_permit_and_activity_for_undiscarded, on: :create
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
+
+  def label
+    "#{permit_type.name} | #{activity.name}"
+  end
 
   def key
     "requirementtemplate#{id}"
@@ -124,6 +131,11 @@ class RequirementTemplate < ApplicationRecord
   end
 
   private
+
+  def validate_uniqueness_of_blocks
+    # Track duplicates across all sections within the same template
+    duplicates = requirement_blocks.unscope(:order).group(:id).having("COUNT(*) > 1").pluck(:name)
+  end
 
   def requirement_block_ids_from_nested_attributes_copy
     # have to manually loop instead of using association because

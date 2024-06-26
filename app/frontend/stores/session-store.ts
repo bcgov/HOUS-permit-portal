@@ -31,8 +31,10 @@ export const SessionStoreModel = types
         const user = response.data.data
         self.loggedIn = true
         self.rootStore.userStore.setCurrentUser(user)
+
         // connect websocket
         self.rootStore.subscribeToUserChannel()
+
         if (opts.redirectToRoot) window.location.replace("/")
         return true
       }

@@ -5,7 +5,7 @@ class AutomatedCompliance::ParcelInfoExtractor < AutomatedCompliance::Base
 
       # extraction of parcel data can be done via LTSA base
       attributes =
-        Integrations::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(
+        Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(
           pid: permit_application.pid,
           pin: permit_application.pin,
         )

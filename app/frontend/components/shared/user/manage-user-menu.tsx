@@ -47,14 +47,16 @@ export const ManageUserMenu = observer(function ManageUserMenu<TSearchModel exte
         </MenuButton>
         <MenuList>
           {user.role != EUserRoles.superAdmin && (
-            <ManageMenuItemButton
-              color={isCurrentUser ? "greys.grey01" : "text.primary"}
-              leftIcon={<ArrowsLeftRight />}
-              onClick={handleChangeRole}
-              isDisabled={isCurrentUser}
-            >
-              {t("user.changeRole")}
-            </ManageMenuItemButton>
+            <Can action="user:updateRole">
+              <ManageMenuItemButton
+                color={isCurrentUser ? "greys.grey01" : "text.primary"}
+                leftIcon={<ArrowsLeftRight />}
+                onClick={handleChangeRole}
+                isDisabled={isCurrentUser}
+              >
+                {t("user.changeRole")}
+              </ManageMenuItemButton>
+            </Can>
           )}
           {(user.isUnconfirmed || user.isDiscarded) && <ReinviteUserForm user={user} />}
           {user.isDiscarded ? (

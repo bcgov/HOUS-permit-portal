@@ -80,6 +80,7 @@ const SectionDisplay = observer(
       control,
     })
 
+    const watchedSections = watch(`requirementTemplateSectionsAttributes`)
     const watchedSectionBlocks = watch(
       `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`
     )
@@ -164,6 +165,7 @@ const SectionDisplay = observer(
               appendSectionBlock({ id: uuidv4(), requirementBlockId: requirementBlock.id })
             }}
             disabledUseForBlockIds={new Set(disabledUseForBlockIds)}
+            disabledReason={t("requirementTemplate.edit.duplicateRequirementBlockDisabledReason")}
           />
         </Stack>
       </Box>

@@ -2,6 +2,7 @@ import { Box, ButtonProps, Flex, HStack, ListItem, StackProps, Tag, UnorderedLis
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
 import { ISearch } from "../../../lib/create-search-model"
 import { IRequirementBlock } from "../../../models/requirement-block"
@@ -77,7 +78,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   </UnorderedList>
                 </SearchGridItem>
                 <SearchGridItem maxW="150px" fontSize={"sm"}>
-                  {format(requirementBlock.updatedAt, "yyyy-MM-dd")}
+                  {format(requirementBlock.updatedAt, datefnsTableDateFormat)}
                 </SearchGridItem>
                 <SearchGridItem maxW="230px">
                   <HStack flexWrap={"wrap"} maxW={"full"} alignSelf={"middle"}>

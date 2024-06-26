@@ -6,18 +6,19 @@ class Jurisdiction < ApplicationRecord
   searchkick searchable: %i[name reverse_qualified_name qualified_name],
              word_start: %i[name reverse_qualified_name qualified_name],
              text_start: %i[name reverse_qualified_name qualified_name]
-  #  word_middle: %i[reverse_qualified_name qualified_name],
-  #  word_end: %i[reverse_qualified_name qualified_name]
 
   # Associations
   has_many :permit_applications
   has_many :contacts, as: :contactable, dependent: :destroy
-  has_many :users, dependent: :destroy
+  has_many :jurisdiction_memberships, dependent: :destroy
+  has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_template_version_customizations
   has_many :template_versions, through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
   has_many :permit_type_submission_contacts
+  has_many :external_api_keys, dependent: :destroy
+  has_many :integration_mappings
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -27,6 +28,8 @@ class Jurisdiction < ApplicationRecord
   before_validation :set_type_based_on_locality
   before_save :sanitize_html_fields
 
+  after_save :create_integration_mappings_async, if: :saved_change_to_external_api_enabled?
+
   accepts_nested_attributes_for :contacts
   accepts_nested_attributes_for :permit_type_submission_contacts,
                                 allow_destroy: true,
@@ -34,12 +37,16 @@ class Jurisdiction < ApplicationRecord
 
   before_create :assign_unique_prefix
 
+  def regional_review_managers
+    users&.kept&.regional_review_manager
+  end
+
   def review_managers
-    users&.kept&.review_managers
+    users&.kept&.review_manager
   end
 
   def reviewers
-    users&.kept&.reviewers
+    users&.kept&.reviewer
   end
 
   def assign_unique_prefix
@@ -85,6 +92,8 @@ class Jurisdiction < ApplicationRecord
       review_managers_size: review_managers_size,
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
+      user_ids: users.pluck(:id),
+      submission_inbox_set_up: submission_inbox_set_up,
     }
   end
 
@@ -105,7 +114,7 @@ class Jurisdiction < ApplicationRecord
   end
 
   def review_managers_size
-    review_managers&.size || 0
+    (review_managers&.size || 0) + (regional_review_managers&.size || 0)
   end
 
   def reviewers_size
@@ -120,6 +129,14 @@ class Jurisdiction < ApplicationRecord
     permit_applications.unviewed
   end
 
+  def submission_inbox_set_up
+    # preload all of the permit_types and contacts for efficiency
+    permit_types = PermitType.all.to_a
+    contacts = permit_type_submission_contacts.where.not(email: nil).where.not(confirmed_at: nil).to_a
+
+    permit_types.all? { |permit_type| contacts.any? { |contact| contact.permit_type_id == permit_type.id } }
+  end
+
   def self.class_for_locality_type(locality_type)
     if locality_type == RegionalDistrict.locality_type
       RegionalDistrict
@@ -128,7 +145,48 @@ class Jurisdiction < ApplicationRecord
     end
   end
 
+  def active_external_api_keys
+    external_api_keys.active
+  end
+
+  def energy_step_required(activit = nil, permit_type = nil)
+    # TODO: Revisit this after per-type step code requirements implemented
+    self[:energy_step_required]
+  end
+
+  def zero_carbon_step_required(activity = nil, permit_type = nil)
+    # TODO: Revisit this after per-type step code requirements implemented
+    self[:zero_carbon_step_required]
+  end
+
+  def create_integration_mappings
+    return unless external_api_enabled?
+
+    existing_mapping_template_ids = integration_mappings.pluck(:template_version_id)
+
+    relevant_template_versions =
+      TemplateVersion
+        .published
+        .or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
+        .where.not(id: existing_mapping_template_ids)
+        .order(version_date: :asc)
+
+    relevant_template_versions.each do |template_version|
+      integration_mappings.create(template_version: template_version)
+    end
+  end
+
   private
+
+  def create_integration_mappings_async
+    return unless external_api_enabled?
+
+    if Rails.env.test?
+      ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
+    else
+      ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
+    end
+  end
 
   def sanitize_html_fields
     attributes.each do |name, value|

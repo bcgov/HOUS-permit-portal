@@ -1,10 +1,13 @@
 class RequirementTemplateBlueprint < Blueprinter::Base
   identifier :id
-  fields :description, :discarded_at, :created_at, :updated_at
+  fields :description, :label, :discarded_at, :created_at, :updated_at
 
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
-  association :template_versions, blueprint: TemplateVersionBlueprint
+  association :last_three_deprecated_template_versions,
+              blueprint: TemplateVersionBlueprint,
+              name: :deprecated_template_versions
+  association :scheduled_template_versions, blueprint: TemplateVersionBlueprint
   association :published_template_version, blueprint: TemplateVersionBlueprint
 
   view :extended do

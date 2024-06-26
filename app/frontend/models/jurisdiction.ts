@@ -1,8 +1,12 @@
+import { t } from "i18next"
 import { Instance, applySnapshot, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
+import { IExternalApiKeyParams } from "../types/api-request"
 import { IContact, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 
 export const JurisdictionModel = types
@@ -25,6 +29,7 @@ export const JurisdictionModel = types
     contactSummaryHtml: types.maybeNull(types.string),
     contacts: types.array(types.frozen<IContact>()),
     permitTypeSubmissionContacts: types.array(types.frozen<IPermitTypeSubmissionContact>()),
+    externalApiKeysMap: types.map(ExternalApiKeyModel),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
@@ -33,10 +38,16 @@ export const JurisdictionModel = types
     mapZoom: types.maybeNull(types.number),
     energyStepRequired: types.maybeNull(types.number),
     zeroCarbonStepRequired: types.maybeNull(types.number),
+    externalApiEnabled: types.optional(types.boolean, false),
+    submissionInboxSetUp: types.boolean,
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  .extend(withMerge())
   .views((self) => ({
+    get externalApiKeys() {
+      return Array.from(self.externalApiKeysMap.values()).sort((a, b) => (b.createdAt as any) - (a.createdAt as any))
+    },
     get primaryContact() {
       if (self.contacts.length === 0) return null
       if (self.contacts.length === 1) return self.contacts[0]
@@ -48,17 +59,13 @@ export const JurisdictionModel = types
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
     },
-    get isSubmissionContactSetupComplete() {
-      const permitTypes = self.rootStore.permitClassificationStore.permitTypes
-
-      const hasValidContactForAllPermitTypes = permitTypes.every((permitType) => {
-        //   checks if there is at least one confirmed email for each permit type
-        return self.permitTypeSubmissionContacts.some(
-          (c) => c.permitTypeId == permitType.id && c.email && c.confirmedAt
-        )
-      })
-
-      return hasValidContactForAllPermitTypes
+    getExternalApiKey(externalApiKeyId: string) {
+      return self.externalApiKeysMap.get(externalApiKeyId)
+    },
+    get zeroCarbonLevelTranslation() {
+      const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
+      // @ts-ignore
+      return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${self.zeroCarbonStepRequired}`)
     },
   }))
   .actions((self) => ({
@@ -71,6 +78,79 @@ export const JurisdictionModel = types
         applySnapshot(self, response.data)
       }
       return ok
+    }),
+    fetchExternalApiKeys: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchExternalApiKeys(self.id))
+
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "externalApiKeysMap")
+      }
+
+      return response.ok
+    }),
+    fetchExternalApiKey: flow(function* (externalApiKeyId: string) {
+      const response = yield* toGenerator(self.environment.api.fetchExternalApiKey(externalApiKeyId))
+
+      if (response.ok) {
+        const data = response.data.data
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return data
+      }
+
+      return response.ok
+    }),
+    createExternalApiKey: flow(function* (params: IExternalApiKeyParams) {
+      params.jurisdictionId = self.id
+      const response = yield* toGenerator(self.environment.api.createExternalApiKey(params))
+
+      if (response.ok) {
+        const data = response.data.data
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return self.getExternalApiKey(data.id)
+      }
+
+      return response.ok
+    }),
+    updateExternalApiKey: flow(function* (externalApiKeyId: string, params: IExternalApiKeyParams) {
+      params.jurisdictionId = self.id
+      const response = yield* toGenerator(self.environment.api.updateExternalApiKey(externalApiKeyId, params))
+
+      if (response.ok) {
+        const data = response.data.data
+
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return self.getExternalApiKey(data.id)
+      }
+
+      return response.ok
+    }),
+    revokeExternalApiKey: flow(function* (externalApiKeyId: string) {
+      const response = yield* toGenerator(self.environment.api.revokeExternalApiKey(externalApiKeyId))
+
+      if (response.ok) {
+        const data = response.data.data
+
+        self.mergeUpdate(data, "externalApiKeysMap")
+
+        return self.getExternalApiKey(data.id)
+      }
+
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    toggleExternalApiEnabled: flow(function* () {
+      const response = yield* toGenerator(
+        self.environment.api.updateJurisdictionExternalApiEnabled(self.id, !self.externalApiEnabled)
+      )
+
+      if (response.ok) {
+        self.externalApiEnabled = !!response.data?.data?.externalApiEnabled
+      }
+      return response.ok
     }),
   }))
 

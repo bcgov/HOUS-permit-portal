@@ -1,5 +1,7 @@
+import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
 import { IActivity, IPermitType } from "../models/permit-classification"
+import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
@@ -8,8 +10,11 @@ import {
   EEnergyStep,
   EFossilFuelsPresence,
   EHotWaterPerformanceType,
+  EJurisdictionTypes,
+  ENotificationActionType,
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
+  EPermitApplicationStatus,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -33,6 +38,7 @@ export interface IContact {
   department?: string
   email?: string
   phone?: string
+  extension: string
   cell?: string
   address?: string
   organization?: string
@@ -63,13 +69,13 @@ export interface IOption<TValue = string> {
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
 
-export type TSearchParams<IModelSortFields> = {
+export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   sort?: ISort<IModelSortFields>
   query?: string
   page?: number
   perPage?: number
   showArchived?: boolean
-  statusFilter?: string
+  filters?: IModelFilterFields
 }
 
 export type TComputedCompliance = {
@@ -126,6 +132,7 @@ export interface IFormIORequirement {
   validation: { required: boolean }
   label: string
   widget?: any
+  customClass?: string
 }
 
 export interface ISubmissionData {
@@ -137,14 +144,18 @@ export interface IDenormalizedRequirement {
   label: string
   inputType: ERequirementType
   inputOptions: IRequirementOptions
+  formJson?: IFormIORequirement
   hint?: string | null
   elective?: boolean
   required?: boolean
+  requirementCode: string
 }
 
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  sku: string
+  formJson?: IFormIOBlock
   description?: string
   displayName: string
   displayDescription?: string
@@ -168,6 +179,19 @@ export interface IDenormalizedTemplate {
   permitType: IPermitType
   activity: IActivity
   requirementTemplateSections: IDenormalizedRequirementTemplateSection[]
+}
+
+export interface ICompareRequirementsBoxData {
+  id?: string
+  class?: string
+  label: string
+  diffSectionLabel: string
+}
+
+export interface ICompareRequirementsBoxDiff {
+  added: ICompareRequirementsBoxData[]
+  removed: ICompareRequirementsBoxData[]
+  changed: ICompareRequirementsBoxData[]
 }
 
 export interface IErrorsBoxData {
@@ -229,6 +253,26 @@ export interface IPermitApplicationComplianceUpdate {
   formattedComplianceData: Object
 }
 
+export interface INotificationObjectData {
+  templateVersionId?: string
+  previousTemplateVersionId?: string
+  requirementTemplateId?: string
+  recentPermitApplicationId?: string
+  // Add future notification data here
+}
+
+export interface INotification {
+  id: string
+  actionType: ENotificationActionType
+  actionText: string
+  objectData?: INotificationObjectData
+}
+
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | INotification
+
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
@@ -239,9 +283,14 @@ export interface IPermitApplicationSupportingDocumentsUpdate {
 }
 
 export interface IUserPushPayload {
+  data: TSocketEventData
   domain: ESocketDomainTypes
   eventType: ESocketEventTypes | EPermitApplicationSocketEventTypes
-  data: INotification | IPermitApplicationComplianceUpdate
+  meta: {
+    lastReadAt: number
+    totalPages: number
+    unreadCount: number
+  }
 }
 
 export interface ISiteConfiguration {
@@ -337,3 +386,46 @@ export type TAutoComplianceModuleConfigurations = {
 
 export type TAutoComplianceModuleConfiguration =
   TAutoComplianceModuleConfigurations[keyof TAutoComplianceModuleConfigurations]
+
+export interface IJurisdictionFilters {
+  name?: string
+  type?: EJurisdictionTypes
+  userId?: string
+}
+
+export interface IJurisdictionSearchFilters {
+  submissionInboxSetUp?: boolean
+}
+
+export interface IPermitApplicationSearchFilters {
+  requirementTemplateId?: string
+  templateVersionId?: string
+  status?: EPermitApplicationStatus
+}
+
+export interface ITemplateVersionDiff {
+  added: IRequirement[]
+  removed: IRequirement[]
+  changed: IRequirement[]
+}
+
+export type TLocalSystemMapping = string
+
+export interface ISimplifiedRequirementsMap {
+  [requirementBlockSku: string]: {
+    [requirementCode: string]: TLocalSystemMapping
+  }
+}
+
+export interface IRequirementMap {
+  id: string
+  requirementCode: string
+  local_system_mapping?: TLocalSystemMapping
+}
+
+export type TChakraColor = keyof Theme["colors"]
+
+export interface ILinkData {
+  text: string
+  href: string
+}

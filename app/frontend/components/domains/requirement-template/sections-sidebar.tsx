@@ -90,7 +90,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
                           pr={4}
                           py={2}
                           _hover={{ textDecoration: "underline" }}
-                          onClick={() => onItemClick?.(sectionBlock.id)}
+                          onClick={() => onItemClick?.(sectionBlock.requirementBlock.id)}
                           cursor={"pointer"}
                         >
                           {sectionBlock.requirementBlock?.name}

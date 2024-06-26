@@ -132,7 +132,7 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
                     px={2}
                     mb={1.5}
                   >
-                    <Warning color="var(--chakra-colors-semantic-warning)" />
+                    <Warning color="var(--chakra-colors-semantic-warning)" size={24} />
                     {t(`${i18nPrefix}.confirmationRequired`)}{" "}
                   </Alert>
                 )}
@@ -147,7 +147,6 @@ export const EditableBlock = observer(function SubmissionsInboxSetupEditableBloc
         )}
       </VStack>
       <Box alignSelf="start">
-        <FormLabel visibility="hidden">PLACEHOLDER</FormLabel>
         {isEditing ? (
           <HStack>
             <Button

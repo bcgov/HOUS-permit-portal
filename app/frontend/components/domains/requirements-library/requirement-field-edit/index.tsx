@@ -354,6 +354,7 @@ const requirementsComponentMap = {
   [ERequirementType.generalContact]: function <TFieldValues>({
     editableLabelProps,
     canAddMultipleContactProps,
+    ...rest
   }: TRequirementEditProps<TFieldValues>) {
     const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
       { type: ERequirementContactFieldItemType.firstName },
@@ -385,6 +386,7 @@ const requirementsComponentMap = {
         contactFieldItems={contactFieldItemTypes}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
+        {...rest}
       />
     )
   },
@@ -392,6 +394,7 @@ const requirementsComponentMap = {
   [ERequirementType.professionalContact]: function <TFieldValues>({
     editableLabelProps,
     canAddMultipleContactProps,
+    ...rest
   }: TRequirementEditProps<TFieldValues>) {
     if (!canAddMultipleContactProps) {
       import.meta.env.DEV && console.error("multipleContactProps is required for contact requirement edit")
@@ -418,13 +421,13 @@ const requirementsComponentMap = {
       { type: ERequirementContactFieldItemType.professionalNumber },
       { type: ERequirementContactFieldItemType.organization },
     ]
-
     return (
       <GenericContactEdit<TFieldValues>
         requirementType={ERequirementType.professionalContact}
         contactFieldItems={contactFieldItemTypes}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
+        {...rest}
       />
     )
   },
@@ -458,7 +461,6 @@ export const RequirementFieldEdit = observer(function RequirementFieldEdit<TFiel
     return toRemove
   })()
   const formattedProps = R.omit(propsToRemove, rest)
-
   return requirementsComponentMap[requirementType]?.(formattedProps) ?? null
 })
 

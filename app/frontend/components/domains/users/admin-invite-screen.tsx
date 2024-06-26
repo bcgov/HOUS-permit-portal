@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { useQuery } from "../../../hooks/use-query"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
-import { CustomToast } from "../../shared/base/flash-message"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { UserInput } from "../../shared/base/inputs/user-input"
 
 interface IAdminInviteScreenProps {}
@@ -93,7 +93,7 @@ export const AdminInviteScreen = observer(({}: IAdminInviteScreenProps) => {
                 </Button>
               </Flex>
               {!R.isEmpty(takenEmails) && (
-                <CustomToast
+                <CustomMessageBox
                   status="error"
                   title={t("user.takenErrorTitle")}
                   description={t("user.takenErrorDescription")}

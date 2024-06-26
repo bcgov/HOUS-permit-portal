@@ -7,20 +7,36 @@ export const UIStoreModel = types
   .model("UIStoreModel")
   .props({
     flashMessage: types.optional(FlashMessageModel, {}),
+    currentlySelectedJurisdictionId: types.maybeNull(types.string),
   })
   .extend(withRootStore())
   .views((self) => ({}))
   .actions((self) => ({
-    afterCreate() {
+    showQueryParamFlash() {
       // check if there are any messages to show in the URL params
       const query = queryString.parse(location.search)
 
       if (query.flash) {
         const { type, title, message } = JSON.parse(query.flash as any)
-        self.flashMessage.show(type, title, message, 5000) // show flash messages from the backend for longer
-        // remove the frontend flash message from URL
-        window.history.replaceState({}, "", location.pathname)
+        self.flashMessage.show(type, title, message, 5000) // show flash messages from the query param for longer
+        // Remove the "flash" parameter
+        delete query.flash
+
+        // Reconstruct the query string without the "flash" parameter
+        const newQueryString = queryString.stringify(query)
+
+        // Update the URL
+        const newUrl = `${location.pathname}${newQueryString ? "?" + newQueryString : ""}`
+        window.history.replaceState({}, "", newUrl)
       }
+    },
+  }))
+  .actions((self) => ({
+    setCurrentlySelectedJurisdictionId(id: string) {
+      self.currentlySelectedJurisdictionId = id
+    },
+    afterCreate() {
+      self.showQueryParamFlash()
     },
   }))
 

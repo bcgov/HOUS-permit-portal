@@ -5,6 +5,7 @@ import {
   DrawerCloseButton,
   DrawerContent,
   DrawerOverlay,
+  Tooltip,
   useDisclosure,
 } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
@@ -19,6 +20,7 @@ interface IProps {
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
   onUse?: (requirementBlock: IRequirementBlock, closeDrawer?: () => void) => void
   disabledUseForBlockIds?: Set<string>
+  disabledReason?: string
 }
 
 export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDrawer({
@@ -26,6 +28,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
   renderTriggerButton,
   onUse,
   disabledUseForBlockIds,
+  disabledReason,
 }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -52,16 +55,26 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
             h={"calc(100% - 120px)"}
             flex={1}
             p={8}
-            renderActionButton={({ requirementBlock }) => (
-              <Button
-                size={"sm"}
-                variant={"primary"}
-                onClick={() => onUse(requirementBlock, onClose)}
-                isDisabled={disabledUseForBlockIds.has(requirementBlock.id)}
-              >
-                {t("ui.use")}
-              </Button>
-            )}
+            renderActionButton={({ requirementBlock }) => {
+              const isDisabled = disabledUseForBlockIds.has(requirementBlock.id)
+              const shouldShowDisabledReason = isDisabled && disabledReason
+
+              const buttonProps = {
+                size: "sm",
+                variant: "primary",
+                onClick: () => onUse(requirementBlock, onClose),
+                isDisabled,
+                children: t("ui.use"),
+              }
+
+              return shouldShowDisabledReason ? (
+                <Tooltip label={disabledReason}>
+                  <Button {...buttonProps} />
+                </Tooltip>
+              ) : (
+                <Button {...buttonProps} />
+              )
+            }}
           />
         </DrawerContent>
       </Drawer>

@@ -19,6 +19,7 @@ export const colors = {
     },
   },
   greys: {
+    overlay: "rgba(150, 150, 150, 0.35)",
     white: "#FFFFFF",
     grey01: "#A19F9D",
     grey02: "#E1DFDD",

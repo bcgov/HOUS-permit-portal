@@ -17,8 +17,9 @@ import {
   Show,
   Spacer,
   Text,
+  VStack,
 } from "@chakra-ui/react"
-import { Envelope, Folders, List, MagnifyingGlass } from "@phosphor-icons/react"
+import { Envelope, Folders, List } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -29,6 +30,8 @@ import { EUserRoles } from "../../../types/enums"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { NotificationsPopover } from "../home/notifications/notifications-popover"
+import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -58,6 +61,11 @@ function isPermitApplicationEditPath(path: string): boolean {
   return regex.test(path)
 }
 
+function isApiMappingPath(path: string): boolean {
+  const regex = /^\/api-settings\/api-mappings.*$/
+  return regex.test(path)
+}
+
 function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
@@ -66,6 +74,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
     isPermitApplicationEditPath,
     isPermitApplicationPath,
     isDigitalPermitEditPath,
+    isApiMappingPath,
   ]
 
   return matchers.some((matcher) => matcher(path))
@@ -110,7 +119,7 @@ export const NavBar = observer(() => {
             </RouterLink>
             <Show above="md">
               <Text fontSize="2xl" fontWeight="normal" mb="0">
-                {currentUser?.isAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+                {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Text>
 
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
@@ -127,7 +136,7 @@ export const NavBar = observer(() => {
                   {t("site.myPermits")}
                 </RouterLinkButton>
               )}
-              {currentUser?.jurisdiction && (
+              {currentUser?.isReviewStaff && !currentUser.isRegionalReviewManager && (
                 <Flex direction="column">
                   <Text color="greys.white">{currentUser.jurisdiction.name}</Text>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
@@ -135,17 +144,29 @@ export const NavBar = observer(() => {
                   </Text>
                 </Flex>
               )}
-              {currentUser?.isReviewer ||
-                currentUser?.isReviewManager ||
-                (currentUser?.isSuperAdmin && (
-                  <Text color="greys.white" textTransform="capitalize">
+              {currentUser?.isRegionalReviewManager && (
+                <VStack align="flex-end" gap={1}>
+                  <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
-                ))}
+                  <RegionalRMJurisdictionSelect />
+                </VStack>
+              )}
+              {currentUser?.isSuperAdmin && (
+                <Text color="greys.white" textTransform="capitalize">
+                  {t(`user.roles.${currentUser.role as EUserRoles}`)}
+                </Text>
+              )}
               {(!loggedIn || currentUser?.isSubmitter) && (
                 <RouterLinkButton variant="tertiary" to="/jurisdictions">
                   {t("home.jurisdictionsTitle")}
                 </RouterLinkButton>
+              )}
+              {loggedIn && (
+                <NotificationsPopover
+                  aria-label="notifications popover"
+                  color={currentUser?.isSubmitter || !loggedIn ? "theme.blue" : "greys.white"}
+                />
               )}
               <NavBarMenu />
             </HStack>
@@ -157,16 +178,6 @@ export const NavBar = observer(() => {
     </>
   )
 })
-
-const NavBarSearch = () => {
-  const { t } = useTranslation()
-
-  return (
-    <Button variant="tertiary" leftIcon={<MagnifyingGlass size={16} />}>
-      {t("ui.search")}
-    </Button>
-  )
-}
 
 interface INavBarMenuProps {}
 
@@ -203,6 +214,10 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
         to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/configuration-management`}
       />
       <NavMenuItem label={t("site.breadcrumb.users")} to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/users`} />
+      <NavMenuItem
+        label={t("site.breadcrumb.apiSettings")}
+        to={`/jurisdictions/${currentUser?.jurisdiction?.slug}/api-settings`}
+      />
       <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
@@ -250,8 +265,11 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                   )}
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
-                  {currentUser?.isReviewManager && reviewManagerOnlyItems}
-                  {(currentUser?.isSuperAdmin || currentUser?.isReviewManager) && adminOrManagerItems}
+                  {(currentUser?.isReviewManager || currentUser?.isRegionalReviewManager) && reviewManagerOnlyItems}
+                  {(currentUser?.isSuperAdmin ||
+                    currentUser?.isReviewManager ||
+                    currentUser?.isRegionalReviewManager) &&
+                    adminOrManagerItems}
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
                   {!currentUser?.isSubmitter && (
@@ -312,11 +330,10 @@ const NavBarMenu = observer(({}: INavBarMenuProps) => {
 interface INavMenuItemProps extends MenuItemProps {
   label: string
   to?: string
-  variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps) => {
+const NavMenuItem = ({ label, to, onClick, ...rest }: INavMenuItemProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -325,7 +342,7 @@ const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps
   }
 
   return (
-    <MenuItem as={Button} variant={variant || "tertiary"} onClick={handleClick} {...rest}>
+    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} {...rest}>
       <Text textAlign="left" w="full">
         {label}
       </Text>
@@ -337,11 +354,10 @@ const NavMenuItem = ({ label, to, variant, onClick, ...rest }: INavMenuItemProps
 interface INavMenuItemCTAProps {
   label: string
   to?: string
-  variant?: string
   onClick?: (any) => void
 }
 
-const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) => {
+const NavMenuItemCTA = ({ label, to, onClick }: INavMenuItemCTAProps) => {
   const navigate = useNavigate()
 
   const handleClick = (e) => {
@@ -351,10 +367,8 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
 
   return (
     <MenuItem
-      as={Button}
+      as={"a"}
       flex={1}
-      variant={variant || "primary"}
-      size="sm"
       onClick={handleClick}
       style={{
         color: "var(--chakra-colors-greys-white)",
@@ -362,6 +376,8 @@ const NavMenuItemCTA = ({ label, to, variant, onClick }: INavMenuItemCTAProps) =
         borderRadius: "var(--chakra-radii-sm)",
         width: "auto",
       }}
+      display={"flex"}
+      justifyContent={"center"}
       _hover={{
         bg: "var(--chakra-colors-theme-blueAlt) !important",
         boxShadow: "none",

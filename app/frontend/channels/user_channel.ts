@@ -1,9 +1,10 @@
-import { createConsumer } from "@rails/actioncable"
+import { createConsumer } from "@anycable/web"
 import { IRootStore } from "../stores/root-store"
 import { camelizeResponse } from "../utils"
 import { UserPushProcessor } from "./processors/user_push_processor"
 
 export const createUserSpecificConsumer = (userId) => {
+  // @ts-ignore
   const BASE_WEBSOCKET_URL = document.querySelector("meta[name='action-cable-url']").content
   return createConsumer(BASE_WEBSOCKET_URL)
 }

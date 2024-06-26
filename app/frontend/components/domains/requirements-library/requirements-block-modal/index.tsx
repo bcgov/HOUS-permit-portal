@@ -11,8 +11,6 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { resetForm } from "@formio/react"
-import { autorun } from "mobx"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -146,14 +144,11 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     onClose()
   }
 
-  useEffect(
-    autorun(() => {
-      if (isOpen) {
-        resetForm(getDefaultValues())
-      }
-    }),
-    [isOpen]
-  )
+  useEffect(() => {
+    if (isOpen) {
+      reset(getDefaultValues())
+    }
+  }, [isOpen, requirementBlock])
 
   return (
     <>

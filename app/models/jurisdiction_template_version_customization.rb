@@ -15,10 +15,61 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   before_save :sanitize_tip
   validates_uniqueness_of :template_version_id, scope: :jurisdiction_id
   after_commit :reindex_jurisdiction_templates_used_size
+  after_commit :publish_customization_event, on: %i[update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
+
+  def update_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::CUSTOMIZATION_UPDATE,
+      "action_text" =>
+        "#{I18n.t("notification.template_version.new_customization_notification", jurisdiction_name: jurisdiction.qualified_name, template_label: template_version.label)}",
+      "object_data" => {
+        "template_version_id" => template_version.id,
+        "customizations" => customizations,
+      },
+    }
+  end
+
+  def label
+    "#{jurisdiction.name} #{template_version.label}"
+  end
+
+  def self.requirement_count_by_reason(requirement_block_id, requirement_id, reason)
+    return 0 unless ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.include?(reason)
+
+    JurisdictionTemplateVersionCustomization
+      .joins(:template_version)
+      .where(template_versions: { status: "published" })
+      .where(
+        "customizations -> 'requirement_block_changes' -> :requirement_block_id -> 'enabled_elective_field_ids' @> :id",
+        requirement_block_id: requirement_block_id,
+        id: "[\"#{requirement_id}\"]",
+      )
+      .select do |jtvc|
+        jtvc
+          .customizations
+          .dig("requirement_block_changes", requirement_block_id, "enabled_elective_field_reasons")
+          &.values
+          &.include?(reason)
+      end
+      .count
+  end
+
+  def self.count_of_jurisdictions_using_requirement(requirement_block_id, requirement_id)
+    JurisdictionTemplateVersionCustomization
+      .joins(:template_version)
+      .where(template_versions: { status: "published" })
+      .where(
+        "customizations -> 'requirement_block_changes' -> :requirement_block_id -> 'enabled_elective_field_ids' @> :id",
+        requirement_block_id: requirement_block_id,
+        id: "[\"#{requirement_id}\"]",
+      )
+      .count
+  end
 
   private
 
@@ -34,7 +85,6 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
     customizations["requirement_block_changes"].each do |key, value|
       next if value["tip"].blank?
-
       customizations["requirement_block_changes"][key]["tip"] = ActionController::Base.helpers.sanitize(value["tip"])
     end
   end
@@ -59,12 +109,15 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         errors.add(
           :customizations,
           I18n.t(
-            "model_validation.jurisdiction_template_version_customization
-.enabled_elective_field_reason_incorrect",
+            "model_validation.jurisdiction_template_version_customization.enabled_elective_field_reason_incorrect",
             accepted_reasons: ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.join(", "),
           ),
         )
       end
     end
+  end
+
+  def publish_customization_event
+    NotificationService.publish_customization_update_event(self)
   end
 end
