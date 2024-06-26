@@ -9,12 +9,23 @@ import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
 import { IUser } from "../models/user"
-import { ECustomEvents, EPermitApplicationSocketEventTypes, EPermitApplicationSortFields } from "../types/enums"
+import {
+  ECustomEvents,
+  EPermitApplicationSocketEventTypes,
+  EPermitApplicationSortFields,
+  EPermitApplicationStatus,
+} from "../types/enums"
 import {
   IPermitApplicationComplianceUpdate,
+  IPermitApplicationSearchFilters,
   IPermitApplicationSupportingDocumentsUpdate,
   IUserPushPayload,
+  TSearchParams,
 } from "../types/types"
+import { setQueryParam } from "../utils/utility-functions"
+
+const filterableStatuses = Object.values(EPermitApplicationStatus)
+export type TFilterableStatus = (typeof filterableStatuses)[number]
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -22,8 +33,11 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
+      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
+      templateVersionIdFilter: types.maybeNull(types.string),
+      requirementTemplateIdFilter: types.maybeNull(types.string),
     }),
-    createSearchModel<EPermitApplicationSortFields>("searchPermitApplications")
+    createSearchModel<EPermitApplicationSortFields>("searchPermitApplications", "setPermitApplicationFilters")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -37,11 +51,13 @@ export const PermitApplicationStoreModel = types
     getPermitApplicationById(id: string) {
       return self.permitApplicationMap.get(id)
     },
-
     // View to get all permitapplications as an array
     get permitApplications() {
       // TODO: UNSTUB APPLICATIONS
       return Array.from(self.permitApplicationMap.values())
+    },
+    get hasResetableFilters() {
+      return !R.isNil(self.templateVersionIdFilter) || !R.isNil(self.requirementTemplateIdFilter)
     },
   }))
   .actions((self) => ({
@@ -52,11 +68,17 @@ export const PermitApplicationStoreModel = types
         pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
         pad.jurisdiction && self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
         pad.submitter && self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
+        pad.templateVersion &&
+          self.rootStore.templateVersionStore.mergeUpdate(pad.templateVersion, "templateVersionMap")
+        pad.publishedTemplateVersion &&
+          self.rootStore.templateVersionStore.mergeUpdate(pad.publishedTemplateVersion, "templateVersionMap")
       }
 
       return R.mergeRight(pad, {
         jurisdiction: pad.jurisdiction?.id,
         submitter: pad.submitter?.id,
+        templateVersion: pad.templateVersion?.id,
+        publishedTemplateVersion: pad.publishedTemplateVersion?.id,
         stepCode: pad.stepCode?.id,
       })
     },
@@ -74,6 +96,22 @@ export const PermitApplicationStoreModel = types
         permitApplicationsData.filter((pa) => pa.submitter).map((pa) => pa.submitter)
       )
       self.rootStore.userStore.mergeUpdateAll(submittersUniq, "usersMap")
+
+      self.rootStore.templateVersionStore.mergeUpdateAll(
+        R.reject(
+          R.isNil,
+          permitApplicationsData.map((pa) => pa.templateVersion)
+        ),
+        "templateVersionMap"
+      )
+
+      self.rootStore.templateVersionStore.mergeUpdateAll(
+        R.reject(
+          R.isNil,
+          permitApplicationsData.map((pa) => pa.publishedTemplateVersion)
+        ),
+        "templateVersionMap"
+      )
 
       self.rootStore.stepCodeStore.mergeUpdateAll(
         R.reject(
@@ -100,6 +138,12 @@ export const PermitApplicationStoreModel = types
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
     },
+    setStatusFilter(status: TFilterableStatus) {
+      if (!status) return
+
+      setQueryParam("status", status)
+      self.statusFilter = status
+    },
   }))
   .actions((self) => ({
     createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
@@ -124,8 +168,13 @@ export const PermitApplicationStoreModel = types
         sort: self.sort,
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
-        statusFilter: self.statusFilter,
-      }
+        filters: {
+          status: self.statusFilter,
+          templateVersionId: self.templateVersionIdFilter,
+          requirementTemplateId: self.requirementTemplateIdFilter,
+        },
+      } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+
       const currentJurisdictionId = self.rootStore?.jurisdictionStore?.currentJurisdiction?.id
 
       const response = currentJurisdictionId
@@ -157,6 +206,17 @@ export const PermitApplicationStoreModel = types
         return permitApplication
       }
     }),
+
+    setPermitApplicationFilters(queryParams: URLSearchParams) {
+      const statusFilter = queryParams.get("status") as TFilterableStatus
+      const templateVersionIdFilter = queryParams.get("templateVersionId")
+      const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
+
+      self.setStatusFilter(statusFilter)
+      self.requirementTemplateIdFilter = requirementTemplateIdFilter
+      self.templateVersionIdFilter = templateVersionIdFilter
+    },
+
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
       self.currentPermitApplication &&

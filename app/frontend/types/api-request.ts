@@ -1,5 +1,5 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
-import { IOption, TComputedCompliance } from "./types"
+import { IOption, ISimplifiedRequirementsMap, TComputedCompliance } from "./types"
 
 export interface IFormConditional {
   when: string
@@ -58,4 +58,16 @@ export interface IRequirementTemplateUpdateParams {
 export interface ITagSearchParams {
   query?: string
   taggableTypes?: Array<ETagType>
+}
+
+export interface IExternalApiKeyParams {
+  name?: string
+  connectingApplication?: string
+  webhookUrl?: string
+  expiredAt?: Date
+  jurisdictionId?: string
+}
+
+export interface IIntegrationMappingUpdateParams {
+  simplifiedMap?: ISimplifiedRequirementsMap
 }

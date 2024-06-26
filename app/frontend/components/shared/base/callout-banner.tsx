@@ -4,14 +4,17 @@ import React from "react"
 
 interface IProps extends Partial<StackProps> {
   type: "warning" | "error" | "success" | "info"
-  title: string
-  body?: string
+  title: string | JSX.Element
+  body?: string | JSX.Element
 }
 
 const iconProps = {
   size: 16,
+  flexShrink: 0,
   style: {
     marginTop: "var(--chakra-space-1)",
+    minWidth: "16px",
+    minH: "16px",
   },
 }
 
@@ -67,7 +70,7 @@ export function CalloutBanner({ type, title, body, ...rest }: IProps) {
           <Text fontSize={"md"} fontWeight={700}>
             {title}
           </Text>
-          <Text>{body}</Text>
+          {typeof body === "string" ? <Text>{body}</Text> : body}
         </Stack>
       ) : (
         <Text>{title}</Text>

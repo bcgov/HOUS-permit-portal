@@ -21,15 +21,35 @@ FactoryBot.define do
       association :jurisdiction, factory: :sub_district
     end
 
+    trait :regional_review_manager do
+      role { :regional_review_manager }
+      association :jurisdiction, factory: :sub_district
+    end
+
     trait :super_admin do
       role { :super_admin }
       password { "P@ssword1" }
     end
 
-    after(:build) do |user, evaluator|
-      if evaluator.confirmed
+    transient do
+      jurisdictions_count { 1 }
+      jurisdiction { build(:jurisdiction, factory: :sub_district) }
+    end
+
+    after(:build) do |user, context|
+      if context.confirmed
         user.skip_confirmation_notification!
         user.confirm
+      end
+
+      if user.review_staff?
+        create_list(
+          :jurisdiction_membership,
+          context.jurisdictions_count,
+          user: user,
+          jurisdiction: context.jurisdiction,
+        )
+        user.reload
       end
     end
   end

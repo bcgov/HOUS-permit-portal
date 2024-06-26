@@ -5,9 +5,12 @@ import {
   Center,
   Container,
   Flex,
+  FormControl,
+  FormLabel,
   HStack,
   Heading,
   Image,
+  InputGroup,
   Link,
   ListItem,
   Text,
@@ -20,8 +23,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { ReactNode, useEffect, useRef, useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { enabledJurisdictions } from "../../../constants"
+import { Trans, useTranslation } from "react-i18next"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
@@ -156,6 +158,15 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               {t("landing.whenNotNecessaryQ")}
             </Heading>
             <Text>{t("landing.whenNotNecessaryA")}</Text>
+
+            <Text>
+              <Trans
+                i18nKey="landing.permitConnect"
+                components={{
+                  1: <Link href={"https://permitconnectbc.gov.bc.ca/"}></Link>,
+                }}
+              />
+            </Text>
           </VStack>
         </Container>
       </Box>
@@ -220,7 +231,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   const { fetchGeocodedJurisdiction, fetchingJurisdiction } = geocoderStore
   const { addJurisdiction } = jurisdictionStore
   const formMethods = useForm()
-  const { control, watch } = formMethods
+  const { control, watch, setValue } = formMethods
   const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
   const [manualMode, setManualMode] = useState<boolean>(false)
 
@@ -264,14 +275,20 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
               />
 
               {manualMode && (
-                <JurisdictionSelect
-                  onChange={(value) => {
-                    if (value) addJurisdiction(value)
-                    setJurisdiction(value)
-                  }}
-                  selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
-                  menuPortalTarget={document.body}
-                />
+                <FormControl w="full" zIndex={1}>
+                  <FormLabel>{t("jurisdiction.index.title")}</FormLabel>
+                  <InputGroup w="full">
+                    <JurisdictionSelect
+                      onChange={(value) => {
+                        if (value) addJurisdiction(value)
+                        setJurisdiction(value)
+                      }}
+                      onFetch={() => setValue("jurisdiction", null)}
+                      selectedOption={{ label: jurisdiction?.reverseQualifiedName, value: jurisdiction }}
+                      menuPortalTarget={document.body}
+                    />
+                  </InputGroup>
+                </FormControl>
               )}
             </Flex>
           </form>
@@ -384,8 +401,15 @@ const BareBox: React.FC<IBareBoxProps> = ({ n, children }) => {
   )
 }
 
-const AvailableJurisdictionsMessageBox: React.FC = () => {
+const AvailableJurisdictionsMessageBox: React.FC = observer(() => {
   const { t } = useTranslation()
+  const { jurisdictionStore } = useMst()
+
+  const { tableJurisdictions, searchEnabledJurisdictions, totalPages } = jurisdictionStore
+
+  useEffect(() => {
+    searchEnabledJurisdictions(12)
+  }, [])
 
   return (
     <Flex
@@ -404,21 +428,26 @@ const AvailableJurisdictionsMessageBox: React.FC = () => {
         <Flex direction="column" gap={2}>
           <Text fontWeight="bold">
             {t("landing.enabledCommunitiesDescription")}{" "}
-            {enabledJurisdictions.map((obj) => (
-              <Text as="span" fontWeight="normal">
-                {" "}
-                <RouterLink color="black" to={obj.href}>
-                  {obj.label}
+            {tableJurisdictions.map((jurisdiction) => (
+              <Text as="span" fontWeight="normal" key={jurisdiction.id} mr={2}>
+                <RouterLink color="black" to={`/jurisdictions/${jurisdiction.slug}`}>
+                  {jurisdiction.qualifiedName}
                 </RouterLink>
               </Text>
             ))}
-            <Text as="span" fontWeight="normal">
-              {" "}
-              {t("landing.moreComingSoon")}
-            </Text>
+            <br />
+            {totalPages > 1 ? (
+              <Text as="span" fontWeight="bold">
+                {t("landing.andMore")}
+              </Text>
+            ) : (
+              <Text as="span" fontWeight="normal">
+                {t("landing.moreComingSoon")}
+              </Text>
+            )}
           </Text>
         </Flex>
       </Flex>
     </Flex>
   )
-}
+})

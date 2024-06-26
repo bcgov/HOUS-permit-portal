@@ -14,6 +14,9 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: postgres://user:password@localhost:5432/test_db
       ELASTICSEARCH_URL: http://localhost:9200
+      REDIS_URL: redis://localhost:6379/0
+      RATE_LIMIT_DEV_REDIS_URL: redis://localhost:6379/1
+      SIMPLE_FEED_DEV_REDIS_URL: redis://localhost:6379/2
       CONSIGNO_URL: https://consignostub.dev-hous-permit-portal.com/stub/api/v1
       GEO_ALR_REST_URL: https://alr_rest_url_stub/arcserver/rest/services
       GEO_LTSA_PARCELMAP_REST_URL: https://ltsa_parcel_map_url_stub/arcserver/rest/services
@@ -21,6 +24,10 @@ jobs:
       MAX_ZERO_CARBON_STEP: "5"
       MIN_ENERGY_STEP: "3"
       MAX_ENERGY_STEP: "4"
+      # The following keys are stub keys
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: "ucZeHIu5E5Fd6mTRQjBzfc1qu6qzvA"
     services:
       postgres:
         image: postgres:16
@@ -35,6 +42,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7.2.5
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.16
         ports:
@@ -44,10 +60,10 @@ jobs:
           -e "xpack.security.enabled=false"
 
     steps:
-      - name: Install Git LFS
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install git-lfs
+          sudo apt-get install -y git-lfs libproj-dev libgeos-dev proj-bin
           git lfs install
       - name: Checkout Code
         uses: actions/checkout@v3

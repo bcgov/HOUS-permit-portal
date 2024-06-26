@@ -65,9 +65,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
                           <Flex align="center">
                             <Box w={5} mr={2}>
                               {completedBlocks[block.key] ? (
-                                <CheckCircle color="#2E8540" size={18} />
+                                <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
                               ) : (
-                                <CircleDashed color="#A19F9D" size={18} />
+                                <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />
                               )}{" "}
                             </Box>
                             <Text>{block.title}</Text>

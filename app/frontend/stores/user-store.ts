@@ -48,9 +48,9 @@ export const UserStoreModel = types
   }))
   .actions((self) => ({
     __beforeMergeUpdate(user) {
-      if (user.jurisdiction) {
-        self.rootStore.jurisdictionStore.mergeUpdate(user.jurisdiction, "jurisdictionMap")
-        user.jurisdiction = user.jurisdiction.id
+      if (user.jurisdictions) {
+        self.rootStore.jurisdictionStore.mergeUpdateAll(user.jurisdictions, "jurisdictionMap")
+        user.jurisdictions = R.pluck("id")(user.jurisdictions)
       }
       return user
     },
@@ -77,12 +77,6 @@ export const UserStoreModel = types
       const response = yield self.environment.api.invite(formData)
       self.invitationResponse = response.data
       return response.ok
-    }),
-    acceptInvitation: flow(function* (params) {
-      const { ok, data: response } = yield* toGenerator(self.environment.api.acceptInvitation(params))
-      if (ok) {
-        window.location.replace(response.meta.redirectUrl)
-      }
     }),
     fetchInvitedUser: flow(function* (token: string) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.fetchInvitedUser(token))

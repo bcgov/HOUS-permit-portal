@@ -401,21 +401,20 @@
   .card-body {
     padding: var(--chakra-space-6) !important;
 
+    .col-form-label {
+      font-weight: bold;
+    }
+
     > .form-group:not(:empty) {
       // each form field inside a block
       margin-bottom: var(--chakra-space-6);
-      max-width: var(--chakra-sizes-container-sm);
+      &.formio-component-select .form-group,
+      input {
+        max-width: var(--chakra-sizes-container-sm);
+      }
 
       a {
         text-decoration: underline;
-      }
-
-      &:not(.contact-field-set):focus-within label:not(.form-check-label) {
-        font-weight: bold;
-      }
-
-      &.contact-field-set .form-group:focus-within .col-form-label {
-        font-weight: bold;
       }
     }
   }
@@ -797,21 +796,81 @@
   }
 
   // the floating error alert box's show/hide
-  #floating-error-alert-box {
+  .floating-side-box {
     transition-property: opacity, transform;
     transition-delay: 300ms;
     transition-duration: 200ms;
   }
 
-  &.float-on #floating-error-alert-box {
+  &.float-on .floating-side-box {
     opacity: 1;
     transform: translateX(0);
   }
 
-  &.float-off #floating-error-alert-box {
+  &.float-off .floating-side-box {
     opacity: 0;
     transform: translateX(200px);
   }
+}
+
+@mixin diff-styles {
+  padding: 12px;
+  border: 1px solid var(--chakra-colors-semantic-warning) !important;
+  background-color: var(--chakra-colors-semantic-warningLight);
+  position: relative;
+  overflow: visible;
+}
+
+@mixin diff-tag-styles($content) {
+  content: $content;
+  position: absolute;
+  top: -15px;
+  left: 86%;
+  color: black;
+  font-size: 14px;
+  border: 1px solid var(--chakra-colors-semantic-error);
+  background-color: var(--chakra-colors-semantic-errorLight);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+@mixin hidden-diff-explainer($content) {
+  content: $content;
+  position: absolute;
+  bottom: 2px; // Adjust this value as needed
+  left: 4px;
+  color: black; // Style the text as needed
+  font-size: 12px; // Adjust font size as needed
+}
+
+.added-in-diff,
+.changed-in-diff,
+.removed-in-diff {
+  @include diff-styles;
+}
+
+.removed-in-diff::before {
+  @include diff-tag-styles("Removed");
+}
+
+.changed-in-diff::before {
+  @include diff-tag-styles("Changed");
+}
+
+.added-in-diff::before {
+  @include diff-tag-styles("Added");
+}
+
+.removed-in-diff.formio-hidden::after {
+  @include hidden-diff-explainer("A hidden field has been removed and is no longer required for your application.");
+}
+
+.changed-in-diff.formio-hidden::after {
+  @include hidden-diff-explainer("A hidden field has been changed but is currently not required for your application.");
+}
+
+.added-in-diff.formio-hidden::after {
+  @include hidden-diff-explainer("A hidden field has been added that is currently not required for your application.");
 }
 
 /* ======================================

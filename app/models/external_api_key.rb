@@ -1,0 +1,59 @@
+class ExternalApiKey < ApplicationRecord
+  include ValidateUrlAttributes
+
+  url_validatable :webhook_url
+
+  scope :active,
+        -> do
+          joins(:jurisdiction).where(
+            "jurisdictions.external_api_enabled = TRUE AND (expired_at IS NULL OR expired_at > ?) AND revoked_at IS
+NULL",
+            Time.now,
+          )
+        end
+  # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning
+  # https://docs.github.com/en/code-security/secret-scanning/secret-scanning-partner-program
+  TOKEN_NAMESPACE = "bphh"
+
+  belongs_to :jurisdiction
+
+  validates :token, uniqueness: true
+  validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
+  validates :connecting_application, presence: true
+  validates :expired_at, presence: true
+
+  before_create :generate_token
+
+  encrypts :token, deterministic: true
+
+  def expired?
+    expired_at.present? && expired_at < Time.now
+  end
+
+  def revoked?
+    # any non nil revoked_at value should be considered as immediately revoked
+    # timestamp is just for logging purposes
+    revoked_at.present?
+  end
+
+  def enabled?
+    jurisdiction.external_api_enabled && !expired? && !revoked?
+  end
+
+  def revoke
+    update(revoked_at: Time.now)
+  end
+
+  private
+
+  def valid_url_format
+    return if url.blank? || URI.parse(url).is_a?(URI::HTTP) || URI.parse(url).is_a?(URI::HTTPS)
+    errors.add(:url, "must be a valid URL")
+  rescue URI::InvalidURIError
+    errors.add(:url, "must be a valid URL")
+  end
+
+  def generate_token
+    self.token = "#{TOKEN_NAMESPACE}_#{SecureRandom.urlsafe_base64(64)}"
+  end
+end

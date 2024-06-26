@@ -8,9 +8,22 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
-import { AdminInviteScreen } from "../users/admin-invite-screen"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
+
+const ExternalApiKeysIndexScreen = lazy(() =>
+  import("../external-api-key").then((module) => ({ default: module.ExternalApiKeysIndexScreen }))
+)
+
+const AdminInviteScreen = lazy(() =>
+  import("../users/admin-invite-screen").then((module) => ({ default: module.AdminInviteScreen }))
+)
+
+const ExternalApiKeyModalSubRoute = lazy(() =>
+  import("../external-api-key/external-api-key-modal-sub-route").then((module) => ({
+    default: module.ExternalApiKeyModalSubRoute,
+  }))
+)
 
 const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
@@ -112,6 +125,18 @@ const JurisdictionEditDigitalPermitScreen = lazy(() =>
     default: module.JurisdictionEditDigitalPermitScreen,
   }))
 )
+const JurisdictionApiMappingsSetupIndexScreen = lazy(() =>
+  import("../requirement-template/screens/jurisdiction-api-mappings-setup-index-screen").then((module) => ({
+    default: module.JurisdictionApiMappingsSetupIndexScreen,
+  }))
+)
+
+const EditJurisdictionApiMappingScreen = lazy(() =>
+  import("../requirement-template/screens/edit-jurisdiction-api-mapping-screen").then((module) => ({
+    default: module.EditJurisdictionApiMappingScreen,
+  }))
+)
+
 const RequirementTemplatesScreen = lazy(() =>
   import("../requirement-template/screens/requirement-template-screen").then((module) => ({
     default: module.RequirementTemplatesScreen,
@@ -122,6 +147,13 @@ const TemplateVersionScreen = lazy(() =>
     default: module.TemplateVersionScreen,
   }))
 )
+
+const ExportTemplatesScreen = lazy(() =>
+  import("../jurisdictions/exports/export-templates-screen").then((module) => ({
+    default: module.ExportTemplatesScreen,
+  }))
+)
+
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
@@ -150,6 +182,16 @@ const AdminUserIndexScreen = lazy(() =>
   }))
 )
 
+const ReportingScreen = lazy(() =>
+  import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
+)
+
+const ExportTemplateSummaryScreen = lazy(() =>
+  import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
+    default: module.ExportTemplateSummaryScreen,
+  }))
+)
+
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -163,7 +205,7 @@ const RedirectScreen = lazy(() =>
 const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({ default: module.Footer })))
 
 export const Navigation = observer(() => {
-  const { sessionStore, siteConfigurationStore } = useMst()
+  const { sessionStore, siteConfigurationStore, subscribeToUserChannel } = useMst()
   const { isLoggingOut } = sessionStore
   const { displaySitewideMessage, sitewideMessage } = siteConfigurationStore
   const { validateToken, isValidating } = sessionStore
@@ -244,6 +286,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
+      <Route path="/reporting" element={<ReportingScreen />} />
+      <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
     </>
   )
 
@@ -251,6 +295,16 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
+      <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
+      <Route
+        path="/api-settings/api-mappings/digital-building-permits/:templateVersionId/edit"
+        element={<EditJurisdictionApiMappingScreen />}
+      />
+      <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
+        <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
+        <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
+      </Route>
     </>
   )
 
@@ -335,7 +389,10 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewManager || currentUser.isSuperAdmin)}
+              isAllowed={
+                loggedIn &&
+                (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
+              }
               redirectPath={loggedIn && "/not-found"}
             />
           }
@@ -353,10 +410,7 @@ const AppRoutes = observer(() => {
 
         <Route
           element={
-            <ProtectedRoute
-              isAllowed={loggedIn && (currentUser.isReviewer || currentUser.isReviewManager)}
-              redirectPath={loggedIn && "/not-found"}
-            />
+            <ProtectedRoute isAllowed={loggedIn && currentUser.isReviewStaff} redirectPath={loggedIn && "/not-found"} />
           }
         >
           {managerOrReviewerRoutes}
@@ -365,7 +419,7 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && currentUser.isReviewManager}
+              isAllowed={loggedIn && currentUser.isReviewStaff && !currentUser.isReviewer}
               redirectPath={loggedIn && "/not-found"}
             />
           }
@@ -373,12 +427,12 @@ const AppRoutes = observer(() => {
           {reviewManagerOnlyRoutes}
         </Route>
 
-        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/not-found" />}>
+        <Route element={<ProtectedRoute isAllowed={!loggedIn} redirectPath="/" />}>
           <Route path="/login" element={<LoginScreen />} />
-          <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/admin" element={<LoginScreen isAdmin />} />
         </Route>
         {/* Public Routes */}
+        <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />

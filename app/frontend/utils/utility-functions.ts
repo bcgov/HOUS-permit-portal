@@ -61,7 +61,8 @@ export function setQueryParam(key: string, value: string) {
   } else {
     searchParams.set(key, encodeURIComponent(value))
   }
-  window.history.replaceState({}, "", `${window.location.pathname}?${searchParams.toString()}`)
+  const stringParams = searchParams.toString()
+  window.history.replaceState({}, "", `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`)
 }
 
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {
@@ -128,20 +129,40 @@ export function renameKeys(keysMap, obj) {
   )
 }
 
+export function startBlobDownload(blobData: BlobPart, mimeType: string, fileName: string) {
+  const blob = new Blob([blobData], { type: mimeType })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = fileName
+  a.click()
+  window.URL.revokeObjectURL(url)
+}
+
 export function isStepCodePackageFileRequirementCode(requirementCode: string) {
   return requirementCode === STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
+}
+
+export function convertE164PhoneToInputDefault(e164PhoneNumber: string): string {
+  if (!e164PhoneNumber) return ""
+
+  // Removes the + from a database formatted number to make it fit in our max lengthed inputs
+  return e164PhoneNumber.substring(2)
 }
 
 export function convertPhoneNumberToFormioFormat(phoneNumber: string): string {
   // Remove any non-numeric characters, especially the leading '+'
   if (!phoneNumber) return ""
 
-  const digits = phoneNumber.replace(/\D+/g, "")
+  let digits = phoneNumber.replace(/\D+/g, "")
+
+  // Modified to handle converting both from user input format and database e164 format
+  if (digits.length === 11) digits = digits.substring(1)
 
   // Extract the area code, first three digits, and last four digits
-  const areaCode = digits.substring(1, 4)
-  const firstThree = digits.substring(4, 7)
-  const lastFour = digits.substring(7, 11)
+  const areaCode = digits.substring(0, 3)
+  const firstThree = digits.substring(3, 6)
+  const lastFour = digits.substring(6, 10)
 
   // Return the formatted phone number
   return `(${areaCode}) ${firstThree}-${lastFour}`
@@ -157,4 +178,8 @@ export function isOptionsMapperModuleConfiguration(moduleConfiguration?: TAutoCo
 
 export function removePrefix(str: string, prefix: string) {
   return str.startsWith(prefix) ? str.slice(prefix.length) : str
+}
+
+export async function delay(seconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
 }

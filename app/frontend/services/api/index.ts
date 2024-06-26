@@ -2,7 +2,9 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
-import { TCreateContactFormData } from "../../components/shared/contact/create-contact-modal"
+import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IExternalApiKey } from "../../models/external-api-key"
+import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
@@ -12,12 +14,19 @@ import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
-import { IRequirementBlockParams, IRequirementTemplateUpdateParams, ITagSearchParams } from "../../types/api-request"
+import {
+  IExternalApiKeyParams,
+  IIntegrationMappingUpdateParams,
+  IRequirementBlockParams,
+  IRequirementTemplateUpdateParams,
+  ITagSearchParams,
+} from "../../types/api-request"
 import {
   IAcceptInvitationResponse,
   IApiResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
+  INotificationResponse,
   IOptionResponse,
   IRequirementBlockResponse,
   IRequirementTemplateResponse,
@@ -25,13 +34,21 @@ import {
 } from "../../types/api-responses"
 import {
   EJurisdictionSortFields,
-  EJurisdictionTypes,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   EUserSortFields,
 } from "../../types/enums"
-import { IContact, ISiteConfiguration, TAutoComplianceModuleConfigurations, TSearchParams } from "../../types/types"
+import {
+  IContact,
+  IJurisdictionFilters,
+  IJurisdictionSearchFilters,
+  IPermitApplicationSearchFilters,
+  ISiteConfiguration,
+  ITemplateVersionDiff,
+  TAutoComplianceModuleConfigurations,
+  TSearchParams,
+} from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
 
 export class Api {
@@ -82,15 +99,15 @@ export class Api {
     return this.client.post("/invitation", params)
   }
 
-  async acceptInvitation(params) {
-    return this.client.put<IAcceptInvitationResponse>("/invitation", { user: params })
+  async acceptInvitation(userId: string, params) {
+    return this.client.post<IAcceptInvitationResponse>(`/users/${userId}/accept_invitation`, params)
   }
 
   async fetchInvitedUser(token: string) {
     return this.client.get<ApiResponse<IUser>>(`/invitations/${token}`)
   }
 
-  async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields>) {
+  async searchJurisdictions(params?: TSearchParams<EJurisdictionSortFields, IJurisdictionSearchFilters>) {
     return this.client.post<IJurisdictionResponse>("/jurisdictions/search", params)
   }
 
@@ -114,9 +131,9 @@ export class Api {
     return this.client.get<IOptionResponse<IContact>>(`/contacts/contact_options`, { query })
   }
 
-  async fetchJurisdictionOptions(name: string, type: EJurisdictionTypes) {
+  async fetchJurisdictionOptions(filters: IJurisdictionFilters) {
     return this.client.get<IOptionResponse>(`/jurisdictions/jurisdiction_options`, {
-      jurisdiction: { name, type },
+      jurisdiction: { ...filters },
     })
   }
 
@@ -153,6 +170,12 @@ export class Api {
     return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`, { jurisdiction: params })
   }
 
+  async updateJurisdictionExternalApiEnabled(id: string, externalApiEnabled: boolean) {
+    return this.client.patch<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}/update_external_api_enabled`, {
+      externalApiEnabled: externalApiEnabled,
+    })
+  }
+
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
   }
@@ -165,11 +188,14 @@ export class Api {
     return this.client.post<IUsersResponse>(`/users/search`, params)
   }
 
-  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
-  async fetchJurisdictionPermitApplications(jurisdictionId, params?: TSearchParams<EPermitApplicationSortFields>) {
+  async fetchJurisdictionPermitApplications(
+    jurisdictionId,
+    params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
+  ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
       params
@@ -222,6 +248,10 @@ export class Api {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, {
       permitApplication: params,
     })
+  }
+
+  async updatePermitApplicationVersion(id) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {
@@ -280,8 +310,9 @@ export class Api {
     )
   }
 
-  async fetchSiteOptions(address: string, pid: string = null) {
-    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address, pid })
+  async fetchSiteOptions(address: string) {
+    //fetch list of locations, returns siteIds (in some cases blank)
+    return this.client.get<IOptionResponse>(`/geocoder/site_options`, { address })
   }
 
   async fetchGeocodedJurisdiction(siteId: string, pid: string = null) {
@@ -290,6 +321,14 @@ export class Api {
 
   async fetchPids(siteId: string) {
     return this.client.get<ApiResponse<string>>(`/geocoder/pids`, { siteId })
+  }
+
+  async fetchSiteDetailsFromPid(pid: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pid_details`, { pid })
+  }
+
+  async fetchPin(pin: string) {
+    return this.client.get<ApiResponse<string>>(`/geocoder/pin`, { pin })
   }
 
   async destroyRequirementTemplate(id) {
@@ -304,6 +343,15 @@ export class Api {
     return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId })
   }
 
+  async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
+    const params = previousVersionId ? { previousVersionId } : {}
+
+    return this.client.get<ApiResponse<ITemplateVersionDiff>>(
+      `/template_versions/${templateVersionId}/compare_requirements`,
+      params
+    )
+  }
+
   async fetchTemplateVersion(id: string) {
     return this.client.get<ApiResponse<ITemplateVersion>>(`/template_versions/${id}`)
   }
@@ -314,6 +362,18 @@ export class Api {
     )
   }
 
+  async fetchIntegrationMapping(templateId: string, jurisdictionId: string) {
+    return this.client.get<ApiResponse<IIntegrationMapping>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/integration_mapping`
+    )
+  }
+
+  async updateIntegrationMapping(id: string, params: IIntegrationMappingUpdateParams) {
+    return this.client.patch<ApiResponse<IIntegrationMapping>>(`/integration_mappings/${id}`, {
+      integrationMapping: params,
+    })
+  }
+
   async createOrUpdateJurisdictionTemplateVersionCustomization(
     templateId: string,
     jurisdictionId: string,
@@ -322,6 +382,12 @@ export class Api {
     return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
       `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization`,
       { jurisdictionTemplateVersionCustomization }
+    )
+  }
+
+  async unscheduleTemplateVersion(templateId: string) {
+    return this.client.post<ApiResponse<ITemplateVersion>>(
+      `requirement_templates/template_versions/${templateId}/unschedule`
     )
   }
 
@@ -337,6 +403,10 @@ export class Api {
     return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
   }
 
+  async downloadStepCodeSummaryCsv() {
+    return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
+  }
+
   async fetchStepCodeChecklist(id: string) {
     return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
   }
@@ -349,6 +419,26 @@ export class Api {
     return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
   }
 
+  async fetchExternalApiKeys(jurisdictionId: string) {
+    return this.client.get<ApiResponse<IExternalApiKey[]>>(`/external_api_keys/`, { jurisdictionId })
+  }
+
+  async fetchExternalApiKey(externalApiKeyId: string) {
+    return this.client.get<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`)
+  }
+
+  async createExternalApiKey(externalApiKey: IExternalApiKeyParams) {
+    return this.client.post<ApiResponse<IExternalApiKey>>(`/external_api_keys/`, { externalApiKey })
+  }
+
+  async updateExternalApiKey(externalApiKeyId: string, externalApiKey: IExternalApiKeyParams) {
+    return this.client.patch<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`, { externalApiKey })
+  }
+
+  async revokeExternalApiKey(externalApiKeyId: string) {
+    return this.client.post<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}/revoke`)
+  }
+
   async updateSiteConfiguration(siteConfiguration) {
     return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
   }
@@ -357,7 +447,39 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
   }
 
-  async createContact(params: TCreateContactFormData) {
+  async createContact(params: TContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
+  }
+
+  async updateContact(id: string, params: TContactFormData) {
+    return this.client.put<ApiResponse<IContact>>(`/contacts/${id}`, { contact: params })
+  }
+
+  async destroyContact(id: string) {
+    return this.client.delete<ApiResponse<IContact>>(`/contacts/${id}`)
+  }
+
+  async downloadCustomizationJson(templateVersionId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_json`
+    )
+  }
+
+  async downloadCustomizationCsv(templateVersionId: string, jurisdictionId: string) {
+    return this.client.get<BlobPart>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_csv`
+    )
+  }
+
+  async downloadRequirementSummaryCsv(templateVersionId: string) {
+    return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
+  }
+
+  async fetchNotifications(page: number) {
+    return this.client.get<INotificationResponse>(`/notifications`, { page })
+  }
+
+  async resetLastReadNotifications() {
+    return this.client.post(`/notifications/reset_last_read`)
   }
 }

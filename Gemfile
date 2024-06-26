@@ -43,7 +43,7 @@ gem "omniauth-rails_csrf_protection", "1.0.1"
 gem "blueprinter", "~> 1.0.2"
 
 gem "awesome_print", "~> 1.9"
-gem "sidekiq", "~> 7.2.0"
+gem "sidekiq", "~> 7.2.4"
 gem "shrine", "~> 3.5.0"
 gem "redis", "~> 5.0.8"
 gem "image_processing", "~> 1.12.2"
@@ -69,16 +69,27 @@ gem "anycable-rails", "~> 1.4"
 gem "addressable", "~> 2.8"
 gem "friendly_id", "~> 5.5.1"
 gem "exception_notification", "~> 4.5.0"
-gem "nokogiri", ">= 1.15.6"
+gem "nokogiri", ">= 1.16.5"
 gem "rdoc", ">= 6.6.3.1"
 gem "rack", ">= 3.0.9.1"
 gem "uppy-s3_multipart", "~> 1.2"
+gem "simple-feed", "~> 3.1.2"
+# For external api docs
+gem "rswag-api", "~> 2.13"
+gem "rswag-ui", "~> 2.13"
+
+# brew install geos
+# bundle config build.rgeo --with-geos-dir=/usr/local/opt/geos
+gem "rgeo", "~> 3.0.1"
+# brew install proj
+gem "rgeo-proj4", "~> 4.0.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[mri windows]
   gem "pry-byebug", "~> 3.10.1"
   gem "rspec-rails", "~> 6.1.0"
+  gem "rswag-specs", "~> 2.13"
   gem "factory_bot_rails", "~> 6.4.2"
   gem "faker", "~> 3.2.2"
   gem "shoulda-matchers", "~> 5.3.0"
@@ -108,3 +119,6 @@ group :development do
 end
 
 gem "faraday-multipart", "~> 1.0"
+
+gem "rack-attack", "~> 6.7"
+gem "data_migrate", "~> 9.4"

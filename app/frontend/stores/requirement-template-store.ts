@@ -45,9 +45,21 @@ export const RequirementTemplateStoreModel = types
         })
       }
 
-      if (requirementTemplate.templateVersions?.length > 0) {
-        self.rootStore.templateVersionStore.mergeUpdateAll(requirementTemplate.templateVersions, "templateVersionMap")
+      const templateVersions = []
+
+      if (requirementTemplate.publishedTemplateVersion) {
+        templateVersions.push(requirementTemplate.publishedTemplateVersion)
       }
+
+      if (requirementTemplate.scheduledTemplateVersions?.length > 0) {
+        templateVersions.push(...requirementTemplate.scheduledTemplateVersions)
+      }
+
+      if (requirementTemplate.deprecatedTemplateVersions?.length > 0) {
+        templateVersions.push(...requirementTemplate.deprecatedTemplateVersions)
+      }
+
+      self.rootStore.templateVersionStore.mergeUpdateAll(templateVersions, "templateVersionMap")
 
       return requirementTemplate
     },

@@ -8,13 +8,13 @@ export class UserPushProcessor {
   }
 
   process(payload: IUserPushPayload) {
-    // TODO: This should have some kind of metadata with the unread counts and such
     switch (payload.domain) {
       // domain, eventType, data
       case ESocketDomainTypes.permitApplication:
         this.rootStore.permitApplicationStore.processWebsocketChange(payload)
         break
       case ESocketDomainTypes.notification:
+        this.rootStore.notificationStore.processWebsocketChange(payload)
         break
       default:
         import.meta.env.DEV && console.log(`Unknown domain type ${payload.domain}`)

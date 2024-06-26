@@ -10,6 +10,12 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "onboarding")
   end
 
+  def new_jurisdiction_membership(user, jurisdiction_id)
+    @user = user
+    @jurisdiction = Jurisdiction.find(jurisdiction_id)
+    send_user_mail(email: user.email, template_key: "new_jurisdiction_membership")
+  end
+
   def notify_submitter_application_submitted(user, permit_application)
     @user = user
     @permit_application = permit_application

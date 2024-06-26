@@ -6,9 +6,9 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction, JurisdictionModel } from "../models/jurisdiction"
-import { EJurisdictionSortFields, EJurisdictionTypes } from "../types/enums"
-import { ISort } from "../types/types"
-import { isUUID, toCamelCase } from "../utils/utility-functions"
+import { EJurisdictionSortFields } from "../types/enums"
+import { IJurisdictionFilters } from "../types/types"
+import { isUUID, setQueryParam, toCamelCase } from "../utils/utility-functions"
 
 export const JurisdictionStoreModel = types
   .compose(
@@ -16,9 +16,9 @@ export const JurisdictionStoreModel = types
       jurisdictionMap: types.map(JurisdictionModel),
       tableJurisdictions: types.array(types.safeReference(JurisdictionModel)),
       currentJurisdiction: types.maybeNull(types.maybe(types.reference(JurisdictionModel))),
-      sort: types.maybeNull(types.frozen<ISort<EJurisdictionSortFields>>()),
+      submissionInboxSetUpFilter: types.maybeNull(types.string),
     }),
-    createSearchModel<EJurisdictionSortFields>("searchJurisdictions")
+    createSearchModel<EJurisdictionSortFields>("searchJurisdictions", "setJurisdictionFilters")
   )
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -61,7 +61,10 @@ export const JurisdictionStoreModel = types
         return response.data
       }
     }),
-    searchJurisdictions: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
+    searchJurisdictions: flow(function* (
+      opts?: { reset?: boolean; page?: number; countPerPage?: number },
+      submissionInboxSetUp?: boolean
+    ) {
       if (opts?.reset) {
         self.resetPages()
       }
@@ -72,9 +75,11 @@ export const JurisdictionStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
+          filters: {
+            submissionInboxSetUp,
+          },
         })
       )
-
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "jurisdictionMap")
         self.tableJurisdictions = cast(response.data.data.map((jurisdiction) => jurisdiction.id))
@@ -85,6 +90,13 @@ export const JurisdictionStoreModel = types
       }
       return response.ok
     }),
+    setJurisdictionFilters(queryParams) {
+      const submissionInboxSetUpFilter = queryParams.get("submissionInboxSetUp")
+
+      if (submissionInboxSetUpFilter) {
+        self.submissionInboxSetUpFilter = submissionInboxSetUpFilter
+      }
+    },
     fetchJurisdiction: flow(function* (id: string) {
       let jurisdiction = self.getJurisdictionById(id)
       if (!jurisdiction) {
@@ -102,9 +114,9 @@ export const JurisdictionStoreModel = types
       const { ok, data: response } = yield self.environment.api.fetchLocalityTypeOptions()
       return response.data
     }),
-    fetchJurisdictionOptions: flow(function* (name: string, jurisdictionType: EJurisdictionTypes = null) {
+    fetchJurisdictionOptions: flow(function* (filters: IJurisdictionFilters) {
       // Jurisdiction not found in the map, fetch from API
-      const { ok, data: response } = yield self.environment.api.fetchJurisdictionOptions(name, jurisdictionType)
+      const { ok, data: response } = yield self.environment.api.fetchJurisdictionOptions(filters)
       return response.data
     }),
     setCurrentJurisdiction(jurisdictionId) {
@@ -118,6 +130,13 @@ export const JurisdictionStoreModel = types
       self.currentJurisdiction = j?.id
       return j?.id
     },
+  }))
+  .actions((self) => ({
+    searchEnabledJurisdictions: flow(function* (countPerPage: number = 10) {
+      const result = self.searchJurisdictions({ reset: true, page: 1, countPerPage }, true)
+      setQueryParam("currentPage", null)
+      return result
+    }),
   }))
 
 export interface IJurisdictionStore extends Instance<typeof JurisdictionStoreModel> {}

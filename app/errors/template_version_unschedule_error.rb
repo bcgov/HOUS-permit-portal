@@ -1,0 +1,2 @@
+class TemplateVersionUnscheduleError < StandardError
+end

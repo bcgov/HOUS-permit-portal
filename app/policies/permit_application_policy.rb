@@ -3,8 +3,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   def index?
     if user.super_admin? || record.submitter == user
       true
-    elsif user.review_manager? || user.reviewer?
-      record.jurisdiction.id == user.jurisdiction_id
+    elsif user.review_staff?
+      user.jurisdictions.find(record.jurisdiction.id).present? && record.submitted?
     end
   end
 
@@ -17,11 +17,15 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def mark_as_viewed?
-    user.review_manager? || user.reviewer?
+    user.review_staff?
   end
 
   def update?
-    record.draft? ? record.submitter == user : (user.review_manager? || user.reviewer?)
+    record.draft? ? record.submitter == user : user.review_staff?
+  end
+
+  def update_version?
+    update?
   end
 
   def upload_supporting_document?
@@ -33,9 +37,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def generate_missing_pdfs?
-    # TODO: update this when remerged into develop, as there is a change roles and jurisdiction to support regional managers
     user.super_admin? || (user.submitter? && record.submitter == user) ||
-      ((user.review_manager? || user.reviewer?) && record.jurisdiction == user.jurisdiction)
+      ((user.review_staff?) && user.jurisdictions.find(record.jurisdiction_id))
   end
 
   # we may want to separate an admin update to a secondary policy

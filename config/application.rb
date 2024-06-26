@@ -48,5 +48,18 @@ module HousPermitPortal
     config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
 
     config.hosts.concat(ENV["AUTHORIZED_HOSTS"].split(",")) if ENV["AUTHORIZED_HOSTS"]
+    # This sets up keys needed for active record attribute encryption
+
+    # the minimum lengths for the keys should be 12 bytes for the
+    # primary key (this will be used to derive the AES 32
+    # bytes key) and 20 bytes for the salt.
+
+    # You can auto generate this in the console with: bin/rails db:encryption:init
+
+    config.active_record.encryption.primary_key = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
+    config.active_record.encryption.deterministic_key = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
+    config.active_record.encryption.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
+    # This will enable unique validations on encrypted fields
+    config.active_record.encryption.extend_queries = true
   end
 end

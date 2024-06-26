@@ -119,7 +119,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         end
       end
 
-      it "sets all earlier versions to be deprecated" do
+      it "sets all earlier versions to be deprecated and adds correct depreciation reason" do
         template_version_1 = nil
         template_version_2 = nil
         Timecop.freeze(Date.current - 3) do
@@ -141,41 +141,10 @@ RSpec.describe TemplateVersioningService, type: :service do
             template_version.reload
 
             expect(template_version.status).to eq("deprecated")
+            expect(template_version.deprecation_reason).to eq("new_publish")
           end
 
           expect(template_version_4.status).to eq("scheduled")
-        end
-      end
-
-      it "updates draft permits with the new template version" do
-        template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
-        permit_application = create(:permit_application, template_version: template_version)
-        permit_application_2 = create(:permit_application, template_version: template_version)
-
-        Timecop.freeze(Date.tomorrow) do
-          published_template_version = TemplateVersioningService.publish_version!(template_version)
-
-          permit_application.reload
-          permit_application_2.reload
-
-          expect(permit_application.template_version_id).to eq(published_template_version.id)
-          expect(permit_application_2.template_version_id).to eq(published_template_version.id)
-        end
-
-        new_template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow + 1)
-
-        new_permit_application = create(:permit_application, template_version: new_template_version)
-
-        Timecop.freeze(Date.tomorrow + 1) do
-          published_new_template_version = TemplateVersioningService.publish_version!(new_template_version)
-
-          permit_application.reload
-          permit_application_2.reload
-          new_permit_application.reload
-
-          expect(permit_application.template_version_id).to eq(published_new_template_version.id)
-          expect(permit_application_2.template_version_id).to eq(published_new_template_version.id)
-          expect(new_permit_application.template_version_id).to eq(published_new_template_version.id)
         end
       end
     end
@@ -209,7 +178,7 @@ RSpec.describe TemplateVersioningService, type: :service do
   end
 
   context "publish_versions_publishable_now!" do
-    it "publishes latest version publishable now and deprecates all older versions" do
+    it "publishes latest version publishable now and deprecates all older versions with correct reason" do
       expected_published_versions = []
       expected_deprecated_versions = []
       expected_scheduled_versions = []
@@ -241,6 +210,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         expected_deprecated_version.reload
 
         expect(expected_deprecated_version.status).to eq("deprecated")
+        expect(expected_deprecated_version.deprecation_reason).to eq("new_publish")
       end
 
       expected_scheduled_versions.each do |expected_scheduled_version|

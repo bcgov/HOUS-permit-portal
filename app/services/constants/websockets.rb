@@ -12,6 +12,11 @@ module Constants
           update_supporting_documents: :update_supporting_documents,
         }.freeze
       end
+
+      module Notification
+        DOMAIN = :notification
+        TYPES = { new: :new, update: :update }.freeze
+      end
     end
   end
 end

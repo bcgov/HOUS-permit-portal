@@ -27,8 +27,7 @@ const options = {
             heading: "Which BCeID should I use?",
             basic: {
               title: "Basic BCeID",
-              description:
-                "Use when accessing a service in a personal capacity that requires your identity to be verified.",
+              description: "Use when accessing a service in a personal capacity.",
               homeownerAgent: "homeowner, agent",
               architectContractor: "architect or contractor may use Basic BCeID or Business BCeID",
               register: "Register for Basic BCeID",
@@ -73,7 +72,7 @@ const options = {
           bestPractices: "Standardized requirements across participating jurisdictions",
           easyToFollow: "Easy to follow instructions to help you submit a building permit application",
           accessMyPermits: "Access my building permits",
-          accessExplanation: "Use your BCeID account to log or register for the Building Permit Hub.",
+          accessExplanation: "Use your BCeID account to log in or register for the Building Permit Hub.",
           whoForTitle: "Who is this for?",
           whoFor: [
             "I want to build housing",
@@ -101,6 +100,8 @@ const options = {
           whenNotNecessaryQ: "When is a permit needed?",
           whenNotNecessaryA:
             "Permits help ensure that construction and major renovations follow local bylaws, the building code and health and safety standards. You will need the required permits before any stage of a project can start. Projects for the interior of your home or minor repairs may not require a permit depending on your local jurisdiction and geography.",
+          permitConnect:
+            "The B.C government is making housing development projects easier with a new coordinated approach. Visit <1>Permit Connect BC to learn more</1>.",
           expectQ: "What can I expect?",
           expectA:
             "Once you have provided all the information needed for the permits, your local jurisdiction will be notified and will contact you to discuss if more details are needed. This could be because of how the land is used, the rules for building in that area, how much the area can support, the quality of the soil, and/or any environmental concerns.",
@@ -120,6 +121,7 @@ const options = {
           adminPanel: "admin panel",
           enabledCommunitiesDescription: "Communities you can submit Building Permit applications in:",
           moreComingSoon: "(more coming soon)",
+          andMore: "...and more",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the New construction checklist for 1 - 4 Dwelling Units",
@@ -130,13 +132,22 @@ const options = {
           },
         },
         ui: {
+          delete: "Delete",
+          confirmDelete: "Confirm delete",
+          sureDelete: "Are you sure you want to delete this item?",
+          disable: "Disable",
+          ok: "OK",
+          dismiss: "Dismiss",
+          revoke: "Revoke",
+          create: "Create",
           verified: "Verified",
           unverified: "Unverified",
           tip: "Tip",
           manage: "Manage",
+          export: "Export",
           preview: "Preview",
           back: "Back",
-          backHome: "Back to home",
+          backToInbox: "Back to inbox",
           yes: "Yes",
           no: "No",
           show: "Show",
@@ -173,11 +184,13 @@ const options = {
           submit: "Submit",
           select: "Select",
           notAvailable: "Not available yet",
+          notApplicable: "Not applicable",
           isRequired: "{{field}} is required",
           notSupported: "Not supported",
           use: "Use",
           publish: "Publish",
           neverMind: "Never mind",
+          open: "Open",
           download: "Download",
           expandAll: "Expand all",
           collapseAll: "Collapse all",
@@ -201,6 +214,19 @@ const options = {
           hideAdvanced: "Hide advanced",
           emailPlaceholder: "email@example.com",
           urlPlaceholder: "https://",
+          showOlder: "Show older",
+          seeMore: "See more",
+          go: "Go",
+          all: "All",
+          and: "and",
+          or: "or",
+          actionRequired: "Action required",
+          resetFilters: "Reset filters",
+        },
+        notification: {
+          title: "Notifications",
+          nUnread: "{{ n }} new",
+          noUnread: "No unread notifications",
         },
         eula: {
           title: "End-User License Agreement",
@@ -208,7 +234,11 @@ const options = {
         },
         contact: {
           create: "New contact",
+          edit: "Edit contact",
           createButton: "Save to my contacts",
+          updateButton: "Update contact",
+          confirmDeleteTitle: "Are you sure you want to delete this contact?",
+          confirmDeleteBody: "This will not remove information from the form.",
           fields: {
             firstName: "First name",
             lastName: "Last name",
@@ -252,6 +282,14 @@ const options = {
             ],
             editMapEnd:
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
+            stepCode: {
+              title: "Step code requirements",
+              description: "Below are the step code requirements for each permit template",
+              permitTemplate: "Permit template",
+              energyStepRequired: "Energy step code required",
+              zeroCarbonStepRequired: "Zero carbon step required",
+              helpLinkText: "What does each step code level mean?",
+            },
           },
           new: {
             title: "Create new jurisdiction",
@@ -267,6 +305,8 @@ const options = {
             createButton: "Create new jurisdiction",
             tableHeading: "Local governments",
             users: "Users",
+            externalApiKeys: "API settings",
+            exportTemplates: "Export templates",
             about: "About",
           },
           fields: {
@@ -278,6 +318,7 @@ const options = {
             templatesUsed: "Templates used",
             mapPosition: "Map position",
             regionalDistrictName: "Regional district",
+            submissionInboxSetUp: "Accepting submissions",
           },
           submissionEmailConfirmed: {
             heading: "Email confirmed!",
@@ -286,6 +327,7 @@ const options = {
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
+          notEnabled: "Permit application submissions are temporarily unavailable for this jurisdiction.",
           checklist: "Checklist",
           lookOut: "Things to look out for",
           startApplication: "Start a permit application",
@@ -298,8 +340,18 @@ const options = {
           applicationsReceived: "Applications received",
           templatesUsed: "Templates used",
           search: "Search jurisdictions",
+          view: "View Jurisdiction",
         },
         permitApplication: {
+          updateToNewVersion: "Update my application",
+          reviewOutdatedSubmissionLink: "View draft applications",
+          reviewOutdatedEditLink: "View template",
+          reviewOutdatedTitle: "Filters applied to show applications that are outdated",
+          reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
+          reviewCustomizedSubmissionLink: "View draft applications",
+          reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
+          reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
+          newVersionPublished: "New version of template has been published - please review changes",
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
@@ -401,6 +453,8 @@ const options = {
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
             pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
+            pinVerified: "PIN is verified.",
+            pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -426,6 +480,7 @@ const options = {
             downloadZip: "Download attached files",
             downloadForm: "Download application form",
             downloadStepCode: "Download step code checklist",
+            backToInbox: "Back to inbox",
           },
         },
         requirementsLibrary: {
@@ -943,6 +998,9 @@ const options = {
           jurisdictionsDescription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
+          reportingTitle: "Reporting",
+          reportingDescription:
+            "Explore reports and analytics to gain insights and make informed decisions about your permit applications",
           permitTemplateCatalogueDescription:
             "Develop and publish a collection of permit templates that provide a standardized foundation for building permits across local jurisdictions. These templates include requirement blocks to establish a structured flow for the building permit template.",
           requirementsLibraryTitle: "Requirements library",
@@ -967,9 +1025,9 @@ const options = {
               description: "Specify email addresses that should receive applications.",
               permitTypes: {
                 label: "Send permit applications for",
-                low_residential: "Low density - Residential",
-                medium_residential: "Medium density - Residential",
-                high_residential: "High density - Residential",
+                low_residential: "1-4 Unit detached housing",
+                medium_residential: "4+ Unit housing",
+                high_residential: "High density appartment buildings",
                 new_construction: "New construction",
                 addition_alteration_renovation: "Addition, alteration, or renovation",
                 site_alteration: "Site alteration",
@@ -1003,6 +1061,10 @@ const options = {
                 },
               },
             },
+            externalApiKeys: {
+              title: "API settings",
+              description: "Manage API keys for the Building Permit Hub.",
+            },
           },
           superAdminTitle: "Admin home",
           submissionsInboxTitle: "Submissions inbox",
@@ -1033,6 +1095,7 @@ const options = {
           fetchOptions: "Something went wrong fetching options",
           fetchJurisdictionTemplateVersionCustomization:
             "Something went wrong fetching jurisdiction template version customization",
+          fetchIntegrationMapping: "Something went wrong fetching jurisdiction integration requirements mapping",
         },
         user: {
           fields: {
@@ -1094,10 +1157,19 @@ const options = {
           rolesAndPermissions: "User roles & permissions",
           inviteInstructions:
             "Enter the email addresses of whom you wish to invite below.  For details about permissions for each role, please see",
+          notifications: {
+            essential: "Essential communications (cannot disable)",
+            event: "Event",
+            enableNotification: "Enable notification",
+            templateChanged: "Changes to permit requirements",
+            templateCustomized: "Jurisdiction customizations to permit requirements",
+          },
+          inApp: "In-App",
+          email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
-
           roles: {
             submitter: "submitter",
+            regional_review_manager: "regional review manager",
             review_manager: "review manager",
             reviewer: "reviewer",
             super_admin: "super admin",
@@ -1115,6 +1187,10 @@ const options = {
           },
         },
         requirementTemplate: {
+          compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
+          changed: "changed",
+          added: "added",
+          removed: "removed",
           edit: {
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
@@ -1155,10 +1231,21 @@ const options = {
             scheduleModalHelperText: "Schedule to <1>publish</1> (at midnight 00:01 PST)",
             scheduleModalCancelMessage: "Changes were not scheduled.",
             forcePublishNow: "Force publish!",
+            pleaseReview: "Please review the following:",
             errorsBox: {
               title: "There are {{count}} fields with errors on the page",
               instructions: "Please fix the following before submitting:",
             },
+            diffBox: {
+              title: "Template changes",
+              instructions: "Please review the following:",
+              added: "Added",
+              changed: "Changed",
+              removed: "Removed",
+              updateToNewVersion: "See new",
+            },
+            duplicateRequirementBlockDisabledReason: "This requirement block is already in the template",
+            goToLatest: "Go to latest",
           },
           fields: {
             status: "Status",
@@ -1174,6 +1261,7 @@ const options = {
             draft: "Draft",
             deprecated: "Deprecated",
           },
+
           index: {
             tableHeading: "Templates",
             title: "Permit templates catalogue",
@@ -1200,9 +1288,53 @@ const options = {
               published: "Published",
               draft: "Drafts",
               scheduled: "Scheduled",
-              deprecated: "Deprecated",
+              deprecated: "Deprecated (last 3)",
+            },
+            unscheduleWarning: {
+              title: "Are you sure you want to unschedule this template?",
+              body: "This action cannot be undone.",
+            },
+            deprecationReasonLabels: {
+              unscheduled: "reason: unscheduled",
+              new_publish: "reason: new publish",
             },
             lastUpdated: "Last updated",
+          },
+          export: {
+            title: "Export Templates",
+            downloadSummaryCsv: "Download Summary CSV",
+            templateSummaryFilename: "Template Summary",
+            downloadCustomizationCsv: "Download Customizations CSV",
+            downloadCustomizationJson: "Download Customizations JSON",
+          },
+        },
+        apiMappingsSetup: {
+          title: "API mappings setup",
+          index: {
+            helperSubtitle: "See details of how fields are mapped to the API.",
+          },
+          edit: {
+            permitTemplate: "Permit template",
+            seeApiDoc: "See API documentation",
+            heading: "<1>Manage mapping for</1> <2>{{permitClassification}}</2>",
+            table: {
+              blockAccordionButton: "{{blockName}} <1>requirement block code: {{blockCode}}</1>",
+              filter: {
+                showAll: "Show all",
+                showOnlyUnmapped: "Show only unmapped",
+              },
+              title: "API mappings",
+              headers: {
+                localField: "Your local field name",
+                localFieldInfo: "Local field mapping info",
+                templateField: "Map to <1>requirement code</1> in template",
+                requirementDetail: "Field in template",
+              },
+              localFieldEdit: {
+                addMapping: "Add local mapping",
+                addMappingLabel: "Local mapping",
+              },
+            },
           },
         },
         digitalBuildingPermits: {
@@ -1277,6 +1409,74 @@ const options = {
             },
           },
         },
+        reporting: {
+          title: "Reporting",
+          tableHeading: "Available reports",
+          filterPlaceholder: "Filter reports by name",
+          stepCodeSummaryName: "Energy step code configuration by jurisdiction",
+          stepCodeSummaryDescription: "Energy step code configuration by jurisdiction",
+          templateSummary: {
+            name: "Template summary",
+            description: "A summary of template usage by jurisdictions",
+            title: "Export Template Summary",
+          },
+          stepCodeSummary: {
+            name: "Energy step code configuration by jurisdiction",
+            description: "A summary of step code requirements by jurisdictions",
+            title: "Export energy step code configuration by jurisdiction",
+            filename: "Energy step code configuration by jurisdiction",
+          },
+          columnHeaders: {
+            name: "Name",
+            description: "Description",
+          },
+        },
+        externalApiKey: {
+          index: {
+            createExternalApiKey: "Create new API key",
+            enabled: "Enabled",
+            disabled: "Disabled",
+            table: {
+              heading: "API keys",
+            },
+            apiKeyInfo: {
+              title: "Generate API Keys for Third-Party Integrators",
+              body: "Use this screen to generate API keys for third-party integrations. For technical details on using the API, refer to our documentation site.<1>Access the API Documentation</1> Share the above link with developers or technical team members needing detailed integration information.",
+            },
+            disabledWarningTitle:
+              "API keys for this jurisdiction have not been enabled. To enable them, please contact" + " us at",
+            disabledTooltipLabel: "User is not authorized to make this change",
+            disableConfirmationModal: {
+              title: "Are you sure you want to disable API keys for this jurisdiction?",
+              body: "All active API keys will be disabled",
+            },
+          },
+          modal: {
+            createTitle: "Create API key",
+            manageTitle: "Manage API key",
+            removeConfirmationModal: {
+              title: "Are you sure you want to revoke this API key?",
+              body: "Any applications using this token will be unable to access the API.",
+            },
+          },
+          fieldLabels: {
+            name: "Name",
+            connectingApplication: "Application connecting to",
+            revokedAt: "Revoked at",
+            webhookUrl: "Webhook URL",
+            expiredAt: "Expires on",
+            createdAt: "Created at",
+            token: "Token",
+            status: "Status",
+          },
+          fieldPlaceholders: {
+            webhookUrl: "https://example.com/webhook",
+          },
+          status: {
+            active: "Active",
+            notActive: "Not-Active",
+          },
+        },
         site: {
           title: "Building Permit Hub",
           titleLong: "Building Permit Hub",
@@ -1342,6 +1542,7 @@ const options = {
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
           breadcrumb: {
+            latest: "Latest",
             profile: "Profile",
             jurisdictions: "Jurisdictions",
             new: "Create new",
@@ -1366,7 +1567,14 @@ const options = {
             confirmed: "E-mail confirmed",
             welcome: "Welcome",
             sitewideMessage: "Site-Wide Message",
+            apiSettings: "API settings",
+            create: "Create",
+            exportTemplates: "Export templates",
+            reporting: "Reporting",
+            exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
+            apiMappings: "API mappings",
+            manageMapping: "Manage mapping",
           },
         },
         automatedCompliance: {

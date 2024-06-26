@@ -18,6 +18,7 @@ JurisdictionSeeder.seed
 jurisdictions = Jurisdiction.all
 
 north_van = Jurisdiction.find_by(name: "North Vancouver")
+van = Jurisdiction.find_by(name: "Vancouver")
 
 puts "Seeding users..."
 User.find_or_create_by(omniauth_username: "super_admin") do |user|
@@ -39,11 +40,25 @@ User.find_or_create_by(omniauth_username: "review_manager") do |user|
   user.last_name = "McUser"
   user.email = "review_manager@example.com"
   user.password = "P@ssword1"
-  user.jurisdiction = north_van
+  user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
   user.omniauth_uid = "85EEC5B6F05A4DB7BB5BB97FBC6985B1"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "review_manager@example.com"
+end
+
+User.find_or_create_by(omniauth_username: "regional_review_manager") do |user|
+  user.role = :regional_review_manager
+  user.first_name = "RegionalReviewManager"
+  user.last_name = "McUser"
+  user.email = "regional_review_manager@example.com"
+  user.password = "P@ssword1"
+  user.jurisdictions = [north_van, van]
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "08B5EED1DB3E42909CB050FFAA600145"
+  user.omniauth_provider = "bceidbasic"
+  user.omniauth_email = "regional_review_manager@example.com"
+  user.omniauth_username = "regional_rm"
 end
 
 User.find_or_create_by(omniauth_username: "reviewer") do |user|
@@ -52,7 +67,7 @@ User.find_or_create_by(omniauth_username: "reviewer") do |user|
   user.last_name = "McUser"
   user.email = "reviewer@example.com"
   user.password = "P@ssword1"
-  user.jurisdiction = north_van
+  user.jurisdictions = [north_van]
   user.confirmed_at = Time.now
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"
@@ -84,12 +99,12 @@ puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
   j
     .permit_type_submission_contacts
-    .where(email: "north-van@laterolabs.com", permit_type: permit_type1)
-    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
+    .where(email: "#{j.name.parameterize}@laterolabs.com", permit_type: permit_type1)
+    .first_or_create!(email: "#{j.name.parameterize}@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
   j
     .permit_type_submission_contacts
-    .where(email: "north-van@laterolabs.com", permit_type: permit_type2)
-    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
+    .where(email: "#{j.name.parameterize}@laterolabs.com", permit_type: permit_type2)
+    .first_or_create!(email: "#{j.name.parameterize}@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
 end
 if PermitApplication.first.blank?
   jurisdictions
@@ -196,8 +211,8 @@ if PermitApplication.first.blank?
     PermitApplication.create!(
       submitter: submitters.sample,
       jurisdiction: north_van,
-      activity: activity1,
-      permit_type: permit_type1,
+      activity_id: template_version.activity.id,
+      permit_type_id: template_version.permit_type.id,
       full_address: full_address,
       template_version: template_version,
       pid: pid,

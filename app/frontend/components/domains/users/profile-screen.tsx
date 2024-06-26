@@ -12,14 +12,21 @@ import {
   InputRightElement,
   Link,
   Select,
+  Switch,
+  Table,
   Tag,
   TagLabel,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react"
 import { Info, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
-import { Controller, FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../setup/root"
@@ -40,12 +47,13 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
 
   const getDefaults = () => {
-    const { firstName, lastName, certified, organization } = currentUser
+    const { firstName, lastName, nickname, certified, organization, preference } = currentUser
     return {
       firstName,
       lastName,
       certified,
       organization,
+      preferenceAttributes: preference,
     }
   }
   const formMethods = useForm({
@@ -67,8 +75,27 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     await currentUser.resendConfirmation()
   }
 
+  const events = [
+    {
+      event: t("user.notifications.essential"),
+      inAppChecked: false,
+      emailChecked: true,
+      emailDisabled: true,
+    },
+    {
+      event: t("user.notifications.templateChanged"),
+      inAppControl: "preferenceAttributes.enableInAppNewTemplateVersionPublishNotification",
+      emailChecked: false,
+    },
+    {
+      event: t("user.notifications.templateCustomized"),
+      inAppControl: "preferenceAttributes.enableInAppCustomizationUpdateNotification",
+      emailChecked: false,
+    },
+  ]
+
   return (
-    <Container maxW="500px" p={8} as="main">
+    <Container maxW="container.sm" p={8} as="main">
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex as="section" direction="column" w="full" gap={6}>
@@ -267,6 +294,20 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   )}
                 </>
               )}
+
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>{t("user.notifications.event")}</Th>
+                    <Th>{t("user.notifications.enableNotification")}</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {events.map((event, index) => (
+                    <EventRow key={index} {...event} />
+                  ))}
+                </Tbody>
+              </Table>
             </Section>
 
             <Flex as="section" gap={4} mt={4}>
@@ -299,5 +340,44 @@ function Section({ children }) {
     <Flex as="section" direction="column" gap={4} w="full" p={6} borderWidth={1} borderColor="border.light">
       {children}
     </Flex>
+  )
+}
+
+interface IEventRowProps {
+  event: string
+  inAppControl?: string
+  inAppChecked?: boolean
+  emailChecked: boolean
+  emailDisabled?: boolean
+}
+
+const EventRow: React.FC<IEventRowProps> = ({ event, inAppControl, inAppChecked, emailChecked, emailDisabled }) => {
+  const { control } = useFormContext()
+  const { t } = useTranslation()
+
+  return (
+    <Tr>
+      <Td w="45%">{event}</Td>
+      <Td w="55%">
+        <Flex gap={6} alignItems="center">
+          {inAppControl ? (
+            <Controller
+              name={inAppControl}
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <Switch isChecked={value} onChange={onChange}>
+                  {t("user.inApp")}
+                </Switch>
+              )}
+            />
+          ) : (
+            <Switch isChecked={inAppChecked}>{t("user.inApp")}</Switch>
+          )}
+          <Switch isChecked={emailChecked} disabled={emailDisabled}>
+            {t("user.email")}
+          </Switch>
+        </Flex>
+      </Td>
+    </Tr>
   )
 }

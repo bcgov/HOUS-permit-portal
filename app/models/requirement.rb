@@ -2,6 +2,8 @@ class Requirement < ApplicationRecord
   include HtmlSanitizeAttributes
   sanitizable :hint
 
+  scope :electives, -> { where(elective: true) }
+
   belongs_to :requirement_block, touch: true
 
   acts_as_list scope: :requirement_block, top_of_list: 0
@@ -155,6 +157,10 @@ class Requirement < ApplicationRecord
     false
   end
 
+  def self.extract_requirement_id_from_submission_key(key)
+    key.split("|").second
+  end
+
   def step_code_package_file?
     requirement_code == STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
   end
@@ -192,9 +198,9 @@ class Requirement < ApplicationRecord
     self.input_options["computed_compliance"] = required_computed_compliance
   end
 
-  def using_dummied_requirement_code
+  def using_dummied_requirement_code(code = self.requirement_code)
     uuid_regex = /^dummy-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    uuid_regex.match?(self.requirement_code)
+    uuid_regex.match?(code)
   end
 
   # requirement codes should not be auto generated during seeding.  Use uuid if not provided

@@ -32,8 +32,14 @@ export enum ETemplateVersionStatus {
   draft = "draft",
 }
 
+export enum ExternalApiKeyStatus {
+  active = "active",
+  notActive = "notActive",
+}
+
 export enum EUserRoles {
   submitter = "submitter",
+  regionalReviewManager = "regional_review_manager",
   reviewManager = "review_manager",
   reviewer = "reviewer",
   superAdmin = "super_admin",
@@ -58,6 +64,7 @@ export enum EJurisdictionSortFields {
   reviewersSize = "reviewers_size",
   permitApplicationsSize = "permit_applications_size",
   regionalDistrict = "regional_district_name",
+  submissionInboxSetUp = "submission_inbox_set_up",
 }
 
 export enum EUserSortFields {
@@ -277,6 +284,12 @@ export enum ESocketDomainTypes {
 
 export enum ESocketEventTypes {
   update = "update",
+  new = "new",
+}
+
+export enum EPermitApplicationSocketEventTypes {
+  updateCompliance = "update_compliance",
+  updateSupportingDocuments = "update_supporting_documents",
 }
 
 export enum EPermitApplicationSocketEventTypes {
@@ -292,6 +305,17 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+}
+
+export enum EExportFormat {
+  csv = "csv",
+  json = "json",
+}
+
+export enum EReportingColumns {
+  name = "name",
+  description = "description",
+  href = "href",
 }
 
 export enum EEnergyStepCodeDependencyRequirementCode {
@@ -319,4 +343,24 @@ export enum EAutoComplianceType {
   externalValueExtractor = "external_value_extractor",
   internalValueExtractor = "internal_value_extractor",
   externalOptionsMapper = "external_options_mapper",
+}
+
+export enum EDeprecationReason {
+  newPublish = "new_publish",
+  unscheduled = "unscheduled",
+}
+
+export enum EFollowableTypes {
+  permitTemplate = "PermitTemplate",
+}
+
+export enum ERequirementChangeAction {
+  added = "added",
+  changed = "changed",
+  removed = "removed",
+}
+
+export enum ENotificationActionType {
+  newTemplateVersionPublish = "new_template_version_publish",
+  customizationUpdate = "customization_update",
 }

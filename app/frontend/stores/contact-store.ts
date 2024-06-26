@@ -1,5 +1,5 @@
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
-import { TCreateContactFormData } from "../components/shared/contact/create-contact-modal.js"
+import { TContactFormData } from "../components/shared/contact/create-edit-contact-modal.js"
 import { withEnvironment } from "../lib/with-environment.js"
 import { withRootStore } from "../lib/with-root-store.js"
 import { IContact, IOption } from "../types/types.js"
@@ -19,8 +19,22 @@ export const ContactStoreModel = types
       self.isContactsLoading = false
       return (response?.data?.data ?? []) as IOption<IContact>[]
     }),
-    createContact: flow(function* (formData: TCreateContactFormData) {
+    createContact: flow(function* (formData: TContactFormData) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.createContact(formData))
+
+      if (ok) {
+        return response.data
+      }
+    }),
+    updateContact: flow(function* (contactId: string, formData: TContactFormData) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.updateContact(contactId, formData))
+
+      if (ok) {
+        return response.data
+      }
+    }),
+    destroyContact: flow(function* (contactId: string) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.destroyContact(contactId))
 
       if (ok) {
         return response.data

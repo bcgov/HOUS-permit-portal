@@ -1,10 +1,12 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { t } from "i18next"
+import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IStepCode, StepCodeModel } from "../models/step-code"
 import { IStepCodeSelectOptions } from "../types/types"
+import { startBlobDownload } from "../utils/utility-functions"
 
 export const StepCodeStoreModel = types
   .model("StepCodeStore", {
@@ -58,6 +60,26 @@ export const StepCodeStoreModel = types
       if (response.ok) {
         self.stepCodesMap.delete(self.currentStepCode.id)
         self.currentStepCode = null
+      }
+    }),
+    downloadStepCodeSummary: flow(function* () {
+      try {
+        const response = yield* toGenerator(self.environment.api.downloadStepCodeSummaryCsv())
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = response.data
+        const fileName = `${t("reporting.stepCodeSummary.filename")}.csv`
+        const mimeType = "text/csv"
+        startBlobDownload(blobData, mimeType, fileName)
+
+        return response
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download energy step code configuration by jurisdiction:`, error)
+        }
+        throw error
       }
     }),
   }))

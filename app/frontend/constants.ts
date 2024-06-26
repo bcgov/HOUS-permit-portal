@@ -57,6 +57,7 @@ export const unitGroups: { [key: string]: ENumberUnit[] } = {
 }
 
 export const datefnsAppDateFormat = "yyyy/MM/dd"
+export const datefnsTableDateFormat = "yyyy-MM-dd"
 
 export const vancouverTimeZone = "America/Vancouver" // Vancouver time zone
 
@@ -175,11 +176,3 @@ export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
 ]
 
 export const OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES = [EAutoComplianceType.externalOptionsMapper]
-
-export const enabledJurisdictions = [
-  {
-    // Translations not necessary for place names
-    label: "City of North Vancouver",
-    href: "/jurisdictions/corporation-of-the-city-of-north-vancouver",
-  },
-]

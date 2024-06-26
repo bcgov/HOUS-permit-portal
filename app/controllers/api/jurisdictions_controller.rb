@@ -3,7 +3,8 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::JurisdictionUsers
   include Api::Concerns::Search::PermitApplications
 
-  before_action :set_jurisdiction, only: %i[show update search_users search_permit_applications]
+  before_action :set_jurisdiction,
+                only: %i[show update search_users search_permit_applications update_external_api_enabled]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
   skip_before_action :authenticate_user!, only: %i[show index jurisdiction_options]
 
@@ -27,7 +28,6 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def update
     authorize @jurisdiction
-
     if jurisdiction_params[:contacts_attributes]
       # Get current contact ids from the params
       payload_contact_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
@@ -42,6 +42,27 @@ class Api::JurisdictionsController < Api::ApplicationController
                      { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     else
       render_error "jurisdiction.update_error",
+                   message_opts: {
+                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def update_external_api_enabled
+    authorize @jurisdiction, :update_external_api_enabled?
+
+    if @jurisdiction.update(external_api_enabled: update_external_api_enabled_params)
+      render_success @jurisdiction,
+                     (
+                       if @jurisdiction.external_api_enabled?
+                         "jurisdiction.external_api_enabled_success"
+                       else
+                         "jurisdiction.external_api_disabled_success"
+                       end
+                     ),
+                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :minimal } }
+    else
+      render_error "jurisdiction.update_external_api_enabled_error",
                    message_opts: {
                      error_message: @jurisdiction.errors.full_messages.join(", "),
                    }
@@ -123,14 +144,20 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   def jurisdiction_options
     authorize :jurisdiction, :jurisdiction_options?
+
+    # TODO: refactor jurisdictions search to accomodate filters,
+    # then use that here instead of having the search logic in the controller
     name = jurisdiction_params["name"]
     type = jurisdiction_params["type"]
+    user_id = jurisdiction_params["user_id"]
 
     filters = {}
-    filters = { where: { type: type } } if type.present?
+    filters = { type: type } if type.present?
+    filters = filters.merge({ user_ids: [user_id] }) if user_id.present?
+    filters = { where: filters, match: :word_start }
 
-    search = Jurisdiction.search(name, **filters)
-    options = search.results.map { |j| { label: j.reverse_qualified_name, value: j } }
+    search = Jurisdiction.search(name || "*", **filters)
+    options = search.results.map { |j| { label: j.qualified_name, value: j } }
     render_success options, nil, { blueprint: JurisdictionOptionBlueprint }
   end
 
@@ -140,6 +167,7 @@ class Api::JurisdictionsController < Api::ApplicationController
     params.require(:jurisdiction).permit(
       :name,
       :type,
+      :user_id,
       :locality_type,
       :address,
       :regional_district_id,
@@ -155,6 +183,10 @@ class Api::JurisdictionsController < Api::ApplicationController
       contacts_attributes: %i[id first_name last_name department title phone cell email],
       permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
     )
+  end
+
+  def update_external_api_enabled_params
+    params.require(:external_api_enabled)
   end
 
   def set_jurisdiction

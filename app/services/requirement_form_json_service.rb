@@ -242,38 +242,52 @@ class RequirementFormJsonService
   end
 
   def get_general_contact_field_components(parent_key = nil)
+    required = self.requirement.required
     [
       get_columns_form_json(
         "name_columns",
-        [get_contact_field_form_json(:first_name, parent_key), get_contact_field_form_json(:last_name, parent_key)],
+        [
+          get_contact_field_form_json(:first_name, parent_key, required),
+          get_contact_field_form_json(:last_name, parent_key, required),
+        ],
       ),
       get_columns_form_json(
         "reach_columns",
-        [get_contact_field_form_json(:email, parent_key), get_contact_field_form_json(:phone, parent_key)],
+        [
+          get_contact_field_form_json(:email, parent_key, required),
+          get_contact_field_form_json(:phone, parent_key, required),
+        ],
       ),
-      get_contact_field_form_json(:address, parent_key),
+      get_contact_field_form_json(:address, parent_key, required),
       get_columns_form_json(
         "organization_columns",
         [
           get_contact_field_form_json(:organization, parent_key, false),
-          get_contact_field_form_json(:title, parent_key),
+          get_contact_field_form_json(:title, parent_key, required),
         ],
       ),
     ]
   end
 
   def get_professional_contact_field_components(parent_key = nil)
+    required = self.requirement.required
     [
       get_columns_form_json(
         "name_columns",
-        [get_contact_field_form_json(:first_name, parent_key), get_contact_field_form_json(:last_name, parent_key)],
+        [
+          get_contact_field_form_json(:first_name, parent_key, required),
+          get_contact_field_form_json(:last_name, parent_key, required),
+        ],
       ),
       get_columns_form_json(
         "reach_columns",
-        [get_contact_field_form_json(:email, parent_key), get_contact_field_form_json(:phone, parent_key)],
+        [
+          get_contact_field_form_json(:email, parent_key, required),
+          get_contact_field_form_json(:phone, parent_key, required),
+        ],
       ),
-      get_contact_field_form_json(:address, parent_key),
-      get_contact_field_form_json(:title, parent_key),
+      get_contact_field_form_json(:address, parent_key, required),
+      get_contact_field_form_json(:title, parent_key, required),
       get_columns_form_json(
         "business_columns",
         [
@@ -308,7 +322,7 @@ class RequirementFormJsonService
 
     key = "#{requirement.key(requirement_block_key)}|multi_contact"
     {
-      label: "Multi Contact",
+      label: requirement.label,
       id: requirement.id,
       reorder: false,
       addAnother: I18n.t("formio.requirement.contact.add_person_button"),

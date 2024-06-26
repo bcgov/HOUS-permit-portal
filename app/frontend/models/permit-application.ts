@@ -1,24 +1,26 @@
 import { t } from "i18next"
-import { Instance, SnapshotIn, cast, flow, types } from "mobx-state-tree"
+import { Instance, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
-import { EPermitApplicationStatus, ERequirementType } from "../types/enums"
+import { EPermitApplicationStatus, ERequirementChangeAction, ERequirementType } from "../types/enums"
 import {
-  IContact,
+  ICompareRequirementsBoxData,
+  ICompareRequirementsBoxDiff,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
   IPermitApplicationSupportingDocumentsUpdate,
   ISubmissionData,
   ITemplateCustomization,
+  ITemplateVersionDiff,
 } from "../types/types"
-import { combineComplianceHints } from "../utils/formio-component-traversal"
-import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
+import { combineComplianceHints, combineDiff } from "../utils/formio-component-traversal"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
+import { IRequirement } from "./requirement"
 import { StepCodeModel } from "./step-code"
+import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
 
 export const PermitApplicationModel = types
@@ -26,14 +28,16 @@ export const PermitApplicationModel = types
     id: types.identifier,
     nickname: types.string,
     number: types.string,
-    fullAddress: types.maybeNull(types.string), //for now some seeds will not have this
-    pin: types.maybeNull(types.string), //for now some seeds will not have this
-    pid: types.maybeNull(types.string), //for now some seeds will not have this
+    fullAddress: types.maybeNull(types.string), // for now some seeds will not have this
+    pin: types.maybeNull(types.string), // for now some seeds will not have this
+    pid: types.maybeNull(types.string), // for now some seeds will not have this
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+    templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
+    publishedTemplateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
     formattedComplianceData: types.maybeNull(types.frozen()),
@@ -52,10 +56,18 @@ export const PermitApplicationModel = types
     missingPdfs: types.maybeNull(types.array(types.string)),
     isFullyLoaded: types.optional(types.boolean, false),
     isDirty: types.optional(types.boolean, false),
+    isLoading: types.optional(types.boolean, false),
+    indexedUsingCurrentTemplateVersion: types.maybeNull(types.boolean),
+    showingCompareAfter: types.optional(types.boolean, false),
+    diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    get usingCurrentTemplateVersion() {
+      if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
+      return self.indexedUsingCurrentTemplateVersion
+    },
     get jurisdictionName() {
       return self.jurisdiction.name
     },
@@ -72,7 +84,13 @@ export const PermitApplicationModel = types
     },
     get formattedFormJson() {
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
-      return combineComplianceHints(self.formJson, self.formCustomizations, self.formattedComplianceData)
+      const complianceHintedFormJson = combineComplianceHints(
+        self.formJson,
+        self.formCustomizations,
+        self.formattedComplianceData
+      )
+      const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+      return diffColoredFormJson
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
@@ -89,17 +107,44 @@ export const PermitApplicationModel = types
     get isViewed() {
       return self.viewedAt !== null
     },
+    get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
+      if (!self.diff) return null
+
+      const mapFn = (req: IRequirement, action: ERequirementChangeAction): ICompareRequirementsBoxData => {
+        return {
+          label: t("requirementTemplate.compareAction", {
+            requirementName: `${req.label}${req.elective ? ` (${t("requirementsLibrary.elective")})` : ""}`,
+            action: t(`requirementTemplate.${action}`),
+          }),
+          class: `formio-component-${req.formJson.key}`,
+          diffSectionLabel: req.diffSectionLabel,
+        }
+      }
+      const addedErrorBoxData = self.diff.added.map((req) => mapFn(req, ERequirementChangeAction.added))
+      const removedErrorBoxData = self.diff.removed.map((req) => mapFn(req, ERequirementChangeAction.removed))
+      const changedErrorBoxData = self.diff.changed.map((req) => mapFn(req, ERequirementChangeAction.changed))
+      return { added: addedErrorBoxData, removed: removedErrorBoxData, changed: changedErrorBoxData }
+    },
   }))
   .actions((self) => ({
-    setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
-      self.submissionData = newData
-      self.isDirty = true
-    },
     setIsDirty(isDirty: boolean) {
-      self.isDirty = true
+      self.isDirty = isDirty
+    },
+    resetDiff() {
+      self.showingCompareAfter = false
+      self.diff = null
     },
   }))
   .views((self) => ({
+    shouldShowApplicationDiff(isEditing: boolean) {
+      return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
+    },
+    get shouldShowNewVersionWarning() {
+      return !self.usingCurrentTemplateVersion && self.isDraft
+    },
+    get formDiffKey() {
+      return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
+    },
     get statusTagText() {
       if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
         return t("permitApplication.viewed")
@@ -112,6 +157,7 @@ export const PermitApplicationModel = types
       return self.flattenedBlocks.findIndex((block) => block.id === blockId)
     },
     getBlockClass(sectionId, blockId) {
+      // 'formio-component-formSubmissionDataRSTsection61ba21b8-dc61-4a4a-9765-901cd4b53b3b|RBdc9d3ab2-fce8-40a0-ba94-14404c0c079b'
       return `formio-component-${blockId === "section-signoff-id" ? "section-signoff-key" : self.blockKey(sectionId, blockId)}`
     },
     get blockClasses() {
@@ -234,6 +280,8 @@ export const PermitApplicationModel = types
     __mergeUpdate: (resourceData) => {
       let jurisdiction = resourceData["jurisdiction"]
       let submitter = resourceData["submitter"]
+      let templateVersion = resourceData["templateVersion"]
+      let publishedTemplateVersion = resourceData["publishedTemplateVersion"]
       if (jurisdiction && typeof jurisdiction !== "string") {
         self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
         jurisdiction = jurisdiction["id"]
@@ -242,9 +290,19 @@ export const PermitApplicationModel = types
         self.rootStore.userStore.mergeUpdate(submitter, "usersMap")
         submitter = submitter["id"]
       }
+      if (templateVersion && typeof templateVersion !== "string") {
+        self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
+        templateVersion = templateVersion["id"]
+      }
+      if (publishedTemplateVersion && typeof publishedTemplateVersion !== "string") {
+        self.rootStore.templateVersionStore.mergeUpdate(publishedTemplateVersion, "templateVersionMap")
+        publishedTemplateVersion = publishedTemplateVersion["id"]
+      }
       const newData = R.mergeRight(resourceData, {
         jurisdiction,
         submitter,
+        templateVersion,
+        publishedTemplateVersion,
       })
       self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
     },
@@ -252,6 +310,7 @@ export const PermitApplicationModel = types
       self.formattedComplianceData = data
     },
     update: flow(function* ({ autosave, ...params }) {
+      self.isLoading = true
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
         const { data: permitApplication } = response.data
@@ -259,9 +318,26 @@ export const PermitApplicationModel = types
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
       }
+      self.isLoading = false
       return response
     }),
-
+    fetchDiff: flow(function* () {
+      const diffData = yield self.publishedTemplateVersion.fetchTemplateVersionCompare(self.templateVersion.id)
+      self.diff = diffData.data
+    }),
+    updateVersion: flow(function* () {
+      self.isLoading = true
+      const retainedDiff = self.diff
+      const response = yield self.environment.api.updatePermitApplicationVersion(self.id)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+      }
+      self.diff = retainedDiff
+      self.showingCompareAfter = true
+      self.isLoading = false
+      return response
+    }),
     submit: flow(function* (params) {
       const response = yield self.environment.api.submitPermitApplication(self.id, params)
       if (response.ok) {
@@ -284,62 +360,22 @@ export const PermitApplicationModel = types
       self.selectedTabIndex = index
     },
 
-    updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
-      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
-      const newSectionFields = {}
-      INPUT_CONTACT_KEYS.forEach((contactField) => {
-        let newValue = ["cell", "phone"].includes(contactField)
-          ? // The normalized phone number starts with +1... (country code)
-            convertPhoneNumberToFormioFormat(contact[contactField] as string)
-          : contact[contactField] || ""
-        newSectionFields[`${requirementKey}|${contactField}`] = newValue
-      })
-
-      const newData = {
-        data: {
-          ...submissionState.data,
-          [sectionKey]: {
-            ...submissionState.data[sectionKey],
-            ...newSectionFields,
-          },
-        },
-      }
-      self.setSubmissionData(newData)
+    resetCompareAfter: () => {
+      self.showingCompareAfter = false
     },
-    updateContactInSubmissionDatagrid: (
-      requirementPrefix: string,
-      index: number,
-      contact: IContact,
-      submissionState: any
-    ) => {
-      const parts = requirementPrefix.split("|")
-      const contactType = parts[parts.length - 1]
-      const requirementKey = parts.slice(0, -1).join("|")
-      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
 
-      const newContactElement = {}
-      INPUT_CONTACT_KEYS.forEach((contactField) => {
-        // The normalized phone number starts with +1... (country code)
-        let newValue = ["cell", "phone"].includes(contactField)
-          ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
-          : contact[contactField]
-        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
-      })
-      const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
-      clonedArray[index] = newContactElement
-      const newSectionFields = {
-        [requirementKey]: clonedArray,
-      }
-      const newData = {
-        data: {
-          ...submissionState.data,
-          [sectionKey]: {
-            ...submissionState.data[sectionKey],
-            ...newSectionFields,
-          },
-        },
-      }
-      self.setSubmissionData(newData)
+    generateMissingPdfs: flow(function* () {
+      const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
+      self.missingPdfs = cast(data.missingPdfs)
+      self.supportingDocuments = data.supportingDocuments
+      self.zipfileSize = data.zipfileSize
+      self.zipfileName = data.zipfileName
+      self.zipfileUrl = data.zipfileUrl
     },
     generateMissingPdfs: flow(function* () {
       const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
