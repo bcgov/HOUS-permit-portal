@@ -40,6 +40,10 @@ class UserPolicy < ApplicationPolicy
     profile?
   end
 
+  def accept_invitation?
+    profile?
+  end
+
   def resend_confirmation?
     profile?
   end

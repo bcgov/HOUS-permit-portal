@@ -18,13 +18,19 @@ class Jurisdiction::UserInviter
   def invite_users
     users_params.each do |user_params|
       user = User.where.not(role: :submitter).find_by(email: user_params[:email].strip)
-      if user.present? && !user.discarded? && user.confirmed? && !user.regional_review_manager?
+      is_regional_rm = user&.regional_review_manager? || (user && user_params[:role].to_sym == :regional_review_manager)
+
+      if user.present? && !user.discarded? && user.confirmed? && !is_regional_rm
         self.results[:email_taken] << user
-      elsif user&.regional_review_manager? && jurisdiction_id = user_params[:jurisdiction_id]
+      elsif user && is_regional_rm && jurisdiction_id = user_params[:jurisdiction_id]
+        user.update(role: :regional_review_manager) if !user.regional_review_manager?
         user
           .jurisdiction_memberships
           .where(jurisdiction_id:)
-          .first_or_create { |m| PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later }
+          .first_or_create do |m|
+            PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later if user.confirmed?
+          end
+        user.invite!(inviter) if !user.confirmed?
         self.results[:invited] << user
       else
         reinvited = user.present?
@@ -33,8 +39,8 @@ class Jurisdiction::UserInviter
           user.invite!(inviter)
           self.results[:reinvited] << user
         elsif inviter.invitable_roles.include?(user_params[:role].to_s)
-          jurisdiction_id = user_params[:jurisdiction_id] || inviter.jurisdiction&.id
-          user = User.new(user_params.merge({ discarded_at: nil, jurisdiction_id: }))
+          jurisdiction_id = user_params.delete(:jurisdiction_id) || inviter.jurisdictions.pluck(:id)
+          user = User.new(user_params.merge({ discarded_at: nil, jurisdiction_ids: [jurisdiction_id].flatten }))
           user.skip_confirmation_notification!
           user.save!
           user.invite!(inviter)

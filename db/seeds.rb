@@ -99,12 +99,12 @@ puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
   j
     .permit_type_submission_contacts
-    .where(email: "north-van@laterolabs.com", permit_type: permit_type1)
-    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
+    .where(email: "#{j.name.parameterize}@laterolabs.com", permit_type: permit_type1)
+    .first_or_create!(email: "#{j.name.parameterize}@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
   j
     .permit_type_submission_contacts
-    .where(email: "north-van@laterolabs.com", permit_type: permit_type2)
-    .first_or_create!(email: "north-van@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
+    .where(email: "#{j.name.parameterize}@laterolabs.com", permit_type: permit_type2)
+    .first_or_create!(email: "#{j.name.parameterize}@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
 end
 if PermitApplication.first.blank?
   jurisdictions

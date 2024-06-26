@@ -1,14 +1,12 @@
 import { t } from "i18next"
-import { Instance, SnapshotIn, cast, flow, types } from "mobx-state-tree"
+import { Instance, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { INPUT_CONTACT_KEYS } from "../stores/contact-store"
 import { EPermitApplicationStatus, ERequirementChangeAction, ERequirementType } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
-  IContact,
   IDownloadableFile,
   IFormIOBlock,
   IFormJson,
@@ -18,7 +16,6 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import { combineComplianceHints, combineDiff } from "../utils/formio-component-traversal"
-import { convertPhoneNumberToFormioFormat } from "../utils/utility-functions"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IRequirement } from "./requirement"
@@ -130,12 +127,8 @@ export const PermitApplicationModel = types
     },
   }))
   .actions((self) => ({
-    setSubmissionData(newData: SnapshotIn<ISubmissionData>) {
-      self.submissionData = newData
-      self.isDirty = true
-    },
     setIsDirty(isDirty: boolean) {
-      self.isDirty = true
+      self.isDirty = isDirty
     },
     resetDiff() {
       self.showingCompareAfter = false
@@ -145,6 +138,9 @@ export const PermitApplicationModel = types
   .views((self) => ({
     shouldShowApplicationDiff(isEditing: boolean) {
       return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
+    },
+    get shouldShowNewVersionWarning() {
+      return !self.usingCurrentTemplateVersion && self.isDraft
     },
     get formDiffKey() {
       return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
@@ -368,62 +364,18 @@ export const PermitApplicationModel = types
       self.showingCompareAfter = false
     },
 
-    updateContactInSubmissionSection: (requirementKey: string, contact: IContact, submissionState: any) => {
-      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
-      const newSectionFields = {}
-      INPUT_CONTACT_KEYS.forEach((contactField) => {
-        let newValue = ["cell", "phone"].includes(contactField)
-          ? // The normalized phone number starts with +1... (country code)
-            convertPhoneNumberToFormioFormat(contact[contactField] as string)
-          : contact[contactField] || ""
-        newSectionFields[`${requirementKey}|${contactField}`] = newValue
-      })
-
-      const newData = {
-        data: {
-          ...submissionState.data,
-          [sectionKey]: {
-            ...submissionState.data[sectionKey],
-            ...newSectionFields,
-          },
-        },
-      }
-      self.setSubmissionData(newData)
-    },
-    updateContactInSubmissionDatagrid: (
-      requirementPrefix: string,
-      index: number,
-      contact: IContact,
-      submissionState: any
-    ) => {
-      const parts = requirementPrefix.split("|")
-      const contactType = parts[parts.length - 1]
-      const requirementKey = parts.slice(0, -1).join("|")
-      const sectionKey = requirementKey.split("|")[0].slice(21, 64)
-
-      const newContactElement = {}
-      INPUT_CONTACT_KEYS.forEach((contactField) => {
-        // The normalized phone number starts with +1... (country code)
-        let newValue = ["cell", "phone"].includes(contactField)
-          ? convertPhoneNumberToFormioFormat(contact[contactField] as string)
-          : contact[contactField]
-        newContactElement[`${requirementKey}|${contactType}|${contactField}`] = newValue
-      })
-      const clonedArray = R.clone(submissionState.data?.[sectionKey]?.[requirementKey] ?? [])
-      clonedArray[index] = newContactElement
-      const newSectionFields = {
-        [requirementKey]: clonedArray,
-      }
-      const newData = {
-        data: {
-          ...submissionState.data,
-          [sectionKey]: {
-            ...submissionState.data[sectionKey],
-            ...newSectionFields,
-          },
-        },
-      }
-      self.setSubmissionData(newData)
+    generateMissingPdfs: flow(function* () {
+      const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
+      return response.ok
+    }),
+  }))
+  .actions((self) => ({
+    handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {
+      self.missingPdfs = cast(data.missingPdfs)
+      self.supportingDocuments = data.supportingDocuments
+      self.zipfileSize = data.zipfileSize
+      self.zipfileName = data.zipfileName
+      self.zipfileUrl = data.zipfileUrl
     },
     generateMissingPdfs: flow(function* () {
       const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)

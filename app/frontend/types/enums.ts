@@ -292,6 +292,11 @@ export enum EPermitApplicationSocketEventTypes {
   updateSupportingDocuments = "update_supporting_documents",
 }
 
+export enum EPermitApplicationSocketEventTypes {
+  updateCompliance = "update_compliance",
+  updateSupportingDocuments = "update_supporting_documents",
+}
+
 export enum EEnabledElectiveFieldReason {
   bylaw = "bylaw",
   zoning = "zoning",

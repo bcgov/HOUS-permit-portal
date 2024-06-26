@@ -21,6 +21,11 @@ FactoryBot.define do
       association :jurisdiction, factory: :sub_district
     end
 
+    trait :regional_review_manager do
+      role { :regional_review_manager }
+      association :jurisdiction, factory: :sub_district
+    end
+
     trait :super_admin do
       role { :super_admin }
       password { "P@ssword1" }

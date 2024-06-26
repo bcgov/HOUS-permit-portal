@@ -107,6 +107,13 @@ export const UserModel = types
       }
       return response.ok
     }),
+    acceptInvitation: flow(function* (invitationToken: string) {
+      const response = yield self.environment.api.acceptInvitation(self.id, { invitationToken })
+      if (response.ok) {
+        self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
+      }
+      return response.ok
+    }),
     resendConfirmation: flow(function* () {
       const response = yield self.environment.api.resendConfirmation(self.id)
       if (response.ok) {
