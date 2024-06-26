@@ -6,4 +6,8 @@ class CreateJurisdictionMemberships < ActiveRecord::Migration[7.1]
       t.timestamps
     end
   end
+
+  def data
+    User.where.not(jurisdiction_id: nil).each { |user| user.update(jurisdiction_ids: [user.jurisdiction_id]) }
+  end
 end

@@ -125,7 +125,7 @@ export const SitesSelect = observer(function ({
                       value: value,
                     }}
                     onChange={(option) => {
-                      onChange(option.value)
+                      onChange(option?.value)
                     }}
                     onCreateOption={(inputValue: string) => {
                       const newValue = { label: inputValue, value: inputValue }

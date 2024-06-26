@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -127,23 +127,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.index ["user_id"], name: "index_jurisdiction_memberships_on_user_id"
   end
 
-  create_table "jurisdiction_template_required_steps",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "jurisdiction_id", null: false
-    t.uuid "requirement_template_id", null: false
-    t.integer "energy_step_required"
-    t.integer "zero_carbon_step_required"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["jurisdiction_id"],
-            name:
-              "index_jurisdiction_template_required_steps_on_jurisdiction_id"
-    t.index ["requirement_template_id"],
-            name: "idx_on_requirement_template_id_b62f7ea082"
-  end
-
   create_table "jurisdiction_template_version_customizations",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -176,6 +159,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.text "contact_summary_html"
     t.jsonb "map_position"
     t.string "prefix", null: false
+    t.integer "energy_step_required", default: 3
+    t.integer "zero_carbon_step_required", default: 1
     t.string "slug"
     t.integer "map_zoom"
     t.boolean "external_api_enabled", default: false
@@ -686,7 +671,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
     t.integer "role", default: 0
     t.string "first_name"
     t.string "last_name"
-    t.uuid "jurisdiction_id"
     t.string "invitation_token"
     t.datetime "invitation_created_at"
     t.datetime "invitation_sent_at"
@@ -714,7 +698,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
             unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index %w[invited_by_type invited_by_id], name: "index_users_on_invited_by"
-    t.index ["jurisdiction_id"], name: "index_users_on_jurisdiction_id"
     t.index %w[omniauth_provider omniauth_uid],
             name: "index_users_on_omniauth_provider_and_omniauth_uid",
             unique: true
@@ -729,9 +712,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
   add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"
   add_foreign_key "jurisdiction_memberships", "users"
-  add_foreign_key "jurisdiction_template_required_steps", "jurisdictions"
-  add_foreign_key "jurisdiction_template_required_steps",
-                  "requirement_templates"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
   add_foreign_key "jurisdiction_template_version_customizations",
@@ -776,5 +756,4 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_002722) do
                   "end_user_license_agreements",
                   column: "agreement_id"
   add_foreign_key "user_license_agreements", "users"
-  add_foreign_key "users", "jurisdictions"
 end

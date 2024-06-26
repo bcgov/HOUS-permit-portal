@@ -20,6 +20,7 @@ export const useJurisdiction = () => {
 
   const jursidictionRoutes = [
     "/jurisdictions/:jurisdictionId/submission-inbox",
+    "/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup",
     "/jurisdictions/:jurisdictionId/configuration-management",
     "/jurisdictions/:jurisdictionId/users",
     "/jurisdictions/:jurisdictionId/api-settings",

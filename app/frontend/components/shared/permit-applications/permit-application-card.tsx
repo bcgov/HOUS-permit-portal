@@ -16,15 +16,15 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
   const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt } = permitApplication
   const { t } = useTranslation()
 
-  const isCurrent = permitApplication.usingCurrentTemplateVersion
+  const { shouldShowNewVersionWarning, isDraft } = permitApplication
 
   return (
     <Flex
-      bg={isCurrent ? "greys.white" : "semantic.warningLight"}
+      bg={shouldShowNewVersionWarning ? "semantic.warningLight" : "greys.white"}
       direction="column"
       borderRadius="lg"
       border="1px solid"
-      borderColor={isCurrent ? "border.light" : "semantic.warning"}
+      borderColor={shouldShowNewVersionWarning ? "semantic.warning" : "border.light"}
       p={6}
       align="center"
       gap={4}
@@ -61,7 +61,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           </Flex>
         </Show>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
-          {!isCurrent && (
+          {shouldShowNewVersionWarning && (
             <Flex p={1} px={2} bg="semantic.warning" align="center" gap={2} w="fit-content" borderRadius="sm">
               <Warning size={24} />
               <Text noOfLines={2}>

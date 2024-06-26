@@ -18,12 +18,11 @@ import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
 import * as R from "ramda"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
@@ -44,14 +43,7 @@ interface IRequirementFormProps {
 }
 
 export const RequirementForm = observer(
-  ({
-    permitApplication,
-    onCompletedBlocksChange,
-    formRef,
-    triggerSave,
-    showHelpButton = true,
-    isEditing = false,
-  }: IRequirementFormProps) => {
+  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave, isEditing = false }: IRequirementFormProps) => {
     const {
       jurisdiction,
       submissionData,
@@ -78,16 +70,18 @@ export const RequirementForm = observer(
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
-    const clonedSubmissionData = useMemo(() => R.clone(submissionData), [submissionData])
+    const [unsavedSubmissionData, setUnsavedSubmissionData] = useState(() => R.clone(submissionData))
+
+    const handleSetUnsavedSubmissionData = (data) => {
+      permitApplication.setIsDirty(true)
+      setUnsavedSubmissionData(data)
+    }
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
     const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
     const infoBoxData = permitApplication.diffToInfoBoxData
-
-    const { userStore } = useMst()
-    const { currentUser } = userStore
 
     useEffect(() => {
       if (!usingCurrentTemplateVersion && isEditing) {
@@ -361,7 +355,7 @@ export const RequirementForm = observer(
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
             can't be mutated*/
-            submission={clonedSubmissionData}
+            submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
             onBlur={onBlur}
@@ -414,7 +408,8 @@ export const RequirementForm = observer(
             onClose={onContactsClose}
             autofillContactKey={autofillContactKey}
             permitApplication={permitApplication}
-            submissionState={clonedSubmissionData}
+            submissionState={unsavedSubmissionData}
+            setSubmissionState={handleSetUnsavedSubmissionData}
           />
         )}
       </>

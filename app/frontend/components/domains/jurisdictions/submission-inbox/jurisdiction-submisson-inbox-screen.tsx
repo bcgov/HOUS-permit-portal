@@ -96,7 +96,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     {pa.isViewed ? (
                       <Flex direction="column">
                         <Text>{format(pa.viewedAt, "yyyy-MM-dd")}</Text>
-                        <Text>{format(pa.viewedAt, "hh:mm")}</Text>
+                        <Text>{format(pa.viewedAt, "HH:mm")}</Text>
                       </Flex>
                     ) : (
                       <PermitApplicationViewedAtTag permitApplication={pa} />
@@ -106,7 +106,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     {pa.isSubmitted && (
                       <Flex direction="column">
                         <Text>{format(pa.submittedAt, "yyyy-MM-dd")}</Text>
-                        <Text>{format(pa.submittedAt, "hh:mm")}</Text>
+                        <Text>{format(pa.submittedAt, "HH:mm")}</Text>
                       </Flex>
                     )}
                   </SearchGridItem>

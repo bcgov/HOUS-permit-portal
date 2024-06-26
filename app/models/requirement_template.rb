@@ -13,6 +13,9 @@ class RequirementTemplate < ApplicationRecord
   has_many :scheduled_template_versions,
            -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
            class_name: "TemplateVersion"
+  has_many :last_three_deprecated_template_versions,
+           -> { where(template_versions: { status: "deprecated" }).order(version_date: :desc).limit(3) },
+           class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
 
   has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
