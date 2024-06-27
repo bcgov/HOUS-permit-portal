@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_21_234528) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -346,6 +346,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
                force: :cascade do |t|
     t.integer "reason_code"
     t.jsonb "requirement_json"
+    t.jsonb "submission_json"
     t.string "comment", limit: 350
     t.uuid "permit_application_id", null: false
     t.datetime "created_at", null: false

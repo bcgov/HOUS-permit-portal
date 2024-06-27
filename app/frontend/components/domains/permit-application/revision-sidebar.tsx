@@ -9,6 +9,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { IrevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
+import { getSinglePreviousSubmissionJson } from "../../../utils/formio-submission-traversal"
 import ConfirmationModal from "../../shared/modals/confirmation-modal"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 import { RevisionModal } from "../../shared/revisions/revision-modal"
@@ -26,6 +27,7 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
   const { t } = useTranslation()
   const isMounted = useMountStatus()
   const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
+  const [submissionJsonForRevision, setSubmissionJsonForRevision] = useState<any>()
   const [revisionRequest, setRevisionRequest] = useState<IRevisionRequest>()
 
   const getDefaultRevisionRequestValues = () => ({
@@ -48,7 +50,7 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
 
   useEffect(() => {
     reset(getDefaultRevisionRequestValues())
-  }, [JSON.stringify(permitApplication.revisionRequests)])
+  }, [permitApplication?.revisionRequests?.length])
 
   const onSaveRevision = (formData: IRevisionRequestForm) => {
     permitApplication.updateRevisionRequests(formData)
@@ -68,10 +70,15 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
   }
 
   const handleOpenRequestRevision = async (_event, upToDateFields) => {
+    if (!permitApplication.formJson) return
+
     const foundRevisionRequest = upToDateFields.find((field) => field.requirementJson?.key === _event.detail.key)
     const foundRequirement = getRequirementByKey(permitApplication.formJson, _event.detail.key)
+    const foundSubmissionJson = getSinglePreviousSubmissionJson(permitApplication.submissionData, _event.detail.key)
+
     setRevisionRequest(foundRevisionRequest)
     setRequirementForRevision(foundRequirement)
+    setSubmissionJsonForRevision(foundSubmissionJson)
     onOpen()
   }
 
@@ -172,6 +179,7 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
           onOpen={onOpen}
           onClose={onClose}
           requirementJson={requirementForRevision}
+          submissionJson={submissionJsonForRevision}
           useFieldArrayMethods={useFieldArrayMethods}
           revisionRequest={revisionRequest}
           onSave={handleSubmit(onSaveRevision)}

@@ -922,6 +922,12 @@
   @include hidden-diff-explainer("A hidden field has been added that is currently not required for your application.");
 }
 
+.single-requirement-form {
+  button {
+    display: none;
+  }
+}
+
 /* ======================================
 
 			Override formio styles (end)

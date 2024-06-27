@@ -1,5 +1,7 @@
 import {
+  Box,
   Button,
+  Divider,
   Flex,
   FormControl,
   FormHelperText,
@@ -23,10 +25,13 @@ import { UseFieldArrayReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { EReasonCode } from "../../../types/enums"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
+import { singleRequirementFormJson } from "../../../utils/formio-helpers"
 import { IRevisionRequestForm } from "../../domains/permit-application/revision-sidebar"
+import { Form } from "../chefs"
 
 export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclosure>> {
   requirementJson: IFormIORequirement
+  submissionJson: any
   revisionRequest: IRevisionRequest
   useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
   onSave: () => Promise<void>
@@ -34,6 +39,7 @@ export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclo
 
 export const RevisionModal: React.FC<IRevisionModalProps> = ({
   requirementJson,
+  submissionJson,
   isOpen,
   onOpen,
   onClose,
@@ -67,6 +73,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
         id: revisionRequest?.id,
         reasonCode,
         requirementJson,
+        submissionJson,
         comment,
       }
       if (revisionRequest) {
@@ -95,8 +102,10 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
     })
   }
 
+  const requirementForm = singleRequirementFormJson(requirementJson)
+
   return (
-    <Modal onClose={handleClose} isOpen={isOpen} size="md">
+    <Modal onClose={handleClose} isOpen={isOpen} size="lg">
       <ModalOverlay />
 
       <ModalContent mt={48}>
@@ -132,6 +141,12 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
               />
               <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
             </FormControl>
+
+            <Divider />
+            <Box className="form-wrapper single-requirement-form">
+              <FormLabel>{t("permitApplication.show.revision.originallySubmitted")}</FormLabel>
+              <Form form={requirementForm} submission={submissionJson} options={{ readOnly: true }} />
+            </Box>
           </Flex>
           <ModalFooter>
             <Flex width="full" justify="center" gap={4}>

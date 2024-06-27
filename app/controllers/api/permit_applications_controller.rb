@@ -195,7 +195,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def revision_request_params # params for submitters
     params.require(:permit_application).permit(
-      revision_requests_attributes: [:id, :_destroy, :reason_code, :comment, requirement_json: {}],
+      revision_requests_attributes: [:id, :_destroy, :reason_code, :comment, requirement_json: {}, submission_json: {}],
     )
   end
 end

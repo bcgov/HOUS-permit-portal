@@ -497,6 +497,7 @@ const options = {
               maxCharacters: "Maximum 350 characters",
               send: "Send to submitter",
               confirmHeader: "Send this list of revisions to the submitter?",
+              originallySubmitted: "Originally submitted",
               confirmMessage: "The submitter will receive a notification end email about the changes you've requested.",
               reasons: {
                 non_compliant: "Non-compliance with regulations",

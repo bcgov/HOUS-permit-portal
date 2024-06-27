@@ -105,6 +105,12 @@ export interface IFormJson {
   components: IFormIOSection[]
 }
 
+export interface ISingleRequirementFormJson {
+  id: string
+  key: string
+  components: IFormIORequirement[]
+}
+
 export interface IFormIOSection {
   id: string
   key: string
@@ -440,5 +446,6 @@ export interface IRevisionRequest {
   id: string
   reasonCode: EReasonCode
   requirementJson: IFormIORequirement
+  submissionJson: any
   comment: string
 }
