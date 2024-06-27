@@ -19,8 +19,100 @@ class IntegrationMapping < ApplicationRecord
   before_create :initialize_requirements_mapping
 
   after_update :sync_changes_with_other_currently_active_mappings
+  after_create :send_missing_requirements_mapping_communication
 
   attr_accessor :simplified_map_to_sync
+
+  def jurisdiction_template_version_customization
+    JurisdictionTemplateVersionCustomization.find_by(jurisdiction:, template_version:)
+  end
+
+  def missing_requirements_mapping
+    missing_mapping = {}
+    template_version_customization = jurisdiction_template_version_customization
+
+    requirements_mapping.each do |requirement_block_sku, requirement_block|
+      requirement_block["requirements"]&.each do |requirement_code, requirement|
+        is_elective =
+          !!template_version.get_requirement_json(requirement_block["id"], requirement["id"])&.dig("elective")
+        enabled = !!template_version_customization&.elective_enabled?(requirement_block["id"], requirement["id"])
+
+        next if is_elective && !enabled
+
+        missing_mapping[requirement_block_sku] ||= { id: requirement_block["id"] }
+        missing_mapping[requirement_block_sku][requirement_code] = requirement if requirement[
+          "local_system_mapping"
+        ].blank?
+      end
+    end
+  end
+
+  def missing_any_requirements_mapping?
+    !missing_requirements_mapping.empty?
+  end
+
+  def template_missing_requirements_mapping_event_notification_data
+    return nil unless missing_any_requirements_mapping? && (template_version.published? || template_version.scheduled?)
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" =>
+        (
+          if template_version.published?
+            Constants::NotificationActionTypes::PUBLISHED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING
+          else
+            Constants::NotificationActionTypes::SCHEDULED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING
+          end
+        ),
+      "action_text" =>
+        "#{I18n.t("notification.template_version.#{template_version.published? ? "published" : "scheduled"}_template_missing_requirements_mapping", template_label: template_version.label, version_date: template_version.version_date_in_province_time)}",
+      "object_data" => {
+        "template_version_id" => id,
+      },
+    }
+  end
+
+  def jurisdiction_template_version_customization
+    JurisdictionTemplateVersionCustomization.find_by(jurisdiction:, template_version:)
+  end
+
+  def missing_requirements_mapping
+    missing_mapping = {}
+    template_version_customization = jurisdiction_template_version_customization
+
+    requirements_mapping.each do |requirement_block_sku, requirement_block|
+      requirement_block["requirements"]&.each do |requirement_code, requirement|
+        is_elective =
+          !!template_version.get_requirement_json(requirement_block["id"], requirement["id"])&.dig("elective")
+        enabled = !!template_version_customization&.elective_enabled?(requirement_block["id"], requirement["id"])
+
+        next if is_elective && !enabled
+
+        missing_mapping[requirement_block_sku] ||= { id: requirement_block["id"] }
+        missing_mapping[requirement_block_sku][requirement_code] = requirement if requirement[
+          "local_system_mapping"
+        ].blank?
+      end
+    end
+  end
+
+  def missing_any_requirements_mapping?
+    !missing_requirements_mapping.empty?
+  end
+
+  def template_missing_requirements_mapping_event_notification_data
+    return nil unless can_send_template_missing_requirements_communication?
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => template_missing_requirements_event_type,
+      "action_text" =>
+        "#{I18n.t("notification.template_version.#{template_version.published? ? "published" : "scheduled"}_template_missing_requirements_mapping", template_label: template_version.label, version_date: template_version.version_date_in_province_time)}",
+      "object_data" => {
+        "template_version_id" => id,
+      },
+    }
+  end
 
   # Updates the requirements mapping of the current model instance.
   # This method takes a simplified map of the requirements and updates the existing mapping accordingly.
@@ -65,6 +157,25 @@ class IntegrationMapping < ApplicationRecord
     IntegrationMappingService.new(self).copyable_record_with_existing_mapping(requirement_block_sku, requirement_code)
   end
 
+  def send_missing_requirements_mapping_communication
+    send_missing_requirements_mapping_notification
+    send_missing_requirements_mapping_email
+  end
+
+  def send_missing_requirements_mapping_notification
+    return unless can_send_template_missing_requirements_communication?
+
+    event_id = requirements_mapping_event_id("notification")
+
+    return unless redis.set(event_id, true, ex: 1.hour, nx: true, get: true)
+
+    NotificationService.publish_missing_requirements_mapping_event(self)
+  end
+
+  def send_missing_requirements_mapping_email
+    #   TODO
+  end
+
   private
 
   def initialize_requirements_mapping
@@ -91,5 +202,21 @@ class IntegrationMapping < ApplicationRecord
         .where.not(id: id)
 
     active_mappings.each { |mapping| mapping.update_requirements_mapping(simplified_map_to_sync, true) }
+  end
+
+  def can_send_template_missing_requirements_communication?
+    missing_any_requirements_mapping? && (template_version.published? || template_version.scheduled?)
+  end
+
+  def template_missing_requirements_event_type
+    if template_version.published?
+      Constants::NotificationActionTypes::PUBLISHED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING
+    elsif template_version.scheduled?
+      Constants::NotificationActionTypes::SCHEDULED_TEMPLATE_MISSING_REQUIREMENTS_MAPPING
+    end
+  end
+
+  def requirements_mapping_event_id(communication_type)
+    "#{self.class.name.underscore}_#{id}_#{communication_type}_event_#{template_missing_requirements_event_type}"
   end
 end
