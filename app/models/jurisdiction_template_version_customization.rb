@@ -21,6 +21,14 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 
+  def elective_enabled?(requirement_block_id, requirement_id)
+    return false if customizations.blank? || customizations["requirement_block_changes"].blank?
+
+    !!customizations.dig("requirement_block_changes", requirement_block_id, "enabled_elective_field_ids")&.include?(
+      requirement_id,
+    )
+  end
+
   def update_event_notification_data
     {
       "id" => SecureRandom.uuid,
