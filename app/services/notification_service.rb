@@ -97,8 +97,7 @@ class NotificationService
   end
 
   def self.publish_missing_requirements_mapping_event(integration_mapping)
-    unless integration_mapping.missing_any_requirements_mapping? &&
-             (integration_mapping.template_version.published? || integration_mapping.template_version.scheduled?)
+    unless integration_mapping.present? && integration_mapping.can_send_template_missing_requirements_communication?
       return
     end
 
@@ -112,7 +111,9 @@ class NotificationService
 
     notification_hash =
       user_ids_to_notify.each_with_object({}) do |user_id, hash|
-        hash[user_id] = integration_mapping.template_missing_requirements_mapping_event_notification_data
+        hash[
+          user_id
+        ] = integration_mapping.template_missing_requirements_mapping_event_notification_data if integration_mapping.template_missing_requirements_mapping_event_notification_data.present?
       end
 
     NotificationPushJob.perform_async(notification_hash)

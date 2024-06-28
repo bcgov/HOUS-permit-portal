@@ -60,7 +60,7 @@ class IntegrationMapping < ApplicationRecord
       "id" => SecureRandom.uuid,
       "action_type" => template_missing_requirements_event_type,
       "action_text" =>
-        "#{I18n.t("notification.integration_mapping.#{template_version.published? ? "published" : "scheduled"}_template_missing_requirements_mapping", template_label: template_version.label, version_date: template_version.version_date_in_province_time)}",
+        "#{I18n.t("notification.integration_mapping.#{template_version.published? ? "published" : "scheduled"}_template_missing_requirements_mapping", template_label: template_version.label, version_date: template_version.version_date)}",
       "object_data" => {
         "template_version_id" => template_version_id,
       },
@@ -120,7 +120,7 @@ class IntegrationMapping < ApplicationRecord
 
     event_id = requirements_mapping_event_id("notification")
 
-    return if Rails.cache.exist?(event_id)
+    return false if Rails.cache.exist?(event_id)
 
     Rails.cache.write(event_id, true, expires_in: 5.minutes)
 
@@ -128,7 +128,11 @@ class IntegrationMapping < ApplicationRecord
   end
 
   def send_missing_requirements_mapping_email
-    #   TODO
+    #  TODO
+  end
+
+  def can_send_template_missing_requirements_communication?
+    missing_any_requirements_mapping? && (template_version.published? || template_version.scheduled?)
   end
 
   private
@@ -147,6 +151,7 @@ class IntegrationMapping < ApplicationRecord
   # Note: This method does nothing if the simplified map to sync is not present or is not a hash.
   #
   # @return [void]
+
   def sync_changes_with_other_currently_active_mappings
     return unless simplified_map_to_sync.present? && simplified_map_to_sync.is_a?(Hash)
 
@@ -157,10 +162,6 @@ class IntegrationMapping < ApplicationRecord
         .where.not(id: id)
 
     active_mappings.each { |mapping| mapping.update_requirements_mapping(simplified_map_to_sync, true) }
-  end
-
-  def can_send_template_missing_requirements_communication?
-    missing_any_requirements_mapping? && (template_version.published? || template_version.scheduled?)
   end
 
   def template_missing_requirements_event_type
