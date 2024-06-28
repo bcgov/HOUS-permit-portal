@@ -364,5 +364,7 @@ export enum ERequirementChangeAction {
 
 export enum ENotificationActionType {
   newTemplateVersionPublish = "new_template_version_publish",
+  publishedTemplateMissingRequirementsMapping = "published_template_missing_requirements_mapping",
+  scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
 }
