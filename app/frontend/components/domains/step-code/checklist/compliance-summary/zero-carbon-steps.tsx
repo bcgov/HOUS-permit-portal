@@ -1,19 +1,22 @@
 import { Flex, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../models/step-code-zero-carbon-compliance-report"
+import { EZeroCarbonStep } from "../../../../../types/enums"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeZeroCarbonComplianceReport
 }
 
-export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }: IProps) {
+export const ZeroCarbonSteps = function ZeroCarbonSteps({ compliance }: IProps) {
+  const steps = Object.values(EZeroCarbonStep)
+  const numSteps = steps.length - 1
   return (
     <Flex align="end" w="full">
-      {[...Array(checklist.numberOfZeroCarbonSteps).keys()].map((stepOffset) => {
-        const step = parseInt(checklist.minZeroCarbonStep) + stepOffset
-        const isRequiredStep = step.toString() == checklist.requiredZeroCarbonStep.slice(-1)
+      {[...Array(numSteps).keys()].map((stepOffset) => {
+        const step = steps[stepOffset + 1]
+        const isRequiredStep = step == compliance.requiredStep.slice(-1)
         let height = 38
         switch (stepOffset) {
           case 0:
@@ -40,7 +43,7 @@ export const ZeroCarbonSteps = function ZeroCarbonSteps({ checklist }: IProps) {
               rounded="none"
               borderStyle={isRequiredStep ? "solid" : "dashed"}
               borderWidth={2}
-              borderRightWidth={stepOffset + 1 == checklist.numberOfZeroCarbonSteps ? 2 : 0}
+              borderRightWidth={stepOffset + 1 == numSteps ? 2 : 0}
               borderColor={isRequiredStep ? "semantic.info" : "border.base"}
               bg={isRequiredStep ? "semantic.infoLight" : "greys.grey03"}
             >

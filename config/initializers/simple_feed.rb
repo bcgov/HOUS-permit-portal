@@ -27,7 +27,7 @@ SimpleFeed.define(:user_feed) do |f|
     f.provider =
       SimpleFeed.provider(
         :redis,
-        redis: -> { Redis.new(url: ENV.fetch("SIMPLE_FEED_DEV_REDIS_URL", "redis://localhost:6310/3"), driver: :ruby) },
+        redis: -> { Redis.new(url: ENV.fetch("SIMPLE_FEED_DEV_REDIS_URL", "redis://localhost:6379/3"), driver: :ruby) },
         pool_size: 10,
       )
   end

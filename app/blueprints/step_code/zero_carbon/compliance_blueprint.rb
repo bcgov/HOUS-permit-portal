@@ -4,14 +4,14 @@ class StepCode::ZeroCarbon::ComplianceBlueprint < Blueprinter::Base
   transform StepCode::ZeroCarbon::PrescriptiveTransformer
   transform RoundDecimalsTransformer
 
-  field :proposed_zero_carbon_step do |compliance, _options|
-    compliance.step && "EL#{compliance.step}"
+  field :proposed_step do |compliance, _options|
+    compliance.step
   end
 
-  field :required_zero_carbon_step do |compliance, _options|
-    "EL#{compliance.min_required_step}"
+  field :required_step do |compliance, _options|
+    compliance.min_required_step
   end
 
-  field :min_step, name: :min_zero_carbon_step
-  field :max_step, name: :max_zero_carbon_step
+  field :min_required_step, name: :min_step
+  field :max_step
 end

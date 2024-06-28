@@ -9,8 +9,7 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
     include_view :completed_by
     include_view :building_characteristics_summary
     include_view :mid_construction_testing_results
-    include_view :energy_performance_compliance
-    include_view :zero_carbon_step_code_compliance
+    include_view :compliance_reports
   end
 
   view :project_info do
@@ -64,8 +63,8 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
            :notes
   end
 
-  view :energy_performance_compliance do
-    transform StepCode::Energy::ComplianceTransformer
+  view :compliance_reports do
+    transform StepCode::ComplianceReportsTransformer
 
     fields :hvac_consumption,
            :dwh_heating_consumption,
@@ -74,9 +73,10 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
            :epc_calculation_airtightness,
            :epc_calculation_testing_target_type,
            :epc_calculation_compliance
-  end
 
-  view :zero_carbon_step_code_compliance do
-    transform StepCode::ZeroCarbon::ComplianceTransformer
+    field :selected_report do |checklist, _options|
+      report = checklist.selected_report || checklist.passing_compliance_reports[0] || checklist.compliance_reports[0]
+      StepCode::ComplianceReportBlueprint.render_as_hash(report)
+    end
   end
 end

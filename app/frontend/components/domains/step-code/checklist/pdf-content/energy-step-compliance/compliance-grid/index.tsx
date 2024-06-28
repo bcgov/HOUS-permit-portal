@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../../../models/step-code-energy-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../energy-step-code-compliance/i18n-prefix"
 import { GridItem } from "../../shared/grid-item"
@@ -14,9 +14,9 @@ import { MEUI } from "./meui"
 import { TEDI } from "./tedi"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeEnergyComplianceReport
 }
-export const EnergyComplianceGrid = function EnergyComplianceGrid({ checklist }: IProps) {
+export const EnergyComplianceGrid = function EnergyComplianceGrid({ report }: IProps) {
   return (
     <VStack style={{ width: "100%", borderWidth: 0.75, borderColor: theme.colors.border.light, gap: 0 }} wrap={false}>
       <HStack
@@ -43,10 +43,10 @@ export const EnergyComplianceGrid = function EnergyComplianceGrid({ checklist }:
         </GridItem>
       </HStack>
 
-      <EnergyStep checklist={checklist} />
-      <MEUI checklist={checklist} />
-      <TEDI checklist={checklist} />
-      <Airtightness checklist={checklist} />
+      <EnergyStep report={report} />
+      <MEUI report={report} />
+      <TEDI report={report} />
+      <Airtightness report={report} />
 
       <HStack
         style={{
@@ -59,7 +59,7 @@ export const EnergyComplianceGrid = function EnergyComplianceGrid({ checklist }:
           <Text style={{ fontWeight: 700, fontSize: 10.5 }}>{t(`${i18nPrefix}.requirementsMet`)}</Text>
         </GridItem>
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center" }}>
-          <RequirementsMetTag success={checklist.energyRequirementsPassed} />
+          <RequirementsMetTag success={report.meuiPassed && report.tediPassed && report.airtightnessPassed} />
         </GridItem>
       </HStack>
     </VStack>

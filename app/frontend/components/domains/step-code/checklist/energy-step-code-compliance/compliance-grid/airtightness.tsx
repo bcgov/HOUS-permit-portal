@@ -1,7 +1,7 @@
 import { Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../../models/step-code-energy-compliance-report"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
@@ -10,10 +10,10 @@ import { UnitsText } from "../../shared/grid/units-text"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeEnergyComplianceReport
 }
 
-export const Airtightness = function Airtightness({ checklist }: IProps) {
+export const Airtightness = function Airtightness({ compliance }: IProps) {
   return (
     <>
       <GridRowHeader>
@@ -21,7 +21,7 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
       </GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.achRequirement || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.achRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0}>
@@ -33,7 +33,7 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.ach || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.ach || "-" }}
           rightElement={
             <VStack spacing={0}>
               <UnitsText>{t(`${i18nPrefix}.achUnits.numerator`)}</UnitsText>
@@ -43,13 +43,13 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
         />
       </GridData>
       <GridData rowSpan={3} alignItems="center" justifyContent="center">
-        <RequirementsMetTag success={checklist.airtightnessPassed} />
+        <RequirementsMetTag success={compliance.airtightnessPassed} />
       </GridData>
 
       <GridRowHeader>{t(`${i18nPrefix}.nla`)}</GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nlaRequirement || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.nlaRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0}>
@@ -61,7 +61,7 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nla || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.nla || "-" }}
           rightElement={
             <VStack spacing={0}>
               <UnitsText>{t(`${i18nPrefix}.nlaUnits.numerator`)}</UnitsText>
@@ -74,14 +74,14 @@ export const Airtightness = function Airtightness({ checklist }: IProps) {
       <GridRowHeader>{t(`${i18nPrefix}.nlr`)}</GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nlrRequirement || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.nlrRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={<UnitsText>{t(`${i18nPrefix}.nlrUnits`)}</UnitsText>}
         />
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.nlr || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.nlr || "-" }}
           rightElement={<UnitsText>{t(`${i18nPrefix}.nlrUnits`)}</UnitsText>}
         />
       </GridData>

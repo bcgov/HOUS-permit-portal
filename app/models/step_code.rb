@@ -3,8 +3,6 @@ class StepCode < ApplicationRecord
 
   delegate :number, to: :permit_application, prefix: :building_permit
   delegate :submitter, :jurisdiction_name, :full_address, :pid, to: :permit_application
-  delegate :energy_step_required, to: :permit_application, allow_nil: true
-  delegate :zero_carbon_step_required, to: :permit_application, allow_nil: true
 
   has_many :data_entries, class_name: "StepCodeDataEntry", dependent: :destroy
   has_many :checklists, class_name: "StepCodeChecklist", dependent: :destroy
@@ -44,5 +42,10 @@ class StepCode < ApplicationRecord
 
   def builder
     "" #replace with a config on permit application
+  end
+
+  def step_requirements
+    all = permit_application.jurisdiction.permit_type_required_steps.where(permit_type: permit_application.permit_type)
+    all.customizations.any? ? all.customizations : all
   end
 end

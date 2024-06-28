@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../zero-carbon-step-code-compliance/i18n-prefix"
 import { Divider } from "../../shared/divider"
@@ -12,10 +12,10 @@ import { RequirementsMetTag } from "../../shared/requirements-met-tag"
 import { VStack } from "../../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeZeroCarbonComplianceReport
 }
 
-export function TotalGHG({ checklist }: IProps) {
+export function TotalGHG({ report }: IProps) {
   return (
     <>
       <HStack
@@ -32,7 +32,7 @@ export function TotalGHG({ checklist }: IProps) {
         </GridItem>
         <GridItem style={{ flex: 1 }}>
           <Field
-            value={checklist.totalGhgRequirement || "-"}
+            value={report.totalGhgRequirement || "-"}
             hint={t(`${i18nPrefix}.max`)}
             inputStyle={{ justifyContent: "center" }}
             rightElement={
@@ -50,7 +50,7 @@ export function TotalGHG({ checklist }: IProps) {
         </GridItem>
         <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
           <Field
-            value={checklist.totalGhg || "-"}
+            value={report.totalGhg || "-"}
             inputStyle={{ justifyContent: "center" }}
             rightElement={
               <VStack style={{ gap: 1.5 }}>
@@ -67,7 +67,7 @@ export function TotalGHG({ checklist }: IProps) {
         </GridItem>
 
         <GridItem style={{ flex: 1, justifyContent: "center", borderRightWidth: 0 }}>
-          <RequirementsMetTag success={checklist.ghgPassed} />
+          <RequirementsMetTag success={report.ghgPassed} />
         </GridItem>
       </HStack>
     </>

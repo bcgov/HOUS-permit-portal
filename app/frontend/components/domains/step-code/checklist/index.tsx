@@ -36,7 +36,10 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const { handleSubmit, reset } = formMethods
 
   const onSubmit = async (values) => {
-    const result = await stepCode.updateStepCodeChecklist(checklist.id, values)
+    const result = await stepCode.updateStepCodeChecklist(
+      checklist.id,
+      R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
+    )
     if (result) navigate(-1)
   }
 
@@ -71,7 +74,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
               </Tag>
             </HStack>
             <VStack spacing={2}>
-              {R.isNil(checklist.proposedEnergyStep) && (
+              {R.isNil(checklist.selectedReport.energy.proposedStep) && (
                 <Alert
                   status="error"
                   rounded="lg"
@@ -85,7 +88,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
                   {t(`${i18nPrefix}.energyStepNotMet`)}
                 </Alert>
               )}
-              {R.isNil(checklist.proposedZeroCarbonStep) && (
+              {R.isNil(checklist.selectedReport.zeroCarbon.proposedStep) && (
                 <Alert
                   status="error"
                   rounded="lg"
@@ -115,15 +118,13 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
                 <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]}>
-                  {/* <VStack spacing={4} pb={12}> */}
                   <ProjectInfo checklist={checklist} />
                   <ComplianceSummary checklist={checklist} />
                   <CompletedBy checklist={checklist} />
                   <BuildingCharacteristicsSummary checklist={checklist} />
-                  <EnergyPerformanceCompliance checklist={checklist} />
-                  <EnergyStepCodeCompliance checklist={checklist} />
-                  <ZeroCarbonStepCodeCompliance checklist={checklist} />
-                  {/* </VStack> */}
+                  <EnergyPerformanceCompliance compliance={checklist.selectedReport.energy} />
+                  <EnergyStepCodeCompliance compliance={checklist.selectedReport.energy} />
+                  <ZeroCarbonStepCodeCompliance compliance={checklist.selectedReport.zeroCarbon} />
                 </Accordion>
               </form>
             </FormProvider>

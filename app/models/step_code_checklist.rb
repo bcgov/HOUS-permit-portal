@@ -1,5 +1,6 @@
 class StepCodeChecklist < ApplicationRecord
   belongs_to :step_code, optional: Rails.env.test?
+  belongs_to :step_requirement, class_name: "PermitTypeRequiredStep", optional: true
 
   has_one :building_characteristics_summary, class_name: "StepCodeBuildingCharacteristicsSummary", dependent: :destroy
   accepts_nested_attributes_for :building_characteristics_summary
@@ -47,11 +48,16 @@ class StepCodeChecklist < ApplicationRecord
     }
   end
 
-  def energy_step_compliance
-    @energy_step_compliance ||= StepCode::Compliance::ProposeStep::Energy.new(checklist: self).call
+  def compliance_reports
+    StepCode::Compliance::GenerateReports.new(checklist: self, requirements: step_code.step_requirements).call.reports
   end
 
-  def zero_carbon_step_compliance
-    @zero_carbon_step_compliance ||= StepCode::Compliance::ProposeStep::ZeroCarbon.new(checklist: self).call
+  def passing_compliance_reports
+    compliance_reports.filter { |r| r[:energy].step && r[:zero_carbon].step }
+  end
+
+  def selected_report
+    return unless step_requirement.present?
+    compliance_reports.find { |r| r[:requirement_id] == step_requirement_id }
   end
 end

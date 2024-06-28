@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
-import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../models/step-code-energy-compliance-report"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { AirtightnessSelect } from "./airtightness-select"
@@ -12,10 +12,10 @@ import { EPCTestingTargetTypeSelect } from "./epc-testing-target-type-select"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeEnergyComplianceReport
 }
 
-export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCompliance({ checklist }: IProps) {
+export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCompliance({ compliance }: IProps) {
   const { control, watch } = useFormContext()
   const watchProposedConsumptionFields = watch(["hvacConsumption", "dhwHeatingConsumption"])
   const watchReferenceConsumptionFields = watch(["refHvacConsumption", "refDhwHeatingConsumption"])
@@ -93,7 +93,7 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
       <HStack align="end">
         <TextFormControl
           label={t(`${i18nPrefix}.calculationTestingTarget`)}
-          inputProps={{ isDisabled: true, value: checklist.ach }}
+          inputProps={{ isDisabled: true, value: compliance.ach }}
         />
         <Controller
           control={control}

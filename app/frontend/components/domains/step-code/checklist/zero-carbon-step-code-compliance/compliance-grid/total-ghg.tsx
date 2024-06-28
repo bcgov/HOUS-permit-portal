@@ -1,7 +1,7 @@
 import { StackDivider, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../models/step-code-zero-carbon-compliance-report"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
@@ -10,16 +10,16 @@ import { UnitsText } from "../../shared/grid/units-text"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeZeroCarbonComplianceReport
 }
 
-export const TotalGHG = function TotalGhg({ checklist }: IProps) {
+export const TotalGHG = function TotalGhg({ compliance }: IProps) {
   return (
     <>
       <GridRowHeader>{t(`${i18nPrefix}.ghg.label`)}</GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.totalGhgRequirement || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.totalGhgRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
@@ -31,7 +31,7 @@ export const TotalGHG = function TotalGhg({ checklist }: IProps) {
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.totalGhg || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.totalGhg || "-" }}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
               <UnitsText>{t(`${i18nPrefix}.ghg.units.numerator`)}</UnitsText>
@@ -41,7 +41,7 @@ export const TotalGHG = function TotalGhg({ checklist }: IProps) {
         />
       </GridData>
       <GridData alignItems="center" justifyContent="center">
-        <RequirementsMetTag success={checklist.ghgPassed} />
+        <RequirementsMetTag success={compliance.ghgPassed} />
       </GridData>
     </>
   )

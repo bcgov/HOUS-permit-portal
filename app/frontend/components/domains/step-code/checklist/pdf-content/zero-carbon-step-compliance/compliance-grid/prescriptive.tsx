@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../zero-carbon-step-code-compliance/i18n-prefix"
 import { Field } from "../../shared/field"
@@ -11,10 +11,10 @@ import { RequirementsMetTag } from "../../shared/requirements-met-tag"
 import { VStack } from "../../shared/v-stack"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeZeroCarbonComplianceReport
 }
 
-export function Prescriptive({ checklist }: IProps) {
+export function Prescriptive({ report }: IProps) {
   return (
     <>
       <HStack
@@ -56,8 +56,8 @@ export function Prescriptive({ checklist }: IProps) {
             <GridItem style={{ flex: 1 }}>
               <Field
                 value={
-                  checklist.prescriptiveHeatingRequirement
-                    ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeatingRequirement}`)
+                  report.prescriptiveHeatingRequirement
+                    ? t(`${i18nPrefix}.prescriptive.${report.prescriptiveHeatingRequirement}`)
                     : "-"
                 }
                 inputStyle={{ justifyContent: "center" }}
@@ -65,9 +65,7 @@ export function Prescriptive({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
-                value={
-                  checklist.prescriptiveHeating ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeating}`) : "-"
-                }
+                value={report.prescriptiveHeating ? t(`${i18nPrefix}.prescriptive.${report.prescriptiveHeating}`) : "-"}
                 inputStyle={{ justifyContent: "center" }}
               />
             </GridItem>
@@ -87,8 +85,8 @@ export function Prescriptive({ checklist }: IProps) {
             <GridItem style={{ flex: 1 }}>
               <Field
                 value={
-                  checklist.prescriptiveHotWaterRequirement
-                    ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWaterRequirement}`)
+                  report.prescriptiveHotWaterRequirement
+                    ? t(`${i18nPrefix}.prescriptive.${report.prescriptiveHotWaterRequirement}`)
                     : "-"
                 }
                 inputStyle={{ justifyContent: "center" }}
@@ -97,9 +95,7 @@ export function Prescriptive({ checklist }: IProps) {
             <GridItem style={{ flex: 1, alignItems: "flex-start" }}>
               <Field
                 value={
-                  checklist.prescriptiveHotWater
-                    ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWater}`)
-                    : "-"
+                  report.prescriptiveHotWater ? t(`${i18nPrefix}.prescriptive.${report.prescriptiveHotWater}`) : "-"
                 }
                 inputStyle={{ justifyContent: "center" }}
               />
@@ -112,8 +108,8 @@ export function Prescriptive({ checklist }: IProps) {
             <GridItem style={{ flex: 1 }}>
               <Field
                 value={
-                  checklist.prescriptiveOtherRequirement
-                    ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOtherRequirement}`)
+                  report.prescriptiveOtherRequirement
+                    ? t(`${i18nPrefix}.prescriptive.${report.prescriptiveOtherRequirement}`)
                     : "-"
                 }
                 inputStyle={{ justifyContent: "center" }}
@@ -121,9 +117,7 @@ export function Prescriptive({ checklist }: IProps) {
             </GridItem>
             <GridItem style={{ flex: 1 }}>
               <Field
-                value={
-                  checklist.prescriptiveOther ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOther}`) : "-"
-                }
+                value={report.prescriptiveOther ? t(`${i18nPrefix}.prescriptive.${report.prescriptiveOther}`) : "-"}
                 inputStyle={{ justifyContent: "center" }}
               />
             </GridItem>
@@ -131,7 +125,7 @@ export function Prescriptive({ checklist }: IProps) {
         </VStack>
 
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center", borderRightWidth: 0 }}>
-          <RequirementsMetTag success={checklist.co2Passed} />
+          <RequirementsMetTag success={report.co2Passed} />
         </GridItem>
       </HStack>
     </>
