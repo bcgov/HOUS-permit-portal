@@ -118,7 +118,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
               ) : (
                 notificationsToShow.map((n) => (
                   <CustomMessageBox status="info" description={n.actionText} key={n.id}>
-                    <UnorderedList pl={0}>
+                    <UnorderedList pl={0} mb={0}>
                       {generateSpecificLinkData(n).map((link) => (
                         <ListItem>
                           <RouterLinkButton

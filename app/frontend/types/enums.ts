@@ -23,6 +23,7 @@ export enum EPermitClassificationCode {
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
+  revisionsRequested = "revisions_requested",
 }
 
 export enum ETemplateVersionStatus {
@@ -358,4 +359,17 @@ export enum ERequirementChangeAction {
 export enum ENotificationActionType {
   newTemplateVersionPublish = "new_template_version_publish",
   customizationUpdate = "customization_update",
+}
+
+export enum EReasonCode {
+  nonCompliant = "non_compliant",
+  conflictingInaccurate = "conflicting_inaccurate",
+  insufficientDetail = "insufficient_detail",
+  incorrectFormat = "incorrect_format",
+  missingDocumentation = "missing_documentation",
+  outdated = "outdated",
+  inapplicable = "inapplicable",
+  missingSignatures = "missing_signatures",
+  incorrectCalculations = "incorrect_calculations",
+  other = "other",
 }

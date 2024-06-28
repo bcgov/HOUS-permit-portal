@@ -1,5 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
+import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
@@ -250,6 +251,12 @@ export class Api {
     })
   }
 
+  async updateRevisionRequests(id, params: IRevisionRequestForm) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests`, {
+      permitApplication: params,
+    })
+  }
+
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
   }
@@ -262,6 +269,10 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,
     })
+  }
+
+  async finalizeRevisionRequests(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {

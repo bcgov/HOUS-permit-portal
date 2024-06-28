@@ -15,6 +15,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EReasonCode,
   ERequirementType,
   ESZeroCarbonStep,
   ESocketDomainTypes,
@@ -25,6 +26,7 @@ import {
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
 } from "./enums"
 
@@ -104,6 +106,12 @@ export interface IFormJson {
   components: IFormIOSection[]
 }
 
+export interface ISingleRequirementFormJson {
+  id: string
+  key: string
+  components: IFormIORequirement[]
+}
+
 export interface IFormIOSection {
   id: string
   key: string
@@ -125,14 +133,19 @@ export interface IFormIOBlock {
 }
 
 export interface IFormIORequirement {
-  id: string
-  key: string
+  id?: string
+  key?: string
   type: string
-  input: true
-  validation: { required: boolean }
+  input?: true
+  validation?: { required: boolean }
   label: string
   widget?: any
+  action?: string
   customClass?: string
+  disabled?: boolean
+  customConditional?: string
+  conditional?: any
+  components?: IFormIORequirement[]
 }
 
 export interface ISubmissionData {
@@ -428,4 +441,24 @@ export type TChakraColor = keyof Theme["colors"]
 export interface ILinkData {
   text: string
   href: string
+}
+
+export interface IRevisionRequest {
+  id: string
+  reasonCode: EReasonCode
+  requirementJson: IFormIORequirement
+  submissionJson: any
+  comment: string
+  user: IMinimalFrozenUser
+}
+
+export interface IMinimalFrozenUser {
+  id: string
+  email: string
+  role: EUserRoles
+  firstName: string
+  lastName: string
+  organization?: string
+  certified: boolean
+  discardedAt?: Date
 }

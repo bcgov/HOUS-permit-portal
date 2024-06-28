@@ -1,5 +1,5 @@
-import { Box, Button, Flex, HStack, Heading, Stack, Text, useDisclosure } from "@chakra-ui/react"
-import { CaretRight, Info } from "@phosphor-icons/react"
+import { Box, Button, Divider, Flex, HStack, Heading, Spacer, Stack, Text, useDisclosure } from "@chakra-ui/react"
+import { CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
@@ -14,6 +14,7 @@ import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/p
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
 interface IReferenceNumberForm {
@@ -40,6 +41,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
+  const [hideRevisionList, setHideRevisionList] = useState(false)
+
+  const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     reset({ referenceNumber: currentPermitApplication?.referenceNumber || "" })
   }, [currentPermitApplication?.referenceNumber])
@@ -50,10 +55,21 @@ export const ReviewPermitApplicationScreen = observer(() => {
     }
   }, [currentPermitApplication])
 
+  useEffect(() => {
+    const container = document.getElementById("permitApplicationFieldsContainer")
+    if (!container) return
+
+    if (currentPermitApplication?.revisionMode) {
+      container.classList.add("revision-mode")
+    } else {
+      container.classList.remove("revision-mode")
+    }
+  }, [currentPermitApplication?.revisionMode])
+
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const { permitTypeAndActivity, formJson, number } = currentPermitApplication
+  const { permitTypeAndActivity, formattedFormJson, number, revisionMode, setRevisionMode } = currentPermitApplication
 
   const onSaveReferenceNumber = handleSubmit(async ({ referenceNumber: referenceNumberToSave }) => {
     if (referenceNumber === referenceNumberSnapshot) {
@@ -68,72 +84,118 @@ export const ReviewPermitApplicationScreen = observer(() => {
       onReferenceNumberChange(referenceNumberSnapshot)
     }
   })
+  const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
 
   return (
     <Box as="main" id="reviewing-permit-application">
-      <Flex
-        id="permitHeader"
-        position="sticky"
-        top={0}
-        zIndex={11}
-        w="full"
-        px={6}
-        py={3}
-        bg="theme.blue"
-        justify="space-between"
-        color="greys.white"
-      >
-        <HStack gap={4} flex={1}>
-          <PermitApplicationViewedAtTag permitApplication={currentPermitApplication} />
-          <Flex direction="column" w="full">
-            <Heading fontSize="xl" as="h3">
-              {currentPermitApplication.nickname}
-            </Heading>
-            <Text noOfLines={1}>{permitTypeAndActivity}</Text>
-            <HStack>
-              <CopyableValue textTransform={"uppercase"} value={number} label={t("permitApplication.fields.number")} />
-              <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
-                <Text textTransform={"uppercase"}> {t("permitApplication.referenceNumber")}:</Text>
-                <EditableInputWithControls
-                  size={"xs"}
-                  value={referenceNumber}
-                  onChange={onReferenceNumberChange}
-                  onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
-                  onSubmit={() => onSaveReferenceNumber()}
-                  editableInputProps={{
-                    "aria-label": "Edit Template Description",
-                    bg: "white",
-                    color: "text.primary",
-                    width: "79px",
-                  }}
-                  controlsProps={{
-                    saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
-                    cancelButtonProps: { variant: "secondaryInverse" },
-                  }}
-                  aria-label={"Edit Template Description"}
-                  onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
+      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12}>
+        <Flex w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
+          <HStack gap={4} flex={1}>
+            <PermitApplicationViewedAtTag permitApplication={currentPermitApplication} />
+            <Flex direction="column" w="full">
+              <Heading fontSize="xl" as="h3">
+                {currentPermitApplication.nickname}
+              </Heading>
+              <Text noOfLines={1}>{permitTypeAndActivity}</Text>
+              <HStack>
+                <CopyableValue
+                  textTransform={"uppercase"}
+                  value={number}
+                  label={t("permitApplication.fields.number")}
                 />
+                <HStack mt={2} sx={{ svg: { fill: "theme.yellow" } }}>
+                  <Text textTransform={"uppercase"}> {t("permitApplication.referenceNumber")}:</Text>
+                  <EditableInputWithControls
+                    size={"xs"}
+                    value={referenceNumber}
+                    onChange={onReferenceNumberChange}
+                    onEdit={() => setReferenceNumberSnapshot(referenceNumber)}
+                    onSubmit={() => onSaveReferenceNumber()}
+                    editableInputProps={{
+                      "aria-label": "Edit Template Description",
+                      bg: "white",
+                      color: "text.primary",
+                      width: "79px",
+                    }}
+                    controlsProps={{
+                      saveButtonProps: { variant: "primaryInverse", textContent: t("ui.onlySave") },
+                      cancelButtonProps: { variant: "secondaryInverse" },
+                    }}
+                    aria-label={"Edit Template Description"}
+                    onCancel={(previousValue) => onReferenceNumberChange(previousValue)}
+                  />
+                </HStack>
               </HStack>
-            </HStack>
-          </Flex>
-        </HStack>
-        <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
-          <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
-            {t("permitApplication.show.contactsSummary")}
-          </Button>
-          <SubmissionDownloadModal permitApplication={currentPermitApplication} />
-          <Button
-            rightIcon={<CaretRight />}
-            onClick={() => navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)}
+            </Flex>
+          </HStack>
+          <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+            <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+              {t("permitApplication.show.contactsSummary")}
+            </Button>
+            <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+            <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
+              {t("ui.backToInbox")}
+            </Button>
+          </Stack>
+        </Flex>
+        {revisionMode && (
+          <Flex
+            position="sticky"
+            zIndex={11}
+            w="full"
+            p={4}
+            bg="theme.yellow"
+            justify="flex-start"
+            align="center"
+            gap={4}
+            top={permitHeaderHeight}
           >
-            {t("ui.backToInbox")}
-          </Button>
-        </Stack>
+            <Flex width="var(--app-sidebar-width)" align="center" gap={2}>
+              <NotePencil size={24} />
+              <Heading fontSize="lg" mt={2}>
+                {t("permitApplication.show.requestingRevisions")}
+              </Heading>
+              <Spacer />
+              <Button
+                fontSize="sm"
+                h={8}
+                p={1}
+                variant="secondary"
+                rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
+                onClick={() => setHideRevisionList((cur) => !cur)}
+              >
+                {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
+              </Button>
+              <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
+            </Flex>
+            <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
+          </Flex>
+        )}
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
-        {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
+        {revisionMode && !hideRevisionList ? (
+          <RevisionSideBar
+            permitApplication={currentPermitApplication}
+            onCancel={() => setRevisionMode(false)}
+            sendRevisionContainerRef={sendRevisionContainerRef}
+          />
+        ) : (
+          <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
+        )}
+        {formattedFormJson && (
+          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
+            {!revisionMode && (
+              <Button
+                ml={{ lg: "8" }}
+                variant="callout"
+                leftIcon={<NotePencil />}
+                onClick={() => setRevisionMode(true)}
+              >
+                {currentPermitApplication.isRevisionsRequested
+                  ? t("permitApplication.show.viewRevisionRequests")
+                  : t("permitApplication.show.requestRevisions")}
+              </Button>
+            )}
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}

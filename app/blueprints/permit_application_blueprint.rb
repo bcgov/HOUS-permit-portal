@@ -18,6 +18,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :missing_pdfs
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
+    association :revision_requests, blueprint: RevisionRequestBlueprint
 
     field :indexed_using_current_template_version do |pa, options|
       # Indexed data is used to prevent N extra queries on every search

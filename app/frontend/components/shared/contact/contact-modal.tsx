@@ -125,7 +125,6 @@ export const ContactModal: React.FC<IContactModalProps> = ({
           <Flex w="full" gap={2}>
             <ContactSelect onChange={onChange} selectedOption={selectedOption} />
           </Flex>
-          <Flex w="full" gap={2}></Flex>
         </ModalBody>
       </ModalContent>
     </Modal>

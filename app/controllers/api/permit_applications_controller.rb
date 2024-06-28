@@ -7,9 +7,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   update
                   submit
                   upload_supporting_document
+                  finalize_revision_requests
                   mark_as_viewed
                   update_version
                   generate_missing_pdfs
+                  update_revision_requests
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -47,10 +49,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def update
     authorize @permit_application
+
     # always reset the submission section keys until actual submission
     submission_section = permit_application_params.dig("submission_data", "data", "section-completion-key")
     submission_section&.each { |key, value| submission_section[key] = nil }
-
     if @permit_application.draft? && @permit_application.update(permit_application_params)
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
@@ -59,6 +61,20 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      ("permit_application.save_draft_success"),
                      { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     elsif @permit_application.submitted? && @permit_application.update(submitted_permit_application_params)
+      render_success @permit_application,
+                     ("permit_application.save_success"),
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "permit_application.update_error",
+                   message_opts: {
+                     error_message: @permit_application.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def update_revision_requests
+    authorize @permit_application
+    if @permit_application.submitted? && @permit_application.update(revision_request_params)
       render_success @permit_application,
                      ("permit_application.save_success"),
                      { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
@@ -148,6 +164,17 @@ class Api::PermitApplicationsController < Api::ApplicationController
     head :ok
   end
 
+  def finalize_revision_requests
+    authorize @permit_application
+    if @permit_application.finalize_revision_requests!
+      render_success @permit_application,
+                     "permit_application.revision_request_finalize_success",
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "permit_application.revision_request_finalize_error"
+    end
+  end
+
   private
 
   def set_permit_application
@@ -176,5 +203,21 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def submitted_permit_application_params # params for submitters
     params.require(:permit_application).permit(:reference_number)
+  end
+
+  def revision_request_params # params for submitters
+    params.require(:permit_application).permit(
+      revision_requests_attributes: [
+        :id,
+        :user_id,
+        :_destroy,
+        :reason_code,
+        :comment,
+        requirement_json: {
+        },
+        submission_json: {
+        },
+      ],
+    )
   end
 end

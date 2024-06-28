@@ -16,6 +16,7 @@ class PermitApplication < ApplicationRecord
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
   has_one :step_code
+  has_many :revision_requests
 
   # Custom validation
 
@@ -25,7 +26,7 @@ class PermitApplication < ApplicationRecord
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
-  enum status: { draft: 0, submitted: 1 }, _default: 0
+  enum status: { draft: 0, submitted: 1, revisions_requested: 2 }, _default: 0
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -49,6 +50,8 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
+
+  accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
   def force_update_published_template_version
     return unless Rails.env.development?
@@ -203,6 +206,11 @@ class PermitApplication < ApplicationRecord
     missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
 
     missing_pdfs
+  end
+
+  def finalize_revision_requests!
+    update(status: :revisions_requested)
+    PermitHubMailer.notify_application_updated(submitter, self).deliver_later
   end
 
   private

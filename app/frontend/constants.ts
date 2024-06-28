@@ -176,3 +176,6 @@ export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
 ]
 
 export const OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES = [EAutoComplianceType.externalOptionsMapper]
+
+export const COMPLETTION_SECTION_ID = "section-completion-id"
+export const COMPLETTION_SECTION_KEY = "section-completion-key"
