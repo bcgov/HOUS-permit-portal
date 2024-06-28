@@ -282,16 +282,12 @@ export enum EGovFeedbackResponseNoReason {
 export enum ESocketDomainTypes {
   notification = "notification",
   permitApplication = "permit_application",
+  template_version = "template_version",
 }
 
 export enum ESocketEventTypes {
   update = "update",
   new = "new",
-}
-
-export enum EPermitApplicationSocketEventTypes {
-  updateCompliance = "update_compliance",
-  updateSupportingDocuments = "update_supporting_documents",
 }
 
 export enum EPermitApplicationSocketEventTypes {

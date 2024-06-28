@@ -16,6 +16,9 @@ export class UserPushProcessor {
       case ESocketDomainTypes.notification:
         this.rootStore.notificationStore.processWebsocketChange(payload)
         break
+      case ESocketDomainTypes.template_version:
+        this.rootStore.templateVersionStore.processWebsocketChange(payload)
+        break
       default:
         import.meta.env.DEV && console.log(`Unknown domain type ${payload.domain}`)
     }

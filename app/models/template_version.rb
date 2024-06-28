@@ -23,6 +23,7 @@ class TemplateVersion < ApplicationRecord
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
+  after_save :notify_users_of_missing_requirements_mappings
 
   def version_date_in_province_time
     version_date.in_time_zone("Pacific Time (US & Canada)").to_time
@@ -82,8 +83,6 @@ class TemplateVersion < ApplicationRecord
     requirement_blocks_json.dig(requirement_block_id, "requirements")&.find { |req| req["id"] == requirement_id }
   end
 
-  private
-
   def create_integration_mappings
     return unless !deprecation_reason_unscheduled?
 
@@ -94,6 +93,19 @@ class TemplateVersion < ApplicationRecord
     jurisdictions_without_mappings = api_enabled_jurisdictions.where.not(id: existing_mapping_jurisdiction_ids)
 
     jurisdictions_without_mappings.each { |jurisdiction| integration_mappings.create(jurisdiction: jurisdiction) }
+  end
+
+  def force_publish_now!
+    return unless scheduled?
+
+    updated_template_version = TemplateVersioningService.publish_version!(self, true)
+
+    WebsocketBroadcaster.push_update_to_relevant_users(
+      User.super_admin.kept.all.pluck(:id), # only super admins can force publish
+      Constants::Websockets::Events::TemplateVersion::DOMAIN,
+      Constants::Websockets::Events::TemplateVersion::TYPES[:update],
+      TemplateVersionBlueprint.render_as_hash(updated_template_version),
+    )
   end
 
   private
@@ -111,7 +123,7 @@ class TemplateVersion < ApplicationRecord
   def notify_users_of_missing_requirements_mappings
     return unless saved_change_to_status? && (published? || scheduled?)
     relevant_integration_mappings =
-      integration_mappings.joins(:jurisdiction).where(jurisdictions: { external_api_enabled: true })
+      integration_mappings.joins(:jurisdiction).where({ jurisdictions: { external_api_enabled: true } })
 
     relevant_integration_mappings.each { |im| im.send_missing_requirements_mapping_communication }
   end
