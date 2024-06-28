@@ -43,6 +43,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const [hideRevisionList, setHideRevisionList] = useState(false)
 
+  const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     reset({ referenceNumber: currentPermitApplication?.referenceNumber || "" })
   }, [currentPermitApplication?.referenceNumber])
@@ -166,12 +168,17 @@ export const ReviewPermitApplicationScreen = observer(() => {
               </Button>
               <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
             </Flex>
+            <Flex align="center" gap={2} flex={1} justify="flex-end" ref={sendRevisionContainerRef}></Flex>
           </Flex>
         )}
       </Flex>
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         {revisionMode && !hideRevisionList ? (
-          <RevisionSideBar permitApplication={currentPermitApplication} onCancel={() => setRevisionMode(false)} />
+          <RevisionSideBar
+            permitApplication={currentPermitApplication}
+            onCancel={() => setRevisionMode(false)}
+            sendRevisionContainerRef={sendRevisionContainerRef}
+          />
         ) : (
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         )}

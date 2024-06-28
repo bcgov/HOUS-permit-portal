@@ -165,7 +165,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def finalize_revision_requests
-    binding.pry
     authorize @permit_application
     if @permit_application.finalize_revision_requests!
       render_success @permit_application,

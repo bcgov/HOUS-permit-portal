@@ -383,6 +383,13 @@ export const PermitApplicationModel = types
     }),
     finalizeRevisionRequests: flow(function* () {
       const response = yield self.environment.api.finalizeRevisionRequests(self.id)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(
+          { revisionMode: true, ...permitApplication },
+          "permitApplicationMap"
+        )
+      }
       return response.ok
     }),
     markAsViewed: flow(function* () {
