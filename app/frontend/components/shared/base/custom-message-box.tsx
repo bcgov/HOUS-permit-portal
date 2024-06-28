@@ -5,6 +5,7 @@ import React from "react"
 interface ICustomMessageBoxProps extends ToastProps {
   children?: React.ReactNode
 }
+
 const iconMap = {
   success: <CheckCircle size={24} aria-label={"success icon"} />,
   warning: <Warning size={24} aria-label={"warning icon"} />,
@@ -23,7 +24,7 @@ export const CustomMessageBox = ({ title, description, status, children }: ICust
       borderColor={`semantic.${status}`}
       p={4}
     >
-      <Flex align="flex-start" gap={2}>
+      <Flex align="flex-start" gap={2} whiteSpace={"normal"}>
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
         <Flex direction="column" gap={2}>
           {title && (
@@ -31,7 +32,7 @@ export const CustomMessageBox = ({ title, description, status, children }: ICust
               {title}
             </Heading>
           )}
-          {description && <Text>{description}</Text>}
+          {description && <Text wordBreak={"break-word"}>{description}</Text>}
           {children}
         </Flex>
       </Flex>

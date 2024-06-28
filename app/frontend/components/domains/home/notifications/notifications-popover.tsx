@@ -121,13 +121,15 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                   <CustomMessageBox status="info" description={n.actionText} key={n.id}>
                     <UnorderedList pl={0}>
                       {generateSpecificLinkData(n).map((link) => (
-                        <ListItem>
+                        <ListItem whiteSpace={"normal"}>
                           <RouterLinkButton
                             variant="link"
                             rightIcon={<CaretRight />}
                             to={link.href}
                             color="text.primary"
                             onClick={onClose}
+                            whiteSpace={"normal"}
+                            wordBreak={"break-word"}
                           >
                             {link.text}
                           </RouterLinkButton>
