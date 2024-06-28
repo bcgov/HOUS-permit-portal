@@ -5,7 +5,7 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../components/dom
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
-import { IDenormalizedRequirementBlock, IDenormalizedTemplate } from "../types/types"
+import { IDenormalizedRequirementBlock, IDenormalizedTemplate, ITemplateVersionUpdate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
@@ -195,6 +195,12 @@ export const TemplateVersionModel = types
 
       return response.ok
     }),
+  }))
+  .actions((self) => ({
+    handleSocketSupportingDocsUpdate: (data: ITemplateVersionUpdate) => {
+      // right now websocket updates is only needed for force pushing
+      self.status = data.status
+    },
   }))
 
 export interface ITemplateVersion extends Instance<typeof TemplateVersionModel> {}

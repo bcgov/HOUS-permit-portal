@@ -17,6 +17,11 @@ module Constants
         DOMAIN = :notification
         TYPES = { new: :new, update: :update }.freeze
       end
+
+      module TemplateVersion
+        DOMAIN = :template_version
+        TYPES = { update: :update }.freeze
+      end
     end
   end
 end

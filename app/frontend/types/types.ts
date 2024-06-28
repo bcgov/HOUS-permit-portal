@@ -25,6 +25,7 @@ import {
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  ETemplateVersionStatus,
   EWindowsGlazedDoorsPerformanceType,
 } from "./enums"
 
@@ -272,10 +273,15 @@ export interface INotification {
   objectData?: IPermitNotificationObjectData | IMissingRequirementsMappingNotificationObjectData
 }
 
+export interface ITemplateVersionUpdate {
+  status: ETemplateVersionStatus
+}
+
 export type TSocketEventData =
   | IPermitApplicationComplianceUpdate
   | IPermitApplicationSupportingDocumentsUpdate
   | INotification
+  | ITemplateVersionUpdate
 
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
