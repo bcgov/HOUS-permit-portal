@@ -64,12 +64,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
             name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
-  end
-
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -235,6 +229,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
     t.string "description"
     t.boolean "enabled"
     t.integer "code"
+  end
+
+  create_table "permit_type_required_steps",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "permit_type_id"
+    t.integer "energy_step_required"
+    t.integer "zero_carbon_step_required"
+    t.boolean "default"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_permit_type_required_steps_on_jurisdiction_id"
+    t.index ["permit_type_id"],
+            name: "index_permit_type_required_steps_on_permit_type_id"
   end
 
   create_table "permit_type_submission_contacts",
@@ -728,6 +739,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234527) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_type_required_steps", "jurisdictions"
+  add_foreign_key "permit_type_required_steps",
+                  "permit_classifications",
+                  column: "permit_type_id"
   add_foreign_key "permit_type_submission_contacts", "jurisdictions"
   add_foreign_key "permit_type_submission_contacts",
                   "permit_classifications",

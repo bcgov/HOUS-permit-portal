@@ -120,13 +120,13 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           <Flex direction={{ base: "column", md: "row" }} gap={4}>
             <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
               {t("permitApplication.seeBestPractices_CTA")}
-              <ArrowSquareOut></ArrowSquareOut>
+              <ArrowSquareOut />
             </Link>
             <Show above="md">
               <Text>{"  |  "}</Text>
             </Show>
             <Link href={t("permitApplication.searchKnowledge_link")} isExternal>
-              {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut></ArrowSquareOut>
+              {t("permitApplication.searchKnowledge_CTA")} <ArrowSquareOut />
             </Link>
           </Flex>
         </Flex>

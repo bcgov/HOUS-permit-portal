@@ -30,10 +30,10 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize @jurisdiction
     if jurisdiction_params[:contacts_attributes]
       # Get current contact ids from the params
-      payload_contact_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+      payload_record_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
       # Mark contacts not included in the current payload for destruction
       @jurisdiction.contacts.each do |contact|
-        contact.mark_for_destruction unless payload_contact_ids.include?(contact.id.to_s)
+        contact.mark_for_destruction unless payload_record_ids.include?(contact.id.to_s)
       end
     end
     if @jurisdiction.update(jurisdiction_params)
@@ -175,13 +175,19 @@ class Api::JurisdictionsController < Api::ApplicationController
       :checklist_html,
       :look_out_html,
       :contact_summary_html,
-      :energy_step_required,
-      :zero_carbon_step_required,
       :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
       contacts_attributes: %i[id first_name last_name department title phone cell email],
       permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
+      permit_type_required_steps_attributes: %i[
+        id
+        permit_type_id
+        default
+        energy_step_required
+        zero_carbon_step_required
+        _destroy
+      ],
     )
   end
 
@@ -190,7 +196,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   end
 
   def set_jurisdiction
-    @jurisdiction = Jurisdiction.friendly.find(params[:id])
+    @jurisdiction = Jurisdiction.includes(Jurisdiction::BASE_INCLUDES).friendly.find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
   end

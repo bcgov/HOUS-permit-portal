@@ -16,7 +16,6 @@ import {
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
   ERequirementType,
-  ESZeroCarbonStep,
   ESocketDomainTypes,
   ESocketEventTypes,
   ESortDirection,
@@ -26,6 +25,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   EWindowsGlazedDoorsPerformanceType,
+  EZeroCarbonStep,
 } from "./enums"
 
 export type TLatLngTuple = [number, number]
@@ -218,7 +218,7 @@ export interface IStepCodeSelectOptions {
   buildingTypes: EStepCodeBuildingType[]
   buildingCharacteristicsSummary: IStepCodeBuildingCharacteristicSummarySelectOptions
   energySteps: EEnergyStep[]
-  zeroCarbonSteps: ESZeroCarbonStep[]
+  zeroCarbonSteps: EZeroCarbonStep[]
 }
 
 export interface IRequirementBlockCustomization {
@@ -428,4 +428,13 @@ export type TChakraColor = keyof Theme["colors"]
 export interface ILinkData {
   text: string
   href: string
+}
+
+export interface IPermitTypeRequiredStep {
+  id?: string
+  default: boolean
+  permitTypeId: string
+  permitTypeLabel?: string
+  energyStepRequired: EEnergyStep
+  zeroCarbonStepRequired: EZeroCarbonStep
 }

@@ -266,7 +266,7 @@ const DisclaimerInfo = () => {
             <ListItem key={disclaimer.href}>
               <Link href={disclaimer.href} isExternal>
                 {disclaimer.text}
-                <ArrowSquareOut></ArrowSquareOut>
+                <ArrowSquareOut />
               </Link>
             </ListItem>
           )
@@ -275,7 +275,7 @@ const DisclaimerInfo = () => {
       <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
       <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
         {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
-        <ArrowSquareOut></ArrowSquareOut>
+        <ArrowSquareOut />
       </Link>
     </Box>
   )
