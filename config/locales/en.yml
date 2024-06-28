@@ -482,8 +482,8 @@ en:
       new_version_notification: 'A new version of "%{template_label}" has been published'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
     integration_mapping:
-      scheduled_template_missing_requirements_mapping: 'A new version of "%{template_label}" has been scheduled for publication on %{version_date} but is missing some requirements mapping for integrations."'
-      published_template_missing_requirements_mapping: 'A new version of "%{template_label}" has been published on %{version_date} but is missing some requirements mapping for integrations.'
+      published_template_missing_requirements_mapping: 'Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}'
+      scheduled_template_missing_requirements_mapping: 'Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST.'
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
