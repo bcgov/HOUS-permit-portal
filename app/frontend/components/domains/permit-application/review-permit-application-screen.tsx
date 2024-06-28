@@ -184,7 +184,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
                 leftIcon={<NotePencil />}
                 onClick={() => setRevisionMode(true)}
               >
-                {t("permitApplication.show.requestRevisions")}
+                {currentPermitApplication.isRevisionsRequested
+                  ? t("permitApplication.show.viewRevisionRequests")
+                  : t("permitApplication.show.requestRevisions")}
               </Button>
             )}
             <RequirementForm

@@ -6,7 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { IrevisionRequestsAttributes } from "../../../types/api-request"
+import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { getSinglePreviousSubmissionJson } from "../../../utils/formio-submission-traversal"
@@ -20,7 +20,7 @@ interface IRevisionSideBarProps {
 }
 
 export interface IRevisionRequestForm {
-  revisionRequestsAttributes: IrevisionRequestsAttributes[]
+  revisionRequestsAttributes: IRevisionRequestsAttributes[]
 }
 
 export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevisionSideBarProps) => {
@@ -31,7 +31,7 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
   const [revisionRequest, setRevisionRequest] = useState<IRevisionRequest>()
 
   const getDefaultRevisionRequestValues = () => ({
-    revisionRequestsAttributes: permitApplication.revisionRequests as IrevisionRequestsAttributes[],
+    revisionRequestsAttributes: permitApplication.revisionRequests as IRevisionRequestsAttributes[],
   })
 
   const revisionFormMethods = useForm<IRevisionRequestForm>({
@@ -66,7 +66,7 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const onFinalizeRevisions = () => {
-    console.log("to")
+    permitApplication.finalizeRevisionRequests()
   }
 
   const handleOpenRequestRevision = async (_event, upToDateFields) => {
@@ -128,8 +128,12 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
                         <ChatDots size={24} />
                       </Box>
                       <Text noOfLines={1}>{field.comment}</Text>
-                      {/* <Text noOfLines={1}>{field.id}</Text> */}
                     </Flex>
+                    {field.user && (
+                      <Text fontStyle={"italic"}>
+                        {t("ui.modifiedBy")}: {field.user.firstName} {field.user.lastName}
+                      </Text>
+                    )}
                   </ListItem>
                 )
               })}
@@ -159,7 +163,12 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
                 promptHeader={t("permitApplication.show.revision.confirmHeader")}
                 promptMessage={t("permitApplication.show.revision.confirmMessage")}
                 renderTrigger={(onOpen) => (
-                  <Button variant="primary" rightIcon={<PaperPlaneTilt />} onClick={onOpen}>
+                  <Button
+                    variant="primary"
+                    rightIcon={<PaperPlaneTilt />}
+                    onClick={onOpen}
+                    isDisabled={permitApplication.isRevisionsRequested}
+                  >
                     {t("permitApplication.show.revision.send")}
                   </Button>
                 )}
@@ -183,6 +192,7 @@ export const RevisionSideBar = observer(({ permitApplication, onCancel }: IRevis
           useFieldArrayMethods={useFieldArrayMethods}
           revisionRequest={revisionRequest}
           onSave={handleSubmit(onSaveRevision)}
+          isRevisionsRequested={permitApplication.isRevisionsRequested}
         />
       )}
     </>

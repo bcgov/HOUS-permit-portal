@@ -23,6 +23,7 @@ import { Trash } from "@phosphor-icons/react"
 import React, { useState } from "react"
 import { UseFieldArrayReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import { EReasonCode } from "../../../types/enums"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { singleRequirementFormJson } from "../../../utils/formio-helpers"
@@ -35,6 +36,7 @@ export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclo
   revisionRequest: IRevisionRequest
   useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
   onSave: () => Promise<void>
+  isRevisionsRequested?: boolean
 }
 
 export const RevisionModal: React.FC<IRevisionModalProps> = ({
@@ -46,12 +48,16 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   revisionRequest,
   useFieldArrayMethods,
   onSave,
+  isRevisionsRequested,
 }) => {
   const { t } = useTranslation()
   const [reasonCode, setReasonCode] = useState<EReasonCode | "">(revisionRequest?.reasonCode ?? "")
   const [comment, setComment] = useState<string>(revisionRequest?.comment ?? "")
 
   const { update, append, fields } = useFieldArrayMethods
+
+  const { userStore } = useMst()
+  const { currentUser } = userStore
 
   const className = `formio-component-${requirementJson.key}`
   const elements = document.getElementsByClassName(className)
@@ -71,6 +77,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
     if (reasonCode && requirementJson) {
       const newItem = {
         id: revisionRequest?.id,
+        userId: currentUser.id,
         reasonCode,
         requirementJson,
         submissionJson,
@@ -123,6 +130,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 placeholder={t("ui.pleaseSelect")}
                 value={reasonCode}
                 onChange={(e) => setReasonCode(e.target.value as EReasonCode)}
+                isDisabled={isRevisionsRequested}
               >
                 {Object.values(EReasonCode).map((value) => (
                   <option value={value} key={value}>
@@ -138,6 +146,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 onChange={(e) => setComment(e.target.value)}
                 placeholder={t("permitApplication.show.revision.comment")}
                 maxLength={350}
+                isDisabled={isRevisionsRequested}
               />
               <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
             </FormControl>
@@ -150,7 +159,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
           </Flex>
           <ModalFooter>
             <Flex width="full" justify="center" gap={4}>
-              <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode}>
+              <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode || isRevisionsRequested}>
                 {t("permitApplication.show.revision.useButton")}
               </Button>
 
@@ -159,7 +168,13 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
               </Button>
               <Spacer />
               {revisionRequest && (
-                <Button color="semantic.error" leftIcon={<Trash />} variant="link" onClick={handleDelete}>
+                <Button
+                  color="semantic.error"
+                  leftIcon={<Trash />}
+                  variant="link"
+                  onClick={handleDelete}
+                  isDisabled={isRevisionsRequested}
+                >
                   {t("ui.delete")}
                 </Button>
               )}

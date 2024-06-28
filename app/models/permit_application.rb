@@ -26,7 +26,7 @@ class PermitApplication < ApplicationRecord
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
-  enum status: { draft: 0, submitted: 1 }, _default: 0
+  enum status: { draft: 0, submitted: 1, revisions_requested: 2 }, _default: 0
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -206,6 +206,11 @@ class PermitApplication < ApplicationRecord
     missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
 
     missing_pdfs
+  end
+
+  def finalize_revision_requests!
+    update(status: :revisions_requested)
+    PermitHubMailer.notify_application_updated(submitter, self).deliver_later
   end
 
   private

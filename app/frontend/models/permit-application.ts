@@ -119,6 +119,9 @@ export const PermitApplicationModel = types
     get isViewed() {
       return self.viewedAt !== null
     },
+    get isRevisionsRequested() {
+      return self.status === EPermitApplicationStatus.revisionsRequested
+    },
     get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
       if (!self.diff) return null
 
@@ -378,7 +381,10 @@ export const PermitApplicationModel = types
       }
       return response.ok
     }),
-
+    finalizeRevisionRequests: flow(function* () {
+      const response = yield self.environment.api.finalizeRevisionRequests(self.id)
+      return response.ok
+    }),
     markAsViewed: flow(function* () {
       const response = yield self.environment.api.viewPermitApplication(self.id)
       if (response.ok) {

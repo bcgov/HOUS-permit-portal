@@ -349,10 +349,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234528) do
     t.jsonb "submission_json"
     t.string "comment", limit: 350
     t.uuid "permit_application_id", null: false
+    t.uuid "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["permit_application_id"],
             name: "index_revision_requests_on_permit_application_id"
+    t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
 
   create_table "site_configurations",
@@ -757,6 +759,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_21_234528) do
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "revision_requests", "permit_applications"
+  add_foreign_key "revision_requests", "users"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists", "step_codes"

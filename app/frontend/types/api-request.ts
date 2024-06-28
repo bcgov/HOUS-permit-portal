@@ -50,8 +50,9 @@ export interface IRequirementTemplateSectionAttributes {
   _destroy?: boolean
 }
 
-export interface IrevisionRequestsAttributes extends Partial<IRevisionRequest> {
+export interface IRevisionRequestsAttributes extends Partial<IRevisionRequest> {
   _destroy?: true
+  userId?: string
 }
 
 export interface IRequirementTemplateUpdateParams {

@@ -26,6 +26,7 @@ import {
   EStepCodeBuildingType,
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
+  EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
 } from "./enums"
 
@@ -448,4 +449,16 @@ export interface IRevisionRequest {
   requirementJson: IFormIORequirement
   submissionJson: any
   comment: string
+  user: IMinimalFrozenUser
+}
+
+export interface IMinimalFrozenUser {
+  id: string
+  email: string
+  role: EUserRoles
+  firstName: string
+  lastName: string
+  organization?: string
+  certified: boolean
+  discardedAt?: Date
 }

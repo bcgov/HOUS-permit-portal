@@ -7,6 +7,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   update
                   submit
                   upload_supporting_document
+                  finalize_revision_requests
                   mark_as_viewed
                   update_version
                   generate_missing_pdfs
@@ -163,6 +164,18 @@ class Api::PermitApplicationsController < Api::ApplicationController
     head :ok
   end
 
+  def finalize_revision_requests
+    binding.pry
+    authorize @permit_application
+    if @permit_application.finalize_revision_requests!
+      render_success @permit_application,
+                     "permit_application.revision_request_finalize_success",
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "permit_application.revision_request_finalize_error"
+    end
+  end
+
   private
 
   def set_permit_application
@@ -195,7 +208,17 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def revision_request_params # params for submitters
     params.require(:permit_application).permit(
-      revision_requests_attributes: [:id, :_destroy, :reason_code, :comment, requirement_json: {}, submission_json: {}],
+      revision_requests_attributes: [
+        :id,
+        :user_id,
+        :_destroy,
+        :reason_code,
+        :comment,
+        requirement_json: {
+        },
+        submission_json: {
+        },
+      ],
     )
   end
 end

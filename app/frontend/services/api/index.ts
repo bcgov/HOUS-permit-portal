@@ -271,6 +271,10 @@ export class Api {
     })
   }
 
+  async finalizeRevisionRequests(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
+  }
+
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }

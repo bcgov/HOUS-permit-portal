@@ -1,5 +1,6 @@
 class RevisionRequest < ApplicationRecord
   belongs_to :permit_application
+  belongs_to :user
 
   enum reason_code: {
          non_compliant: 0,
@@ -14,4 +15,14 @@ class RevisionRequest < ApplicationRecord
          other: 9,
        },
        _default: 0
+
+  validate :user_must_be_review_staff
+
+  private
+
+  def user_must_be_review_staff
+    unless user&.review_staff?
+      errors.add(:user, I18n.t("errors.models.revision_request.attributes.user.incorrect_role"))
+    end
+  end
 end
