@@ -20,6 +20,7 @@ import {
   ListItem,
   OrderedList,
   Show,
+  Tag,
   Text,
 } from "@chakra-ui/react"
 
@@ -394,7 +395,7 @@ const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) =
         (permitTypeId, index) =>
           requiredStepsByPermitType[permitTypeId][0] && (
             <Accordion key={index} allowToggle>
-              <AccordionItem>
+              <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
                 <AccordionButton bg="greys.grey03" fontWeight="bold">
                   <Box flex="1" textAlign="left">
                     {requiredStepsByPermitType[permitTypeId][0].permitTypeName}
@@ -404,38 +405,39 @@ const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) =
                 <AccordionPanel pb={4}>
                   <>
                     <Flex justify="flex-end">
-                      <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full">
-                        <GridItem textAlign="center">{t("jurisdiction.edit.stepCode.energyStepRequired")}</GridItem>
+                      <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
+                        <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                          {t("jurisdiction.edit.stepCode.energyStepRequired")}
+                        </GridItem>
                         <GridItem textAlign="center"></GridItem>
-                        <GridItem textAlign="center">{t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}</GridItem>
+                        <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                          {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
+                        </GridItem>
                         {requiredStepsByPermitType[permitTypeId].map((ptrs, i) => (
                           <>
                             <GridItem as={Center}>
-                              <Text bg="semantic.successLight" w="fit-content" p={1} fontWeight="bold">
+                              <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
                                 {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
-                              </Text>
+                              </Tag>
                             </GridItem>
-                            <GridItem as={Center} textTransform="lowercase" fontStyle="italic" fontWeight="bold">
-                              <Text w="fit-content" p={1} color="text.secondary">
-                                {t("ui.and")}
-                              </Text>
+                            <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
+                              {t("ui.and")}
                             </GridItem>
                             <GridItem as={Center}>
-                              <Text bg="semantic.successLight" w="fit-content" p={1} fontWeight="bold">
-                                {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}
-                              </Text>
+                              <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                                {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}{" "}
+                              </Tag>
                             </GridItem>
                             {i !== requiredStepsByPermitType[permitTypeId].length - 1 && (
                               <GridItem
-                                as={Flex}
-                                justify="flex-start"
                                 colSpan={3}
                                 textTransform="uppercase"
                                 bg="theme.blueLight"
                                 fontStyle="italic"
-                                color="theme.blue"
-                                fontWeight="light"
-                                pl={4}
+                                color="text.link"
+                                fontSize="sm"
+                                px={2}
+                                py={1}
                               >
                                 {t("ui.or")}
                               </GridItem>
