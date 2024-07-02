@@ -124,6 +124,23 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_application_submission_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[permit_application.submitter_id] = permit_application.submit_event_notification_data
+
+    PermitHubMailer.notify_submitter_application_submitted(permit_application).deliver_later
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_application_revisions_request_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[
+      permit_application.submitter_id
+    ] = permit_application.revisions_request_event_notification_data
+    PermitHubMailer.notify_application_revisions_requested(permit_application).deliver_later
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   private
 
   # this is just a wrapper around the activity's metadat methods

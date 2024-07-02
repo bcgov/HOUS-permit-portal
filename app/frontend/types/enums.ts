@@ -23,7 +23,16 @@ export enum EPermitClassificationCode {
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
+  approved = "approved",
+}
+export enum EPermitApplicationSubstatus {
+  draft = "draft",
+  submitted = "submitted",
+  viewed = "viewed",
   revisionsRequested = "revisions_requested",
+  revisionsViewed = "revisions_viewed",
+  resubmitted = "resubmitted",
+  approved = "approved",
 }
 
 export enum ETemplateVersionStatus {
@@ -99,6 +108,7 @@ export enum EPermitApplicationSortFields {
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
   status = "status",
+  substatus = "substatus",
 }
 
 export enum EPermitApplicationSubmitterSortFields {
@@ -106,10 +116,11 @@ export enum EPermitApplicationSubmitterSortFields {
   permitClassification = "permit_classification",
   submitter = "submitter",
   submittedAt = "submitted_at",
-  status = "status",
+  substatus = "substatus",
 }
 
 export enum EPermitApplicationReviewerSortFields {
+  substatus = "substatus",
   number = "number",
   referenceNumber = "reference_number",
   permitClassification = "permit_classification",
@@ -359,6 +370,8 @@ export enum ERequirementChangeAction {
 export enum ENotificationActionType {
   newTemplateVersionPublish = "new_template_version_publish",
   customizationUpdate = "customization_update",
+  applicationSubmission = "application_submission",
+  applicationRevisionsRequest = "application_revisions_request",
 }
 
 export enum EReasonCode {

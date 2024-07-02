@@ -88,7 +88,7 @@ en:
       onboarding: "Welcome to the Building Permit Hub"
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
-      notify_application_updated: "Updated application status: %{permit_application_number}"
+      notify_application_viewed: "Updated application status: %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
@@ -491,6 +491,10 @@ en:
     template_version:
       new_version_notification: 'A new version of "%{template_label}" has been published'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
+    permit_application:
+      submission_notification: "Your application %{number} has been recieved by %{jurisdiction_name} and is pending review. Please check your email inbox for details."
+      resubmission_notification: "Your revised application %{number} has been recieved by %{jurisdiction_name} and is pending review. Please check your email inbox for details."
+      revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"

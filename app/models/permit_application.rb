@@ -1,4 +1,5 @@
 class PermitApplication < ApplicationRecord
+  include AASM
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
@@ -26,7 +27,21 @@ class PermitApplication < ApplicationRecord
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
-  enum status: { draft: 0, submitted: 1, revisions_requested: 2 }, _default: 0
+  enum status: { draft: 0, submitted: 1, approved: 2 }, _default: 0
+
+  aasm column: "status", enum: true do
+    state :draft, initial: true
+    state :submitted
+    state :approved
+
+    event :submit, after: :handle_submission do
+      transitions from: :draft, to: :submitted, guard: :can_submit?
+    end
+
+    event :finalize_revision_requests, after: :handle_finalize_revision_requests do
+      transitions from: :submitted, to: :draft
+    end
+  end
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -41,17 +56,36 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_save :set_submitted_at, if: :status_changed?
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :notify_user_application_updated
+  after_commit :notify_user_application_viewed
   after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
+
+  def substatus
+    if draft?
+      timestamp_map = { 1 => "draft", (revisions_requested_at&.to_i || 0) => "revisions_requested" }
+      return timestamp_map[timestamp_map.keys.max]
+    end
+
+    if submitted?
+      timestamp_map = {
+        submitted_at.to_i => "submitted",
+        (viewed_at&.to_i || 1) => "viewed",
+        (resubmitted_at&.to_i || 0) => "resubmitted",
+      }
+      map_max = timestamp_map[timestamp_map.keys.max]
+      return "revisions_viewed" if map_max == "viewed" && resubmitted_at.present?
+      return timestamp_map[timestamp_map.keys.max]
+    end
+
+    return status
+  end
 
   def force_update_published_template_version
     return unless Rails.env.development?
@@ -71,6 +105,8 @@ class PermitApplication < ApplicationRecord
       submitted_at: submitted_at,
       viewed_at: viewed_at,
       status: status,
+      substatus: substatus,
+      substatus: substatus,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
       template_version_id: template_version.id,
@@ -161,6 +197,14 @@ class PermitApplication < ApplicationRecord
     viewed_at&.strftime("%Y-%m-%d")
   end
 
+  def formatted_revisions_requested_at
+    revisions_requested_at&.strftime("%Y-%m-%d")
+  end
+
+  def formatted_resubmitted_at
+    resubmitted_at&.strftime("%Y-%m-%d")
+  end
+
   def permit_type_and_activity
     "#{activity.name} - #{permit_type.name}".strip
   end
@@ -170,7 +214,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    # All submission related emails and in-app notifications are handled by this method
+    NotificationService.publish_application_submission_event(self)
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
   end
 
@@ -208,9 +253,58 @@ class PermitApplication < ApplicationRecord
     missing_pdfs
   end
 
-  def finalize_revision_requests!
-    update(status: :revisions_requested)
-    PermitHubMailer.notify_application_updated(submitter, self).deliver_later
+  def can_submit?
+    signed = submission_data.dig("data", "section-completion-key", "signed").present?
+    signed && using_current_template_version
+  end
+
+  def handle_finalize_revision_requests
+    update(revisions_requested_at: Time.current)
+    NotificationService.publish_application_revisions_request_event(self)
+    reindex
+  end
+
+  def handle_submission
+    update(signed_off_at: Time.current)
+    submitted_at.blank? ? update(submitted_at: Time.current) : update(resubmitted_at: Time.current)
+    send_submit_notifications
+    reindex
+  end
+
+  def resubmitted?
+    resubmitted_at.present? && submitted?
+  end
+
+  def submit_event_notification_data
+    i18n_key =
+      (
+        if resubmitted_at.present?
+          "notification.permit_application.resubmission_notification"
+        else
+          "notification.permit_application.submission_notification"
+        end
+      )
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_SUBMISSION,
+      "action_text" => "#{I18n.t(i18n_key, number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
+  def revisions_request_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_REVISIONS_REQUEST,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.revisions_request_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
   end
 
   private
@@ -281,12 +375,12 @@ class PermitApplication < ApplicationRecord
     self.form_customizations_snapshot = current_customizations
   end
 
-  def notify_user_application_updated
+  def notify_user_application_viewed
     return if new_record?
     viewed_at_change = previous_changes.dig("viewed_at")
     # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
     if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
-      PermitHubMailer.notify_application_updated(submitter, self).deliver_later
+      PermitHubMailer.notify_application_viewed(self).deliver_later
     end
   end
 
@@ -295,11 +389,6 @@ class PermitApplication < ApplicationRecord
     return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
 
     jurisdiction.reindex
-  end
-
-  def set_submitted_at
-    # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
-    self.submitted_at = Time.current if submitted? && submitted_at.nil?
   end
 
   def submitter_must_have_role

@@ -66,6 +66,17 @@ export const NotificationStoreModel = types
           },
         ]
       }
+      if (
+        notification.actionType === ENotificationActionType.applicationSubmission ||
+        notification.actionType === ENotificationActionType.applicationRevisionsRequest
+      ) {
+        return [
+          {
+            text: t("ui.show"),
+            href: `/permit-applications/${notification.objectData.permitApplicationId}/edit`,
+          },
+        ]
+      }
     },
   }))
   .actions((self) => ({

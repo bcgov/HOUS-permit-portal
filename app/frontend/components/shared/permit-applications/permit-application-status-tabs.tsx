@@ -48,7 +48,7 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
           {Object.values(EPermitApplicationStatus).map((status) => {
             return (
               <Tab key={status} px={8}>
-                {t(`permitApplication.status.${status}`)}
+                {t(`permitApplication.statusTabs.${status}`)}
               </Tab>
             )
           })}

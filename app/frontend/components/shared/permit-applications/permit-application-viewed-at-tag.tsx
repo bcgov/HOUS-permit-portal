@@ -12,7 +12,7 @@ export const PermitApplicationViewedAtTag = ({ permitApplication, ...rest }: IPe
   return (
     <Tag
       p={1}
-      bg={permitApplication.isViewed ? undefined : "theme.yellow"}
+      bg={permitApplication.wasViewed ? undefined : "theme.yellow"}
       color={"text.link"}
       fontWeight="bold"
       border="1px solid"
@@ -21,7 +21,9 @@ export const PermitApplicationViewedAtTag = ({ permitApplication, ...rest }: IPe
       minW="fit-content"
       {...rest}
     >
-      {permitApplication.isViewed ? t("permitApplication.viewed") : t("permitApplication.notViewed")}
+      {permitApplication.wasViewed
+        ? t("permitApplication.substatus.viewed")
+        : t("permitApplication.substatus.notViewed")}
     </Tag>
   )
 }

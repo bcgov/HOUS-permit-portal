@@ -3,7 +3,12 @@ import { Instance, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EPermitApplicationStatus, ERequirementChangeAction, ERequirementType } from "../types/enums"
+import {
+  EPermitApplicationStatus,
+  EPermitApplicationSubstatus,
+  ERequirementChangeAction,
+  ERequirementType,
+} from "../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
@@ -41,6 +46,7 @@ export const PermitApplicationModel = types
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
+    substatus: types.enumeration(Object.values(EPermitApplicationSubstatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
@@ -51,6 +57,8 @@ export const PermitApplicationModel = types
     formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
     submittedAt: types.maybeNull(types.Date),
     viewedAt: types.maybeNull(types.Date),
+    resubmittedAt: types.maybeNull(types.Date),
+    revisionsRequestedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
     updatedAt: types.Date,
@@ -110,17 +118,35 @@ export const PermitApplicationModel = types
     blockKey(sectionId, blockId) {
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
-    get isSubmitted() {
-      return self.status === EPermitApplicationStatus.submitted
-    },
     get isDraft() {
       return self.status === EPermitApplicationStatus.draft
     },
-    get isViewed() {
+    get isSubmitted() {
+      return self.status === EPermitApplicationStatus.submitted
+    },
+    get isApproved() {
+      return self.status === EPermitApplicationStatus.approved
+    },
+    get wasViewed() {
       return self.viewedAt !== null
     },
+    get wasResubmitted() {
+      return self.resubmittedAt !== null
+    },
+    get wasRevisionsRequested() {
+      return self.revisionsRequestedAt !== null
+    },
     get isRevisionsRequested() {
-      return self.status === EPermitApplicationStatus.revisionsRequested
+      return self.substatus === EPermitApplicationSubstatus.revisionsRequested
+    },
+    get isResubmitted() {
+      return self.substatus === EPermitApplicationSubstatus.resubmitted
+    },
+    get isViewed() {
+      return self.substatus === EPermitApplicationSubstatus.viewed
+    },
+    get isRevisionsViewed() {
+      return self.substatus === EPermitApplicationSubstatus.revisionsViewed
     },
     get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
       if (!self.diff) return null
@@ -165,13 +191,6 @@ export const PermitApplicationModel = types
         (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
         (self.revisionMode ? "-revision" : "")
       )
-    },
-    get statusTagText() {
-      if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
-        return t("permitApplication.viewed")
-      }
-
-      return self.status
     },
     indexOfBlockId: (blockId: string) => {
       if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1

@@ -41,10 +41,18 @@ interface IRequirementFormProps {
   triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
   showHelpButton?: boolean
   isEditing?: boolean
+  renderTopButtons?: () => React.ReactNode
 }
 
 export const RequirementForm = observer(
-  ({ permitApplication, onCompletedBlocksChange, formRef, triggerSave, isEditing = false }: IRequirementFormProps) => {
+  ({
+    permitApplication,
+    onCompletedBlocksChange,
+    formRef,
+    triggerSave,
+    isEditing = false,
+    renderTopButtons,
+  }: IRequirementFormProps) => {
     const {
       jurisdiction,
       submissionData,
@@ -268,7 +276,9 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: !permitApplication.revisionMode }),
+      ...(isDraft
+        ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) }
+        : { readOnly: !permitApplication.revisionMode }),
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -305,6 +315,7 @@ export const RequirementForm = observer(
             },
           }}
         >
+          {renderTopButtons && renderTopButtons()}
           {permitApplication.isLoading && (
             <Center position="fixed" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">
               <SharedSpinner h={24} w={24} />

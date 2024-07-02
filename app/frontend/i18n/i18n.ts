@@ -383,11 +383,25 @@ const options = {
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
-          viewed: "Viewed",
-          notViewed: "New",
           status: {
+            draft: "Draft",
+            submitted: "Submitted",
+            approved: "Approved",
+          },
+          substatus: {
+            draft: "Draft",
+            submitted: "Submitted",
+            approved: "Approved",
+            notViewed: "New",
+            viewed: "Viewed",
+            resubmitted: "Newly revised",
+            revisions_requested: "Revision needed",
+            revisions_viewed: "Revision viewed",
+          },
+          statusTabs: {
             draft: "Draft permits",
             submitted: "Submitted permits",
+            approved: "Approved permits",
           },
           columns: {
             number: "Application #",
@@ -397,6 +411,7 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
+            substatus: "Status",
           },
           submissionInbox: {
             contactInviteWarning:

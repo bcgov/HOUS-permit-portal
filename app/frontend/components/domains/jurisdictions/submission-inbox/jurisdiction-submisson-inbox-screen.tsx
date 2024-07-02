@@ -19,6 +19,7 @@ import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
 import { Can } from "../../../shared/user/can"
 import { SubmissionDownloadModal } from "../../permit-application/submission-download-modal"
@@ -62,7 +63,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Can>
         </Flex>
 
-        <SearchGrid templateColumns="170px 1.2fr 1.5fr repeat(4, 1fr)">
+        <SearchGrid templateColumns="90px 170px 1.6fr 1.5fr repeat(4, 1.3fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -78,6 +79,9 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   role={"row"}
                   display={"contents"}
                 >
+                  <SearchGridItem>
+                    <PermitApplicationStatusTag permitApplication={pa} />
+                  </SearchGridItem>
                   <SearchGridItem>{pa.number}</SearchGridItem>
                   <SearchGridItem>{pa.referenceNumber}</SearchGridItem>
                   <SearchGridItem>
@@ -93,7 +97,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     </Flex>
                   </SearchGridItem>
                   <SearchGridItem>
-                    {pa.isViewed ? (
+                    {pa.wasViewed ? (
                       <Flex direction="column">
                         <Text>{format(pa.viewedAt, "yyyy-MM-dd")}</Text>
                         <Text>{format(pa.viewedAt, "HH:mm")}</Text>

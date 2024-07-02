@@ -3,6 +3,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     identifier :id
     fields :nickname,
            :status,
+           :substatus,
            :number,
            :created_at,
            :updated_at,
@@ -15,6 +16,8 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :zipfile_url,
            :reference_number,
            :submitted_at,
+           :resubmitted_at,
+           :revisions_requested_at,
            :missing_pdfs
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint

@@ -50,7 +50,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
   }, [currentPermitApplication?.referenceNumber])
 
   useEffect(() => {
-    if (currentPermitApplication && !currentPermitApplication.isViewed) {
+    if (currentPermitApplication) {
       currentPermitApplication.markAsViewed()
     }
   }, [currentPermitApplication])
@@ -133,7 +133,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
               {t("permitApplication.show.contactsSummary")}
             </Button>
             <SubmissionDownloadModal permitApplication={currentPermitApplication} />
-            <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
+            <Button
+              rightIcon={<CaretRight />}
+              onClick={() => navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)}
+            >
               {t("ui.backToInbox")}
             </Button>
           </Stack>
@@ -184,23 +187,22 @@ export const ReviewPermitApplicationScreen = observer(() => {
         )}
         {formattedFormJson && (
           <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
-            {!revisionMode && (
-              <Button
-                ml={{ lg: "8" }}
-                variant="callout"
-                leftIcon={<NotePencil />}
-                onClick={() => setRevisionMode(true)}
-              >
-                {currentPermitApplication.isRevisionsRequested
-                  ? t("permitApplication.show.viewRevisionRequests")
-                  : t("permitApplication.show.requestRevisions")}
-              </Button>
-            )}
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
               onCompletedBlocksChange={setCompletedBlocks}
               showHelpButton
+              renderTopButtons={() => {
+                return (
+                  !revisionMode && (
+                    <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
+                      {currentPermitApplication.isRevisionsRequested
+                        ? t("permitApplication.show.viewRevisionRequests")
+                        : t("permitApplication.show.requestRevisions")}
+                    </Button>
+                  )
+                )
+              }}
             />
           </Flex>
         )}
