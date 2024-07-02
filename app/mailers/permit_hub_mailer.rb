@@ -22,6 +22,22 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "notify_submitter_application_submitted")
   end
 
+  def notify_integration_mapping(user:, integration_mapping:)
+    @user = user
+    @template_version = integration_mapping.template_version
+
+    unless (@user.review_manager? || @user.regional_review_manager?) &&
+             (@template_version.published? || @template_version.scheduled?)
+      return
+    end
+
+    @front_end_path = integration_mapping.front_end_edit_path
+
+    template_key = "notify_#{@template_version.scheduled? ? "new" : "missing"}_integration_mapping"
+
+    send_user_mail(email: user.email, template_key: template_key)
+  end
+
   def notify_reviewer_application_received(permit_type_submission_contact, permit_application)
     @permit_application = permit_application
     send_mail(

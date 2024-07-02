@@ -7,6 +7,7 @@ import { useActivityOptions } from "../../../../hooks/resources/use-activity-opt
 import { useMst } from "../../../../setup/root"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
+import { RedirectScreen } from "../../../shared/base/redirect-screen"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { SubNavBar } from "../../navigation/sub-nav-bar"
 import { ActivityTabSwitcher } from "../activity-tab-switcher"
@@ -40,6 +41,9 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
   if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
+  if (currentJurisdiction && !currentJurisdiction.externalApiEnabled) {
+    return <RedirectScreen path={`/jurisdictions/${currentJurisdiction.slug}/api-settings`} />
+  }
 
   const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
 

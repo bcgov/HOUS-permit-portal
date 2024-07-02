@@ -128,11 +128,28 @@ class IntegrationMapping < ApplicationRecord
   end
 
   def send_missing_requirements_mapping_email
-    #  TODO
+    return unless can_send_template_missing_requirements_communication?
+
+    event_id = requirements_mapping_event_id("email")
+
+    return false if Rails.cache.exist?(event_id)
+
+    Rails.cache.write(event_id, true, expires_in: 5.minutes)
+
+    users_to_notify = jurisdiction.users.kept.where(role: %w[review_manager regional_review_manager])
+
+    users_to_notify.each do |u|
+      PermitHubMailer.notify_integration_mapping(user: u, integration_mapping: self)&.deliver_later
+    end
   end
 
   def can_send_template_missing_requirements_communication?
-    missing_any_requirements_mapping? && (template_version.published? || template_version.scheduled?)
+    jurisdiction.external_api_enabled? && missing_any_requirements_mapping? &&
+      (template_version.published? || template_version.scheduled?)
+  end
+
+  def front_end_edit_path
+    "/jurisdictions/#{jurisdiction.slug}/api-settings/api-mappings/digital-building-permits/#{template_version.id}/edit"
   end
 
   private
