@@ -170,12 +170,20 @@ class IntegrationMapping < ApplicationRecord
   # @return [void]
 
   def sync_changes_with_other_currently_active_mappings
-    return unless simplified_map_to_sync.present? && simplified_map_to_sync.is_a?(Hash)
+    unless simplified_map_to_sync.present? && simplified_map_to_sync.is_a?(Hash) &&
+             (template_version.published? || template_version.scheduled?)
+      return
+    end
 
     active_mappings =
       IntegrationMapping
         .joins(:template_version)
-        .where(jurisdiction_id: jurisdiction_id, template_versions: { status: "published" })
+        .where(
+          jurisdiction_id: jurisdiction_id,
+          template_versions: {
+            status: template_version.published? ? %i[published scheduled] : :scheduled,
+          },
+        )
         .where.not(id: id)
 
     active_mappings.each { |mapping| mapping.update_requirements_mapping(simplified_map_to_sync, true) }

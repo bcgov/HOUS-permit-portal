@@ -1337,6 +1337,7 @@ const options = {
           title: "API mappings setup",
           index: {
             helperSubtitle: "See details of how fields are mapped to the API.",
+            seeButton: "See {{status}}",
           },
           edit: {
             permitTemplate: "Permit template",

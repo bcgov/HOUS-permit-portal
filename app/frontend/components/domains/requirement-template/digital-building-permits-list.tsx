@@ -17,15 +17,18 @@ import { SectionBox } from "../home/section-box"
 interface IProps {
   activityId?: string
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
+  status?: ETemplateVersionStatus
 }
 
 export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({
   activityId,
   renderButton,
+  status = ETemplateVersionStatus.published,
 }: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, hasLoaded } = useTemplateVersions({
     activityId,
+    status,
     customErrorMessage: t("errors.fetchBuildingPermits"),
   })
 

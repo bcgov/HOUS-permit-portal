@@ -1,10 +1,11 @@
-import { Box, Button, Container, Heading, TabPanel, Text } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, TabPanel, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useActivityOptions } from "../../../../hooks/resources/use-activity-options"
 import { useMst } from "../../../../setup/root"
+import { ETemplateVersionStatus } from "../../../../types/enums"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { RedirectScreen } from "../../../shared/base/redirect-screen"
@@ -23,10 +24,14 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   const [searchParams, setSearchParams] = useSearchParams()
   const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
   const activityId = searchParams.get("activityId")
+  const status =
+    [ETemplateVersionStatus.published, ETemplateVersionStatus.scheduled].find(
+      (s) => s === searchParams.get("status")
+    ) || ETemplateVersionStatus.published
   const currentJurisdiction = currentUser?.jurisdiction
 
   const navigateToActivityTab = (activityId: string, replace?: boolean) => {
-    setSearchParams({ activityId }, { replace })
+    setSearchParams({ activityId, status }, { replace })
   }
   useEffect(() => {
     if (!enabledActivityOptions || activityOptionsError || activityId) {
@@ -73,9 +78,28 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
         <Heading as="h1" size="2xl">
           {t("apiMappingsSetup.title")}
         </Heading>
-        <Text color="text.secondary" my={6}>
-          {t("apiMappingsSetup.index.helperSubtitle")}
-        </Text>
+        <Flex my={6} w={"full"} justifyContent={"space-between"} mr={6}>
+          <Text color="text.secondary">{t("apiMappingsSetup.index.helperSubtitle")}</Text>
+          <Button
+            variant={"secondary"}
+            onClick={() =>
+              setSearchParams({
+                status:
+                  status === ETemplateVersionStatus.published
+                    ? ETemplateVersionStatus.scheduled
+                    : ETemplateVersionStatus.published,
+              })
+            }
+          >
+            {t("apiMappingsSetup.index.seeButton", {
+              status:
+                status === ETemplateVersionStatus.published
+                  ? ETemplateVersionStatus.scheduled
+                  : ETemplateVersionStatus.published,
+            })}
+          </Button>
+        </Flex>
+
         <Text color="text.secondary" my={6}>
           {t("digitalBuildingPermits.index.selectPermit")}
         </Text>
@@ -101,6 +125,7 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
                     {t("ui.manage")}
                   </Button>
                 )}
+                status={status}
               />
             </TabPanel>
           ))}
