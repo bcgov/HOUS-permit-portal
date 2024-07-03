@@ -152,6 +152,28 @@ class IntegrationMapping < ApplicationRecord
     "/jurisdictions/#{jurisdiction.slug}/api-settings/api-mappings/digital-building-permits/#{template_version.id}/edit"
   end
 
+  def elective_filtered_requirements_mapping
+    template_version_customization = jurisdiction_template_version_customization
+
+    elective_filtered_mapping = {}
+
+    requirements_mapping.each do |requirement_block_sku, requirement_block|
+      requirement_block["requirements"]&.each do |requirement_code, requirement|
+        # binding.pry if requirement_code == "business_license_number"
+        is_elective =
+          !!template_version.get_requirement_json(requirement_block["id"], requirement["id"])&.dig("elective")
+        enabled = !!template_version_customization&.elective_enabled?(requirement_block["id"], requirement["id"])
+
+        next if is_elective && !enabled
+
+        elective_filtered_mapping[requirement_block_sku] ||= { "id" => requirement_block["id"], "requirements" => {} }
+        elective_filtered_mapping[requirement_block_sku]["requirements"][requirement_code] = requirement
+      end
+    end
+
+    elective_filtered_mapping
+  end
+
   private
 
   def initialize_requirements_mapping
