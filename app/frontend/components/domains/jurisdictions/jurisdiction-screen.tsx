@@ -1,4 +1,9 @@
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Box,
   Button,
   Center,
@@ -6,21 +11,20 @@ import {
   Flex,
   FormControl,
   FormLabel,
+  Grid,
+  GridItem,
   HStack,
   Heading,
   Input,
+  Link,
   ListItem,
   OrderedList,
   Show,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
+  Tag,
   Text,
-  Th,
-  Thead,
-  Tr,
 } from "@chakra-ui/react"
+
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -184,11 +188,10 @@ export const JurisdictionScreen = observer(() => {
                 <Flex direction="column" p={6} gap={9}>
                   <Flex direction="column" gap={2}>
                     <Text>{t("jurisdiction.edit.stepCode.description")}</Text>
-                    {/* TODO: Add step code help link href */}
-                    {/* <Link href={"#"} isExternal>
-                      {t("jurisdiction.edit.stepCode.helpLinkText")}
+                    <Link href={t("stepCode.helpLink")} isExternal fontWeight="normal">
+                      {t("stepCode.helpLinkText")}
                       <ArrowSquareOut />
-                    </Link> */}
+                    </Link>
                   </Flex>
                   <StepCodeTable currentJurisdiction={currentJurisdiction} />
                 </Flex>
@@ -385,31 +388,70 @@ interface IStepCodeTableProps {
 
 const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) => {
   const { t } = useTranslation()
-
+  const requiredStepsByPermitType = currentJurisdiction.requiredStepsByPermitType
   return (
-    <TableContainer>
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th textAlign="center">{t("jurisdiction.edit.stepCode.permitTemplate")}</Th>
-            <Th textAlign="center">{t("jurisdiction.edit.stepCode.energyStepRequired")}</Th>
-            <Th textAlign="center"></Th>
-            <Th textAlign="center">{t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td textAlign="center" fontWeight="bold">
-              {t("ui.all")}
-            </Td>
-            <Td textAlign="center">{currentJurisdiction.energyStepRequired}</Td>
-            <Td textAlign="center" textTransform="lowercase" fontStyle="italic">
-              {t("ui.and")}
-            </Td>
-            <Td textAlign="center">{currentJurisdiction.zeroCarbonLevelTranslation}</Td>
-          </Tr>
-        </Tbody>
-      </Table>
-    </TableContainer>
+    <Flex direction="column" gap={4}>
+      {Object.keys(requiredStepsByPermitType).map(
+        (permitTypeId, index) =>
+          requiredStepsByPermitType[permitTypeId][0] && (
+            <Accordion key={index} allowToggle>
+              <AccordionItem borderWidth={1} borderColor="border.light" rounded="sm">
+                <AccordionButton bg="greys.grey03" fontWeight="bold">
+                  <Box flex="1" textAlign="left">
+                    {requiredStepsByPermitType[permitTypeId][0].permitTypeName}
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+                <AccordionPanel pb={4}>
+                  <>
+                    <Flex justify="flex-end">
+                      <Grid templateColumns="2fr 1fr 2fr" gap={4} w="full" color="text.secondary">
+                        <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                          {t("jurisdiction.edit.stepCode.energyStepRequired")}
+                        </GridItem>
+                        <GridItem textAlign="center"></GridItem>
+                        <GridItem textAlign="center" textTransform="uppercase" fontSize="xs">
+                          {t("jurisdiction.edit.stepCode.zeroCarbonStepRequired")}
+                        </GridItem>
+                        {requiredStepsByPermitType[permitTypeId].map((ptrs, i) => (
+                          <>
+                            <GridItem as={Center}>
+                              <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                                {currentJurisdiction.energyStepRequiredTranslation(ptrs.energyStepRequired)}
+                              </Tag>
+                            </GridItem>
+                            <GridItem as={Center} fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
+                              {t("ui.and")}
+                            </GridItem>
+                            <GridItem as={Center}>
+                              <Tag bg="semantic.successLight" color="inherit" rounded="xs" fontWeight="bold">
+                                {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}{" "}
+                              </Tag>
+                            </GridItem>
+                            {i !== requiredStepsByPermitType[permitTypeId].length - 1 && (
+                              <GridItem
+                                colSpan={3}
+                                textTransform="uppercase"
+                                bg="theme.blueLight"
+                                fontStyle="italic"
+                                color="text.link"
+                                fontSize="sm"
+                                px={2}
+                                py={1}
+                              >
+                                {t("ui.or")}
+                              </GridItem>
+                            )}
+                          </>
+                        ))}
+                      </Grid>
+                    </Flex>
+                  </>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          )
+      )}
+    </Flex>
   )
 }

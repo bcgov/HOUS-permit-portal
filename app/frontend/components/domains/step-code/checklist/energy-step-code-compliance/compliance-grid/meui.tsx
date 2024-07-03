@@ -2,7 +2,7 @@ import { StackDivider, Text, VStack } from "@chakra-ui/react"
 import { Percent } from "@phosphor-icons/react"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../../models/step-code-energy-compliance-report"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridData } from "../../shared/grid/data"
 import { RequirementsMetTag } from "../../shared/grid/requirements-met-tag"
@@ -11,10 +11,10 @@ import { UnitsText } from "../../shared/grid/units-text"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeEnergyComplianceReport
 }
 
-export const MEUI = function MEUI({ checklist }: IProps) {
+export const MEUI = function MEUI({ compliance }: IProps) {
   return (
     <>
       <GridRowHeader>
@@ -22,7 +22,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
       </GridRowHeader>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.meuiRequirement || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.meuiRequirement || "-" }}
           hint={t(`${i18nPrefix}.max`)}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
@@ -34,7 +34,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.meui || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.meui || "-" }}
           rightElement={
             <VStack spacing={0} divider={<StackDivider color="border.base" />}>
               <UnitsText>{t(`${i18nPrefix}.meuiUnits.numerator`)}</UnitsText>
@@ -44,7 +44,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
         />
       </GridData>
       <GridData rowSpan={2} alignItems="center" justifyContent="center">
-        <RequirementsMetTag success={checklist.meuiPassed} />
+        <RequirementsMetTag success={compliance.meuiPassed} />
       </GridData>
 
       <GridRowHeader>{t(`${i18nPrefix}.meuiImprovement`)}</GridRowHeader>
@@ -53,7 +53,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.meuiPercentImprovementRequirement || "-",
+            value: compliance.meuiPercentImprovementRequirement || "-",
           }}
           hint={t(`${i18nPrefix}.min`)}
           rightElement={<Percent />}
@@ -61,7 +61,7 @@ export const MEUI = function MEUI({ checklist }: IProps) {
       </GridData>
       <GridData>
         <TextFormControl
-          inputProps={{ isDisabled: true, textAlign: "center", value: checklist.meuiPercentImprovement || "-" }}
+          inputProps={{ isDisabled: true, textAlign: "center", value: compliance.meuiPercentImprovement || "-" }}
           rightElement={<Percent />}
         />
       </GridData>

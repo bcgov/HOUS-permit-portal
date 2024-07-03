@@ -12,6 +12,7 @@ interface IProps {
   checklist: IStepCodeChecklist
 }
 export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary({ checklist }: IProps) {
+  const report = checklist.selectedReport
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
       <Field
@@ -22,17 +23,17 @@ export const ComplianceSummary = function StepCodeChecklistPDFComplianceSummary(
         <ComplianceBox
           heading={t(`${i18nPrefix}.energyStepCode.heading`)}
           stepRequiredLabel={t(`${i18nPrefix}.energyStepCode.stepRequired`) + ": "}
-          stepRequired={checklist.requiredEnergyStep}
+          stepRequired={report.energy.requiredStep}
           stepProposedLabel={t(`${i18nPrefix}.energyStepCode.stepProposed`) + ": "}
-          stepProposed={checklist.proposedEnergyStep}
+          stepProposed={report.energy.proposedStep}
         />
 
         <ComplianceBox
           heading={t(`${i18nPrefix}.zeroCarbonStepCode.heading`)}
           stepRequiredLabel={t(`${i18nPrefix}.zeroCarbonStepCode.stepRequired`) + ": "}
-          stepRequired={checklist.requiredZeroCarbonStep}
+          stepRequired={report.zeroCarbon.requiredStep}
           stepProposedLabel={t(`${i18nPrefix}.zeroCarbonStepCode.stepProposed`) + ": "}
-          stepProposed={checklist.proposedZeroCarbonStep}
+          stepProposed={report.zeroCarbon.proposedStep}
         />
       </View>
 
