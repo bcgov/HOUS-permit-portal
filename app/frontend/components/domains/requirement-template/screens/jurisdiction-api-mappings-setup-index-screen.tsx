@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, TabPanel, Text } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,15 +24,18 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
   const [searchParams, setSearchParams] = useSearchParams()
   const enabledActivityOptions = allActivityOptions?.filter((option) => option.value.enabled) ?? null
   const activityId = searchParams.get("activityId")
-  const status =
-    [ETemplateVersionStatus.published, ETemplateVersionStatus.scheduled].find(
-      (s) => s === searchParams.get("status")
-    ) || ETemplateVersionStatus.published
+  let templateStatuses = [ETemplateVersionStatus.published, ETemplateVersionStatus.scheduled]
+  const status = templateStatuses.find((s) => s === searchParams.get("status"))
   const currentJurisdiction = currentUser?.jurisdiction
 
   const navigateToActivityTab = (activityId: string, replace?: boolean) => {
     setSearchParams({ activityId, status }, { replace })
   }
+
+  const navigateToStatusTab = (status: ETemplateVersionStatus, replace?: boolean) => {
+    setSearchParams({ status }, { replace })
+  }
+
   useEffect(() => {
     if (!enabledActivityOptions || activityOptionsError || activityId) {
       return
@@ -43,6 +46,12 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
     navigateToActivityTab(firstActivityId, true)
   }, [activityId, enabledActivityOptions, activityOptionsError])
 
+  useEffect(() => {
+    if (!status) {
+      navigateToStatusTab(ETemplateVersionStatus.published, true)
+    }
+  }, [status])
+
   if (!currentUser?.jurisdiction) return <ErrorScreen error={new Error(t("errors.fetchJurisdiction"))} />
   if (activityOptionsError) return <ErrorScreen error={activityOptionsError} />
   if (!enabledActivityOptions || (enabledActivityOptions && !activityId)) return <LoadingScreen />
@@ -50,9 +59,10 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
     return <RedirectScreen path={`/jurisdictions/${currentJurisdiction.slug}/api-settings`} />
   }
 
-  const selectedTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId)
+  const selectedActivityTabIndex = enabledActivityOptions.findIndex((option) => option.value.id === activityId) || 0
+  const selectedStatusTabIndex = templateStatuses.findIndex((s) => s === status) || 0
 
-  if (enabledActivityOptions.length === 0 || selectedTabIndex === -1) {
+  if (enabledActivityOptions.length === 0 || selectedActivityTabIndex === -1) {
     return <ErrorScreen error={new Error(t("errors.workTypeNotFound"))} />
   }
 
@@ -78,58 +88,64 @@ export const JurisdictionApiMappingsSetupIndexScreen = observer(function Jurisdi
         <Heading as="h1" size="2xl">
           {t("apiMappingsSetup.title")}
         </Heading>
-        <Flex my={6} w={"full"} justifyContent={"space-between"} mr={6}>
-          <Text color="text.secondary">{t("apiMappingsSetup.index.helperSubtitle")}</Text>
-          <Button
-            variant={"secondary"}
-            onClick={() =>
-              setSearchParams({
-                status:
-                  status === ETemplateVersionStatus.published
-                    ? ETemplateVersionStatus.scheduled
-                    : ETemplateVersionStatus.published,
-              })
-            }
-          >
-            {t("apiMappingsSetup.index.seeButton", {
-              status:
-                status === ETemplateVersionStatus.published
-                  ? ETemplateVersionStatus.scheduled
-                  : ETemplateVersionStatus.published,
-            })}
-          </Button>
-        </Flex>
 
-        <Text color="text.secondary" my={6}>
-          {t("digitalBuildingPermits.index.selectPermit")}
-        </Text>
+        <Tabs isLazy index={selectedStatusTabIndex}>
+          <Flex alignItems={"center"}>
+            <Box flex={1}>
+              <Text color="text.secondary" my={6}>
+                {t("apiMappingsSetup.index.helperSubtitle")}
+              </Text>
 
-        <ActivityTabSwitcher
-          selectedTabIndex={selectedTabIndex}
-          navigateToActivityTab={navigateToActivityTab}
-          enabledActivityOptions={enabledActivityOptions}
-        >
-          {enabledActivityOptions.map((activityOption) => (
-            <TabPanel key={activityOption.value.id} w="100%" pt={0}>
-              <DigitalBuildingPermitsList
-                activityId={activityOption.value.id}
-                renderButton={(templateVersion) => (
-                  <Button
-                    as={RouterLink}
-                    to={`/api-settings/api-mappings/digital-building-permits/${templateVersion.id}/edit`}
-                    isDisabled={!currentUser?.jurisdiction?.externalApiEnabled}
-                    variant={"primary"}
-                    ml={4}
-                    alignSelf={"center"}
-                  >
-                    {t("ui.manage")}
-                  </Button>
-                )}
-                status={status}
-              />
-            </TabPanel>
-          ))}
-        </ActivityTabSwitcher>
+              <Text color="text.secondary" my={6}>
+                {t("digitalBuildingPermits.index.selectPermit")}
+              </Text>
+            </Box>
+            <TabList border={"none"} h={"fit-content"}>
+              {templateStatuses.map((status) => (
+                <Tab key={status} onClick={() => navigateToStatusTab(status)}>
+                  {t(`requirementTemplate.status.${status}`)}
+                </Tab>
+              ))}
+            </TabList>
+          </Flex>
+
+          <TabPanels>
+            {templateStatuses.map((status) => (
+              <TabPanel key={status}>
+                <ActivityTabSwitcher
+                  selectedTabIndex={selectedActivityTabIndex}
+                  navigateToActivityTab={navigateToActivityTab}
+                  enabledActivityOptions={enabledActivityOptions}
+                >
+                  {enabledActivityOptions.map((activityOption) => (
+                    <TabPanel key={activityOption.value.id} w="100%" pt={0}>
+                      <DigitalBuildingPermitsList
+                        activityId={activityOption.value.id}
+                        renderButton={(templateVersion) => (
+                          <Button
+                            as={RouterLink}
+                            to={`/api-settings/api-mappings/digital-building-permits/${templateVersion.id}/edit`}
+                            isDisabled={!currentUser?.jurisdiction?.externalApiEnabled}
+                            variant={"primary"}
+                            ml={4}
+                            alignSelf={"center"}
+                          >
+                            {t("ui.manage")}
+                          </Button>
+                        )}
+                        status={status}
+                        statusDisplayOptions={{
+                          showStatus: true,
+                          showVersionDate: false,
+                        }}
+                      />
+                    </TabPanel>
+                  ))}
+                </ActivityTabSwitcher>
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </Tabs>
       </Box>
     </Container>
   )

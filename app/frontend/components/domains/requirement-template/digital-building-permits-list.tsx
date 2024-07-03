@@ -10,7 +10,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
-import { Can } from "../../shared/user/can"
+import { can } from "../../shared/user/can"
 import { VersionTag } from "../../shared/version-tag"
 import { SectionBox } from "../home/section-box"
 
@@ -18,12 +18,17 @@ interface IProps {
   activityId?: string
   renderButton?: (templateVersion: ITemplateVersion) => React.ReactNode
   status?: ETemplateVersionStatus
+  statusDisplayOptions?: {
+    showStatus?: boolean
+    showVersionDate?: boolean
+  }
 }
 
 export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({
   activityId,
   renderButton,
   status = ETemplateVersionStatus.published,
+  statusDisplayOptions,
 }: IProps) {
   const { t } = useTranslation()
   const { error, templateVersions, hasLoaded } = useTemplateVersions({
@@ -31,6 +36,8 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
     status,
     customErrorMessage: t("errors.fetchBuildingPermits"),
   })
+  const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
+  const showStatusTag = showStatus || can("requirementTemplate:manage")
 
   if (error) return <ErrorScreen error={error} />
   if (!hasLoaded) return <LoadingScreen />
@@ -61,16 +68,18 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                 </Text>
                 <HStack gap={4} align="center">
                   <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
-                  <Can action="requirementTemplate:manage">
+                  {showStatusTag && (
                     <TemplateStatusTag
                       status={templateVersion.status}
                       scheduledFor={
-                        templateVersion.status === ETemplateVersionStatus.scheduled && templateVersion.versionDate
+                        showVersionDate &&
+                        templateVersion.status === ETemplateVersionStatus.scheduled &&
+                        templateVersion.versionDate
                           ? templateVersion.versionDate
                           : undefined
                       }
                     />
-                  </Can>
+                  )}
                 </HStack>
               </Stack>
 
