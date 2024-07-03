@@ -1,9 +1,9 @@
 import { Accordion, Alert, Center, Container, HStack, Heading, Tag, VStack } from "@chakra-ui/react"
-import { LightningA, WarningCircle } from "@phosphor-icons/react"
+import { LightningA } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { Suspense, useEffect } from "react"
+import React, { Suspense, useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
@@ -14,6 +14,7 @@ import { ComplianceSummary } from "./compliance-summary"
 import { EnergyPerformanceCompliance } from "./energy-performance-compliance"
 import { EnergyStepCodeCompliance } from "./energy-step-code-compliance"
 import { ProjectInfo } from "./project-info"
+import { StepNotMetWarning } from "./shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance"
 
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
@@ -22,6 +23,10 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   } = useMst()
   const checklist = stepCode.preConstructionChecklist
   const navigate = useNavigate()
+  const [index, setIndex] = useState([0, 1, 2, 3, 4])
+  const [scrollRef, setScrollRef] = useState<null | HTMLDivElement>()
+  const energyComplianceRef = useRef<null | HTMLDivElement>()
+  const zeroCarbonComplianceRef = useRef<null | HTMLDivElement>()
 
   useEffect(() => {
     const fetch = async () => await checklist.load()
@@ -44,6 +49,33 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   }
 
   const i18nPrefix = "stepCodeChecklist.edit"
+
+  const scrollToEnergyCompliance = () => scrollToRef(energyComplianceRef.current, 5)
+  const scrollToZeroCarbonCompliance = () => scrollToRef(zeroCarbonComplianceRef.current, 6)
+
+  const scrollToRef = (ref, refIndex) => {
+    if (!ref) return
+    setScrollRef(ref)
+    // expand the accordion if needed
+    if (!R.includes(refIndex, index)) {
+      setIndex([...index, refIndex])
+    }
+  }
+
+  useEffect(() => {
+    if (!scrollRef) return
+
+    // timeout to allow for accordion transition to complete so scroll position can be determined accurately
+    setTimeout(() => {
+      const yOffset = document.getElementById("stepCodeNav")?.offsetHeight + 20
+      const scrollParent = document.getElementById("stepCodeScroll")
+      const y = scrollRef.getBoundingClientRect().top + scrollParent.scrollTop - yOffset
+
+      scrollParent.scrollTo({ top: y, behavior: "smooth" })
+
+      setScrollRef(null)
+    }, 200)
+  }, [index, scrollRef])
 
   return (
     <Suspense
@@ -75,32 +107,10 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </HStack>
             <VStack spacing={2}>
               {R.isNil(checklist.selectedReport.energy.proposedStep) && (
-                <Alert
-                  status="error"
-                  rounded="lg"
-                  borderWidth={1}
-                  borderColor="semantic.error"
-                  bg="semantic.errorLight"
-                  gap={2}
-                  color="text.primary"
-                >
-                  <WarningCircle color="var(--chakra-colors-semantic-error)" />
-                  {t(`${i18nPrefix}.energyStepNotMet`)}
-                </Alert>
+                <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} />
               )}
               {R.isNil(checklist.selectedReport.zeroCarbon.proposedStep) && (
-                <Alert
-                  status="error"
-                  rounded="lg"
-                  borderWidth={1}
-                  borderColor="semantic.error"
-                  bg="semantic.errorLight"
-                  gap={2}
-                  color="text.primary"
-                >
-                  <WarningCircle color="var(--chakra-colors-semantic-error)" />
-                  {t(`${i18nPrefix}.zeroCarbonStepNotMet`)}
-                </Alert>
+                <StepNotMetWarning i18nKey="zeroCarbonStepNotMet" scrollToSection={scrollToZeroCarbonCompliance} />
               )}
               <Alert
                 status="info"
@@ -117,14 +127,21 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </VStack>
             <FormProvider {...formMethods}>
               <form onSubmit={handleSubmit(onSubmit)} name="stepCodeChecklistForm">
-                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]}>
+                <Accordion allowMultiple defaultIndex={[0, 1, 2, 3, 4]} index={index} onChange={setIndex}>
                   <ProjectInfo checklist={checklist} />
-                  <ComplianceSummary checklist={checklist} />
+                  <ComplianceSummary
+                    checklist={checklist}
+                    scrollToEnergyCompliance={scrollToEnergyCompliance}
+                    scrollToZeroCarbonCompliance={scrollToZeroCarbonCompliance}
+                  />
                   <CompletedBy checklist={checklist} />
                   <BuildingCharacteristicsSummary checklist={checklist} />
                   <EnergyPerformanceCompliance compliance={checklist.selectedReport.energy} />
-                  <EnergyStepCodeCompliance compliance={checklist.selectedReport.energy} />
-                  <ZeroCarbonStepCodeCompliance compliance={checklist.selectedReport.zeroCarbon} />
+                  <EnergyStepCodeCompliance ref={energyComplianceRef} compliance={checklist.selectedReport.energy} />
+                  <ZeroCarbonStepCodeCompliance
+                    ref={zeroCarbonComplianceRef}
+                    compliance={checklist.selectedReport.zeroCarbon}
+                  />
                 </Accordion>
               </form>
             </FormProvider>

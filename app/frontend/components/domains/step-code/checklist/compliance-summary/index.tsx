@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Divider,
   FormControl,
@@ -12,7 +11,7 @@ import {
   VStack,
   styled,
 } from "@chakra-ui/react"
-import { ArrowSquareOut, WarningCircle } from "@phosphor-icons/react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import { CalendarBlank } from "@phosphor-icons/react/dist/ssr"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -22,15 +21,22 @@ import { Trans } from "react-i18next"
 import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
 import { TextFormControl } from "../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
+import { StepNotMetWarning } from "../shared/step-not-met-warning"
 import { EnergySteps } from "./energy-steps"
 import { i18nPrefix } from "./i18n-prefix"
 import { StepRequirementRadioGroup } from "./step-requirement-radio-group"
 import { ZeroCarbonSteps } from "./zero-carbon-steps"
 interface IProps {
   checklist: IStepCodeChecklist
+  scrollToEnergyCompliance: () => void
+  scrollToZeroCarbonCompliance: () => void
 }
 
-export const ComplianceSummary = observer(function ComplianceSummary({ checklist }: IProps) {
+export const ComplianceSummary = observer(function ComplianceSummary({
+  checklist,
+  scrollToEnergyCompliance,
+  scrollToZeroCarbonCompliance,
+}: IProps) {
   const report = checklist.selectedReport
 
   return (
@@ -62,34 +68,14 @@ export const ComplianceSummary = observer(function ComplianceSummary({ checklist
             </FormHelperText>
           </FormControl>
           {R.isNil(report.energy.proposedStep) && (
-            <Alert
-              status="error"
-              rounded="lg"
-              borderWidth={1}
-              borderColor="semantic.error"
-              bg="semantic.errorLight"
-              gap={2}
-              color="text.primary"
-              fontSize="xs"
-            >
-              <WarningCircle color="var(--chakra-colors-semantic-error)" />
-              {t(`stepCodeChecklist.edit.energyStepNotMet`)}
-            </Alert>
+            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="xs" />
           )}
           {R.isNil(report.zeroCarbon.proposedStep) && (
-            <Alert
-              status="error"
-              rounded="lg"
-              borderWidth={1}
-              borderColor="semantic.error"
-              bg="semantic.errorLight"
-              gap={2}
-              color="text.primary"
+            <StepNotMetWarning
+              i18nKey="zeroCarbonStepNotMet"
+              scrollToSection={scrollToZeroCarbonCompliance}
               fontSize="xs"
-            >
-              <WarningCircle color="var(--chakra-colors-semantic-error)" />
-              {t(`stepCodeChecklist.edit.zeroCarbonStepNotMet`)}
-            </Alert>
+            />
           )}
         </VStack>
       )}

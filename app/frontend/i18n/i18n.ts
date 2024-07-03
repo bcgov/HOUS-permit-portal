@@ -731,9 +731,9 @@ const options = {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
             notice: "Relevant data fields below has been filled in for you by Auto-Compliance.",
             energyStepNotMet:
-              "Minimum energy step was not met. Please see Energy step code compliance section for details.",
+              "Minimum energy step was not met. Please see <1>F: 9.36.6 Energy Step Code Compliance</1> for details.",
             zeroCarbonStepNotMet:
-              "Minimum zero carbon step was not met. Please see Zero carbon step code compliance section for details.",
+              "Minimum zero carbon step was not met. Please see <1>G: Zero Carbon Step Code Compliance</1> for details.",
             projectInfo: {
               stages: {
                 pre_construction: "Pre Construction",
