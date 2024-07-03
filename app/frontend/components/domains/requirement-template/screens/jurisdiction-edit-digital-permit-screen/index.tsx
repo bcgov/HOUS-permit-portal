@@ -189,7 +189,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             px="6"
             py="4"
             bg="greys.grey03"
-            w="var(--app-sidebar-remaining-width)"
+            w="full"
             justifyContent="flex-end"
             boxShadow="elevations.elevation02"
           >

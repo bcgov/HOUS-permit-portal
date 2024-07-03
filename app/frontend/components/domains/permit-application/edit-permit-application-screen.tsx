@@ -1,5 +1,6 @@
 import { Box, Button, Flex, HStack, Stack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
-import { CaretRight, Info } from "@phosphor-icons/react"
+import { CaretRight, FloppyDiskBack, Info } from "@phosphor-icons/react"
+import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
@@ -292,7 +293,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
         <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
+          <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
@@ -300,6 +301,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               triggerSave={handleSave}
               showHelpButton
               isEditing
+              renderSaveButton={() => <SaveButton handleSave={handleSave} />}
             />
           </Flex>
         )}
@@ -315,3 +317,25 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     </Box>
   )
 })
+
+function SaveButton({ handleSave }) {
+  const { handleSubmit, formState } = useForm()
+  const { isSubmitting } = formState
+
+  const onSubmit = async () => {
+    await handleSave({ skipPristineCheck: true })
+  }
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Button
+        variant="primary"
+        leftIcon={<FloppyDiskBack />}
+        type="submit"
+        isLoading={isSubmitting}
+        isDisabled={isSubmitting}
+      >
+        {t("ui.onlySave")}
+      </Button>
+    </form>
+  )
+}
