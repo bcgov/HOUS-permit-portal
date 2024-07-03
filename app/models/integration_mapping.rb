@@ -141,6 +141,18 @@ class IntegrationMapping < ApplicationRecord
     users_to_notify.each do |u|
       PermitHubMailer.notify_integration_mapping(user: u, integration_mapping: self)&.deliver_later
     end
+
+    external_api_keys = ExternalApiKey.active.where(jurisdiction: jurisdiction)
+
+    # Notify external API key integrations
+    external_api_keys.each do |eak|
+      next unless eak.notification_email.present?
+
+      PermitHubMailer.notify_integration_mapping_external(
+        external_api_key: eak,
+        template_version: template_version,
+      )&.deliver_later
+    end
   end
 
   def can_send_template_missing_requirements_communication?
