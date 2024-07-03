@@ -73,7 +73,7 @@ export const TemplateVersionStoreModel = types
     }),
   }))
   .actions((self) => ({
-    processWebsocketChange: flow(function* (payload: IUserPushPayload) {
+    processWebsocketChange: function (payload: IUserPushPayload) {
       //based on the eventType do stuff
       let payloadData
       switch (payload.eventType as ESocketEventTypes) {
@@ -85,7 +85,7 @@ export const TemplateVersionStoreModel = types
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }
-    }),
+    },
   }))
 
 export interface ITemplateVersionStoreModel extends Instance<typeof TemplateVersionStoreModel> {}
