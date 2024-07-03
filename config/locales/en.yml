@@ -421,7 +421,7 @@ en:
   services:
     auto_compliance_configuration:
       digital_seal_validator:
-        label: "Digital Seal Validator - Validates the digital seal of a file"
+        label: "Digital Seal Validator for AIBC and EGBC - Validates the digital seal of a file"
       parcel_info_extractor:
         label: "Parcel Info Extractor - Extracts info from parcel information: PID, PIN, etc"
         available_field_labels:
