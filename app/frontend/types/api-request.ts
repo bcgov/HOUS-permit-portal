@@ -66,6 +66,7 @@ export interface IExternalApiKeyParams {
   webhookUrl?: string
   expiredAt?: Date
   jurisdictionId?: string
+  notificationEmail?: string
 }
 
 export interface IIntegrationMappingUpdateParams {
