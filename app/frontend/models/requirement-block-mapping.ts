@@ -60,11 +60,13 @@ const RequirementBlockMappingModel = types
       matches?: FuseResult<IRequirementMap>["matches"]
     })[] {
       const showOnlyUnmapped = self.integrationMapping.showOnlyUnmapped
-      const filteredRequirementsJson = showOnlyUnmapped
-        ? requirementsJson.filter((r) =>
-            shouldShowRequirementByFilter(self.requirements.get(r.requirementCode), showOnlyUnmapped)
-          )
-        : requirementsJson
+      let filteredRequirementsJson = requirementsJson.filter((r) => !!self.requirements.get(r.requirementCode))
+
+      if (showOnlyUnmapped) {
+        filteredRequirementsJson = requirementsJson.filter((r) =>
+          shouldShowRequirementByFilter(self.requirements.get(r.requirementCode), showOnlyUnmapped)
+        )
+      }
 
       if (!self.hasQuery) {
         return filteredRequirementsJson

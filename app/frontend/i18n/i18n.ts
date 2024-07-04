@@ -1337,6 +1337,7 @@ const options = {
           title: "API mappings setup",
           index: {
             helperSubtitle: "See details of how fields are mapped to the API.",
+            seeButton: "See {{status}}",
           },
           edit: {
             permitTemplate: "Permit template",
@@ -1493,7 +1494,10 @@ const options = {
             createdAt: "Created at",
             token: "Token",
             status: "Status",
+            notificationEmail: "Notification email",
           },
+          notificationEmailHint:
+            "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",
           fieldPlaceholders: {
             webhookUrl: "https://example.com/webhook",
           },

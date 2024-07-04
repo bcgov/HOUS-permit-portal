@@ -172,6 +172,7 @@ class Jurisdiction < ApplicationRecord
     relevant_template_versions =
       TemplateVersion
         .published
+        .or(TemplateVersion.scheduled)
         .or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
         .where.not(id: existing_mapping_template_ids)
         .order(version_date: :asc)

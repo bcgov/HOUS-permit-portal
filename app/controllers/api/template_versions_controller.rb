@@ -10,11 +10,16 @@ class Api::TemplateVersionsController < Api::ApplicationController
                 ]
 
   def index
+    status = params[:status] || "published"
+
     @template_versions =
       if params[:activity_id].present?
-        policy_scope(TemplateVersion).where(activity: { id: params[:activity_id] }).order(updated_at: :desc)
+        policy_scope(TemplateVersion)
+          .where(activity: { id: params[:activity_id] })
+          .order(updated_at: :desc)
+          .where(status:)
       else
-        policy_scope(TemplateVersion).order(updated_at: :desc)
+        policy_scope(TemplateVersion).order(updated_at: :desc).where(status:)
       end
 
     render_success @template_versions, nil, { blueprint: TemplateVersionBlueprint, blueprint_opts: { view: :extended } }

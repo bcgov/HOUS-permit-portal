@@ -61,7 +61,7 @@ function isPermitApplicationEditPath(path: string): boolean {
 }
 
 function isApiMappingPath(path: string): boolean {
-  const regex = /^\/api-settings\/api-mappings.*$/
+  const regex = /^(\/jurisdictions\/[a-z\d-]+)?\/api-settings\/api-mappings.*$/
   return regex.test(path)
 }
 

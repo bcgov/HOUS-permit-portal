@@ -3,6 +3,8 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { TemplateVersionModel } from "../models/template-version"
+import { ESocketEventTypes, ETemplateVersionStatus } from "../types/enums"
+import { ITemplateVersionUpdate, IUserPushPayload } from "../types/types"
 
 export const TemplateVersionStoreModel = types
   .model("TemplateVersionStoreModel")
@@ -23,13 +25,19 @@ export const TemplateVersionStoreModel = types
     getTemplateVersionById(id: string) {
       return self.templateVersionMap.get(id)
     },
-    getTemplateVersionsByActivityId: (permitTypeId: string) => {
-      return self.templateVersionsByActivityId.get(permitTypeId) ?? []
+    getTemplateVersionsByStatus(status: ETemplateVersionStatus = ETemplateVersionStatus.published) {
+      return self.templateVersions.filter((t) => t.status === status)
+    },
+    getTemplateVersionsByActivityId: (
+      permitTypeId: string,
+      status: ETemplateVersionStatus = ETemplateVersionStatus.published
+    ) => {
+      return (self.templateVersionsByActivityId.get(permitTypeId) ?? []).filter((t) => t.status === status)
     },
   }))
   .actions((self) => ({
-    fetchTemplateVersions: flow(function* (activityId?: string) {
-      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(activityId))
+    fetchTemplateVersions: flow(function* (activityId?: string, status?: ETemplateVersionStatus) {
+      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(activityId, status))
 
       if (response.ok) {
         const templateVersions = response.data.data
@@ -63,6 +71,21 @@ export const TemplateVersionStoreModel = types
       }
       return response.ok
     }),
+  }))
+  .actions((self) => ({
+    processWebsocketChange: function (payload: IUserPushPayload) {
+      //based on the eventType do stuff
+      let payloadData
+      switch (payload.eventType as ESocketEventTypes) {
+        case ESocketEventTypes.update:
+          payloadData = payload.data as ITemplateVersionUpdate
+
+          self.templateVersionMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
+          break
+        default:
+          import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
+      }
+    },
   }))
 
 export interface ITemplateVersionStoreModel extends Instance<typeof TemplateVersionStoreModel> {}
