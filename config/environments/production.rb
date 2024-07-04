@@ -66,17 +66,19 @@ Rails.application.configure do
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
   # Use a different cache store in production.
-  config.cache_store =
-    :redis_cache_store,
-    {
-      url: "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["CACHE_REDIS_DB"]&.to_i || 4}",
-      sentinels:
-        Resolv
-          .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-          .map { |address| { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) } },
-      role: :master,
-      namespace: "cache",
-    }
+  if ENV["IS_DOCKER_BUILD"].blank?
+    config.cache_store =
+      :redis_cache_store,
+      {
+        url: "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["CACHE_REDIS_DB"]&.to_i || 4}",
+        sentinels:
+          Resolv
+            .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
+            .map { |address| { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) } },
+        role: :master,
+        namespace: "cache",
+      }
+  end
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

@@ -23,7 +23,7 @@ module Constants
 end
 
 SHRINE_USE_S3 =
-  !(Rails.env.test? || ENV["SKIP_DEPENDENCY_INITIALIZERS"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?)
+  !(Rails.env.test? || ENV["IS_DOCKER_BUILD"].present? || ENV["BCGOV_OBJECT_STORAGE_ACCESS_KEY_ID"].blank?)
 
 if SHRINE_USE_S3
   s3_options = {

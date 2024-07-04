@@ -15,7 +15,7 @@ end
 
 # Configure SimpleFeed
 SimpleFeed.define(:user_feed) do |f|
-  if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank?
+  if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank?
     f.provider =
       SimpleFeed.provider(
         :redis,

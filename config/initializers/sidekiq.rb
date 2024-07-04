@@ -2,7 +2,7 @@ require "sidekiq-cron"
 require "sidekiq-unique-jobs"
 
 # in production mode we use redis-sentinel for HA Redis, locally / test just fallback to default (ENV['REDIS_URL'])
-if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation in the docker build stage
+if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during precompilation in the docker build stage
   redis_cfg = {
     name: ENV["REDIS_SENTINEL_MASTER_SET_NAME"],
     driver: :ruby,
