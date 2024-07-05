@@ -132,6 +132,7 @@ const options = {
           },
         },
         ui: {
+          reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
           sureDelete: "Are you sure you want to delete this item?",
@@ -504,6 +505,7 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            unlabeled: "Unlabeled",
             defaultContactLabel: "Contact",
             canAddMultipleContacts: "Submitter can add multiple contacts",
             addLabel: "Add label",

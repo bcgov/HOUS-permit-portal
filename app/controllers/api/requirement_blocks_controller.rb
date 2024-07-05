@@ -96,6 +96,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
         :required_for_in_person_hint,
         :required_for_multiple_owners,
         :elective,
+        :position,
         :_destroy,
         input_options: [
           :number_unit,
