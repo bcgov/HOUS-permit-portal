@@ -22,6 +22,7 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
+import { BrowserSearchPrompt } from "../../../../shared/permit-applications/browser-search-prompt"
 import { CompareRequirementsBox } from "../../../permit-application/compare-requirements-box"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
 import { SectionsDisplay } from "../../sections-display"
@@ -194,6 +195,7 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             boxShadow="elevations.elevation02"
           >
             <ButtonGroup>
+              <BrowserSearchPrompt color="text.primary" />
               <Button
                 variant={"primary"}
                 rightIcon={<CaretRight />}
