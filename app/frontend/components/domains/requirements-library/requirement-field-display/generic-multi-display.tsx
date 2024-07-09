@@ -22,6 +22,7 @@ export type TGenericDisplayProps<TFieldValues extends FieldValues> = {
   editableInput?: JSX.Element
   editableLabelProps?: TEditableLabelProps<TFieldValues>
   editableHelperTextProps?: TEditableHelperTextProps<TFieldValues>
+  addAnotherText?: string
   renderHeading?: () => JSX.Element
 } & TRequirementFieldDisplayProps
 
@@ -34,6 +35,7 @@ export function GenericMultiDisplay<TFieldValues>({
   containerProps,
   showAddPersonButton,
   requirementType,
+  addAnotherText,
   // required,
 }: TGenericDisplayProps<TFieldValues>) {
   const { t } = useTranslation()
@@ -104,7 +106,7 @@ export function GenericMultiDisplay<TFieldValues>({
             cursor: "not-allowed",
           }}
         >
-          {t("requirementsLibrary.addAnother")}
+          {label ? `${t("requirementsLibrary.addAnother")} ${label}` : t("requirementsLibrary.addAnother")}
         </Button>
       )}
     </Box>

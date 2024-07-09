@@ -529,7 +529,7 @@ const options = {
           },
         },
         requirementsLibrary: {
-          addAnother: "Add another",
+          addAnother: "Add",
           addAnotherPerson: "Add another person",
           elective: "Elective",
           hasElective: "Has elective(s)",
