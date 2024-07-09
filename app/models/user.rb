@@ -30,6 +30,7 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
   has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 

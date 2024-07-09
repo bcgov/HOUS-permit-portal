@@ -21,6 +21,7 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
   has_one :step_code
   has_many :submission_versions, dependent: :destroy
+  has_many :permit_collaborations, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 

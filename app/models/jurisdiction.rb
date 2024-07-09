@@ -22,6 +22,7 @@ class Jurisdiction < ApplicationRecord
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :permit_type_required_steps, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true

@@ -37,6 +37,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "collaborators",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "collaboratorable_type", null: false
+    t.uuid "collaboratorable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[collaboratorable_type collaboratorable_id],
+            name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
+    t.index %w[collaboratorable_type collaboratorable_id],
+            name: "index_collaborators_on_collaboratorable"
+    t.index ["user_id"], name: "index_collaborators_on_user_id"
+  end
+
   create_table "contacts",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -234,6 +250,35 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
     t.string "description"
     t.boolean "enabled"
     t.integer "code"
+  end
+
+  create_table "permit_collaborations",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "collaborator_id", null: false
+    t.uuid "permit_application_id", null: false
+    t.integer "collaboration_type", default: 0
+    t.integer "collaborator_type", default: 0
+    t.jsonb "assignments", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collaboration_type"],
+            name: "index_permit_collaborations_on_collaboration_type"
+    t.index ["collaborator_id"],
+            name: "index_permit_collaborations_on_collaborator_id"
+    t.index ["collaborator_type"],
+            name: "index_permit_collaborations_on_collaborator_type"
+    t.index %w[
+              permit_application_id
+              collaborator_id
+              collaboration_type
+              collaborator_type
+            ],
+            name: "index_permit_collaborations_on_unique_columns",
+            unique: true
+    t.index ["permit_application_id"],
+            name: "index_permit_collaborations_on_permit_application_id"
   end
 
   create_table "permit_type_required_steps",
@@ -783,6 +828,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "collaborators", "users"
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -804,6 +850,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_collaborations", "collaborators"
+  add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
                   "permit_classifications",
