@@ -502,8 +502,14 @@ const options = {
             requestRevisions: "Request revisions",
             viewRevisionRequests: "View revision requests",
             requestingRevisions: "Requesting revisions",
+            requestedRevisions: "Requested revisions",
+            pleaseFix: "Please fix the requested revisions and re-submit your application",
+            onlySpecified:
+              "Only the the specified fields highlighted below (in yellow) and their corresponding blocks can be edited",
             showList: "Show list",
             hideList: "Hide list",
+            locateRevisions: "Locate each rquested revision by clicking the links below.",
+            revisionsWereRequested: "Revisions to this application were requested on {{date}}",
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
             revision: {
               reason: "Reason",

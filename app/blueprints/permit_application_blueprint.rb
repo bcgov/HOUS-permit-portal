@@ -21,7 +21,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :missing_pdfs
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
-    association :revision_requests, blueprint: RevisionRequestBlueprint
+    association :revision_requests, blueprint: RevisionRequestBlueprint, view: :base
 
     field :indexed_using_current_template_version do |pa, options|
       # Indexed data is used to prevent N extra queries on every search
@@ -31,7 +31,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :jurisdiction_review_inbox do
     include_view :base
-
+    association :revision_requests, blueprint: RevisionRequestBlueprint, view: :extended
     association :submitter, blueprint: UserBlueprint, view: :base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
   end
@@ -50,6 +50,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
+  end
+
+  view :jurisdiction_review_extended do
+    include_view :extended
+    association :revision_requests, blueprint: RevisionRequestBlueprint, view: :extended
   end
 
   view :compliance_update do

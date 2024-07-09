@@ -81,43 +81,6 @@ export const PermitApplicationModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
-    get usingCurrentTemplateVersion() {
-      if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
-      return self.indexedUsingCurrentTemplateVersion
-    },
-    get jurisdictionName() {
-      return self.jurisdiction.name
-    },
-    get permitTypeAndActivity() {
-      return `${self.activity.name} - ${self.permitType.name}`.trim()
-    },
-    get flattenedBlocks() {
-      return self.formJson.components
-        .reduce((acc, section) => {
-          const blocks = section.components
-          return acc.concat(blocks)
-        }, [] as IFormIOBlock[])
-        .filter((outNull) => outNull)
-    },
-    get formattedFormJson() {
-      const clonedFormJson = R.clone(self.formJson)
-      const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.revisionRequests)
-      //merge the formattedComliance data.  This should trigger a form redraw when it is updated
-      const complianceHintedFormJson = combineComplianceHints(
-        revisionAnnotatedFormJson,
-        self.formCustomizations,
-        self.formattedComplianceData
-      )
-      const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
-      const revisionModeFormJson = self.revisionMode ? combineRevisionButtons(diffColoredFormJson) : diffColoredFormJson
-      return revisionModeFormJson
-    },
-    sectionKey(sectionId) {
-      return `section${sectionId}`
-    },
-    blockKey(sectionId, blockId) {
-      return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
-    },
     get isDraft() {
       return self.status === EPermitApplicationStatus.draft
     },
@@ -147,6 +110,48 @@ export const PermitApplicationModel = types
     },
     get isRevisionsViewed() {
       return self.substatus === EPermitApplicationSubstatus.revisionsViewed
+    },
+  }))
+  .views((self) => ({
+    get usingCurrentTemplateVersion() {
+      if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
+      return self.indexedUsingCurrentTemplateVersion
+    },
+    get jurisdictionName() {
+      return self.jurisdiction.name
+    },
+    get permitTypeAndActivity() {
+      return `${self.activity.name} - ${self.permitType.name}`.trim()
+    },
+    get flattenedBlocks() {
+      return self.formJson.components
+        .reduce((acc, section) => {
+          const blocks = section.components
+          return acc.concat(blocks)
+        }, [] as IFormIOBlock[])
+        .filter((outNull) => outNull)
+    },
+    get formattedFormJson() {
+      const clonedFormJson = R.clone(self.formJson)
+      const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.revisionRequests)
+      //merge the formattedComliance data.  This should trigger a form redraw when it is updated
+      const complianceHintedFormJson = combineComplianceHints(
+        revisionAnnotatedFormJson,
+        self.formCustomizations,
+        self.formattedComplianceData
+      )
+      const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+      const revisionModeFormJson =
+        self.revisionMode || self.isRevisionsRequested
+          ? combineRevisionButtons(diffColoredFormJson)
+          : diffColoredFormJson
+      return revisionModeFormJson
+    },
+    sectionKey(sectionId) {
+      return `section${sectionId}`
+    },
+    blockKey(sectionId, blockId) {
+      return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
     },
     get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
       if (!self.diff) return null

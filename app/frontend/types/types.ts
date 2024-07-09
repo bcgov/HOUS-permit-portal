@@ -449,7 +449,7 @@ export interface IRevisionRequest {
   requirementJson: IFormIORequirement
   submissionJson: any
   comment: string
-  user: IMinimalFrozenUser
+  user?: IMinimalFrozenUser
 }
 
 export interface IMinimalFrozenUser {

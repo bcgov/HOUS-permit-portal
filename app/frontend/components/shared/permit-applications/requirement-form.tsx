@@ -336,6 +336,15 @@ export const RequirementForm = observer(
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
             ))}
+          {permitApplication?.isRevisionsRequested && (
+            <CustomMessageBox
+              description={t("permitApplication.show.revisionsWereRequested", {
+                date: format(permitApplication.revisionsRequestedAt, "MMM d, yyyy h:mm a"),
+              })}
+              status="warning"
+            />
+          )}
+
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {

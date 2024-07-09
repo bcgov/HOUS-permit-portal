@@ -37,6 +37,7 @@ export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclo
   useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
   onSave: () => Promise<void>
   isRevisionsRequested?: boolean
+  forSubmitter?: boolean
 }
 
 export const RevisionModal: React.FC<IRevisionModalProps> = ({
@@ -49,6 +50,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   useFieldArrayMethods,
   onSave,
   isRevisionsRequested,
+  forSubmitter,
 }) => {
   const { t } = useTranslation()
   const [reasonCode, setReasonCode] = useState<EReasonCode | "">(revisionRequest?.reasonCode ?? "")
@@ -148,7 +150,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 maxLength={350}
                 isDisabled={isRevisionsRequested}
               />
-              <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>
+              {!forSubmitter && <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>}
             </FormControl>
 
             <Divider />
@@ -159,24 +161,34 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
           </Flex>
           <ModalFooter>
             <Flex width="full" justify="center" gap={4}>
-              <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode || isRevisionsRequested}>
-                {t("permitApplication.show.revision.useButton")}
-              </Button>
+              {forSubmitter ? (
+                <>
+                  <Button variant="secondary" onClick={onClose}>
+                    {t("ui.ok")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={handleUpsert} variant="primary" isDisabled={!reasonCode || isRevisionsRequested}>
+                    {t("permitApplication.show.revision.useButton")}
+                  </Button>
 
-              <Button variant="secondary" onClick={onClose}>
-                {t("ui.cancel")}
-              </Button>
-              <Spacer />
-              {revisionRequest && (
-                <Button
-                  color="semantic.error"
-                  leftIcon={<Trash />}
-                  variant="link"
-                  onClick={handleDelete}
-                  isDisabled={isRevisionsRequested}
-                >
-                  {t("ui.delete")}
-                </Button>
+                  <Button variant="secondary" onClick={onClose}>
+                    {t("ui.cancel")}
+                  </Button>
+                  <Spacer />
+                  {revisionRequest && (
+                    <Button
+                      color="semantic.error"
+                      leftIcon={<Trash />}
+                      variant="link"
+                      onClick={handleDelete}
+                      isDisabled={isRevisionsRequested}
+                    >
+                      {t("ui.delete")}
+                    </Button>
+                  )}
+                </>
               )}
             </Flex>
           </ModalFooter>

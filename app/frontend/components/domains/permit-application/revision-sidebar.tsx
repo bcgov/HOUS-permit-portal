@@ -28,8 +28,9 @@ import { RevisionModal } from "../../shared/revisions/revision-modal"
 
 interface IRevisionSideBarProps {
   permitApplication: IPermitApplication
-  onCancel: () => void
-  sendRevisionContainerRef: MutableRefObject<HTMLDivElement>
+  onCancel?: () => void
+  sendRevisionContainerRef?: MutableRefObject<HTMLDivElement>
+  forSubmitter?: boolean
 }
 
 export interface IRevisionRequestForm {
@@ -37,7 +38,7 @@ export interface IRevisionRequestForm {
 }
 
 export const RevisionSideBar = observer(
-  ({ permitApplication, onCancel, sendRevisionContainerRef }: IRevisionSideBarProps) => {
+  ({ permitApplication, onCancel, sendRevisionContainerRef, forSubmitter }: IRevisionSideBarProps) => {
     const { t } = useTranslation()
     const isMounted = useMountStatus()
     const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
@@ -123,9 +124,11 @@ export const RevisionSideBar = observer(
             )}
             onConfirm={onFinalizeRevisions}
           />
-          <Button variant="secondary" onClick={onCancel}>
-            {t("ui.cancel")}
-          </Button>
+          {onCancel && (
+            <Button variant="secondary" onClick={onCancel}>
+              {t("ui.cancel")}
+            </Button>
+          )}
         </Flex>
       )
     }
@@ -149,7 +152,11 @@ export const RevisionSideBar = observer(
           >
             <Box overflowY="auto">
               <Center p={8} textAlign="center" borderBottom="1px solid" borderColor="border.light">
-                <Text fontStyle="italic">{t("permitApplication.show.clickQuestion")}</Text>
+                <Text fontStyle="italic">
+                  {forSubmitter
+                    ? t("permitApplication.show.locateRevisions")
+                    : t("permitApplication.show.clickQuestion")}
+                </Text>
               </Center>
               <OrderedList>
                 {fields.map((field) => {
@@ -214,21 +221,24 @@ export const RevisionSideBar = observer(
             revisionRequest={revisionRequest}
             onSave={handleSubmit(onSaveRevision)}
             isRevisionsRequested={permitApplication.isRevisionsRequested}
+            forSubmitter={forSubmitter}
           />
         )}
-        <Portal containerRef={sendRevisionContainerRef}>
-          <Flex gap={4} align="center">
-            <Box>
-              <Text as="span" fontWeight="bold">
-                {fields.length}
-              </Text>{" "}
-              <Text as="span" color="text.secondary">
-                {t("ui.selected")}
-              </Text>
-            </Box>
-            {renderButtons()}
-          </Flex>
-        </Portal>
+        {sendRevisionContainerRef && (
+          <Portal containerRef={sendRevisionContainerRef}>
+            <Flex gap={4} align="center">
+              <Box>
+                <Text as="span" fontWeight="bold">
+                  {fields.length}
+                </Text>{" "}
+                <Text as="span" color="text.secondary">
+                  {t("ui.selected")}
+                </Text>
+              </Box>
+              {renderButtons()}
+            </Flex>
+          </Portal>
+        )}
       </>
     )
   }

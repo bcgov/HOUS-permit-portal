@@ -190,14 +190,13 @@ const convertToRevisionButton = (requirement: IFormIORequirement) => {
   } as IFormIORequirement
 }
 
-export const combineRevisionButtons = (formJson: IFormJson) => {
+export const combineRevisionButtons = (formJson: IFormJson, revisionRequests?: IRevisionRequest[]) => {
   formJson.components.forEach((section: IFormIOSection) => {
     if (section.id === COMPLETTION_SECTION_ID) return
 
     section.components.forEach((block: IFormIOBlock) => {
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
-        requirement.disabled = true
         const revisionButton = convertToRevisionButton(requirement)
 
         // Insert the revision button before the current requirement
