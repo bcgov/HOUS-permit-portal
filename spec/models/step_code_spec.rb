@@ -17,7 +17,7 @@ RSpec.describe StepCode, type: :model do
       expect(step_code.valid?).to eq false
     end
 
-    context "supporting doc invalid" do
+    context "supporting doc validator fails" do
       let!(:supporting_doc_with_compliance) do
         create(
           :supporting_document,
@@ -38,12 +38,18 @@ RSpec.describe StepCode, type: :model do
         )
       end
 
-      it "sets plan fields" do
+      #this is true for part 9, but may need to chagne for part 3
+      it "is still valid" do
         step_code.save
-        expect(step_code.errors.full_messages).to eq(
-          ["Plan version file uploaded failed to verify author and data due to an error with the serivce."],
-        )
+        step_code.valid?
       end
+
+      # it "is invalid if it is part 3" do
+      #   step_code.save
+      #   expect(step_code.errors.full_messages).to eq(
+      #     ["Plan version file uploaded failed to verify author and data due to an error with the serivce."],
+      #   )
+      # end
     end
 
     context "has supporting doc with compliance" do

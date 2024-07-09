@@ -18,11 +18,12 @@ class StepCode < ApplicationRecord
     return if permit_application.blank? #do not enforce if there is no permit application
     if permit_application.step_code_plan_document.blank?
       errors.add(:plan_version, "file is missing.  Please upload on the permit application first.")
-    elsif permit_application.step_code_plan_document.compliance_data.blank? ||
-          permit_application.step_code_plan_document.compliance_data.empty?
-      errors.add(:plan_version, "file is being verified for author and date.")
-    elsif permit_application.step_code_plan_document.compliance_data.dig("error")
-      errors.add(:plan_version, "file uploaded failed to verify author and data due to an error with the serivce.")
+      # EVENTUALLY BRING THIS LOGIC BACK ONCE WE DECIDE BEST WAY TO CONFIGURE IF A STEP CODE REQUIRES A SIGNED DOCUMENT.
+      # elsif permit_application.step_code_plan_document.compliance_data.blank? ||
+      #       permit_application.step_code_plan_document.compliance_data.empty?
+      #   errors.add(:plan_version, "file is being verified for author and date.")
+      # elsif permit_application.step_code_plan_document.compliance_data.dig("error")
+      #   errors.add(:plan_version, "file uploaded failed to verify author and data due to an error with the serivce.")
     end
   end
 
