@@ -345,6 +345,11 @@ const options = {
           view: "View Jurisdiction",
         },
         permitApplication: {
+          browserSearch: {
+            prompt: "Find specific form fields by using your web browser search: press keyboard shortcut",
+            windows: "Windows: <1>Ctrl</1> + <1>F</1>",
+            mac: "Mac: <1>Cmd</1> + <1>F</1> ",
+          },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
           reviewOutdatedEditLink: "View template",

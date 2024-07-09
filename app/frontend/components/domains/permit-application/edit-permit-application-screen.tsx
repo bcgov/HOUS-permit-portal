@@ -18,6 +18,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
+import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
@@ -269,6 +270,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           </HStack>
           {isSubmitted ? (
             <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+              <BrowserSearchPrompt />
               <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                 {t("permitApplication.show.contactsSummary")}
               </Button>
@@ -279,6 +281,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </Stack>
           ) : (
             <HStack gap={4}>
+              <BrowserSearchPrompt />
               <Button variant="primary" onClick={handleClickFinishLater}>
                 {t("permitApplication.edit.saveDraft")}
               </Button>
