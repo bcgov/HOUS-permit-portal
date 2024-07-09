@@ -24,8 +24,9 @@ ENV LD_PRELOAD="libjemalloc.so.2" \
     RUBY_YJIT_ENABLE="1"
 
 # Install Node.js
-ARG NODE_VERSION=20.10.0
+ARG NODE_VERSION=20.15.0
 RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp/ && \
+    cd /tmp/node-build-master && ./install.sh && \
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
     rm -rf /tmp/node-build-master
 
