@@ -153,6 +153,7 @@ export enum ERequirementType {
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
+  pidInfo = "pid_info",
 }
 
 export enum ENumberUnit {
