@@ -63,7 +63,7 @@ const RequirementBlockMappingModel = types
       let filteredRequirementsJson = requirementsJson.filter((r) => !!self.requirements.get(r.requirementCode))
 
       if (showOnlyUnmapped) {
-        filteredRequirementsJson = requirementsJson.filter((r) =>
+        filteredRequirementsJson = filteredRequirementsJson.filter((r) =>
           shouldShowRequirementByFilter(self.requirements.get(r.requirementCode), showOnlyUnmapped)
         )
       }
