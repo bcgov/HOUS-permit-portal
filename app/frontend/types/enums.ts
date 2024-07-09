@@ -372,6 +372,7 @@ export enum ENotificationActionType {
   customizationUpdate = "customization_update",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
+  applicationView = "application_view",
 }
 
 export enum EReasonCode {

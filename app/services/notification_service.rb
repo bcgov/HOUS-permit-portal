@@ -128,8 +128,13 @@ class NotificationService
     notification_user_hash = {}
     notification_user_hash[permit_application.submitter_id] = permit_application.submit_event_notification_data
 
-    PermitHubMailer.notify_submitter_application_submitted(permit_application).deliver_later
-    NotificationPushJob.perform_async(notification_user_hash)
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_submission_notification
+      PermitHubMailer.notify_submitter_application_submitted(permit_application).deliver_later
+    end
+    if preference.enable_in_app_application_submission_notification
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
   end
 
   def self.publish_application_revisions_request_event(permit_application)
@@ -137,8 +142,25 @@ class NotificationService
     notification_user_hash[
       permit_application.submitter_id
     ] = permit_application.revisions_request_event_notification_data
-    PermitHubMailer.notify_application_revisions_requested(permit_application).deliver_later
-    NotificationPushJob.perform_async(notification_user_hash)
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_revisions_request_notification
+      PermitHubMailer.notify_application_revisions_requested(permit_application).deliver_later
+    end
+    if preference.enable_in_app_application_revisions_request_notification
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
+  end
+
+  def self.publish_application_view_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[
+      permit_application.submitter_id
+    ] = permit_application.application_view_event_notification_data
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_view_notification
+      PermitHubMailer.notify_application_viewed(permit_application).deliver_later
+    end
+    NotificationPushJob.perform_async(notification_user_hash) if preference.enable_in_app_application_view_notification
   end
 
   private

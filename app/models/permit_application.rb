@@ -307,6 +307,18 @@ class PermitApplication < ApplicationRecord
     }
   end
 
+  def application_view_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
   private
 
   def assign_default_nickname
@@ -380,7 +392,7 @@ class PermitApplication < ApplicationRecord
     viewed_at_change = previous_changes.dig("viewed_at")
     # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
     if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
-      PermitHubMailer.notify_application_viewed(self).deliver_later
+      NotificationService.publish_application_view_event(self)
     end
   end
 

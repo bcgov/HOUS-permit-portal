@@ -68,7 +68,8 @@ export const NotificationStoreModel = types
       }
       if (
         notification.actionType === ENotificationActionType.applicationSubmission ||
-        notification.actionType === ENotificationActionType.applicationRevisionsRequest
+        notification.actionType === ENotificationActionType.applicationRevisionsRequest ||
+        notification.actionType === ENotificationActionType.applicationView
       ) {
         return [
           {

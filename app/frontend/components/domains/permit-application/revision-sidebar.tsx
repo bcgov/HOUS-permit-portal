@@ -16,6 +16,7 @@ import { observer } from "mobx-react-lite"
 import React, { MutableRefObject, useEffect, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
@@ -44,6 +45,7 @@ export const RevisionSideBar = observer(
     const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
     const [submissionJsonForRevision, setSubmissionJsonForRevision] = useState<any>()
     const [revisionRequest, setRevisionRequest] = useState<IRevisionRequest>()
+    const navigate = useNavigate()
 
     const getDefaultRevisionRequestValues = () => ({
       revisionRequestsAttributes: permitApplication.revisionRequests as IRevisionRequestsAttributes[],
@@ -81,7 +83,10 @@ export const RevisionSideBar = observer(
     const { isOpen, onOpen, onClose } = useDisclosure()
 
     const onFinalizeRevisions = () => {
-      permitApplication.finalizeRevisionRequests()
+      ;(async () => {
+        const ok = await permitApplication.finalizeRevisionRequests()
+        if (ok) navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
+      })()
     }
 
     const handleOpenRequestRevision = async (_event, upToDateFields) => {

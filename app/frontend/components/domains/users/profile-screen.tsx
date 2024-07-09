@@ -92,6 +92,21 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       inAppControl: "preferenceAttributes.enableInAppCustomizationUpdateNotification",
       emailChecked: false,
     },
+    {
+      event: t("user.notifications.applicationSubmitted"),
+      inAppControl: "preferenceAttributes.enableInAppApplicationSubmissionNotification",
+      emailControl: "preferenceAttributes.enableEmailApplicationSubmissionNotification",
+    },
+    {
+      event: t("user.notifications.applicationViewed"),
+      inAppControl: "preferenceAttributes.enableInAppApplicationViewNotification",
+      emailControl: "preferenceAttributes.enableEmailApplicationViewNotification",
+    },
+    {
+      event: t("user.notifications.applicationRevisionsRequested"),
+      inAppControl: "preferenceAttributes.enableInAppApplicationRevisionsRequestNotification",
+      emailControl: "preferenceAttributes.enableEmailApplicationRevisionsRequestNotification",
+    },
   ]
 
   return (
@@ -148,6 +163,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
               )}
               <Divider my={1} />
               <TextFormControl
+                // @ts-ignore
                 label={t(`user.omniauthProviders.${currentUser.omniauthProvider as EOmniauthProvider}`)}
                 hint={currentUser.omniauthEmail}
                 inputProps={{ value: currentUser.omniauthUsername }}
@@ -285,7 +301,6 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                     <Button
                       variant="link"
                       onClick={() => {
-                        setValue("email", null)
                         setIsEditingEmail(true)
                       }}
                     >
@@ -346,12 +361,20 @@ function Section({ children }) {
 interface IEventRowProps {
   event: string
   inAppControl?: string
+  emailControl?: string
   inAppChecked?: boolean
-  emailChecked: boolean
+  emailChecked?: boolean
   emailDisabled?: boolean
 }
 
-const EventRow: React.FC<IEventRowProps> = ({ event, inAppControl, inAppChecked, emailChecked, emailDisabled }) => {
+const EventRow: React.FC<IEventRowProps> = ({
+  event,
+  inAppControl,
+  emailControl,
+  inAppChecked,
+  emailChecked,
+  emailDisabled,
+}) => {
   const { control } = useFormContext()
   const { t } = useTranslation()
 
@@ -373,9 +396,22 @@ const EventRow: React.FC<IEventRowProps> = ({ event, inAppControl, inAppChecked,
           ) : (
             <Switch isChecked={inAppChecked}>{t("user.inApp")}</Switch>
           )}
-          <Switch isChecked={emailChecked} disabled={emailDisabled}>
-            {t("user.email")}
-          </Switch>
+
+          {emailControl ? (
+            <Controller
+              name={emailControl}
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <Switch isChecked={value} onChange={onChange}>
+                  {t("user.email")}
+                </Switch>
+              )}
+            />
+          ) : (
+            <Switch isChecked={emailChecked} disabled={emailDisabled}>
+              {t("user.email")}
+            </Switch>
+          )}
         </Flex>
       </Td>
     </Tr>
