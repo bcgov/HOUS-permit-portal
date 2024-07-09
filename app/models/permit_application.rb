@@ -16,6 +16,7 @@ class PermitApplication < ApplicationRecord
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
   has_one :step_code
+  has_many :permit_collaborations, dependent: :destroy
 
   # Custom validation
 
