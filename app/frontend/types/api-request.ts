@@ -23,6 +23,7 @@ export interface IRequirementAttributes {
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
   }
+  position?: number
 }
 
 export interface IRequirementBlockParams {
