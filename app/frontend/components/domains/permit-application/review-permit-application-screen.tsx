@@ -149,7 +149,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
             position="sticky"
             zIndex={11}
             w="full"
-            p={4}
+            px={4}
+            py={2}
             bg="theme.yellow"
             justify="flex-start"
             align="center"
@@ -201,7 +202,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
                     <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
                       {currentPermitApplication.isRevisionsRequested
                         ? t("permitApplication.show.viewRevisionRequests")
-                        : t("permitApplication.show.requestRevisions")}
+                        : t("permitApplication.show.requestRevisions")}{" "}
+                      {currentPermitApplication?.revisionRequests?.length > 0 &&
+                        `(${currentPermitApplication.revisionRequests.length})`}
                     </Button>
                   )
                 )

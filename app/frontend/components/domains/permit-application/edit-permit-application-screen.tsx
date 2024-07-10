@@ -211,9 +211,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const scrollToBottom = () => {
-    handleScrollToBottom()
-  }
   const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
 
   const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
@@ -309,7 +306,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button variant="primary" onClick={handleClickFinishLater}>
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
-                <Button rightIcon={<CaretRight />} onClick={scrollToBottom}>
+                <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
                   {t("permitApplication.edit.submit")}
                 </Button>
               </HStack>
@@ -321,7 +318,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               position="sticky"
               zIndex={11}
               w="full"
-              p={4}
+              px={4}
+              py={2}
               bg="theme.yellow"
               justify="flex-start"
               align="center"

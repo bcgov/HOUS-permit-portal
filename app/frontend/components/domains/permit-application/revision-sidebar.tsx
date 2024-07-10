@@ -1,17 +1,5 @@
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Hide,
-  ListItem,
-  OrderedList,
-  Portal,
-  Spacer,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
-import { ChatDots, PaperPlaneTilt } from "@phosphor-icons/react"
+import { Box, Button, Center, Flex, Hide, ListItem, OrderedList, Portal, Text, useDisclosure } from "@chakra-ui/react"
+import { CaretRight, ChatDots, PaperPlaneTilt } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { MutableRefObject, useEffect, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -23,6 +11,7 @@ import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { getSinglePreviousSubmissionJson } from "../../../utils/formio-submission-traversal"
+import { handleScrollToBottom } from "../../../utils/utility-functions"
 import ConfirmationModal from "../../shared/modals/confirmation-modal"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 import { RevisionModal } from "../../shared/revisions/revision-modal"
@@ -111,6 +100,14 @@ export const RevisionSideBar = observer(
     }, [fields])
 
     const renderButtons = () => {
+      if (forSubmitter) {
+        return (
+          <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom} variant="primary">
+            {t("permitApplication.edit.submit")}
+          </Button>
+        )
+      }
+
       return (
         <Flex gap={4}>
           <ConfirmationModal
@@ -122,7 +119,7 @@ export const RevisionSideBar = observer(
                 border={0}
                 rightIcon={<PaperPlaneTilt />}
                 onClick={onOpen}
-                isDisabled={permitApplication.isRevisionsRequested}
+                isDisabled={permitApplication.isRevisionsRequested || fields?.length == 0}
               >
                 {t("permitApplication.show.revision.send")}
               </Button>
@@ -155,7 +152,7 @@ export const RevisionSideBar = observer(
             id="permit-revision-sidebar"
             bg="theme.yellowLight"
           >
-            <Box overflowY="auto">
+            <Box overflowY="auto" flex={1}>
               <Center p={8} textAlign="center" borderBottom="1px solid" borderColor="border.light">
                 <Text fontStyle="italic">
                   {forSubmitter
@@ -191,7 +188,6 @@ export const RevisionSideBar = observer(
                 })}
               </OrderedList>
             </Box>
-            <Spacer />
             <Flex
               direction="column"
               borderTop="1px solid"
@@ -201,6 +197,8 @@ export const RevisionSideBar = observer(
               justify="center"
               position="sticky"
               bottom={0}
+              maxH={145}
+              flex={1}
             >
               <Box>
                 <Text as="span" fontWeight="bold">

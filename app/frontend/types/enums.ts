@@ -23,7 +23,6 @@ export enum EPermitClassificationCode {
 export enum EPermitApplicationStatus {
   draft = "draft",
   submitted = "submitted",
-  approved = "approved",
 }
 export enum EPermitApplicationSubstatus {
   draft = "draft",

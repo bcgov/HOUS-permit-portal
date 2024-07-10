@@ -844,8 +844,6 @@
 .formio-component-panel {
   legend,
   .form-group > label {
-    border-bottom: 2px solid;
-    border-color: var(--chakra-colors-theme-yellow);
     margin-bottom: 8px;
     max-width: fit-content;
   }
@@ -857,6 +855,8 @@
 
   .revision-requested legend,
   .form-group.revision-requested > label {
+    border-bottom: 2px solid;
+    border-color: var(--chakra-colors-theme-yellow);
     border-color: var(--chakra-colors-semantic-error);
     background-color: var(--chakra-colors-semantic-warningLight);
   }

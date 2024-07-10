@@ -197,6 +197,7 @@ export const combineRevisionButtons = (formJson: IFormJson, revisionRequests?: I
     section.components.forEach((block: IFormIOBlock) => {
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
+        requirement.disabled = true
         const revisionButton = convertToRevisionButton(requirement)
 
         // Insert the revision button before the current requirement
