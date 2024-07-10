@@ -16,6 +16,7 @@
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "@vitejs/plugin-react": "^4.2.1",
+    "cypress": "^13.13.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "^7.22.0",
     "husky": "^8.0.3",
@@ -95,7 +96,8 @@
     "gen:theme-typings": "chakra-cli tokens app/frontend/styles/theme/index.ts",
     "postinstall": "npm run gen:theme-typings",
     "build:ssr": "bundle exec vite build --ssr",
-    "generate-pdf": " node public/vite-ssr/ssr.js"
+    "generate-pdf": " node public/vite-ssr/ssr.js",
+    "e2e:run": "npx cypress run"
   },
   "lint-staged": {
     "*.{js,css,md,rb,ts,tsx}": [
