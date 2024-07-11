@@ -11,7 +11,8 @@ import {
   Tooltip,
   useDisclosure,
 } from "@chakra-ui/react"
-import { CaretDown, CaretRight, CaretUp, Info, NotePencil } from "@phosphor-icons/react"
+import { CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil } from "@phosphor-icons/react"
+import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
@@ -29,6 +30,7 @@ import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
+import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
@@ -293,16 +295,18 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             </HStack>
             {isSubmitted ? (
               <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+                <BrowserSearchPrompt />
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
                 </Button>
                 <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                  {t("ui.backHome")}
+                  {t("permitApplication.show.backToInbox")}
                 </Button>
               </Stack>
             ) : (
               <HStack gap={4}>
+                <BrowserSearchPrompt />
                 <Button variant="primary" onClick={handleClickFinishLater}>
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
@@ -355,7 +359,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         )}
         {formJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer">
+          <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}
@@ -363,6 +367,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               triggerSave={handleSave}
               showHelpButton
               isEditing
+              renderSaveButton={() => <SaveButton handleSave={handleSave} />}
             />
           </Flex>
         )}
@@ -378,3 +383,25 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
     </Box>
   )
 })
+
+function SaveButton({ handleSave }) {
+  const { handleSubmit, formState } = useForm()
+  const { isSubmitting } = formState
+
+  const onSubmit = async () => {
+    await handleSave({ skipPristineCheck: true })
+  }
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Button
+        variant="primary"
+        leftIcon={<FloppyDiskBack />}
+        type="submit"
+        isLoading={isSubmitting}
+        isDisabled={isSubmitting}
+      >
+        {t("ui.onlySave")}
+      </Button>
+    </form>
+  )
+}

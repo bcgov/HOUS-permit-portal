@@ -3,7 +3,10 @@ RSpec.describe StepCode::Compliance::ProposeStep::Base do
   let(:min_step) { 3 }
   let(:max_step) { 5 }
   subject(:compliance_checker) do
-    StepCode::Compliance::ProposeStep::Base.new(checklist: step_code.pre_construction_checklist)
+    StepCode::Compliance::ProposeStep::Base.new(
+      checklist: step_code.pre_construction_checklist,
+      min_required_step: min_step,
+    )
   end
 
   before :each do
@@ -13,7 +16,6 @@ RSpec.describe StepCode::Compliance::ProposeStep::Base do
         step = min_step + n
         expected_step ? step <= expected_step : false
       end
-    allow(subject).to receive(:min_required_step).and_return min_step
     allow(subject).to receive(:max_step).and_return max_step
     allow(subject).to receive(:requirements_met?).and_return(*results)
     subject.call

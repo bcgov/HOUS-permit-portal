@@ -40,6 +40,7 @@ interface IRequirementFormProps {
   formRef: any
   triggerSave?: (params?: { autosave?: boolean; skipPristineCheck?: boolean }) => void
   showHelpButton?: boolean
+  renderSaveButton?: () => JSX.Element
   isEditing?: boolean
   renderTopButtons?: () => React.ReactNode
 }
@@ -50,8 +51,9 @@ export const RequirementForm = observer(
     onCompletedBlocksChange,
     formRef,
     triggerSave,
-    isEditing = false,
     renderTopButtons,
+    renderSaveButton,
+    isEditing = false,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -382,7 +384,11 @@ export const RequirementForm = observer(
           />
         </Flex>
 
-        <BuilderBottomFloatingButtons isCollapsedAll={isCollapsedAll} setIsCollapsedAll={setIsCollapsedAll} />
+        <BuilderBottomFloatingButtons
+          isCollapsedAll={isCollapsedAll}
+          setIsCollapsedAll={setIsCollapsedAll}
+          renderSaveButton={renderSaveButton}
+        />
         {isOpen && (
           <Modal onClose={onClose} isOpen={isOpen} size="2xl">
             <ModalOverlay />

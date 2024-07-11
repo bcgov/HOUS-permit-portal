@@ -87,6 +87,8 @@ en:
       welcome: "Welcome to the Building Permit Hub"
       onboarding: "Welcome to the Building Permit Hub"
       notify_submitter_application_submitted: "Your Building Permit Hub application has been submitted"
+      notify_new_integration_mapping: "New API mappings available"
+      notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_application_viewed: "Updated application status: %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
@@ -429,7 +431,7 @@ en:
   services:
     auto_compliance_configuration:
       digital_seal_validator:
-        label: "Digital Seal Validator - Validates the digital seal of a file"
+        label: "Digital Seal Validator for AIBC and EGBC - Validates the digital seal of a file"
       parcel_info_extractor:
         label: "Parcel Info Extractor - Extracts info from parcel information: PID, PIN, etc"
         available_field_labels:
@@ -496,6 +498,9 @@ en:
       resubmission_notification: "Your revised application %{number} has been recieved by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
+    integration_mapping:
+      published_template_missing_requirements_mapping: 'Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}'
+      scheduled_template_missing_requirements_mapping: 'Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST.'
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"

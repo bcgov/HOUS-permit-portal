@@ -4,7 +4,7 @@ class TemplateVersionBlueprint < Blueprinter::Base
 
   field :version_date do |template_version|
     # Parse version date in BC time
-    template_version.version_date.in_time_zone("Pacific Time (US & Canada)").to_time
+    template_version.version_date_in_province_time
   end
 
   view :extended do

@@ -96,6 +96,29 @@ class NotificationService
     NotificationPushJob.perform_async({ **notification_manager_hash, **notification_submitter_hash })
   end
 
+  def self.publish_missing_requirements_mapping_event(integration_mapping)
+    unless integration_mapping.present? && integration_mapping.can_send_template_missing_requirements_communication?
+      return
+    end
+
+    user_ids_to_notify =
+      integration_mapping
+        .jurisdiction
+        .users
+        &.kept
+        &.where(role: %i[review_manager regional_review_manager])
+        &.pluck(:id) || []
+
+    notification_hash =
+      user_ids_to_notify.each_with_object({}) do |user_id, hash|
+        hash[
+          user_id
+        ] = integration_mapping.template_missing_requirements_mapping_event_notification_data if integration_mapping.template_missing_requirements_mapping_event_notification_data.present?
+      end
+
+    NotificationPushJob.perform_async(notification_hash)
+  end
+
   def self.publish_customization_update_event(customization)
     template_version = customization.template_version
     relevant_submitter_ids =

@@ -4,7 +4,7 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show?
-    !record.scheduled? || user.super_admin?
+    !record.scheduled? || (user.super_admin? || user.review_manager? || user.regional_review_manager?)
   end
 
   def show_jurisdiction_template_version_customization?
@@ -41,12 +41,17 @@ class TemplateVersionPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      [] unless user.super_admin?
+      template_versions =
+        scope
+          .joins(requirement_template: :activity)
+          .where(requirement_templates: { discarded_at: nil })
+          .where.not(status: "deprecated")
 
-      scope
-        .joins(requirement_template: :activity)
-        .where(requirement_templates: { discarded_at: nil })
-        .where(status: "published")
+      if user.super_admin? || user.review_manager? || user.regional_review_manager?
+        template_versions
+      else
+        template_versions.where(status: "published")
+      end
     end
   end
 end

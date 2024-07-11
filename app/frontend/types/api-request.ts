@@ -23,6 +23,7 @@ export interface IRequirementAttributes {
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
   }
+  position?: number
 }
 
 export interface IRequirementBlockParams {
@@ -71,6 +72,7 @@ export interface IExternalApiKeyParams {
   webhookUrl?: string
   expiredAt?: Date
   jurisdictionId?: string
+  notificationEmail?: string
 }
 
 export interface IIntegrationMappingUpdateParams {

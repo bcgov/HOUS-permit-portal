@@ -17,17 +17,14 @@ module Api::Concerns::Search::Jurisdictions
     }
 
     # Conditionally add the `where` clause
-    unless jurisdiction_search_params[:submission_inbox_set_up].nil?
-      search_params[:where] = { submission_inbox_set_up: jurisdiction_search_params[:submission_inbox_set_up] }
-    end
-
-    @search = Jurisdiction.search(jurisdiction_query, **search_params)
+    search_params[:where] = jurisdiction_where_clause unless jurisdiction_where_clause.nil?
+    @search = Jurisdiction.search(jurisdiction_query, **search_params, includes: Jurisdiction::BASE_INCLUDES)
   end
 
   private
 
   def jurisdiction_search_params
-    params.permit(:query, :page, :per_page, :submission_inbox_set_up, sort: %i[field direction])
+    params.permit(:query, :page, :per_page, filters: [:submission_inbox_set_up], sort: %i[field direction])
   end
 
   def jurisdiction_query
@@ -40,5 +37,9 @@ module Api::Concerns::Search::Jurisdictions
     else
       { name: { order: :asc, unmapped_type: "long" } }
     end
+  end
+
+  def jurisdiction_where_clause
+    jurisdiction_search_params[:filters]
   end
 end

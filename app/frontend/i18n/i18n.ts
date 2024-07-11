@@ -132,6 +132,7 @@ const options = {
           },
         },
         ui: {
+          reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
           confirmation: "Are you sure you want to proceed?",
@@ -226,6 +227,7 @@ const options = {
           or: "or",
           actionRequired: "Action required",
           resetFilters: "Reset filters",
+          customize: "Customize",
         },
         notification: {
           title: "Notifications",
@@ -289,7 +291,7 @@ const options = {
             stepCode: {
               title: "Step code requirements",
               description: "Below are the step code requirements for each permit template",
-              permitTemplate: "Permit template",
+              permitType: "Permit type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
               helpLinkText: "What does each step code level mean?",
@@ -347,6 +349,11 @@ const options = {
           view: "View Jurisdiction",
         },
         permitApplication: {
+          browserSearch: {
+            prompt: "Find specific form fields by using your web browser search: press keyboard shortcut",
+            windows: "Windows: <1>Ctrl</1> + <1>F</1>",
+            mac: "Mac: <1>Cmd</1> + <1>F</1> ",
+          },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
           reviewOutdatedEditLink: "View template",
@@ -508,6 +515,7 @@ const options = {
               "Only the the specified fields highlighted below (in yellow) and their corresponding blocks can be edited",
             showList: "Show list",
             hideList: "Hide list",
+            backToInbox: "Back to inbox",
             locateRevisions: "Locate each rquested revision by clicking the links below.",
             revisionsWereRequested: "Revisions to this application were requested on {{date}}",
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
@@ -557,6 +565,7 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            unlabeled: "Unlabeled",
             defaultContactLabel: "Contact",
             canAddMultipleContacts: "Submitter can add multiple contacts",
             addLabel: "Add label",
@@ -716,6 +725,9 @@ const options = {
           title: "Step code auto-compliance tool",
           subTitle: "Automatically generate your BC Energy Step Code compliance report",
           checklistGuide: "See checklist guide",
+          helpLink:
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065",
+          helpLinkText: "What does each step code level mean?",
           saveAndGoBack: "Save and go back",
           markAsComplete: "Mark as complete",
           back: "Back to permit application",
@@ -781,9 +793,9 @@ const options = {
             heading: "BC Step Code Compliance Checklist - Part 9 Buildings",
             notice: "Relevant data fields below has been filled in for you by Auto-Compliance.",
             energyStepNotMet:
-              "Minimum energy step was not met. Please see Energy step code compliance section for details.",
+              "Minimum energy step was not met. Please see <1>F: 9.36.6 Energy Step Code Compliance</1> for details.",
             zeroCarbonStepNotMet:
-              "Minimum zero carbon step was not met. Please see Zero carbon step code compliance section for details.",
+              "Minimum zero carbon step was not met. Please see <1>G: Zero Carbon Step Code Compliance</1> for details.",
             projectInfo: {
               stages: {
                 pre_construction: "Pre Construction",
@@ -820,6 +832,13 @@ const options = {
             codeComplianceSummary: {
               heading: "B: Code Compliance Summary",
               required: "Required",
+              notMet: "not achieved",
+              stepRequirement: {
+                heading: "Step Requirements",
+                label: "Please select the energy and zero carbon step combination you are trying to achieve:",
+                helpText:
+                  "Please reference the <1>step code tool page<2></2></1> for more details and helpful information.",
+              },
               compliancePath: {
                 label: "BC Building Code Performance Compliance Path:",
                 options: {
@@ -829,11 +848,14 @@ const options = {
                   step_code: "9.36.5 BC Energy Step Code",
                 },
               },
+              energyStepRequired: "Energy step code required",
+              zeroCarbonStepRequired: "Zero carbon step required",
               energyStepCode: {
                 heading: "Energy Step Code",
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "0": "Not Required",
                   "3": "3",
                   "4": "4",
                   "5": "5",
@@ -844,6 +866,7 @@ const options = {
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
+                  "0": "Not Required",
                   "1": "EL 1",
                   "2": "EL 2",
                   "3": "EL 3",
@@ -1094,19 +1117,29 @@ const options = {
             stepCodeRequirements: {
               title: "Energy Step Code requirements",
               description: "Define step code requirements.",
+              setMinimum:
+                "Set the minimum acceptable levels of Energy Step Code and Zero Carbon Step Code for each permit type below:",
               part9Building: "Part 9 Building",
+              addStep: "Add another requirement combination",
+              deleteCustomization: "Delete customization",
+              overriddenWarning: "This was overridden by your customized requirements below.",
               stepRequired: {
+                permitTypeHeading: "PERMIT TYPE",
+                standardToPass: "Standard Step Code compliance to pass",
+                customizedMinimum: "Customized minimum requirement for submission",
                 energy: {
-                  title: "Energy Step required",
+                  title: "Energy Step Code Level",
                   options: {
+                    "0": "Not required",
                     "3": "3",
                     "4": "4",
                     "5": "5",
                   },
                 },
                 zeroCarbon: {
-                  title: "Zero Carbon Step Code Level required",
+                  title: "Zero Carbon Step Code Level",
                   options: {
+                    "0": "Not required",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",
                     "3": "EL 3 - Strong",
@@ -1369,6 +1402,7 @@ const options = {
           title: "API mappings setup",
           index: {
             helperSubtitle: "See details of how fields are mapped to the API.",
+            seeButton: "See {{status}}",
           },
           edit: {
             permitTemplate: "Permit template",
@@ -1525,7 +1559,10 @@ const options = {
             createdAt: "Created at",
             token: "Token",
             status: "Status",
+            notificationEmail: "Notification email",
           },
+          notificationEmailHint:
+            "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",
           fieldPlaceholders: {
             webhookUrl: "https://example.com/webhook",
           },

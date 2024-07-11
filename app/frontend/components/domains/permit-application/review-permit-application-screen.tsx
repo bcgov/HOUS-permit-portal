@@ -10,6 +10,7 @@ import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EditableInputWithControls } from "../../shared/editable-input-with-controls"
+import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
@@ -132,6 +133,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             </Flex>
           </HStack>
           <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+            <BrowserSearchPrompt />
             <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
               {t("permitApplication.show.contactsSummary")}
             </Button>
@@ -190,7 +192,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
           <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
         )}
         {formattedFormJson && (
-          <Flex flex={1} direction="column" p={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
+          <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer" gap={8}>
             <RequirementForm
               formRef={formRef}
               permitApplication={currentPermitApplication}

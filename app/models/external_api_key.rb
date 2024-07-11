@@ -21,6 +21,7 @@ NULL",
   validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
   validates :connecting_application, presence: true
   validates :expired_at, presence: true
+  validates :notification_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
 
   before_create :generate_token
 

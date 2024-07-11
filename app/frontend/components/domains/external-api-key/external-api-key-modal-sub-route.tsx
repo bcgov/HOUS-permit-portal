@@ -45,6 +45,7 @@ const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKe
     expiredAt: externalApiKey?.expiredAt ?? addYears(new Date(), 2),
     webhookUrl: externalApiKey?.webhookUrl,
     revokedAt: externalApiKey?.revokedAt,
+    notificationEmail: externalApiKey?.notificationEmail,
   }
 }
 
@@ -157,6 +158,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   isReadOnly
                 />
               </GridItem>
+
               <GridItem colSpan={2}>
                 <UrlFormControl
                   label={t("externalApiKey.fieldLabels.webhookUrl")}
@@ -176,6 +178,16 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   )}
                   inputProps={{ placeholder: t("externalApiKey.fieldPlaceholders.webhookUrl") }}
                   validate
+                />
+              </GridItem>
+              <GridItem colSpan={2}>
+                <TextFormControl
+                  label={t("externalApiKey.fieldLabels.notificationEmail")}
+                  fieldName={"notificationEmail"}
+                  inputProps={{
+                    type: "email",
+                  }}
+                  hint={t("externalApiKey.notificationEmailHint")}
                 />
               </GridItem>
               <GridItem colSpan={2}>

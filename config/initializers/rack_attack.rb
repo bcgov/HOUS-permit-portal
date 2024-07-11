@@ -2,7 +2,7 @@ class Rack::Attack
   # cache.store = ActiveSupport::Cache::RedisStore.new # Configure cache store (replace if necessary)
 
   redis_options =
-    if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank? # skip this during precompilation in the docker build stage
+    if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during precompilation in the docker build stage
       {
         url: "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["RATE_LIMIT_REDIS_DB"]&.to_i || 2}",
         sentinels:

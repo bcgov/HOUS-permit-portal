@@ -28,11 +28,12 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
-import { HStack } from "../../step-code/checklist/pdf-content/shared/h-stack"
 
 interface INotificationsPopoverProps extends IconButtonProps {}
 
-export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observer(({ ...rest }) => {
+export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observer(function NotificationsPopover({
+  ...rest
+}) {
   const { notificationStore } = useMst()
   const {
     notifications,
@@ -100,16 +101,16 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
           <PopoverArrow />
           <PopoverCloseButton mt={1} />
           <PopoverHeader>
-            <HStack gap={4}>
+            <Flex gap={4}>
               <Heading as="h3" fontSize="lg" mb={0}>
                 {t("notification.title")}
               </Heading>
               {numberJustRead > 0 && (
                 <Badge fontWeight="normal" textTransform="lowercase">
-                  {t("notification.nUnread", { n: numberJustRead })}
+                  {t("notification.nUnread", { n: 3 })}
                 </Badge>
               )}
-            </HStack>
+            </Flex>
           </PopoverHeader>
           <PopoverBody p={4} maxH="50vh" overflow="auto">
             <Flex direction="column" gap={4}>
@@ -120,13 +121,15 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                   <CustomMessageBox status="info" description={n.actionText} key={n.id}>
                     <UnorderedList pl={0} mb={0}>
                       {generateSpecificLinkData(n).map((link) => (
-                        <ListItem>
+                        <ListItem whiteSpace={"normal"}>
                           <RouterLinkButton
                             variant="link"
                             rightIcon={<CaretRight />}
                             to={link.href}
                             color="text.primary"
                             onClick={onClose}
+                            whiteSpace={"normal"}
+                            wordBreak={"break-word"}
                           >
                             {link.text}
                           </RouterLinkButton>

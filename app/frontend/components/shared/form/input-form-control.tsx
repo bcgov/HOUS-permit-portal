@@ -28,7 +28,7 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   required?: boolean
   validate?: any
   maxLength?: number
-  hint?: string[]
+  hint?: string[] | string
   leftElement?: JSX.Element
   rightElement?: JSX.Element
   inputProps?: TInputProps

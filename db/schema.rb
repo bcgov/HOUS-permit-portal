@@ -94,6 +94,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "connecting_application", null: false
+    t.string "notification_email"
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
@@ -159,8 +160,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
     t.text "contact_summary_html"
     t.jsonb "map_position"
     t.string "prefix", null: false
-    t.integer "energy_step_required", default: 3
-    t.integer "zero_carbon_step_required", default: 1
     t.string "slug"
     t.integer "map_zoom"
     t.boolean "external_api_enabled", default: false
@@ -235,6 +234,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
     t.string "description"
     t.boolean "enabled"
     t.integer "code"
+  end
+
+  create_table "permit_type_required_steps",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.uuid "permit_type_id"
+    t.integer "energy_step_required"
+    t.integer "zero_carbon_step_required"
+    t.boolean "default"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"],
+            name: "index_permit_type_required_steps_on_jurisdiction_id"
+    t.index ["permit_type_id"],
+            name: "index_permit_type_required_steps_on_permit_type_id"
   end
 
   create_table "permit_type_submission_contacts",
@@ -481,8 +497,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
     t.boolean "codeco"
     t.integer "status", default: 0, null: false
     t.string "builder"
+    t.uuid "step_requirement_id"
     t.index ["status"], name: "index_step_code_checklists_on_status"
     t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
+    t.index ["step_requirement_id"],
+            name: "index_step_code_checklists_on_step_requirement_id"
   end
 
   create_table "step_code_data_entries",
@@ -766,6 +785,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_type_required_steps", "jurisdictions"
+  add_foreign_key "permit_type_required_steps",
+                  "permit_classifications",
+                  column: "permit_type_id"
   add_foreign_key "permit_type_submission_contacts", "jurisdictions"
   add_foreign_key "permit_type_submission_contacts",
                   "permit_classifications",
@@ -783,6 +806,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
   add_foreign_key "revision_requests", "users"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
+  add_foreign_key "step_code_checklists",
+                  "permit_type_required_steps",
+                  column: "step_requirement_id"
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"

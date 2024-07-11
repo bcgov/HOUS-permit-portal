@@ -38,6 +38,7 @@ import {
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
+  ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
 import {
@@ -350,8 +351,8 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(activityId?: string) {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId })
+  async fetchTemplateVersions(activityId?: string, status?: ETemplateVersionStatus) {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId, status })
   }
 
   async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {

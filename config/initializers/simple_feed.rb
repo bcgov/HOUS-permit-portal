@@ -15,7 +15,7 @@ end
 
 # Configure SimpleFeed
 SimpleFeed.define(:user_feed) do |f|
-  if Rails.env.production? && ENV["SKIP_DEPENDENCY_INITIALIZERS"].blank?
+  if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank?
     f.provider =
       SimpleFeed.provider(
         :redis,
@@ -27,7 +27,7 @@ SimpleFeed.define(:user_feed) do |f|
     f.provider =
       SimpleFeed.provider(
         :redis,
-        redis: -> { Redis.new(url: ENV.fetch("SIMPLE_FEED_DEV_REDIS_URL", "redis://localhost:6310/3"), driver: :ruby) },
+        redis: -> { Redis.new(url: ENV.fetch("SIMPLE_FEED_DEV_REDIS_URL", "redis://localhost:6379/3"), driver: :ruby) },
         pool_size: 10,
       )
   end

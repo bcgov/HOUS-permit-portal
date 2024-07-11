@@ -78,7 +78,13 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const onSubmit = async (data: IRequirementBlockForm) => {
     let isSuccess = false
 
-    const mappedRequirementAttributes = data.requirementsAttributes.map((ra) => {
+    const mappedRequirementAttributes = data.requirementsAttributes.map((ra, index) => {
+      // set order of the requirement
+      ra.position = index
+      if (ra.id?.startsWith("dummy-")) {
+        // remove dummy id to prevent backend from trying to update a non-existent record
+        ra.id = undefined
+      }
       if (!ra?.inputOptions) return ra
 
       const { conditional, ...restOfInputOptions } = ra?.inputOptions
@@ -212,30 +218,30 @@ function getPrunedOptionsMapperComplianceConfiguration(
   requirementAttributes: IRequirementAttributes,
   autoComplianceModuleConfigurations: TAutoComplianceModuleConfigurations
 ) {
-  const clonesAttributes = R.clone(requirementAttributes) as IRequirementAttributes
+  const clonedAttributes = R.clone(requirementAttributes) as IRequirementAttributes
 
-  const moduleName = clonesAttributes.inputOptions?.computedCompliance?.module
+  const moduleName = clonedAttributes.inputOptions?.computedCompliance?.module
 
   if (!moduleName) {
-    return clonesAttributes
+    return clonedAttributes
   }
 
   const moduleConfig = autoComplianceModuleConfigurations?.[moduleName]
 
   if (!isOptionsMapperModuleConfiguration(moduleConfig)) {
-    return clonesAttributes
+    return clonedAttributes
   }
 
-  const valueOptions = clonesAttributes.inputOptions?.valueOptions ?? []
+  const valueOptions = clonedAttributes.inputOptions?.valueOptions ?? []
 
   if (valueOptions.length === 0) {
     // remove the computed compliance if there are no value options (could happen if options were removed after mapping)
-    delete clonesAttributes.inputOptions.computedCompliance
+    delete clonedAttributes.inputOptions.computedCompliance
 
-    return clonesAttributes
+    return clonedAttributes
   }
 
-  const optionsMap = clonesAttributes.inputOptions.computedCompliance?.optionsMap ?? {}
+  const optionsMap = clonedAttributes.inputOptions.computedCompliance?.optionsMap ?? {}
 
   Object.entries(optionsMap).forEach(([key, value]) => {
     if (!valueOptions.find((option) => option.value === value)) {
@@ -244,13 +250,13 @@ function getPrunedOptionsMapperComplianceConfiguration(
   })
 
   if (Object.keys(optionsMap).length === 0) {
-    delete clonesAttributes.inputOptions.computedCompliance
+    delete clonedAttributes.inputOptions.computedCompliance
   }
 
   // this needs to be done to prevent decamelizing the computed compliance options map keys
   // as conversion results in unexpected behaviour
   // for example value Y is converted to y, when we don't want to change the key
-  clonesAttributes.inputOptions.computedCompliance.optionsMap = Object.entries(optionsMap).reduce(
+  clonedAttributes.inputOptions.computedCompliance.optionsMap = Object.entries(optionsMap).reduce(
     (acc, [key, value]) => {
       acc[`${AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX}${key}`] = value
       return acc
@@ -258,5 +264,5 @@ function getPrunedOptionsMapperComplianceConfiguration(
     {}
   )
 
-  return clonesAttributes
+  return clonedAttributes
 }

@@ -3,18 +3,22 @@ import { t } from "i18next"
 import React from "react"
 import { i18nPrefix } from "./i18n-prefix"
 
-import { IStepCodeChecklist } from "../../../../../models/step-code-checklist"
+import { IStepCodeEnergyComplianceReport } from "../../../../../models/step-code-energy-compliance-report"
+import { EEnergyStep } from "../../../../../types/enums"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeEnergyComplianceReport
 }
 
-export const EnergySteps = function EnergySteps({ checklist }: IProps) {
+export const EnergySteps = function EnergySteps({ compliance }: IProps) {
+  const steps = Object.values(EEnergyStep)
+  const numSteps = steps.length - 1
+
   return (
     <Flex align="end" w="full">
-      {[...Array(checklist.numberOfEnergySteps).keys()].map((stepOffset) => {
-        const step = parseInt(checklist.minEnergyStep) + stepOffset
-        const isRequiredStep = step.toString() == checklist.requiredEnergyStep
+      {[...Array(numSteps).keys()].map((stepOffset) => {
+        const step = steps[stepOffset + 1]
+        const isRequiredStep = step == compliance.requiredStep
         let height = 38
         switch (stepOffset) {
           case 0:
@@ -41,7 +45,7 @@ export const EnergySteps = function EnergySteps({ checklist }: IProps) {
               rounded="none"
               borderStyle={isRequiredStep ? "solid" : "dashed"}
               borderWidth={2}
-              borderRightWidth={stepOffset + 1 == checklist.numberOfEnergySteps ? 2 : 0}
+              borderRightWidth={stepOffset + 1 == numSteps ? 2 : 0}
               borderColor={isRequiredStep ? "semantic.info" : "border.base"}
               bg={isRequiredStep ? "semantic.infoLight" : "greys.grey03"}
             >

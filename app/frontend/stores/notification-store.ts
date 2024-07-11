@@ -4,7 +4,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { ENotificationActionType } from "../types/enums"
-import { ILinkData, INotification, IUserPushPayload } from "../types/types"
+import { ILinkData, INotification, IPermitNotificationObjectData, IUserPushPayload } from "../types/types"
 
 export const NotificationStoreModel = types
   .model("NotificationStoreModel")
@@ -30,11 +30,13 @@ export const NotificationStoreModel = types
     },
     generateSpecificLinkData(notification: INotification): ILinkData[] {
       const currentUser = self.rootStore.userStore.currentUser
+      let objectData = notification.objectData
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
+        objectData = objectData as IPermitNotificationObjectData
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewOutdatedTitle"),
@@ -46,17 +48,17 @@ export const NotificationStoreModel = types
         if (currentUser.isManager) {
           linkData.push({
             text: t("permitApplication.reviewOutdatedEditLink"),
-            href: `/digital-building-permits/${notification.objectData.previousTemplateVersionId}/edit?compare=true`,
+            href: `/digital-building-permits/${objectData.previousTemplateVersionId}/edit?compare=true`,
           })
         }
 
         return linkData
-      }
-      if (notification.actionType === ENotificationActionType.customizationUpdate) {
+      } else if (notification.actionType === ENotificationActionType.customizationUpdate) {
+        objectData = objectData as IPermitNotificationObjectData
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${notification.objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewCustomizedTitle"),
@@ -65,6 +67,20 @@ export const NotificationStoreModel = types
             )}`,
           },
         ]
+      } else if (
+        [
+          ENotificationActionType.publishedTemplateMissingRequirementsMapping,
+          ENotificationActionType.scheduledTemplateMissingRequirementsMapping,
+        ].includes(notification.actionType)
+      ) {
+        return [
+          {
+            text: "View integration mapping",
+            href: `/api-settings/api-mappings/digital-building-permits/${objectData.templateVersionId}/edit`,
+          },
+        ]
+      } else {
+        return []
       }
       if (
         notification.actionType === ENotificationActionType.applicationSubmission ||

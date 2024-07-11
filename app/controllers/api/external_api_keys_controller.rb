@@ -97,6 +97,7 @@ class Api::ExternalApiKeysController < Api::ApplicationController
       :name,
       :expired_at,
       :connecting_application,
+      :notification_email,
       :jurisdiction_id,
       :webhook_url,
     )

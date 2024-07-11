@@ -47,8 +47,6 @@ class PermitApplication < ApplicationRecord
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
-  delegate :energy_step_required, to: :jurisdiction, allow_nil: true
-  delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
   delegate :form_json, to: :template_version
   delegate :published_template_version, to: :template_version
 
