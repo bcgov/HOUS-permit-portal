@@ -17,7 +17,7 @@ class PermitApplication < ApplicationRecord
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
   has_one :step_code
-  has_many :revision_requests
+  has_many :submission_versions, dependent: :destroy
 
   # Custom validation
 
@@ -65,7 +65,19 @@ class PermitApplication < ApplicationRecord
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
-  accepts_nested_attributes_for :revision_requests, allow_destroy: true
+  # Helper method to get the latest SubmissionVersion
+  def latest_submission_version
+    submission_versions.order(created_at: :desc).first
+  end
+
+  def earliest_submission_version
+    submission_versions.order(created_at: :desc).last
+  end
+
+  # Method to get all revision requests from the latest SubmissionVersion
+  def revision_requests
+    latest_submission_version&.revision_requests || RevisionRequest.none
+  end
 
   def substatus
     if draft?
@@ -266,9 +278,21 @@ class PermitApplication < ApplicationRecord
 
   def handle_submission
     update(signed_off_at: Time.current)
-    submitted_at.blank? ? update(submitted_at: Time.current) : update(resubmitted_at: Time.current)
+
+    submission_versions.create!(form_json: self.form_json, submission_data: self.submission_data)
+
     send_submit_notifications
     reindex
+  end
+
+  def submitted_at
+    return nil if submission_versions.length < 1
+    return earliest_submission_version.created_at
+  end
+
+  def resubmitted_at
+    return nil if submission_versions.length <= 1
+    return latest_submission_version.created_at
   end
 
   def resubmitted?

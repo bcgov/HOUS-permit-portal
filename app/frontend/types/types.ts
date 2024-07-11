@@ -462,3 +462,10 @@ export interface IMinimalFrozenUser {
   certified: boolean
   discardedAt?: Date
 }
+
+export interface ISubmissionVersion {
+  id: string
+  formJson: IFormJson
+  submissionData: ISubmissionData
+  revisionRequests: IRevisionRequest[]
+}

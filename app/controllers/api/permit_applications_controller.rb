@@ -79,7 +79,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def update_revision_requests
     authorize @permit_application
-    if @permit_application.submitted? && @permit_application.update(revision_request_params)
+    if @permit_application.submitted? && @permit_application.latest_submission_version&.update(revision_request_params)
       render_success @permit_application,
                      ("permit_application.save_success"),
                      { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }

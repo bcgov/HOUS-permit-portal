@@ -16,8 +16,8 @@ import {
   IFormIOBlock,
   IFormJson,
   IPermitApplicationSupportingDocumentsUpdate,
-  IRevisionRequest,
   ISubmissionData,
+  ISubmissionVersion,
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
@@ -76,7 +76,7 @@ export const PermitApplicationModel = types
     showingCompareAfter: types.optional(types.boolean, false),
     revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
-    revisionRequests: types.optional(types.array(types.frozen<IRevisionRequest>()), []),
+    latestSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -86,9 +86,6 @@ export const PermitApplicationModel = types
     },
     get isSubmitted() {
       return self.status === EPermitApplicationStatus.submitted
-    },
-    get isApproved() {
-      return self.status === EPermitApplicationStatus.approved
     },
     get wasViewed() {
       return self.viewedAt !== null
@@ -110,6 +107,9 @@ export const PermitApplicationModel = types
     },
     get isRevisionsViewed() {
       return self.substatus === EPermitApplicationSubstatus.revisionsViewed
+    },
+    get revisionRequests() {
+      return self.latestSubmissionVersion?.revisionRequests || []
     },
   }))
   .views((self) => ({
