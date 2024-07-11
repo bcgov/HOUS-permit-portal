@@ -388,7 +388,7 @@ interface IStepCodeTableProps {
 
 const StepCodeTable: React.FC<IStepCodeTableProps> = ({ currentJurisdiction }) => {
   const { t } = useTranslation()
-  const requiredStepsByPermitType = currentJurisdiction.requiredStepsByPermitType
+  const { requiredStepsByPermitType } = currentJurisdiction
   return (
     <Flex direction="column" gap={4}>
       {Object.keys(requiredStepsByPermitType).map(
