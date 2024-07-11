@@ -254,7 +254,7 @@ export class Api {
 
   async updateRevisionRequests(id, params: IRevisionRequestForm) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests`, {
-      permitApplication: params,
+      submissionVersion: params,
     })
   }
 

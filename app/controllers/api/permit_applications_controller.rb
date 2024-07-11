@@ -211,7 +211,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def revision_request_params # params for submitters
-    params.require(:permit_application).permit(
+    params.require(:submission_version).permit(
       revision_requests_attributes: [
         :id,
         :user_id,

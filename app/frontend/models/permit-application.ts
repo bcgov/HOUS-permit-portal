@@ -143,7 +143,7 @@ export const PermitApplicationModel = types
       const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
       const revisionModeFormJson =
         self.revisionMode || self.isRevisionsRequested
-          ? combineRevisionButtons(diffColoredFormJson)
+          ? combineRevisionButtons(diffColoredFormJson, self.revisionMode)
           : diffColoredFormJson
       return revisionModeFormJson
     },

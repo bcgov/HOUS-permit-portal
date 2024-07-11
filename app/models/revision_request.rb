@@ -1,5 +1,5 @@
 class RevisionRequest < ApplicationRecord
-  belongs_to :permit_application
+  belongs_to :submission_version
   belongs_to :user
 
   enum reason_code: {
