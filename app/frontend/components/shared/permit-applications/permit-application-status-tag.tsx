@@ -2,7 +2,7 @@ import { Tag, TagProps } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
-import { EPermitApplicationSubstatus } from "../../../types/enums"
+import { EPermitApplicationStatus } from "../../../types/enums"
 
 interface IPermitApplicationStatusTagProps extends TagProps {
   permitApplication: IPermitApplication
@@ -12,28 +12,24 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
   const { t } = useTranslation()
 
   const bgMap = {
-    [EPermitApplicationSubstatus.submitted]: "theme.yellow",
-    [EPermitApplicationSubstatus.resubmitted]: "theme.yellow",
-    [EPermitApplicationSubstatus.viewed]: "greys.grey03",
-    [EPermitApplicationSubstatus.draft]: "theme.blueLight",
-    [EPermitApplicationSubstatus.revisionsRequested]: "semantic.errorLight",
-    [EPermitApplicationSubstatus.revisionsViewed]: "greys.grey03",
+    [EPermitApplicationStatus.newlySubmitted]: "theme.yellow",
+    [EPermitApplicationStatus.resubmitted]: "theme.yellow",
+    [EPermitApplicationStatus.newDraft]: "theme.blueLight",
+    [EPermitApplicationStatus.revisionsRequested]: "semantic.errorLight",
   }
 
   const colorMap = {
-    [EPermitApplicationSubstatus.submitted]: "text.primary",
-    [EPermitApplicationSubstatus.resubmitted]: "text.primary",
-    [EPermitApplicationSubstatus.viewed]: "text.primary",
-    [EPermitApplicationSubstatus.draft]: "text.primary",
-    [EPermitApplicationSubstatus.revisionsRequested]: "semantic.error",
-    [EPermitApplicationSubstatus.revisionsViewed]: "text.primary",
+    [EPermitApplicationStatus.newlySubmitted]: "text.primary",
+    [EPermitApplicationStatus.resubmitted]: "text.primary",
+    [EPermitApplicationStatus.newDraft]: "text.primary",
+    [EPermitApplicationStatus.revisionsRequested]: "semantic.error",
   }
 
   return (
     <Tag
       p={1}
-      bg={bgMap[permitApplication.substatus]}
-      color={colorMap[permitApplication.substatus]}
+      bg={bgMap[permitApplication.status]}
+      color={colorMap[permitApplication.status]}
       fontWeight="bold"
       border="1px solid"
       borderColor="border.light"
@@ -42,7 +38,7 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
       {...rest}
     >
       {/* @ts-ignore */}
-      {t(`permitApplication.substatus.${permitApplication.substatus}`)}
+      {t(`permitApplication.status.${permitApplication.status}`)}
     </Tag>
   )
 }

@@ -27,19 +27,21 @@ class PermitApplication < ApplicationRecord
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
-  enum status: { draft: 0, submitted: 1, approved: 2 }, _default: 0
+  enum status: { new_draft: 0, newly_submitted: 1, revisions_requested: 3, resubmitted: 4 }, _default: 0
 
   aasm column: "status", enum: true do
-    state :draft, initial: true
+    state :new_draft, initial: true
     state :submitted
+    state :revisions_requested
     state :approved
 
     event :submit, after: :handle_submission do
-      transitions from: :draft, to: :submitted, guard: :can_submit?
+      transitions from: :new_draft, to: :newly_submitted, guard: :can_submit?
+      transitions from: :revisions_requested, to: :resubmitted, guard: :can_submit?
     end
 
     event :finalize_revision_requests, after: :handle_finalize_revision_requests do
-      transitions from: :submitted, to: :draft
+      transitions from: %i[newly_submitted resubmitted], to: :revisions_requested
     end
   end
 
@@ -77,24 +79,12 @@ class PermitApplication < ApplicationRecord
     latest_submission_version&.revision_requests || RevisionRequest.none
   end
 
-  def substatus
-    if draft?
-      timestamp_map = { 1 => "draft", (revisions_requested_at&.to_i || 0) => "revisions_requested" }
-      return timestamp_map[timestamp_map.keys.max]
-    end
+  def draft?
+    new? || revisions_requested?
+  end
 
-    if submitted?
-      timestamp_map = {
-        submitted_at.to_i => "submitted",
-        (viewed_at&.to_i || 1) => "viewed",
-        (resubmitted_at&.to_i || 0) => "resubmitted",
-      }
-      map_max = timestamp_map[timestamp_map.keys.max]
-      return "revisions_viewed" if map_max == "viewed" && resubmitted_at.present?
-      return timestamp_map[timestamp_map.keys.max]
-    end
-
-    return status
+  def submitted?
+    newly_submitted? || resubmitted?
   end
 
   def force_update_published_template_version
@@ -115,8 +105,7 @@ class PermitApplication < ApplicationRecord
       submitted_at: submitted_at,
       viewed_at: viewed_at,
       status: status,
-      substatus: substatus,
-      substatus: substatus,
+      EPermitApplicationStatus: EPermitApplicationStatus,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
       template_version_id: template_version.id,
@@ -155,7 +144,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
-    update(viewed_at: Time.current)
+    latest_submission_version.update(viewed_at: Time.current)
   end
 
   def number_prefix
@@ -281,6 +270,10 @@ class PermitApplication < ApplicationRecord
 
     send_submit_notifications
     reindex
+  end
+
+  def viewed_at
+    latest_submission_version&.viewed_at
   end
 
   def submitted_at

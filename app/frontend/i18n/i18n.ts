@@ -390,25 +390,17 @@ const options = {
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
           pidLabel: "Parcel Identification (PID) No.",
           addressLabel: "Address",
+          viewed: "Viewed",
+          notViewed: "New",
           status: {
-            draft: "Draft",
-            submitted: "Submitted",
-            approved: "Approved",
+            new_draft: "Draft",
+            newly_submitted: "Submitted",
+            resubmitted: "Reubmitted",
+            revisions_requested: "Revisions Requested",
           },
-          substatus: {
-            draft: "Draft",
-            submitted: "Submitted",
-            approved: "Approved",
-            notViewed: "New",
-            viewed: "Viewed",
-            resubmitted: "Newly revised",
-            revisions_requested: "Revision needed",
-            revisions_viewed: "Revision viewed",
-          },
-          statusTabs: {
+          statusGroups: {
             draft: "Draft permits",
             submitted: "Submitted permits",
-            approved: "Approved permits",
           },
           columns: {
             number: "Application #",
@@ -418,7 +410,6 @@ const options = {
             submitted_at: "Submitted at",
             viewed_at: "Viewed at",
             status: "Status",
-            substatus: "Status",
           },
           submissionInbox: {
             contactInviteWarning:
@@ -1683,9 +1674,9 @@ const options = {
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
-  parseMissingKeyHandler: (key, defaultValue) => {
-    return fallbackTranslations.en.fallback
-  },
+  // parseMissingKeyHandler: (key, defaultValue) => {
+  //   return fallbackTranslations.en.fallback
+  // },
 }
 
 i18n.use(initReactI18next).init(options)

@@ -61,7 +61,9 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             justify="space-between"
             direction={{ base: "column", md: "row" }}
           >
-            <Heading as="h2">{t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.draft}`)}</Heading>
+            <Heading as="h2">
+              {t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.newDraft}`)}
+            </Heading>
             <Flex align="flex-end" gap={4}>
               {hasResetableFilters && (
                 <Button variant="link" mb={2} onClick={resetQueryParams}>

@@ -478,6 +478,7 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
+  viewedAt?: Date
 }
 export interface IPermitTypeRequiredStep {
   id?: string

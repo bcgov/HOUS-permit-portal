@@ -1,14 +1,9 @@
 import { t } from "i18next"
-import { Instance, cast, flow, types } from "mobx-state-tree"
+import { Instance, applySnapshot, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import {
-  EPermitApplicationStatus,
-  EPermitApplicationSubstatus,
-  ERequirementChangeAction,
-  ERequirementType,
-} from "../types/enums"
+import { EPermitApplicationStatus, ERequirementChangeAction, ERequirementType } from "../types/enums"
 import {
   ICompareRequirementsBoxData,
   ICompareRequirementsBoxDiff,
@@ -46,7 +41,7 @@ export const PermitApplicationModel = types
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
-    substatus: types.enumeration(Object.values(EPermitApplicationSubstatus)),
+    EPermitApplicationStatus: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
@@ -56,7 +51,6 @@ export const PermitApplicationModel = types
     formattedComplianceData: types.maybeNull(types.frozen()),
     formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
     submittedAt: types.maybeNull(types.Date),
-    viewedAt: types.maybeNull(types.Date),
     resubmittedAt: types.maybeNull(types.Date),
     revisionsRequestedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
@@ -82,31 +76,19 @@ export const PermitApplicationModel = types
   .extend(withRootStore())
   .views((self) => ({
     get isDraft() {
-      return self.status === EPermitApplicationStatus.draft
+      return self.status === EPermitApplicationStatus.new || self.status === EPermitApplicationStatus.revisionsRequested
     },
     get isSubmitted() {
-      return self.status === EPermitApplicationStatus.submitted
-    },
-    get wasViewed() {
-      return self.viewedAt !== null
-    },
-    get wasResubmitted() {
-      return self.resubmittedAt !== null
-    },
-    get wasRevisionsRequested() {
-      return self.revisionsRequestedAt !== null
+      return self.status === EPermitApplicationStatus.newlySubmitted || EPermitApplicationStatus.resubmitted
     },
     get isRevisionsRequested() {
-      return self.substatus === EPermitApplicationSubstatus.revisionsRequested
+      return self.EPermitApplicationStatus === EPermitApplicationStatus.revisionsRequested
     },
     get isResubmitted() {
-      return self.substatus === EPermitApplicationSubstatus.resubmitted
+      return self.EPermitApplicationStatus === EPermitApplicationStatus.resubmitted
     },
     get isViewed() {
-      return self.substatus === EPermitApplicationSubstatus.viewed
-    },
-    get isRevisionsViewed() {
-      return self.substatus === EPermitApplicationSubstatus.revisionsViewed
+      return self.latestSubmissionVersion.viewedAt
     },
     get revisionRequests() {
       return self.latestSubmissionVersion?.revisionRequests || []
@@ -420,7 +402,7 @@ export const PermitApplicationModel = types
       const response = yield self.environment.api.viewPermitApplication(self.id)
       if (response.ok) {
         const { data: permitApplication } = response.data
-        self.viewedAt = permitApplication.viewedAt
+        applySnapshot(self, permitApplication)
       }
       return response.ok
     }),

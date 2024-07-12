@@ -4,6 +4,7 @@ class CreateRevisionRequests < ActiveRecord::Migration[7.1]
       t.jsonb :form_json
       t.jsonb :submission_data
       t.references :permit_application, null: false, foreign_key: true, type: :uuid
+      t.timestamp :viewed_at
 
       t.timestamps
     end
@@ -19,15 +20,17 @@ class CreateRevisionRequests < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    # This needs to occur between two migrations
-    # Im not sure if there is a way to accomplish this with the data_migration
-    # But this seems to work completely fine
-    PermitApplication.submitted.each do |pa|
-      pa.submission_versions.create(
-        form_json: pa.form_json,
-        submission_data: pa.submission_data,
-        created_at: pa.submitted_at,
-      )
+    def data
+      PermitApplication.submitted.each do |pa|
+        pa.submission_versions.create(
+          form_json: pa.form_json,
+          submission_data: pa.submission_data,
+          created_at: pa.submitted_at,
+          viewed_at: pa.viewed_at,
+        )
+      end
+
+      remove_column :permit_applications, :viewed_at, :timestamp
     end
   end
 end

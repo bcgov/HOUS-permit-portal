@@ -13,7 +13,7 @@ import {
   ECustomEvents,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationSortFields,
-  EPermitApplicationStatus,
+  EPermitApplicationStatusGroups,
 } from "../types/enums"
 import {
   IPermitApplicationComplianceUpdate,
@@ -24,8 +24,8 @@ import {
 } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
-const filterableStatuses = Object.values(EPermitApplicationStatus)
-export type TFilterableStatus = (typeof filterableStatuses)[number]
+const filterableStatusGroups = Object.values(EPermitApplicationStatusGroups)
+export type TFilterableStatus = (typeof filterableStatusGroups)[number]
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -33,7 +33,10 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
-      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
+      statusGroupFilter: types.optional(
+        types.enumeration(filterableStatusGroups),
+        EPermitApplicationStatusGroups.draft
+      ),
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.maybeNull(types.string),
     }),
@@ -138,11 +141,11 @@ export const PermitApplicationStoreModel = types
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
     },
-    setStatusFilter(status: TFilterableStatus) {
+    setStatusGroupFilter(status: TFilterableStatus) {
       if (!status) return
 
-      setQueryParam("status", status)
-      self.statusFilter = status
+      setQueryParam("statusGroup", status)
+      self.statusGroupFilter = status
     },
   }))
   .actions((self) => ({
@@ -169,7 +172,7 @@ export const PermitApplicationStoreModel = types
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
         filters: {
-          status: self.statusFilter,
+          statusGroup: self.statusFilterGroup,
           templateVersionId: self.templateVersionIdFilter,
           requirementTemplateId: self.requirementTemplateIdFilter,
         },
@@ -208,11 +211,11 @@ export const PermitApplicationStoreModel = types
     }),
 
     setPermitApplicationFilters(queryParams: URLSearchParams) {
-      const statusFilter = queryParams.get("status") as TFilterableStatus
+      const statusGroupFilter = queryParams.get("statusGroup") as TFilterableStatus
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
 
-      self.setStatusFilter(statusFilter)
+      self.setStatusGroupFilter(statusGroupFilter)
       self.requirementTemplateIdFilter = requirementTemplateIdFilter
       self.templateVersionIdFilter = templateVersionIdFilter
     },

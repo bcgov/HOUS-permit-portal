@@ -97,7 +97,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     </Flex>
                   </SearchGridItem>
                   <SearchGridItem>
-                    {pa.wasViewed ? (
+                    {pa.isViewed ? (
                       <Flex direction="column">
                         <Text>{format(pa.viewedAt, "yyyy-MM-dd")}</Text>
                         <Text>{format(pa.viewedAt, "HH:mm")}</Text>

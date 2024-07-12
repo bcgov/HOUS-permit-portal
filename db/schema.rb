@@ -575,6 +575,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
     t.jsonb "form_json"
     t.jsonb "submission_data"
     t.uuid "permit_application_id", null: false
+    t.datetime "viewed_at", precision: nil
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["permit_application_id"],

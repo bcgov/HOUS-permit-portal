@@ -3,7 +3,6 @@ class PermitApplicationBlueprint < Blueprinter::Base
     identifier :id
     fields :nickname,
            :status,
-           :substatus,
            :number,
            :created_at,
            :updated_at,

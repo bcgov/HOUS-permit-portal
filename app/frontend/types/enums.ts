@@ -21,17 +21,15 @@ export enum EPermitClassificationCode {
 }
 
 export enum EPermitApplicationStatus {
-  draft = "draft",
-  submitted = "submitted",
-}
-export enum EPermitApplicationSubstatus {
-  draft = "draft",
-  submitted = "submitted",
-  viewed = "viewed",
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
   revisionsRequested = "revisions_requested",
-  revisionsViewed = "revisions_viewed",
   resubmitted = "resubmitted",
-  approved = "approved",
+}
+
+export enum EPermitApplicationStatusGroups {
+  draft = "draft",
+  submitted = "submitted",
 }
 
 export enum ETemplateVersionStatus {
@@ -107,7 +105,6 @@ export enum EPermitApplicationSortFields {
   submittedAt = "submitted_at",
   viewedAt = "viewed_at",
   status = "status",
-  substatus = "substatus",
 }
 
 export enum EPermitApplicationSubmitterSortFields {
@@ -115,11 +112,9 @@ export enum EPermitApplicationSubmitterSortFields {
   permitClassification = "permit_classification",
   submitter = "submitter",
   submittedAt = "submitted_at",
-  substatus = "substatus",
 }
 
 export enum EPermitApplicationReviewerSortFields {
-  substatus = "substatus",
   number = "number",
   referenceNumber = "reference_number",
   permitClassification = "permit_classification",
