@@ -376,16 +376,3 @@ export enum ENotificationActionType {
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
 }
-
-export enum EReasonCode {
-  nonCompliant = "non_compliant",
-  conflictingInaccurate = "conflicting_inaccurate",
-  insufficientDetail = "insufficient_detail",
-  incorrectFormat = "incorrect_format",
-  missingDocumentation = "missing_documentation",
-  outdated = "outdated",
-  inapplicable = "inapplicable",
-  missingSignatures = "missing_signatures",
-  incorrectCalculations = "incorrect_calculations",
-  other = "other",
-}

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -364,11 +364,28 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
             name: "index_requirements_on_requirement_block_id"
   end
 
+  create_table "revision_reasons",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.string "reason_code", limit: 64
+    t.string "description"
+    t.uuid "site_configuration_id", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reason_code"],
+            name: "index_revision_reasons_on_reason_code",
+            unique: true
+    t.index ["site_configuration_id"],
+            name: "index_revision_reasons_on_site_configuration_id"
+  end
+
   create_table "revision_requests",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.integer "reason_code"
+    t.string "reason_code", limit: 64
     t.jsonb "requirement_json"
     t.jsonb "submission_json"
     t.string "comment", limit: 350
@@ -421,6 +438,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
               }
             },
             null: false
+    t.jsonb "revision_reason_options"
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -803,6 +821,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_230956) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "step_code_building_characteristics_summaries",

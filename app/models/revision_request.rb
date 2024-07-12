@@ -1,20 +1,7 @@
 class RevisionRequest < ApplicationRecord
   belongs_to :submission_version
   belongs_to :user
-
-  enum reason_code: {
-         non_compliant: 0,
-         conflicting_inaccurate: 1,
-         insufficient_detail: 2,
-         incorrect_format: 3,
-         missing_documentation: 4,
-         outdated: 5,
-         inapplicable: 6,
-         missing_signatures: 7,
-         incorrect_calculations: 8,
-         other: 9,
-       },
-       _default: 0
+  belongs_to :revision_reason, foreign_key: :revision_code, primary_key: :reason_code
 
   validate :user_must_be_review_staff
 

@@ -15,7 +15,6 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  EReasonCode,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -311,8 +310,13 @@ export interface IUserPushPayload {
   }
 }
 
-export interface ISiteConfiguration {
+export type TSiteWideMessageConfiguration = {
   displaySitewideMessage: boolean
+  sitewideMessage: string | null
+}
+
+export interface ISiteConfiguration extends TSiteWideMessageConfiguration {
+  helpLinkItems: IHelpLinkItems
 }
 
 export interface IContact {
@@ -450,7 +454,7 @@ export interface ILinkData {
 
 export interface IRevisionRequest {
   id: string
-  reasonCode: EReasonCode
+  reasonCode: string
   requirementJson: IFormIORequirement
   submissionJson: any
   comment: string
