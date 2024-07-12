@@ -161,6 +161,14 @@ Rails.application.routes.draw do
     resources :external_api_keys do
       post "revoke", on: :member
     end
+
+    resources :collaborators, only: %i[] do
+      collection do
+        resources :collaboratable, only: %i[] do
+          post "search", to: "collaborators#collaborator_search"
+        end
+      end
+    end
   end
 
   scope module: :external_api, path: :external_api do
