@@ -25,6 +25,7 @@ import {
 import {
   IAcceptInvitationResponse,
   IApiResponse,
+  ICollaboratorSearchResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
   INotificationResponse,
@@ -192,6 +193,13 @@ export class Api {
 
   async fetchPermitApplications(params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
+  }
+
+  async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
+    return this.client.post<ICollaboratorSearchResponse>(
+      `/collaborators/collaboratorable/${collaboratorableId}/search`,
+      params
+    )
   }
 
   async fetchJurisdictionPermitApplications(

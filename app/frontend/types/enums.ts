@@ -375,3 +375,8 @@ export enum ENotificationActionType {
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
 }
+
+export enum ECollaboratorableType {
+  Jurisdiction = "Jurisdiction",
+  User = "User",
+}

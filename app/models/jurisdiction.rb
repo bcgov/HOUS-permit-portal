@@ -184,6 +184,10 @@ class Jurisdiction < ApplicationRecord
     end
   end
 
+  def blueprint
+    JurisdictionBlueprint
+  end
+
   private
 
   def create_integration_mappings_async

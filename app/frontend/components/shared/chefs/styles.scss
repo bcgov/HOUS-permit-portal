@@ -408,6 +408,7 @@
     > .form-group:not(:empty) {
       // each form field inside a block
       margin-bottom: var(--chakra-space-6);
+
       &.formio-component-select .form-group,
       input {
         max-width: var(--chakra-sizes-container-sm);
@@ -526,9 +527,8 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition:
-        background-color 200ms ease-in-out,
-        border-color 200ms ease-in-out;
+      transition: background-color 200ms ease-in-out,
+      border-color 200ms ease-in-out;
 
       a {
         color: inherit;
@@ -784,6 +784,12 @@
 }
 
 #requirement-form-wrapper {
+  .card-title {
+    display: inline-grid;
+    width: 100%;
+    grid-template-columns: 1fr auto 20px;
+  }
+
   // style default error box that to look similar to our floating error alert box
   [id^="error-list-"].alert.alert-danger {
     padding-top: var(--chakra-space-7);

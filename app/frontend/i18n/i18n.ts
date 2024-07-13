@@ -230,6 +230,7 @@ const options = {
           customize: "Customize",
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
+          proceed: "Proceed",
         },
         notification: {
           title: "Notifications",

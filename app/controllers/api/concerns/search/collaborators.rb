@@ -17,7 +17,9 @@ module Api::Concerns::Search::Collaborators
         ),
     }
 
-    @collaborator_search = PermitApplication.search(collaborator_query, **search_conditions)
+    # binding.pry
+
+    @collaborator_search = Collaborator.search(collaborator_query, **search_conditions)
   end
 
   private

@@ -164,7 +164,7 @@ Rails.application.routes.draw do
 
     resources :collaborators, only: %i[] do
       collection do
-        resources :collaboratable, only: %i[] do
+        resources :collaboratorable, only: %i[] do
           post "search", to: "collaborators#collaborator_search"
         end
       end

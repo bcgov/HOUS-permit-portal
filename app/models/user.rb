@@ -108,6 +108,10 @@ class User < ApplicationRecord
     role.gsub("_", " ")
   end
 
+  def blueprint
+    UserBlueprint
+  end
+
   private
 
   def create_default_preference

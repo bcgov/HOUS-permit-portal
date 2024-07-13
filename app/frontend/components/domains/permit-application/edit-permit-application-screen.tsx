@@ -16,6 +16,7 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -34,6 +35,7 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
+import { CollaboratorAssignmentPopover } from "./collaborator-assignment-popover"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
@@ -61,6 +63,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
+  const [accordionPanelNodes, setAccordionPanelNodes] = useState<HTMLDivElement[]>([])
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -80,6 +83,43 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       setProcessEventOnLoad(null)
     }
   }, [formRef.current, processEventOnLoad])
+
+  useEffect(() => {
+    if (!formRef.current?.element) {
+      return
+    }
+
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type !== "childList") {
+          continue
+        }
+        // @ts-ignore
+        const changedNodes = [...mutation.addedNodes, ...mutation.removedNodes]
+
+        const anyPaneNodeChanged = changedNodes.some((node) => {
+          return node.classList?.contains("formio-component-panel")
+        })
+
+        if (!anyPaneNodeChanged) {
+          continue
+        }
+
+        updateAccordionNode()
+      }
+    })
+
+    // Start observing
+    observer.observe(formRef.current.element, {
+      childList: true,
+      subtree: true,
+    })
+    //
+    // Cleanup function to disconnect the observer
+    return () => {
+      observer.disconnect()
+    }
+  }, [formRef.current])
 
   useEffect(() => {
     document.addEventListener<ECustomEvents.handlePermitApplicationUpdate>(
@@ -371,6 +411,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               showHelpButton
               isEditing
               renderSaveButton={() => <SaveButton handleSave={handleSave} />}
+              setAccordionHeaderNodes={updateAccordionNode}
             />
           </Flex>
         )}
@@ -383,8 +424,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
+      {accordionPanelNodes.map((node) => {
+        const titleNode = node.querySelector(".card-title")
+        return createPortal(
+          <HStack mr={6}>
+            <CollaboratorAssignmentPopover />
+          </HStack>,
+          titleNode
+        )
+      })}
     </Box>
   )
+
+  function updateAccordionNode() {
+    let accordionNodes = document.querySelectorAll<HTMLDivElement>(".formio-component-panel")
+
+    setAccordionPanelNodes?.(Array.from(accordionNodes))
+  }
 })
 
 function SaveButton({ handleSave }) {
