@@ -31,7 +31,6 @@ class PermitApplication < ApplicationRecord
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
-  delegate :form_json, to: :template_version
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_default_nickname, on: :create
@@ -47,6 +46,21 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
+
+  def form_json
+    processed_json = template_version.form_json.deep_dup
+    block_ids_to_remove = get_requirement_block_ids_to_remove
+
+    return processed_json if block_ids_to_remove.empty?
+
+    processed_json["components"].each do |component|
+      next unless component["components"].present?
+
+      component["components"].delete_if { |sub_component| block_ids_to_remove.include?(sub_component["id"]) }
+    end
+
+    processed_json
+  end
 
   def force_update_published_template_version
     return unless Rails.env.development?
@@ -312,5 +326,39 @@ class PermitApplication < ApplicationRecord
     if pin.blank? && pid.blank?
       errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
     end
+  end
+
+  def get_requirement_block_ids_to_remove
+    jurisdiction_customizations = form_customizations
+    requirement_blocks_json = template_version.requirement_blocks_json
+    block_ids_to_remove = []
+
+    requirement_blocks_json.each do |rb_id, requirement_block|
+      next if requirement_block["requirements"].blank? || requirement_block["requirements"].empty?
+
+      has_only_elective_fields = requirement_block["requirements"].all? { |requirement| requirement["elective"] }
+
+      next unless has_only_elective_fields
+
+      enabled_elective_field_ids =
+        jurisdiction_customizations&.dig("requirement_block_changes", rb_id, "enabled_elective_field_ids") || []
+
+      # remove the block if no elective fields are enabled
+      if enabled_elective_field_ids.empty?
+        block_ids_to_remove << rb_id
+        next
+      end
+
+      # This check is to ensure that the enabled elective fields are valid, i.e. they exist in the requirement block
+      any_enabled_elective_field_valid =
+        enabled_elective_field_ids.any? do |elective_field_id|
+          requirement_block["requirements"].any? { |requirement| elective_field_id == requirement["id"] }
+        end
+
+      # remove the block if no enabled elective fields are valid
+      block_ids_to_remove << rb_id unless any_enabled_elective_field_valid
+    end
+
+    block_ids_to_remove
   end
 end
