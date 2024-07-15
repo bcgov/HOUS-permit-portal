@@ -59,7 +59,7 @@ class PermitApplication < ApplicationRecord
       component["components"].delete_if { |sub_component| block_ids_to_remove.include?(sub_component["id"]) }
     end
 
-    processed_json
+    remove_empty_sections_from_form_json!(processed_json)
   end
 
   def force_update_published_template_version
@@ -326,6 +326,12 @@ class PermitApplication < ApplicationRecord
     if pin.blank? && pid.blank?
       errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
     end
+  end
+
+  def remove_empty_sections_from_form_json!(form_json)
+    form_json["components"].delete_if { |component| component["components"].blank? || component["components"].empty? }
+
+    form_json
   end
 
   def get_requirement_block_ids_to_remove
