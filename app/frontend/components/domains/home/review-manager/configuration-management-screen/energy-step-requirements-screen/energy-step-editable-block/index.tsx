@@ -40,6 +40,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
 
   const onSubmit = async (values) => {
     await jurisdiction.update(values)
+    reset(getDefaultValues())
     setIsEditing(false)
   }
 
