@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, applySnapshot, cast, flow, types } from "mobx-state-tree"
+import { Instance, cast, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -41,7 +41,6 @@ export const PermitApplicationModel = types
     permitType: types.frozen<IPermitType>(),
     activity: types.frozen<IActivity>(),
     status: types.enumeration(Object.values(EPermitApplicationStatus)),
-    EPermitApplicationStatus: types.enumeration(Object.values(EPermitApplicationStatus)),
     submitter: types.maybe(types.reference(types.late(() => UserModel))),
     jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
     templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
@@ -76,19 +75,26 @@ export const PermitApplicationModel = types
   .extend(withRootStore())
   .views((self) => ({
     get isDraft() {
-      return self.status === EPermitApplicationStatus.new || self.status === EPermitApplicationStatus.revisionsRequested
+      return (
+        self.status === EPermitApplicationStatus.newDraft || self.status === EPermitApplicationStatus.revisionsRequested
+      )
     },
     get isSubmitted() {
-      return self.status === EPermitApplicationStatus.newlySubmitted || EPermitApplicationStatus.resubmitted
+      return (
+        self.status === EPermitApplicationStatus.newlySubmitted || self.status === EPermitApplicationStatus.resubmitted
+      )
     },
     get isRevisionsRequested() {
-      return self.EPermitApplicationStatus === EPermitApplicationStatus.revisionsRequested
+      return self.status === EPermitApplicationStatus.revisionsRequested
     },
     get isResubmitted() {
-      return self.EPermitApplicationStatus === EPermitApplicationStatus.resubmitted
+      return self.status === EPermitApplicationStatus.resubmitted
     },
     get isViewed() {
-      return self.latestSubmissionVersion.viewedAt
+      return self.latestSubmissionVersion?.viewedAt
+    },
+    get viewedAt() {
+      return self.latestSubmissionVersion?.viewedAt
     },
     get revisionRequests() {
       return self.latestSubmissionVersion?.revisionRequests || []
@@ -402,7 +408,7 @@ export const PermitApplicationModel = types
       const response = yield self.environment.api.viewPermitApplication(self.id)
       if (response.ok) {
         const { data: permitApplication } = response.data
-        applySnapshot(self, permitApplication)
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
       return response.ok
     }),

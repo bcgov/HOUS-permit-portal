@@ -9,11 +9,7 @@
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            <% if @permit_application.reference_number.present? %>
-              Your permit application reference number has changed:
-            <% elsif @permit_application.viewed_at.present? %>
-              Your permit application has been viewed:
-            <% end %>
+            Your permit application has been viewed:
           </p>
 
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Application details:</h2>

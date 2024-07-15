@@ -54,12 +54,13 @@ export function toCamelCase(input: string): string {
   )
 }
 
-export function setQueryParam(key: string, value: string) {
+export function setQueryParam(key: string, value: string | string[]) {
   const searchParams = new URLSearchParams(window.location.search)
   if (!value) {
     searchParams.delete(key)
   } else {
-    searchParams.set(key, encodeURIComponent(value))
+    // @ts-ignore
+    searchParams.set(key, value)
   }
   const stringParams = searchParams.toString()
   window.history.replaceState({}, "", `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`)

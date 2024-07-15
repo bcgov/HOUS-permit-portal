@@ -255,12 +255,6 @@ export interface IEULA {
   content: string
 }
 
-export interface INotification {
-  title: string
-  description: string
-  at: string
-}
-
 export interface IPermitApplicationComplianceUpdate {
   id: string
   frontEndFormUpdate: Object
@@ -272,6 +266,7 @@ export interface IPermitNotificationObjectData {
   previousTemplateVersionId?: string
   requirementTemplateId?: string
   permitApplicationId?: string
+  permitApplicationNumber?: string
   // Add future notification data here
 }
 
@@ -423,7 +418,7 @@ export interface IJurisdictionSearchFilters {
 export interface IPermitApplicationSearchFilters {
   requirementTemplateId?: string
   templateVersionId?: string
-  status?: EPermitApplicationStatus
+  status?: EPermitApplicationStatus[]
 }
 
 export interface ITemplateVersionDiff {

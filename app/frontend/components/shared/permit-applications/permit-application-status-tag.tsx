@@ -35,6 +35,7 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
       borderColor="border.light"
       textTransform="uppercase"
       minW="fit-content"
+      textAlign="center"
       {...rest}
     >
       {/* @ts-ignore */}

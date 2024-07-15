@@ -121,7 +121,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
         <ModalHeader textAlign="center">
           <ModalCloseButton fontSize="11px" />
           <Heading as="h3" fontSize="xl">
-            {t("permitApplication.show.revision.requestRevision")}
+            {t("permitApplication.show.revision.revisionRequest")}
           </Heading>
         </ModalHeader>
         <ModalBody>
@@ -133,6 +133,12 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 value={reasonCode}
                 onChange={(e) => setReasonCode(e.target.value as EReasonCode)}
                 isDisabled={isRevisionsRequested}
+                sx={{
+                  _disabled: {
+                    color: "text.primary",
+                    cursor: "not-allowed",
+                  },
+                }}
               >
                 {Object.values(EReasonCode).map((value) => (
                   <option value={value} key={value}>
@@ -149,6 +155,12 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                 placeholder={t("permitApplication.show.revision.comment")}
                 maxLength={350}
                 isDisabled={isRevisionsRequested}
+                sx={{
+                  _disabled: {
+                    color: "text.primary",
+                    cursor: "not-allowed",
+                  },
+                }}
               />
               {!forSubmitter && <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>}
             </FormControl>

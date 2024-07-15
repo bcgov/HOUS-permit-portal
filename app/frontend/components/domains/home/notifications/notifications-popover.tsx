@@ -18,13 +18,13 @@ import {
   Portal,
   Text,
   UnorderedList,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { Bell, BellRinging, CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { useNotificationPopover } from "../../../../hooks/use-notification-popover"
 import { useMst } from "../../../../setup/root"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
@@ -35,38 +35,16 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
   ...rest
 }) {
   const { notificationStore } = useMst()
-  const {
-    notifications,
-    initialFetch,
-    fetchNotifications,
-    anyUnread,
-    unreadNotificationsCount,
-    markAllAsRead,
-    generateSpecificLinkData,
-  } = notificationStore
-
-  const [numberJustRead, setNumberJustRead] = useState<number>()
-
-  const [showRead, setShowRead] = useState<boolean>(false)
+  const { notifications, initialFetch, fetchNotifications, anyUnread, generateSpecificLinkData, getSemanticKey } =
+    notificationStore
 
   useEffect(() => {
     initialFetch()
   }, [])
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
-
-  const handleClose = () => {
-    setShowRead(false)
-    onClose()
-  }
+  const { isOpen, handleOpen, handleClose, numberJustRead, showRead, setShowRead } = useNotificationPopover()
 
   const { t } = useTranslation()
-
-  const handleOpen = () => {
-    onOpen()
-    setNumberJustRead(unreadNotificationsCount)
-    markAllAsRead()
-  }
 
   const notificationsToShow = showRead ? notifications : notifications.slice(0, numberJustRead)
 
@@ -118,7 +96,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                 <Text color="greys.grey01">{t("notification.noUnread")}</Text>
               ) : (
                 notificationsToShow.map((n) => (
-                  <CustomMessageBox status="info" description={n.actionText} key={n.id}>
+                  <CustomMessageBox status={getSemanticKey(n)} description={n.actionText} key={n.id}>
                     <UnorderedList pl={0} mb={0}>
                       {generateSpecificLinkData(n).map((link) => (
                         <ListItem whiteSpace={"normal"}>
@@ -127,7 +105,7 @@ export const NotificationsPopover: React.FC<INotificationsPopoverProps> = observ
                             rightIcon={<CaretRight />}
                             to={link.href}
                             color="text.primary"
-                            onClick={onClose}
+                            onClick={handleClose}
                             whiteSpace={"normal"}
                             wordBreak={"break-word"}
                           >

@@ -36,12 +36,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def mark_as_viewed
     authorize @permit_application
     @permit_application.update_viewed_at
-    render_success @permit_application, nil, { blueprint_opts: { view: :base } }
+    render_success @permit_application, nil, { blueprint_opts: { view: :jurisdiction_review_extended } }
   end
 
   def show
     authorize @permit_application
-
     render_success @permit_application,
                    nil,
                    {

@@ -228,6 +228,7 @@ const options = {
           actionRequired: "Action required",
           resetFilters: "Reset filters",
           customize: "Customize",
+          acknowledgeAndDismiss: "Acknowledge and dismiss",
         },
         notification: {
           title: "Notifications",
@@ -382,6 +383,7 @@ const options = {
           drafts: "Draft Permits",
           startedOn: "Started on",
           lastUpdated: "Last updated",
+          viewedOn: "Viewed on",
           seeBestPractices_CTA: "See best practices",
           seeBestPractices_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
@@ -395,10 +397,10 @@ const options = {
           status: {
             new_draft: "Draft",
             newly_submitted: "Submitted",
-            resubmitted: "Reubmitted",
+            resubmitted: "Resubmitted",
             revisions_requested: "Revisions Requested",
           },
-          statusGroups: {
+          statusGroup: {
             draft: "Draft permits",
             submitted: "Submitted permits",
           },
@@ -512,7 +514,7 @@ const options = {
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
             revision: {
               reason: "Reason",
-              requestRevision: "Request revision",
+              revisionRequest: "Revision request",
               reasonFor: "Reason for revision",
               comment: "Comment (optional)",
               useButton: "Use this reason",
@@ -1571,6 +1573,10 @@ const options = {
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",
           thankYouForResponse: "Thank you for your response!",
+          actionRequired: {
+            application_revisions_request:
+              "You have received a request for revisions on application <1 />. Please revise before resubmitting (you won't lose your place in line).",
+          },
           govFeedbackResponseNoReasons: {
             unclear: "This information is unclear",
             missingInfo: "This page is missing the information I need",
@@ -1626,6 +1632,7 @@ const options = {
           needMoreHelp: "Need more help?",
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
+          reviewNotifications: "Review notifications",
           breadcrumb: {
             latest: "Latest",
             profile: "Profile",

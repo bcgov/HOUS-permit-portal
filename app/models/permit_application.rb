@@ -1,9 +1,12 @@
 class PermitApplication < ApplicationRecord
-  include AASM
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
+  include PermitApplicationStatus
+
+  SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter]
+
   searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
              word_start: %i[number nickname full_address permit_classifications submitter status]
 
@@ -27,24 +30,6 @@ class PermitApplication < ApplicationRecord
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
 
-  enum status: { new_draft: 0, newly_submitted: 1, revisions_requested: 3, resubmitted: 4 }, _default: 0
-
-  aasm column: "status", enum: true do
-    state :new_draft, initial: true
-    state :submitted
-    state :revisions_requested
-    state :approved
-
-    event :submit, after: :handle_submission do
-      transitions from: :new_draft, to: :newly_submitted, guard: :can_submit?
-      transitions from: :revisions_requested, to: :resubmitted, guard: :can_submit?
-    end
-
-    event :finalize_revision_requests, after: :handle_finalize_revision_requests do
-      transitions from: %i[newly_submitted resubmitted], to: :revisions_requested
-    end
-  end
-
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
@@ -59,9 +44,9 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :notify_user_application_viewed
   after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
+  after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
@@ -77,14 +62,6 @@ class PermitApplication < ApplicationRecord
   # Method to get all revision requests from the latest SubmissionVersion
   def revision_requests
     latest_submission_version&.revision_requests || RevisionRequest.none
-  end
-
-  def draft?
-    new? || revisions_requested?
-  end
-
-  def submitted?
-    newly_submitted? || resubmitted?
   end
 
   def force_update_published_template_version
@@ -105,7 +82,6 @@ class PermitApplication < ApplicationRecord
       submitted_at: submitted_at,
       viewed_at: viewed_at,
       status: status,
-      EPermitApplicationStatus: EPermitApplicationStatus,
       jurisdiction_id: jurisdiction.id,
       submitter_id: submitter.id,
       template_version_id: template_version.id,
@@ -252,26 +228,6 @@ class PermitApplication < ApplicationRecord
     missing_pdfs
   end
 
-  def can_submit?
-    signed = submission_data.dig("data", "section-completion-key", "signed").present?
-    signed && using_current_template_version
-  end
-
-  def handle_finalize_revision_requests
-    update(revisions_requested_at: Time.current)
-    NotificationService.publish_application_revisions_request_event(self)
-    reindex
-  end
-
-  def handle_submission
-    update(signed_off_at: Time.current)
-
-    submission_versions.create!(form_json: self.form_json, submission_data: self.submission_data)
-
-    send_submit_notifications
-    reindex
-  end
-
   def viewed_at
     latest_submission_version&.viewed_at
   end
@@ -284,10 +240,6 @@ class PermitApplication < ApplicationRecord
   def resubmitted_at
     return nil if submission_versions.length <= 1
     return latest_submission_version.created_at
-  end
-
-  def resubmitted?
-    resubmitted_at.present? && submitted?
   end
 
   def submit_event_notification_data
@@ -318,6 +270,7 @@ class PermitApplication < ApplicationRecord
         "#{I18n.t("notification.permit_application.revisions_request_notification", number: number, jurisdiction_name: jurisdiction_name)}",
       "object_data" => {
         "permit_application_id" => id,
+        "permit_application_number" => number,
       },
     }
   end
@@ -328,6 +281,18 @@ class PermitApplication < ApplicationRecord
       "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
       "action_text" =>
         "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
+  def application_reference_updated_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_REFERENCE_UPDATED,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.reference_updated_notification", number: number, jurisdiction_name: jurisdiction_name)}",
       "object_data" => {
         "permit_application_id" => id,
       },
@@ -402,13 +367,9 @@ class PermitApplication < ApplicationRecord
     self.form_customizations_snapshot = current_customizations
   end
 
-  def notify_user_application_viewed
+  def notify_user_reference_number_updated
     return if new_record?
-    viewed_at_change = previous_changes.dig("viewed_at")
-    # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
-    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
-      NotificationService.publish_application_view_event(self)
-    end
+    NotificationService.publish_application_view_event(self)
   end
 
   def reindex_jurisdiction_permit_application_size

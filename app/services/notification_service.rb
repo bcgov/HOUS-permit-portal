@@ -188,7 +188,7 @@ class NotificationService
 
   private
 
-  # this is just a wrapper around the activity's metadat methods
+  # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object
   def self.activity_metadata(user_id, activity_obj, method)

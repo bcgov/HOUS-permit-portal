@@ -86,7 +86,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
     }
   })
   const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
-
   return (
     <Box as="main" id="reviewing-permit-application">
       <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12}>

@@ -294,7 +294,6 @@ export const RequirementForm = observer(
         permitApplication.updateVersion()
       }
     }
-
     return (
       <>
         <Flex

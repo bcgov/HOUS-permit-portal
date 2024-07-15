@@ -27,7 +27,7 @@ export enum EPermitApplicationStatus {
   resubmitted = "resubmitted",
 }
 
-export enum EPermitApplicationStatusGroups {
+export enum EPermitApplicationStatusGroup {
   draft = "draft",
   submitted = "submitted",
 }
@@ -112,9 +112,12 @@ export enum EPermitApplicationSubmitterSortFields {
   permitClassification = "permit_classification",
   submitter = "submitter",
   submittedAt = "submitted_at",
+  viewedAt = "viewed_at",
+  status = "status",
 }
 
 export enum EPermitApplicationReviewerSortFields {
+  status = "status",
   number = "number",
   referenceNumber = "reference_number",
   permitClassification = "permit_classification",
