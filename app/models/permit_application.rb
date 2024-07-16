@@ -164,13 +164,15 @@ class PermitApplication < ApplicationRecord
     "#{activity.name} - #{permit_type.name}".strip
   end
 
-  def permit_type_submission_contact
-    jurisdiction.permit_type_submission_contacts.find_by(permit_type: permit_type)
+  def confirmed_permit_type_submission_contacts
+    jurisdiction.permit_type_submission_contacts.where(permit_type: permit_type).where.not(confirmed_at: nil)
   end
 
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
-    PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+    confirmed_permit_type_submission_contacts.each do |permit_type_submission_contact|
+      PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+    end
   end
 
   def formatted_submission_data_for_external_use
