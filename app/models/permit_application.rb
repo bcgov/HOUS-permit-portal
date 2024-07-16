@@ -48,18 +48,8 @@ class PermitApplication < ApplicationRecord
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
   def form_json
-    processed_json = template_version.form_json.deep_dup
-    block_ids_to_remove = get_requirement_block_ids_to_remove
-
-    return processed_json if block_ids_to_remove.empty?
-
-    processed_json["components"].each do |component|
-      next unless component["components"].present?
-
-      component["components"].delete_if { |sub_component| block_ids_to_remove.include?(sub_component["id"]) }
-    end
-
-    remove_empty_sections_from_form_json!(processed_json)
+    result = PermitApplication::FormJsonService.new(permit_application: self).call
+    result.form_json
   end
 
   def force_update_published_template_version
@@ -217,6 +207,16 @@ class PermitApplication < ApplicationRecord
     missing_pdfs
   end
 
+  def step_code_requirements
+    jurisdiction.permit_type_required_steps.where(permit_type_id:)
+  end
+
+  def energy_step_code_required?
+    custom_requirements = step_code_requirements.customizations
+
+    custom_requirements.empty? || custom_requirements.any? { |r| r.energy_step_required || r.zero_carbon_step_required }
+  end
+
   private
 
   def assign_default_nickname
@@ -326,45 +326,5 @@ class PermitApplication < ApplicationRecord
     if pin.blank? && pid.blank?
       errors.add(:base, I18n.t("activerecord.errors.models.permit_application.attributes.pid_or_pin"))
     end
-  end
-
-  def remove_empty_sections_from_form_json!(form_json)
-    form_json["components"].delete_if { |component| component["components"].blank? || component["components"].empty? }
-
-    form_json
-  end
-
-  def get_requirement_block_ids_to_remove
-    jurisdiction_customizations = form_customizations
-    requirement_blocks_json = template_version.requirement_blocks_json
-    block_ids_to_remove = []
-
-    requirement_blocks_json.each do |rb_id, requirement_block|
-      next if requirement_block["requirements"].blank? || requirement_block["requirements"].empty?
-
-      has_only_elective_fields = requirement_block["requirements"].all? { |requirement| requirement["elective"] }
-
-      next unless has_only_elective_fields
-
-      enabled_elective_field_ids =
-        jurisdiction_customizations&.dig("requirement_block_changes", rb_id, "enabled_elective_field_ids") || []
-
-      # remove the block if no elective fields are enabled
-      if enabled_elective_field_ids.empty?
-        block_ids_to_remove << rb_id
-        next
-      end
-
-      # This check is to ensure that the enabled elective fields are valid, i.e. they exist in the requirement block
-      any_enabled_elective_field_valid =
-        enabled_elective_field_ids.any? do |elective_field_id|
-          requirement_block["requirements"].any? { |requirement| elective_field_id == requirement["id"] }
-        end
-
-      # remove the block if no enabled elective fields are valid
-      block_ids_to_remove << rb_id unless any_enabled_elective_field_valid
-    end
-
-    block_ids_to_remove
   end
 end
