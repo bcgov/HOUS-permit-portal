@@ -122,5 +122,13 @@ export const Button = {
       _hover: { color: "focus" },
       _disabled: { ...disabledStyles, bg: "inherit" },
     },
+    callout: {
+      bg: "semantic.warning",
+      color: "text.primary",
+      fontWeight: "normal",
+      fontSize: "inherit",
+      _hover: { bg: "darken.100" },
+      _disabled: { ...disabledStyles, bg: "inherit" },
+    },
   },
 }

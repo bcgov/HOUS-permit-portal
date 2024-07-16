@@ -23,7 +23,7 @@ export function BuilderBottomFloatingButtons({ isCollapsedAll, setIsCollapsedAll
       bottom={0}
       px={6}
       py={4}
-      zIndex="sticky"
+      zIndex={10}
       borderWidth={1}
       borderColor="border.light"
       shadow="drop"

@@ -1,5 +1,13 @@
 import { t } from "i18next"
-import { IFormIOBlock, IFormIORequirement, IFormIOSection, IFormJson, ITemplateVersionDiff } from "../types/types"
+import { COMPLETTION_SECTION_ID } from "../constants"
+import {
+  IFormIOBlock,
+  IFormIORequirement,
+  IFormIOSection,
+  IFormJson,
+  IRevisionRequest,
+  ITemplateVersionDiff,
+} from "../types/types"
 
 const findComponentsByType = (components, type) => {
   let foundComponents = []
@@ -127,32 +135,101 @@ export const combineComplianceHints = (
   return updatedJson
 }
 
-export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => {
-  const removedIds = diff?.removed?.map((req) => req.id) || []
-  const addedIds = diff?.added?.map((req) => req.id) || []
-  const changedIds = diff?.changed?.map((req) => req.id) || []
-
-  const updateClasses = (classes: string[], id: string, ids: string[], className: string) => {
-    const index = classes.indexOf(className)
-    if (ids.includes(id)) {
-      if (index === -1) classes.push(className)
-    } else {
-      if (index > -1) classes.splice(index, 1)
-    }
-  }
-
+const updateFormJsonClasses = (formJson: IFormJson, idsMap: { [key: string]: string[] }) => {
   formJson.components.forEach((section: IFormIOSection) => {
     section.components.forEach((block: IFormIOBlock) => {
       block.components.forEach((requirement: IFormIORequirement) => {
         const classes = requirement.customClass?.split(" ") || []
-
-        updateClasses(classes, requirement.id, removedIds, "removed-in-diff")
-        updateClasses(classes, requirement.id, addedIds, "added-in-diff")
-        updateClasses(classes, requirement.id, changedIds, "changed-in-diff")
+        Object.keys(idsMap).forEach((key) => {
+          const index = classes.indexOf(key)
+          if (idsMap[key].includes(requirement.id)) {
+            if (index === -1) classes.push(key)
+          } else {
+            if (index > -1) classes.splice(index, 1)
+          }
+        })
 
         requirement.customClass = classes.filter(Boolean).join(" ")
       })
     })
   })
   return formJson
+}
+
+export const combineRevisionAnnotations = (formJson: IFormJson, revisionRequests: IRevisionRequest[]) => {
+  const revisionIds = revisionRequests.map((rr) => rr.requirementJson.id)
+  return updateFormJsonClasses(formJson, { "revision-requested": revisionIds })
+}
+
+export const combineDiff = (formJson: IFormJson, diff: ITemplateVersionDiff) => {
+  const removedIds = diff?.removed?.map((req) => req.id) || []
+  const addedIds = diff?.added?.map((req) => req.id) || []
+  const changedIds = diff?.changed?.map((req) => req.id) || []
+
+  return updateFormJsonClasses(formJson, {
+    "removed-in-diff": removedIds,
+    "added-in-diff": addedIds,
+    "changed-in-diff": changedIds,
+  })
+}
+
+const convertToRevisionButton = (requirement: IFormIORequirement) => {
+  return {
+    id: requirement.id + "-revision-button",
+    key: requirement.key + "-revision-button",
+    type: "button",
+    label: "",
+    title: "Revision Button",
+    input: true,
+    action: "custom",
+    custom: `document.dispatchEvent(new CustomEvent('openRequestRevision', { detail: { key: '${requirement.key}' } } ));`,
+    customClass: "revision-button",
+    hideLabel: true,
+    customConditional: requirement.customConditional,
+    conditional: requirement.conditional,
+  } as IFormIORequirement
+}
+
+export const combineRevisionButtons = (formJson: IFormJson, disableAllRequirements?: boolean): IFormJson => {
+  formJson.components.forEach((section: IFormIOSection) => {
+    section.components.forEach((block: IFormIOBlock) => {
+      for (let i = 0; i < block.components.length; i++) {
+        const requirement = block.components[i]
+        if (section.id === COMPLETTION_SECTION_ID) {
+          requirement.disabled = disableAllRequirements
+        } else {
+          requirement.disabled = disableAllRequirements
+
+          const revisionButton = convertToRevisionButton(requirement)
+
+          // Insert the revision button before the current requirement
+          block.components.splice(i, 0, revisionButton)
+
+          // Move the index to the next requirement to skip the newly added revision button
+          i++
+        }
+      }
+    })
+  })
+  return formJson
+}
+
+export const getRequirementByKey = (formJson: IFormJson, requirementKey: string) => {
+  let foundRequirement: IFormIORequirement = null
+
+  traverseFormIORequirements(formJson, (requirement) => {
+    if (requirement.key === requirementKey) foundRequirement = requirement
+  })
+
+  return foundRequirement
+}
+
+export const traverseFormIORequirements = (formJson: IFormJson, callback: (requirement) => void) => {
+  formJson.components.forEach((section: IFormIOSection) => {
+    section.components.forEach((block: IFormIOBlock) => {
+      block.components.forEach((requirement: IFormIORequirement) => {
+        callback(requirement)
+      })
+    })
+  })
 }

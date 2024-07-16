@@ -719,6 +719,29 @@
     }
   }
 
+  .btn.revision-button {
+    background: transparent;
+    color: var(--chakra-colors-theme-yellow);
+    padding: 15px;
+    padding-right: 18px;
+    position: absolute;
+    left: -40px;
+    top: 5px;
+    z-index: 0;
+
+    &::before {
+      content: "\f044"; // This is the content code for a specific icon, example here
+      font-family: "FontAwesome"; // Ensure you are using the correct font-family
+      position: absolute;
+      font-weight: 200;
+      left: 10px; // Adjust based on padding and size
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px; // Icon size
+      color: inherit; // Icon color
+    }
+  }
+
   // ERROR STATES
 
   .formio-error-wrapper:not(:empty) {
@@ -813,6 +836,32 @@
   }
 }
 
+#permitApplicationFieldsContainer.revision-mode {
+  .card-body {
+    padding-left: 45px !important;
+  }
+}
+.formio-component-panel {
+  legend,
+  .form-group > label {
+    margin-bottom: 8px;
+    max-width: fit-content;
+  }
+  .fieldset-body label {
+    border-bottom: 0;
+    margin-bottom: 0px;
+    background-color: transparent !important;
+  }
+
+  .revision-requested legend,
+  .form-group.revision-requested > label {
+    border-bottom: 2px solid;
+    border-color: var(--chakra-colors-theme-yellow);
+    border-color: var(--chakra-colors-semantic-error);
+    background-color: var(--chakra-colors-semantic-warningLight);
+  }
+}
+
 @mixin diff-styles {
   padding: 12px;
   border: 1px solid var(--chakra-colors-semantic-warning) !important;
@@ -871,6 +920,12 @@
 
 .added-in-diff.formio-hidden::after {
   @include hidden-diff-explainer("A hidden field has been added that is currently not required for your application.");
+}
+
+.single-requirement-form {
+  button {
+    display: none;
+  }
 }
 
 /* ======================================

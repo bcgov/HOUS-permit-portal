@@ -171,7 +171,6 @@ class IntegrationMapping < ApplicationRecord
 
     requirements_mapping.each do |requirement_block_sku, requirement_block|
       requirement_block["requirements"]&.each do |requirement_code, requirement|
-        # binding.pry if requirement_code == "business_license_number"
         is_elective =
           !!template_version.get_requirement_json(requirement_block["id"], requirement["id"])&.dig("elective")
         enabled = !!template_version_customization&.elective_enabled?(requirement_block["id"], requirement["id"])

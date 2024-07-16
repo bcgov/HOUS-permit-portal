@@ -16,10 +16,10 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "new_jurisdiction_membership")
   end
 
-  def notify_submitter_application_submitted(user, permit_application)
-    @user = user
+  def notify_submitter_application_submitted(permit_application)
+    @user = permit_application.submitter
     @permit_application = permit_application
-    send_user_mail(email: user.email, template_key: "notify_submitter_application_submitted")
+    send_user_mail(email: @user.email, template_key: "notify_submitter_application_submitted")
   end
 
   def notify_integration_mapping(user:, integration_mapping:)
@@ -65,12 +65,24 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def notify_application_updated(user, permit_application)
-    @user = user
+  def notify_application_viewed(permit_application)
+    @user = permit_application.submitter
     @permit_application = permit_application
     send_user_mail(
-      email: user.email,
-      template_key: "notify_application_updated",
+      email: @user.email,
+      template_key: "notify_application_viewed",
+      subject_i18n_params: {
+        permit_application_number: permit_application.number,
+      },
+    )
+  end
+
+  def notify_application_revisions_requested(permit_application)
+    @user = permit_application.submitter
+    @permit_application = permit_application
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_application_revisions_requested",
       subject_i18n_params: {
         permit_application_number: permit_application.number,
       },

@@ -66,7 +66,7 @@ class TemplateVersion < ApplicationRecord
         "template_version_id" => id,
         "previous_template_version_id" => previous_version.id,
         "requirement_template_id" => requirement_template_id,
-        "recent_permit_application_id" => recent_permit_application&.id,
+        "permit_application_id" => recent_permit_application&.id,
       },
     }
   end

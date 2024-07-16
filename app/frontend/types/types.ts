@@ -15,6 +15,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EReasonCode,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -25,6 +26,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   ETemplateVersionStatus,
+  EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
@@ -105,6 +107,12 @@ export interface IFormJson {
   components: IFormIOSection[]
 }
 
+export interface ISingleRequirementFormJson {
+  id: string
+  key: string
+  components: IFormIORequirement[]
+}
+
 export interface IFormIOSection {
   id: string
   key: string
@@ -126,14 +134,19 @@ export interface IFormIOBlock {
 }
 
 export interface IFormIORequirement {
-  id: string
-  key: string
+  id?: string
+  key?: string
   type: string
-  input: true
-  validation: { required: boolean }
+  input?: true
+  validation?: { required: boolean }
   label: string
   widget?: any
+  action?: string
   customClass?: string
+  disabled?: boolean
+  customConditional?: string
+  conditional?: any
+  components?: IFormIORequirement[]
 }
 
 export interface ISubmissionData {
@@ -242,12 +255,6 @@ export interface IEULA {
   content: string
 }
 
-export interface INotification {
-  title: string
-  description: string
-  at: string
-}
-
 export interface IPermitApplicationComplianceUpdate {
   id: string
   frontEndFormUpdate: Object
@@ -258,7 +265,8 @@ export interface IPermitNotificationObjectData {
   templateVersionId?: string
   previousTemplateVersionId?: string
   requirementTemplateId?: string
-  recentPermitApplicationId?: string
+  permitApplicationId?: string
+  permitApplicationNumber?: string
   // Add future notification data here
 }
 
@@ -410,7 +418,7 @@ export interface IJurisdictionSearchFilters {
 export interface IPermitApplicationSearchFilters {
   requirementTemplateId?: string
   templateVersionId?: string
-  status?: EPermitApplicationStatus
+  status?: EPermitApplicationStatus[]
 }
 
 export interface ITemplateVersionDiff {
@@ -440,6 +448,33 @@ export interface ILinkData {
   href: string
 }
 
+export interface IRevisionRequest {
+  id: string
+  reasonCode: EReasonCode
+  requirementJson: IFormIORequirement
+  submissionJson: any
+  comment: string
+  user?: IMinimalFrozenUser
+}
+
+export interface IMinimalFrozenUser {
+  id: string
+  email: string
+  role: EUserRoles
+  firstName: string
+  lastName: string
+  organization?: string
+  certified: boolean
+  discardedAt?: Date
+}
+
+export interface ISubmissionVersion {
+  id: string
+  formJson: IFormJson
+  submissionData: ISubmissionData
+  revisionRequests: IRevisionRequest[]
+  viewedAt?: Date
+}
 export interface IPermitTypeRequiredStep {
   id?: string
   default: boolean

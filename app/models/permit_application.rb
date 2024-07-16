@@ -3,6 +3,10 @@ class PermitApplication < ApplicationRecord
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
+  include PermitApplicationStatus
+
+  SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter]
+
   searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
              word_start: %i[number nickname full_address permit_classifications submitter status]
 
@@ -16,6 +20,9 @@ class PermitApplication < ApplicationRecord
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
   has_one :step_code
+  has_many :submission_versions, dependent: :destroy
+
+  scope :submitted, -> { joins(:submission_versions).distinct }
 
   # Custom validation
 
@@ -24,8 +31,6 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-
-  enum status: { draft: 0, submitted: 1 }, _default: 0
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -38,15 +43,28 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_save :set_submitted_at, if: :status_changed?
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :notify_user_application_updated
   after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
+  after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
+
+  # Helper method to get the latest SubmissionVersion
+  def latest_submission_version
+    submission_versions.order(created_at: :desc).first
+  end
+
+  def earliest_submission_version
+    submission_versions.order(created_at: :desc).last
+  end
+
+  # Method to get all revision requests from the latest SubmissionVersion
+  def revision_requests
+    latest_submission_version&.revision_requests || RevisionRequest.none
+  end
 
   def force_update_published_template_version
     return unless Rails.env.development?
@@ -104,7 +122,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
-    update(viewed_at: Time.current)
+    latest_submission_version.update(viewed_at: Time.current)
   end
 
   def number_prefix
@@ -156,6 +174,14 @@ class PermitApplication < ApplicationRecord
     viewed_at&.strftime("%Y-%m-%d")
   end
 
+  def formatted_revisions_requested_at
+    revisions_requested_at&.strftime("%Y-%m-%d")
+  end
+
+  def formatted_resubmitted_at
+    resubmitted_at&.strftime("%Y-%m-%d")
+  end
+
   def permit_type_and_activity
     "#{activity.name} - #{permit_type.name}".strip
   end
@@ -165,7 +191,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    # All submission related emails and in-app notifications are handled by this method
+    NotificationService.publish_application_submission_event(self)
     PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
   end
 
@@ -201,6 +228,77 @@ class PermitApplication < ApplicationRecord
     missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
 
     missing_pdfs
+  end
+
+  def viewed_at
+    latest_submission_version&.viewed_at
+  end
+
+  def submitted_at
+    return nil if submission_versions.length < 1
+    return earliest_submission_version.created_at
+  end
+
+  def resubmitted_at
+    return nil if submission_versions.length <= 1
+    return latest_submission_version.created_at
+  end
+
+  def submit_event_notification_data
+    i18n_key =
+      (
+        if resubmitted_at.present?
+          "notification.permit_application.resubmission_notification"
+        else
+          "notification.permit_application.submission_notification"
+        end
+      )
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_SUBMISSION,
+      "action_text" => "#{I18n.t(i18n_key, number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
+  def revisions_request_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_REVISIONS_REQUEST,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.revisions_request_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+        "permit_application_number" => number,
+      },
+    }
+  end
+
+  def application_view_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
+  def application_reference_updated_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_REFERENCE_UPDATED,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.reference_updated_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
   end
 
   private
@@ -271,13 +369,9 @@ class PermitApplication < ApplicationRecord
     self.form_customizations_snapshot = current_customizations
   end
 
-  def notify_user_application_updated
+  def notify_user_reference_number_updated
     return if new_record?
-    viewed_at_change = previous_changes.dig("viewed_at")
-    # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
-    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
-      PermitHubMailer.notify_application_updated(submitter, self).deliver_later
-    end
+    NotificationService.publish_application_view_event(self)
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -285,11 +379,6 @@ class PermitApplication < ApplicationRecord
     return unless new_record? || destroyed? || saved_change_to_jurisdiction_id?
 
     jurisdiction.reindex
-  end
-
-  def set_submitted_at
-    # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
-    self.submitted_at = Time.current if submitted? && submitted_at.nil?
   end
 
   def submitter_must_have_role

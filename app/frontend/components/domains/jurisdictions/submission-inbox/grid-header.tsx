@@ -22,7 +22,7 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 7"}
+          gridColumn={"span 8"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}

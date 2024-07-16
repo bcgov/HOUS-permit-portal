@@ -1,5 +1,17 @@
-import { Box, Button, Flex, HStack, Stack, Text, Tooltip, useDisclosure } from "@chakra-ui/react"
-import { CaretRight, FloppyDiskBack, Info } from "@phosphor-icons/react"
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  HStack,
+  Heading,
+  Spacer,
+  Stack,
+  Text,
+  Tooltip,
+  useDisclosure,
+} from "@chakra-ui/react"
+import { CaretDown, CaretRight, CaretUp, FloppyDiskBack, Info, NotePencil } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
@@ -23,6 +35,7 @@ import { PermitApplicationStatusTag } from "../../shared/permit-applications/per
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
+import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
 
 interface IEditPermitApplicationScreenProps {}
@@ -77,6 +90,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       document.removeEventListener(ECustomEvents.handlePermitApplicationUpdate, handlePermitApplicationUpdate)
     }
   }, [currentPermitApplication?.id])
+
+  const [hideRevisionList, setHideRevisionList] = useState(false)
 
   const nicknameWatch = watch("nickname")
   const isStepCode = R.test(/step-code/, window.location.pathname)
@@ -179,122 +194,173 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   useInterval(() => handleSave({ autosave: true }), 60000) // save progress every minute
 
+  const permitHeaderRef = useRef()
+
   useEffect(() => {
     // sets the defaults subject to application load
     reset(getDefaultPermitApplicationMetadataValues())
   }, [currentPermitApplication?.nickname])
 
+  useEffect(() => {
+    const container = document.getElementById("permitApplicationFieldsContainer")
+    if (!container) return
+
+    if (currentPermitApplication?.isRevisionsRequested) {
+      container.classList.add("revision-mode")
+    } else {
+      container.classList.remove("revision-mode")
+    }
+  }, [currentPermitApplication?.isRevisionsRequested])
+
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const scrollToBottom = () => {
-    handleScrollToBottom()
-  }
+  // @ts-ignore
+  const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
-  const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty } = currentPermitApplication
+  const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
+    currentPermitApplication
 
   return (
     <Box as="main" id="submitter-view-permit">
       {!isStepCode && (
-        <Flex
-          id="permitHeader"
-          w="full"
-          px={6}
-          py={3}
-          bg="theme.blue"
-          justify="space-between"
-          color="greys.white"
-          position="sticky"
-          top="0"
-          zIndex={12}
-          flexDirection={{ base: "column", md: "row" }}
-        >
-          <HStack gap={4} flex={1}>
-            <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
-            <Flex direction="column" w="full">
-              <form>
-                <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
-                  <Box>
-                    <EditableInputWithControls
-                      w="full"
-                      initialHint={t("permitApplication.edit.clickToWriteNickname")}
-                      value={nicknameWatch || ""}
-                      isDisabled={isSubmitted}
-                      controlsProps={{
-                        iconButtonProps: {
-                          color: "greys.white",
-                          display: isSubmitted ? "none" : "block",
-                        },
-                      }}
-                      editableInputProps={{
-                        fontWeight: 700,
-                        fontSize: "xl",
-                        width: "100%",
-                        ...register("nickname", {
-                          maxLength: {
-                            value: 256,
-                            message: t("ui.invalidInput"),
+        <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
+          <Flex
+            w="full"
+            px={6}
+            py={3}
+            bg="theme.blue"
+            justify="space-between"
+            color="greys.white"
+            position="sticky"
+            top="0"
+            zIndex={12}
+            flexDirection={{ base: "column", md: "row" }}
+          >
+            <HStack gap={4} flex={1}>
+              <PermitApplicationStatusTag permitApplication={currentPermitApplication} />
+              <Flex direction="column" w="full">
+                <form>
+                  <Tooltip label={t("permitApplication.edit.clickToWriteNickname")} placement="top-start">
+                    <Box>
+                      <EditableInputWithControls
+                        w="full"
+                        initialHint={t("permitApplication.edit.clickToWriteNickname")}
+                        value={nicknameWatch || ""}
+                        isDisabled={isSubmitted}
+                        controlsProps={{
+                          iconButtonProps: {
+                            color: "greys.white",
+                            display: isSubmitted ? "none" : "block",
                           },
-                        }),
+                        }}
+                        editableInputProps={{
+                          fontWeight: 700,
+                          fontSize: "xl",
+                          width: "100%",
+                          ...register("nickname", {
+                            maxLength: {
+                              value: 256,
+                              message: t("ui.invalidInput"),
+                            },
+                          }),
 
-                        onBlur: () => {
-                          handleSave()
-                        },
-                        "aria-label": "Edit Nickname",
-                      }}
-                      editablePreviewProps={{
-                        fontWeight: 700,
-                        fontSize: "xl",
-                      }}
-                      onEdit={() => {
-                        setIsDirty(true)
-                      }}
-                      aria-label={"Edit Nickname"}
-                      onCancel={(previousValue) => setValue("nickname", previousValue)}
+                          onBlur: () => {
+                            handleSave()
+                          },
+                          "aria-label": "Edit Nickname",
+                        }}
+                        editablePreviewProps={{
+                          fontWeight: 700,
+                          fontSize: "xl",
+                        }}
+                        onEdit={() => {
+                          setIsDirty(true)
+                        }}
+                        aria-label={"Edit Nickname"}
+                        onCancel={(previousValue) => setValue("nickname", previousValue)}
+                      />
+                    </Box>
+                  </Tooltip>
+                </form>
+
+                <Text noOfLines={1}>{permitTypeAndActivity}</Text>
+                <HStack>
+                  <CopyableValue value={number} label={t("permitApplication.fields.number")} />
+                  {currentPermitApplication.referenceNumber && (
+                    <CopyableValue
+                      value={currentPermitApplication.referenceNumber}
+                      label={t("permitApplication.referenceNumber")}
                     />
-                  </Box>
-                </Tooltip>
-              </form>
-
-              <Text noOfLines={1}>{permitTypeAndActivity}</Text>
-              <HStack>
-                <CopyableValue value={number} label={t("permitApplication.fields.number")} />
-                {currentPermitApplication.referenceNumber && (
-                  <CopyableValue
-                    value={currentPermitApplication.referenceNumber}
-                    label={t("permitApplication.referenceNumber")}
-                  />
-                )}
-              </HStack>
-            </Flex>
-          </HStack>
-          {isSubmitted ? (
-            <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
-              <BrowserSearchPrompt />
-              <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
-                {t("permitApplication.show.contactsSummary")}
-              </Button>
-              <SubmissionDownloadModal permitApplication={currentPermitApplication} />
-              <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
-                {t("permitApplication.show.backToInbox")}
-              </Button>
-            </Stack>
-          ) : (
-            <HStack gap={4}>
-              <BrowserSearchPrompt />
-              <Button variant="primary" onClick={handleClickFinishLater}>
-                {t("permitApplication.edit.saveDraft")}
-              </Button>
-              <Button rightIcon={<CaretRight />} onClick={scrollToBottom}>
-                {t("permitApplication.edit.submit")}
-              </Button>
+                  )}
+                </HStack>
+              </Flex>
             </HStack>
+            {isSubmitted ? (
+              <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
+                <BrowserSearchPrompt />
+                <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+                  {t("permitApplication.show.contactsSummary")}
+                </Button>
+                <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
+                  {t("permitApplication.show.backToInbox")}
+                </Button>
+              </Stack>
+            ) : (
+              <HStack gap={4}>
+                <BrowserSearchPrompt />
+                <Button variant="primary" onClick={handleClickFinishLater}>
+                  {t("permitApplication.edit.saveDraft")}
+                </Button>
+                <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
+                  {t("permitApplication.edit.submit")}
+                </Button>
+              </HStack>
+            )}
+            <FloatingHelpDrawer top={permitHeaderHeight + 20} position="absolute" />
+          </Flex>
+          {currentPermitApplication.isRevisionsRequested && (
+            <Flex
+              position="sticky"
+              zIndex={11}
+              w="full"
+              px={4}
+              py={2}
+              bg="theme.yellow"
+              justify="flex-start"
+              align="center"
+              gap={4}
+              top={permitHeaderHeight}
+            >
+              <Flex width={"sidebar.width"} align="center" gap={2}>
+                <NotePencil size={24} />
+                <Heading fontSize="lg" mt={2}>
+                  {t("permitApplication.show.requestedRevisions")}
+                </Heading>
+                <Spacer />
+                <Button
+                  fontSize="sm"
+                  h={8}
+                  p={1}
+                  variant="secondary"
+                  rightIcon={hideRevisionList ? <CaretDown /> : <CaretUp />}
+                  onClick={() => setHideRevisionList((cur) => !cur)}
+                >
+                  {hideRevisionList ? t("permitApplication.show.showList") : t("permitApplication.show.hideList")}
+                </Button>
+                <Divider orientation="vertical" height="24px" mx={4} borderColor="greys.grey01" />
+              </Flex>
+            </Flex>
           )}
-          <FloatingHelpDrawer top={{ base: "145px", md: "130px" }} position="absolute" />
         </Flex>
       )}
       <Box id="sidebar-and-form-container" sx={{ "&:after": { content: `""`, display: "block", clear: "both" } }}>
-        <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
+        {isRevisionsRequested && !hideRevisionList ? (
+          <RevisionSideBar permitApplication={currentPermitApplication} forSubmitter />
+        ) : (
+          <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
+        )}
         {formJson && (
           <Flex flex={1} direction="column" pt={8} position={"relative"} id="permitApplicationFieldsContainer">
             <RequirementForm

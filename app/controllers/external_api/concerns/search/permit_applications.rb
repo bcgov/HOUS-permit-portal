@@ -22,6 +22,7 @@ module ExternalApi::Concerns::Search::PermitApplications
             nil
           end
         ),
+      includes: PermitApplication::SEARCH_INCLUDES,
     }
 
     @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
