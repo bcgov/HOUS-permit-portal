@@ -77,12 +77,12 @@ export const RevisionSideBar = observer(
       if (ok) navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
     }
 
-    const handleOpenRequestRevision = async (_event, upToDateFields) => {
+    const handleOpenRequestRevision = async (event, upToDateFields) => {
       if (!permitApplication.formJson) return
 
-      const foundRevisionRequest = upToDateFields.find((field) => field.requirementJson?.key === _event.detail.key)
-      const foundRequirement = getRequirementByKey(permitApplication.formJson, _event.detail.key)
-      const foundSubmissionJson = getSinglePreviousSubmissionJson(permitApplication.submissionData, _event.detail.key)
+      const foundRevisionRequest = upToDateFields.find((field) => field.requirementJson?.key === event.detail.key)
+      const foundRequirement = getRequirementByKey(permitApplication.formJson, event.detail.key)
+      const foundSubmissionJson = getSinglePreviousSubmissionJson(permitApplication.submissionData, event.detail.key)
 
       setRevisionRequest(foundRevisionRequest)
       setRequirementForRevision(foundRequirement)
@@ -91,10 +91,10 @@ export const RevisionSideBar = observer(
     }
 
     useEffect(() => {
-      document.removeEventListener("openRequestRevision", (event) => handleOpenRequestRevision(event, fields))
-      document.addEventListener("openRequestRevision", (event) => handleOpenRequestRevision(event, fields))
+      const handleOpenEvent = (event) => handleOpenRequestRevision(event, fields)
+      document.addEventListener("openRequestRevision", handleOpenEvent)
       return () => {
-        document.removeEventListener("openRequestRevision", (event) => handleOpenRequestRevision(event, fields))
+        document.removeEventListener("openRequestRevision", handleOpenEvent)
       }
     }, [fields])
 
@@ -160,31 +160,32 @@ export const RevisionSideBar = observer(
                 </Text>
               </Center>
               <OrderedList>
-                {fields.map((field) => {
-                  if (field._destroy) return
-                  return (
-                    <ListItem mb={4}>
-                      <ScrollLink to={`formio-component-${field.requirementJson.key}`}>
-                        {field.requirementJson.label}
-                      </ScrollLink>
-                      <Flex fontStyle="italic">
-                        {t("permitApplication.show.revision.reason")}: {/* @ts-ignore */}
-                        {t(`permitApplication.show.revision.reasons.${field.reasonCode}`)}
-                      </Flex>
-                      <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap">
-                        <Box width={6} height={6}>
-                          <ChatDots size={24} />
-                        </Box>
-                        <Text noOfLines={1}>{field.comment}</Text>
-                      </Flex>
-                      {field.user && (
-                        <Text fontStyle={"italic"}>
-                          {t("ui.modifiedBy")}: {field.user.firstName} {field.user.lastName}
-                        </Text>
-                      )}
-                    </ListItem>
-                  )
-                })}
+                {fields
+                  .filter((field) => !field._destroy)
+                  .map((field) => {
+                    return (
+                      <ListItem mb={4} key={field.id}>
+                        <ScrollLink to={`formio-component-${field.requirementJson.key}`}>
+                          {field.requirementJson.label}
+                        </ScrollLink>
+                        <Flex fontStyle="italic">
+                          {t("permitApplication.show.revision.reason")}: {/* @ts-ignore */}
+                          {t(`permitApplication.show.revision.reasons.${field.reasonCode}`)}
+                        </Flex>
+                        <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap">
+                          <Box width={6} height={6}>
+                            <ChatDots size={24} />
+                          </Box>
+                          <Text noOfLines={1}>{field.comment}</Text>
+                        </Flex>
+                        {field.user && (
+                          <Text fontStyle={"italic"}>
+                            {t("ui.modifiedBy")}: {field.user.firstName} {field.user.lastName}
+                          </Text>
+                        )}
+                      </ListItem>
+                    )
+                  })}
               </OrderedList>
             </Box>
             <Flex

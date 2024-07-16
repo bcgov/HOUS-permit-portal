@@ -184,3 +184,13 @@ export function removePrefix(str: string, prefix: string) {
 export async function delay(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
 }
+
+export const arrayEqualsAsSet = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false
+  const setA = new Set(a)
+  const setB = new Set(b)
+  for (let item of setA) {
+    if (!setB.has(item)) return false
+  }
+  return true
+}

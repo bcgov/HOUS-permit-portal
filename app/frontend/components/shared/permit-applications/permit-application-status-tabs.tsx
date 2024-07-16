@@ -6,6 +6,7 @@ import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { TFilterableStatus } from "../../../stores/permit-application-store"
 import { EPermitApplicationStatus, EPermitApplicationStatusGroup } from "../../../types/enums"
+import { arrayEqualsAsSet } from "../../../utils/utility-functions"
 
 interface IPermitApplicationStatusTabsProps<TSearchModel extends ISearch> extends ContainerProps {}
 
@@ -21,11 +22,10 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
   const submittedFilters = [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
 
   const statusStringToIndex = (statusString: string): number => {
-    const map = {
-      [draftFilters.join(",")]: 0,
-      [submittedFilters.join(",")]: 1,
-    }
-    return map[statusString]
+    const statusArray = statusString?.split(",") || []
+    if (arrayEqualsAsSet(statusArray, draftFilters)) return 0
+    if (arrayEqualsAsSet(statusArray, submittedFilters)) return 1
+    return 0
   }
 
   const { statusFilter, setStatusFilter, search } = permitApplicationStore
