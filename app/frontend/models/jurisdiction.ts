@@ -55,21 +55,9 @@ export const JurisdictionModel = types
 
       return sortByCreatedAt(self.contacts)[0]
     },
-    get requiredStepsByPermitType() {
-      return self.permitTypeRequiredSteps.reduce((result, jtrs) => {
-        const templateId = jtrs.permitTypeId
-
-        // If the category doesn't exist in the result object, create an array for it
-        if (!result[templateId]) {
-          result[templateId] = []
-        }
-
-        // Push the current item to the appropriate category array
-        result[templateId].push(jtrs)
-
-        // Return the result object for the next iteration
-        return result
-      }, {})
+    permitTypeStepRequirements(permitTypeId: string) {
+      const all = self.permitTypeRequiredSteps.filter((r) => r.permitTypeId == permitTypeId)
+      return R.any((r) => !r.default, all) ? all.filter((r) => !r.default) : all
     },
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
@@ -89,6 +77,15 @@ export const JurisdictionModel = types
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
       // @ts-ignore
       return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
+    },
+  }))
+  .views((self) => ({
+    get requiredStepsByPermitType() {
+      const groupRequirements = (acc, r) =>
+        R.includes(r, self.permitTypeStepRequirements(r.permitTypeId)) ? acc.concat(r) : acc
+      const toPermitType = ({ permitTypeId }) => permitTypeId
+
+      return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
     },
   }))
   .actions((self) => ({
