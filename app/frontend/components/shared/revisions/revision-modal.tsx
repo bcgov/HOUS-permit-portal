@@ -140,7 +140,6 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                   },
                 }}
               >
-                {/* TODO: USE SITE OPTIONS IN CONFIGURATION */}
                 {revisionReasonOptions.map((opt) => (
                   <option value={opt.value} key={opt.value}>
                     {opt.label}

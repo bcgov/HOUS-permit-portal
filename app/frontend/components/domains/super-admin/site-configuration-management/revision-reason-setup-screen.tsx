@@ -16,8 +16,7 @@ export interface IRevisionReasonForm {
 
 export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupScreen() {
   const { siteConfigurationStore } = useMst()
-  const { updateSiteConfiguration, configurationLoaded, activeRevisionReasons, resetConfigurationLoaded } =
-    siteConfigurationStore
+  const { updateSiteConfiguration, configurationLoaded, activeRevisionReasons } = siteConfigurationStore
   const { t } = useTranslation()
   const navigate = useNavigate()
 

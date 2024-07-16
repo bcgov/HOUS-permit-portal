@@ -523,18 +523,6 @@ const options = {
               confirmHeader: "Send this list of revisions to the submitter?",
               originallySubmitted: "Originally submitted",
               confirmMessage: "The submitter will receive a notification end email about the changes you've requested.",
-              // reasons: {
-              //   non_compliant: "Non-compliance with regulations",
-              //   conflicting_inaccurate: "Conflicting/inaccurate information",
-              //   insufficient_detail: "Insufficient detail",
-              //   incorrect_format: "Incorrect format",
-              //   missing_documentation: "Missing documentation",
-              //   outdated: "Outdated",
-              //   inapplicable: "Inapplicable",
-              //   missing_signatures: "Missing signatures",
-              //   incorrect_calculations: "Incorrect calculations",
-              //   other: "Other",
-              // },
             },
           },
         },
@@ -1090,7 +1078,6 @@ const options = {
               description:
                 "Customize the informational page that submitters will see when they are in the Building Permit Hub.",
             },
-            revisionReasonSetup: {},
             submissionsInboxSetup: {
               title: "Submissions inbox setup",
               description: "Specify email addresses that should receive applications.",

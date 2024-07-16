@@ -14,7 +14,6 @@ export const RevisionReasonModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({}))
-
   .actions((self) => ({}))
 
 export interface IRevisionReason extends Instance<typeof RevisionReasonModel> {}

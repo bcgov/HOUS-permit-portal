@@ -1,7 +1,7 @@
 class RevisionRequest < ApplicationRecord
   belongs_to :submission_version
   belongs_to :user
-  belongs_to :revision_reason, foreign_key: :revision_code, primary_key: :reason_code
+  belongs_to :revision_reason, foreign_key: :reason_code, primary_key: :reason_code
 
   validate :user_must_be_review_staff
 
