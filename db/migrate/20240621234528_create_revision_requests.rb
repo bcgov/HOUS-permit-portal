@@ -21,14 +21,17 @@ class CreateRevisionRequests < ActiveRecord::Migration[7.1]
     end
 
     def data
-      PermitApplication.submitted.each do |pa|
-        pa.submission_versions.create(
-          form_json: pa.form_json,
-          submission_data: pa.submission_data,
-          created_at: pa.submitted_at,
-          viewed_at: pa.viewed_at,
-        )
-      end
+      # code agnostic retrieval of all submitted PermitApplications
+      PermitApplication
+        .where(status: 1)
+        .each do |pa|
+          pa.submission_versions.create(
+            form_json: pa.form_json,
+            submission_data: pa.submission_data,
+            created_at: pa.submitted_at,
+            viewed_at: pa.viewed_at,
+          )
+        end
 
       remove_column :permit_applications, :viewed_at, :timestamp
     end

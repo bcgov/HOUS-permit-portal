@@ -194,6 +194,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
 
   useInterval(() => handleSave({ autosave: true }), 60000) // save progress every minute
 
+  const permitHeaderRef = useRef()
+
   useEffect(() => {
     // sets the defaults subject to application load
     reset(getDefaultPermitApplicationMetadataValues())
@@ -213,7 +215,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
+  // @ts-ignore
+  const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
 
   const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
@@ -221,7 +224,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   return (
     <Box as="main" id="submitter-view-permit">
       {!isStepCode && (
-        <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12}>
+        <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
           <Flex
             w="full"
             px={6}
