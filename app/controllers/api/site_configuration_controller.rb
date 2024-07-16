@@ -45,7 +45,7 @@ class Api::SiteConfigurationController < Api::ApplicationController
         dictionary_link_item: %i[href title description show],
         user_guide_link_item: %i[href title description show],
       ],
-      revision_reasons_attributes: %i[id description reason_code _destroy],
+      revision_reasons_attributes: %i[id description reason_code _discard],
     )
   end
 end

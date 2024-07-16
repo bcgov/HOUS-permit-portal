@@ -229,6 +229,7 @@ const options = {
           resetFilters: "Reset filters",
           customize: "Customize",
           acknowledgeAndDismiss: "Acknowledge and dismiss",
+          markedForRemoval: 'Click "Save changes" to confirm removal',
         },
         notification: {
           title: "Notifications",
@@ -1458,7 +1459,7 @@ const options = {
           revisionReasonsAttributesSetup: {
             title: "Revision reasons",
             description: "Setup reasons to be applied to revision requests",
-            settings: "Reasons",
+            options: "Selectable options",
             fields: {
               reasonCode: "Reason code",
               reasonDescription: "Reason description",

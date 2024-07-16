@@ -60,7 +60,7 @@ export interface IRevisionReasonsAttributes {
   id?: string
   reasonCode?: string
   description?: string
-  _destroy?: true
+  _discard?: true
 }
 
 export interface IRequirementTemplateUpdateParams {
@@ -69,7 +69,7 @@ export interface IRequirementTemplateUpdateParams {
 }
 
 export interface ISiteConfigurationUpdateParams extends Partial<ISiteConfiguration> {
-  revisionReasonsAttributes: IRevisionReasonsAttributes[]
+  revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 
 export interface ITagSearchParams {
