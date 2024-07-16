@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { sizes } from "../../../styles/theme/foundations/sizes"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
@@ -71,11 +72,9 @@ export const RevisionSideBar = observer(
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
-    const onFinalizeRevisions = () => {
-      ;(async () => {
-        const ok = await permitApplication.finalizeRevisionRequests()
-        if (ok) navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
-      })()
+    const onFinalizeRevisions = async () => {
+      const ok = await permitApplication.finalizeRevisionRequests()
+      if (ok) navigate(`/jurisdictions/${permitApplication.jurisdiction.slug}/submission-inbox`)
     }
 
     const handleOpenRequestRevision = async (_event, upToDateFields) => {
@@ -143,7 +142,7 @@ export const RevisionSideBar = observer(
             boxShadow="md"
             borderRight="1px solid"
             borderRightColor="theme.yellow"
-            width="var(--app-sidebar-width)"
+            width={sizes.sidebar.width}
             position="sticky"
             top={topHeight}
             bottom="0"

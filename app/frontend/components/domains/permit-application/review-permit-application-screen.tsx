@@ -6,6 +6,7 @@ import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { sizes } from "../../../styles/theme/foundations/sizes"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -46,6 +47,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
 
   const sendRevisionContainerRef = useRef<HTMLDivElement | null>(null)
 
+  const permitHeaderRef = useRef()
+
   useEffect(() => {
     reset({ referenceNumber: currentPermitApplication?.referenceNumber || "" })
   }, [currentPermitApplication?.referenceNumber])
@@ -85,10 +88,13 @@ export const ReviewPermitApplicationScreen = observer(() => {
       onReferenceNumberChange(referenceNumberSnapshot)
     }
   })
-  const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
+
+  // @ts-ignore
+  const permitHeaderHeight = permitHeaderRef?.current?.offsetHeight ?? 0
+
   return (
     <Box as="main" id="reviewing-permit-application">
-      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12}>
+      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
         <Flex w="full" px={6} py={3} bg="theme.blue" justify="space-between" color="greys.white">
           <HStack gap={4} flex={1}>
             <PermitApplicationViewedAtTag permitApplication={currentPermitApplication} />
@@ -158,7 +164,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             gap={4}
             top={permitHeaderHeight}
           >
-            <Flex width="var(--app-sidebar-width)" align="center" gap={2}>
+            <Flex width={sizes.sidebar.width} align="center" gap={2}>
               <NotePencil size={24} />
               <Heading fontSize="lg" mt={2}>
                 {t("permitApplication.show.requestingRevisions")}

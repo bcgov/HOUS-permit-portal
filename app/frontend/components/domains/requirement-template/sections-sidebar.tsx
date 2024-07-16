@@ -2,6 +2,7 @@ import { Box, Button, Divider, Heading, HeadingProps, HStack, Stack, Text } from
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { sizes } from "../../../styles/theme/foundations/sizes"
 import { IDenormalizedRequirementTemplateSection } from "../../../types/types"
 
 interface IProps {
@@ -29,7 +30,7 @@ export const SectionsSidebar = observer(function SectionsSidebar({
     <Box
       id="sections-sidebar"
       as={"section"}
-      w="var(--app-sidebar-width)"
+      w={sizes.sidebar.width}
       h="calc(100vh) "
       bg="greys.white"
       borderRight={"1px solid"}
