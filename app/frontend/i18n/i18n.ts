@@ -286,11 +286,11 @@ const options = {
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
             stepCode: {
               title: "Step code requirements",
-              description: "Below are the step code requirements for each permit template",
+              description:
+                "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
               permitType: "Permit type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
-              helpLinkText: "What does each step code level mean?",
             },
           },
           new: {

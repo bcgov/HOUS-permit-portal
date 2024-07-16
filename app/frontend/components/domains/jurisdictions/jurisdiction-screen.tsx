@@ -8,6 +8,7 @@ import {
   Button,
   Center,
   Container,
+  Divider,
   Flex,
   FormControl,
   FormLabel,
@@ -29,7 +30,7 @@ import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { Control, Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -135,16 +136,24 @@ export const JurisdictionScreen = observer(() => {
                 </Flex>
               </Flex>
               <Flex direction={{ base: "column", md: "row" }} gap={6}>
-                <Flex direction="column" flex={3}>
-                  <Flex as="section" direction="column" gap={2}>
-                    <Heading>{t("jurisdiction.checklist")}</Heading>
-                    <JurisdictionQuillFormController
-                      control={control}
-                      label={t("jurisdiction.edit.displayChecklistLabel")}
-                      initialTriggerText={t("jurisdiction.edit.addChecklist")}
-                      name={"checklistHtml"}
-                    />
-                  </Flex>
+                <Flex
+                  as="section"
+                  direction="column"
+                  gap={4}
+                  flex={3}
+                  borderWidth={1}
+                  borderColor="border.light"
+                  rounded="lg"
+                  p={6}
+                >
+                  <Heading mb={0}>{t("jurisdiction.checklist")}</Heading>
+                  <Divider my={0} />
+                  <JurisdictionQuillFormController
+                    control={control}
+                    label={t("jurisdiction.edit.displayChecklistLabel")}
+                    initialTriggerText={t("jurisdiction.edit.addChecklist")}
+                    name={"checklistHtml"}
+                  />
                 </Flex>
                 <Flex
                   as="section"
@@ -153,8 +162,7 @@ export const JurisdictionScreen = observer(() => {
                   flex={2}
                   gap={4}
                   borderRadius="lg"
-                  border="1px solid"
-                  borderColor="border.light"
+                  background="theme.blueLight"
                 >
                   <Heading as="h3">{t("jurisdiction.lookOut")}</Heading>
                   <JurisdictionQuillFormController
@@ -165,36 +173,21 @@ export const JurisdictionScreen = observer(() => {
                   />
                 </Flex>
               </Flex>
-              <Flex
-                as="section"
-                direction="column"
-                borderRadius="lg"
-                boxShadow="md"
-                border="1px solid"
-                borderColor="border.light"
-              >
-                <Box
-                  py={3}
-                  px={6}
-                  bg="greys.white"
-                  borderTopRadius="lg"
-                  borderBottom="1px solid"
-                  borderColor="border.light"
-                >
-                  <Heading as="h3" color="theme.blueAlt" fontSize="xl">
-                    {t("jurisdiction.edit.stepCode.title")}
-                  </Heading>
+              <Flex as="section" direction="column" gap={4}>
+                <Heading as="h2" fontSize="xl" my={0}>
+                  {t("jurisdiction.edit.stepCode.title")}
+                </Heading>
+                <Box>
+                  <Trans
+                    i18nKey={"jurisdiction.edit.stepCode.description"}
+                    components={{
+                      1: <Link href={t("stepCode.helpLink")} isExternal></Link>,
+                      2: <ArrowSquareOut />,
+                    }}
+                  />
                 </Box>
-                <Flex direction="column" p={6} gap={9}>
-                  <Flex direction="column" gap={2}>
-                    <Text>{t("jurisdiction.edit.stepCode.description")}</Text>
-                    <Link href={t("stepCode.helpLink")} isExternal fontWeight="normal">
-                      {t("stepCode.helpLinkText")}
-                      <ArrowSquareOut />
-                    </Link>
-                  </Flex>
-                  <StepCodeTable currentJurisdiction={currentJurisdiction} />
-                </Flex>
+
+                <StepCodeTable currentJurisdiction={currentJurisdiction} />
               </Flex>
               <Flex as="section" direction="column" borderRadius="lg" boxShadow="md">
                 <Box py={3} px={6} bg="theme.blueAlt" borderTopRadius="lg">
@@ -266,31 +259,42 @@ const JurisdictionQuillFormController = observer(
     const { t } = useTranslation()
 
     return (
-      <Can
-        action={"jurisdiction:manage"}
-        data={{ jurisdiction: currentJurisdiction }}
-        onPermissionDeniedRender={
-          <Editor value={currentJurisdiction[name]} readOnly={true} modules={{ toolbar: false }} />
-        }
+      <Box
+        sx={{
+          ".ql-container.ql-snow": {
+            border: "none",
+          },
+          ".ql-editor": {
+            padding: 0,
+          },
+        }}
       >
-        <Controller
-          render={({ field: { value, onChange } }) => (
-            <EditorWithPreview
-              label={label}
-              editText={t("ui.clickToEdit")}
-              htmlValue={value as string}
-              onChange={onChange}
-              initialTriggerText={initialTriggerText}
-              onRemove={(setEditMode) => {
-                setEditMode(false)
-                onChange("")
-              }}
-            />
-          )}
-          name={name}
-          control={control}
-        />
-      </Can>
+        <Can
+          action={"jurisdiction:manage"}
+          data={{ jurisdiction: currentJurisdiction }}
+          onPermissionDeniedRender={
+            <Editor value={currentJurisdiction[name]} readOnly={true} modules={{ toolbar: false }} />
+          }
+        >
+          <Controller
+            render={({ field: { value, onChange } }) => (
+              <EditorWithPreview
+                label={label}
+                editText={t("ui.clickToEdit")}
+                htmlValue={value as string}
+                onChange={onChange}
+                initialTriggerText={initialTriggerText}
+                onRemove={(setEditMode) => {
+                  setEditMode(false)
+                  onChange("")
+                }}
+              />
+            )}
+            name={name}
+            control={control}
+          />
+        </Can>
+      </Box>
     )
   }
 )
