@@ -90,7 +90,8 @@ en:
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
-      notify_application_viewed: "Updated application status: %{permit_application_number}"
+      notify_application_viewed: "Application update: %{permit_application_number}"
+      notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
@@ -499,8 +500,8 @@ en:
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
     integration_mapping:
-      published_template_missing_requirements_mapping: 'Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}'
-      scheduled_template_missing_requirements_mapping: 'Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST.'
+      published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
+      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
