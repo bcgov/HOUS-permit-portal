@@ -12,12 +12,12 @@ interface IProps {
 
 export const EnergySteps = function EnergySteps({ compliance }: IProps) {
   const steps = Object.values(EEnergyStep)
-  const numSteps = steps.length - 1
+  const numSteps = steps.length
 
   return (
     <Flex align="end" w="full">
       {[...Array(numSteps).keys()].map((stepOffset) => {
-        const step = steps[stepOffset + 1]
+        const step = steps[stepOffset]
         const isRequiredStep = step == compliance.requiredStep
         let height = 38
         switch (stepOffset) {
