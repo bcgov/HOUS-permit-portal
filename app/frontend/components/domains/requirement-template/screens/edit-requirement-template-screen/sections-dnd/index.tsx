@@ -23,7 +23,6 @@ import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-ki
 import * as R from "ramda"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { sizes } from "../../../../../../styles/theme/foundations/sizes"
 import {
   IRequirementTemplateSectionAttributes,
   ITemplateSectionBlockAttributes,
@@ -164,7 +163,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
     <Box
       id="sections-sidebar-reordering"
       as={"section"}
-      w={sizes.sidebar.width}
+      w={"sidebar.width"}
       h="calc(100vh) "
       bg="greys.white"
       borderRight={"1px solid"}
@@ -183,7 +182,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
         top="0"
         right="0"
         bottom="0"
-        left={sizes.sidebar.width}
+        left={"sidebar.width"}
 
         // hide the form side so user can focus on drag /up down and can't click the form accordions (in sections-display)
       >

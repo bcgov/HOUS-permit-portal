@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { sizes } from "../../../styles/theme/foundations/sizes"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
@@ -142,7 +141,7 @@ export const RevisionSideBar = observer(
             boxShadow="md"
             borderRight="1px solid"
             borderRightColor="theme.yellow"
-            width={sizes.sidebar.width}
+            width={"sidebar.width"}
             position="sticky"
             top={topHeight}
             bottom="0"

@@ -1681,9 +1681,9 @@ const options = {
   lng: "en", // default language
   fallbackLng: "en",
   interpolation: { escapeValue: false },
-  // parseMissingKeyHandler: (key, defaultValue) => {
-  //   return fallbackTranslations.en.fallback
-  // },
+  parseMissingKeyHandler: (key, defaultValue) => {
+    return fallbackTranslations.en.fallback
+  },
 }
 
 i18n.use(initReactI18next).init(options)

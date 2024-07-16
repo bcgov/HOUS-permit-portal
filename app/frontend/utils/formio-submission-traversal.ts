@@ -3,31 +3,33 @@ import { isFieldSetKey } from "./formio-helpers"
 
 export const getSinglePreviousSubmissionJson = (submissionData: any, requirementKey: string) => {
   if (isFieldSetKey(requirementKey)) {
-    let data = {}
-    Object.keys(submissionData.data).forEach((sectionKey) => {
-      const section = submissionData.data[sectionKey]
-      if (!R.isEmpty(data)) return
+    const sectionKeys = Object.keys(submissionData.data)
 
-      const filteredObject = Object.keys(section)
-        .filter((key) => key.startsWith(requirementKey))
-        .reduce((filteredObj, key) => {
-          filteredObj[key] = section[key]
-          return filteredObj
-        }, {})
+    for (let i = 0; i < sectionKeys.length; i++) {
+      const sectionKey = sectionKeys[i]
+      const section = submissionData.data[sectionKey]
+
+      const filteredObject = Object.keys(section).reduce((reducedObject, currentKey) => {
+        if (!currentKey.startsWith(requirementKey)) return reducedObject
+
+        reducedObject[currentKey] = section[currentKey]
+        return reducedObject
+      }, {})
 
       if (!R.isEmpty(filteredObject)) {
-        data = filteredObject
+        return { data: filteredObject }
       }
-    })
-    return { data }
+    }
   } else {
-    let foundSubmission = null
+    const sectionKeys = Object.keys(submissionData.data)
 
-    Object.keys(submissionData.data).forEach((sectionKey) => {
+    for (let i = 0; i < sectionKeys.length; i++) {
+      const sectionKey = sectionKeys[i]
+
       if (submissionData.data[sectionKey][requirementKey]) {
-        foundSubmission = submissionData.data[sectionKey][requirementKey]
+        const foundSubmission = submissionData.data[sectionKey][requirementKey]
+        return { data: { [requirementKey]: foundSubmission } }
       }
-    })
-    return { data: { [requirementKey]: foundSubmission } }
+    }
   }
 }

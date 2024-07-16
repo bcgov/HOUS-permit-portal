@@ -22,7 +22,6 @@ import { useNavigate } from "react-router-dom"
 import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
-import { sizes } from "../../../styles/theme/foundations/sizes"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
@@ -331,7 +330,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               gap={4}
               top={permitHeaderHeight}
             >
-              <Flex width={sizes.sidebar.width} align="center" gap={2}>
+              <Flex width={"sidebar.width"} align="center" gap={2}>
                 <NotePencil size={24} />
                 <Heading fontSize="lg" mt={2}>
                   {t("permitApplication.show.requestedRevisions")}

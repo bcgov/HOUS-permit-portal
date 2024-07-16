@@ -9,7 +9,6 @@ module PermitApplicationStatus
       state :newly_submitted
       state :revisions_requested
       state :resubmitted
-      state :approved
 
       event :submit do
         transitions from: :new_draft, to: :newly_submitted, guard: :can_submit?, after: :handle_submission

@@ -151,7 +151,7 @@ export const PermitApplicationStoreModel = types
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
     },
-    setStatusFilter(statuses: TFilterableStatus[]) {
+    setStatusFilter(statuses: TFilterableStatus[] | undefined) {
       if (!statuses) return
       setQueryParam("status", statuses)
       // @ts-ignore

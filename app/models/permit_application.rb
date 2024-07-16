@@ -22,6 +22,8 @@ class PermitApplication < ApplicationRecord
   has_one :step_code
   has_many :submission_versions, dependent: :destroy
 
+  scope :submitted, -> { joins(:submission_versions).distinct }
+
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact

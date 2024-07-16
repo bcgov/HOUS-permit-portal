@@ -3,7 +3,6 @@ import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { IPermitApplication } from "../../../models/permit-application"
-import { sizes } from "../../../styles/theme/foundations/sizes"
 
 interface IChecklistSideBarProps {
   permitApplication: IPermitApplication
@@ -34,7 +33,7 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
         boxShadow="md"
         borderRight="1px solid"
         borderRightColor="greys.grey02"
-        width={sizes.sidebar.width}
+        width={"sidebar.width"}
         position="sticky"
         top={permitHeaderHeight}
         bottom="0"

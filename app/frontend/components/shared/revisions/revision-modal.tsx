@@ -76,28 +76,28 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   const index = fields.findIndex((field) => field.id === revisionRequest?.id)
 
   const handleUpsert = () => {
-    if (reasonCode && requirementJson) {
-      const newItem = {
-        id: revisionRequest?.id,
-        userId: currentUser.id,
-        reasonCode,
-        requirementJson,
-        submissionJson,
-        comment,
-      }
-      if (revisionRequest) {
-        // Item exists, replace it
-        update(index, newItem)
-      } else {
-        // Item does not exist, append it
-        append(newItem)
-      }
+    if (!reasonCode || !requirementJson) return
 
-      onSave().then(() => {
-        elements?.[0]?.classList?.add("revision-requested")
-        handleClose()
-      })
+    const newItem = {
+      id: revisionRequest?.id,
+      userId: currentUser.id,
+      reasonCode,
+      requirementJson,
+      submissionJson,
+      comment,
     }
+    if (revisionRequest) {
+      // Item exists, replace it
+      update(index, newItem)
+    } else {
+      // Item does not exist, append it
+      append(newItem)
+    }
+
+    onSave().then(() => {
+      elements?.[0]?.classList?.add("revision-requested")
+      handleClose()
+    })
   }
 
   const handleDelete = () => {

@@ -6,7 +6,6 @@ import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
-import { sizes } from "../../../styles/theme/foundations/sizes"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -164,7 +163,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             gap={4}
             top={permitHeaderHeight}
           >
-            <Flex width={sizes.sidebar.width} align="center" gap={2}>
+            <Flex width={"sidebar.width"} align="center" gap={2}>
               <NotePencil size={24} />
               <Heading fontSize="lg" mt={2}>
                 {t("permitApplication.show.requestingRevisions")}
