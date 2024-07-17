@@ -1,0 +1,2 @@
+class CollaborationManagementError < StandardError
+end

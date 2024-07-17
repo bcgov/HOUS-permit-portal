@@ -86,6 +86,12 @@ en:
           attributes:
             user:
               incorrect_role: "User must be review staff"
+        permit_collaboration:
+          attributes:
+            base:
+              delegatee_already_exits: "There can only be one delegatee for a permit application"
+            assigned_requirement_block_id:
+              does_not_exist: "Requirement block does not exist in the permit application"
   application_mailer:
     subject_start: "Building Permit Hub"
     subjects:
@@ -366,6 +372,12 @@ en:
       save_success:
         title: ""
         message: "Permit application successfully updated!"
+      assign_collaborator_success:
+        title: ""
+        message: "Collaborator successfully assigned!"
+      assign_collaborator_error:
+        title: ""
+        message: "%{error_message}"
       update_version_succes:
         title: ""
         message: "Permit application successfully updated to new version!"

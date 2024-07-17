@@ -12,6 +12,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   update_version
                   generate_missing_pdfs
                   update_revision_requests
+                  create_permit_collaboration
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -156,6 +157,26 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
+  def create_permit_collaboration
+    @permit_collaboration =
+      PermitApplication::CollaborationManagementService.new(@permit_application).build_permit_collaboration(
+        *permit_collaboration_params,
+      )
+
+    authorize @permit_collaboration, policy_class: PermitApplicationPolicy
+
+    if @permit_collaboration.save
+      render_success @permit_collaboration,
+                     "permit_application.assign_collaborator_success",
+                     { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
+    else
+      render_error "permit_application.assign_collaborator_error",
+                   message_opts: {
+                     error_message: @permit_collaboration.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
   def generate_missing_pdfs
     authorize @permit_application
 
@@ -197,6 +218,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
       submission_data: {
       },
     )
+  end
+
+  def permit_collaboration_params
+    params.require(:permit_collaboration).permit(:collaborator_id, :collaborator_type, :assigned_requirement_block_id)
   end
 
   def supporting_document_params

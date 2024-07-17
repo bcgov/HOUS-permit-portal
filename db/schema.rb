@@ -260,7 +260,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
     t.uuid "permit_application_id", null: false
     t.integer "collaboration_type", default: 0
     t.integer "collaborator_type", default: 0
-    t.jsonb "assignments", default: {}
+    t.string "assigned_requirement_block_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["collaboration_type"],
@@ -274,6 +274,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
               collaborator_id
               collaboration_type
               collaborator_type
+              assigned_requirement_block_id
             ],
             name: "index_permit_collaborations_on_unique_columns",
             unique: true
