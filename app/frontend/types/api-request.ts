@@ -1,5 +1,5 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
-import { IOption, IRevisionRequest, ISimplifiedRequirementsMap, TComputedCompliance } from "./types"
+import { IOption, IRevisionRequest, ISimplifiedRequirementsMap, ISiteConfiguration, TComputedCompliance } from "./types"
 
 export interface IFormConditional {
   when: string
@@ -56,9 +56,20 @@ export interface IRevisionRequestsAttributes extends Partial<IRevisionRequest> {
   userId?: string
 }
 
+export interface IRevisionReasonsAttributes {
+  id?: string
+  reasonCode?: string
+  description?: string
+  _discard?: true
+}
+
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
+}
+
+export interface ISiteConfigurationUpdateParams extends Partial<ISiteConfiguration> {
+  revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 
 export interface ITagSearchParams {

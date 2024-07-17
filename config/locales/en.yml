@@ -35,6 +35,9 @@ en:
         site_configuration:
           single_record: "There can only be one SiteConfiguration record."
           attributes:
+            revision_reasons:
+              max_undiscarded_records: cannot have more than 20 undiscarded.
+              max_records: cannot have more than 200.
             help_link_items:
               incomplete: "%{link} can only be shown if href, title, and description are all set."
               invalid_url: "%{link} has an invalid URL. It must start with https://."
@@ -384,7 +387,7 @@ en:
         message: "There was an error loading the site configuration"
       update_error:
         tite: "Oops"
-        message: "There was an error updating the site configuration"
+        message: "%{error_message}"
     step_code:
       h2k_imported:
         title: ""

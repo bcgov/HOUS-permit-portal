@@ -24,7 +24,6 @@ import React, { useState } from "react"
 import { UseFieldArrayReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { EReasonCode } from "../../../types/enums"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { singleRequirementFormJson } from "../../../utils/formio-helpers"
 import { IRevisionRequestForm } from "../../domains/permit-application/revision-sidebar"
@@ -53,13 +52,14 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   forSubmitter,
 }) => {
   const { t } = useTranslation()
-  const [reasonCode, setReasonCode] = useState<EReasonCode | "">(revisionRequest?.reasonCode ?? "")
+  const [reasonCode, setReasonCode] = useState<string>(revisionRequest?.reasonCode ?? "")
   const [comment, setComment] = useState<string>(revisionRequest?.comment ?? "")
 
   const { update, append, fields } = useFieldArrayMethods
 
-  const { userStore } = useMst()
+  const { userStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
+  const { revisionReasonOptions } = siteConfigurationStore
 
   const className = `formio-component-${requirementJson.key}`
   const elements = document.getElementsByClassName(className)
@@ -131,7 +131,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
               <Select
                 placeholder={t("ui.pleaseSelect")}
                 value={reasonCode}
-                onChange={(e) => setReasonCode(e.target.value as EReasonCode)}
+                onChange={(e) => setReasonCode(e.target.value)}
                 isDisabled={isRevisionsRequested}
                 sx={{
                   _disabled: {
@@ -140,9 +140,9 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                   },
                 }}
               >
-                {Object.values(EReasonCode).map((value) => (
-                  <option value={value} key={value}>
-                    {t(`permitApplication.show.revision.reasons.${value}`)}
+                {revisionReasonOptions.map((opt) => (
+                  <option value={opt.value} key={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
               </Select>
