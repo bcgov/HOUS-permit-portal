@@ -98,6 +98,10 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
     }
   }, [watchRequiredSteps])
 
+  useEffect(() => {
+    reset(getDefaultValues())
+  }, [jurisdiction.id])
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
       <EditableBlockContainer>
