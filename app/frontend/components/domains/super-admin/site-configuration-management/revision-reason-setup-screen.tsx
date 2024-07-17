@@ -106,7 +106,7 @@ export const RevisionReasonSetupScreen = observer(function RevisionReasonSetupSc
                         </Flex>
                         {!field._discard ? (
                           <Button type="button" variant="secondary" onClick={() => handleDelete(index)}>
-                            {t("ui.remove")}
+                            {t("ui.archive")}
                           </Button>
                         ) : (
                           <Text color="semantic.error">{t("ui.markedForRemoval")}</Text>
