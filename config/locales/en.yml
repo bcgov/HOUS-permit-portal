@@ -30,6 +30,9 @@
 en:
   activerecord:
     attributes:
+      contact:
+        cell: "Mobile no."
+        phone: "Phone no."
     errors:
       models:
         site_configuration:
