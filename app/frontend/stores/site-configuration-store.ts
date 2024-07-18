@@ -20,11 +20,13 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .actions((self) => ({
       fetchSiteConfiguration: flow(function* fetchSiteConfiguration() {
+        self.configurationLoaded = false
         const response: any = yield self.environment.api.fetchSiteConfiguration()
         if (response.ok) {
           let responseData = response.data.data
           applySnapshot(self, preProcessor(responseData))
         }
+        self.configurationLoaded = true
         return response.ok
       }),
       updateSiteConfiguration: flow(function* updateSiteConfiguration(

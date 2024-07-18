@@ -515,6 +515,7 @@ const options = {
             clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
             revision: {
               reason: "Reason",
+              reasonCode: "Reason code",
               revisionRequest: "Revision request",
               reasonFor: "Reason for revision",
               comment: "Comment (optional)",

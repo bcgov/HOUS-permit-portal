@@ -168,8 +168,8 @@ export const RevisionSideBar = observer(
                           {field.requirementJson.label}
                         </ScrollLink>
                         <Flex fontStyle="italic">
-                          {t("permitApplication.show.revision.reason")}: {/* @ts-ignore */}
-                          {t(`permitApplication.show.revision.reasons.${field.reasonCode}`)}
+                          {t("permitApplication.show.revision.reasonCode")}: {/* @ts-ignore */}
+                          {field.reasonCode}
                         </Flex>
                         <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap">
                           <Box width={6} height={6}>
