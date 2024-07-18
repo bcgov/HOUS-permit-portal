@@ -40,7 +40,7 @@ export type TRequirementFieldDisplayProps = {
     formControlProps?: FormControlProps
     switchProps?: SwitchProps
   }
-  showAddPersonButton?: boolean
+  showAddButton?: boolean
   requirementType: ERequirementType
   showAddLabelIndicator?: boolean
   required?: boolean
@@ -270,7 +270,7 @@ const requirementsComponentMap = {
         },
       },
     ]
-    return <GenericMultiDisplay fieldItems={pidInfoFieldItemTypes} {...props} showAddPersonButton={true} />
+    return <GenericMultiDisplay fieldItems={pidInfoFieldItemTypes} {...props} showAddButton={true} />
   },
 
   [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {

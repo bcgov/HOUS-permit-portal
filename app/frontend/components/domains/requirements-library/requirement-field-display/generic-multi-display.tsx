@@ -15,7 +15,6 @@ export type TGenericDisplayProps<TFieldValues extends FieldValues> = {
     type: ERequirementType
     key: string
     label: string
-    required?: boolean
     containerProps?: BoxProps
   }>
   containerProps?: BoxProps
@@ -26,6 +25,7 @@ export type TGenericDisplayProps<TFieldValues extends FieldValues> = {
   renderHeading?: () => JSX.Element
 } & TRequirementFieldDisplayProps
 
+//This is a generic multi-display, it makes the assumption that this is additional info and is NOT ever required.
 export function GenericMultiDisplay<TFieldValues>({
   fieldItems,
   label,
@@ -33,10 +33,9 @@ export function GenericMultiDisplay<TFieldValues>({
   showAddLabelIndicator,
   renderHeading,
   containerProps,
-  showAddPersonButton,
+  showAddButton,
   requirementType,
   addAnotherText,
-  // required,
 }: TGenericDisplayProps<TFieldValues>) {
   const { t } = useTranslation()
 
@@ -89,7 +88,7 @@ export function GenericMultiDisplay<TFieldValues>({
         </Box>
       </Box>
 
-      {showAddPersonButton && (
+      {showAddButton && (
         <Button
           variant={"secondary"}
           leftIcon={<Plus />}

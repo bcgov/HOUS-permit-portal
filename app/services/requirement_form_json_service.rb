@@ -319,7 +319,7 @@ class RequirementFormJsonService
     }
   end
 
-  def get_multi_contact_datagrid_form_json(initEmpty, requirement_block_key = requirement&.requirement_block&.key)
+  def get_multi_contact_datagrid_form_json(requirement_block_key = requirement&.requirement_block&.key)
     return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
 
     key = "#{requirement.key(requirement_block_key)}|multi_contact"
@@ -377,7 +377,7 @@ class RequirementFormJsonService
 
   def get_pid_info_components(requirement_block_key = requirement&.requirement_block&.key)
     return {} unless requirement.input_type_pid_info?
-    # key = "#{requirement.key(requirement_block_key)}|pid_info?"
+    key = "#{requirement.key(requirement_block_key)}|additional_pid_info"
     component = {
       legend: requirement.label,
       key: requirement_block_key,
