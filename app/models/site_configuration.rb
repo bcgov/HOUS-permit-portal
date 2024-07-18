@@ -17,29 +17,20 @@ class SiteConfiguration < ApplicationRecord
 
   # This override allows discarding of reasons and updating them by reason_code
   # if a discarded reason of a particular code is found and updated, it will be undiscarded.
-  # TODO: move into separate service?
   def revision_reasons_attributes=(attributes)
     attributes.each do |attribute, _|
-      if attribute["_discard"] == true
-        self.revision_reasons.find(attribute["id"]).discard if attribute["id"].present?
+      if attribute["id"].present?
+        # Update the existing record
+        existing_record = self.revision_reasons.find(attribute["id"])
+        existing_record.update(attribute.except("id"))
       else
-        if attribute["id"].present?
-          # Update the existing record
-          existing_record = self.revision_reasons.with_discarded.find(attribute["id"])
-          existing_record.undiscard if existing_record.discarded?
-          existing_record.update(attribute.except("id"))
+        existing_reason = self.revision_reasons.with_discarded.find_by(reason_code: attribute["reason_code"])
+        if existing_reason.present?
+          # Undiscard and update the record
+          existing_reason.update(attribute.except("id").merge({ discarded_at: nil }))
         else
-          reason_code = attribute["reason_code"]
-          discarded_reason = self.revision_reasons.with_discarded.find_by(reason_code: reason_code)
-
-          if discarded_reason&.discarded?
-            # Undiscard and update the record
-            discarded_reason.undiscard
-            discarded_reason.update(attribute.except("id"))
-          else
-            # Proceed with the normal behavior
-            self.revision_reasons.build(attribute)
-          end
+          # Proceed with the normal behavior
+          self.revision_reasons.build(attribute)
         end
       end
     end
