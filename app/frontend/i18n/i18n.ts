@@ -358,7 +358,7 @@ const options = {
           },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
-          reviewOutdatedEditLink: "View template",
+          reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
           reviewCustomizedSubmissionLink: "View draft applications",
