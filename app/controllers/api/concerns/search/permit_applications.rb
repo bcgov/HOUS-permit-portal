@@ -15,6 +15,7 @@ module Api::Concerns::Search::PermitApplications
             nil
           end
         ),
+      includes: PermitApplication::SEARCH_INCLUDES,
     }
 
     @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
@@ -27,7 +28,11 @@ module Api::Concerns::Search::PermitApplications
       :query,
       :page,
       :per_page,
-      filters: %i[status template_version_id requirement_template_id],
+      filters: {
+        status: [],
+        template_version_id: :template_version_id,
+        requirement_template_id: :requirement_template_id,
+      },
       sort: %i[field direction],
     )
   end
@@ -56,11 +61,13 @@ module Api::Concerns::Search::PermitApplications
       where = {
         jurisdiction_id: @jurisdiction.id,
         # Overrides status filter, reorder the code if necessary
-        status: %i[submitted],
+        status: %i[newly_submitted resubmitted],
       }
     else
       where = { submitter_id: current_user.id }
     end
-    (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
+    ret = (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
+
+    ret
   end
 end

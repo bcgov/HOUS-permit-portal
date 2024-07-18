@@ -13,7 +13,7 @@ export const PermitApplicationViewedAtTag = ({ permitApplication, ...rest }: IPe
     <Tag
       p={1}
       bg={permitApplication.isViewed ? undefined : "theme.yellow"}
-      color={"text.link"}
+      color={"text.primary"}
       fontWeight="bold"
       border="1px solid"
       borderColor="border.light"

@@ -1,5 +1,5 @@
 import { Container, Grid, GridItem, Heading, VStack } from "@chakra-ui/react"
-import { FlagBanner, Question, Users } from "@phosphor-icons/react"
+import { FlagBanner, NotePencil, Question, Users } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -21,7 +21,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               title={t(`${i18nPrefix}.sitewideMessage.title`)}
               description={t(`${i18nPrefix}.sitewideMessage.description`)}
               linkText={t("ui.edit")}
-              icon={<FlagBanner size="24px" color="--var(chakra-colors-text-primary)" />}
+              icon={<FlagBanner size="24px" color="var(--chakra-colors-text-link)" />}
               href="sitewide-message"
               h="full"
             />
@@ -31,7 +31,7 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               title={t(`${i18nPrefix}.adminUserIndex.title`)}
               description={t(`${i18nPrefix}.adminUserIndex.description`)}
               linkText={t("ui.edit")}
-              icon={<Users size="24px" color="--var(chakra-colors-text-primary)" />}
+              icon={<Users size="24px" color="var(--chakra-colors-text-link)" />}
               href="users"
               h="full"
             />
@@ -41,8 +41,18 @@ export const SiteConfigurationManagementScreen = observer(function SiteConfigura
               title={t(`${i18nPrefix}.helpDrawerSetup.title`)}
               description={t(`${i18nPrefix}.helpDrawerSetup.description`)}
               linkText={t("ui.edit")}
-              icon={<Question size="24px" color="--var(chakra-colors-text-primary)" />}
+              icon={<Question size="24px" color="var(--chakra-colors-text-link)" />}
               href="help-drawer-setup"
+              h="full"
+            />
+          </GridItem>
+          <GridItem>
+            <HomeScreenBox
+              title={t(`${i18nPrefix}.revisionReasonsAttributesSetup.title`)}
+              description={t(`${i18nPrefix}.revisionReasonsAttributesSetup.description`)}
+              linkText={t("ui.edit")}
+              icon={<NotePencil size="24px" color="var(--chakra-colors-text-link)" />}
+              href="revision-reason-setup"
               h="full"
             />
           </GridItem>

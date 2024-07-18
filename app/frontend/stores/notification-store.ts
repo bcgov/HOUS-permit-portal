@@ -19,6 +19,9 @@ export const NotificationStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .views((self) => ({
+    getSemanticKey(notification: INotification) {
+      return criticalNotificationTypes.includes(notification.actionType) ? "warning" : "info"
+    },
     get anyUnread() {
       return self.unreadNotificationsCount > 0
     },
@@ -27,6 +30,11 @@ export const NotificationStoreModel = types
     },
     get hasMorePages() {
       return self.totalPages > self.page
+    },
+    get criticalNotifications() {
+      return self.notifications
+        ?.slice(0, self.unreadNotificationsCount)
+        .filter((n) => criticalNotificationTypes.includes(n.actionType))
     },
     generateSpecificLinkData(notification: INotification): ILinkData[] {
       const currentUser = self.rootStore.userStore.currentUser
@@ -79,8 +87,17 @@ export const NotificationStoreModel = types
             href: `/api-settings/api-mappings/digital-building-permits/${objectData.templateVersionId}/edit`,
           },
         ]
-      } else {
-        return []
+      } else if (
+        notification.actionType === ENotificationActionType.applicationSubmission ||
+        notification.actionType === ENotificationActionType.applicationRevisionsRequest ||
+        notification.actionType === ENotificationActionType.applicationView
+      ) {
+        return [
+          {
+            text: t("ui.show"),
+            href: `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`,
+          },
+        ]
       }
     },
   }))
@@ -143,5 +160,7 @@ export const NotificationStoreModel = types
       self.totalPages = payload.meta.totalPages
     }),
   }))
+
+const criticalNotificationTypes = [ENotificationActionType.applicationRevisionsRequest]
 
 export interface INotificationStore extends Instance<typeof NotificationStoreModel> {}

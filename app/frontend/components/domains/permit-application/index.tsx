@@ -8,7 +8,7 @@ import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
 import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EPermitApplicationStatus, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
+import { EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -35,6 +35,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     handlePageChange,
     isSearching,
     statusFilter,
+    statusFilterToGroup,
     hasResetableFilters,
   } = permitApplicationStore
 
@@ -61,7 +62,10 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             justify="space-between"
             direction={{ base: "column", md: "row" }}
           >
-            <Heading as="h2">{t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.draft}`)}</Heading>
+            <Heading as="h2">
+              {/* @ts-ignore */}
+              {t(`permitApplication.statusGroup.${statusFilterToGroup || EPermitApplicationStatusGroup.draft}`)}
+            </Heading>
             <Flex align="flex-end" gap={4}>
               {hasResetableFilters && (
                 <Button variant="link" mb={2} onClick={resetQueryParams}>

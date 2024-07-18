@@ -12,10 +12,17 @@ import {
   IFormJson,
   IPermitApplicationSupportingDocumentsUpdate,
   ISubmissionData,
+  ISubmissionVersion,
   ITemplateCustomization,
   ITemplateVersionDiff,
 } from "../types/types"
-import { combineComplianceHints, combineDiff } from "../utils/formio-component-traversal"
+import {
+  combineComplianceHints,
+  combineDiff,
+  combineRevisionAnnotations,
+  combineRevisionButtons,
+} from "../utils/formio-component-traversal"
+
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IRequirement } from "./requirement"
@@ -43,7 +50,8 @@ export const PermitApplicationModel = types
     formattedComplianceData: types.maybeNull(types.frozen()),
     formCustomizations: types.maybeNull(types.frozen<ITemplateCustomization>()),
     submittedAt: types.maybeNull(types.Date),
-    viewedAt: types.maybeNull(types.Date),
+    resubmittedAt: types.maybeNull(types.Date),
+    revisionsRequestedAt: types.maybeNull(types.Date),
     selectedTabIndex: types.optional(types.number, 0),
     createdAt: types.Date,
     updatedAt: types.Date,
@@ -59,10 +67,39 @@ export const PermitApplicationModel = types
     isLoading: types.optional(types.boolean, false),
     indexedUsingCurrentTemplateVersion: types.maybeNull(types.boolean),
     showingCompareAfter: types.optional(types.boolean, false),
+    revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
+    latestSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
+  .views((self) => ({
+    get isDraft() {
+      return (
+        self.status === EPermitApplicationStatus.newDraft || self.status === EPermitApplicationStatus.revisionsRequested
+      )
+    },
+    get isSubmitted() {
+      return (
+        self.status === EPermitApplicationStatus.newlySubmitted || self.status === EPermitApplicationStatus.resubmitted
+      )
+    },
+    get isRevisionsRequested() {
+      return self.status === EPermitApplicationStatus.revisionsRequested
+    },
+    get isResubmitted() {
+      return self.status === EPermitApplicationStatus.resubmitted
+    },
+    get isViewed() {
+      return self.latestSubmissionVersion?.viewedAt
+    },
+    get viewedAt() {
+      return self.latestSubmissionVersion?.viewedAt
+    },
+    get revisionRequests() {
+      return self.latestSubmissionVersion?.revisionRequests || []
+    },
+  }))
   .views((self) => ({
     get usingCurrentTemplateVersion() {
       if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
@@ -83,29 +120,26 @@ export const PermitApplicationModel = types
         .filter((outNull) => outNull)
     },
     get formattedFormJson() {
+      const clonedFormJson = R.clone(self.formJson)
+      const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.revisionRequests)
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
       const complianceHintedFormJson = combineComplianceHints(
-        self.formJson,
+        revisionAnnotatedFormJson,
         self.formCustomizations,
         self.formattedComplianceData
       )
       const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
-      return diffColoredFormJson
+      const revisionModeFormJson =
+        self.revisionMode || self.isRevisionsRequested
+          ? combineRevisionButtons(diffColoredFormJson, self.revisionMode)
+          : diffColoredFormJson
+      return revisionModeFormJson
     },
     sectionKey(sectionId) {
       return `section${sectionId}`
     },
     blockKey(sectionId, blockId) {
       return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
-    },
-    get isSubmitted() {
-      return self.status === EPermitApplicationStatus.submitted
-    },
-    get isDraft() {
-      return self.status === EPermitApplicationStatus.draft
-    },
-    get isViewed() {
-      return self.viewedAt !== null
     },
     get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
       if (!self.diff) return null
@@ -127,6 +161,9 @@ export const PermitApplicationModel = types
     },
   }))
   .actions((self) => ({
+    setRevisionMode(revisionMode: boolean) {
+      self.revisionMode = revisionMode
+    },
     setIsDirty(isDirty: boolean) {
       self.isDirty = isDirty
     },
@@ -142,15 +179,11 @@ export const PermitApplicationModel = types
     get shouldShowNewVersionWarning() {
       return !self.usingCurrentTemplateVersion && self.isDraft
     },
-    get formDiffKey() {
-      return R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`
-    },
-    get statusTagText() {
-      if (self.status === EPermitApplicationStatus.submitted && self.isViewed) {
-        return t("permitApplication.viewed")
-      }
-
-      return self.status
+    get formFormatKey() {
+      return (
+        (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
+        (self.revisionMode ? "-revision" : "")
+      )
     },
     indexOfBlockId: (blockId: string) => {
       if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
@@ -321,6 +354,20 @@ export const PermitApplicationModel = types
       self.isLoading = false
       return response
     }),
+    updateRevisionRequests: flow(function* (params) {
+      self.isLoading = true
+      const response = yield self.environment.api.updateRevisionRequests(self.id, params)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+
+        self.rootStore.permitApplicationStore.mergeUpdate(
+          { ...permitApplication, revisionMode: true },
+          "permitApplicationMap"
+        )
+      }
+      self.isLoading = false
+      return response
+    }),
     fetchDiff: flow(function* () {
       const diffData = yield self.publishedTemplateVersion.fetchTemplateVersionCompare(self.templateVersion.id)
       self.diff = diffData.data
@@ -346,12 +393,22 @@ export const PermitApplicationModel = types
       }
       return response.ok
     }),
-
+    finalizeRevisionRequests: flow(function* () {
+      const response = yield self.environment.api.finalizeRevisionRequests(self.id)
+      if (response.ok) {
+        const { data: permitApplication } = response.data
+        self.rootStore.permitApplicationStore.mergeUpdate(
+          { revisionMode: true, ...permitApplication },
+          "permitApplicationMap"
+        )
+      }
+      return response.ok
+    }),
     markAsViewed: flow(function* () {
       const response = yield self.environment.api.viewPermitApplication(self.id)
       if (response.ok) {
         const { data: permitApplication } = response.data
-        self.viewedAt = permitApplication.viewedAt
+        self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
       }
       return response.ok
     }),
@@ -391,5 +448,18 @@ export const PermitApplicationModel = types
       self.zipfileUrl = data.zipfileUrl
     },
   }))
+
+export const reasonCodes = [
+  "non_compliant",
+  "conflicting_inaccurate",
+  "insufficient_detail",
+  "incorrect_format",
+  "missing_documentation",
+  "outdated",
+  "inapplicable",
+  "missing_signatures",
+  "incorrect_calculations",
+  "other",
+]
 
 export interface IPermitApplication extends Instance<typeof PermitApplicationModel> {}

@@ -5,6 +5,16 @@ Rails.application.configure do
   config.after_initialize do
     config.action_cable.url =
       ActionCable.server.config.url = ENV.fetch("ANYCABLE_URL", "ws://localhost:8080/cable") if AnyCable::Rails.enabled?
+
+    Bullet.enable = true
+    Bullet.bullet_logger = true # Log to the Bullet log file (Rails.root/log/bullet.log)
+    Bullet.console = true # Log warnings to the browser's console.log
+    Bullet.rails_logger = true # Add warnings to the Rails log
+
+    # Optional: Enable these settings to fine-tune Bullet's behavior
+    # Bullet.n_plus_one_query_enable = true
+    # Bullet.unused_eager_loading_enable = true
+    # Bullet.counter_cache_enable = true
   end
   # Settings specified here will take precedence over those in config/application.rb.
 
