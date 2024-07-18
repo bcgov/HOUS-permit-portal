@@ -85,6 +85,12 @@ export const PermitApplicationStoreModel = types
           self.rootStore.templateVersionStore.mergeUpdate(pad.templateVersion, "templateVersionMap")
         pad.publishedTemplateVersion &&
           self.rootStore.templateVersionStore.mergeUpdate(pad.publishedTemplateVersion, "templateVersionMap")
+        pad.permitCollaborations &&
+          self.rootStore.collaboratorStore.mergeUpdateAll(
+            // @ts-ignore
+            R.map(R.prop("collaborator"), pad.permitCollaborations),
+            "collaboratorMap"
+          )
       }
 
       return R.mergeRight(pad, {
@@ -132,6 +138,18 @@ export const PermitApplicationStoreModel = types
           permitApplicationsData.map((pa) => pa.stepCode)
         ),
         "stepCodesMap"
+      )
+
+      self.rootStore.collaboratorStore.mergeUpdateAll(
+        // @ts-ignore
+        R.pipe(
+          R.map(R.prop("permitCollaborations")),
+          R.reject(R.isNil),
+          R.flatten,
+          R.map(R.prop("collaborator")),
+          R.uniqBy((c) => c.id)
+        )(permitApplicationsData),
+        "collaboratorMap"
       )
 
       // Already merged associations here.

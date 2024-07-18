@@ -10,6 +10,7 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
+import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
@@ -35,6 +36,7 @@ import {
   IUsersResponse,
 } from "../../types/api-responses"
 import {
+  ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
@@ -268,6 +270,22 @@ export class Api {
 
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
+  }
+
+  async assignCollaboratorToPermitApplication(
+    permitApplicationId: string,
+    params: {
+      collaboratorId: string
+      collaboratorType: ECollaboratorType
+      assignedRequirementBlockId?: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations`,
+      {
+        permitCollaboration: params,
+      }
+    )
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {

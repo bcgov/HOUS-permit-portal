@@ -13,7 +13,7 @@ class PermitCollaboration < ApplicationRecord
             }
   validates :collaboration_type, presence: true
   validates :collaborator_type, presence: true
-  validates :assigned_requirement_block_id, presence: true, if: assignee?
+  validates :assigned_requirement_block_id, presence: true, if: -> { assignee? }
 
   validate :validate_delegatee, on: :create
   validate :validate_requirement_block_id, on: :create # only needs to validate on create as the requirement block can be deleted after assignment due to new template versions

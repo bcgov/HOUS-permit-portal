@@ -15,13 +15,30 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
+import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import { ECollaborationType, ECollaboratorType } from "../../../types/enums"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
 
-export const CollaboratorAssignmentPopover = observer(function AssignmentPopover() {
+interface IProps {
+  permitApplication: IPermitApplication
+  collaborationType: ECollaborationType
+  requirementBlockId: string
+}
+
+export const CollaboratorAssignmentPopover = observer(function AssignmentPopover({
+  permitApplication,
+  collaborationType,
+  requirementBlockId,
+}: IProps) {
   const { collaboratorStore } = useMst()
   const { collaboratorSearchList } = collaboratorStore
+  const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(
+    collaborationType,
+    requirementBlockId
+  )
+  const existingCollaboratorIds = new Set<string>(existingAssignments.map((a) => a.collaborator.id))
 
   return (
     <Popover placement={"bottom-start"}>
@@ -30,26 +47,40 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
           onClick={(e) => {
             e.stopPropagation()
           }}
+          onKeyDown={(e) => {
+            e.stopPropagation()
+          }}
           leftIcon={<Users />}
           variant={"link"}
         >
           <Text as={"span"} textDecoration={"underline"}>
-            Assign
+            Assign ({existingAssignments.length})
           </Text>
         </Button>
       </PopoverTrigger>
       <Portal>
         <PopoverContent w={"370px"} maxW={"370px"}>
-          <CollaboratorSearch />
+          <CollaboratorSearch
+            onSelect={(collaboratorId) =>
+              permitApplication.assignCollaborator(collaboratorId, ECollaboratorType.assignee, requirementBlockId)
+            }
+            takenCollaboratorIds={existingCollaboratorIds}
+          />
         </PopoverContent>
       </Portal>
     </Popover>
   )
 })
 
-const CollaboratorSearch = observer(function CollaboratorSearch() {
+const CollaboratorSearch = observer(function CollaboratorSearch({
+  onSelect,
+  takenCollaboratorIds = new Set<string>(),
+}: {
+  onSelect?: (collaboratorId?: string) => void | Promise<void>
+  takenCollaboratorIds?: Set<string>
+}) {
   const { collaboratorStore } = useMst()
-  const { collaboratorSearchList } = collaboratorStore
+  const collaboratorSearchList = collaboratorStore.getFilteredCollaborationSearchList(takenCollaboratorIds)
   const { t } = useTranslation()
   const { isOpen } = usePopoverContext()
 
@@ -83,6 +114,8 @@ const CollaboratorSearch = observer(function CollaboratorSearch() {
               >
                 {collaborator.user?.name}
                 <ConfirmationModal
+                  title={"Some title"}
+                  body={"Some body that I used to know"}
                   triggerText={t("ui.proceed")}
                   renderTriggerButton={(props) => (
                     <Button
@@ -96,6 +129,10 @@ const CollaboratorSearch = observer(function CollaboratorSearch() {
                       {t("ui.select")}{" "}
                     </Button>
                   )}
+                  onConfirm={(onClose) => {
+                    onSelect?.(collaborator.id)
+                    onClose()
+                  }}
                 />
               </Text>
             )

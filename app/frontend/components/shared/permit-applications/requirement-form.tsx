@@ -236,8 +236,6 @@ export const RequirementForm = observer(
     }
 
     const onChange = (changedEvent) => {
-      // console.log("xyd change", document.querySelectorAll('[ref="header"]'))
-
       //in the case of a multi select box, there is a change but no onblur bubbled up
       if (changedEvent?.changed?.component?.type == "selectboxes") {
         if (onCompletedBlocksChange) {
@@ -380,7 +378,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-                                                                                                                                                                                                                                                                                                                                                can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                            can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}

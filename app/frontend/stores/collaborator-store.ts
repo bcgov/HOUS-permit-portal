@@ -25,6 +25,9 @@ export const CollaboratorStoreModel = types
     getCollaboratorById(id: string) {
       return self.collaboratorMap.get(id)
     },
+    getFilteredCollaborationSearchList(takenCollaboratorIds: Set<string>) {
+      return self.collaboratorSearchList.filter((c) => !takenCollaboratorIds.has(c.id))
+    },
   }))
   .actions((self) => ({
     __beforeMergeUpdate(collaboratorData) {
@@ -37,9 +40,7 @@ export const CollaboratorStoreModel = types
         collaboratorData.user && self.rootStore.userStore.mergeUpdate(collaboratorData.user, "usersMap")
       }
 
-      return R.mergeRight(collaboratorData, {
-        user: collaboratorData.user?.id,
-      })
+      return collaboratorData
     },
     __beforeMergeUpdateAll(collaboratorsData) {
       //find all unique jurisdictions
@@ -100,7 +101,6 @@ export const CollaboratorStoreModel = types
       const response = yield self.environment.api.fetchCollaboratorsByCollaboratorable(currentUser.id, searchParams)
 
       if (response.ok) {
-        console.log("xyd", response.data.data)
         self.mergeUpdateAll(response.data.data, "collaboratorMap")
         self.setCollaboratorSearchList(response.data.data)
 

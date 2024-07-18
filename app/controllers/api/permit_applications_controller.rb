@@ -158,9 +158,12 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def create_permit_collaboration
+    # binding.pry
     @permit_collaboration =
       PermitApplication::CollaborationManagementService.new(@permit_application).build_permit_collaboration(
-        *permit_collaboration_params,
+        collaborator_id: permit_collaboration_params[:collaborator_id],
+        collaborator_type: permit_collaboration_params[:collaborator_type],
+        assigned_requirement_block_id: permit_collaboration_params[:assigned_requirement_block_id],
       )
 
     authorize @permit_collaboration, policy_class: PermitApplicationPolicy

@@ -3,8 +3,8 @@ import {
   Button,
   Divider,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Spacer,
   Stack,
   Text,
@@ -24,7 +24,7 @@ import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { ICustomEventMap } from "../../../types/dom"
-import { ECustomEvents, ERequirementType } from "../../../types/enums"
+import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -424,15 +424,29 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
-      {accordionPanelNodes.map((node) => {
-        const titleNode = node.querySelector(".card-title")
-        return createPortal(
-          <HStack mr={6}>
-            <CollaboratorAssignmentPopover />
-          </HStack>,
-          titleNode
+      {accordionPanelNodes
+        .filter(
+          (node) =>
+            node.querySelector(".card-title") &&
+            Array.from(node.classList).find((c) => c.startsWith("formio-component-formSubmissionDataRSTsection"))
         )
-      })}
+        .map((node) => {
+          const titleNode = node.querySelector(".card-title")
+          const requirementBlockId = Array.from(node.classList)
+            .find((c) => c.startsWith("formio-component-formSubmissionDataRSTsection"))
+            .split("|RB")
+            .at(-1)
+          return createPortal(
+            <HStack mr={6}>
+              <CollaboratorAssignmentPopover
+                permitApplication={currentPermitApplication}
+                collaborationType={ECollaborationType.submission}
+                requirementBlockId={requirementBlockId}
+              />
+            </HStack>,
+            titleNode
+          )
+        })}
     </Box>
   )
 
