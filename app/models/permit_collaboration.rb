@@ -17,11 +17,23 @@ class PermitCollaboration < ApplicationRecord
 
   validate :validate_delegatee, on: :create
   validate :validate_requirement_block_id, on: :create # only needs to validate on create as the requirement block can be deleted after assignment due to new template versions
+  validate :validate_author_not_collaborator
+  validate :validate_review_collaborator
 
   private
 
-  # @todo: validate author not collaborator
   def validate_author_not_collaborator
+    return unless submission?
+
+    errors.add(:collaborator, :cannot_be_author) if collaborator.user == permit_application.submitter
+  end
+
+  def validate_review_collaborator
+    return unless review?
+
+    unless collaborator.user.jurisdictions.find_by(id: permit_application.jurisdiction_id).present?
+      errors.add(:collaborator, :must_be_same_jurisdiction)
+    end
   end
 
   def validate_requirement_block_id

@@ -91,7 +91,15 @@ en:
             base:
               delegatee_already_exits: "There can only be one delegatee for a permit application"
             assigned_requirement_block_id:
-              does_not_exist: "Requirement block does not exist in the permit application"
+              does_not_exist: "does not exist in the permit application"
+            collaborator:
+              cannot_be_author: "cannot be the author of the permit application"
+              must_be_same_jurisdiction: "must be of the same jurisdiction as the permit application"
+        collaborator:
+          attributes:
+            user:
+              incorrect_jurisdiction: "must be from the same jurisdiction as the permit application for review collaboration"
+              incorrect_user: "cannot be the same as the requester for submission collaboration"
   application_mailer:
     subject_start: "Building Permit Hub"
     subjects:
