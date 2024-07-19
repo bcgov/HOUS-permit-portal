@@ -313,6 +313,8 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+  openRequestRevision = "openRequestRevision",
+  openPreviousSubmission = "openPreviousSubmission",
 }
 
 export enum EExportFormat {

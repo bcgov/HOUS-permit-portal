@@ -185,29 +185,69 @@ const convertToRevisionButton = (requirement: IFormIORequirement) => {
     custom: `document.dispatchEvent(new CustomEvent('openRequestRevision', { detail: { key: '${requirement.key}' } } ));`,
     customClass: "revision-button",
     hideLabel: true,
+    persistent: "client-only",
     customConditional: requirement.customConditional,
     conditional: requirement.conditional,
   } as IFormIORequirement
 }
 
-export const combineRevisionButtons = (formJson: IFormJson, disableAllRequirements?: boolean): IFormJson => {
+const convertToChangeMarker = (requirement: IFormIORequirement) => {
+  return {
+    id: requirement.id + "-submission-change-marker",
+    key: requirement.key + "-submission-change-marker",
+    type: "button",
+    label: "",
+    title: "ANSWER CHANGED",
+    input: true,
+    action: "custom",
+    custom: `document.dispatchEvent(new CustomEvent('openPreviousSubmission', { detail: { key: '${requirement.key}' } } ));`,
+    customClass: "submission-change-marker",
+    hideLabel: true,
+    persistent: "client-only",
+    // customConditional: `${requirement.customConditional}; show = true;`,
+    customConditional: `show = true;`,
+    conditional: requirement.conditional,
+  } as IFormIORequirement
+}
+
+export const combineRevisionButtons = (
+  formJson: IFormJson,
+  isInReview: boolean,
+  revisionRequests?: IRevisionRequest[]
+): IFormJson => {
+  const revisionRequestRequirementKeys = revisionRequests?.map((rr) => rr.requirementJson.key) || []
   formJson.components.forEach((section: IFormIOSection) => {
     section.components.forEach((block: IFormIOBlock) => {
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
-        if (section.id === COMPLETTION_SECTION_ID) {
-          requirement.disabled = disableAllRequirements
-        } else {
-          requirement.disabled = disableAllRequirements
+        if (section.id === COMPLETTION_SECTION_ID) continue
 
+        if (revisionRequestRequirementKeys.includes(requirement.key) || isInReview) {
           const revisionButton = convertToRevisionButton(requirement)
-
           // Insert the revision button before the current requirement
           block.components.splice(i, 0, revisionButton)
-
           // Move the index to the next requirement to skip the newly added revision button
           i++
         }
+      }
+    })
+  })
+  return formJson
+}
+
+export const combineChangeMarkers = (formJson: IFormJson, isInReview: boolean, changedKeys: string[]): IFormJson => {
+  formJson.components.forEach((section: IFormIOSection) => {
+    section.components.forEach((block: IFormIOBlock) => {
+      for (let i = 0; i < block.components.length; i++) {
+        const requirement = block.components[i]
+        requirement.disabled = isInReview
+        if (section.id === COMPLETTION_SECTION_ID || !changedKeys.includes(requirement.key)) continue
+
+        const changeMarker = convertToChangeMarker(requirement)
+        // Insert the revision button before the current requirement
+        block.components.splice(i, 0, changeMarker)
+        // Move the index to the next requirement to skip the newly added marker
+        i++
       }
     })
   })

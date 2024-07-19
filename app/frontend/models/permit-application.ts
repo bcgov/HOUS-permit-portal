@@ -17,12 +17,15 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import {
+  combineChangeMarkers,
   combineComplianceHints,
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
 } from "../utils/formio-component-traversal"
 
+import { format } from "date-fns"
+import { compareSubmissionData } from "../utils/formio-helpers"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IRequirement } from "./requirement"
@@ -69,7 +72,9 @@ export const PermitApplicationModel = types
     showingCompareAfter: types.optional(types.boolean, false),
     revisionMode: types.optional(types.boolean, false),
     diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
-    latestSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
+    submissionVersions: types.array(types.frozen<ISubmissionVersion>()),
+    selectedPastSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
+    isViewingPastRequests: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -90,17 +95,56 @@ export const PermitApplicationModel = types
     get isResubmitted() {
       return self.status === EPermitApplicationStatus.resubmitted
     },
+    get sortedSubmissionVersions() {
+      return self.submissionVersions.slice().sort((a, b) => b.createdAt - a.createdAt)
+    },
+  }))
+  .views((self) => ({
+    get latestSubmissionVersion() {
+      if (self.submissionVersions?.length === 0) {
+        return null
+      }
+      return self.sortedSubmissionVersions[0]
+    },
+  }))
+  .views((self) => ({
+    get previousSubmissionVersion() {
+      if (self.submissionVersions.length <= 1) {
+        return null
+      }
+      return self.sortedSubmissionVersions[1]
+    },
+    get previousToSelectedSubmissionVersion() {
+      if (!self.selectedPastSubmissionVersion) return null
+
+      // Find the index of the selected version
+      const selectedIndex = self.sortedSubmissionVersions.findIndex(
+        (version) => version.createdAt === self.selectedPastSubmissionVersion?.createdAt
+      )
+
+      // Return the previous version if it exists
+      return selectedIndex > 0 ? self.sortedSubmissionVersions[selectedIndex - 1] : null
+    },
+    get latestRevisionRequests() {
+      return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
+    },
+  }))
+  .views((self) => ({
+    get pastSubmissionVersionOptions() {
+      const latestVersion = self.latestSubmissionVersion
+      return self.submissionVersions
+        .filter((submissionVersion) => submissionVersion.id !== latestVersion?.id)
+        .map((submissionVersion) => ({
+          label: format(submissionVersion.createdAt, "MMMM d, yyyy 'at' h:mma"),
+          value: submissionVersion,
+        }))
+    },
     get isViewed() {
       return self.latestSubmissionVersion?.viewedAt
     },
     get viewedAt() {
       return self.latestSubmissionVersion?.viewedAt
     },
-    get revisionRequests() {
-      return self.latestSubmissionVersion?.revisionRequests || []
-    },
-  }))
-  .views((self) => ({
     get usingCurrentTemplateVersion() {
       if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
       return self.indexedUsingCurrentTemplateVersion
@@ -121,7 +165,7 @@ export const PermitApplicationModel = types
     },
     get formattedFormJson() {
       const clonedFormJson = R.clone(self.formJson)
-      const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.revisionRequests)
+      const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.latestRevisionRequests)
       //merge the formattedComliance data.  This should trigger a form redraw when it is updated
       const complianceHintedFormJson = combineComplianceHints(
         revisionAnnotatedFormJson,
@@ -129,10 +173,30 @@ export const PermitApplicationModel = types
         self.formattedComplianceData
       )
       const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+
+      const revisionRequestsToUse = self.isViewingPastRequests
+        ? self.selectedPastSubmissionVersion?.revisionRequests
+        : self.latestRevisionRequests
+
+      let changedKeys = []
+      if (self.isViewingPastRequests && self.selectedPastSubmissionVersion) {
+        changedKeys = compareSubmissionData(
+          self.previousToSelectedSubmissionVersion?.submissionData,
+          self.selectedPastSubmissionVersion?.submissionData
+        )
+      } else if (self.previousSubmissionVersion) {
+        changedKeys = compareSubmissionData(
+          self.previousSubmissionVersion.submissionData,
+          self.latestSubmissionVersion.submissionData
+        )
+      }
+      const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, self.isSubmitted, changedKeys)
+
       const revisionModeFormJson =
         self.revisionMode || self.isRevisionsRequested
-          ? combineRevisionButtons(diffColoredFormJson, self.revisionMode)
+          ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
           : diffColoredFormJson
+
       return revisionModeFormJson
     },
     sectionKey(sectionId) {
@@ -164,6 +228,12 @@ export const PermitApplicationModel = types
     setRevisionMode(revisionMode: boolean) {
       self.revisionMode = revisionMode
     },
+    setSelectedPastSubmissionVersion(submissionVersion: ISubmissionVersion) {
+      self.selectedPastSubmissionVersion = submissionVersion
+    },
+    setIsViewingPastRequests(isViewingPastRequests: boolean) {
+      self.isViewingPastRequests = isViewingPastRequests
+    },
     setIsDirty(isDirty: boolean) {
       self.isDirty = isDirty
     },
@@ -182,7 +252,11 @@ export const PermitApplicationModel = types
     get formFormatKey() {
       return (
         (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
-        (self.revisionMode ? "-revision" : "")
+        (self.revisionMode ? "-revision" : "") +
+        (self.selectedPastSubmissionVersion
+          ? `-past-submission-version-${self.selectedPastSubmissionVersion.id}`
+          : "") +
+        (self.isViewingPastRequests ? "-past-requests" : "")
       )
     },
     indexOfBlockId: (blockId: string) => {
