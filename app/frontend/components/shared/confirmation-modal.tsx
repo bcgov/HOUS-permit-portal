@@ -6,9 +6,11 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalContentProps,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  ModalProps,
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
@@ -21,7 +23,9 @@ export interface IConfirmationModalProps {
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   title?: string
   body?: string
-  onConfirm?: (closeModal: () => void) => void
+  onConfirm?: (closeModal: () => void) => void | Promise<void>
+  modalProps?: Partial<ModalProps>
+  modalContentProps?: Partial<ModalContentProps>
 }
 
 export const ConfirmationModal = observer(function ConfirmationModal({
@@ -31,6 +35,8 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   title,
   body,
   onConfirm,
+  modalProps,
+  modalContentProps,
 }: IConfirmationModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
@@ -44,9 +50,9 @@ export const ConfirmationModal = observer(function ConfirmationModal({
           {triggerText ?? t("ui.confirm")}
         </Button>
       )}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} {...modalProps}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent {...modalContentProps}>
           {title && (
             <ModalHeader fontSize={"2xl"} mt={2}>
               {title}

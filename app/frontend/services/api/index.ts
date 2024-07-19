@@ -288,6 +288,10 @@ export class Api {
     )
   }
 
+  async unassignPermitCollaboration(id: string) {
+    return this.client.delete<ApiResponse<IPermitCollaboration>>(`/permit_collaborations/${id}`)
+  }
+
   async generatePermitApplicationMissingPdfs(id: string) {
     return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
   }

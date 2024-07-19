@@ -533,6 +533,14 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const response = yield self.environment.api.generatePermitApplicationMissingPdfs(self.id)
         return response.ok
       }),
+
+      unassignPermitCollaboration: flow(function* (collaborationId: string) {
+        const response = yield self.environment.api.unassignPermitCollaboration(collaborationId)
+        if (response.ok) {
+          self.permitCollaborationMap.delete(collaborationId)
+        }
+        return response
+      }),
     }))
     .actions((self) => ({
       handleSocketSupportingDocsUpdate: (data: IPermitApplicationSupportingDocumentsUpdate) => {

@@ -353,12 +353,15 @@ const options = {
         },
         permitCollaboration: {
           popover: {
+            triggerButton: "Assign ({{count}})",
             collaborations: {
               title: "Collaborators",
               assignButton: "Assign",
+              unassignButton: "Unassign",
             },
             assignment: {
               title: "Assign collaborator",
+              noneAssigned: "None assigned",
               inviteWarning: {
                 title: "Assign a collaborator?",
                 body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
