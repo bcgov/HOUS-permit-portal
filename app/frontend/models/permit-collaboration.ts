@@ -9,6 +9,8 @@ export const PermitCollaborationModel = types.snapshotProcessor(
     collaboratorType: types.enumeration(Object.values(ECollaboratorType)),
     assignedRequirementBlockId: types.maybeNull(types.string),
     collaborator: types.reference(types.late(() => CollaboratorModel)),
+    createdAt: types.Date,
+    updatedAt: types.Date,
   }),
   {
     preProcessor(snapshot: any) {

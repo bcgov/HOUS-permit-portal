@@ -20,6 +20,10 @@ class PermitCollaboration < ApplicationRecord
 
   private
 
+  # @todo: validate author not collaborator
+  def validate_author_not_collaborator
+  end
+
   def validate_requirement_block_id
     return unless assignee?
 

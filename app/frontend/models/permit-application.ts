@@ -113,9 +113,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       getCollaborationsByType(collaborationType: ECollaborationType) {
-        return Array.from(self.permitCollaborationMap.values()).filter(
-          (collaboration) => collaboration.collaborationType === collaborationType
-        )
+        return R.pipe(
+          Array.from<IPermitCollaboration>,
+          R.filter(R.propEq(collaborationType, "collaborationType")),
+          mutableSortPermitCollaborations
+        )(self.permitCollaborationMap.values())
       },
     }))
     .views((self) => ({
@@ -569,5 +571,11 @@ export const reasonCodes = [
   "incorrect_calculations",
   "other",
 ]
+
+function mutableSortPermitCollaborations(permitCollaborations: IPermitCollaboration[]) {
+  return permitCollaborations.sort((a, b) => {
+    return b.createdAt.getTime() - a.createdAt.getTime()
+  })
+}
 
 export interface IPermitApplication extends Instance<typeof PermitApplicationModel> {}
