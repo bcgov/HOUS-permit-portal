@@ -32,6 +32,7 @@ class Jurisdiction < ApplicationRecord
   before_save :sanitize_html_fields
 
   after_save :create_integration_mappings_async, if: :saved_change_to_external_api_enabled?
+  after_create :create_permit_type_required_steps
 
   accepts_nested_attributes_for :contacts
   accepts_nested_attributes_for :permit_type_submission_contacts,
@@ -191,6 +192,17 @@ class Jurisdiction < ApplicationRecord
       ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
     else
       ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
+    end
+  end
+
+  def create_permit_type_required_steps
+    PermitType.all.each do |permit_type|
+      permit_type_required_steps.create(
+        permit_type:,
+        energy_step_required: ENV["MIN_ENERGY_STEP"],
+        zero_carbon_step_required: ENV["MIN_ZERO_CARBON_STEP"],
+        default: true,
+      )
     end
   end
 
