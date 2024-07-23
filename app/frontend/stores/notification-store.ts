@@ -55,8 +55,8 @@ export const NotificationStoreModel = types
         ]
         if (currentUser.isManager) {
           linkData.push({
-            text: t("permitApplication.reviewOutdatedEditLink"),
-            href: `/digital-building-permits/${objectData.previousTemplateVersionId}/edit?compare=true`,
+            text: t("permitApplication.reviewUpdatedEditLink"),
+            href: `/digital-building-permits/${objectData.templateVersionId}/edit?compare=true`,
           })
         }
 

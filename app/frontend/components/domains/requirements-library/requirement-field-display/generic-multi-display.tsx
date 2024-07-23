@@ -1,35 +1,44 @@
-import { Box, BoxProps, Button, FormControl, FormLabel, Heading, HeadingProps, Switch } from "@chakra-ui/react"
+import { Box, BoxProps, Button, Heading, HeadingProps } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import React from "react"
 import { FieldValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { getRequirementTypeLabel } from "../../../../constants"
-import { ERequirementContactFieldItemType } from "../../../../types/enums"
-import { ContactFieldItemDisplay } from "./contact-field-item-display"
+import { ERequirementType } from "../../../../types/enums"
+import { TEditableHelperTextProps } from "../requirement-field-edit/editable-helper-text"
+import { TEditableLabelProps } from "../requirement-field-edit/editable-label"
+import { GenericFieldItemDisplay } from "./generic-field-item-display"
 import { TRequirementFieldDisplayProps } from "./index"
 
-export type TGenericContactDisplayProps<TFieldValues extends FieldValues> = {
-  contactFieldItems: Array<{
-    type: ERequirementContactFieldItemType
+export type TGenericDisplayProps<TFieldValues extends FieldValues> = {
+  fieldItems: Array<{
+    type: ERequirementType
+    key: string
+    label: string
     containerProps?: BoxProps
   }>
   containerProps?: BoxProps
+  editableInput?: JSX.Element
+  editableLabelProps?: TEditableLabelProps<TFieldValues>
+  editableHelperTextProps?: TEditableHelperTextProps<TFieldValues>
+  addAnotherText?: string
   renderHeading?: () => JSX.Element
 } & TRequirementFieldDisplayProps
 
-export function GenericContactDisplay<TFieldValues>({
-  contactFieldItems,
+//This is a generic multi-display, it makes the assumption that this is additional info and is NOT ever required.
+export function GenericMultiDisplay<TFieldValues>({
+  fieldItems,
   label,
   labelProps,
   showAddLabelIndicator,
-  requirementType,
-  containerProps,
   renderHeading,
-  addMultipleContactProps,
+  containerProps,
   showAddButton,
-  required,
-}: TGenericContactDisplayProps<TFieldValues>) {
+  requirementType,
+  addAnotherText,
+}: TGenericDisplayProps<TFieldValues>) {
   const { t } = useTranslation()
+
   return (
     <Box>
       <Box
@@ -38,7 +47,7 @@ export function GenericContactDisplay<TFieldValues>({
         borderRadius={"sm"}
         border={"1px solid"}
         borderColor={"border.light"}
-        borderBottomRadius={addMultipleContactProps?.shouldRender ? "none" : undefined}
+        borderBottomRadius={"none"}
         px={4}
         py={3}
         {...containerProps}
@@ -58,8 +67,9 @@ export function GenericContactDisplay<TFieldValues>({
                 : getRequirementTypeLabel(requirementType))}
           </Heading>
         )}
+
         <Box w={"full"} display={"grid"} gridTemplateColumns={"repeat(2, calc(50% - 0.75rem))"} gap={"1rem 1.5rem"}>
-          {contactFieldItems.map(({ type, containerProps }) => (
+          {fieldItems.map(({ type, key, label, required, containerProps }) => (
             <Box
               key={type}
               sx={{
@@ -72,41 +82,11 @@ export function GenericContactDisplay<TFieldValues>({
               }}
               {...containerProps}
             >
-              <ContactFieldItemDisplay required={required} contactFieldItemType={type} />
+              <GenericFieldItemDisplay type={type} label={label} required={required} />
             </Box>
           ))}
         </Box>
       </Box>
-
-      {addMultipleContactProps?.shouldRender && (
-        <FormControl
-          bg={"greys.grey04"}
-          border={"1px solid"}
-          borderColor={"border.light"}
-          borderBottomRadius={"sm"}
-          borderTop={"none"}
-          w={"full"}
-          px={4}
-          py={3}
-          display="flex"
-          alignItems="center"
-          justifyContent={"space-between"}
-          {...addMultipleContactProps?.formControlProps}
-        >
-          <FormLabel htmlFor="can-add-label" mb="0">
-            {t("requirementsLibrary.modals.canAddMultipleContacts")}
-          </FormLabel>
-          <Switch
-            id="can-add-label"
-            sx={{
-              ".chakra-switch__track[aria-checked=true], .chakra-switch__track[data-checked]": {
-                "--switch-bg": "var(--chakra-colors-success)",
-              },
-            }}
-            {...addMultipleContactProps?.switchProps}
-          />
-        </FormControl>
-      )}
 
       {showAddButton && (
         <Button
@@ -125,7 +105,7 @@ export function GenericContactDisplay<TFieldValues>({
             cursor: "not-allowed",
           }}
         >
-          {t("requirementsLibrary.addAnotherPerson")}
+          {label ? `${t("requirementsLibrary.addAnother")} ${label}` : t("requirementsLibrary.addAnother")}
         </Button>
       )}
     </Box>

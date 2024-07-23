@@ -358,7 +358,7 @@ const options = {
           },
           updateToNewVersion: "Update my application",
           reviewOutdatedSubmissionLink: "View draft applications",
-          reviewOutdatedEditLink: "View template",
+          reviewUpdatedEditLink: "View template",
           reviewOutdatedTitle: "Filters applied to show applications that are outdated",
           reviewOutdatedMessage: "Filters have been applied. Please review and acknowledge the actions required below.",
           reviewCustomizedSubmissionLink: "View draft applications",
@@ -529,6 +529,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          addAnother: "Add",
           addAnotherPerson: "Add another person",
           elective: "Elective",
           hasElective: "Has elective(s)",
@@ -655,6 +656,7 @@ const options = {
             email: "E-mail",
             energyStepCode: "Energy Step Code",
             stepCodePackageFile: "Design package file for energy step code",
+            pidInfo: "Pid Info",
           },
           contactFieldItemLabels: {
             firstName: "First name",
