@@ -5,6 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
+import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
 import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
@@ -68,15 +69,17 @@ export const JurisdictionModel = types
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)
     },
-    energyStepRequiredTranslation(energyStepRequired: number) {
+    energyStepRequiredTranslation(energyStepRequired?: EEnergyStep) {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
-      // @ts-ignore
-      return t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
+      return energyStepRequired
+        ? t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
+        : t(`${i18nPrefix}.notRequired`)
     },
-    zeroCarbonLevelTranslation(zeroCarbonStepRequired: number) {
+    zeroCarbonLevelTranslation(zeroCarbonStepRequired?: EZeroCarbonStep) {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
-      // @ts-ignore
-      return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
+      return zeroCarbonStepRequired
+        ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
+        : t(`${i18nPrefix}.notRequired`)
     },
   }))
   .views((self) => ({
