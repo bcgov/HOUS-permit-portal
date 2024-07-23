@@ -19,9 +19,6 @@ class Api::CollaboratorsController < Api::ApplicationController
                    }
   end
 
-  def create
-  end
-
   private
 
   def set_collaboratorable

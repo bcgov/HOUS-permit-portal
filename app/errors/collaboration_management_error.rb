@@ -1,2 +1,0 @@
-class CollaborationManagementError < StandardError
-end

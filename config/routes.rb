@@ -121,6 +121,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "generate_missing_pdfs", on: :member, to: "permit_applications#generate_missing_pdfs"
       post "permit_collaborations", on: :member, to: "permit_applications#create_permit_collaboration"
+      post "permit_collaborations/invite", on: :member, to: "permit_applications#invite_new_collaborator"
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       post "mark_as_viewed", on: :member

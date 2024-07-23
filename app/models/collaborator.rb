@@ -9,6 +9,8 @@ class Collaborator < ApplicationRecord
   validates :collaboratorable_type, inclusion: { in: %w[User Jurisdiction] }
   validates :user, uniqueness: { scope: %i[collaboratorable_id collaboratorable_type] }
 
+  validate :validate_user, on: :create
+
   def search_data
     {
       collaboratorable_type: collaboratorable_type,
@@ -28,9 +30,15 @@ class Collaborator < ApplicationRecord
   def validate_user
     error_key = nil
     if collaboratorable.is_a? Jurisdiction
-      error_key = :incorrect_jurisdiction unless user.jurisdictions.find_by(id: collaboratorable.id).present?
+      error_key = :incorrect_jurisdiction unless user.review_staff? &&
+        user.jurisdictions.find_by(id: collaboratorable.id).present?
     elsif collaboratorable.is_a? User
-      error_key = :invalid_user if user == collaboratorable
+      error_key =
+        if user == collaboratorable
+          :incorrect_user
+        elsif user.review_staff?
+          :submission_collaborator_cant_be_review_staff
+        end
     end
 
     errors.add(:user, error_key) unless error_key.nil?

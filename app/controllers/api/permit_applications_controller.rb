@@ -13,6 +13,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   generate_missing_pdfs
                   update_revision_requests
                   create_permit_collaboration
+                  invite_new_collaborator
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -158,25 +159,43 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def create_permit_collaboration
-    # binding.pry
-    @permit_collaboration =
-      PermitApplication::CollaborationManagementService.new(@permit_application).build_permit_collaboration(
-        collaborator_id: permit_collaboration_params[:collaborator_id],
-        collaborator_type: permit_collaboration_params[:collaborator_type],
-        assigned_requirement_block_id: permit_collaboration_params[:assigned_requirement_block_id],
-      )
+    begin
+      @permit_collaboration =
+        PermitCollaboration::CollaborationManagementService.new(@permit_application).assign_collaborator!(
+          collaborator_id: permit_collaboration_params[:collaborator_id],
+          collaborator_type: permit_collaboration_params[:collaborator_type],
+          assigned_requirement_block_id: permit_collaboration_params[:assigned_requirement_block_id],
+        )
 
-    authorize @permit_collaboration, policy_class: PermitApplicationPolicy
+      authorize @permit_collaboration, policy_class: PermitApplicationPolicy
 
-    if @permit_collaboration.save
       render_success @permit_collaboration,
                      "permit_application.assign_collaborator_success",
                      { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
-    else
-      render_error "permit_application.assign_collaborator_error",
-                   message_opts: {
-                     error_message: @permit_collaboration.errors.full_messages.join(", "),
-                   }
+    rescue PermitCollaborationError => e
+      render_error "permit_application.assign_collaborator_error", message_opts: { error_message: e.message }
+    end
+  end
+
+  def invite_new_collaborator
+    begin
+      @permit_collaboration =
+        PermitCollaboration::CollaborationManagementService.new(
+          @permit_application,
+        ).invite_new_submission_collaborator!(
+          user_params: collaborator_invite_params[:user],
+          inviter: current_user,
+          collaborator_type: collaborator_invite_params[:collaborator_type],
+          assigned_requirement_block_id: collaborator_invite_params[:assigned_requirement_block_id],
+        )
+
+      authorize @permit_collaboration, policy_class: PermitApplicationPolicy
+
+      render_success @permit_collaboration,
+                     "permit_application.assign_collaborator_success",
+                     { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
+    rescue PermitCollaborationError => e
+      render_error "permit_application.assign_collaborator_error", message_opts: { error_message: e.message }
     end
   end
 
@@ -225,6 +244,14 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def permit_collaboration_params
     params.require(:permit_collaboration).permit(:collaborator_id, :collaborator_type, :assigned_requirement_block_id)
+  end
+
+  def collaborator_invite_params
+    params.require(:collaborator_invite).permit(
+      :collaborator_type,
+      :assigned_requirement_block_id,
+      user: %i[email first_name last_name],
+    )
   end
 
   def supporting_document_params

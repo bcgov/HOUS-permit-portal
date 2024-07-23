@@ -100,6 +100,7 @@ en:
             user:
               incorrect_jurisdiction: "must be from the same jurisdiction as the permit application for review collaboration"
               incorrect_user: "cannot be the same as the requester for submission collaboration"
+              submission_collaborator_cant_be_review_staff: "cannot be a review staff for submission collaboration"
   application_mailer:
     subject_start: "Building Permit Hub"
     subjects:
@@ -406,7 +407,7 @@ en:
         title: ""
         message: "Collaborator unassigned successfully!"
       destroy_error:
-        title: Error unassigning collaborator
+        title: Error unassigning permit_collaboration
         message: "%{error_message}"
     site_configuration:
       update_success:
@@ -490,6 +491,12 @@ en:
         incorrect_value_extraction_field: "incorrect extraction field for %{module_name} automated compliance module"
         incorrect_options_map: "incorrect options map for %{module_name} automated compliance module"
         default_settings_not_valid: "computed compliance is not populated with default settings for %{module_name} automated compliance module"
+    permit_collaboration:
+      collaboration_management:
+        add_collaborator_error: "Failed to add collaborator: %{error_message}"
+        assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
+        create_user_error: "Failed to invite user to collaborate: %{error_message}"
+        submission_collaborator_cant_be_review_staff: "Cannot invite review staff as collaborator for submission"
   formio:
     requirement_template:
       completion_title: "Completion"
