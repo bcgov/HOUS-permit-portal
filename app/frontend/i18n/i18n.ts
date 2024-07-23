@@ -529,6 +529,7 @@ const options = {
           },
         },
         requirementsLibrary: {
+          addAnother: "Add",
           addAnotherPerson: "Add another person",
           elective: "Elective",
           hasElective: "Has elective(s)",
@@ -655,6 +656,7 @@ const options = {
             email: "E-mail",
             energyStepCode: "Energy Step Code",
             stepCodePackageFile: "Design package file for energy step code",
+            pidInfo: "Pid Info",
           },
           contactFieldItemLabels: {
             firstName: "First name",

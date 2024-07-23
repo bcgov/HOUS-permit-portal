@@ -220,7 +220,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         selectProps={{
                           maxW: "339px",
                         }}
-                        showAddPersonButton={!!requirement?.inputOptions?.canAddMultipleContacts}
+                        showAddButton={!!requirement?.inputOptions?.canAddMultipleContacts}
                         required={requirement.required}
                       />
                       {requirement?.elective && <ElectiveTag position="absolute" right="0" top="0" />}
