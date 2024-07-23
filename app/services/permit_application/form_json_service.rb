@@ -34,12 +34,21 @@ class PermitApplication::FormJsonService
 
   def set_step_code_requirement(hash = form_json)
     if hash.is_a?(Hash)
-      if hash["key"]&.end_with?("energy_step_code_method")
+      if energy_step_keys.any? { |key| hash["key"]&.end_with?(key) }
         hash["validate"] = { "required" => permit_application.energy_step_code_required? }
       end
     end
 
     hash["components"].each { |component| set_step_code_requirement(component) } if hash["components"].is_a?(Array)
+  end
+
+  def energy_step_keys
+    @energy_step_keys ||= %w[
+      energy_step_code_method
+      energy_step_code_tool_part_9
+      energy_step_code_report_file
+      energy_step_code_h2000_file
+    ]
   end
 
   def empty_block_ids
