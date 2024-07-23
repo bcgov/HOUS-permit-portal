@@ -28,11 +28,11 @@ export const StepCodeStoreModel = types
     },
     getEnergyStepOptions(allowNull: boolean = false): EEnergyStep[] {
       const { energySteps } = self.selectOptions
-      return [...energySteps, allowNull && null] as EEnergyStep[]
+      return (allowNull ? [...energySteps, null] : energySteps) as EEnergyStep[]
     },
     getZeroCarbonStepOptions(allowNull: boolean = false): EZeroCarbonStep[] {
       const { zeroCarbonSteps } = self.selectOptions
-      return [...zeroCarbonSteps, allowNull && null] as EZeroCarbonStep[]
+      return (allowNull ? [...zeroCarbonSteps, null] : zeroCarbonSteps) as EZeroCarbonStep[]
     },
   }))
   .actions((self) => ({
