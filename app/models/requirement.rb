@@ -26,6 +26,7 @@ class Requirement < ApplicationRecord
          energy_step_code: 16,
          general_contact: 17,
          professional_contact: 18,
+         pid_info: 19,
        },
        _prefix: true
 
