@@ -62,6 +62,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     end
   end
 
+  def invite_new_collaborator?
+    create_permit_collaboration?
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope

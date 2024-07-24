@@ -288,6 +288,26 @@ export class Api {
     )
   }
 
+  async inviteNewCollaboratorToPermitApplication(
+    permitApplicationId: string,
+    params: {
+      user: {
+        email: string
+        firstName: string
+        lastName: string
+      }
+      collaboratorType: ECollaboratorType
+      assignedRequirementBlockId?: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations/invite`,
+      {
+        collaboratorInvite: params,
+      }
+    )
+  }
+
   async unassignPermitCollaboration(id: string) {
     return this.client.delete<ApiResponse<IPermitCollaboration>>(`/permit_collaborations/${id}`)
   }

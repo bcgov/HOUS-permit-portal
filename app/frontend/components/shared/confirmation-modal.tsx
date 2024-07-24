@@ -26,6 +26,7 @@ export interface IConfirmationModalProps {
   onConfirm?: (closeModal: () => void) => void | Promise<void>
   modalProps?: Partial<ModalProps>
   modalContentProps?: Partial<ModalContentProps>
+  modalControlProps?: Partial<Omit<ReturnType<typeof useDisclosure>, "onToggle">>
 }
 
 export const ConfirmationModal = observer(function ConfirmationModal({
@@ -37,8 +38,14 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   onConfirm,
   modalProps,
   modalContentProps,
+  modalControlProps,
 }: IConfirmationModalProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const disclosureProps = useDisclosure()
+
+  const isOpen = modalControlProps?.isOpen ?? disclosureProps.isOpen
+  const onOpen = modalControlProps?.onOpen ?? disclosureProps.onOpen
+  const onClose = modalControlProps?.onClose ?? disclosureProps.onClose
+
   const { t } = useTranslation()
 
   return (

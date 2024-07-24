@@ -5,13 +5,20 @@ class PermitCollaboration::CollaborationManagementService
     @permit_application = permit_application
   end
 
-  def assign_collaborator!(collaborator_id:, collaborator_type:, assigned_requirement_block_id: nil)
+  def assign_collaborator!(
+    authorize_collaboration: nil,
+    collaborator_id:,
+    collaborator_type:,
+    assigned_requirement_block_id: nil
+  )
     permit_collaboration =
       build_permit_collaboration(
         collaborator_id: collaborator_id,
         collaborator_type: collaborator_type,
         assigned_requirement_block_id: assigned_requirement_block_id,
       )
+
+    authorize_collaboration.call(permit_collaboration) unless authorize_collaboration.nil?
 
     return permit_collaboration if permit_collaboration.save
 
@@ -23,6 +30,7 @@ class PermitCollaboration::CollaborationManagementService
   end
 
   def invite_new_submission_collaborator!(
+    authorize_collaboration: nil,
     inviter:,
     user_params:,
     collaborator_type:,
@@ -39,6 +47,7 @@ class PermitCollaboration::CollaborationManagementService
 
         permit_collaboration =
           assign_collaborator!(
+            authorize_collaboration: authorize_collaboration,
             collaborator_id: collaborator.id,
             collaborator_type: collaborator_type,
             assigned_requirement_block_id: assigned_requirement_block_id,
@@ -54,13 +63,11 @@ class PermitCollaboration::CollaborationManagementService
   private
 
   def send_submission_collaboration_email!(permit_collaboration, inviter, is_new_user = false)
-    user = permit_collaboration
+    user = permit_collaboration.collaborator.user
 
-    if user.review_staff?
+    if !user.submitter?
       raise PermitCollaborationError,
-            I18n.t(
-              "services.permit_collaboration.collaboration_management.submission_collaborator_cant_be_review_staff",
-            )
+            I18n.t("services.permit_collaboration.collaboration_management.submission_collaborator_must_be_submitter")
     end
 
     should_send_registration_collaboration_email = is_new_user || user.discarded? || !user.confirmed?
@@ -104,7 +111,7 @@ class PermitCollaboration::CollaborationManagementService
   end
 
   def create_collaborator!(inviter, user)
-    collaborator = inviter.collaborators.build(collaborator: user)
+    collaborator = inviter.collaborators.build(user: user)
 
     return collaborator if collaborator.save
 

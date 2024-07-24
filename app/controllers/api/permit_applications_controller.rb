@@ -162,12 +162,13 @@ class Api::PermitApplicationsController < Api::ApplicationController
     begin
       @permit_collaboration =
         PermitCollaboration::CollaborationManagementService.new(@permit_application).assign_collaborator!(
+          authorize_collaboration: ->(permit_collaboration) do
+            authorize permit_collaboration, policy_class: PermitApplicationPolicy
+          end,
           collaborator_id: permit_collaboration_params[:collaborator_id],
           collaborator_type: permit_collaboration_params[:collaborator_type],
           assigned_requirement_block_id: permit_collaboration_params[:assigned_requirement_block_id],
         )
-
-      authorize @permit_collaboration, policy_class: PermitApplicationPolicy
 
       render_success @permit_collaboration,
                      "permit_application.assign_collaborator_success",
@@ -183,18 +184,23 @@ class Api::PermitApplicationsController < Api::ApplicationController
         PermitCollaboration::CollaborationManagementService.new(
           @permit_application,
         ).invite_new_submission_collaborator!(
+          authorize_collaboration: ->(permit_collaboration) do
+            authorize permit_collaboration, policy_class: PermitApplicationPolicy
+          end,
           user_params: collaborator_invite_params[:user],
           inviter: current_user,
           collaborator_type: collaborator_invite_params[:collaborator_type],
           assigned_requirement_block_id: collaborator_invite_params[:assigned_requirement_block_id],
         )
 
-      authorize @permit_collaboration, policy_class: PermitApplicationPolicy
-
       render_success @permit_collaboration,
                      "permit_application.assign_collaborator_success",
                      { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
     rescue PermitCollaborationError => e
+      # The skip_authorization is necessary here as if there are any errors
+      # in the invite_new_submission_collaborator! method, before the permit_collaboration
+      # is created, the policy will not be able to authorize the permit_collaboration
+      skip_authorization
       render_error "permit_application.assign_collaborator_error", message_opts: { error_message: e.message }
     end
   end

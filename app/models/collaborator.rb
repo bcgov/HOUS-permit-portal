@@ -36,8 +36,8 @@ class Collaborator < ApplicationRecord
       error_key =
         if user == collaboratorable
           :incorrect_user
-        elsif user.review_staff?
-          :submission_collaborator_cant_be_review_staff
+        elsif !user.submitter?
+          :submission_collaborator_must_be_submitter
         end
     end
 

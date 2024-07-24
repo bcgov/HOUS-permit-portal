@@ -11,6 +11,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Portal,
+  SimpleGrid,
   Stack,
   Text,
   useDisclosure,
@@ -18,6 +19,7 @@ import {
 import { Plus, Users, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
+import { FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -26,6 +28,8 @@ import { useMst } from "../../../setup/root"
 import { ECollaborationType, ECollaboratorType } from "../../../types/enums"
 import { ModelSearchInput } from "../../shared/base/model-search-input"
 import { ConfirmationModal } from "../../shared/confirmation-modal"
+import { EmailFormControl } from "../../shared/form/email-form-control"
+import { TextFormControl } from "../../shared/form/input-form-control"
 import { RequestLoadingButton } from "../../shared/request-loading-button"
 
 interface IProps {
@@ -34,12 +38,13 @@ interface IProps {
   requirementBlockId: string
 }
 
-enum EScreens {
+enum EScreen {
   collaborations,
   collaborationAssignment,
-  collaboratorCreate,
+  collaboratorInvite,
 }
 
+const INITIAL_SCREEN = EScreen.collaborations
 export const CollaboratorAssignmentPopover = observer(function AssignmentPopover({
   permitApplication,
   collaborationType,
@@ -52,10 +57,12 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   )
   const existingCollaboratorIds = new Set<string>(existingAssignments.map((a) => a.collaborator.id))
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [currentScreen, setCurrentScreen] = React.useState<EScreens>(EScreens.collaborations)
+  const assignConfirmationModalDisclosureProps = useDisclosure()
+  const createConfirmationModalDisclosureProps = useDisclosure()
+  const [currentScreen, setCurrentScreen] = React.useState<EScreen>(INITIAL_SCREEN)
   const contentRef = React.useRef<HTMLDivElement>(null)
 
-  const changeScreen = (screen: EScreens) => {
+  const changeScreen = (screen: EScreen) => {
     setCurrentScreen(screen)
 
     // This needs to be done as their is a focus loss issue when dynamically
@@ -65,12 +72,23 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
 
   useEffect(() => {
     if (isOpen) {
-      changeScreen(EScreens.collaborations)
+      changeScreen(INITIAL_SCREEN)
     }
   }, [isOpen])
 
+  const onPopoverClose = () => {
+    if (assignConfirmationModalDisclosureProps.isOpen || createConfirmationModalDisclosureProps.isOpen) {
+      return
+    }
+
+    onClose()
+  }
+
+  const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
+    permitApplication.inviteNewCollaborator(ECollaboratorType.assignee, user, requirementBlockId)
+
   return (
-    <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onClose} onOpen={onOpen}>
+    <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onPopoverClose} onOpen={onOpen}>
       <PopoverTrigger>
         <Button
           onClick={(e) => {
@@ -89,22 +107,31 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
       </PopoverTrigger>
       <Portal>
         <PopoverContent w={"370px"} maxW={"370px"} ref={contentRef}>
-          {currentScreen === EScreens.collaborations && (
+          {currentScreen === EScreen.collaborations && (
             <Collaborations
               permitCollaborations={existingAssignments}
-              transitionToAssign={() => changeScreen(EScreens.collaborationAssignment)}
+              transitionToAssign={() => changeScreen(EScreen.collaborationAssignment)}
               onUnassign={(permitCollaborationId) =>
                 permitApplication.unassignPermitCollaboration(permitCollaborationId)
               }
             />
           )}
-          {currentScreen === EScreens.collaborationAssignment && (
+          {currentScreen === EScreen.collaborationAssignment && (
             <CollaborationAssignment
               onSelect={(collaboratorId) =>
                 permitApplication.assignCollaborator(collaboratorId, ECollaboratorType.assignee, requirementBlockId)
               }
-              onClose={() => changeScreen(EScreens.collaborations)}
+              onClose={() => changeScreen(EScreen.collaborations)}
               takenCollaboratorIds={existingCollaboratorIds}
+              confirmationModalDisclosureProps={assignConfirmationModalDisclosureProps}
+              transitionToInvite={() => changeScreen(EScreen.collaboratorInvite)}
+            />
+          )}
+          {currentScreen === EScreen.collaboratorInvite && (
+            <CollaboratorInvite
+              transitionToScreen={changeScreen}
+              onInvite={onInviteCollaborator}
+              confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
             />
           )}
         </PopoverContent>
@@ -117,10 +144,14 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
   onSelect,
   takenCollaboratorIds = new Set<string>(),
   onClose,
+  confirmationModalDisclosureProps,
+  transitionToInvite,
 }: {
   onSelect?: (collaboratorId?: string) => Promise<void>
   takenCollaboratorIds?: Set<string>
   onClose?: () => void
+  confirmationModalDisclosureProps?: ReturnType<typeof useDisclosure>
+  transitionToInvite?: () => void
 }) {
   const { collaboratorStore } = useMst()
   const collaboratorSearchList = collaboratorStore.getFilteredCollaborationSearchList(takenCollaboratorIds)
@@ -147,10 +178,23 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
             color={"text.primary"}
           />
         </Flex>
-        <ModelSearchInput searchModel={collaboratorStore as ISearch} inputProps={{ placeholder: "Find" }} />
+        <HStack justifyContent={"space-between"}>
+          <ModelSearchInput
+            searchModel={collaboratorStore as ISearch}
+            inputProps={{ w: "194px", placeholder: "Find" }}
+          />
+          <Button variant={"secondary"} leftIcon={<Plus />} size={"sm"} fontSize={"sm"} onClick={transitionToInvite}>
+            {t("permitCollaboration.popover.assignment.newContactButton")}
+          </Button>
+        </HStack>
       </PopoverHeader>
       <PopoverBody p={4}>
         <Stack as={"ul"} w={"full"} listStyleType={"none"} pl={0}>
+          {collaboratorSearchList.length === 0 && (
+            <Text textAlign={"center"} fontSize={"sm"} color={"text.secondary"} fontStyle={"italic"}>
+              {t("permitCollaboration.popover.assignment.noResultsText")}
+            </Text>
+          )}
           {collaboratorSearchList.map((collaborator) => {
             return (
               <Text
@@ -164,6 +208,10 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"space-between"}
+                borderRadius={"sm"}
+                _hover={{
+                  bg: "theme.blueLight",
+                }}
               >
                 {collaborator.user?.name}
                 <ConfirmationModal
@@ -171,22 +219,23 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
                   body={t("permitCollaboration.popover.assignment.inviteWarning.body")}
                   triggerText={t("ui.proceed")}
                   renderTriggerButton={({ onClick, ...rest }) => (
-                    <RequestLoadingButton
+                    <Button
                       variant={"ghost"}
                       color={"text.link"}
                       size={"sm"}
                       fontWeight={"semibold"}
                       fontSize={"sm"}
-                      onClick={onClick as (e: React.MouseEvent) => Promise<any>}
+                      onClick={onClick}
                       {...rest}
                     >
-                      {t("ui.select")}{" "}
-                    </RequestLoadingButton>
+                      {t("ui.select")}
+                    </Button>
                   )}
                   onConfirm={(onClose) => {
                     onSelect?.(collaborator.id)
                     onClose()
                   }}
+                  modalControlProps={confirmationModalDisclosureProps}
                   modalContentProps={{
                     maxW: "700px",
                   }}
@@ -264,6 +313,109 @@ const Collaborations = observer(function PermitCollaborations({
             )
           })}
         </Stack>
+      </PopoverBody>
+    </>
+  )
+})
+
+interface ICollaboratorInviteForm {
+  email: string
+  firstName: string
+  lastName: string
+}
+
+const CollaboratorInvite = observer(function CollaboratorCreate({
+  onInvite,
+  confirmationModalDisclosureProps,
+  transitionToScreen,
+}: {
+  onInvite?: (user: { email: string; firstName: string; lastName: string }) => Promise<IPermitCollaboration>
+  confirmationModalDisclosureProps?: ReturnType<typeof useDisclosure>
+  transitionToScreen?: (screen: EScreen) => void
+}) {
+  const { t } = useTranslation()
+  const formMethods = useForm<ICollaboratorInviteForm>({
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+    },
+  })
+  const {
+    formState: { isValid },
+    handleSubmit,
+  } = formMethods
+
+  const onSubmit = handleSubmit(async (values) => {
+    const response = await onInvite?.(values)
+    response && transitionToScreen?.(EScreen.collaborations)
+  })
+
+  return (
+    <>
+      <PopoverHeader
+        fontSize={"lg"}
+        fontFamily={"heading"}
+        fontWeight={"bold"}
+        p={4}
+        display="flex"
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
+        {t("permitCollaboration.popover.collaboratorInvite.title")}
+        <IconButton
+          size={"xs"}
+          onClick={() => transitionToScreen(EScreen.collaborationAssignment)}
+          variant={"ghost"}
+          aria-label={"close assignment screen"}
+          icon={<X />}
+          color={"text.primary"}
+        />
+      </PopoverHeader>
+      <PopoverBody px={5} py={4}>
+        <FormProvider {...formMethods}>
+          <SimpleGrid columns={2} spacing={4}>
+            <TextFormControl label={t("contact.fields.firstName")} fieldName={`firstName`} required />
+            <TextFormControl label={t("contact.fields.lastName")} fieldName={`lastName`} required />
+            <Box gridColumn={"span 2"}>
+              <EmailFormControl
+                inputProps={{
+                  type: "email",
+                }}
+                label={t("contact.fields.email")}
+                fieldName={`email`}
+                validate
+                required
+              />
+            </Box>
+            <Box gridColumn={"span 2"}>
+              <ConfirmationModal
+                title={t("permitCollaboration.popover.assignment.inviteWarning.title")}
+                body={t("permitCollaboration.popover.assignment.inviteWarning.body")}
+                triggerText={t("ui.proceed")}
+                renderTriggerButton={({ onClick, ...rest }) => (
+                  <Button
+                    variant={"primary"}
+                    size={"sm"}
+                    fontWeight={"semibold"}
+                    fontSize={"sm"}
+                    onClick={onClick as (e: React.MouseEvent) => Promise<any>}
+                    {...rest}
+                  >
+                    {t("permitCollaboration.popover.collaboratorInvite.inviteButton")}
+                  </Button>
+                )}
+                onConfirm={(_onClose) => {
+                  onSubmit()
+                }}
+                modalControlProps={confirmationModalDisclosureProps}
+                modalContentProps={{
+                  maxW: "700px",
+                }}
+              />
+            </Box>
+          </SimpleGrid>
+        </FormProvider>
       </PopoverBody>
     </>
   )

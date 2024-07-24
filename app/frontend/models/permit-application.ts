@@ -110,6 +110,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get revisionRequests() {
         return self.latestSubmissionVersion?.revisionRequests || []
       },
+      getPermitCollaboration(collaborationId: string) {
+        return self.permitCollaborationMap.get(collaborationId)
+      },
     }))
     .views((self) => ({
       getCollaborationsByType(collaborationType: ECollaborationType) {
@@ -388,8 +391,32 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (response.ok) {
           const { data: permitCollaboration } = response.data
           self.addPermitCollaboration(permitCollaboration)
+          return self.getPermitCollaboration(permitCollaboration.id)
         }
-        return response
+        return false
+      }),
+      inviteNewCollaborator: flow(function* (
+        collaboratorType: ECollaboratorType,
+        user: {
+          email: string
+          firstName: string
+          lastName: string
+        },
+        assignedRequirementBlockId?: string
+      ) {
+        const response = yield self.environment.api.inviteNewCollaboratorToPermitApplication(self.id, {
+          collaboratorType,
+          assignedRequirementBlockId,
+          user,
+        })
+
+        if (response.ok) {
+          const { data: permitCollaboration } = response.data
+          self.addPermitCollaboration(permitCollaboration)
+          return self.getPermitCollaboration(permitCollaboration.id)
+        }
+
+        return false
       }),
     }))
     .actions((self) => ({
