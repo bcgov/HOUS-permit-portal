@@ -20,13 +20,19 @@ class PermitCollaboration::CollaborationManagementService
 
     authorize_collaboration.call(permit_collaboration) unless authorize_collaboration.nil?
 
-    return permit_collaboration if permit_collaboration.save
+    unless permit_collaboration.save
+      raise PermitCollaborationError,
+            I18n.t(
+              "services.permit_collaboration.collaboration_management.assign_collaborator_error",
+              error_message: permit_collaboration.errors.full_messages.join(", "),
+            )
+    end
 
-    raise PermitCollaborationError,
-          I18n.t(
-            "services.permit_collaboration.collaboration_management.assign_collaborator_error",
-            error_message: permit_collaboration.errors.full_messages.join(", "),
-          )
+    if permit_collaboration.submission?
+      send_submission_collaboration_email!(permit_collaboration, permit_application.submitter)
+    end
+
+    permit_collaboration
   end
 
   def invite_new_submission_collaborator!(
@@ -65,20 +71,23 @@ class PermitCollaboration::CollaborationManagementService
   def send_submission_collaboration_email!(permit_collaboration, inviter, is_new_user = false)
     user = permit_collaboration.collaborator.user
 
-    if !user.submitter?
+    should_send_registration_collaboration_email = is_new_user || user.discarded? || !user.confirmed?
+
+    # Only submitters are invitable initially
+    # But their role might be upgraded after they are invited
+    # As long as they were invited once as a submitter and the user doesn't need to be re-registered into the system,
+    # they can be invited as a collaborator
+    if !user.submitter? && should_send_registration_collaboration_email
       raise PermitCollaborationError,
             I18n.t("services.permit_collaboration.collaboration_management.submission_collaborator_must_be_submitter")
     end
 
-    should_send_registration_collaboration_email = is_new_user || user.discarded? || !user.confirmed?
-
     if should_send_registration_collaboration_email
-      # @todo update email to new template
       user.skip_confirmation_notification!
+      user.set_collaboration_invitation(permit_collaboration)
       user.invite!(inviter)
     else
-      # @todo
-      # PermitHubMailer.new_submission_collaboration(permit_collaboration).deliver_later
+      PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration).deliver_later
     end
   end
 

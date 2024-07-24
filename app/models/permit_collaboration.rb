@@ -21,6 +21,18 @@ class PermitCollaboration < ApplicationRecord
   validate :validate_review_collaborator
   validate :validate_collaboration_type, on: :create
 
+  def collaborator_name
+    collaborator.user.name
+  end
+
+  def inviter_name
+    collaborator.collaboratorable&.name
+  end
+
+  def assigned_requirement_block_name
+    permit_application.template_version.requirement_blocks_json.dig(assigned_requirement_block_id, "name")
+  end
+
   private
 
   def validate_author_not_collaborator

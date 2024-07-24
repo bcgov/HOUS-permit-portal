@@ -47,6 +47,7 @@ class User < ApplicationRecord
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
+  attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
 
   def confirmation_required?
     false
@@ -111,6 +112,10 @@ class User < ApplicationRecord
 
   def blueprint
     UserBlueprint
+  end
+
+  def set_collaboration_invitation(permit_collaboration)
+    self.collaboration_invitation = { permit_collaboration: permit_collaboration }
   end
 
   private

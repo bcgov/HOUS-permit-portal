@@ -39,6 +39,15 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: template_key)
   end
 
+  def notify_permit_collaboration(permit_collaboration:)
+    @permit_collaboration = permit_collaboration
+    @user = permit_collaboration.collaborator.user
+
+    return unless permit_collaboration.permit_application
+
+    send_user_mail(email: @user.email, template_key: :notify_permit_collaboration)
+  end
+
   def notify_integration_mapping_external(external_api_key:, template_version:)
     @template_version = template_version
 
