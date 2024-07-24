@@ -125,6 +125,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def submit
     authorize @permit_application
     # for submissions, we do not run the automated compliance as that should have already been complete
+    #
+    if !@permit_application.using_current_template_version
+      render_error "permit_application.outdated_error", message_opts: {} and return
+    end
 
     if @permit_application.update(permit_application_params) && @permit_application.submit!
       render_success @permit_application,
