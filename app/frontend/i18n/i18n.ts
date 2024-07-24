@@ -430,6 +430,7 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
+            forFirstNations: "Is this permit for first nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
             applicationDisclaimerInstruction:
@@ -536,6 +537,7 @@ const options = {
           addAnotherPerson: "Add another person",
           elective: "Elective",
           hasElective: "Has elective(s)",
+          forFirstNations: "Intended for First Nations",
           hasConditionalLogic: "Has conditional logic",
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
@@ -628,6 +630,7 @@ const options = {
           },
           fields: {
             name: "Name",
+            firstNations: "First Nations",
             description: "Description",
             associations: "Associations",
             formFields: "Form fields",
@@ -1268,6 +1271,11 @@ const options = {
           added: "added",
           removed: "removed",
           edit: {
+            options: {
+              button: "Options",
+              copyTips: "Import tips from ({{ templateLabel }})",
+              copyElectives: "Import electives from ({{ templateLabel }})",
+            },
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
@@ -1327,6 +1335,7 @@ const options = {
             status: "Status",
             permitType: "Permit type",
             activity: "Work type",
+            firstNations: "First Nations",
             description: "Description",
             currentVersion: "Current version",
             jurisdictionsSize: "Used by",
@@ -1352,6 +1361,8 @@ const options = {
             descriptionHelpText:
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
+            firstNationsLand: "This permit is intended <1>only for First Nations land</1>",
+            copyExisting: "Copy from existing template of this permit and work type if available",
           },
           versionSidebar: {
             triggerButton: "Versions",

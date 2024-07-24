@@ -54,6 +54,7 @@ export enum EUserRoles {
 
 export enum ERequirementLibrarySortFields {
   name = "name",
+  firstNations = "first_nations",
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
@@ -85,6 +86,7 @@ export enum EUserSortFields {
 export enum ERequirementTemplateSortFields {
   permitType = "permit_type",
   activity = "activity",
+  firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
   jurisdictionsSize = "jurisdictions_size",

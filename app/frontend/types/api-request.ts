@@ -28,6 +28,7 @@ export interface IRequirementAttributes {
 
 export interface IRequirementBlockParams {
   name: string
+  firstNations: boolean
   displayName: string
   displayDescription: string
   description?: string

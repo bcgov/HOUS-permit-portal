@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_24_190137) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -62,12 +62,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "end_user_license_agreements",
@@ -307,6 +301,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.string "sku"
     t.string "display_name", null: false
     t.string "display_description"
+    t.boolean "first_nations", default: false
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
@@ -335,6 +330,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.datetime "discarded_at"
+    t.boolean "first_nations", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"],
             name: "index_requirement_templates_on_discarded_at"

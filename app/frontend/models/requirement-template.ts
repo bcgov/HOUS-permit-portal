@@ -61,6 +61,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
       discardedAt: types.maybeNull(types.Date),
+      firstNations: types.boolean,
       requirementTemplateSectionMap: types.map(RequirementTemplateSectionModel),
       sortedRequirementTemplateSections: types.array(types.safeReference(RequirementTemplateSectionModel)),
       createdAt: types.Date,

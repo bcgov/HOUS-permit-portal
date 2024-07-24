@@ -168,6 +168,7 @@ export interface IDenormalizedRequirement {
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  firstNations: string
   sku: string
   formJson?: IFormIOBlock
   description?: string
@@ -189,6 +190,7 @@ export interface IDenormalizedRequirementTemplateSection {
 
 export interface IDenormalizedTemplate {
   id: string
+  label: string
   description?: string
   permitType: IPermitType
   activity: IActivity

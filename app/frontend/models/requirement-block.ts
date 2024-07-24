@@ -10,6 +10,7 @@ export const RequirementBlockModel = types
   .model("RequirementBlockModel", {
     id: types.identifier,
     name: types.string,
+    firstNations: types.boolean,
     displayName: types.string,
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),
@@ -48,6 +49,7 @@ export const RequirementBlockModel = types
       return self.requirements.some((requirement) => !!requirement.dataValidation)
     },
     get requirementFormDefaults(): IRequirementAttributes[] {
+      // TODO: investigate conditional type error
       return self.requirements.map((requirement) => {
         if (!requirement.conditional) return requirement as unknown as IRequirementAttributes
 
