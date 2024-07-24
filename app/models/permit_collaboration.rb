@@ -19,6 +19,7 @@ class PermitCollaboration < ApplicationRecord
   validate :validate_requirement_block_id, on: :create # only needs to validate on create as the requirement block can be deleted after assignment due to new template versions
   validate :validate_author_not_collaborator
   validate :validate_review_collaborator
+  validate :validate_collaboration_type, on: :create
 
   private
 
@@ -26,6 +27,14 @@ class PermitCollaboration < ApplicationRecord
     return unless submission?
 
     errors.add(:collaborator, :cannot_be_author) if collaborator.user == permit_application.submitter
+  end
+
+  def validate_collaboration_type
+    if submission?
+      errors.add(:base, :must_be_draft_for_submission) unless permit_application.draft?
+    elsif review?
+      errors.add(:base, :must_be_submitted_for_review) unless permit_application.submitted?
+    end
   end
 
   def validate_review_collaborator

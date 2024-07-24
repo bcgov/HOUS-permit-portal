@@ -90,6 +90,8 @@ en:
           attributes:
             base:
               delegatee_already_exits: "There can only be one delegatee for a permit application"
+              must_be_draft_for_submission: "permit application must be in draft state for submission collaboration"
+              must_be_submitted_for_review: "permit application must be in submitted state for review collaboration"
             assigned_requirement_block_id:
               does_not_exist: "does not exist in the permit application"
             collaborator:
