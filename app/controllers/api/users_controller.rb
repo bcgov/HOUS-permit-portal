@@ -97,8 +97,16 @@ class Api::UsersController < Api::ApplicationController
   def accept_invitation
     authorize @user
     invited_user = User.find_by_invitation_token(params[:invitation_token], true)
-    PromoteUser.new(existing_user: @user, invited_user:).call if @user.id != invited_user.id
-    @user.accept_invitation!
+    if @user.id != invited_user.id
+      PromoteUser.new(existing_user: @user, invited_user:).call
+      if !@user.valid?
+        render_error "user.accept_invite_error",
+                     { message_opts: { error_message: @user.errors.full_messages.join(", ") } } and return
+      end
+    else
+      @user.accept_invitation!
+    end
+
     render_success @user, "user.invitation_accepted", { blueprint_opts: { view: :extended } }
   end
 

@@ -31,7 +31,17 @@ export const StepCodeForm = observer(function NewStepCodeForm() {
 
   return (
     <RemoveScroll>
-      <Box id="stepCodeScroll" overflow="auto" pos="fixed" top="0" left="0" right="0" bottom="0" zIndex={11} bg="white">
+      <Box
+        id="stepCodeScroll"
+        overflow="auto"
+        pos="fixed"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        zIndex="modal"
+        bg="white"
+      >
         <Box
           as="nav"
           id="stepCodeNav"

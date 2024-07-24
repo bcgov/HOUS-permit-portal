@@ -20,7 +20,7 @@ class Jurisdiction::UserInviter
       user = User.where.not(role: :submitter).find_by(email: user_params[:email].strip)
       is_regional_rm = user&.regional_review_manager? || (user && user_params[:role].to_sym == :regional_review_manager)
 
-      if user.present? && !user.discarded? && user.confirmed? && !is_regional_rm
+      if user.present? && !user.discarded? && user.confirmed? && (!is_regional_rm || user.super_admin?)
         self.results[:email_taken] << user
       elsif user && is_regional_rm && jurisdiction_id = user_params[:jurisdiction_id]
         user.update(role: :regional_review_manager) if !user.regional_review_manager?
