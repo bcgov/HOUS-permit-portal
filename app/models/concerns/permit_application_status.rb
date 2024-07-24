@@ -4,6 +4,14 @@ module PermitApplicationStatus
     include AASM
     enum status: { new_draft: 0, newly_submitted: 1, revisions_requested: 3, resubmitted: 4 }, _default: 0
 
+    def self.draft_statuses
+      %w[new_draft revisions_requested]
+    end
+
+    def self.submitted_statuses
+      %w[newly_submitted resubmitted]
+    end
+
     aasm column: "status", enum: true do
       state :new_draft, initial: true
       state :newly_submitted
