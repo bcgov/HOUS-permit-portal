@@ -35,7 +35,9 @@ export const StepRequirementRadioGroup = observer(function StepRequirementRadioS
                 rounded="xs"
                 fontWeight="bold"
               >
-                {t(`${i18nPrefix}.energyStepCode.steps.${report.energy.requiredStep}`)}
+                {report.energy.requiredStep
+                  ? t(`${i18nPrefix}.energyStepCode.steps.${report.energy.requiredStep}`)
+                  : t(`${i18nPrefix}.notRequired`)}
               </Tag>
             </GridItem>
             <GridItem fontStyle="italic" fontWeight="bold" fontSize="sm" px={4} mx="auto">
@@ -48,9 +50,11 @@ export const StepRequirementRadioGroup = observer(function StepRequirementRadioS
                 rounded="xs"
                 fontWeight="bold"
               >
-                {t(
-                  `home.configurationManagement.stepCodeRequirements.stepRequired.zeroCarbon.options.${report.zeroCarbon.requiredStep}`
-                )}
+                {report.zeroCarbon.requiredStep
+                  ? t(
+                      `home.configurationManagement.stepCodeRequirements.stepRequired.zeroCarbon.options.${report.zeroCarbon.requiredStep}`
+                    )
+                  : t(`${i18nPrefix}.notRequired`)}
               </Tag>
             </GridItem>
           </>

@@ -88,11 +88,15 @@ export const ComplianceSummary = observer(function ComplianceSummary({
             {t(`${i18nPrefix}.energyStepCode.heading`)}
           </Heading>
 
-          <VStack align="stretch">
+          <VStack align="center">
             <Text fontSize="md" color="text.primary">
               {t(`${i18nPrefix}.energyStepCode.stepRequired`) + ": "}
             </Text>
-            <StepBox>{t(`${i18nPrefix}.energyStepCode.steps.${report.energy.requiredStep}`)}</StepBox>
+            <StepBox>
+              {report.energy.requiredStep
+                ? t(`${i18nPrefix}.energyStepCode.steps.${report.energy.requiredStep}`)
+                : t(`${i18nPrefix}.notRequired`)}
+            </StepBox>
           </VStack>
 
           <VStack flex={1} justify="end" w="full">
@@ -121,7 +125,11 @@ export const ComplianceSummary = observer(function ComplianceSummary({
 
           <VStack align="center">
             <Text>{t(`${i18nPrefix}.zeroCarbonStepCode.stepRequired`) + ": "}</Text>
-            <StepBox>{t(`${i18nPrefix}.zeroCarbonStepCode.steps.${report.zeroCarbon.requiredStep}`)}</StepBox>
+            <StepBox>
+              {report.zeroCarbon.requiredStep
+                ? t(`${i18nPrefix}.zeroCarbonStepCode.steps.${report.zeroCarbon.requiredStep}`)
+                : t(`${i18nPrefix}.notRequired`)}
+            </StepBox>
           </VStack>
 
           <VStack flex={1} justify="end" w="full">
