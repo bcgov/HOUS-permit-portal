@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next"
 
 export interface IConfirmationModalProps {
   triggerButtonProps?: Partial<ButtonProps>
+  confirmButtonProps?: Partial<ButtonProps>
   triggerText?: string
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   title?: string
@@ -39,6 +40,7 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   modalProps,
   modalContentProps,
   modalControlProps,
+  confirmButtonProps,
 }: IConfirmationModalProps) {
   const disclosureProps = useDisclosure()
 
@@ -70,7 +72,7 @@ export const ConfirmationModal = observer(function ConfirmationModal({
 
           <ModalFooter justifyContent={"flex-start"}>
             <ButtonGroup spacing={4}>
-              <Button variant={"primary"} onClick={() => onConfirm(onClose)}>
+              <Button variant={"primary"} onClick={() => onConfirm(onClose)} {...confirmButtonProps}>
                 {triggerText ?? t("ui.confirm")}
               </Button>
               <Button variant={"secondary"} onClick={onClose}>

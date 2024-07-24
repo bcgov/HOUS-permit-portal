@@ -60,9 +60,6 @@ class PermitCollaboration::CollaborationManagementService
             assigned_requirement_block_id: assigned_requirement_block_id,
           )
 
-        send_submission_collaboration_email!(permit_collaboration, inviter, is_new_user)
-        send_submission_collaboration_notification(permit_collaboration)
-
         permit_collaboration
       end
     end
@@ -70,10 +67,10 @@ class PermitCollaboration::CollaborationManagementService
 
   private
 
-  def send_submission_collaboration_email!(permit_collaboration, inviter, is_new_user = false)
+  def send_submission_collaboration_email!(permit_collaboration, inviter)
     user = permit_collaboration.collaborator.user
 
-    should_send_registration_collaboration_email = is_new_user || user.discarded? || !user.confirmed?
+    should_send_registration_collaboration_email = user.discarded? || !user.confirmed?
 
     # Only submitters are invitable initially
     # But their role might be upgraded after they are invited

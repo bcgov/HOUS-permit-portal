@@ -342,7 +342,7 @@ const CollaboratorInvite = observer(function CollaboratorCreate({
     },
   })
   const {
-    formState: { isValid },
+    formState: { isValid, isSubmitting },
     handleSubmit,
   } = formMethods
 
@@ -400,6 +400,8 @@ const CollaboratorInvite = observer(function CollaboratorCreate({
                     fontWeight={"semibold"}
                     fontSize={"sm"}
                     onClick={onClick as (e: React.MouseEvent) => Promise<any>}
+                    isDisabled={!isValid}
+                    isLoading={isSubmitting}
                     {...rest}
                   >
                     {t("permitCollaboration.popover.collaboratorInvite.inviteButton")}
@@ -411,6 +413,10 @@ const CollaboratorInvite = observer(function CollaboratorCreate({
                 modalControlProps={confirmationModalDisclosureProps}
                 modalContentProps={{
                   maxW: "700px",
+                }}
+                confirmButtonProps={{
+                  isLoading: isSubmitting,
+                  isDisabled: !isValid,
                 }}
               />
             </Box>
