@@ -8,4 +8,5 @@ export const shadows = {
   innerShadows: {
     depth02: "0px 2px 7px 0px rgba(0, 0, 0, 0.10) inset",
   },
+  drop: "0px -8px 9px 0px rgba(0, 0, 0, 0.04), 0px 0px 2px 0px rgba(0, 0, 0, 0.05)",
 }

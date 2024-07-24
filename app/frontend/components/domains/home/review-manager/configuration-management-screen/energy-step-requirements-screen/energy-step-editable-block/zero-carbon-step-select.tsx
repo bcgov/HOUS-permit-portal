@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
   Portal,
-  StackDivider,
   VStack,
 } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
@@ -15,19 +14,27 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useMst } from "../../../../../../../setup/root"
-import { ESZeroCarbonStep } from "../../../../../../../types/enums"
+import { EZeroCarbonStep } from "../../../../../../../types/enums"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
   onChange: (event: any) => void
-  value: ESZeroCarbonStep
+  value: EZeroCarbonStep
   isDisabled?: boolean
+  allowNull?: boolean
 }
 
-export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onChange, value, isDisabled }: IProps) {
+export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
+  onChange,
+  value,
+  isDisabled,
+  allowNull,
+}: IProps) {
   const {
-    stepCodeStore: { selectOptions },
+    stepCodeStore: { getZeroCarbonStepOptions },
   } = useMst()
+
+  const options = getZeroCarbonStepOptions(allowNull)
 
   return (
     <Popover placement="bottom-end">
@@ -46,15 +53,19 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onC
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {value ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`) : t(`ui.selectPlaceholder`)}
+                {value === undefined
+                  ? t(`ui.selectPlaceholder`)
+                  : value
+                    ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
+                    : t(`${i18nPrefix}.notRequired`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
           <Portal>
             <PopoverContent>
-              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-                {selectOptions.zeroCarbonSteps.map((value) => (
+              <VStack align="start" spacing={0}>
+                {options.map((value, i) => (
                   <Flex
                     key={value}
                     onClick={() => {
@@ -64,10 +75,14 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({ onC
                     px={2}
                     py={1.5}
                     w="full"
+                    borderTopWidth={value ? undefined : 1}
+                    borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >
-                    {t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
+                    {value
+                      ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
+                      : t(`${i18nPrefix}.notRequired`)}
                   </Flex>
                 ))}
               </VStack>

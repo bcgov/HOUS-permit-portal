@@ -5,6 +5,7 @@ import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { ITemplateVersion } from "../../../../../models/template-version"
 import { useMst } from "../../../../../setup/root"
+import { TemplateStatusTag } from "../../../../shared/requirement-template/template-status-tag"
 import { VersionTag } from "../../../../shared/version-tag"
 import { SubNavBar } from "../../../navigation/sub-nav-bar"
 
@@ -58,6 +59,7 @@ export const Header = observer(function Header({ templateVersion }: IProps) {
             }}
           />
         </Heading>
+        <TemplateStatusTag status={templateVersion.status} />
         <HStack spacing={6} fontSize={"sm"}>
           <HStack alignItems={"flex-start"} spacing={2}>
             <Text>{t("apiMappingsSetup.edit.permitTemplate")}:</Text>

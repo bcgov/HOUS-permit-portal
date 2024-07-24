@@ -72,7 +72,7 @@ export const ContactScreen = () => {
           isExternal
           ml="1"
         >
-          {t("site.contactNeedHelpCTA")} <ArrowSquareOut></ArrowSquareOut>
+          {t("site.contactNeedHelpCTA")} <ArrowSquareOut />
         </Link>
       </Text>
     </Container>

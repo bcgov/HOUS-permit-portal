@@ -3,7 +3,7 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
 
   def initialize(checklist:, step:)
     @checklist = checklist
-    @step = step || checklist.step_code.energy_step_required || ENV["MIN_ENERGY_STEP"].to_i
+    @step = step
   end
 
   def total_heated_floor_area

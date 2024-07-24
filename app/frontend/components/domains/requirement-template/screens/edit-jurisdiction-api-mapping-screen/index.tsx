@@ -9,6 +9,7 @@ import { useMst } from "../../../../../setup/root"
 import { ITemplateCustomization } from "../../../../../types/types"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
+import { RedirectScreen } from "../../../../shared/base/redirect-screen"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { FloatingButtons } from "./floating-buttons"
@@ -62,7 +63,13 @@ export const EditJurisdictionApiMappingScreen = observer(function EditJurisdicti
   if (error) {
     return <ErrorScreen error={error} />
   }
-  if (!templateVersion?.isFullyLoaded) return <LoadingScreen />
+  if (!templateVersion?.isFullyLoaded) {
+    return <LoadingScreen />
+  }
+
+  if (currentUser.jurisdiction && !currentUser.jurisdiction?.externalApiEnabled) {
+    return <RedirectScreen path={`/jurisdictions/${currentUser.jurisdiction.slug}/api-settings`} />
+  }
 
   return (
     <Flex

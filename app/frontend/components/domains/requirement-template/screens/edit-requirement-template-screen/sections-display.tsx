@@ -150,7 +150,7 @@ const SectionDisplay = observer(
             <RequirementBlockAccordion
               mb="6"
               as={"section"}
-              id={formScrollToId(sectionBlock.id)}
+              id={formScrollToId(sectionBlock.requirementBlockId)}
               key={sectionBlock.id}
               requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
               onRemove={() => removeSectionBlock(index)}

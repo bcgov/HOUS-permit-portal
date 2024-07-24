@@ -1,7 +1,7 @@
 import { Text } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../../models/step-code-zero-carbon-compliance-report"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../../zero-carbon-step-code-compliance/i18n-prefix"
 import { GridItem } from "../../shared/grid-item"
@@ -14,10 +14,10 @@ import { TotalGHG } from "./total-ghg"
 import { ZeroCarbonStep } from "./zero-carbon-step"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  report: IStepCodeZeroCarbonComplianceReport
 }
 
-export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ checklist }: IProps) {
+export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ report }: IProps) {
   return (
     <VStack style={{ width: "100%", borderWidth: 0.75, borderColor: theme.colors.border.light, gap: 0 }}>
       <HStack
@@ -44,10 +44,10 @@ export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ chec
         </GridItem>
       </HStack>
 
-      <ZeroCarbonStep checklist={checklist} />
-      <TotalGHG checklist={checklist} />
-      <CO2 checklist={checklist} />
-      <Prescriptive checklist={checklist} />
+      <ZeroCarbonStep report={report} />
+      <TotalGHG report={report} />
+      <CO2 report={report} />
+      <Prescriptive report={report} />
 
       <HStack
         style={{
@@ -60,7 +60,7 @@ export const ZeroCarbonComplianceGrid = function ZeroCarbonComplianceGrid({ chec
           <Text style={{ fontWeight: 700, fontSize: 10.5 }}>{t(`${i18nPrefix}.requirementsMet`)}</Text>
         </GridItem>
         <GridItem style={{ flexBasis: "25%", minWidth: "25%", justifyContent: "center" }}>
-          <RequirementsMetTag success={checklist.zeroCarbonRequirementsPassed} />
+          <RequirementsMetTag success={report.co2Passed && report.ghgPassed && report.prescriptivePassed} />
         </GridItem>
       </HStack>
     </VStack>

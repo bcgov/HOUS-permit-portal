@@ -34,7 +34,7 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
-    getOptionValue: (idx: number) => IOption
+    getOptionValue: (idx: number) => IOption | undefined
   }
   canAddMultipleContactProps?: IControlProps<TFieldValues>
 }
@@ -178,7 +178,7 @@ const requirementsComponentMap = {
                 <Input
                   bg={"white"}
                   size={"sm"}
-                  value={getOptionValue(idx).label}
+                  value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
                 />
@@ -263,7 +263,7 @@ const requirementsComponentMap = {
                 <Input
                   bg={"white"}
                   size={"sm"}
-                  value={getOptionValue(idx).label}
+                  value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
                 />
@@ -313,7 +313,7 @@ const requirementsComponentMap = {
                 <Input
                   bg={"white"}
                   size={"sm"}
-                  value={getOptionValue(idx).label}
+                  value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
                   isDisabled={isEnergyStepCodeDependency}

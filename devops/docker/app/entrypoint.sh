@@ -35,7 +35,7 @@ if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
 
   echo "*** Preparing Database..."
   
-  SKIP_DEPENDENCY_INITIALIZERS=true ./bin/rails db:migrate
+  IS_DOCKER_BUILD=true ./bin/rails db:migrate
 fi
 
 exec "$@"

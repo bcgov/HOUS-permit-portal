@@ -1,6 +1,6 @@
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeZeroCarbonComplianceReport } from "../../../../../../models/step-code-zero-carbon-compliance-report"
 import { TextFormControl } from "../../../../../shared/form/input-form-control"
 import { GridColumnHeader } from "../../shared/grid/column-header"
 import { GridData } from "../../shared/grid/data"
@@ -9,10 +9,10 @@ import { GridRowHeader } from "../../shared/grid/row-header"
 import { i18nPrefix } from "../i18n-prefix"
 
 interface IProps {
-  checklist: IStepCodeChecklist
+  compliance: IStepCodeZeroCarbonComplianceReport
 }
 
-export const Prescriptive = function Prescriptive({ checklist }: IProps) {
+export const Prescriptive = function Prescriptive({ compliance }: IProps) {
   return (
     <>
       <GridColumnHeader colSpan={4}>{t(`${i18nPrefix}.prescriptive.title`)}</GridColumnHeader>
@@ -23,8 +23,8 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveHeatingRequirement
-              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeatingRequirement}`)
+            value: compliance.prescriptiveHeatingRequirement
+              ? t(`${i18nPrefix}.prescriptive.${compliance.prescriptiveHeatingRequirement}`)
               : "-",
           }}
         />
@@ -34,15 +34,15 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveHeating
-              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHeating}`)
+            value: compliance.prescriptiveHeating
+              ? t(`${i18nPrefix}.prescriptive.${compliance.prescriptiveHeating}`)
               : "-",
           }}
         />
       </GridData>
 
       <GridData rowSpan={3} alignItems="center" justifyContent="center">
-        <RequirementsMetTag success={checklist.prescriptivePassed} />
+        <RequirementsMetTag success={compliance.prescriptivePassed} />
       </GridData>
 
       <GridRowHeader>{t(`${i18nPrefix}.prescriptive.hotWater`)}</GridRowHeader>
@@ -51,8 +51,8 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveHotWaterRequirement
-              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWaterRequirement}`)
+            value: compliance.prescriptiveHotWaterRequirement
+              ? t(`${i18nPrefix}.prescriptive.${compliance.prescriptiveHotWaterRequirement}`)
               : "-",
           }}
         />
@@ -62,8 +62,8 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveHotWater
-              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveHotWater}`)
+            value: compliance.prescriptiveHotWater
+              ? t(`${i18nPrefix}.prescriptive.${compliance.prescriptiveHotWater}`)
               : "-",
           }}
         />
@@ -75,8 +75,8 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveOtherRequirement
-              ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOtherRequirement}`)
+            value: compliance.prescriptiveOtherRequirement
+              ? t(`${i18nPrefix}.prescriptive.${compliance.prescriptiveOtherRequirement}`)
               : "-",
           }}
         />
@@ -86,7 +86,7 @@ export const Prescriptive = function Prescriptive({ checklist }: IProps) {
           inputProps={{
             isDisabled: true,
             textAlign: "center",
-            value: checklist.prescriptiveOther ? t(`${i18nPrefix}.prescriptive.${checklist.prescriptiveOther}`) : "-",
+            value: compliance.prescriptiveOther ? t(`${i18nPrefix}.prescriptive.${compliance.prescriptiveOther}`) : "-",
           }}
         />
       </GridData>

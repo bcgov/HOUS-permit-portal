@@ -31,9 +31,6 @@ class PermitApplication < ApplicationRecord
   delegate :name, to: :jurisdiction, prefix: true
   delegate :code, :name, to: :permit_type, prefix: true
   delegate :code, :name, to: :activity, prefix: true
-  delegate :energy_step_required, to: :jurisdiction, allow_nil: true
-  delegate :zero_carbon_step_required, to: :jurisdiction, allow_nil: true
-  delegate :form_json, to: :template_version
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_default_nickname, on: :create
@@ -49,6 +46,11 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
+
+  def form_json
+    result = PermitApplication::FormJsonService.new(permit_application: self).call
+    result.form_json
+  end
 
   def force_update_published_template_version
     return unless Rails.env.development?
@@ -162,13 +164,15 @@ class PermitApplication < ApplicationRecord
     "#{activity.name} - #{permit_type.name}".strip
   end
 
-  def permit_type_submission_contact
-    jurisdiction.permit_type_submission_contacts.find_by(permit_type: permit_type)
+  def confirmed_permit_type_submission_contacts
+    jurisdiction.permit_type_submission_contacts.where(permit_type: permit_type).where.not(confirmed_at: nil)
   end
 
   def send_submit_notifications
     PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
-    PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+    confirmed_permit_type_submission_contacts.each do |permit_type_submission_contact|
+      PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
+    end
   end
 
   def formatted_submission_data_for_external_use
@@ -203,6 +207,16 @@ class PermitApplication < ApplicationRecord
     missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
 
     missing_pdfs
+  end
+
+  def step_code_requirements
+    jurisdiction.permit_type_required_steps.where(permit_type_id:)
+  end
+
+  def energy_step_code_required?
+    custom_requirements = step_code_requirements.customizations
+
+    custom_requirements.empty? || custom_requirements.any? { |r| r.energy_step_required || r.zero_carbon_step_required }
   end
 
   private

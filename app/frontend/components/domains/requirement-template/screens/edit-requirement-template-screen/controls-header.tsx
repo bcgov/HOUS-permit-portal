@@ -6,6 +6,7 @@ import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
+import { BrowserSearchPrompt } from "../../../../shared/permit-applications/browser-search-prompt"
 import { IRequirementTemplateForm } from "./index"
 import { PublishScheduleModal } from "./publish-schedule-modal"
 
@@ -55,6 +56,7 @@ export const ControlsHeader = observer(function ControlsHeader({
         {t("requirementTemplate.edit.addSectionButton")}
       </Button>
       <HStack spacing={4}>
+        <BrowserSearchPrompt color="text.primary" />
         <Button variant={"primary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
           {t("requirementTemplate.edit.saveDraft")}
         </Button>

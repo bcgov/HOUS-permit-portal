@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
   Portal,
-  StackDivider,
   VStack,
 } from "@chakra-ui/react"
 import { CaretDown } from "@phosphor-icons/react"
@@ -22,13 +21,14 @@ interface IProps {
   onChange: (event: any) => void
   value: EEnergyStep
   isDisabled?: boolean
+  allowNull?: boolean
 }
 
-export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled }: IProps) {
+export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled, allowNull }: IProps) {
   const {
-    stepCodeStore: { selectOptions },
+    stepCodeStore: { getEnergyStepOptions },
   } = useMst()
-
+  const options = getEnergyStepOptions(allowNull)
   return (
     <Popover placement="bottom-end">
       {({ onClose }) => (
@@ -46,15 +46,19 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {value ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`ui.selectPlaceholder`)}
+                {value === undefined
+                  ? t(`ui.selectPlaceholder`)
+                  : value
+                    ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`)
+                    : t(`${i18nPrefix}.notRequired`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
           </PopoverTrigger>
           <Portal>
             <PopoverContent>
-              <VStack align="start" spacing={0} divider={<StackDivider borderColor="border.light" />}>
-                {selectOptions.energySteps.map((value) => (
+              <VStack align="start" spacing={0}>
+                {options.map((value, i) => (
                   <Flex
                     key={value}
                     onClick={() => {
@@ -64,10 +68,12 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                     px={2}
                     py={1.5}
                     w="full"
+                    borderTopWidth={value ? undefined : 1}
+                    borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >
-                    {t(`${i18nPrefix}.stepRequired.energy.options.${value}`)}
+                    {value ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`${i18nPrefix}.notRequired`)}
                   </Flex>
                 ))}
               </VStack>

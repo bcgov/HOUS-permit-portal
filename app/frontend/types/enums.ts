@@ -249,7 +249,7 @@ export enum EEnergyStep {
   five = "5",
 }
 
-export enum ESZeroCarbonStep {
+export enum EZeroCarbonStep {
   one = "1",
   two = "2",
   three = "3",
@@ -280,16 +280,12 @@ export enum EGovFeedbackResponseNoReason {
 export enum ESocketDomainTypes {
   notification = "notification",
   permitApplication = "permit_application",
+  template_version = "template_version",
 }
 
 export enum ESocketEventTypes {
   update = "update",
   new = "new",
-}
-
-export enum EPermitApplicationSocketEventTypes {
-  updateCompliance = "update_compliance",
-  updateSupportingDocuments = "update_supporting_documents",
 }
 
 export enum EPermitApplicationSocketEventTypes {
@@ -362,5 +358,7 @@ export enum ERequirementChangeAction {
 
 export enum ENotificationActionType {
   newTemplateVersionPublish = "new_template_version_publish",
+  publishedTemplateMissingRequirementsMapping = "published_template_missing_requirements_mapping",
+  scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
 }

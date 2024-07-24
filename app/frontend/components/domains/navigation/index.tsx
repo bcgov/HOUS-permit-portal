@@ -296,11 +296,6 @@ const AppRoutes = observer(() => {
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
-      <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
-      <Route
-        path="/api-settings/api-mappings/digital-building-permits/:templateVersionId/edit"
-        element={<EditJurisdictionApiMappingScreen />}
-      />
       <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
         <Route path="create" element={<ExternalApiKeyModalSubRoute />} />
         <Route path=":externalApiKeyId/manage" element={<ExternalApiKeyModalSubRoute />} />
@@ -354,6 +349,15 @@ const AppRoutes = observer(() => {
         element={<ConfigurationManagementScreen />}
       />
       <Route path="/digital-building-permits" element={<JurisdictionDigitalPermitScreen />} />
+      <Route path="/api-settings/api-mappings" element={<JurisdictionApiMappingsSetupIndexScreen />} />
+      <Route
+        path="/jurisdictions/:jurisdictionId/api-settings/api-mappings/digital-building-permits/:templateVersionId/edit"
+        element={<EditJurisdictionApiMappingScreen />}
+      />
+      <Route
+        path="/api-settings/api-mappings/digital-building-permits/:templateVersionId/edit"
+        element={<EditJurisdictionApiMappingScreen />}
+      />
     </>
   )
 

@@ -3,8 +3,6 @@ class StepCode < ApplicationRecord
 
   delegate :number, to: :permit_application, prefix: :building_permit
   delegate :submitter, :jurisdiction_name, :full_address, :pid, to: :permit_application
-  delegate :energy_step_required, to: :permit_application, allow_nil: true
-  delegate :zero_carbon_step_required, to: :permit_application, allow_nil: true
 
   has_many :data_entries, class_name: "StepCodeDataEntry", dependent: :destroy
   has_many :checklists, class_name: "StepCodeChecklist", dependent: :destroy
@@ -20,11 +18,12 @@ class StepCode < ApplicationRecord
     return if permit_application.blank? #do not enforce if there is no permit application
     if permit_application.step_code_plan_document.blank?
       errors.add(:plan_version, "file is missing.  Please upload on the permit application first.")
-    elsif permit_application.step_code_plan_document.compliance_data.blank? ||
-          permit_application.step_code_plan_document.compliance_data.empty?
-      errors.add(:plan_version, "file is being verified for author and date.")
-    elsif permit_application.step_code_plan_document.compliance_data.dig("error")
-      errors.add(:plan_version, "file uploaded failed to verify author and data due to an error with the serivce.")
+      # EVENTUALLY BRING THIS LOGIC BACK ONCE WE DECIDE BEST WAY TO CONFIGURE IF A STEP CODE REQUIRES A SIGNED DOCUMENT.
+      # elsif permit_application.step_code_plan_document.compliance_data.blank? ||
+      #       permit_application.step_code_plan_document.compliance_data.empty?
+      #   errors.add(:plan_version, "file is being verified for author and date.")
+      # elsif permit_application.step_code_plan_document.compliance_data.dig("error")
+      #   errors.add(:plan_version, "file uploaded failed to verify author and data due to an error with the serivce.")
     end
   end
 
@@ -44,5 +43,10 @@ class StepCode < ApplicationRecord
 
   def builder
     "" #replace with a config on permit application
+  end
+
+  def step_requirements
+    all = permit_application.jurisdiction.permit_type_required_steps.where(permit_type: permit_application.permit_type)
+    all.customizations.any? ? all.customizations : all
   end
 end

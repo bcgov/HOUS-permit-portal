@@ -23,6 +23,15 @@ class TemplateVersion < ApplicationRecord
 
   after_save :reindex_models_if_published, if: :saved_change_to_status?
   after_save :create_integration_mappings
+  after_save :notify_users_of_missing_requirements_mappings
+
+  def formatted_permit_classifications
+    "#{permit_type.name} - #{activity.name}"
+  end
+
+  def version_date_in_province_time
+    version_date.in_time_zone("Pacific Time (US & Canada)").to_time
+  end
 
   def label
     "#{permit_type.name} #{activity.name} (#{version_date.to_s})"
@@ -74,8 +83,12 @@ class TemplateVersion < ApplicationRecord
     TemplateVersioningService.produce_diff_hash(before_version, self)
   end
 
+  def get_requirement_json(requirement_block_id, requirement_id)
+    requirement_blocks_json.dig(requirement_block_id, "requirements")&.find { |req| req["id"] == requirement_id }
+  end
+
   def create_integration_mappings
-    return unless published?
+    return unless !deprecation_reason_unscheduled?
 
     api_enabled_jurisdictions = Jurisdiction.where(external_api_enabled: true)
 
@@ -86,16 +99,37 @@ class TemplateVersion < ApplicationRecord
     jurisdictions_without_mappings.each { |jurisdiction| integration_mappings.create(jurisdiction: jurisdiction) }
   end
 
+  def force_publish_now!
+    return unless scheduled?
+
+    updated_template_version = TemplateVersioningService.publish_version!(self, true)
+
+    WebsocketBroadcaster.push_update_to_relevant_users(
+      User.super_admin.kept.all.pluck(:id), # only super admins can force publish
+      Constants::Websockets::Events::TemplateVersion::DOMAIN,
+      Constants::Websockets::Events::TemplateVersion::TYPES[:update],
+      TemplateVersionBlueprint.render_as_hash(updated_template_version),
+    )
+  end
+
   private
 
   def create_integration_mappings_async
-    return unless published? && saved_change_to_status?
+    return unless !deprecation_reason_unscheduled? && saved_change_to_status?
 
     if Rails.env.test?
       ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
     else
       ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
     end
+  end
+
+  def notify_users_of_missing_requirements_mappings
+    return unless saved_change_to_status? && (published? || scheduled?)
+    relevant_integration_mappings =
+      integration_mappings.joins(:jurisdiction).where({ jurisdictions: { external_api_enabled: true } })
+
+    relevant_integration_mappings.each { |im| im.send_missing_requirements_mapping_communication }
   end
 
   def set_default_deprecation_reason

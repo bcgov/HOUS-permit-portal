@@ -74,7 +74,7 @@ export const TemplateVersionScreen = observer(function TemplateVersionScreen() {
             px="6"
             py="4"
             bg="greys.grey03"
-            w="var(--app-sidebar-remaining-width)"
+            w="100%"
             justifyContent={"flex-end"}
             boxShadow={"elevations.elevation02"}
           >
