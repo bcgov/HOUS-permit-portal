@@ -33,6 +33,33 @@ class PermitCollaboration < ApplicationRecord
     permit_application.template_version.requirement_blocks_json.dig(assigned_requirement_block_id, "name")
   end
 
+  def submission_collaboration_assignment_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_ASSIGNMENT,
+      "action_text" =>
+        (
+          if delegatee?
+            I18n.t(
+              "notification.permit_collaboration.submission_delegatee_collaboration_notification",
+              number: permit_application.number,
+            )
+          else
+            I18n.t(
+              "notification.permit_collaboration.submission_assignee_collaboration_notification",
+              number: permit_application.number,
+              requirement_block_name: assigned_requirement_block_name,
+            )
+          end
+        ),
+      "object_data" => {
+        "permit_application_id" => permit_application.id,
+        "collaborator_type" => collaborator_type,
+        "assigned_requirement_block_name" => assigned_requirement_block_name,
+      },
+    }
+  end
+
   private
 
   def validate_author_not_collaborator

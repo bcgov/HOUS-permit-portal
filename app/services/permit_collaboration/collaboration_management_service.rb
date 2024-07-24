@@ -30,6 +30,7 @@ class PermitCollaboration::CollaborationManagementService
 
     if permit_collaboration.submission?
       send_submission_collaboration_email!(permit_collaboration, permit_application.submitter)
+      send_submission_collaboration_notification(permit_collaboration)
     end
 
     permit_collaboration
@@ -60,6 +61,7 @@ class PermitCollaboration::CollaborationManagementService
           )
 
         send_submission_collaboration_email!(permit_collaboration, inviter, is_new_user)
+        send_submission_collaboration_notification(permit_collaboration)
 
         permit_collaboration
       end
@@ -89,6 +91,10 @@ class PermitCollaboration::CollaborationManagementService
     else
       PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration).deliver_later
     end
+  end
+
+  def send_submission_collaboration_notification(permit_collaboration)
+    NotificationService.publish_permit_collaboration_event(permit_collaboration)
   end
 
   def build_permit_collaboration(collaborator_id:, collaborator_type:, assigned_requirement_block_id: nil)

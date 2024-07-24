@@ -544,6 +544,9 @@ en:
       resubmission_notification: "Your revised application %{number} has been recieved by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
+    permit_collaboration:
+      submission_delegatee_collaboration_notification: "You have been assigned as a designated submitter for permit application %{number}."
+      submission_assignee_collaboration_notification: 'You have been assigned to collaborate on requirement "%{requirement_block_name}" for permit application %{number}.'
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
