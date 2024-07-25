@@ -46,6 +46,14 @@ type TPermitApplicationMetadataForm = {
   nickname: string
 }
 
+const FORMIO_DATA_CLASS_PREFIX = "formio-component-formSubmissionDataRSTsection"
+
+interface IRequirementBlockAssignmentNode {
+  requirementBlockId: string
+  panelNode: HTMLElement
+  attachmentNode: HTMLElement
+}
+
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
@@ -63,7 +71,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
-  const [accordionPanelNodes, setAccordionPanelNodes] = useState<HTMLDivElement[]>([])
+  const [requirementBlockAssignmentNodes, setRequirementBlockAssignmentNodes] = useState<
+    Array<IRequirementBlockAssignmentNode>
+  >([])
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -105,7 +115,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           continue
         }
 
-        updateAccordionNode()
+        updateRequirementBlockAssignmentNode()
       }
     })
 
@@ -411,7 +421,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               showHelpButton
               isEditing
               renderSaveButton={() => <SaveButton handleSave={handleSave} />}
-              setAccordionHeaderNodes={updateAccordionNode}
+              setAccordionHeaderNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
         )}
@@ -424,36 +434,46 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
-      {accordionPanelNodes
-        .filter(
-          (node) =>
-            node.querySelector(".card-title") &&
-            Array.from(node.classList).find((c) => c.startsWith("formio-component-formSubmissionDataRSTsection"))
+      {requirementBlockAssignmentNodes.map(({ requirementBlockId, attachmentNode }) => {
+        return createPortal(
+          <HStack mr={6}>
+            <CollaboratorAssignmentPopover
+              permitApplication={currentPermitApplication}
+              collaborationType={ECollaborationType.submission}
+              requirementBlockId={requirementBlockId}
+            />
+          </HStack>,
+          attachmentNode
         )
-        .map((node) => {
-          const titleNode = node.querySelector(".card-title")
-          const requirementBlockId = Array.from(node.classList)
-            .find((c) => c.startsWith("formio-component-formSubmissionDataRSTsection"))
-            .split("|RB")
-            .at(-1)
-          return createPortal(
-            <HStack mr={6}>
-              <CollaboratorAssignmentPopover
-                permitApplication={currentPermitApplication}
-                collaborationType={ECollaborationType.submission}
-                requirementBlockId={requirementBlockId}
-              />
-            </HStack>,
-            titleNode
-          )
-        })}
+      })}
     </Box>
   )
 
-  function updateAccordionNode() {
-    let accordionNodes = document.querySelectorAll<HTMLDivElement>(".formio-component-panel")
+  function updateRequirementBlockAssignmentNode() {
+    const accordionNodes = document.querySelectorAll<HTMLDivElement>(".formio-component-panel")
 
-    setAccordionPanelNodes?.(Array.from(accordionNodes))
+    const updatedRequirementBlockAssignmentNodes: Array<IRequirementBlockAssignmentNode> = Array.from(accordionNodes)
+      .filter((node) => {
+        return (
+          node.querySelector(".card-title") &&
+          Array.from(node.classList).find((c) => c.startsWith(FORMIO_DATA_CLASS_PREFIX))
+        )
+      })
+      .map((node) => {
+        const titleNode = node.querySelector<HTMLElement>(".card-title")
+        const requirementBlockId = Array.from(node.classList)
+          .find((c) => c.startsWith(FORMIO_DATA_CLASS_PREFIX))
+          .split("|RB")
+          .at(-1)
+
+        return {
+          requirementBlockId,
+          panelNode: node,
+          attachmentNode: titleNode,
+        }
+      })
+
+    setRequirementBlockAssignmentNodes(updatedRequirementBlockAssignmentNodes)
   }
 })
 
