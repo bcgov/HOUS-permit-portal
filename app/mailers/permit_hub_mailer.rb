@@ -48,6 +48,24 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: @user.email, template_key: :notify_permit_collaboration)
   end
 
+  def notify_new_or_unconfirmed_permit_collaboration(permit_collaboration:, user:)
+    @permit_collaboration = permit_collaboration
+    @user = user
+
+    return unless @permit_collaboration.permit_application
+
+    if !@user.discarded? && @user.submitter?
+      @user.skip_confirmation_notification!
+      @user.skip_invitation = true
+      @user.invite!(@permit_collaboration.collaborator.collaboratorable)
+      @user.invitation_sent_at = Time.now
+
+      @user.save!
+    end
+
+    send_mail(email: @user.email, template_key: :notify_new_or_unconfirmed_permit_collaboration)
+  end
+
   def notify_integration_mapping_external(external_api_key:, template_version:)
     @template_version = template_version
 

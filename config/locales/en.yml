@@ -118,7 +118,8 @@ en:
       remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
-      notify_permit_collaboration: "You have been assigned as a collaborator on a permit application"
+      notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
   arbitrary_message_construct:
     devise:
       failure:
@@ -551,8 +552,8 @@ en:
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
     permit_collaboration:
-      submission_delegatee_collaboration_notification: "You have been assigned as a designated submitter for permit application %{number}."
-      submission_assignee_collaboration_notification: 'You have been assigned to collaborate on requirement "%{requirement_block_name}" for permit application %{number}.'
+      submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
+      submission_assignee_collaboration_notification: 'Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}'
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

@@ -30,7 +30,7 @@ class PermitCollaboration::CollaborationManagementService
       end
 
       if permit_collaboration.submission?
-        send_submission_collaboration_email!(permit_collaboration, permit_application.submitter)
+        send_submission_collaboration_email!(permit_collaboration)
         send_submission_collaboration_notification(permit_collaboration)
       end
 
@@ -66,7 +66,7 @@ class PermitCollaboration::CollaborationManagementService
     end
   end
 
-  def send_submission_collaboration_email!(permit_collaboration, inviter)
+  def send_submission_collaboration_email!(permit_collaboration)
     user = permit_collaboration.collaborator.user
 
     should_send_registration_collaboration_email = (user.discarded? || !user.confirmed?)
@@ -81,9 +81,10 @@ class PermitCollaboration::CollaborationManagementService
     end
 
     if should_send_registration_collaboration_email
-      user.skip_confirmation_notification!
-      user.set_collaboration_invitation(permit_collaboration)
-      user.invite!(inviter)
+      PermitHubMailer.notify_new_or_unconfirmed_permit_collaboration(
+        permit_collaboration: permit_collaboration,
+        user: user,
+      ).deliver_later
     else
       PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration).deliver_later
     end

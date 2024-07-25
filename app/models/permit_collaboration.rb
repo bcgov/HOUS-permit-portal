@@ -43,12 +43,14 @@ class PermitCollaboration < ApplicationRecord
             I18n.t(
               "notification.permit_collaboration.submission_delegatee_collaboration_notification",
               number: permit_application.number,
+              author_name: permit_application.submitter.name,
             )
           else
             I18n.t(
               "notification.permit_collaboration.submission_assignee_collaboration_notification",
               number: permit_application.number,
               requirement_block_name: assigned_requirement_block_name,
+              author_name: permit_application.submitter.name,
             )
           end
         ),
