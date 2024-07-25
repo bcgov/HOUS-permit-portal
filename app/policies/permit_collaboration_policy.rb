@@ -5,9 +5,13 @@ class PermitCollaborationPolicy < ApplicationPolicy
     if record.submission?
       user == record.permit_application.submitter
     elsif record.review?
-      user.review_staff? && user.jurisdictions.find_by(id: recor.permit_application.jurisdiction_id).present?
+      user.review_staff? && user.jurisdictions.find_by(id: record.permit_application.jurisdiction_id).present?
     else
       false
     end
+  end
+
+  def re_invite?
+    record.submission? && record.collaborator.user.submitter? && user == record.permit_application.submitter
   end
 end

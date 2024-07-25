@@ -17,17 +17,17 @@ class Api::PermitCollaborationsController < Api::ApplicationController
   end
 
   def re_invite
+    authorize @permit_collaboration
     begin
       PermitCollaboration::CollaborationManagementService.new(@permit_application).send_submission_collaboration_email!(
         @permit_collaboration,
-        current_user,
       )
 
       render_success @permit_collaboration,
                      "permit_collaboration.re_invite_success",
                      { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
     rescue PermitCollaborationError => e
-      render_error "permit_collaboration.re_invite__error", message_opts: { error_message: e.message }
+      render_error "permit_collaboration.re_invite_error", message_opts: { error_message: e.message }
     end
   end
 
