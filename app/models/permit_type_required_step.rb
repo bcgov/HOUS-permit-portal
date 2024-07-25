@@ -15,9 +15,6 @@ class PermitTypeRequiredStep < ApplicationRecord
     other_requirements.customizations.empty? && !default
   end
 
-  validates :energy_step_required, presence: true
-  validates :zero_carbon_step_required, presence: true
-
   scope :customizations, -> { where(default: nil) }
 
   def other_requirements

@@ -11,12 +11,12 @@ interface IProps {
 
 export const ZeroCarbonSteps = function ZeroCarbonSteps({ compliance }: IProps) {
   const steps = Object.values(EZeroCarbonStep)
-  const numSteps = steps.length - 1
+  const numSteps = steps.length
   return (
     <Flex align="end" w="full">
       {[...Array(numSteps).keys()].map((stepOffset) => {
-        const step = steps[stepOffset + 1]
-        const isRequiredStep = step == compliance.requiredStep.slice(-1)
+        const step = steps[stepOffset]
+        const isRequiredStep = compliance.requiredStep && step == compliance.requiredStep.slice(-1)
         let height = 38
         switch (stepOffset) {
           case 0:
