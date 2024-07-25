@@ -111,9 +111,8 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
             <Collaborations
               permitCollaborations={existingAssignments}
               transitionToAssign={() => changeScreen(EScreen.collaborationAssignment)}
-              onUnassign={(permitCollaborationId) =>
-                permitApplication.unassignPermitCollaboration(permitCollaborationId)
-              }
+              onUnassign={permitApplication.unassignPermitCollaboration}
+              onReInvite={permitApplication.reInvitePermitCollaboration}
             />
           )}
           {currentScreen === EScreen.collaborationAssignment && (
@@ -251,11 +250,13 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
 
 const Collaborations = observer(function PermitCollaborations({
   transitionToAssign,
-  onUnassign,
   permitCollaborations,
+  onUnassign,
+  onReInvite,
 }: {
   transitionToAssign?: () => void
   onUnassign?: (permitCollaborationId: string) => Promise<void>
+  onReInvite?: (permitCollaborationId: string) => Promise<void>
   permitCollaborations: IPermitCollaboration[]
 }) {
   const { t } = useTranslation()
@@ -286,30 +287,55 @@ const Collaborations = observer(function PermitCollaborations({
           {permitCollaborations.map((permitCollaboration) => {
             const name = permitCollaboration.collaborator.user.name
             const organization = permitCollaboration.collaborator.user.organization
+            const isConfirmedUser =
+              !permitCollaboration.collaborator.user?.isDiscarded &&
+              !permitCollaboration.collaborator.user?.isUnconfirmed
+            const isEligibleForReInvite = permitCollaboration.collaborator.user?.isSubmitter
             return (
-              <HStack
+              <Stack
                 key={permitCollaboration.id}
-                spacing={2}
                 px={4}
                 py={"0.625rem"}
                 border={"1px solid"}
                 borderColor={"border.light"}
                 borderRadius={"sm"}
+                bg={!isEligibleForReInvite && !isConfirmedUser ? "greys.grey03" : undefined}
               >
-                <Avatar name={name} size={"sm"} />
-                <Box flex={1} h={"full"} ml={2}>
-                  <Text fontWeight={700}>{name}</Text>
-                  {organization && <Text fontSize={"sm"}>{organization}</Text>}
-                </Box>
-                <RequestLoadingButton
-                  onClick={() => onUnassign?.(permitCollaboration.id)}
-                  size={"sm"}
-                  fontSize={"sm"}
-                  variant={"link"}
-                >
-                  {t("permitCollaboration.popover.collaborations.unassignButton")}
-                </RequestLoadingButton>
-              </HStack>
+                <HStack spacing={2}>
+                  <Avatar name={name} size={"sm"} />
+                  <Box flex={1} h={"full"} ml={2}>
+                    <Text fontWeight={700}>{name}</Text>
+                    {organization && <Text fontSize={"sm"}>{organization}</Text>}
+                  </Box>
+
+                  <RequestLoadingButton
+                    onClick={() => onUnassign?.(permitCollaboration.id)}
+                    size={"sm"}
+                    fontSize={"sm"}
+                    variant={"link"}
+                  >
+                    {t("permitCollaboration.popover.collaborations.unassignButton")}
+                  </RequestLoadingButton>
+                </HStack>
+                {!isConfirmedUser && (
+                  <Text fontSize={"xs"} color={"text.secondary"}>
+                    {isEligibleForReInvite ? (
+                      <>
+                        {t("permitCollaboration.popover.collaborations.unconfirmed")}
+                        <RequestLoadingButton
+                          onClick={onReInvite ? () => onReInvite(permitCollaboration.id) : undefined}
+                          variant={"link"}
+                          fontStyle={"italic"}
+                        >
+                          {t("permitCollaboration.popover.collaborations.resendInvite")}
+                        </RequestLoadingButton>
+                      </>
+                    ) : (
+                      t("permitCollaboration.popover.collaborations.inEligibleForReInvite")
+                    )}
+                  </Text>
+                )}
+              </Stack>
             )
           })}
         </Stack>

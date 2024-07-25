@@ -359,7 +359,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
-      addPermitCollaboration(permitCollaborationData: IPermitCollaboration) {
+      updatePermitCollaboration(permitCollaborationData: IPermitCollaboration) {
         if (permitCollaborationData.collaborator) {
           self.rootStore.collaboratorStore.mergeUpdate(permitCollaborationData.collaborator, "collaboratorMap")
         }
@@ -390,7 +390,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         })
         if (response.ok) {
           const { data: permitCollaboration } = response.data
-          self.addPermitCollaboration(permitCollaboration)
+          self.updatePermitCollaboration(permitCollaboration)
           return self.getPermitCollaboration(permitCollaboration.id)
         }
         return false
@@ -412,7 +412,18 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         if (response.ok) {
           const { data: permitCollaboration } = response.data
-          self.addPermitCollaboration(permitCollaboration)
+          self.updatePermitCollaboration(permitCollaboration)
+          return self.getPermitCollaboration(permitCollaboration.id)
+        }
+
+        return false
+      }),
+      reInvitePermitCollaboration: flow(function* (permitCollaborationId: string) {
+        const response = yield self.environment.api.reInvitePermitCollaboration(permitCollaborationId)
+
+        if (response.ok) {
+          const { data: permitCollaboration } = response.data
+          self.updatePermitCollaboration(permitCollaboration)
           return self.getPermitCollaboration(permitCollaboration.id)
         }
 

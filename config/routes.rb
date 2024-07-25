@@ -131,7 +131,9 @@ Rails.application.routes.draw do
       post "revision_requests/finalize", on: :member, to: "permit_applications#finalize_revision_requests"
     end
 
-    resources :permit_collaborations, only: %i[destroy]
+    resources :permit_collaborations, only: %i[destroy] do
+      post "re_invite", on: :member, to: "permit_collaborations#re_invite"
+    end
 
     patch "profile", to: "users#profile"
     resources :users, only: %i[destroy update] do

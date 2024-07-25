@@ -358,6 +358,9 @@ const options = {
               title: "Collaborators",
               assignButton: "Assign",
               unassignButton: "Unassign",
+              unconfirmed: "Unconfirmed.",
+              resendInvite: "Resend invite?",
+              inEligibleForReInvite: "Ineligible for re-invite.",
             },
             assignment: {
               title: "Assign collaborator",

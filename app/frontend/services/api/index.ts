@@ -312,6 +312,12 @@ export class Api {
     return this.client.delete<ApiResponse<IPermitCollaboration>>(`/permit_collaborations/${id}`)
   }
 
+  async reInvitePermitCollaboration(permitCollaborationId: string) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_collaborations/${permitCollaborationId}/re_invite`
+    )
+  }
+
   async generatePermitApplicationMissingPdfs(id: string) {
     return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
   }

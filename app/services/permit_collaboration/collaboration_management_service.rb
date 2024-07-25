@@ -11,29 +11,31 @@ class PermitCollaboration::CollaborationManagementService
     collaborator_type:,
     assigned_requirement_block_id: nil
   )
-    permit_collaboration =
-      build_permit_collaboration(
-        collaborator_id: collaborator_id,
-        collaborator_type: collaborator_type,
-        assigned_requirement_block_id: assigned_requirement_block_id,
-      )
+    ActiveRecord::Base.transaction do
+      permit_collaboration =
+        build_permit_collaboration(
+          collaborator_id: collaborator_id,
+          collaborator_type: collaborator_type,
+          assigned_requirement_block_id: assigned_requirement_block_id,
+        )
 
-    authorize_collaboration.call(permit_collaboration) unless authorize_collaboration.nil?
+      authorize_collaboration.call(permit_collaboration) unless authorize_collaboration.nil?
 
-    unless permit_collaboration.save
-      raise PermitCollaborationError,
-            I18n.t(
-              "services.permit_collaboration.collaboration_management.assign_collaborator_error",
-              error_message: permit_collaboration.errors.full_messages.join(", "),
-            )
+      unless permit_collaboration.save
+        raise PermitCollaborationError,
+              I18n.t(
+                "services.permit_collaboration.collaboration_management.assign_collaborator_error",
+                error_message: permit_collaboration.errors.full_messages.join(", "),
+              )
+      end
+
+      if permit_collaboration.submission?
+        send_submission_collaboration_email!(permit_collaboration, permit_application.submitter)
+        send_submission_collaboration_notification(permit_collaboration)
+      end
+
+      permit_collaboration
     end
-
-    if permit_collaboration.submission?
-      send_submission_collaboration_email!(permit_collaboration, permit_application.submitter)
-      send_submission_collaboration_notification(permit_collaboration)
-    end
-
-    permit_collaboration
   end
 
   def invite_new_submission_collaborator!(
@@ -46,7 +48,6 @@ class PermitCollaboration::CollaborationManagementService
     ActiveRecord::Base.transaction do
       begin
         user = User.find_by(email: user_params[:email].strip)
-        is_new_user = user.blank?
 
         user ||= create_submission_user!(user_params)
 
@@ -65,17 +66,15 @@ class PermitCollaboration::CollaborationManagementService
     end
   end
 
-  private
-
   def send_submission_collaboration_email!(permit_collaboration, inviter)
     user = permit_collaboration.collaborator.user
 
-    should_send_registration_collaboration_email = user.discarded? || !user.confirmed?
+    should_send_registration_collaboration_email = (user.discarded? || !user.confirmed?)
 
     # Only submitters are invitable initially
-    # But their role might be upgraded after they are invited
+    # But their role might be upgraded after they are invited once.
     # As long as they were invited once as a submitter and the user doesn't need to be re-registered into the system,
-    # they can be invited as a collaborator
+    # they can be invited as a collaborator i.e. we shouldn't send existing archived or unconfirmed reviewer staff a new registration email
     if !user.submitter? && should_send_registration_collaboration_email
       raise PermitCollaborationError,
             I18n.t("services.permit_collaboration.collaboration_management.submission_collaborator_must_be_submitter")
@@ -89,6 +88,8 @@ class PermitCollaboration::CollaborationManagementService
       PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration).deliver_later
     end
   end
+
+  private
 
   def send_submission_collaboration_notification(permit_collaboration)
     NotificationService.publish_permit_collaboration_event(permit_collaboration)

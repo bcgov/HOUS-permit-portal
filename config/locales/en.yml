@@ -102,7 +102,7 @@ en:
             user:
               incorrect_jurisdiction: "must be from the same jurisdiction as the permit application for review collaboration"
               incorrect_user: "cannot be the same as the requester for submission collaboration"
-              submission_collaborator_must_be_submitter: "needs to be submitter for submission collaboration"
+              submission_collaborator_must_be_submitter: "ineligible collaborator for submission collaboration"
   application_mailer:
     subject_start: "Building Permit Hub"
     subjects:
@@ -412,6 +412,12 @@ en:
       destroy_error:
         title: Error unassigning permit_collaboration
         message: "%{error_message}"
+      re_invite_success:
+        title: ""
+        message: "Collaborator re-invited successfully!"
+      re_invite_error:
+        title: ""
+        message: "%{error_message}"
     site_configuration:
       update_success:
         title: ""
@@ -499,7 +505,7 @@ en:
         add_collaborator_error: "Failed to add collaborator: %{error_message}"
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
-        submission_collaborator_must_be_submitter: "Can only invite submitters to collaborate for submission"
+        submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
   formio:
     requirement_template:
       completion_title: "Completion"

@@ -1,5 +1,5 @@
 class Api::PermitCollaborationsController < Api::ApplicationController
-  before_action :set_permit_collaboration, only: [:destroy]
+  before_action :set_permit_collaboration, only: %i[re_invite destroy]
 
   def destroy
     authorize @permit_collaboration
@@ -13,6 +13,21 @@ class Api::PermitCollaborationsController < Api::ApplicationController
                    message_opts: {
                      error_message: @permit_collaboration.errors.full_messages.join(", "),
                    }
+    end
+  end
+
+  def re_invite
+    begin
+      PermitCollaboration::CollaborationManagementService.new(@permit_application).send_submission_collaboration_email!(
+        @permit_collaboration,
+        current_user,
+      )
+
+      render_success @permit_collaboration,
+                     "permit_collaboration.re_invite_success",
+                     { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
+    rescue PermitCollaborationError => e
+      render_error "permit_collaboration.re_invite__error", message_opts: { error_message: e.message }
     end
   end
 
