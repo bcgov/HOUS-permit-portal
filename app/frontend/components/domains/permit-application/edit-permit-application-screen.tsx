@@ -16,7 +16,6 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -34,8 +33,11 @@ import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import {
+  BlockCollaboratorAssignmentManagement,
+  IRequirementBlockAssignmentNode,
+} from "./block-collaborator-assignment-management"
 import { ChecklistSideBar } from "./checklist-sidebar"
-import { CollaboratorAssignmentPopover } from "./collaborator-assignment-popover"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
@@ -47,12 +49,6 @@ type TPermitApplicationMetadataForm = {
 }
 
 const FORMIO_DATA_CLASS_PREFIX = "formio-component-formSubmissionDataRSTsection"
-
-interface IRequirementBlockAssignmentNode {
-  requirementBlockId: string
-  panelNode: HTMLElement
-  attachmentNode: HTMLElement
-}
 
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
   const { currentPermitApplication, error } = usePermitApplication()
@@ -434,16 +430,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
-      {requirementBlockAssignmentNodes.map(({ requirementBlockId, attachmentNode }) => {
-        return createPortal(
-          <HStack mr={6}>
-            <CollaboratorAssignmentPopover
-              permitApplication={currentPermitApplication}
-              collaborationType={ECollaborationType.submission}
-              requirementBlockId={requirementBlockId}
-            />
-          </HStack>,
-          attachmentNode
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
+        return (
+          <BlockCollaboratorAssignmentManagement
+            key={requirementBlockAssignmentNode.requirementBlockId}
+            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+            permitApplication={currentPermitApplication}
+            collaborationType={ECollaborationType.submission}
+          />
         )
       })}
     </Box>
