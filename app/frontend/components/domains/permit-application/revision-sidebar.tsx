@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react"
 import { CaretRight, ChatDots, PaperPlaneTilt } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { MutableRefObject, useEffect, useState } from "react"
+import React, { MutableRefObject, useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -131,7 +131,6 @@ export const RevisionSideBar = observer(
     useEffect(() => {
       const handleOpenEvent = (event) => handleOpenRequestRevision(event, fields)
       // Listener needs to be re-registered every time the tab index changes
-      document.removeEventListener("openRequestRevision", handleOpenEvent)
       document.addEventListener("openRequestRevision", handleOpenEvent)
       return () => {
         document.removeEventListener("openRequestRevision", handleOpenEvent)
@@ -190,11 +189,13 @@ export const RevisionSideBar = observer(
       borderBottomColor: "theme.yellowLight",
       borderRadius: 0,
     }
-    const sortedPastRevisionRequests = Array.from(
-      (selectedPastSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []
-    ).sort((a, b) => {
-      return a.createdAt - b.createdAt
-    })
+
+    const sortedPastRevisionRequests = useMemo(() => {
+      return Array.from((selectedPastSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []).sort((a, b) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      })
+    }, [JSON.stringify(selectedPastSubmissionVersion?.revisionRequests)])
+
     return (
       <>
         <Hide below="md">

@@ -1,3 +1,4 @@
+import * as R from "ramda"
 import { IFormIORequirement, ISingleRequirementFormJson, ISubmissionData } from "../types/types"
 
 export const singleRequirementFormJson = (requirementJson: IFormIORequirement): ISingleRequirementFormJson => {
@@ -27,7 +28,7 @@ export const compareSubmissionData = (beforeSubmissionData: ISubmissionData, aft
 
   // Helper function to compare two values
   const isDifferent = (value1: any, value2: any): boolean => {
-    return JSON.stringify(value1) !== JSON.stringify(value2)
+    return !R.equals(value1, value2)
   }
 
   for (const sectionKey in afterSubmissionData.data) {
@@ -36,11 +37,10 @@ export const compareSubmissionData = (beforeSubmissionData: ISubmissionData, aft
       const beforeSection = beforeSubmissionData.data[sectionKey] || {}
 
       for (const fieldKey in afterSection) {
-        if (afterSection.hasOwnProperty(fieldKey)) {
-          if (isDifferent(afterSection[fieldKey], beforeSection[fieldKey])) {
-            changedFields.push(fieldKey)
-          }
-        }
+        if (!afterSection.hasOwnProperty(fieldKey) || !isDifferent(afterSection[fieldKey], beforeSection[fieldKey]))
+          continue
+
+        changedFields.push(fieldKey)
       }
     }
   }

@@ -180,13 +180,13 @@ export const RequirementForm = observer(
       navigate("step-code", { state: { background: location } })
     }
 
-    const handleOpenContactAutofill = async (_event) => {
-      setAutofillContactKey(_event.detail.key)
+    const handleOpenContactAutofill = async (event) => {
+      setAutofillContactKey(event.detail.key)
       onContactsOpen()
     }
 
-    const handleOpenPreviousSubmission = async (_event) => {
-      setPreviousSubmissionKey(_event.detail.key)
+    const handleOpenPreviousSubmission = async (event) => {
+      setPreviousSubmissionKey(event.detail.key)
       onPreviousSubmissionOpen()
     }
 
