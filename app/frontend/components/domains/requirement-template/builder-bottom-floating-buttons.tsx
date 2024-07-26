@@ -21,9 +21,9 @@ export function BuilderBottomFloatingButtons({ isCollapsedAll, setIsCollapsedAll
       bg="greys.grey03"
       position="sticky"
       bottom={0}
-      px={6}
-      py={4}
-      zIndex={10}
+      px={4}
+      py={2.5}
+      zIndex="sticky"
       borderWidth={1}
       borderColor="border.light"
       shadow="drop"

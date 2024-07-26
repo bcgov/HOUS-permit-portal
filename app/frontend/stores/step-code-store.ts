@@ -26,13 +26,13 @@ export const StepCodeStoreModel = types
     getStepCode(id: string) {
       return self.stepCodesMap.get(id)
     },
-    getEnergyStepOptions(allowZero: boolean = false): EEnergyStep[] {
+    getEnergyStepOptions(allowNull: boolean = false): EEnergyStep[] {
       const { energySteps } = self.selectOptions
-      return [...energySteps, allowZero && "0"].filter((outFalsy) => outFalsy) as EEnergyStep[]
+      return (allowNull ? [...energySteps, null] : energySteps) as EEnergyStep[]
     },
-    getZeroCarbonStepOptions(allowZero: boolean = false): EZeroCarbonStep[] {
+    getZeroCarbonStepOptions(allowNull: boolean = false): EZeroCarbonStep[] {
       const { zeroCarbonSteps } = self.selectOptions
-      return [...zeroCarbonSteps, allowZero && "0"].filter((outFalsy) => outFalsy) as EZeroCarbonStep[]
+      return (allowNull ? [...zeroCarbonSteps, null] : zeroCarbonSteps) as EZeroCarbonStep[]
     },
   }))
   .actions((self) => ({
