@@ -53,6 +53,20 @@ class PermitApplication < ApplicationRecord
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
+  def users_by_collaboration_type(collaboration_type)
+    User
+      .joins(collaborations: :permit_collaborations)
+      .where(
+        collaborations: {
+          permit_collaborations: {
+            collaboration_type: collaboration_type,
+            permit_application_id: id,
+          },
+        },
+      )
+      .distinct
+  end
+
   # Helper method to get the latest SubmissionVersion
   def latest_submission_version
     submission_versions.order(created_at: :desc).first
@@ -96,7 +110,12 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       using_current_template_version: using_current_template_version,
+      user_ids_with_submission_edit_permissions: [submitter.id] + users_by_collaboration_type(:submission).pluck(:id),
     }
+  end
+
+  def collaborator?(user_id:, collaboration_type:)
+    users_by_collaboration_type(collaboration_type).exists?(id: user_id)
   end
 
   def indexed_using_current_template_version
@@ -135,7 +154,7 @@ class PermitApplication < ApplicationRecord
     jurisdiction.prefix
   end
 
-  def collaborators
+  def notifiable_users
     relevant_collaborators = [submitter]
 
     if submitted?

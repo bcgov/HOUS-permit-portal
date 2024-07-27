@@ -40,6 +40,7 @@ class PromoteUser
   end
 
   def merge_collaborations
+    # @todo reindex permit applications for relevant collaborations
     invited_user.collaborations.each do |invited_user_collaborator|
       existing_user_collaborator =
         existing_user.collaborations.find_by(collaboratorable: invited_user_collaborator.collaboratorable)
