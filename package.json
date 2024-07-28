@@ -16,11 +16,13 @@
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "@vitejs/plugin-react": "^4.2.1",
-    "cypress": "^13.13.0",
+    "allure-commandline": "^2.29.0",
+    "cypress": "^13.13.1",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "^7.22.0",
     "husky": "^8.0.3",
     "lint-staged": "^11.0.0",
+    "mocha-allure-reporter": "^1.4.0",
     "prettier": "^3.1.0",
     "prettier-plugin-organize-imports": "^3.2.4",
     "react": "^18.2.0",
@@ -89,6 +91,8 @@
     }
   },
   "scripts": {
+    "browser:chrome": "npx cypress run --browser=chrome --headed --spec cypress/Integration/*.js --reporter mocha-allure-reporter",
+    "report:allure": "allure generate allure-results --clean -o allure-report && allure open  allure-report",
     "dev": "bin/vite dev",
     "build": "bundle exec vite build",
     "lint": "eslint app/frontend/**/*.ts[x]",
@@ -99,6 +103,7 @@
     "generate-pdf": " node public/vite-ssr/ssr.js",
     "e2e:run": "npx cypress run"
   },
+  "author": "Tanmay Jalindre",
   "lint-staged": {
     "*.{js,css,md,rb,ts,tsx}": [
       "prettier --write"

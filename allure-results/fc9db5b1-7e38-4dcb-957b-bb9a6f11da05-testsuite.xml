@@ -1,0 +1,40 @@
+<?xml version='1.0'?>
+<ns2:test-suite xmlns:ns2='urn:model.allure.qatools.yandex.ru' start='1722201645786' stop='1722201651056'>
+    <name>API tests</name>
+    <title>API tests</title>
+    <test-cases>
+        <test-case start='1722201645786' status='broken' stop='1722201651028'>
+            <name>API test</name>
+            <title>API test</title>
+            <labels/>
+            <parameters/>
+            <steps/>
+            <attachments/>
+            <failure>
+                <message>Timed out retrying after 5000ms: `cy.wait()` timed out waiting `5000ms` for the 1st request to the route: `loginPage`. No request ever occurred.
+                
+                https://on.cypress.io/wait</message>
+                <stack-trace>CypressError: Timed out retrying after 5000ms: `cy.wait()` timed out waiting `5000ms` for the 1st request to the route: `loginPage`. No request ever occurred.
+                
+                https://on.cypress.io/wait
+                    at cypressErr (http://localhost:61249/__cypress/runner/cypress_runner.js:76024:18)
+                    at Object.errByPath (http://localhost:61249/__cypress/runner/cypress_runner.js:76078:10)
+                    at checkForXhr (http://localhost:61249/__cypress/runner/cypress_runner.js:135653:84)
+                    at &lt;unknown> (http://localhost:61249/__cypress/runner/cypress_runner.js:135679:28)
+                    at tryCatcher (http://localhost:61249/__cypress/runner/cypress_runner.js:1807:23)
+                    at Promise.attempt.Promise.try (http://localhost:61249/__cypress/runner/cypress_runner.js:4315:29)
+                    at whenStable (http://localhost:61249/__cypress/runner/cypress_runner.js:144055:68)
+                    at &lt;unknown> (http://localhost:61249/__cypress/runner/cypress_runner.js:143996:14)
+                    at tryCatcher (http://localhost:61249/__cypress/runner/cypress_runner.js:1807:23)
+                    at Promise._settlePromiseFromHandler (http://localhost:61249/__cypress/runner/cypress_runner.js:1519:31)
+                    at Promise._settlePromise (http://localhost:61249/__cypress/runner/cypress_runner.js:1576:18)
+                    at Promise._settlePromise0 (http://localhost:61249/__cypress/runner/cypress_runner.js:1621:10)
+                    at Promise._settlePromises (http://localhost:61249/__cypress/runner/cypress_runner.js:1701:18)
+                    at Promise._fulfill (http://localhost:61249/__cypress/runner/cypress_runner.js:1645:18)
+                    at &lt;unknown> (http://localhost:61249/__cypress/runner/cypress_runner.js:5450:46)
+                From Your Spec Code:
+                    at Context.eval (webpack://hous-permit-potal/./cypress/Integration/API_Login.js:7:7)</stack-trace>
+            </failure>
+        </test-case>
+    </test-cases>
+</ns2:test-suite>

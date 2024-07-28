@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+<ns2:test-suite xmlns:ns2='urn:model.allure.qatools.yandex.ru' start='1722201803023' stop='1722201823120'>
+    <name>Login As Super Admin</name>
+    <title>Login As Super Admin</title>
+    <test-cases>
+        <test-case start='1722201803023' status='failed' stop='1722201823097'>
+            <name> Login</name>
+            <title> Login</title>
+            <labels/>
+            <parameters/>
+            <steps/>
+            <attachments/>
+            <failure>
+                <message>Timed out retrying after 4000ms: Expected to find content: 'Basic BCeID' but never did.</message>
+                <stack-trace>AssertionError: Timed out retrying after 4000ms: Expected to find content: 'Basic BCeID' but never did.
+                    at Context.eval (webpack://hous-permit-potal/./cypress/Integration/ui_LoginAsSuperAdmin.js:15:11)</stack-trace>
+            </failure>
+        </test-case>
+    </test-cases>
+</ns2:test-suite>
