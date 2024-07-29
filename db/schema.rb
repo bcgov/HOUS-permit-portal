@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -374,6 +374,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_162543) do
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "_discard"
     t.index ["reason_code"],
             name: "index_revision_reasons_on_reason_code",
             unique: true
