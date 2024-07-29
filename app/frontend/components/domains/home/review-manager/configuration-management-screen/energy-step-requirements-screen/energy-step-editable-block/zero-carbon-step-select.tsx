@@ -12,7 +12,6 @@ import {
 import { CaretDown } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useMst } from "../../../../../../../setup/root"
 import { EZeroCarbonStep } from "../../../../../../../types/enums"
@@ -22,20 +21,20 @@ interface IProps {
   onChange: (event: any) => void
   value: EZeroCarbonStep
   isDisabled?: boolean
-  allowZero?: boolean
+  allowNull?: boolean
 }
 
 export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
   onChange,
   value,
   isDisabled,
-  allowZero,
+  allowNull,
 }: IProps) {
   const {
     stepCodeStore: { getZeroCarbonStepOptions },
   } = useMst()
 
-  const options = getZeroCarbonStepOptions(allowZero)
+  const options = getZeroCarbonStepOptions(allowNull)
 
   return (
     <Popover placement="bottom-end">
@@ -54,9 +53,11 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {!R.isNil(value)
-                  ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
-                  : t(`ui.selectPlaceholder`)}
+                {value === undefined
+                  ? t(`ui.selectPlaceholder`)
+                  : value
+                    ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
+                    : t(`${i18nPrefix}.notRequired`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -74,12 +75,14 @@ export const ZeroCarbonStepSelect = observer(function ZeroCarbonStepSelect({
                     px={2}
                     py={1.5}
                     w="full"
-                    borderTopWidth={value == "0" ? 1 : undefined}
+                    borderTopWidth={value ? undefined : 1}
                     borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >
-                    {t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)}
+                    {value
+                      ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${value}`)
+                      : t(`${i18nPrefix}.notRequired`)}
                   </Flex>
                 ))}
               </VStack>

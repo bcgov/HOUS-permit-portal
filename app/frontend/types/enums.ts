@@ -153,6 +153,7 @@ export enum ERequirementType {
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
+  pidInfo = "pid_info",
 }
 
 export enum ENumberUnit {
@@ -253,14 +254,12 @@ export enum EFossilFuelsPresence {
 }
 
 export enum EEnergyStep {
-  zero = "0",
   three = "3",
   four = "4",
   five = "5",
 }
 
 export enum EZeroCarbonStep {
-  zero = "0",
   one = "1",
   two = "2",
   three = "3",

@@ -12,7 +12,6 @@ import {
 import { CaretDown } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useMst } from "../../../../../../../setup/root"
 import { EEnergyStep } from "../../../../../../../types/enums"
@@ -22,14 +21,14 @@ interface IProps {
   onChange: (event: any) => void
   value: EEnergyStep
   isDisabled?: boolean
-  allowZero?: boolean
+  allowNull?: boolean
 }
 
-export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled, allowZero }: IProps) {
+export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, value, isDisabled, allowNull }: IProps) {
   const {
     stepCodeStore: { getEnergyStepOptions },
   } = useMst()
-  const options = getEnergyStepOptions(allowZero)
+  const options = getEnergyStepOptions(allowNull)
   return (
     <Popover placement="bottom-end">
       {({ onClose }) => (
@@ -47,7 +46,11 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                 shadow="base"
                 isDisabled={isDisabled}
               >
-                {!R.isNil(value) ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`ui.selectPlaceholder`)}
+                {value === undefined
+                  ? t(`ui.selectPlaceholder`)
+                  : value
+                    ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`)
+                    : t(`${i18nPrefix}.notRequired`)}
               </Input>
               <InputRightElement children={<CaretDown color="gray.300" />} />
             </InputGroup>
@@ -65,12 +68,12 @@ export const EnergyStepSelect = observer(function EnergyStepSelect({ onChange, v
                     px={2}
                     py={1.5}
                     w="full"
-                    borderTopWidth={value === "0" ? 1 : undefined}
+                    borderTopWidth={value ? undefined : 1}
                     borderColor="border.light"
                     cursor="pointer"
                     _hover={{ bg: "hover.blue" }}
                   >
-                    {t(`${i18nPrefix}.stepRequired.energy.options.${value}`)}
+                    {value ? t(`${i18nPrefix}.stepRequired.energy.options.${value}`) : t(`${i18nPrefix}.notRequired`)}
                   </Flex>
                 ))}
               </VStack>

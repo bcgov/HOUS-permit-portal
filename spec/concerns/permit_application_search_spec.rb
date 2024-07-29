@@ -20,25 +20,11 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
   end
 
   let!(:submitted_permit_applications) do
-    create_list(
-      :permit_application,
-      3,
-      submitter: submitter,
-      jurisdiction: jurisdiction,
-      status: "submitted",
-      submitted_at: Time.now,
-    )
+    create_list(:permit_application, 3, :newly_submitted, submitter: submitter, jurisdiction: jurisdiction)
   end
 
   let!(:submitted_permit_applications_different_jur) do
-    create_list(
-      :permit_application,
-      3,
-      submitter: submitter,
-      jurisdiction: other_jurisdiction,
-      status: "submitted",
-      submitted_at: Time.now,
-    )
+    create_list(:permit_application, 3, :newly_submitted, submitter: submitter, jurisdiction: other_jurisdiction)
   end
 
   let!(:other_permit_applications_same_jur) do

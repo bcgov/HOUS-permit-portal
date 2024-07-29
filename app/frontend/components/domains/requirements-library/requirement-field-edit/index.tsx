@@ -27,6 +27,7 @@ import { isContactRequirement, isMultiOptionRequirement } from "../../../../util
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
+import { PidInfoEdit } from "./pid-info-edit"
 import { IControlProps } from "./types"
 
 export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableGroupProps<TFieldValues> & {
@@ -427,6 +428,39 @@ const requirementsComponentMap = {
         contactFieldItems={contactFieldItemTypes}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
+        {...rest}
+      />
+    )
+  },
+
+  [ERequirementType.pidInfo]: function <TFieldValues>({ editableLabelProps, ...rest }) {
+    const pidInfoFieldItemTypes: Array<{
+      type: ERequirementType
+      key: string
+      label: string
+      containerProps?: BoxProps
+    }> = [
+      { type: ERequirementType.text, key: "pid", label: "PID" }, //pid or pin?
+      { type: ERequirementType.text, key: "folio_number", label: "Folio Number" }, //folio
+      {
+        type: ERequirementType.address,
+        key: "address",
+        label: "Address",
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
+    ]
+    return (
+      <PidInfoEdit<TFieldValues>
+        requirementType={ERequirementType.pidInfo}
+        fieldItems={pidInfoFieldItemTypes}
+        editableLabelProps={editableLabelProps}
         {...rest}
       />
     )

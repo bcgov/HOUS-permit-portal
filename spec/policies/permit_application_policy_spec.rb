@@ -62,7 +62,7 @@ RSpec.describe PermitApplicationPolicy do
     let(:user) { submitter }
 
     let(:submitted_permit_application) do
-      FactoryBot.create(:permit_application, submitter: submitter, status: :submitted)
+      FactoryBot.create(:permit_application, :newly_submitted, submitter: submitter)
     end
 
     subject { described_class.new(submitter, submitted_permit_application) }

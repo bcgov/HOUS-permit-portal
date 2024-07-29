@@ -30,6 +30,9 @@
 en:
   activerecord:
     attributes:
+      contact:
+        cell: "Mobile no."
+        phone: "Phone no."
     errors:
       models:
         site_configuration:
@@ -472,6 +475,8 @@ en:
     requirement_block:
       optional_block_confirmation_requirement_label: "I acknowledge that all fields in this block are either complete, or not applicable."
     requirement:
+      multi_grid:
+        default_add: "Add more"
       contact:
         first_name: "First name"
         last_name: "Last name"
