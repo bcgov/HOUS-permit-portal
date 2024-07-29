@@ -393,6 +393,11 @@ const options = {
           reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
           reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
           newVersionPublished: "New version of template has been published - please review changes",
+          card: {
+            collaborateButton: "Collaborate",
+            collaborationCallout:
+              "<1>{{authorName}} has assigned you to this permit.</1> Collaborate on this permit application.",
+          },
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
