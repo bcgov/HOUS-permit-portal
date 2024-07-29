@@ -57,9 +57,9 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   )
   const existingCollaboratorIds = new Set<string>(existingAssignments.map((a) => a.collaborator.id))
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const assignConfirmationModalDisclosureProps = useDisclosure()
   const createConfirmationModalDisclosureProps = useDisclosure()
   const [currentScreen, setCurrentScreen] = React.useState<EScreen>(INITIAL_SCREEN)
+  const [openAssignmentConfirmationModals, setOpenAssignmentConfirmationModals] = React.useState<Set<string>>([])
   const contentRef = React.useRef<HTMLDivElement>(null)
 
   const changeScreen = (screen: EScreen) => {
@@ -73,16 +73,34 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   useEffect(() => {
     if (isOpen) {
       changeScreen(INITIAL_SCREEN)
+      setOpenAssignmentConfirmationModals(new Set())
     }
   }, [isOpen])
 
   const onPopoverClose = () => {
-    if (assignConfirmationModalDisclosureProps.isOpen || createConfirmationModalDisclosureProps.isOpen) {
+    if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.isOpen) {
       return
     }
 
     onClose()
   }
+
+  const openAssignmentPopover = (collaboratorId: string) => {
+    setOpenAssignmentConfirmationModals((prev) => new Set([...prev, collaboratorId]))
+  }
+  const closeAssignmentPopover = (collaboratorId: string) => {
+    setOpenAssignmentConfirmationModals((prev) => {
+      const newSet = new Set([...prev])
+      newSet.delete(collaboratorId)
+      return newSet
+    })
+  }
+
+  const createAssignmentConfirmationModalDisclosureProps = (collaboratorId: string) => ({
+    isOpen: openAssignmentConfirmationModals.has(collaboratorId),
+    onOpen: () => openAssignmentPopover(collaboratorId),
+    onClose: () => closeAssignmentPopover(collaboratorId),
+  })
 
   const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
     permitApplication.inviteNewCollaborator(ECollaboratorType.assignee, user, requirementBlockId)
@@ -122,7 +140,7 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
               }
               onClose={() => changeScreen(EScreen.collaborations)}
               takenCollaboratorIds={existingCollaboratorIds}
-              confirmationModalDisclosureProps={assignConfirmationModalDisclosureProps}
+              getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
               transitionToInvite={() => changeScreen(EScreen.collaboratorInvite)}
             />
           )}
@@ -143,13 +161,15 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
   onSelect,
   takenCollaboratorIds = new Set<string>(),
   onClose,
-  confirmationModalDisclosureProps,
+  getConfirmationModalDisclosureProps,
   transitionToInvite,
 }: {
-  onSelect?: (collaboratorId?: string) => Promise<void>
+  onSelect: (collaboratorId?: string) => Promise<void>
   takenCollaboratorIds?: Set<string>
   onClose?: () => void
-  confirmationModalDisclosureProps?: ReturnType<typeof useDisclosure>
+  getConfirmationModalDisclosureProps?: (
+    collaboratorId: string
+  ) => Partial<Omit<ReturnType<typeof useDisclosure>, "onToggle">>
   transitionToInvite?: () => void
 }) {
   const { collaboratorStore } = useMst()
@@ -160,6 +180,13 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
     collaboratorStore.search()
     return () => collaboratorStore.setQuery(null)
   }, [])
+
+  const onSelectCreator = (collaboratorId: string) => {
+    return async (onClose: () => void) => {
+      await onSelect(collaboratorId)
+      onClose()
+    }
+  }
 
   return (
     <>
@@ -230,11 +257,13 @@ const CollaborationAssignment = observer(function CollaboratorSearch({
                       {t("ui.select")}
                     </Button>
                   )}
-                  onConfirm={(onClose) => {
-                    onSelect?.(collaborator.id)
-                    onClose()
-                  }}
-                  modalControlProps={confirmationModalDisclosureProps}
+                  renderConfirmationButton={({ onClick }) => (
+                    <RequestLoadingButton variant={"primary"} onClick={onClick as () => Promise<any>}>
+                      {t("ui.confirm")}
+                    </RequestLoadingButton>
+                  )}
+                  onConfirm={onSelectCreator(collaborator.id)}
+                  modalControlProps={getConfirmationModalDisclosureProps(collaborator.id)}
                   modalContentProps={{
                     maxW: "700px",
                   }}

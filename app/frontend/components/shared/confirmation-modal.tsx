@@ -22,6 +22,7 @@ export interface IConfirmationModalProps {
   confirmButtonProps?: Partial<ButtonProps>
   triggerText?: string
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
+  renderConfirmationButton?: (props: ButtonProps) => JSX.Element
   title?: string
   body?: string
   onConfirm?: (closeModal: () => void) => void | Promise<void>
@@ -41,6 +42,7 @@ export const ConfirmationModal = observer(function ConfirmationModal({
   modalContentProps,
   modalControlProps,
   confirmButtonProps,
+  renderConfirmationButton,
 }: IConfirmationModalProps) {
   const disclosureProps = useDisclosure()
 
@@ -72,9 +74,13 @@ export const ConfirmationModal = observer(function ConfirmationModal({
 
           <ModalFooter justifyContent={"flex-start"}>
             <ButtonGroup spacing={4}>
-              <Button variant={"primary"} onClick={() => onConfirm(onClose)} {...confirmButtonProps}>
-                {triggerText ?? t("ui.confirm")}
-              </Button>
+              {renderConfirmationButton ? (
+                renderConfirmationButton({ onClick: () => onConfirm(onClose) })
+              ) : (
+                <Button variant={"primary"} onClick={() => onConfirm(onClose)} {...confirmButtonProps}>
+                  {triggerText ?? t("ui.confirm")}
+                </Button>
+              )}
               <Button variant={"secondary"} onClick={onClose}>
                 {t("ui.neverMind")}
               </Button>
