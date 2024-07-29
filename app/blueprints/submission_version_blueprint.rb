@@ -1,7 +1,7 @@
 class SubmissionVersionBlueprint < Blueprinter::Base
   view :base do
     identifier :id
-    fields :viewed_at
+    fields :viewed_at, :created_at
   end
 
   view :extended do

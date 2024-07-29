@@ -720,14 +720,18 @@
   }
 
   .btn.revision-button {
-    background: transparent;
-    color: var(--chakra-colors-theme-yellow);
+    background: var(--chakra-colors-theme-yellow);
+    color: var(--chakra-colors-border-dark);
     padding: 15px;
     padding-right: 18px;
     position: absolute;
     left: -40px;
-    top: 5px;
+    top: 7px;
     z-index: 0;
+
+    &:hover {
+      background: var(--chakra-colors-darken-100);
+    }
 
     &::before {
       content: "\f044"; // This is the content code for a specific icon, example here
@@ -739,6 +743,41 @@
       transform: translateY(-50%);
       font-size: 16px; // Icon size
       color: inherit; // Icon color
+    }
+  }
+
+  .btn.submission-change-marker {
+    background: transparent !important;
+    color: var(--chakra-colors-border-dark);
+    padding: 15px;
+    position: absolute;
+    top: 7px;
+    right: 126px;
+    z-index: 1;
+
+    &:hover {
+      background: transparent;
+    }
+
+    &::before {
+      background: var(--chakra-colors-theme-yellow) !important;
+      color: var(--chakra-colors-text-primary);
+      text-transform: uppercase;
+      text-decoration: underline;
+      content: "Answer changed";
+      position: absolute;
+      font-weight: 200;
+      top: 50%;
+      padding-left: 20px;
+      padding-right: 4px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+      transform: translateY(-50%);
+      font-size: 14px;
+      width: "fit-content";
+      white-space: nowrap;
+      overflow: hidden;
+      clip-path: polygon(0% 50%, 10% 0%, 100% 0%, 100% 100%, 10% 100%);
     }
   }
 

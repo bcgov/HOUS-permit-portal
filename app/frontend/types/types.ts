@@ -146,6 +146,7 @@ export interface IFormIORequirement {
   customConditional?: string
   conditional?: any
   components?: IFormIORequirement[]
+  persistent?: string
 }
 
 export interface ISubmissionData {
@@ -459,6 +460,7 @@ export interface IRevisionRequest {
   submissionJson: any
   comment: string
   user?: IMinimalFrozenUser
+  createdAt: number
 }
 
 export interface IMinimalFrozenUser {
@@ -478,6 +480,7 @@ export interface ISubmissionVersion {
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
   viewedAt?: Date
+  createdAt: number
 }
 export interface IPermitTypeRequiredStep {
   id?: string
