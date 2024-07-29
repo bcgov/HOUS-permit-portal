@@ -81,7 +81,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     if @permit_application.submitted? && @permit_application.latest_submission_version&.update(revision_request_params)
       render_success @permit_application,
                      ("permit_application.save_success"),
-                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :jurisdiction_review_extended } }
     else
       render_error "permit_application.update_error",
                    message_opts: {
@@ -125,6 +125,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def submit
     authorize @permit_application
     # for submissions, we do not run the automated compliance as that should have already been complete
+    #
+    if !@permit_application.using_current_template_version
+      render_error "permit_application.outdated_error", message_opts: {} and return
+    end
 
     if @permit_application.update(permit_application_params) && @permit_application.submit!
       render_success @permit_application,

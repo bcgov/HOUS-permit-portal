@@ -2,13 +2,12 @@ import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakr
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useSearch } from "../../../hooks/use-search"
-
 import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
 import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
+import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EPermitApplicationSubmitterSortFields } from "../../../types/enums"
+import { EPermitApplicationStatusGroup, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -34,7 +33,6 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
-    statusFilter,
     statusFilterToGroup,
     hasResetableFilters,
   } = permitApplicationStore

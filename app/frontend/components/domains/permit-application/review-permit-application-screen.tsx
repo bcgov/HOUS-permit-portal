@@ -209,8 +209,8 @@ export const ReviewPermitApplicationScreen = observer(() => {
                       {currentPermitApplication.isRevisionsRequested
                         ? t("permitApplication.show.viewRevisionRequests")
                         : t("permitApplication.show.requestRevisions")}{" "}
-                      {currentPermitApplication?.revisionRequests?.length > 0 &&
-                        `(${currentPermitApplication.revisionRequests.length})`}
+                      {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
+                        `(${currentPermitApplication.latestRevisionRequests.length})`}
                     </Button>
                   )
                 )

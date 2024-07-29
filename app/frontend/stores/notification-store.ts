@@ -39,12 +39,13 @@ export const NotificationStoreModel = types
     generateSpecificLinkData(notification: INotification): ILinkData[] {
       const currentUser = self.rootStore.userStore.currentUser
       let objectData = notification.objectData
+      const draftFilterUriComponent = encodeURIComponent(self.rootStore.permitApplicationStore.draftStatuses.join(","))
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
         objectData = objectData as IPermitNotificationObjectData
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewOutdatedTitle"),
@@ -66,7 +67,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=draft&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewCustomizedTitle"),
