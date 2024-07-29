@@ -73,7 +73,7 @@ class NotificationService
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
-          status: "draft",
+          status: PermitApplication.draft_statuses,
           users: {
             preferences: {
               enable_in_app_new_template_version_publish_notification: true,
@@ -129,7 +129,7 @@ class NotificationService
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
-          status: "draft",
+          status: PermitApplication.draft_statuses,
           users: {
             preferences: {
               enable_in_app_customization_update_notification: true,
