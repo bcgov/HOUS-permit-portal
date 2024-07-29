@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Divider,
   Flex,
@@ -27,16 +26,17 @@ import { useMst } from "../../../setup/root"
 import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
 import { singleRequirementFormJson } from "../../../utils/formio-helpers"
 import { IRevisionRequestForm } from "../../domains/permit-application/revision-sidebar"
-import { Form } from "../chefs"
+import { SingleRequirementForm } from "../permit-applications/single-requirement-form"
 
 export interface IRevisionModalProps extends Partial<ReturnType<typeof useDisclosure>> {
   requirementJson: IFormIORequirement
   submissionJson: any
   revisionRequest: IRevisionRequest
+  revisionRequestDefault?: IRevisionRequest
   useFieldArrayMethods: UseFieldArrayReturn<IRevisionRequestForm, "revisionRequestsAttributes", "fieldId">
   onSave: () => Promise<void>
   isRevisionsRequested?: boolean
-  forSubmitter?: boolean
+  disableInput?: boolean
 }
 
 export const RevisionModal: React.FC<IRevisionModalProps> = ({
@@ -46,14 +46,17 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   onOpen,
   onClose,
   revisionRequest,
+  revisionRequestDefault,
   useFieldArrayMethods,
   onSave,
   isRevisionsRequested,
-  forSubmitter,
+  disableInput,
 }) => {
   const { t } = useTranslation()
-  const [reasonCode, setReasonCode] = useState<string>(revisionRequest?.reasonCode ?? "")
-  const [comment, setComment] = useState<string>(revisionRequest?.comment ?? "")
+  const [reasonCode, setReasonCode] = useState<string>(
+    revisionRequest?.reasonCode ?? revisionRequestDefault?.reasonCode ?? ""
+  )
+  const [comment, setComment] = useState<string>(revisionRequest?.comment ?? revisionRequestDefault?.comment ?? "")
 
   const { update, append, fields } = useFieldArrayMethods
 
@@ -111,7 +114,11 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
     })
   }
 
-  const requirementForm = singleRequirementFormJson(requirementJson)
+  const requirementForm = singleRequirementFormJson(
+    revisionRequest?.requirementJson ?? revisionRequestDefault?.requirementJson ?? requirementJson
+  )
+  const requirementSubmission =
+    revisionRequest?.submissionJson ?? revisionRequestDefault?.submissionJson ?? submissionJson
 
   return (
     <Modal onClose={handleClose} isOpen={isOpen} size="lg">
@@ -162,18 +169,16 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
                   },
                 }}
               />
-              {!forSubmitter && <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>}
+              {!disableInput && <FormHelperText>{t("permitApplication.show.revision.maxCharacters")}</FormHelperText>}
             </FormControl>
 
             <Divider />
-            <Box className="form-wrapper single-requirement-form">
-              <FormLabel>{t("permitApplication.show.revision.originallySubmitted")}</FormLabel>
-              <Form form={requirementForm} submission={submissionJson} options={{ readOnly: true }} />
-            </Box>
+
+            <SingleRequirementForm requirementJson={requirementForm} submissionJson={requirementSubmission} />
           </Flex>
           <ModalFooter>
             <Flex width="full" justify="center" gap={4}>
-              {forSubmitter ? (
+              {disableInput ? (
                 <>
                   <Button variant="secondary" onClick={onClose}>
                     {t("ui.ok")}
