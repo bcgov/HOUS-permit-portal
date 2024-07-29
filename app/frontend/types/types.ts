@@ -168,7 +168,7 @@ export interface IDenormalizedRequirement {
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
-  firstNations: string
+  firstNations: boolean
   sku: string
   formJson?: IFormIOBlock
   description?: string

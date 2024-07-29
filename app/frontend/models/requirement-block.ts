@@ -49,7 +49,6 @@ export const RequirementBlockModel = types
       return self.requirements.some((requirement) => !!requirement.dataValidation)
     },
     get requirementFormDefaults(): IRequirementAttributes[] {
-      // TODO: investigate conditional type error
       return self.requirements.map((requirement) => {
         if (!requirement.conditional) return requirement as unknown as IRequirementAttributes
 
