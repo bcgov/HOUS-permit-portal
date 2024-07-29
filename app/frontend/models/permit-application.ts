@@ -417,7 +417,6 @@ export const PermitApplicationModel = types
       self.formattedComplianceData = data
     },
     update: flow(function* ({ autosave, ...params }) {
-      self.isLoading = true
       const response = yield self.environment.api.updatePermitApplication(self.id, params)
       if (response.ok) {
         const { data: permitApplication } = response.data
@@ -425,7 +424,6 @@ export const PermitApplicationModel = types
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
       }
-      self.isLoading = false
       return response
     }),
     updateRevisionRequests: flow(function* (params) {

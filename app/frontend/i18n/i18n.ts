@@ -292,11 +292,11 @@ const options = {
               "This process ensures the map accurately represents the center of your jurisdiction and is displayed with the appropriate level of detail.",
             stepCode: {
               title: "Step code requirements",
-              description: "Below are the step code requirements for each permit template",
+              description:
+                "Below are the step code requirements for each permit application type. <1>What does each step code level mean?<2></2></1>",
               permitType: "Permit type",
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
-              helpLinkText: "What does each step code level mean?",
             },
           },
           new: {
@@ -838,12 +838,12 @@ const options = {
               },
               energyStepRequired: "Energy step code required",
               zeroCarbonStepRequired: "Zero carbon step required",
+              notRequired: "Not Required",
               energyStepCode: {
                 heading: "Energy Step Code",
                 stepRequired: "Step required",
                 stepProposed: "Proposed step achieved",
                 steps: {
-                  "0": "Not Required",
                   "3": "3",
                   "4": "4",
                   "5": "5",
@@ -854,7 +854,6 @@ const options = {
                 stepRequired: "Level required",
                 stepProposed: "Proposed step achieved",
                 steps: {
-                  "0": "Not Required",
                   "1": "EL 1",
                   "2": "EL 2",
                   "3": "EL 3",
@@ -1111,6 +1110,7 @@ const options = {
               addStep: "Add another requirement combination",
               deleteCustomization: "Delete customization",
               overriddenWarning: "This was overridden by your customized requirements below.",
+              notRequired: "Not required",
               stepRequired: {
                 permitTypeHeading: "PERMIT TYPE",
                 standardToPass: "Standard Step Code compliance to pass",
@@ -1118,7 +1118,6 @@ const options = {
                 energy: {
                   title: "Energy Step Code Level",
                   options: {
-                    "0": "Not required",
                     "3": "3",
                     "4": "4",
                     "5": "5",
@@ -1127,7 +1126,6 @@ const options = {
                 zeroCarbon: {
                   title: "Zero Carbon Step Code Level",
                   options: {
-                    "0": "Not required",
                     "1": "EL 1 - Measure Only",
                     "2": "EL 2 - Moderate",
                     "3": "EL 3 - Strong",

@@ -4,13 +4,14 @@ import {
   ButtonProps,
   Editable,
   EditableInput,
-  EditableInputProps,
   EditablePreview,
   EditablePreviewProps,
   EditableProps,
   Flex,
   IconButton,
   IconButtonProps,
+  Input,
+  InputProps,
   useEditableControls,
 } from "@chakra-ui/react"
 import { Pencil } from "@phosphor-icons/react"
@@ -40,7 +41,7 @@ interface ICustomEditablePreviewProps extends Partial<EditablePreviewProps> {
 
 export interface IEditableInputWithControlsProps extends EditableProps {
   editablePreviewProps?: Omit<ICustomEditablePreviewProps, "initialHint">
-  editableInputProps?: Partial<EditableInputProps>
+  editableInputProps?: Partial<InputProps>
   initialHint?: string
   controlsProps?: IControlsProps
 }
@@ -126,7 +127,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
   return (
     <Editable
       as={Flex}
-      alignItems={"baseline"}
+      alignItems={"center"}
       placeholder={isInEditMode ? placeholder : initialHint ?? placeholder}
       onEdit={() => {
         setIsInEditMode(true)
@@ -146,8 +147,8 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
       }}
       {...editableProps}
     >
-      <CustomEditablePreview initialHint={initialHint} {...editablePreviewProps} />
-      <EditableInput {...editableInputProps} />
+      <CustomEditablePreview initialHint={initialHint} mt={6} {...editablePreviewProps} />
+      <Input as={EditableInput} {...editableInputProps} />
       <EditableControls {...controlsProps} />
     </Editable>
   )

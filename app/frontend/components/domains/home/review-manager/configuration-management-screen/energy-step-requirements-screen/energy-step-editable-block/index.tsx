@@ -40,6 +40,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
 
   const onSubmit = async (values) => {
     await jurisdiction.update(values)
+    reset(getDefaultValues())
     setIsEditing(false)
   }
 
@@ -67,7 +68,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
   }
 
   const onAdd = () => {
-    append({ permitTypeId, energyStepRequired: null, zeroCarbonStepRequired: null, default: null })
+    append({ permitTypeId, energyStepRequired: undefined, zeroCarbonStepRequired: undefined, default: null })
   }
 
   const onRemove = (index: number, field?: TPermitTypeRequiredStepField) => {
@@ -96,6 +97,10 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
       setIsCustomizing(true)
     }
   }, [watchRequiredSteps])
+
+  useEffect(() => {
+    reset(getDefaultValues())
+  }, [jurisdiction.id])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
@@ -184,11 +189,11 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                           <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.energy.title`)}</FormLabel>
                           <Controller
                             control={control}
-                            rules={{ required: true }}
+                            rules={{ validate: (value) => value !== undefined }}
                             name={`${fieldArrayName}.${trueIndex}.energyStepRequired`}
                             render={({ field: { onChange, value } }) => {
                               return (
-                                <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing} allowZero />
+                                <EnergyStepSelect onChange={onChange} value={value} isDisabled={!isEditing} allowNull />
                               )
                             }}
                           />
@@ -200,7 +205,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                           <FormLabel noOfLines={1}>{t(`${i18nPrefix}.stepRequired.zeroCarbon.title`)}</FormLabel>
                           <Controller
                             control={control}
-                            rules={{ required: true }}
+                            rules={{ validate: (value) => value !== undefined }}
                             name={`${fieldArrayName}.${trueIndex}.zeroCarbonStepRequired`}
                             render={({ field: { onChange, value } }) => {
                               return (
@@ -208,7 +213,7 @@ export const EnergyStepEditableBlock = observer(function EnergyStepEditableBlock
                                   onChange={onChange}
                                   value={value}
                                   isDisabled={!isEditing}
-                                  allowZero
+                                  allowNull
                                 />
                               )
                             }}

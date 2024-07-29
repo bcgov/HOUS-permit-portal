@@ -5,6 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
+import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
 import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
@@ -55,21 +56,9 @@ export const JurisdictionModel = types
 
       return sortByCreatedAt(self.contacts)[0]
     },
-    get requiredStepsByPermitType() {
-      return self.permitTypeRequiredSteps.reduce((result, jtrs) => {
-        const templateId = jtrs.permitTypeId
-
-        // If the category doesn't exist in the result object, create an array for it
-        if (!result[templateId]) {
-          result[templateId] = []
-        }
-
-        // Push the current item to the appropriate category array
-        result[templateId].push(jtrs)
-
-        // Return the result object for the next iteration
-        return result
-      }, {})
+    permitTypeStepRequirements(permitTypeId: string) {
+      const all = self.permitTypeRequiredSteps.filter((r) => r.permitTypeId == permitTypeId)
+      return R.any((r) => !r.default, all) ? all.filter((r) => !r.default) : all
     },
     getPermitTypeSubmissionContact(id: string): IPermitTypeSubmissionContact {
       return self.permitTypeSubmissionContacts.find((c) => c.id == id)
@@ -80,15 +69,26 @@ export const JurisdictionModel = types
     getExternalApiKey(externalApiKeyId: string) {
       return self.externalApiKeysMap.get(externalApiKeyId)
     },
-    energyStepRequiredTranslation(energyStepRequired: number) {
+    energyStepRequiredTranslation(energyStepRequired?: EEnergyStep) {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
-      // @ts-ignore
-      return t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
+      return energyStepRequired
+        ? t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
+        : t(`${i18nPrefix}.notRequired`)
     },
-    zeroCarbonLevelTranslation(zeroCarbonStepRequired: number) {
+    zeroCarbonLevelTranslation(zeroCarbonStepRequired?: EZeroCarbonStep) {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
-      // @ts-ignore
-      return t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
+      return zeroCarbonStepRequired
+        ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
+        : t(`${i18nPrefix}.notRequired`)
+    },
+  }))
+  .views((self) => ({
+    get requiredStepsByPermitType() {
+      const groupRequirements = (acc, r) =>
+        R.includes(r, self.permitTypeStepRequirements(r.permitTypeId)) ? acc.concat(r) : acc
+      const toPermitType = ({ permitTypeId }) => permitTypeId
+
+      return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
     },
   }))
   .actions((self) => ({
