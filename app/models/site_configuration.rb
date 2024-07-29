@@ -19,21 +19,18 @@ class SiteConfiguration < ApplicationRecord
   # if a discarded reason of a particular code is found and updated, it will be undiscarded.
   def revision_reasons_attributes=(attributes)
     attributes.each do |attribute, _|
-      if attribute["id"].present?
-        # Update the existing record
-        existing_record = self.revision_reasons.find(attribute["id"])
-        existing_record.update(attribute.except("id"))
-      else
-        existing_reason = self.revision_reasons.with_discarded.find_by(reason_code: attribute["reason_code"])
-        if existing_reason.present?
-          # Undiscard and update the record
-          existing_reason.update(attribute.except("id").merge({ discarded_at: nil }))
-        else
-          # Proceed with the normal behavior
-          self.revision_reasons.build(attribute)
-        end
-      end
+      next unless attribute["id"].blank? && attribute["reason_code"].present?
+
+      existing_reason = self.revision_reasons.with_discarded.find_by(reason_code: attribute["reason_code"])
+
+      next unless existing_reason.present?
+
+      # Undiscard and update the record
+      attribute["id"] = existing_reason.id
+      attribute["discarded_at"] = nil
     end
+
+    super(attributes)
   end
 
   private
