@@ -21,7 +21,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :base
-    association :submitter, blueprint: UserBlueprint, view: :base
+    association :submitter, blueprint: UserBlueprint, view: :minimal
 
     field :indexed_using_current_template_version do |pa, options|
       # Indexed data is used to prevent N extra queries on every search
@@ -31,12 +31,16 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :jurisdiction_review_inbox do
     include_view :base
+
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    association :submitter, blueprint: UserBlueprint, view: :minimal
   end
 
   view :extended do
     include_view :base
     fields :formatted_compliance_data, :front_end_form_update, :form_customizations
+
+    association :submitter, blueprint: UserBlueprint, view: :minimal
 
     field :is_fully_loaded do |pa, options|
       true

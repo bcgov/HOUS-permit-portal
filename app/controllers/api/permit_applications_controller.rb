@@ -60,7 +60,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
     # always reset the submission section keys until actual submission
     submission_section = permit_application_params.dig("submission_data", "data", "section-completion-key")
     submission_section&.each { |key, value| submission_section[key] = nil }
-    if @permit_application.draft? && @permit_application.update(permit_application_params)
+    if @permit_application.draft? &&
+         @permit_application.update_with_submission_data_merge(
+           permit_application_params: permit_application_params,
+           current_user: current_user,
+         )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
         AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
       end

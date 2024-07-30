@@ -53,28 +53,10 @@ class PermitApplication < ApplicationRecord
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
+  COMPLETION_SECTION_KEY = "section-completion-key"
+
   def formatted_submission_data(current_user: nil)
-    return submission_data unless current_user.present?
-
-    formatted_data = submission_data.deep_dup
-
-    permissions = submission_requirement_block_edit_permissions(user_id: current_user.id)
-
-    if permissions == :all ||
-         (submitted? && current_user.review_staff? && current_user.jurisdictions.find_by(id: jurisdiction_id).present?)
-      return formatted_data
-    end
-
-    return {} if permissions.blank?
-
-    formatted_data["data"].each do |_section_key, section_values|
-      section_values.delete_if do |key, _value|
-        requirement_block_id = key[/\|RB([^|]+)/, 1]
-        !permissions.include?(requirement_block_id)
-      end
-    end
-
-    formatted_data
+    PermitApplication::SubmissionDataService.new(self).formatted_submission_data(current_user: current_user)
   end
 
   def users_by_collaboration_options(collaboration_type:, collaborator_type: nil)
@@ -119,6 +101,13 @@ class PermitApplication < ApplicationRecord
 
     current_published_template_version.update(
       form_json: current_published_template_version.requirement_template.to_form_json,
+    )
+  end
+
+  def update_with_submission_data_merge(permit_application_params:, current_user: nil)
+    PermitApplication::SubmissionDataService.new(self).update_with_submission_data_merge(
+      permit_application_params:,
+      current_user:,
     )
   end
 
@@ -379,11 +368,6 @@ class PermitApplication < ApplicationRecord
     custom_requirements = step_code_requirements.customizations
 
     custom_requirements.empty? || custom_requirements.any? { |r| r.energy_step_required || r.zero_carbon_step_required }
-  end
-
-  def intended_submission_data_authorized_for_user?()
-    return false unless permit_application.draft?
-    # @todo
   end
 
   private

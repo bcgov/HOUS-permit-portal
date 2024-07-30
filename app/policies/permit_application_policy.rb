@@ -22,7 +22,11 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update?
-    record.draft? ? record.submitter == user : user.review_staff?
+    if record.draft?
+      record.submission_requirement_block_edit_permissions(user_id: user.id).present?
+    else
+      user.review_staff? && user.jurisdictions.find(record.jurisdiction_id)
+    end
   end
 
   def update_version?
