@@ -36,7 +36,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :extended do
     include_view :base
-    fields :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
+    fields :formatted_compliance_data, :front_end_form_update, :form_customizations
 
     field :is_fully_loaded do |pa, options|
       true
@@ -44,6 +44,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :form_json do |pa, options|
       pa.form_json(current_user: options[:current_user])
+    end
+
+    field :submission_data do |pa, options|
+      pa.formatted_submission_data(current_user: options[:current_user])
     end
 
     association :template_version, blueprint: TemplateVersionBlueprint
