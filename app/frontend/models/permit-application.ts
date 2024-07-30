@@ -235,31 +235,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return { added: addedErrorBoxData, removed: removedErrorBoxData, changed: changedErrorBoxData }
       },
     }))
-    .actions((self) => ({
-      setRevisionMode(revisionMode: boolean) {
-        self.revisionMode = revisionMode
-      },
-      setSelectedPastSubmissionVersion(submissionVersion: ISubmissionVersion) {
-        self.selectedPastSubmissionVersion = submissionVersion
-      },
-      setIsViewingPastRequests(isViewingPastRequests: boolean) {
-        self.isViewingPastRequests = isViewingPastRequests
-      },
-      setIsDirty(isDirty: boolean) {
-        self.isDirty = isDirty
-      },
-      resetDiff() {
-        self.showingCompareAfter = false
-        self.diff = null
-      },
-    }))
     .views((self) => ({
-      shouldShowApplicationDiff(isEditing: boolean) {
-        return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
-      },
-      get shouldShowNewVersionWarning() {
-        return !self.usingCurrentTemplateVersion && self.isDraft
-      },
       get formFormatKey() {
         return (
           (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
@@ -281,184 +257,17 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get blockClasses() {
         return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
       },
-      get contacts() {
-        // traverses the nest form json components
-        // and collects the label for contact requirements
-        const contactKeyToLabelMapping = R.pipe(
-          R.prop("components"),
-          R.chain(R.prop("components")),
-          R.chain(R.prop("components")),
-          R.reduce((acc, { id, key, title, components, label }) => {
-            if (key.includes("multi_contact")) {
-              const firstComponent = components[0]
-
-              if (firstComponent) {
-                acc[firstComponent.key] = firstComponent.label
-              }
-            }
-
-            if (key.includes(ERequirementType.generalContact) || key.includes(ERequirementType.professionalContact)) {
-              acc[key] = label
-            }
-
-            return acc
-          }, {})
-        )(self.formJson)
-        // Convert each section's object into an array of [key, value] pairs
-        const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
-
-        // Filters out non contact form components
-        const getContactBlocks = (blocks) =>
-          blocks.filter(
-            (block) =>
-              block[0].includes("multi_contact") ||
-              block[0].includes(ERequirementType.generalContact) ||
-              block[0].includes(ERequirementType.professionalContact)
-          )
-      },
-      get isViewed() {
-        return self.latestSubmissionVersion?.viewedAt
-      },
-      get viewedAt() {
-        return self.latestSubmissionVersion?.viewedAt
-      },
       get revisionRequests() {
         return self.latestSubmissionVersion?.revisionRequests || []
       },
       getPermitCollaboration(collaborationId: string) {
         return self.permitCollaborationMap.get(collaborationId)
       },
-    }))
-    .views((self) => ({
-      getCollaborationsByType(collaborationType: ECollaborationType) {
-        return R.pipe(
-          Array.from<IPermitCollaboration>,
-          R.filter(R.propEq(collaborationType, "collaborationType")),
-          mutableSortPermitCollaborations
-        )(self.permitCollaborationMap.values())
-      },
-    }))
-    .views((self) => ({
-      getCollaborationAssignees(collaborationType: ECollaborationType) {
-        return self
-          .getCollaborationsByType(collaborationType)
-          .filter((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.assignee)
-      },
-      getCollaborationDelegatee(collaborationType: ECollaborationType) {
-        return (
-          self
-            .getCollaborationsByType(collaborationType)
-            .find((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.delegatee) ?? null
-        )
-      },
-      get usingCurrentTemplateVersion() {
-        if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
-        return self.indexedUsingCurrentTemplateVersion
-      },
-      get jurisdictionName() {
-        return self.jurisdiction.name
-      },
-      get permitTypeAndActivity() {
-        return `${self.activity.name} - ${self.permitType.name}`.trim()
-      },
-      get flattenedBlocks() {
-        return self.formJson.components
-          .reduce((acc, section) => {
-            const blocks = section.components
-            return acc.concat(blocks)
-          }, [] as IFormIOBlock[])
-          .filter((outNull) => outNull)
-      },
-      get formattedFormJson() {
-        const clonedFormJson = R.clone(self.formJson)
-        const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.revisionRequests)
-        //merge the formattedComliance data.  This should trigger a form redraw when it is updated
-        const complianceHintedFormJson = combineComplianceHints(
-          revisionAnnotatedFormJson,
-          self.formCustomizations,
-          self.formattedComplianceData
-        )
-        const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
-        const revisionModeFormJson =
-          self.revisionMode || self.isRevisionsRequested
-            ? combineRevisionButtons(diffColoredFormJson, self.revisionMode)
-            : diffColoredFormJson
-        return revisionModeFormJson
-      },
-      sectionKey(sectionId) {
-        return `section${sectionId}`
-      },
-      blockKey(sectionId, blockId) {
-        return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
-      },
-      get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
-        if (!self.diff) return null
-
-        const mapFn = (req: IRequirement, action: ERequirementChangeAction): ICompareRequirementsBoxData => {
-          return {
-            label: t("requirementTemplate.compareAction", {
-              requirementName: `${req.label}${req.elective ? ` (${t("requirementsLibrary.elective")})` : ""}`,
-              action: t(`requirementTemplate.${action}`),
-            }),
-            class: `formio-component-${req.formJson.key}`,
-            diffSectionLabel: req.diffSectionLabel,
-          }
-        }
-        const addedErrorBoxData = self.diff.added.map((req) => mapFn(req, ERequirementChangeAction.added))
-        const removedErrorBoxData = self.diff.removed.map((req) => mapFn(req, ERequirementChangeAction.removed))
-        const changedErrorBoxData = self.diff.changed.map((req) => mapFn(req, ERequirementChangeAction.changed))
-        return { added: addedErrorBoxData, removed: removedErrorBoxData, changed: changedErrorBoxData }
-      },
-    }))
-    .views((self) => ({
-      getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
-        return self
-          .getCollaborationAssignees(collaborationType)
-          .reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
-            const blockId = collaboration.assignedRequirementBlockId
-
-            if (!blockId) {
-              return acc
-            }
-
-            if (!acc[blockId]) {
-              acc[blockId] = []
-            }
-
-            acc[blockId].push(collaboration)
-
-            return acc
-          }, {})
-      },
-    }))
-    .views((self) => ({
-      getCollaborationAssigneesByBlockId(collaborationType: ECollaborationType, requirementBlockId: string) {
-        return self.getCollaborationAssigneesByBlockIdMap(collaborationType)[requirementBlockId] ?? []
-      },
-    }))
-    .views((self) => ({
       shouldShowApplicationDiff(isEditing: boolean) {
         return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
       },
       get shouldShowNewVersionWarning() {
         return !self.usingCurrentTemplateVersion && self.isDraft
-      },
-      get formFormatKey() {
-        return (
-          (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
-          (self.revisionMode ? "-revision" : "")
-        )
-      },
-      indexOfBlockId: (blockId: string) => {
-        if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
-        return self.flattenedBlocks.findIndex((block) => block.id === blockId)
-      },
-      getBlockClass(sectionId, blockId) {
-        // 'formio-component-formSubmissionDataRSTsection61ba21b8-dc61-4a4a-9765-901cd4b53b3b|RBdc9d3ab2-fce8-40a0-ba94-14404c0c079b'
-        return `formio-component-${blockId === "section-signoff-id" ? "section-signoff-key" : self.blockKey(sectionId, blockId)}`
-      },
-      get blockClasses() {
-        return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
       },
       get contacts() {
         // traverses the nest form json components
@@ -573,6 +382,55 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return singleContacts.concat(multiContacts)
       },
     }))
+    .views((self) => ({
+      getCollaborationsByType(collaborationType: ECollaborationType) {
+        return R.pipe(
+          Array.from<IPermitCollaboration>,
+          R.filter(R.propEq(collaborationType, "collaborationType")),
+          mutableSortPermitCollaborations
+        )(self.permitCollaborationMap.values())
+      },
+    }))
+    .views((self) => ({
+      getCollaborationAssignees(collaborationType: ECollaborationType) {
+        return self
+          .getCollaborationsByType(collaborationType)
+          .filter((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.assignee)
+      },
+      getCollaborationDelegatee(collaborationType: ECollaborationType) {
+        return (
+          self
+            .getCollaborationsByType(collaborationType)
+            .find((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.delegatee) ?? null
+        )
+      },
+    }))
+    .views((self) => ({
+      getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
+        return self
+          .getCollaborationAssignees(collaborationType)
+          .reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
+            const blockId = collaboration.assignedRequirementBlockId
+
+            if (!blockId) {
+              return acc
+            }
+
+            if (!acc[blockId]) {
+              acc[blockId] = []
+            }
+
+            acc[blockId].push(collaboration)
+
+            return acc
+          }, {})
+      },
+    }))
+    .views((self) => ({
+      getCollaborationAssigneesByBlockId(collaborationType: ECollaborationType, requirementBlockId: string) {
+        return self.getCollaborationAssigneesByBlockIdMap(collaborationType)[requirementBlockId] ?? []
+      },
+    }))
     .actions((self) => ({
       updatePermitCollaboration(permitCollaborationData: IPermitCollaboration) {
         if (permitCollaborationData.collaborator) {
@@ -589,9 +447,15 @@ export const PermitApplicationModel = types.snapshotProcessor(
       setIsDirty(isDirty: boolean) {
         self.isDirty = isDirty
       },
+      setSelectedPastSubmissionVersion(submissionVersion: ISubmissionVersion) {
+        self.selectedPastSubmissionVersion = submissionVersion
+      },
       resetDiff() {
         self.showingCompareAfter = false
         self.diff = null
+      },
+      setIsViewingPastRequests(isViewingPastRequests: boolean) {
+        self.isViewingPastRequests = isViewingPastRequests
       },
       assignCollaborator: flow(function* (
         collaboratorId: string,
