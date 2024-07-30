@@ -25,7 +25,8 @@ import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
+import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
+import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
@@ -33,6 +34,7 @@ import { CustomMessageBox } from "../base/custom-message-box"
 import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
+import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -66,7 +68,12 @@ export const RequirementForm = observer(
       blockClasses,
       formattedFormJson,
       isDraft,
+      previousSubmissionVersion,
+      selectedPastSubmissionVersion,
+      isViewingPastRequests,
     } = permitApplication
+
+    const pastVersion = isViewingPastRequests ? selectedPastSubmissionVersion : previousSubmissionVersion
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -81,6 +88,7 @@ export const RequirementForm = observer(
     const [floatErrorBox, setFloatErrorBox] = useState(false)
     const [hasErrors, setHasErrors] = useState(false)
     const [autofillContactKey, setAutofillContactKey] = useState(null)
+    const [previousSubmissionKey, setPreviousSubmissionKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
@@ -92,6 +100,11 @@ export const RequirementForm = observer(
     }
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+    const {
+      isOpen: isPreviousSubmissionOpen,
+      onOpen: onPreviousSubmissionOpen,
+      onClose: onPreviousSubmissionClose,
+    } = useDisclosure()
 
     const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
@@ -169,17 +182,24 @@ export const RequirementForm = observer(
       navigate("step-code", { state: { background: location } })
     }
 
-    const handleOpenContactAutofill = async (_event) => {
-      setAutofillContactKey(_event.detail.key)
+    const handleOpenContactAutofill = async (event) => {
+      setAutofillContactKey(event.detail.key)
       onContactsOpen()
+    }
+
+    const handleOpenPreviousSubmission = async (event) => {
+      setPreviousSubmissionKey(event.detail.key)
+      onPreviousSubmissionOpen()
     }
 
     useEffect(() => {
       document.addEventListener("openStepCode", handleOpenStepCode)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
+      document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       return () => {
         document.removeEventListener("openStepCode", handleOpenStepCode)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
+        document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       }
     }, [])
 
@@ -283,9 +303,8 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft
-        ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) }
-        : { readOnly: !permitApplication.revisionMode }),
+      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: false }),
+      // readonly loggic depends on formattedJson for submitted applications
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -438,6 +457,18 @@ export const RequirementForm = observer(
             permitApplication={permitApplication}
             submissionState={unsavedSubmissionData}
             setSubmissionState={handleSetUnsavedSubmissionData}
+          />
+        )}
+
+        {isPreviousSubmissionOpen && (
+          <PreviousSubmissionModal
+            isOpen={isPreviousSubmissionOpen}
+            onOpen={onPreviousSubmissionOpen}
+            onClose={onPreviousSubmissionClose}
+            requirementJson={singleRequirementFormJson(
+              getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
+            )}
+            submissionJson={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}
       </>

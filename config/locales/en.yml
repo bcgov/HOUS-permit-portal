@@ -400,6 +400,9 @@ en:
       submit_error:
         title: Error
         message: "%{error_message}"
+      outdated_error:
+        title: Error
+        message: "Please refresh the page. A new template version is available."
       revision_request_finalize_success:
         title: ""
         message: "Revision requests have been finalized successfully!"

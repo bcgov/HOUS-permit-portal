@@ -1,20 +1,38 @@
-import { Box, Button, Center, Flex, Hide, ListItem, OrderedList, Portal, Text, useDisclosure } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Hide,
+  ListItem,
+  OrderedList,
+  Portal,
+  Spacer,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { CaretRight, ChatDots, PaperPlaneTilt } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { MutableRefObject, useEffect, useState } from "react"
+import React, { MutableRefObject, useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { IRevisionRequestsAttributes } from "../../../types/api-request"
-import { IFormIORequirement, IRevisionRequest } from "../../../types/types"
+import { IFormIORequirement, IRevisionRequest, ISubmissionVersion } from "../../../types/types"
 import { getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { getSinglePreviousSubmissionJson } from "../../../utils/formio-submission-traversal"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import ConfirmationModal from "../../shared/modals/confirmation-modal"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 import { RevisionModal } from "../../shared/revisions/revision-modal"
+import SubmissionVersionSelect from "../../shared/select/selectors/submission-version-select"
 
 interface IRevisionSideBarProps {
   permitApplication: IPermitApplication
@@ -34,10 +52,25 @@ export const RevisionSideBar = observer(
     const [requirementForRevision, setRequirementForRevision] = useState<IFormIORequirement>()
     const [submissionJsonForRevision, setSubmissionJsonForRevision] = useState<any>()
     const [revisionRequest, setRevisionRequest] = useState<IRevisionRequest>()
+    const [revisionRequestDefault, setRevisionRequestDefault] = useState<IRevisionRequest>()
+    const {
+      selectedPastSubmissionVersion,
+      setSelectedPastSubmissionVersion,
+      isViewingPastRequests,
+      setIsViewingPastRequests,
+    } = permitApplication
+
+    const [tabIndex, setTabIndex] = useState(0)
+    const handleSetTabIndex = (index: number) => {
+      setTabIndex(index)
+      setIsViewingPastRequests(index === 1)
+    }
+
+    const inNewRequest = tabIndex === 0
     const navigate = useNavigate()
 
     const getDefaultRevisionRequestValues = () => ({
-      revisionRequestsAttributes: permitApplication.revisionRequests as IRevisionRequestsAttributes[],
+      revisionRequestsAttributes: permitApplication.latestRevisionRequests as IRevisionRequestsAttributes[],
     })
 
     const revisionFormMethods = useForm<IRevisionRequestForm>({
@@ -56,13 +89,15 @@ export const RevisionSideBar = observer(
 
     useEffect(() => {
       reset(getDefaultRevisionRequestValues())
-    }, [permitApplication?.revisionRequests?.length])
+    }, [permitApplication?.latestRevisionRequests?.length])
 
     const onSaveRevision = (formData: IRevisionRequestForm) => {
+      setTabIndex(0)
       permitApplication.updateRevisionRequests(formData)
     }
 
     const [topHeight, setTopHeight] = useState<number>()
+    const submitBoxHeight = 145
 
     useEffect(() => {
       const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
@@ -79,11 +114,15 @@ export const RevisionSideBar = observer(
     const handleOpenRequestRevision = async (event, upToDateFields) => {
       if (!permitApplication.formJson) return
 
-      const foundRevisionRequest = upToDateFields.find((field) => field.requirementJson?.key === event.detail.key)
+      const finder = (rr) => rr.requirementJson?.key === event.detail.key
+      const foundRevisionRequestDefault =
+        isViewingPastRequests && selectedPastSubmissionVersion?.revisionRequests?.find(finder)
+      const foundRevisionRequest = upToDateFields.find(finder)
       const foundRequirement = getRequirementByKey(permitApplication.formJson, event.detail.key)
       const foundSubmissionJson = getSinglePreviousSubmissionJson(permitApplication.submissionData, event.detail.key)
 
       setRevisionRequest(foundRevisionRequest)
+      setRevisionRequestDefault(foundRevisionRequestDefault)
       setRequirementForRevision(foundRequirement)
       setSubmissionJsonForRevision(foundSubmissionJson)
       onOpen()
@@ -91,11 +130,18 @@ export const RevisionSideBar = observer(
 
     useEffect(() => {
       const handleOpenEvent = (event) => handleOpenRequestRevision(event, fields)
+      // Listener needs to be re-registered every time the tab index changes
       document.addEventListener("openRequestRevision", handleOpenEvent)
       return () => {
         document.removeEventListener("openRequestRevision", handleOpenEvent)
       }
-    }, [fields])
+    }, [fields, tabIndex])
+
+    const handleSelectPastVersionChange = (pastVersion: ISubmissionVersion | null) => {
+      if (pastVersion) {
+        setSelectedPastSubmissionVersion(pastVersion)
+      }
+    }
 
     const renderButtons = () => {
       if (forSubmitter) {
@@ -126,17 +172,35 @@ export const RevisionSideBar = observer(
           />
           {onCancel && (
             <Button variant="secondary" onClick={onCancel}>
-              {t("ui.cancel")}
+              {t("ui.close")}
             </Button>
           )}
         </Flex>
       )
     }
 
+    const selectedTabStyles = {
+      borderLeft: "1px Solid",
+      borderRight: "1px Solid",
+      borderTop: "4px solid",
+      borderColor: "border.dark",
+      borderLeftColor: "border.dark",
+      borderTopColor: "theme.blueAlt",
+      borderBottomColor: "theme.yellowLight",
+      borderRadius: 0,
+    }
+
+    const sortedPastRevisionRequests = useMemo(() => {
+      return Array.from((selectedPastSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []).sort((a, b) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      })
+    }, [JSON.stringify(selectedPastSubmissionVersion?.revisionRequests)])
+
     return (
       <>
         <Hide below="md">
           <Flex
+            as={Tabs}
             direction="column"
             boxShadow="md"
             borderRight="1px solid"
@@ -149,66 +213,77 @@ export const RevisionSideBar = observer(
             float="left"
             id="permit-revision-sidebar"
             bg="theme.yellowLight"
+            index={tabIndex}
+            // @ts-ignore
+            onChange={(index: number) => handleSetTabIndex(index)}
           >
-            <Box overflowY="auto" flex={1}>
-              <Center p={8} textAlign="center" borderBottom="1px solid" borderColor="border.light">
-                <Text fontStyle="italic">
-                  {forSubmitter
-                    ? t("permitApplication.show.locateRevisions")
-                    : t("permitApplication.show.clickQuestion")}
-                </Text>
-              </Center>
-              <OrderedList>
-                {fields
-                  .filter((field) => !field._destroy)
-                  .map((field) => {
-                    return (
-                      <ListItem mb={4} key={field.id}>
-                        <ScrollLink to={`formio-component-${field.requirementJson.key}`}>
-                          {field.requirementJson.label}
-                        </ScrollLink>
-                        <Flex fontStyle="italic">
-                          {t("permitApplication.show.revision.reasonCode")}: {/* @ts-ignore */}
-                          {field.reasonCode}
-                        </Flex>
-                        <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap">
-                          <Box width={6} height={6}>
-                            <ChatDots size={24} />
-                          </Box>
-                          <Text noOfLines={1}>{field.comment}</Text>
-                        </Flex>
-                        {field.user && (
-                          <Text fontStyle={"italic"}>
-                            {t("ui.modifiedBy")}: {field.user.firstName} {field.user.lastName}
-                          </Text>
-                        )}
-                      </ListItem>
-                    )
-                  })}
-              </OrderedList>
-            </Box>
-            <Flex
-              direction="column"
-              borderTop="1px solid"
-              borderColor="border.light"
-              p={8}
-              gap={4}
-              justify="center"
-              position="sticky"
-              bottom={0}
-              maxH={145}
-              flex={1}
-            >
-              <Box>
-                <Text as="span" fontWeight="bold">
-                  {fields.length}
-                </Text>{" "}
-                <Text as="span" color="text.secondary">
-                  {t("ui.selected")}
-                </Text>
-              </Box>
-              {renderButtons()}
-            </Flex>
+            <TabList borderBottom="1px solid" borderColor="border.dark" mt={4}>
+              <Tab ml={4} _selected={selectedTabStyles}>
+                {t("permitApplication.show.revision.newRevision")}
+              </Tab>
+              <Tab ml={4} _selected={selectedTabStyles}>
+                {t("permitApplication.show.revision.pastRequests")}
+              </Tab>
+            </TabList>
+            <TabPanels as={Flex} direction="column" flex={1} overflowY="auto">
+              <TabPanel flex={1}>
+                <Box flex={1}>
+                  <Center p={4} textAlign="center" borderBottom="1px solid" borderColor="border.light">
+                    <Text fontStyle="italic">
+                      {forSubmitter
+                        ? t("permitApplication.show.locateRevisions")
+                        : t("permitApplication.show.clickQuestion")}
+                    </Text>
+                  </Center>
+                  <OrderedList pb={50} mt={4} ml={0}>
+                    {fields
+                      .filter((field) => !field._destroy)
+                      .map((field) => {
+                        return <RevisionRequestListItem revisionRequest={field} key={field.id} />
+                      })}
+                  </OrderedList>
+                </Box>
+              </TabPanel>
+              <TabPanel>
+                <SubmissionVersionSelect
+                  options={permitApplication.pastSubmissionVersionOptions}
+                  onChange={handleSelectPastVersionChange}
+                  value={selectedPastSubmissionVersion}
+                />
+                <OrderedList mt={4} ml={0}>
+                  {sortedPastRevisionRequests.map((rr) => (
+                    <RevisionRequestListItem revisionRequest={rr} key={rr.id} />
+                  ))}
+                </OrderedList>
+              </TabPanel>
+            </TabPanels>
+            {inNewRequest && (
+              <Flex
+                direction="column"
+                border="1px solid"
+                borderColor="border.light"
+                p={8}
+                width={"sidebar.width"}
+                gap={4}
+                justify="center"
+                position="sticky"
+                bottom={0}
+                left={0}
+                maxH={submitBoxHeight}
+                bg="theme.yellowLight"
+                flex={1}
+              >
+                <Box>
+                  <Text as="span" fontWeight="bold">
+                    {fields.length}
+                  </Text>{" "}
+                  <Text as="span" color="text.secondary">
+                    {t("ui.selected")}
+                  </Text>
+                </Box>
+                {renderButtons()}
+              </Flex>
+            )}
           </Flex>
         </Hide>
 
@@ -221,12 +296,13 @@ export const RevisionSideBar = observer(
             submissionJson={submissionJsonForRevision}
             useFieldArrayMethods={useFieldArrayMethods}
             revisionRequest={revisionRequest}
+            revisionRequestDefault={revisionRequestDefault}
             onSave={handleSubmit(onSaveRevision)}
             isRevisionsRequested={permitApplication.isRevisionsRequested}
-            forSubmitter={forSubmitter}
+            disableInput={forSubmitter}
           />
         )}
-        {sendRevisionContainerRef && (
+        {sendRevisionContainerRef && tabIndex == 0 && (
           <Portal containerRef={sendRevisionContainerRef}>
             <Flex gap={4} align="center">
               <Box>
@@ -245,3 +321,41 @@ export const RevisionSideBar = observer(
     )
   }
 )
+
+interface IRevisionRequestListItemProps {
+  revisionRequest: Partial<IRevisionRequest>
+}
+
+const RevisionRequestListItem = ({ revisionRequest }: IRevisionRequestListItemProps) => {
+  const { t } = useTranslation()
+
+  const { requirementJson, reasonCode, comment, user } = revisionRequest
+
+  const clickHandleView = () => {
+    document.dispatchEvent(new CustomEvent("openRequestRevision", { detail: { key: requirementJson.key } }))
+  }
+
+  return (
+    <ListItem mb={4} w="full">
+      <ScrollLink to={`formio-component-${requirementJson.key}`}>{requirementJson.label}</ScrollLink>
+      <Flex fontStyle="italic">
+        {t("permitApplication.show.revision.reasonCode")}: {reasonCode}
+      </Flex>
+      <Flex gap={2} fontStyle="italic" alignItems="center" flexWrap="nowrap" w="full">
+        <Box width={6} height={6}>
+          <ChatDots size={24} />
+        </Box>
+        <Text noOfLines={1}>{comment}</Text>
+        <Spacer />
+        <Button variant="link" onClick={clickHandleView}>
+          {t("ui.view")}
+        </Button>
+      </Flex>
+      {user && (
+        <Text fontStyle={"italic"}>
+          {t("ui.modifiedBy")}: {user.firstName} {user.lastName}
+        </Text>
+      )}
+    </ListItem>
+  )
+}

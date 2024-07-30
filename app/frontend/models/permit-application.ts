@@ -23,12 +23,15 @@ import {
   ITemplateVersionDiff,
 } from "../types/types"
 import {
+  combineChangeMarkers,
   combineComplianceHints,
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
 } from "../utils/formio-component-traversal"
 
+import { format } from "date-fns"
+import { compareSubmissionData } from "../utils/formio-helpers"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
@@ -77,8 +80,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       showingCompareAfter: types.optional(types.boolean, false),
       revisionMode: types.optional(types.boolean, false),
       diff: types.maybeNull(types.frozen<ITemplateVersionDiff>()),
-      latestSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
+      submissionVersions: types.array(types.frozen<ISubmissionVersion>()),
+      selectedPastSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
       permitCollaborationMap: types.map(PermitCollaborationModel),
+      isViewingPastRequests: types.optional(types.boolean, false),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -100,6 +105,216 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get isResubmitted() {
         return self.status === EPermitApplicationStatus.resubmitted
+      },
+      get sortedSubmissionVersions() {
+        return self.submissionVersions.slice().sort((a, b) => b.createdAt - a.createdAt)
+      },
+    }))
+    .views((self) => ({
+      get latestSubmissionVersion() {
+        if (self.submissionVersions?.length === 0) {
+          return null
+        }
+        return self.sortedSubmissionVersions[0]
+      },
+    }))
+    .views((self) => ({
+      get previousSubmissionVersion() {
+        if (self.submissionVersions.length <= 1) {
+          return null
+        }
+        return self.sortedSubmissionVersions[1]
+      },
+      get previousToSelectedSubmissionVersion() {
+        if (!self.selectedPastSubmissionVersion) return null
+
+        // Find the index of the selected version
+        const selectedIndex = self.sortedSubmissionVersions.findIndex(
+          (version) => version.createdAt === self.selectedPastSubmissionVersion?.createdAt
+        )
+
+        // Return the previous version if it exists
+        return selectedIndex > 0 ? self.sortedSubmissionVersions[selectedIndex - 1] : null
+      },
+      get latestRevisionRequests() {
+        return (self.latestSubmissionVersion?.revisionRequests || []).slice().sort((a, b) => a.createdAt - b.createdAt)
+      },
+    }))
+    .views((self) => ({
+      get pastSubmissionVersionOptions() {
+        const latestVersion = self.latestSubmissionVersion
+        return self.submissionVersions
+          .filter((submissionVersion) => submissionVersion.id !== latestVersion?.id)
+          .map((submissionVersion) => ({
+            label: format(submissionVersion.createdAt, "MMMM d, yyyy 'at' h:mma"),
+            value: submissionVersion,
+          }))
+      },
+      get isViewed() {
+        return self.latestSubmissionVersion?.viewedAt
+      },
+      get viewedAt() {
+        return self.latestSubmissionVersion?.viewedAt
+      },
+      get usingCurrentTemplateVersion() {
+        if (self.templateVersion) return self.templateVersion.id == self.publishedTemplateVersion.id
+        return self.indexedUsingCurrentTemplateVersion
+      },
+      get jurisdictionName() {
+        return self.jurisdiction.name
+      },
+      get permitTypeAndActivity() {
+        return `${self.activity.name} - ${self.permitType.name}`.trim()
+      },
+      get flattenedBlocks() {
+        return self.formJson.components
+          .reduce((acc, section) => {
+            const blocks = section.components
+            return acc.concat(blocks)
+          }, [] as IFormIOBlock[])
+          .filter((outNull) => outNull)
+      },
+      get formattedFormJson() {
+        const clonedFormJson = R.clone(self.formJson)
+        const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.latestRevisionRequests)
+        //merge the formattedComliance data.  This should trigger a form redraw when it is updated
+        const complianceHintedFormJson = combineComplianceHints(
+          revisionAnnotatedFormJson,
+          self.formCustomizations,
+          self.formattedComplianceData
+        )
+        const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
+
+        const revisionRequestsToUse = self.isViewingPastRequests
+          ? self.selectedPastSubmissionVersion?.revisionRequests
+          : self.latestRevisionRequests
+
+        let changedKeys = []
+        if (self.isViewingPastRequests && self.selectedPastSubmissionVersion) {
+          changedKeys = compareSubmissionData(
+            self.previousToSelectedSubmissionVersion?.submissionData,
+            self.selectedPastSubmissionVersion?.submissionData
+          )
+        } else if (self.previousSubmissionVersion) {
+          changedKeys = compareSubmissionData(
+            self.previousSubmissionVersion.submissionData,
+            self.latestSubmissionVersion.submissionData
+          )
+        }
+        const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, self.isSubmitted, changedKeys)
+
+        const revisionModeFormJson =
+          self.revisionMode || self.isRevisionsRequested
+            ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
+            : diffColoredFormJson
+
+        return revisionModeFormJson
+      },
+      sectionKey(sectionId) {
+        return `section${sectionId}`
+      },
+      blockKey(sectionId, blockId) {
+        return `formSubmissionDataRSTsection${sectionId}|RB${blockId}`
+      },
+      get diffToInfoBoxData(): ICompareRequirementsBoxDiff | null {
+        if (!self.diff) return null
+
+        const mapFn = (req: IRequirement, action: ERequirementChangeAction): ICompareRequirementsBoxData => {
+          return {
+            label: t("requirementTemplate.compareAction", {
+              requirementName: `${req.label}${req.elective ? ` (${t("requirementsLibrary.elective")})` : ""}`,
+              action: t(`requirementTemplate.${action}`),
+            }),
+            class: `formio-component-${req.formJson.key}`,
+            diffSectionLabel: req.diffSectionLabel,
+          }
+        }
+        const addedErrorBoxData = self.diff.added.map((req) => mapFn(req, ERequirementChangeAction.added))
+        const removedErrorBoxData = self.diff.removed.map((req) => mapFn(req, ERequirementChangeAction.removed))
+        const changedErrorBoxData = self.diff.changed.map((req) => mapFn(req, ERequirementChangeAction.changed))
+        return { added: addedErrorBoxData, removed: removedErrorBoxData, changed: changedErrorBoxData }
+      },
+    }))
+    .actions((self) => ({
+      setRevisionMode(revisionMode: boolean) {
+        self.revisionMode = revisionMode
+      },
+      setSelectedPastSubmissionVersion(submissionVersion: ISubmissionVersion) {
+        self.selectedPastSubmissionVersion = submissionVersion
+      },
+      setIsViewingPastRequests(isViewingPastRequests: boolean) {
+        self.isViewingPastRequests = isViewingPastRequests
+      },
+      setIsDirty(isDirty: boolean) {
+        self.isDirty = isDirty
+      },
+      resetDiff() {
+        self.showingCompareAfter = false
+        self.diff = null
+      },
+    }))
+    .views((self) => ({
+      shouldShowApplicationDiff(isEditing: boolean) {
+        return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
+      },
+      get shouldShowNewVersionWarning() {
+        return !self.usingCurrentTemplateVersion && self.isDraft
+      },
+      get formFormatKey() {
+        return (
+          (R.isNil(self.diff) ? `${self.templateVersion.id}` : `${self.templateVersion.id}-diff`) +
+          (self.revisionMode ? "-revision" : "") +
+          (self.selectedPastSubmissionVersion
+            ? `-past-submission-version-${self.selectedPastSubmissionVersion.id}`
+            : "") +
+          (self.isViewingPastRequests ? "-past-requests" : "")
+        )
+      },
+      indexOfBlockId: (blockId: string) => {
+        if (blockId === "formio-component-section-signoff-key") return self.flattenedBlocks.length - 1
+        return self.flattenedBlocks.findIndex((block) => block.id === blockId)
+      },
+      getBlockClass(sectionId, blockId) {
+        // 'formio-component-formSubmissionDataRSTsection61ba21b8-dc61-4a4a-9765-901cd4b53b3b|RBdc9d3ab2-fce8-40a0-ba94-14404c0c079b'
+        return `formio-component-${blockId === "section-signoff-id" ? "section-signoff-key" : self.blockKey(sectionId, blockId)}`
+      },
+      get blockClasses() {
+        return self.flattenedBlocks.map((b) => `formio-component-${b.key}`)
+      },
+      get contacts() {
+        // traverses the nest form json components
+        // and collects the label for contact requirements
+        const contactKeyToLabelMapping = R.pipe(
+          R.prop("components"),
+          R.chain(R.prop("components")),
+          R.chain(R.prop("components")),
+          R.reduce((acc, { id, key, title, components, label }) => {
+            if (key.includes("multi_contact")) {
+              const firstComponent = components[0]
+
+              if (firstComponent) {
+                acc[firstComponent.key] = firstComponent.label
+              }
+            }
+
+            if (key.includes(ERequirementType.generalContact) || key.includes(ERequirementType.professionalContact)) {
+              acc[key] = label
+            }
+
+            return acc
+          }, {})
+        )(self.formJson)
+        // Convert each section's object into an array of [key, value] pairs
+        const sectionsPairs = R.values(self.submissionData.data).map(R.toPairs)
+
+        // Filters out non contact form components
+        const getContactBlocks = (blocks) =>
+          blocks.filter(
+            (block) =>
+              block[0].includes("multi_contact") ||
+              block[0].includes(ERequirementType.generalContact) ||
+              block[0].includes(ERequirementType.professionalContact)
+          )
       },
       get isViewed() {
         return self.latestSubmissionVersion?.viewedAt

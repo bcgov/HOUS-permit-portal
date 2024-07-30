@@ -47,6 +47,14 @@ export const PermitApplicationStoreModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    get draftStatuses() {
+      return [EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested]
+    },
+    get submittedStatuses() {
+      return [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
+    },
+  }))
+  .views((self) => ({
     getSortColumnHeader(field: EPermitApplicationSortFields) {
       // @ts-ignore
       return t(`permitApplication.columns.${field}`)
@@ -65,10 +73,8 @@ export const PermitApplicationStoreModel = types
     },
     get statusFilterToGroup(): EPermitApplicationStatusGroup {
       const map = {
-        [[EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested].join(",")]:
-          EPermitApplicationStatusGroup.draft,
-        [[EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted].join(",")]:
-          EPermitApplicationStatusGroup.submitted,
+        [self.draftStatuses.join(",")]: EPermitApplicationStatusGroup.draft,
+        [self.submittedStatuses.join(",")]: EPermitApplicationStatusGroup.submitted,
       }
       return map[self.statusFilter.join(",")]
     },
