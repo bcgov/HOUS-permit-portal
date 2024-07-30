@@ -16,5 +16,24 @@ FactoryBot.define do
         permit_application.reindex
       end
     end
+
+    trait :revisions_requested do
+      status { :revisions_requested }
+      after(:create) do |permit_application|
+        submission_version = create(:submission_version, permit_application: permit_application)
+        create(:revision_request, submission_version: submission_version)
+        permit_application.reindex
+      end
+    end
+
+    trait :resubmitted do
+      status { :resubmitted }
+      after(:create) do |permit_application|
+        viewed_submission_version = create(:submission_version, :viewed, permit_application: permit_application)
+        create(:revision_request, submission_version: viewed_submission_version)
+        create(:submission_version, permit_application: permit_application)
+        permit_application.reindex
+      end
+    end
   end
 end
