@@ -17,8 +17,6 @@ module Api::Concerns::Search::Collaborators
         ),
     }
 
-    # binding.pry
-
     @collaborator_search = Collaborator.search(collaborator_query, **search_conditions)
   end
 

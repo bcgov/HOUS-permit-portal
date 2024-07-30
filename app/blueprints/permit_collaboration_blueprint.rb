@@ -9,6 +9,7 @@ class PermitCollaborationBlueprint < Blueprinter::Base
   end
 
   view :extended do
+    include_view :base
     association :permit_application, blueprint: PermitApplicationBlueprint, view: :base
   end
 end

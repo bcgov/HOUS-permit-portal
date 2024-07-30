@@ -418,8 +418,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return false
       }),
-      reInvitePermitCollaboration: flow(function* (permitCollaborationId: string) {
-        const response = yield self.environment.api.reInvitePermitCollaboration(permitCollaborationId)
+      reinvitePermitCollaboration: flow(function* (permitCollaborationId: string) {
+        const response = yield self.environment.api.reinvitePermitCollaboration(permitCollaborationId)
 
         if (response.ok) {
           const { data: permitCollaboration } = response.data

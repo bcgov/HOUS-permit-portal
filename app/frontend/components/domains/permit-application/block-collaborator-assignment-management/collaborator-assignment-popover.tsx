@@ -130,7 +130,7 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
               permitCollaborations={existingAssignments}
               transitionToAssign={() => changeScreen(EScreen.collaborationAssignment)}
               onUnassign={permitApplication.unassignPermitCollaboration}
-              onReInvite={permitApplication.reInvitePermitCollaboration}
+              onReinvite={permitApplication.reinvitePermitCollaboration}
             />
           )}
           {currentScreen === EScreen.collaborationAssignment && (
@@ -281,11 +281,11 @@ const Collaborations = observer(function PermitCollaborations({
   transitionToAssign,
   permitCollaborations,
   onUnassign,
-  onReInvite,
+  onReinvite,
 }: {
   transitionToAssign?: () => void
   onUnassign?: (permitCollaborationId: string) => Promise<void>
-  onReInvite?: (permitCollaborationId: string) => Promise<void>
+  onReinvite?: (permitCollaborationId: string) => Promise<void>
   permitCollaborations: IPermitCollaboration[]
 }) {
   const { t } = useTranslation()
@@ -352,7 +352,7 @@ const Collaborations = observer(function PermitCollaborations({
                       <>
                         {t("permitCollaboration.popover.collaborations.unconfirmed")}
                         <RequestLoadingButton
-                          onClick={onReInvite ? () => onReInvite(permitCollaboration.id) : undefined}
+                          onClick={onReinvite ? () => onReinvite(permitCollaboration.id) : undefined}
                           variant={"link"}
                           fontStyle={"italic"}
                         >

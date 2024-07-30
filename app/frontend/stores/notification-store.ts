@@ -80,11 +80,11 @@ export const NotificationStoreModel = types
           },
         ]
       } else if (notification.actionType === ENotificationActionType.submissionCollaborationAssignment) {
-        const collaborationDate = objectData as IPermitCollaborationNotificationObjectData
+        const collaborationData = objectData as IPermitCollaborationNotificationObjectData
         return [
           {
             text: t("ui.show"),
-            href: `/permit-applications/${collaborationDate.permitApplicationId}/edit`,
+            href: `/permit-applications/${collaborationData.permitApplicationId}/edit`,
           },
         ]
       } else if (

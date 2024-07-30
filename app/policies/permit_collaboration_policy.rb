@@ -11,7 +11,7 @@ class PermitCollaborationPolicy < ApplicationPolicy
     end
   end
 
-  def re_invite?
+  def reinvite?
     record.submission? && record.collaborator.user.submitter? && user == record.permit_application.submitter
   end
 end

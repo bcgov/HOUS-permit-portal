@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { requirementTypeToFormioType } from "../../../constants"
+import { FORMIO_DATA_CLASS_PREFIX } from "../../../constants/formio-constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { ICustomEventMap } from "../../../types/dom"
@@ -47,8 +48,6 @@ interface IEditPermitApplicationScreenProps {}
 type TPermitApplicationMetadataForm = {
   nickname: string
 }
-
-const FORMIO_DATA_CLASS_PREFIX = "formio-component-formSubmissionDataRSTsection"
 
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
   const { currentPermitApplication, error } = usePermitApplication()

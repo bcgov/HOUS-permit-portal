@@ -2,7 +2,7 @@ import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { ConfirmationModal, IConfirmationModalProps } from "./confirmation-modal"
+import { ConfirmationModal, IConfirmationModalProps } from "../confirmation-modal"
 
 interface IProps extends Omit<IConfirmationModalProps, "onConfirm"> {
   onRemove?: (closeModal: () => void) => void

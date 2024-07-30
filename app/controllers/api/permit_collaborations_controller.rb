@@ -1,5 +1,5 @@
 class Api::PermitCollaborationsController < Api::ApplicationController
-  before_action :set_permit_collaboration, only: %i[re_invite destroy]
+  before_action :set_permit_collaboration, only: %i[reinvite destroy]
 
   def destroy
     authorize @permit_collaboration
@@ -16,7 +16,7 @@ class Api::PermitCollaborationsController < Api::ApplicationController
     end
   end
 
-  def re_invite
+  def reinvite
     authorize @permit_collaboration
     begin
       PermitCollaboration::CollaborationManagementService.new(@permit_application).send_submission_collaboration_email!(

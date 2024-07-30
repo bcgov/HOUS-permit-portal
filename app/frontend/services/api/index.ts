@@ -312,9 +312,9 @@ export class Api {
     return this.client.delete<ApiResponse<IPermitCollaboration>>(`/permit_collaborations/${id}`)
   }
 
-  async reInvitePermitCollaboration(permitCollaborationId: string) {
+  async reinvitePermitCollaboration(permitCollaborationId: string) {
     return this.client.post<ApiResponse<IPermitCollaboration>>(
-      `/permit_collaborations/${permitCollaborationId}/re_invite`
+      `/permit_collaborations/${permitCollaborationId}/reinvite`
     )
   }
 

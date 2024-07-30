@@ -132,7 +132,7 @@ Rails.application.routes.draw do
     end
 
     resources :permit_collaborations, only: %i[destroy] do
-      post "re_invite", on: :member, to: "permit_collaborations#re_invite"
+      post "reinvite", on: :member, to: "permit_collaborations#reinvite"
     end
 
     patch "profile", to: "users#profile"

@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { COMPLETTION_SECTION_ID } from "../constants"
+import { COMPLETTION_SECTION_ID } from "../constants/formio-constants"
 import {
   IFormIOBlock,
   IFormIORequirement,
