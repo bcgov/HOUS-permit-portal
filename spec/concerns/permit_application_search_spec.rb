@@ -19,12 +19,24 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
     create_list(:permit_application, 3, submitter: submitter, jurisdiction: jurisdiction)
   end
 
+  let!(:revisions_requested_permit_applications) do
+    create_list(:permit_application, 3, :revisions_requested, submitter: submitter, jurisdiction: jurisdiction)
+  end
+
   let!(:submitted_permit_applications) do
     create_list(:permit_application, 3, :newly_submitted, submitter: submitter, jurisdiction: jurisdiction)
   end
 
+  let!(:resubmitted_permit_applications) do
+    create_list(:permit_application, 3, :resubmitted, submitter: submitter, jurisdiction: jurisdiction)
+  end
+
   let!(:submitted_permit_applications_different_jur) do
     create_list(:permit_application, 3, :newly_submitted, submitter: submitter, jurisdiction: other_jurisdiction)
+  end
+
+  let!(:resubmitted_permit_applications_different_jur) do
+    create_list(:permit_application, 3, :resubmitted, submitter: submitter, jurisdiction: other_jurisdiction)
   end
 
   let!(:other_permit_applications_same_jur) do
@@ -47,12 +59,14 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
   describe "perform_permit_application_search" do
     context "when searching for the users permit applications" do
       let(:cur_user) { submitter }
-      let(:permit_application_search_params) { { query: "", page: 1, per_page: 10 } }
+      let(:permit_application_search_params) { { query: "", page: 1, per_page: 20 } }
 
       it "returns only own permit applications" do
         controller.perform_permit_application_search
         expect(controller.instance_variable_get(:@permit_application_search).results).to match_array(
-          draft_permit_applications + submitted_permit_applications + submitted_permit_applications_different_jur,
+          draft_permit_applications + submitted_permit_applications + resubmitted_permit_applications +
+            revisions_requested_permit_applications + submitted_permit_applications_different_jur +
+            resubmitted_permit_applications_different_jur,
         )
       end
     end
@@ -61,12 +75,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
       before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
 
       let(:cur_user) { reviewer }
-      let(:permit_application_search_params) { { query: "", page: 1, per_page: 10 } }
+      let(:permit_application_search_params) { { query: "", page: 1, per_page: 20 } }
 
       it "returns only own jurisdictions permit applications" do
         controller.perform_permit_application_search
         expect(controller.instance_variable_get(:@permit_application_search).results).to match_array(
-          submitted_permit_applications,
+          submitted_permit_applications + resubmitted_permit_applications,
         )
       end
     end
@@ -75,12 +89,12 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
       before { controller.instance_variable_set(:@jurisdiction, jurisdiction) }
 
       let(:cur_user) { review_manager }
-      let(:permit_application_search_params) { { query: "", page: 1, per_page: 10 } }
+      let(:permit_application_search_params) { { query: "", page: 1, per_page: 20 } }
 
       it "returns only own jurisdictions permit applications" do
         controller.perform_permit_application_search
         expect(controller.instance_variable_get(:@permit_application_search).results).to match_array(
-          submitted_permit_applications,
+          submitted_permit_applications + resubmitted_permit_applications,
         )
       end
     end
