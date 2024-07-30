@@ -3,8 +3,8 @@ import {
   Button,
   Divider,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Spacer,
   Stack,
   Text,
@@ -20,10 +20,11 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { requirementTypeToFormioType } from "../../../constants"
+import { FORMIO_DATA_CLASS_PREFIX } from "../../../constants/formio-constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
 import { ICustomEventMap } from "../../../types/dom"
-import { ECustomEvents, ERequirementType } from "../../../types/enums"
+import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -33,6 +34,10 @@ import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import {
+  BlockCollaboratorAssignmentManagement,
+  IRequirementBlockAssignmentNode,
+} from "./block-collaborator-assignment-management"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
@@ -61,6 +66,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
+  const [requirementBlockAssignmentNodes, setRequirementBlockAssignmentNodes] = useState<
+    Array<IRequirementBlockAssignmentNode>
+  >([])
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -80,6 +88,43 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
       setProcessEventOnLoad(null)
     }
   }, [formRef.current, processEventOnLoad])
+
+  useEffect(() => {
+    if (!formRef.current?.element) {
+      return
+    }
+
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type !== "childList") {
+          continue
+        }
+        // @ts-ignore
+        const changedNodes = [...mutation.addedNodes, ...mutation.removedNodes]
+
+        const anyPaneNodeChanged = changedNodes.some((node) => {
+          return node.classList?.contains("formio-component-panel")
+        })
+
+        if (!anyPaneNodeChanged) {
+          continue
+        }
+
+        updateRequirementBlockAssignmentNode()
+      }
+    })
+
+    // Start observing
+    observer.observe(formRef.current.element, {
+      childList: true,
+      subtree: true,
+    })
+    //
+    // Cleanup function to disconnect the observer
+    return () => {
+      observer.disconnect()
+    }
+  }, [formRef.current])
 
   useEffect(() => {
     document.addEventListener<ECustomEvents.handlePermitApplicationUpdate>(
@@ -371,6 +416,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               showHelpButton
               isEditing
               renderSaveButton={() => <SaveButton handleSave={handleSave} />}
+              setAccordionHeaderNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
         )}
@@ -383,8 +429,45 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
+        return (
+          <BlockCollaboratorAssignmentManagement
+            key={requirementBlockAssignmentNode.requirementBlockId}
+            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+            permitApplication={currentPermitApplication}
+            collaborationType={ECollaborationType.submission}
+          />
+        )
+      })}
     </Box>
   )
+
+  function updateRequirementBlockAssignmentNode() {
+    const accordionNodes = document.querySelectorAll<HTMLDivElement>(".formio-component-panel")
+
+    const updatedRequirementBlockAssignmentNodes: Array<IRequirementBlockAssignmentNode> = Array.from(accordionNodes)
+      .filter((node) => {
+        return (
+          node.querySelector(".card-title") &&
+          Array.from(node.classList).find((c) => c.startsWith(FORMIO_DATA_CLASS_PREFIX))
+        )
+      })
+      .map((node) => {
+        const titleNode = node.querySelector<HTMLElement>(".card-title")
+        const requirementBlockId = Array.from(node.classList)
+          .find((c) => c.startsWith(FORMIO_DATA_CLASS_PREFIX))
+          .split("|RB")
+          .at(-1)
+
+        return {
+          requirementBlockId,
+          panelNode: node,
+          attachmentNode: titleNode,
+        }
+      })
+
+    setRequirementBlockAssignmentNodes(updatedRequirementBlockAssignmentNodes)
+  }
 })
 
 function SaveButton({ handleSave }) {

@@ -49,6 +49,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
     association :latest_submission_version, blueprint: SubmissionVersionBlueprint, view: :extended
+    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
   end
 
   view :jurisdiction_review_extended do

@@ -371,7 +371,23 @@ export enum ENotificationActionType {
   publishedTemplateMissingRequirementsMapping = "published_template_missing_requirements_mapping",
   scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
+  submissionCollaborationAssignment = "submission_collaboration_assignment",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
+}
+
+export enum ECollaboratorableType {
+  Jurisdiction = "Jurisdiction",
+  User = "User",
+}
+
+export enum ECollaborationType {
+  submission = "submission",
+  review = "review",
+}
+
+export enum ECollaboratorType {
+  delegatee = "delegatee",
+  assignee = "assignee",
 }

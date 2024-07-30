@@ -43,6 +43,7 @@ interface IRequirementFormProps {
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
   renderTopButtons?: () => React.ReactNode
+  setAccordionHeaderNodes?: () => void
 }
 
 export const RequirementForm = observer(
@@ -54,6 +55,7 @@ export const RequirementForm = observer(
     renderTopButtons,
     renderSaveButton,
     isEditing = false,
+    setAccordionHeaderNodes,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -252,6 +254,9 @@ export const RequirementForm = observer(
 
     const onInitialized = (event) => {
       if (!formRef.current) return
+
+      setAccordionHeaderNodes?.()
+
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
@@ -303,8 +308,8 @@ export const RequirementForm = observer(
           className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
           mb="40vh"
           mx="auto"
-          pl={{ lg: "8" }}
-          pr={{ base: "0", xl: "var(--app-permit-form-right-white-space)" }}
+          pl={{ base: "10" }}
+          pr={{ base: "10", xl: "var(--app-permit-form-right-white-space)" }}
           width="full"
           maxWidth="container.lg"
           gap={8}
@@ -373,7 +378,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-            can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}

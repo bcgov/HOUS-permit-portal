@@ -21,6 +21,8 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
   has_one :step_code
   has_many :submission_versions, dependent: :destroy
+  has_many :permit_collaborations, dependent: :destroy
+  has_many :collaborators, through: :permit_collaborations
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -318,6 +320,10 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  def update_collaboration_assignments
+    # TODO: Implement this method to remove collaborations for missing requirement block when a new template is published
+  end
 
   def assign_default_nickname
     self.nickname = "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
