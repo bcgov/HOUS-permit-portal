@@ -132,6 +132,7 @@ const options = {
           },
         },
         ui: {
+          okay: "Okay",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
@@ -379,6 +380,13 @@ const options = {
           },
         },
         permitApplication: {
+          submissionBlockModal: {
+            title: "Trying to submit this application?",
+            description:
+              "Only the designated submitter or the author can submit  this permit application. Please contact that person to continue.",
+            designatedSubmitter: "Designated submitter",
+            author: "Author",
+          },
           browserSearch: {
             prompt: "Find specific form fields by using your web browser search: press keyboard shortcut",
             windows: "Windows: <1>Ctrl</1> + <1>F</1>",
@@ -395,8 +403,9 @@ const options = {
           newVersionPublished: "New version of template has been published - please review changes",
           card: {
             collaborateButton: "Collaborate",
-            collaborationCallout:
+            collaborationCalloutDraft:
               "<1>{{authorName}} has assigned you to this permit.</1> Collaborate on this permit application.",
+            collaborationCalloutSubmitted: "<1>{{authorName}} assigned you to this permit.</1>",
           },
           referenceNumber: "Reference #",
           pdf: {

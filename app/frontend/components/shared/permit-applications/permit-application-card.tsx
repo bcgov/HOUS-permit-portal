@@ -34,7 +34,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
   const { t } = useTranslation()
 
   const { shouldShowNewVersionWarning, isDraft } = permitApplication
-  const isSubmissionCollaboration = permitApplication.isDraft && permitApplication.submitter?.id !== currentUser?.id
+  const isSubmissionCollaboration = permitApplication.submitter?.id !== currentUser?.id
 
   const routingButtonText = (() => {
     if (permitApplication.isSubmitted) return t("ui.view")
@@ -102,7 +102,11 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               <Info size={14} />
               <Text {...calloutBannerTextProps}>
                 <Trans
-                  i18nKey={"permitApplication.card.collaborationCallout"}
+                  i18nKey={
+                    permitApplication.isDraft
+                      ? "permitApplication.card.collaborationCalloutDraft"
+                      : "permitApplication.card.collaborationCalloutSubmitted"
+                  }
                   t={t}
                   components={{ 1: <Text as="span" fontWeight="bold" /> }}
                   values={{

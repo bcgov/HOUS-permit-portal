@@ -38,7 +38,7 @@ import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collabo
 import { IRequirement } from "./requirement"
 import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
-import { UserModel } from "./user"
+import { IUser, UserModel } from "./user"
 
 export const PermitApplicationModel = types.snapshotProcessor(
   types
@@ -429,6 +429,24 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .views((self) => ({
       getCollaborationAssigneesByBlockId(collaborationType: ECollaborationType, requirementBlockId: string) {
         return self.getCollaborationAssigneesByBlockIdMap(collaborationType)[requirementBlockId] ?? []
+      },
+      canUserSubmit(user: IUser) {
+        if (self.submitter.id === user.id) {
+          return true
+        }
+
+        const delegateePermitCollaboration = self.getCollaborationDelegatee(ECollaborationType.submission)
+
+        return delegateePermitCollaboration?.collaborator?.user?.id == user.id
+      },
+      delegateeUser(collaborationType: ECollaborationType) {
+        return self.getCollaborationDelegatee(collaborationType)?.collaborator?.user
+      },
+      assigneeUsers(collaborationType: ECollaborationType) {
+        return (
+          self.getCollaborationAssignees(collaborationType)?.map((collaboration) => collaboration.collaborator.user) ??
+          []
+        )
       },
     }))
     .actions((self) => ({
