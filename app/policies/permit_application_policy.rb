@@ -25,7 +25,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update_version?
-    update?
+    record.draft? && record.submitter == user
   end
 
   def update_revision_requests?

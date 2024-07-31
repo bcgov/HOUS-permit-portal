@@ -63,7 +63,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Can>
         </Flex>
 
-        <SearchGrid templateColumns="120px 170px 1.6fr 1.5fr repeat(4, 1.3fr)">
+        <SearchGrid templateColumns="repeat(8, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
