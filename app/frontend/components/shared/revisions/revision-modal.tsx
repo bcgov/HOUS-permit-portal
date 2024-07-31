@@ -54,9 +54,9 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
 }) => {
   const { t } = useTranslation()
   const [reasonCode, setReasonCode] = useState<string>(
-    revisionRequest?.reasonCode ?? revisionRequestDefault?.reasonCode ?? ""
+    revisionRequestDefault?.reasonCode ?? revisionRequest?.reasonCode ?? ""
   )
-  const [comment, setComment] = useState<string>(revisionRequest?.comment ?? revisionRequestDefault?.comment ?? "")
+  const [comment, setComment] = useState<string>(revisionRequestDefault?.comment ?? revisionRequest?.comment ?? "")
 
   const { update, append, fields } = useFieldArrayMethods
 
@@ -115,10 +115,10 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   }
 
   const requirementForm = singleRequirementFormJson(
-    revisionRequest?.requirementJson ?? revisionRequestDefault?.requirementJson ?? requirementJson
+    revisionRequestDefault?.requirementJson ?? revisionRequest?.requirementJson ?? requirementJson
   )
   const requirementSubmission =
-    revisionRequest?.submissionJson ?? revisionRequestDefault?.submissionJson ?? submissionJson
+    revisionRequestDefault?.submissionJson ?? revisionRequest?.submissionJson ?? submissionJson
 
   return (
     <Modal onClose={handleClose} isOpen={isOpen} size="lg">
