@@ -64,7 +64,7 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   const { currentUser } = userStore
   const { revisionReasonOptions } = siteConfigurationStore
 
-  const className = `formio-component-${requirementJson.key}`
+  const className = `formio-component-${requirementJson?.key}`
   const elements = document.getElementsByClassName(className)
 
   const resetFields = () => {

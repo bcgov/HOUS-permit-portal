@@ -135,7 +135,7 @@ export const RevisionSideBar = observer(
       return () => {
         document.removeEventListener("openRequestRevision", handleOpenEvent)
       }
-    }, [fields, tabIndex])
+    }, [fields, tabIndex, selectedPastSubmissionVersion?.id])
 
     const handleSelectPastVersionChange = (pastVersion: ISubmissionVersion | null) => {
       if (pastVersion) {

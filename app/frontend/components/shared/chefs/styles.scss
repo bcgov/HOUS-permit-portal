@@ -893,7 +893,8 @@
   }
 
   .revision-requested legend,
-  .form-group.revision-requested > label {
+  .form-group.revision-requested > label,
+  .form-group.revision-requested > .checkbox > label {
     border-bottom: 2px solid;
     border-color: var(--chakra-colors-theme-yellow);
     border-color: var(--chakra-colors-semantic-error);
