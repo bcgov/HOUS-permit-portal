@@ -40,7 +40,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
+    <Container maxW="container.xl" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
         {!currentJurisdiction.submissionInboxSetUp && (
           <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
