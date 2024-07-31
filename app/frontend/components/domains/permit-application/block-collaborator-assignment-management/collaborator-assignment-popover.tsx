@@ -45,11 +45,14 @@ enum EScreen {
 }
 
 const INITIAL_SCREEN = EScreen.collaborations
+
 export const CollaboratorAssignmentPopover = observer(function AssignmentPopover({
   permitApplication,
   collaborationType,
   requirementBlockId,
 }: IProps) {
+  const { userStore } = useMst()
+  const { currentUser } = userStore
   const { t } = useTranslation()
   const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(
     collaborationType,
@@ -62,8 +65,16 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   const [openAssignmentConfirmationModals, setOpenAssignmentConfirmationModals] = React.useState<Set<string>>([])
   const contentRef = React.useRef<HTMLDivElement>(null)
 
+  const canManage = (() => {
+    if (collaborationType === ECollaborationType.review) {
+      return currentUser.isReviewStaff && currentUser.jurisdiction?.id === permitApplication.jurisdiction?.id
+    }
+
+    return permitApplication.isDraft && currentUser?.id === permitApplication.submitter?.id
+  })()
+
   const changeScreen = (screen: EScreen) => {
-    setCurrentScreen(screen)
+    setCurrentScreen(canManage ? screen : INITIAL_SCREEN)
 
     // This needs to be done as their is a focus loss issue when dynamically
     // changing the screen in the popover, causing close on blur to not work
@@ -128,12 +139,12 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
           {currentScreen === EScreen.collaborations && (
             <Collaborations
               permitCollaborations={existingAssignments}
-              transitionToAssign={() => changeScreen(EScreen.collaborationAssignment)}
-              onUnassign={permitApplication.unassignPermitCollaboration}
+              transitionToAssign={canManage ? () => changeScreen(EScreen.collaborationAssignment) : undefined}
+              onUnassign={canManage ? permitApplication.unassignPermitCollaboration : undefined}
               onReinvite={permitApplication.reinvitePermitCollaboration}
             />
           )}
-          {currentScreen === EScreen.collaborationAssignment && (
+          {canManage && currentScreen === EScreen.collaborationAssignment && (
             <CollaborationAssignment
               onSelect={(collaboratorId) =>
                 permitApplication.assignCollaborator(collaboratorId, ECollaboratorType.assignee, requirementBlockId)
@@ -144,7 +155,7 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
               transitionToInvite={() => changeScreen(EScreen.collaboratorInvite)}
             />
           )}
-          {currentScreen === EScreen.collaboratorInvite && (
+          {canManage && currentScreen === EScreen.collaboratorInvite && (
             <CollaboratorInvite
               transitionToScreen={changeScreen}
               onInvite={onInviteCollaborator}
@@ -302,9 +313,11 @@ const Collaborations = observer(function PermitCollaborations({
         alignItems={"center"}
       >
         {t("permitCollaboration.popover.collaborations.title")}
-        <Button leftIcon={<Plus />} onClick={transitionToAssign} variant={"primary"} size={"sm"} fontSize={"sm"}>
-          {t("permitCollaboration.popover.collaborations.assignButton")}
-        </Button>
+        {transitionToAssign && (
+          <Button leftIcon={<Plus />} onClick={transitionToAssign} variant={"primary"} size={"sm"} fontSize={"sm"}>
+            {t("permitCollaboration.popover.collaborations.assignButton")}
+          </Button>
+        )}
       </PopoverHeader>
       <PopoverBody px={5} py={4}>
         <Stack as={"ul"} w={"full"} listStyleType={"none"} pl={0} spacing={4}>
@@ -337,14 +350,16 @@ const Collaborations = observer(function PermitCollaborations({
                     {organization && <Text fontSize={"sm"}>{organization}</Text>}
                   </Box>
 
-                  <RequestLoadingButton
-                    onClick={() => onUnassign?.(permitCollaboration.id)}
-                    size={"sm"}
-                    fontSize={"sm"}
-                    variant={"link"}
-                  >
-                    {t("permitCollaboration.popover.collaborations.unassignButton")}
-                  </RequestLoadingButton>
+                  {onUnassign && (
+                    <RequestLoadingButton
+                      onClick={() => onUnassign(permitCollaboration.id)}
+                      size={"sm"}
+                      fontSize={"sm"}
+                      variant={"link"}
+                    >
+                      {t("permitCollaboration.popover.collaborations.unassignButton")}
+                    </RequestLoadingButton>
+                  )}
                 </HStack>
                 {!isConfirmedUser && (
                   <Text fontSize={"xs"} color={"text.secondary"}>
