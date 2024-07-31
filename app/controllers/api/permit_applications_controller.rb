@@ -60,9 +60,19 @@ class Api::PermitApplicationsController < Api::ApplicationController
     # always reset the submission section keys until actual submission
     submission_section = permit_application_params.dig("submission_data", "data", "section-completion-key")
     submission_section&.each { |key, value| submission_section[key] = nil }
+
+    is_current_user_submitter = current_user.id == @permit_application.submitter_id
+
     if @permit_application.draft? &&
          @permit_application.update_with_submission_data_merge(
-           permit_application_params: permit_application_params,
+           permit_application_params:
+             (
+               if is_current_user_submitter
+                 permit_application_params
+               else
+                 permit_collaboration_params
+               end
+             ),
            current_user: current_user,
          )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
@@ -155,7 +165,17 @@ class Api::PermitApplicationsController < Api::ApplicationController
       render_error "permit_application.outdated_error", message_opts: {} and return
     end
 
-    if @permit_application.update(permit_application_params) && @permit_application.submit!
+    is_current_user_submitter = current_user.id == @permit_application.submitter_id
+
+    if @permit_application.update(
+         (
+           if is_current_user_submitter
+             permit_application_params
+           else
+             submission_collaborator_permit_application_params
+           end
+         ),
+       ) && @permit_application.submit!
       render_success @permit_application,
                      nil,
                      {
@@ -291,6 +311,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
       submission_data: {
       },
     )
+  end
+
+  def submission_collaborator_permit_application_params # permit application params collaborators can update if they are a collaborator during submission
+    params.require(:permit_application).permit(submission_data: {})
   end
 
   def permit_collaboration_params

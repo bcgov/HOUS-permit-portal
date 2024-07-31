@@ -30,7 +30,7 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update_version?
-    update?
+    record.draft? ? record.submitter == user : user.review_staff?
   end
 
   def update_revision_requests?
@@ -42,7 +42,12 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def submit?
-    update?
+    record.draft? ? record.submitter == user : user.review_staff?
+    if record.draft?
+      record.submission_requirement_block_edit_permissions(user_id: user.id) == :all
+    else
+      user.review_staff? && user.jurisdictions.find(record.jurisdiction_id)
+    end
   end
 
   def generate_missing_pdfs?

@@ -1,22 +1,4 @@
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Heading,
-  HStack,
-  Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  TextProps,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
@@ -35,9 +17,10 @@ import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
 import { CustomMessageBox } from "../base/custom-message-box"
 import { SharedSpinner } from "../base/shared-spinner"
-import { defaultOptions, Form } from "../chefs"
+import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
+import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -400,7 +383,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
@@ -416,44 +399,12 @@ export const RequirementForm = observer(
           renderSaveButton={renderSaveButton}
         />
         {isOpen && (
-          <Modal onClose={onClose} isOpen={isOpen} size="2xl">
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>
-                <ModalCloseButton fontSize="11px" />
-              </ModalHeader>
-              <ModalBody py={6}>
-                {permitApplication.canUserSubmit(currentUser) ? (
-                  <Flex direction="column" gap={8}>
-                    <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
-                    <Box
-                      borderRadius="md"
-                      border="1px solid"
-                      borderColor="semantic.warning"
-                      backgroundColor="semantic.warningLight"
-                      px={6}
-                      py={3}
-                    >
-                      <Heading as="h3" fontSize="lg">
-                        {t("permitApplication.new.bySubmitting")}
-                      </Heading>
-                      <Text>{t("permitApplication.new.confirmation")}</Text>
-                    </Box>
-                    <Flex justify="center" gap={6}>
-                      <Button onClick={onModalSubmit} variant="primary">
-                        {t("ui.submit")}
-                      </Button>
-                      <Button onClick={onClose} variant="secondary">
-                        {t("ui.neverMind")}
-                      </Button>
-                    </Flex>
-                  </Flex>
-                ) : (
-                  <CollaboratorSubmitBlockModalContent permitApplication={permitApplication} onDismiss={onClose} />
-                )}
-              </ModalBody>
-            </ModalContent>
-          </Modal>
+          <PermitApplicationSubmitModal
+            permitApplication={permitApplication}
+            isOpen={isOpen}
+            onClose={onClose}
+            onSubmit={onModalSubmit}
+          />
         )}
         {isContactsOpen && (
           <ContactModal
@@ -482,86 +433,6 @@ export const RequirementForm = observer(
     )
   }
 )
-
-const CollaboratorSubmitBlockModalContent = observer(function CollaboratorSubmitBlockModalBodyContent({
-  permitApplication,
-  onDismiss,
-}: {
-  permitApplication: IPermitApplication
-  onDismiss: () => void
-}) {
-  const { t } = useTranslation()
-
-  const submitter = permitApplication.submitter
-  const delegatee = permitApplication.delegatee
-
-  return (
-    <VStack spacing={8} textAlign={"center"}>
-      <Heading as="h3" fontSize={"2xl"}>
-        {t("permitApplication.submissionBlockModal.title")}
-      </Heading>
-      <Text textAlign={"center"}> {t("permitApplication.submissionBlockModal.description")}</Text>
-
-      <HStack justifyContent={"center"} w={"full"} spacing={6} alignItems={"stretch"}>
-        <CollaboratorSubmitBlockModalCard
-          title={t("permitApplication.submissionBlockModal.designatedSubmitter")}
-          name={delegatee?.name}
-          organization={delegatee?.organization}
-        />
-
-        <CollaboratorSubmitBlockModalCard
-          title={t("permitApplication.submissionBlockModal.author")}
-          name={submitter?.name}
-          organization={submitter?.organization || "some organization"}
-        />
-      </HStack>
-      <Button
-        variant={"primary"}
-        onClick={(e) => {
-          e.stopPropagation()
-          onDismiss()
-        }}
-      >
-        {t("ui.okay")}
-      </Button>
-    </VStack>
-  )
-})
-
-const cardContainerProps = {
-  gap: 4,
-  p: 3,
-  border: "1px solid",
-  borderColor: "border.light",
-  borderRadius: "sm",
-  w: "50%",
-  maxW: "258px",
-}
-const cardTextProps: Partial<TextProps> = {
-  textTransform: "uppercase",
-  color: "text.secondary",
-  fontSize: "sm",
-}
-
-function CollaboratorSubmitBlockModalCard({
-  title,
-  name,
-  organization,
-}: {
-  title: string
-  name: string
-  organization?: string
-}) {
-  return (
-    <VStack {...cardContainerProps}>
-      <Text {...cardTextProps}>{title}</Text>
-      <Box>
-        {name && <Text fontWeight={700}>{name}</Text>}
-        {organization && <Text>{organization}</Text>}
-      </Box>
-    </VStack>
-  )
-}
 
 function isFirstComponentNearTopOfView(firstComponentKey) {
   const firstComponentElement = document.querySelector(`.formio-component-${firstComponentKey}`)
