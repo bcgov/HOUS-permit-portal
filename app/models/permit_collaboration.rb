@@ -7,6 +7,8 @@ class PermitCollaboration < ApplicationRecord
 
   before_validation :set_default_collaboration_type, on: :create
 
+  after_save :reindex_permit_application
+
   validates :permit_application_id,
             uniqueness: {
               scope: %i[collaborator_id collaboration_type collaborator_type assigned_requirement_block_id],
@@ -63,6 +65,10 @@ class PermitCollaboration < ApplicationRecord
   end
 
   private
+
+  def reindex_permit_application
+    permit_application.reindex if saved_change_to_collaborator_id?
+  end
 
   def validate_author_not_collaborator
     return unless submission?

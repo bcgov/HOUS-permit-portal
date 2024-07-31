@@ -53,6 +53,29 @@ class PermitApplication < ApplicationRecord
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
+  COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def formatted_submission_data(current_user: nil)
+    PermitApplication::SubmissionDataService.new(self).formatted_submission_data(current_user: current_user)
+  end
+
+  def users_by_collaboration_options(collaboration_type:, collaborator_type: nil)
+    base_where_clause = {
+      collaborations: {
+        permit_collaborations: {
+          collaboration_type: collaboration_type,
+          permit_application_id: id,
+        },
+      },
+    }
+
+    base_where_clause[:collaborations][:permit_collaborations][
+      :collaborator_type
+    ] = collaborator_type if collaborator_type.present?
+
+    User.joins(collaborations: :permit_collaborations).where(base_where_clause).distinct
+  end
+
   # Helper method to get the latest SubmissionVersion
   def latest_submission_version
     submission_versions.order(created_at: :desc).first
@@ -67,8 +90,8 @@ class PermitApplication < ApplicationRecord
     latest_submission_version&.revision_requests || RevisionRequest.none
   end
 
-  def form_json
-    result = PermitApplication::FormJsonService.new(permit_application: self).call
+  def form_json(current_user: nil)
+    result = PermitApplication::FormJsonService.new(permit_application: self, current_user:).call
     result.form_json
   end
 
@@ -78,6 +101,13 @@ class PermitApplication < ApplicationRecord
 
     current_published_template_version.update(
       form_json: current_published_template_version.requirement_template.to_form_json,
+    )
+  end
+
+  def update_with_submission_data_merge(permit_application_params:, current_user: nil)
+    PermitApplication::SubmissionDataService.new(self).update_with_submission_data_merge(
+      permit_application_params:,
+      current_user:,
     )
   end
 
@@ -96,7 +126,28 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       using_current_template_version: using_current_template_version,
+      user_ids_with_submission_edit_permissions:
+        [submitter.id] + users_by_collaboration_options(collaboration_type: :submission).pluck(:id),
     }
+  end
+
+  def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
+    users_by_collaboration_options(collaboration_type:, collaborator_type:).exists?(id: user_id)
+  end
+
+  def submission_requirement_block_edit_permissions(user_id:)
+    return nil if submitter_id != user_id && !collaborator?(user_id:, collaboration_type: :submission)
+
+    if submitter_id == user_id ||
+         collaborator?(user_id:, collaboration_type: :submission, collaborator_type: :delegatee)
+      return :all
+    end
+
+    permit_collaborations
+      .joins(:collaborator)
+      .where(collaboration_type: :submission, collaborators: { user_id: })
+      .map(&:assigned_requirement_block_id)
+      .compact
   end
 
   def indexed_using_current_template_version
@@ -135,7 +186,7 @@ class PermitApplication < ApplicationRecord
     jurisdiction.prefix
   end
 
-  def collaborators
+  def notifiable_users
     relevant_collaborators = [submitter]
 
     if submitted?

@@ -11,6 +11,8 @@ class Collaborator < ApplicationRecord
 
   validate :validate_user, on: :create
 
+  after_save :reindex_permit_applications
+
   def search_data
     {
       collaboratorable_type: collaboratorable_type,
@@ -26,6 +28,14 @@ class Collaborator < ApplicationRecord
   end
 
   private
+
+  def reindex_permit_applications
+    return unless saved_change_to_user_id
+
+    permit_applications = permit_collaborations.includes(:permit_application).map(&:permit_application).uniq
+
+    permit_applications.each(&:reindex)
+  end
 
   def validate_user
     error_key = nil

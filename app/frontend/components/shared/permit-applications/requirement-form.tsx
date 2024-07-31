@@ -1,19 +1,4 @@
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Heading,
-  Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
@@ -35,6 +20,7 @@ import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
+import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -397,7 +383,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
@@ -413,40 +399,12 @@ export const RequirementForm = observer(
           renderSaveButton={renderSaveButton}
         />
         {isOpen && (
-          <Modal onClose={onClose} isOpen={isOpen} size="2xl">
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>
-                <ModalCloseButton fontSize="11px" />
-              </ModalHeader>
-              <ModalBody py={6}>
-                <Flex direction="column" gap={8}>
-                  <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
-                  <Box
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor="semantic.warning"
-                    backgroundColor="semantic.warningLight"
-                    px={6}
-                    py={3}
-                  >
-                    <Heading as="h3" fontSize="lg">
-                      {t("permitApplication.new.bySubmitting")}
-                    </Heading>
-                    <Text>{t("permitApplication.new.confirmation")}</Text>
-                  </Box>
-                  <Flex justify="center" gap={6}>
-                    <Button onClick={onModalSubmit} variant="primary">
-                      {t("ui.submit")}
-                    </Button>
-                    <Button onClick={onClose} variant="secondary">
-                      {t("ui.neverMind")}
-                    </Button>
-                  </Flex>
-                </Flex>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
+          <PermitApplicationSubmitModal
+            permitApplication={permitApplication}
+            isOpen={isOpen}
+            onClose={onClose}
+            onSubmit={onModalSubmit}
+          />
         )}
         {isContactsOpen && (
           <ContactModal

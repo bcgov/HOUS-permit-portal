@@ -23,6 +23,7 @@ import { requirementTypeToFormioType } from "../../../constants"
 import { FORMIO_DATA_CLASS_PREFIX } from "../../../constants/formio-constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
+import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
@@ -33,6 +34,7 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
+import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import {
   BlockCollaboratorAssignmentManagement,
@@ -50,6 +52,8 @@ type TPermitApplicationMetadataForm = {
 }
 
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
+  const { userStore } = useMst()
+  const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
   const formRef = useRef(null)
@@ -69,6 +73,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const [requirementBlockAssignmentNodes, setRequirementBlockAssignmentNodes] = useState<
     Array<IRequirementBlockAssignmentNode>
   >([])
+  const {
+    isOpen: isSubmitBlockedModalOpen,
+    onOpen: onSubmitBlockedModalOpen,
+    onClose: onSubmitBlockedModalClose,
+  } = useDisclosure()
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -266,6 +275,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
+  const isCurrentUserSubmitter = currentUser?.id === currentPermitApplication.submitter?.id
   return (
     <Box as="main" id="submitter-view-permit">
       {!isStepCode && (
@@ -292,11 +302,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={isSubmitted}
+                        isDisabled={!isCurrentUserSubmitter || isSubmitted}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
-                            display: isSubmitted ? "none" : "block",
+                            display: !isCurrentUserSubmitter || isSubmitted ? "none" : "block",
                           },
                         }}
                         editableInputProps={{
@@ -358,9 +368,23 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <Button variant="primary" onClick={handleClickFinishLater}>
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
-                <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
+                <Button
+                  rightIcon={<CaretRight />}
+                  onClick={
+                    currentPermitApplication.canUserSubmit(currentUser)
+                      ? handleScrollToBottom
+                      : onSubmitBlockedModalOpen
+                  }
+                >
                   {t("permitApplication.edit.submit")}
                 </Button>
+                {!currentPermitApplication.canUserSubmit(currentUser) && isSubmitBlockedModalOpen && (
+                  <PermitApplicationSubmitModal
+                    permitApplication={currentPermitApplication}
+                    isOpen={isSubmitBlockedModalOpen}
+                    onClose={onSubmitBlockedModalClose}
+                  />
+                )}
               </HStack>
             )}
             <FloatingHelpDrawer top={permitHeaderHeight + 20} position="absolute" />

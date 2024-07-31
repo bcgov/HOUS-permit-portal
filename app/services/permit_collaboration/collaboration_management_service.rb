@@ -47,7 +47,9 @@ class PermitCollaboration::CollaborationManagementService
   )
     ActiveRecord::Base.transaction do
       begin
-        user = User.find_by(email: user_params[:email].strip)
+        # check if user exists
+        # Use omniauth_email to find the user because that is the actual email of the associated bceid
+        user = User.find_by(omniauth_email: user_params[:email].strip)
 
         user ||= create_submission_user!(user_params)
 
