@@ -1,3 +1,4 @@
+import { ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication } from "../models/permit-application"
 import { IRequirementBlock } from "../models/requirement-block"
@@ -27,6 +28,8 @@ export interface IJurisdictionResponse extends IApiResponse<IJurisdiction[], IPa
 export interface IUsersResponse extends IApiResponse<IUser[], IPageMeta> {}
 
 export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPermitApplication[], IPageMeta> {}
+
+export interface ICollaboratorSearchResponse extends IApiResponse<ICollaborator[], IPageMeta> {}
 
 export interface IAcceptInvitationResponse extends IApiResponse<{}, { redirectUrl: string }> {}
 

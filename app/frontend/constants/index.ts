@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { IRequirementAttributes } from "./types/api-request"
+import { IRequirementAttributes } from "../types/api-request"
 import {
   EAutoComplianceType,
   EEnabledElectiveFieldReason,
@@ -8,8 +8,8 @@ import {
   ENumberUnit,
   ERequirementContactFieldItemType,
   ERequirementType,
-} from "./types/enums"
-import { IOption } from "./types/types"
+} from "../types/enums"
+import { IOption } from "../types/types"
 
 export const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -176,6 +176,3 @@ export const VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES = [
 ]
 
 export const OPTIONS_MAPPER_AUTO_COMPLIANCE_TYPES = [EAutoComplianceType.externalOptionsMapper]
-
-export const COMPLETTION_SECTION_ID = "section-completion-id"
-export const COMPLETTION_SECTION_KEY = "section-completion-key"

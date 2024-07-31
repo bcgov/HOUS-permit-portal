@@ -19,7 +19,7 @@ import { IContact } from "../../../types/types"
 import { convertE164PhoneToInputDefault } from "../../../utils/utility-functions"
 import { EmailFormControl } from "../form/email-form-control"
 import { PhoneFormControl, TextFormControl } from "../form/input-form-control"
-import { RemoveConfirmationModal } from "../remove-confirmation-modal"
+import { RemoveConfirmationModal } from "../modals/remove-confirmation-modal"
 
 export type TContactFormData = {
   id: string

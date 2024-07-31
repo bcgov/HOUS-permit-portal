@@ -147,6 +147,18 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_permit_collaboration_event(permit_collaboration)
+    return unless permit_collaboration.submission?
+
+    collaborator_user_id = permit_collaboration.collaborator.user_id
+
+    notification_user_hash = {
+      collaborator_user_id => permit_collaboration.submission_collaboration_assignment_notification_data,
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_application_submission_event(permit_application)
     notification_user_hash = {}
     notification_user_hash[permit_application.submitter_id] = permit_application.submit_event_notification_data

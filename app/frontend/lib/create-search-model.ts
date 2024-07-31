@@ -11,7 +11,8 @@ interface IFetchOptions {
 
 export const createSearchModel = <TSortField, TFetchOptions extends IFetchOptions = IFetchOptions>(
   fetchDataActionName: string,
-  setFiltersName?: string
+  setFiltersName?: string,
+  skipQueryParam = false
 ) =>
   types
     .model()
@@ -30,22 +31,22 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.currentPage = 1
         self.totalPages = null
         self.totalCount = null
-        setQueryParam("currentPage", "1")
+        !skipQueryParam && setQueryParam("currentPage", "1")
       },
       setCountPerPage(countPerPage: number) {
-        setQueryParam("countPerPage", countPerPage.toString())
+        !skipQueryParam && setQueryParam("countPerPage", countPerPage.toString())
         self.countPerPage = countPerPage
       },
       setCurrentPage(currentPage: number) {
-        setQueryParam("currentPage", currentPage.toString())
+        !skipQueryParam && setQueryParam("currentPage", currentPage.toString())
         self.currentPage = currentPage
       },
       setQuery(query: string) {
-        setQueryParam("query", query)
+        !skipQueryParam && setQueryParam("query", query)
         self.query = !!query?.trim() ? query : null
       },
       setShowArchived(bool) {
-        setQueryParam("showArchived", bool.toString())
+        !skipQueryParam && setQueryParam("showArchived", bool.toString())
         self.showArchived = bool
       },
       fetchData: flow(function* (opts?: TFetchOptions) {

@@ -48,6 +48,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
+    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
   end
 

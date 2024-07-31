@@ -5,6 +5,7 @@ import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  ECollaboratorType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
   EEnergyStep,
@@ -270,6 +271,12 @@ export interface IPermitNotificationObjectData {
   // Add future notification data here
 }
 
+export interface IPermitCollaborationNotificationObjectData {
+  permitApplicationId?: string
+  collaboratorType?: ECollaboratorType
+  assignedRequirementBlockName?: string
+}
+
 export interface IMissingRequirementsMappingNotificationObjectData {
   templateVersionId: string
 }
@@ -278,7 +285,10 @@ export interface INotification {
   id: string
   actionType: ENotificationActionType
   actionText: string
-  objectData?: IPermitNotificationObjectData | IMissingRequirementsMappingNotificationObjectData
+  objectData?:
+    | IPermitNotificationObjectData
+    | IMissingRequirementsMappingNotificationObjectData
+    | IPermitCollaborationNotificationObjectData
 }
 
 export interface ITemplateVersionUpdate {
@@ -482,6 +492,7 @@ export interface ISubmissionVersion {
   viewedAt?: Date
   createdAt: number
 }
+
 export interface IPermitTypeRequiredStep {
   id?: string
   default: boolean

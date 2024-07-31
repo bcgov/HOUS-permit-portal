@@ -10,6 +10,7 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
+import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
@@ -25,6 +26,7 @@ import {
 import {
   IAcceptInvitationResponse,
   IApiResponse,
+  ICollaboratorSearchResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
   INotificationResponse,
@@ -34,6 +36,7 @@ import {
   IUsersResponse,
 } from "../../types/api-responses"
 import {
+  ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   ERequirementLibrarySortFields,
@@ -194,6 +197,13 @@ export class Api {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
+  async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
+    return this.client.post<ICollaboratorSearchResponse>(
+      `/collaborators/collaboratorable/${collaboratorableId}/search`,
+      params
+    )
+  }
+
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
     params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
@@ -260,6 +270,52 @@ export class Api {
 
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
+  }
+
+  async assignCollaboratorToPermitApplication(
+    permitApplicationId: string,
+    params: {
+      collaboratorId: string
+      collaboratorType: ECollaboratorType
+      assignedRequirementBlockId?: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations`,
+      {
+        permitCollaboration: params,
+      }
+    )
+  }
+
+  async inviteNewCollaboratorToPermitApplication(
+    permitApplicationId: string,
+    params: {
+      user: {
+        email: string
+        firstName: string
+        lastName: string
+      }
+      collaboratorType: ECollaboratorType
+      assignedRequirementBlockId?: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations/invite`,
+      {
+        collaboratorInvite: params,
+      }
+    )
+  }
+
+  async unassignPermitCollaboration(id: string) {
+    return this.client.delete<ApiResponse<IPermitCollaboration>>(`/permit_collaborations/${id}`)
+  }
+
+  async reinvitePermitCollaboration(permitCollaborationId: string) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_collaborations/${permitCollaborationId}/reinvite`
+    )
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {

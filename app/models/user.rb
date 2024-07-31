@@ -30,6 +30,8 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
   has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
+  has_many :collaborations, foreign_key: "user_id", class_name: "Collaborator", dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
@@ -45,6 +47,7 @@ class User < ApplicationRecord
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
+  attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
 
   def confirmation_required?
     false
@@ -105,6 +108,14 @@ class User < ApplicationRecord
 
   def role_name
     role.gsub("_", " ")
+  end
+
+  def blueprint
+    UserBlueprint
+  end
+
+  def set_collaboration_invitation(permit_collaboration)
+    self.collaboration_invitation = { permit_collaboration: permit_collaboration }
   end
 
   private

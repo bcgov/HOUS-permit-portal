@@ -4,7 +4,13 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { ENotificationActionType } from "../types/enums"
-import { ILinkData, INotification, IPermitNotificationObjectData, IUserPushPayload } from "../types/types"
+import {
+  ILinkData,
+  INotification,
+  IPermitCollaborationNotificationObjectData,
+  IPermitNotificationObjectData,
+  IUserPushPayload,
+} from "../types/types"
 
 export const NotificationStoreModel = types
   .model("NotificationStoreModel")
@@ -41,7 +47,6 @@ export const NotificationStoreModel = types
       let objectData = notification.objectData
       const draftFilterUriComponent = encodeURIComponent(self.rootStore.permitApplicationStore.draftStatuses.join(","))
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
-        objectData = objectData as IPermitNotificationObjectData
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
@@ -63,7 +68,6 @@ export const NotificationStoreModel = types
 
         return linkData
       } else if (notification.actionType === ENotificationActionType.customizationUpdate) {
-        objectData = objectData as IPermitNotificationObjectData
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
@@ -74,6 +78,14 @@ export const NotificationStoreModel = types
                 message: t("permitApplication.reviewCustomizedMessage"),
               })
             )}`,
+          },
+        ]
+      } else if (notification.actionType === ENotificationActionType.submissionCollaborationAssignment) {
+        const collaborationData = objectData as IPermitCollaborationNotificationObjectData
+        return [
+          {
+            text: t("ui.show"),
+            href: `/permit-applications/${collaborationData.permitApplicationId}/edit`,
           },
         ]
       } else if (

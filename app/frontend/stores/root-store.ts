@@ -2,6 +2,7 @@ import { makePersistable } from "mobx-persist-store"
 import { IStateTreeNode, flow, protect, types, unprotect } from "mobx-state-tree"
 import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
+import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
@@ -28,6 +29,7 @@ export const RootStoreModel = types
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
+    collaboratorStore: types.optional(CollaboratorStoreModel, {}),
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
@@ -88,6 +90,7 @@ export interface IRootStore extends IStateTreeNode {
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore
   notificationStore: INotificationStore
+  collaboratorStore: ICollaboratorStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

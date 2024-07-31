@@ -49,6 +49,23 @@ class PermitApplicationPolicy < ApplicationPolicy
     user.review_staff? && record.submitted?
   end
 
+  def create_permit_collaboration?
+    permit_collaboration = record
+
+    if permit_collaboration.submission?
+      permit_collaboration.permit_application.submitter == user
+    elsif permit_collaboration.review?
+      (user.review_staff?) &&
+        user.jurisdictions.find_by(id: permit_collaboration.permit_application.jurisdiction_id).present?
+    else
+      false
+    end
+  end
+
+  def invite_new_collaborator?
+    create_permit_collaboration?
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope
