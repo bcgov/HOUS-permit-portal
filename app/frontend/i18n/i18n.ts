@@ -383,7 +383,7 @@ const options = {
           submissionBlockModal: {
             title: "Trying to submit this application?",
             description:
-              "Only the designated submitter or the author can submit  this permit application. Please contact that person to continue.",
+              "Only the designated submitter or the author can submit this permit application. Please contact that person to continue.",
             designatedSubmitter: "Designated submitter",
             author: "Author",
           },
@@ -1101,7 +1101,7 @@ const options = {
         home: {
           jurisdictionsTitle: "Jurisdictions",
           siteConfigurationTitle: "Configuration management",
-          jurisdictionsDescription:
+          jurisdictionsubription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
           reportingTitle: "Reporting",
