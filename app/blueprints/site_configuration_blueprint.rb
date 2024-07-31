@@ -4,4 +4,6 @@ class SiteConfigurationBlueprint < Blueprinter::Base
   field :help_link_items do |site_configuration, _options|
     HelpLinkItemsBlueprint.render_as_hash(site_configuration.help_link_items)
   end
+
+  association :revision_reasons, blueprint: RevisionReasonBlueprint
 end

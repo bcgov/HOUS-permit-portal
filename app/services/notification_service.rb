@@ -73,7 +73,7 @@ class NotificationService
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
-          status: "draft",
+          status: PermitApplication.draft_statuses,
           users: {
             preferences: {
               enable_in_app_new_template_version_publish_notification: true,
@@ -129,7 +129,7 @@ class NotificationService
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
-          status: "draft",
+          status: PermitApplication.draft_statuses,
           users: {
             preferences: {
               enable_in_app_customization_update_notification: true,
@@ -147,9 +147,48 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_application_submission_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[permit_application.submitter_id] = permit_application.submit_event_notification_data
+
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_submission_notification
+      PermitHubMailer.notify_submitter_application_submitted(permit_application).deliver_later
+    end
+    if preference.enable_in_app_application_submission_notification
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
+  end
+
+  def self.publish_application_revisions_request_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[
+      permit_application.submitter_id
+    ] = permit_application.revisions_request_event_notification_data
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_revisions_request_notification
+      PermitHubMailer.notify_application_revisions_requested(permit_application).deliver_later
+    end
+    if preference.enable_in_app_application_revisions_request_notification
+      NotificationPushJob.perform_async(notification_user_hash)
+    end
+  end
+
+  def self.publish_application_view_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[
+      permit_application.submitter_id
+    ] = permit_application.application_view_event_notification_data
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_view_notification
+      PermitHubMailer.notify_application_viewed(permit_application).deliver_later
+    end
+    NotificationPushJob.perform_async(notification_user_hash) if preference.enable_in_app_application_view_notification
+  end
+
   private
 
-  # this is just a wrapper around the activity's metadat methods
+  # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object
   def self.activity_metadata(user_id, activity_obj, method)

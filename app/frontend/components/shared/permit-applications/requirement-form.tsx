@@ -20,11 +20,13 @@ import { format } from "date-fns"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { IErrorsBoxData } from "../../../types/types"
-import { getCompletedBlocksFromForm } from "../../../utils/formio-component-traversal"
+import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
+import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
 import { CompareRequirementsBox } from "../../domains/permit-application/compare-requirements-box"
 import { ErrorsBox } from "../../domains/permit-application/errors-box"
 import { BuilderBottomFloatingButtons } from "../../domains/requirement-template/builder-bottom-floating-buttons"
@@ -32,6 +34,7 @@ import { CustomMessageBox } from "../base/custom-message-box"
 import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
+import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -41,6 +44,7 @@ interface IRequirementFormProps {
   showHelpButton?: boolean
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
+  renderTopButtons?: () => React.ReactNode
 }
 
 export const RequirementForm = observer(
@@ -49,6 +53,7 @@ export const RequirementForm = observer(
     onCompletedBlocksChange,
     formRef,
     triggerSave,
+    renderTopButtons,
     renderSaveButton,
     isEditing = false,
   }: IRequirementFormProps) => {
@@ -61,13 +66,19 @@ export const RequirementForm = observer(
       blockClasses,
       formattedFormJson,
       isDraft,
+      previousSubmissionVersion,
+      selectedPastSubmissionVersion,
+      isViewingPastRequests,
     } = permitApplication
+
+    const pastVersion = isViewingPastRequests ? selectedPastSubmissionVersion : previousSubmissionVersion
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const location = useLocation()
     const { isOpen, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
+    const { userStore } = useMst()
+    const { currentUser } = userStore
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
@@ -75,6 +86,7 @@ export const RequirementForm = observer(
     const [floatErrorBox, setFloatErrorBox] = useState(false)
     const [hasErrors, setHasErrors] = useState(false)
     const [autofillContactKey, setAutofillContactKey] = useState(null)
+    const [previousSubmissionKey, setPreviousSubmissionKey] = useState(null)
     const [firstComponentKey, setFirstComponentKey] = useState(null)
     const [isCollapsedAll, setIsCollapsedAllState] = useState(false)
 
@@ -86,13 +98,18 @@ export const RequirementForm = observer(
     }
 
     const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
+    const {
+      isOpen: isPreviousSubmissionOpen,
+      onOpen: onPreviousSubmissionOpen,
+      onClose: onPreviousSubmissionClose,
+    } = useDisclosure()
 
     const usingCurrentTemplateVersion = permitApplication?.usingCurrentTemplateVersion
 
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (!usingCurrentTemplateVersion && isEditing) {
+      if (permitApplication?.shouldShowApplicationDiff(isEditing)) {
         permitApplication.fetchDiff()
       }
     }, [usingCurrentTemplateVersion])
@@ -158,25 +175,29 @@ export const RequirementForm = observer(
       }
     }, [formJson, isMounted, window.innerHeight, wrapperClickCount])
 
-    useEffect(() => {
-      const handleOpenStepCode = async (_event) => {
-        await triggerSave?.()
-        navigate("step-code", { state: { background: location } })
-      }
-      document.addEventListener("openStepCode", handleOpenStepCode)
-      return () => {
-        document.removeEventListener("openStepCode", handleOpenStepCode)
-      }
-    }, [])
+    const handleOpenStepCode = async (_event) => {
+      await triggerSave?.()
+      navigate("step-code", { state: { background: location } })
+    }
+
+    const handleOpenContactAutofill = async (event) => {
+      setAutofillContactKey(event.detail.key)
+      onContactsOpen()
+    }
+
+    const handleOpenPreviousSubmission = async (event) => {
+      setPreviousSubmissionKey(event.detail.key)
+      onPreviousSubmissionOpen()
+    }
 
     useEffect(() => {
-      const handleOpenContactAutofill = async (_event) => {
-        setAutofillContactKey(_event.detail.key)
-        onContactsOpen()
-      }
+      document.addEventListener("openStepCode", handleOpenStepCode)
       document.addEventListener("openAutofillContact", handleOpenContactAutofill)
+      document.addEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       return () => {
+        document.removeEventListener("openStepCode", handleOpenStepCode)
         document.removeEventListener("openAutofillContact", handleOpenContactAutofill)
+        document.removeEventListener("openPreviousSubmission", handleOpenPreviousSubmission)
       }
     }, [])
 
@@ -277,7 +298,8 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: true }),
+      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: false }),
+      // readonly loggic depends on formattedJson for submitted applications
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
       persistFileUploadAction: "PATCH",
@@ -291,7 +313,6 @@ export const RequirementForm = observer(
         permitApplication.updateVersion()
       }
     }
-
     return (
       <>
         <Flex
@@ -314,12 +335,12 @@ export const RequirementForm = observer(
             },
           }}
         >
+          {renderTopButtons && renderTopButtons()}
           {permitApplication.isLoading && (
-            <Center position="absolute" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">
+            <Center position="fixed" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">
               <SharedSpinner h={24} w={24} />
             </Center>
           )}
-
           <ErrorsBox data={errorBoxData} />
           {permitApplication.shouldShowApplicationDiff(isEditing) &&
             (permitApplication.diff ? (
@@ -330,11 +351,20 @@ export const RequirementForm = observer(
                 handleClickDismiss={() => {
                   permitApplication.resetDiff()
                 }}
-                isUpdatable
+                isUpdatable={permitApplication.isDraft}
               />
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />
             ))}
+          {permitApplication?.isRevisionsRequested && (
+            <CustomMessageBox
+              description={t("permitApplication.show.revisionsWereRequested", {
+                date: format(permitApplication.revisionsRequestedAt, "MMM d, yyyy h:mm a"),
+              })}
+              status="warning"
+            />
+          )}
+
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
@@ -358,7 +388,7 @@ export const RequirementForm = observer(
             </Text>
           </Box>
           <Form
-            key={permitApplication.formDiffKey}
+            key={permitApplication.formFormatKey}
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
@@ -422,6 +452,18 @@ export const RequirementForm = observer(
             permitApplication={permitApplication}
             submissionState={unsavedSubmissionData}
             setSubmissionState={handleSetUnsavedSubmissionData}
+          />
+        )}
+
+        {isPreviousSubmissionOpen && (
+          <PreviousSubmissionModal
+            isOpen={isPreviousSubmissionOpen}
+            onOpen={onPreviousSubmissionOpen}
+            onClose={onPreviousSubmissionClose}
+            requirementJson={singleRequirementFormJson(
+              getRequirementByKey(pastVersion.formJson, previousSubmissionKey)
+            )}
+            submissionJson={singleRequirementSubmissionData(pastVersion.submissionData, previousSubmissionKey)}
           />
         )}
       </>

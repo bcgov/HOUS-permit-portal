@@ -1,5 +1,5 @@
 import { Flex, FormLabel } from "@chakra-ui/react"
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Select from "react-select"
 import { ISearch } from "../../../../lib/create-search-model"
@@ -32,12 +32,20 @@ export const SortSelect: React.FC<ISearchSortProps> = ({ searchModel, i18nPrefix
         })
       })
     })
-
     return sortOptions
   }, sortFields)
 
-  const { applySort, fetchData } = searchModel
-  const [selectedOption, setSelectedOption] = useState<IOption<ISort>>(sortOptions[0])
+  const { applySort, fetchData, sort } = searchModel
+
+  useEffect(() => {
+    if (sortOptions.length === 0 || !sort) return
+
+    const selected = sortOptions.find((so) => so.value.field === sort.field && so.value.direction === sort.direction)
+
+    setSelectedOption(selected)
+  }, [JSON.stringify(sort)])
+
+  const [selectedOption, setSelectedOption] = useState<IOption<ISort>>(null)
 
   const handleChange = (selectedOption: IOption<ISort> | null) => {
     if (selectedOption) {
@@ -51,7 +59,7 @@ export const SortSelect: React.FC<ISearchSortProps> = ({ searchModel, i18nPrefix
   }
 
   return (
-    <Flex direction="column">
+    <Flex direction="column" minW={250}>
       <FormLabel htmlFor={uniqueId}>{t("ui.sortBy")}</FormLabel>
 
       <Select

@@ -4,6 +4,7 @@ import {
   Container,
   Flex,
   HStack,
+  Heading,
   Image,
   Link,
   Menu,
@@ -19,13 +20,16 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { Envelope, Folders, List } from "@phosphor-icons/react"
+import { Envelope, Folders, List, Warning } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
+import { PopoverProvider, useNotificationPopover } from "../../../hooks/use-notification-popover"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
+import { INotification, IPermitNotificationObjectData } from "../../../types/types"
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
@@ -81,17 +85,17 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore } = useMst()
+  const { sessionStore, userStore, notificationStore } = useMst()
 
   const { currentUser } = userStore
-
   const { loggedIn } = sessionStore
+  const { criticalNotifications } = notificationStore
 
   const location = useLocation()
   const path = location.pathname
 
   return (
-    <>
+    <PopoverProvider>
       <Box
         as="nav"
         id="mainNav"
@@ -170,9 +174,57 @@ export const NavBar = observer(function NavBar() {
           </Flex>
         </Container>
       </Box>
+      {!R.isEmpty(criticalNotifications) && criticalNotifications.map((cn) => <ActionRequiredBox notification={cn} />)}
 
       {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
-    </>
+    </PopoverProvider>
+  )
+})
+
+interface IActionRequiredBoxProps {
+  notification: INotification
+}
+
+const ActionRequiredBox: React.FC<IActionRequiredBoxProps> = observer(({ notification }) => {
+  const { notificationStore } = useMst()
+  const { generateSpecificLinkData } = notificationStore
+  const { t } = useTranslation()
+  const linkData = generateSpecificLinkData(notification)
+  const { handleOpen } = useNotificationPopover()
+
+  return (
+    <Flex
+      direction="column"
+      gap={2}
+      bg={`semantic.warningLight`}
+      borderBottom="1px solid"
+      borderColor={`semantic.warning`}
+      p={4}
+    >
+      <Flex align="flex-start" gap={2} whiteSpace={"normal"}>
+        <Box color={`semantic.warning`}>{<Warning size={24} aria-label={"warning icon"} />}</Box>
+        <Flex direction="column" gap={2}>
+          <Heading as="h3" fontSize="md">
+            {t("ui.actionRequired")}
+          </Heading>
+          <Text>
+            <Trans
+              // @ts-ignore
+              i18nKey={`site.actionRequired.${notification.actionType}`}
+              number={(notification.objectData as IPermitNotificationObjectData).permitApplicationNumber}
+              components={{
+                1: (
+                  <Link href={linkData[0].href}>
+                    {(notification.objectData as IPermitNotificationObjectData).permitApplicationNumber}
+                  </Link>
+                ),
+              }}
+            />
+          </Text>
+          <Link onClick={handleOpen}>{t("site.reviewNotifications")}</Link>
+        </Flex>
+      </Flex>
+    </Flex>
   )
 })
 

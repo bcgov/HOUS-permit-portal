@@ -1,16 +1,4 @@
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Flex,
-  FormControl,
-  FormLabel,
-  HStack,
-  Heading,
-  Switch,
-  Text,
-} from "@chakra-ui/react"
+import { Box, Button, Container, Flex, FormControl, FormLabel, HStack, Heading, Switch, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -53,12 +41,12 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
     await updateSiteConfiguration(formData)
   }
   return (
-    <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1} as="main">
-      <Heading mb={0} fontSize="3xl">
-        {t("siteConfiguration.helpDrawerSetup.title")}
-      </Heading>
-      <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Container maxW="container.lg" py={8} px={{ base: 8, xl: 0 }} flexGrow={1} as="main">
+        <Heading mb={0} fontSize="3xl">
+          {t("siteConfiguration.helpDrawerSetup.title")}
+        </Heading>
+        <FormProvider {...formMethods}>
           <Flex mt={8} gap={16}>
             <Box minW="fit-content">
               <Heading as="h3" noOfLines={1}>
@@ -135,17 +123,25 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
               </Flex>
             </SectionBox>
           </Flex>
-          <Divider my={16} />
-          <HStack alignSelf="end">
-            <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t("ui.save")}
-            </Button>
-            <Button variant="secondary" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
-              {t("ui.cancel")}
-            </Button>
-          </HStack>
-        </form>
-      </FormProvider>
-    </Container>
+        </FormProvider>
+      </Container>
+      <Flex
+        position="sticky"
+        bottom={0}
+        bg="greys.white"
+        padding={4}
+        borderTop="1px solid"
+        borderColor="border.light"
+        justify="center"
+        gap={4}
+      >
+        <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isSubmitting}>
+          {t("ui.save")}
+        </Button>
+        <Button variant="secondary" onClick={() => navigate(-1)} isDisabled={isSubmitting}>
+          {t("ui.cancel")}
+        </Button>
+      </Flex>
+    </form>
   )
 })

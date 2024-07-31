@@ -1,17 +1,16 @@
 class UserBlueprint < Blueprinter::Base
   identifier :id
 
+  view :minimal do
+    fields :email, :role, :first_name, :last_name, :organization, :certified, :discarded_at
+  end
+
   view :base do
-    fields :email,
-           :unconfirmed_email,
-           :role,
+    include_view :minimal
+    fields :unconfirmed_email,
            :omniauth_username,
            :omniauth_email,
            :omniauth_provider,
-           :first_name,
-           :last_name,
-           :certified,
-           :organization,
            :created_at,
            :confirmed_at,
            :confirmation_sent_at,

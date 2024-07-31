@@ -15,13 +15,17 @@ RSpec.describe Wrappers::DigitalSealValidator do
   end
 
   context "detects a seal" do
-    # it "validates a pdf with a seal and return the seal types" do
-    #   VCR.use_cassette("wrappers/digital_seal_validator/signed") do
-    #     result = Wrappers::DigitalSealValidator.new.call("spec/support/real-arch-signed.pdf", "application/pdf")
-    #     expect(result.success).to eq true
-    #     expect(result.signatures.length).to be > 0
-    #   end
-    # end
+    it "validates a Engineering seal" do
+      VCR.use_cassette("wrappers/digital_seal_validator/signed_approved_orgs") do
+        result =
+          Wrappers::DigitalSealValidator.new.call(
+            "spec/support/TEST OF ENGINEERING DIGITAL SEAL RECOGNITION - Sealed.pdf",
+            "application/pdf",
+          )
+        expect(result.success).to eq true
+        expect(result.signatures.length).to be > 0
+      end
+    end
 
     it "validates a pdf with a seal and return the seal types" do
       VCR.use_cassette("wrappers/digital_seal_validator/signed_documents") do

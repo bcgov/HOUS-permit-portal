@@ -125,6 +125,8 @@ Rails.application.routes.draw do
       post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
+      patch "revision_requests", on: :member, to: "permit_applications#update_revision_requests"
+      post "revision_requests/finalize", on: :member, to: "permit_applications#finalize_revision_requests"
     end
 
     patch "profile", to: "users#profile"

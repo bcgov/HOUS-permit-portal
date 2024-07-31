@@ -22,6 +22,7 @@ module ExternalApi::Concerns::Search::PermitApplications
             nil
           end
         ),
+      includes: PermitApplication::SEARCH_INCLUDES,
     }
 
     @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
@@ -54,7 +55,7 @@ module ExternalApi::Concerns::Search::PermitApplications
   def permit_application_where_clause
     constraints = permit_application_search_params[:constraints]
 
-    where = { status: %i[submitted], jurisdiction_id: current_external_api_key.jurisdiction_id }
+    where = { status: %i[newly_submitted resubmitted], jurisdiction_id: current_external_api_key.jurisdiction_id }
 
     where.merge!(constraints.to_h.deep_symbolize_keys) if constraints.present?
 

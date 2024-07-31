@@ -21,6 +21,13 @@ export enum EPermitClassificationCode {
 }
 
 export enum EPermitApplicationStatus {
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+}
+
+export enum EPermitApplicationStatusGroup {
   draft = "draft",
   submitted = "submitted",
 }
@@ -105,10 +112,12 @@ export enum EPermitApplicationSubmitterSortFields {
   permitClassification = "permit_classification",
   submitter = "submitter",
   submittedAt = "submitted_at",
+  viewedAt = "viewed_at",
   status = "status",
 }
 
 export enum EPermitApplicationReviewerSortFields {
+  status = "status",
   number = "number",
   referenceNumber = "reference_number",
   permitClassification = "permit_classification",
@@ -144,6 +153,7 @@ export enum ERequirementType {
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
+  pidInfo = "pid_info",
 }
 
 export enum ENumberUnit {
@@ -301,6 +311,8 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+  openRequestRevision = "openRequestRevision",
+  openPreviousSubmission = "openPreviousSubmission",
 }
 
 export enum EExportFormat {
@@ -361,4 +373,7 @@ export enum ENotificationActionType {
   publishedTemplateMissingRequirementsMapping = "published_template_missing_requirements_mapping",
   scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
+  applicationSubmission = "application_submission",
+  applicationRevisionsRequest = "application_revisions_request",
+  applicationView = "application_view",
 }

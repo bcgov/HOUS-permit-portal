@@ -27,5 +27,8 @@ namespace :db do
     puts "Seeding step code reference tables..."
     StepCode::MEUIReferencesSeeder.seed!
     StepCode::TEDIReferencesSeeder.seed!
+
+    puts "Seeding default revision reasons..."
+    RevisionReasonSeeder.seed
   end
 end

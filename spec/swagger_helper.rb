@@ -47,7 +47,7 @@ To integrate with our APIs, please contact the Building Permit Hub team to enabl
 and register your webhook URL in their configuration settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>
 for further assistance.
 
-### Authentication and authorization: 
+### Authentication and authorization:
 Access to these APIs is controlled via an API key, which must be included in the Authorization header as a Bearer token like so:
 ```
 Authorization: Bearer {Your_API_Key_Here}
@@ -63,13 +63,13 @@ may necessitate further contact with the building permit hub team.
 The base path for all API endpoints is `/external_api/v1`.
 
 ### Server information for testing:
-By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable. 
+By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable.
 During your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
 ### Special considerations:
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
-We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a 
+We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a
 new file URL.
 
 ### Visual aids and examples:

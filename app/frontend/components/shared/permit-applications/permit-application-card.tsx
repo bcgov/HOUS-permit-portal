@@ -13,7 +13,7 @@ interface IPermitApplicationCardProps {
 }
 
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
-  const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt } = permitApplication
+  const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt, viewedAt } = permitApplication
   const { t } = useTranslation()
 
   const { shouldShowNewVersionWarning, isDraft } = permitApplication
@@ -116,6 +116,24 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               </Show>
               {format(updatedAt, "MMM d, yyyy")}
             </Text>
+            {viewedAt && (
+              <>
+                <Show above="md">
+                  <Text>{"  |  "}</Text>
+                </Show>
+                <Show below="md">
+                  <Spacer />
+                </Show>
+                <Text>
+                  {t("permitApplication.viewedOn")}
+                  <Text as="span">{":  "}</Text>
+                  <Show below="md">
+                    <br />
+                  </Show>
+                  {format(viewedAt, "MMM d, yyyy")}
+                </Text>
+              </>
+            )}
           </Flex>
           <Flex direction={{ base: "column", md: "row" }} gap={4}>
             <Link href={t("permitApplication.seeBestPractices_link")} isExternal>

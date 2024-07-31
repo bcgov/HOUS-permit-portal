@@ -5,14 +5,14 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
   let!(:token) { external_api_key.token }
   let!(:Authorization) { "Bearer #{token}" }
   let!(:submitted_permit_applications) do
-    create_list(:permit_application, 3, status: "submitted", jurisdiction: external_api_key.jurisdiction)
+    create_list(:permit_application, 3, :newly_submitted, jurisdiction: external_api_key.jurisdiction)
   end
   let!(:draft_permit_applications) { create_list(:permit_application, 3, jurisdiction: external_api_key.jurisdiction) }
   let!(:unauthorized_jurisdiction_permit_applications) do
     [
-      create(:permit_application, status: "submitted"),
+      create(:permit_application, :newly_submitted),
       create(:permit_application),
-      create(:permit_application, status: "submitted"),
+      create(:permit_application, :newly_submitted),
     ]
   end
 

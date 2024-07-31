@@ -14,6 +14,7 @@ import {
   EPermitApplicationSocketEventTypes,
   EPermitApplicationSortFields,
   EPermitApplicationStatus,
+  EPermitApplicationStatusGroup,
 } from "../types/enums"
 import {
   IPermitApplicationComplianceUpdate,
@@ -24,8 +25,8 @@ import {
 } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
-const filterableStatuses = Object.values(EPermitApplicationStatus)
-export type TFilterableStatus = (typeof filterableStatuses)[number]
+const filterableStatus = Object.values(EPermitApplicationStatus)
+export type TFilterableStatus = (typeof filterableStatus)[number]
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -33,7 +34,10 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
-      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
+      statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), [
+        EPermitApplicationStatus.newDraft,
+        EPermitApplicationStatus.revisionsRequested,
+      ]),
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.maybeNull(types.string),
     }),
@@ -42,6 +46,14 @@ export const PermitApplicationStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
+  .views((self) => ({
+    get draftStatuses() {
+      return [EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested]
+    },
+    get submittedStatuses() {
+      return [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
+    },
+  }))
   .views((self) => ({
     getSortColumnHeader(field: EPermitApplicationSortFields) {
       // @ts-ignore
@@ -58,6 +70,13 @@ export const PermitApplicationStoreModel = types
     },
     get hasResetableFilters() {
       return !R.isNil(self.templateVersionIdFilter) || !R.isNil(self.requirementTemplateIdFilter)
+    },
+    get statusFilterToGroup(): EPermitApplicationStatusGroup {
+      const map = {
+        [self.draftStatuses.join(",")]: EPermitApplicationStatusGroup.draft,
+        [self.submittedStatuses.join(",")]: EPermitApplicationStatusGroup.submitted,
+      }
+      return map[self.statusFilter.join(",")]
     },
   }))
   .actions((self) => ({
@@ -138,11 +157,11 @@ export const PermitApplicationStoreModel = types
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
     },
-    setStatusFilter(status: TFilterableStatus) {
-      if (!status) return
-
-      setQueryParam("status", status)
-      self.statusFilter = status
+    setStatusFilter(statuses: TFilterableStatus[] | undefined) {
+      if (!statuses) return
+      setQueryParam("status", statuses)
+      // @ts-ignore
+      self.statusFilter = statuses
     },
   }))
   .actions((self) => ({
@@ -208,7 +227,7 @@ export const PermitApplicationStoreModel = types
     }),
 
     setPermitApplicationFilters(queryParams: URLSearchParams) {
-      const statusFilter = queryParams.get("status") as TFilterableStatus
+      const statusFilter = queryParams.get("status")?.split(",") as TFilterableStatus[]
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
 

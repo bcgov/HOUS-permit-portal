@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../lib/create-search-model"
 import { useMst } from "../../../setup/root"
 import { TFilterableStatus } from "../../../stores/permit-application-store"
-import { EPermitApplicationStatus } from "../../../types/enums"
+import { EPermitApplicationStatus, EPermitApplicationStatusGroup } from "../../../types/enums"
+import { arrayEqualsAsSet } from "../../../utils/utility-functions"
 
 interface IPermitApplicationStatusTabsProps<TSearchModel extends ISearch> extends ContainerProps {}
 
@@ -14,41 +15,47 @@ export const PermitApplicationStatusTabs = observer(function ToggleArchivedButto
 }: IPermitApplicationStatusTabsProps<TSearchModel>) {
   const { permitApplicationStore } = useMst()
   const queryParams = new URLSearchParams(location.search)
-  const paramStatusFilter = queryParams.get("status") as TFilterableStatus
+  const paramStatusFilterString = queryParams.get("status") as string
+  const paramStatusFilter = paramStatusFilterString?.split(",") as TFilterableStatus[]
 
-  const statusToIndex = (status: EPermitApplicationStatus): number => {
-    const index = Object.values(EPermitApplicationStatus).indexOf(status)
-    return index === -1 ? 0 : index
+  const draftFilters = [EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested]
+  const submittedFilters = [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
+
+  const statusStringToIndex = (statusString: string): number => {
+    const statusArray = statusString?.split(",") || []
+    if (arrayEqualsAsSet(statusArray, draftFilters)) return 0
+    if (arrayEqualsAsSet(statusArray, submittedFilters)) return 1
+    return 0
   }
 
   const { statusFilter, setStatusFilter, search } = permitApplicationStore
-  const [selectedIndex, setSelectedIndex] = useState(statusToIndex(statusFilter))
+  const [selectedIndex, setSelectedIndex] = useState(statusStringToIndex(paramStatusFilterString))
 
   const { t } = useTranslation()
 
-  const indexToStatus = (i: number): EPermitApplicationStatus => {
-    return Object.values(EPermitApplicationStatus)[i]
+  const indexToStatuses = (i: number): EPermitApplicationStatus[] => {
+    return [draftFilters, submittedFilters][i]
   }
 
   const handleChange = (index: number) => {
     setSelectedIndex(index)
-    setStatusFilter(indexToStatus(index))
+    setStatusFilter(indexToStatuses(index))
     search()
   }
 
   useEffect(() => {
-    const newIndex = statusToIndex(paramStatusFilter)
-    if (selectedIndex != newIndex) handleChange(statusToIndex(paramStatusFilter))
+    const newIndex = statusStringToIndex(paramStatusFilterString)
+    if (selectedIndex != newIndex) handleChange(statusStringToIndex(paramStatusFilterString))
   }, [])
 
   return (
     <Container maxW="container.lg" py={3} {...rest}>
       <Tabs index={selectedIndex} onChange={handleChange}>
         <TabList>
-          {Object.values(EPermitApplicationStatus).map((status) => {
+          {Object.values(EPermitApplicationStatusGroup).map((statusGroup) => {
             return (
-              <Tab key={status} px={8}>
-                {t(`permitApplication.status.${status}`)}
+              <Tab key={statusGroup} px={8}>
+                {t(`permitApplication.statusGroup.${statusGroup}`)}
               </Tab>
             )
           })}

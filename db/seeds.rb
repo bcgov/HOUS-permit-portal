@@ -237,3 +237,6 @@ TemplateVersion
 
 puts "Seeding EULA..."
 EulaUpdater.run
+
+puts "Seeding default revision reasons..."
+RevisionReasonSeeder.seed

@@ -163,7 +163,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
     <Box
       id="sections-sidebar-reordering"
       as={"section"}
-      w="var(--app-sidebar-width)"
+      w={"sidebar.width"}
       h="calc(100vh) "
       bg="greys.white"
       borderRight={"1px solid"}
@@ -182,7 +182,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
         top="0"
         right="0"
         bottom="0"
-        left="var(--app-sidebar-width)"
+        left={"sidebar.width"}
 
         // hide the form side so user can focus on drag /up down and can't click the form accordions (in sections-display)
       >

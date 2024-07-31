@@ -12,13 +12,17 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
   const { t } = useTranslation()
 
   const bgMap = {
-    [EPermitApplicationStatus.submitted]: "theme.yellow",
-    [EPermitApplicationStatus.draft]: "theme.blueLight",
+    [EPermitApplicationStatus.newlySubmitted]: "theme.yellow",
+    [EPermitApplicationStatus.resubmitted]: "theme.yellow",
+    [EPermitApplicationStatus.newDraft]: "theme.blueLight",
+    [EPermitApplicationStatus.revisionsRequested]: "semantic.errorLight",
   }
 
   const colorMap = {
-    [EPermitApplicationStatus.submitted]: "text.link",
-    [EPermitApplicationStatus.draft]: "text.link",
+    [EPermitApplicationStatus.newlySubmitted]: "text.primary",
+    [EPermitApplicationStatus.resubmitted]: "text.primary",
+    [EPermitApplicationStatus.newDraft]: "text.primary",
+    [EPermitApplicationStatus.revisionsRequested]: "semantic.error",
   }
 
   return (
@@ -31,9 +35,11 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
       borderColor="border.light"
       textTransform="uppercase"
       minW="fit-content"
+      textAlign="center"
       {...rest}
     >
-      {permitApplication.statusTagText}
+      {/* @ts-ignore */}
+      {t(`permitApplication.status.${permitApplication.status}`)}
     </Tag>
   )
 }

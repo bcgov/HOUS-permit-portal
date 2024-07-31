@@ -4,6 +4,7 @@ import { IPermitApplicationComplianceUpdate } from "./types"
 
 export interface ICustomEventMap {
   [ECustomEvents.handlePermitApplicationUpdate]: CustomEvent<IPermitApplicationComplianceUpdate>
+  [ECustomEvents.openRequestRevision]: CustomEvent<{ key: string }>
 }
 
 declare global {

@@ -17,13 +17,9 @@ import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
+import { TSiteWideMessageConfiguration } from "../../../../types/types"
 import { TextFormControl } from "../../../shared/form/input-form-control"
 import { SectionBox } from "../../home/section-box"
-
-export type TSiteWideMessageConfiguration = {
-  displaySitewideMessage: boolean
-  sitewideMessage: string | null
-}
 
 export const SitewideMessageScreen = observer(function SitewideMessageScreen() {
   const { siteConfigurationStore } = useMst()

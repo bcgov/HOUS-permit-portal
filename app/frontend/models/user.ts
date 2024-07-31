@@ -71,9 +71,6 @@ export const UserModel = types
         self.jurisdictions[0]
       )
     },
-    get shouldSeeApplicationDiff() {
-      return self.role == EUserRoles.submitter
-    },
   }))
   .actions((self) => ({
     destroy: flow(function* () {
@@ -136,5 +133,11 @@ export interface IPreference {
   enableInAppNewTemplateVersionPublishNotification: boolean
   enableEmailNewTemplateVersionPublishNotification: boolean
   enableInAppCustomizationUpdateNotification: boolean
-  enableEmailCustomizationUpdateNotification: boolean
+
+  enableInAppApplicationSubmissionNotification: boolean
+  enableEmailApplicationSubmissionNotification: boolean
+  enableInAppApplicationViewNotification: boolean
+  enableEmailApplicationViewNotification: boolean
+  enableInAppApplicationRevisionsRequestNotification: boolean
+  enableEmailApplicationRevisionsRequestNotification: boolean
 }
