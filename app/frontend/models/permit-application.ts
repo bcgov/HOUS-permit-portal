@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, cast, flow, types } from "mobx-state-tree"
+import { cast, flow, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -439,6 +439,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return delegateePermitCollaboration?.collaborator?.user?.id == user.id
       },
+      canUserManageCollaborators(user: IUser, collaborationType: ECollaborationType) {
+        if (collaborationType === ECollaborationType.review) {
+          return !self.isDraft && user.isReviewStaff && user.jurisdiction?.id === self.jurisdiction?.id
+        }
+
+        return self.isDraft && user?.id === self.submitter?.id
+      },
       delegateeUser(collaborationType: ECollaborationType) {
         return self.getCollaborationDelegatee(collaborationType)?.collaborator?.user
       },
@@ -447,6 +454,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.getCollaborationAssignees(collaborationType)?.map((collaboration) => collaboration.collaborator.user) ??
           []
         )
+      },
+      getCollaborationUniqueUserCount(collaborationType: ECollaborationType) {
+        return R.uniqBy(
+          (collaboration) => collaboration.collaborator.user.id,
+          self.getCollaborationsByType(collaborationType)
+        ).length
       },
     }))
     .actions((self) => ({
@@ -485,12 +498,21 @@ export const PermitApplicationModel = types.snapshotProcessor(
           collaboratorType,
           assignedRequirementBlockId,
         })
-        if (response.ok) {
-          const { data: permitCollaboration } = response.data
-          self.updatePermitCollaboration(permitCollaboration)
-          return self.getPermitCollaboration(permitCollaboration.id)
+
+        if (!response.ok) {
+          return false
         }
-        return false
+
+        const { data: permitCollaboration } = response.data
+
+        if (permitCollaboration.collaboratorType === ECollaboratorType.delegatee) {
+          const existingDelegatee = self.getCollaborationDelegatee(permitCollaboration.collaborationType)
+
+          existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
+        }
+        self.updatePermitCollaboration(permitCollaboration)
+
+        return self.getPermitCollaboration(permitCollaboration.id)
       }),
       inviteNewCollaborator: flow(function* (
         collaboratorType: ECollaboratorType,

@@ -353,8 +353,25 @@ const options = {
           view: "View Jurisdiction",
         },
         permitCollaboration: {
+          sidebar: {
+            triggerButton: "Collaborators ({{count}})",
+            title: "Collaborators",
+            description:
+              "Collaborators can be invited to work on the different areas of the permit application form. Only the author can manage collaborators.",
+            howItWorksTitle: "How it works",
+            howItWorksDescription:
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            designatedSubmitters: "Designated submitter(s)",
+            authorCanSubmit:
+              "Author of this application is also allowed to submit: <1>{{author}}</1> ({{organization}}).",
+            assignees: "Assignee(s)",
+            assigneeHelperText:
+              "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
+            noDesignatedSubmitters: "None assigned",
+          },
           popover: {
             triggerButton: "Assign ({{count}})",
+            designatedSubmitterChangeButton: "Change",
             collaborations: {
               title: "Collaborators",
               assignButton: "Assign",
@@ -372,6 +389,7 @@ const options = {
               },
               newContactButton: "New contact",
               noResultsText: "No results found. Invite new collaborators by clicking the button above",
+              unassiggn: "Unselect",
             },
             collaboratorInvite: {
               title: "New contact",
