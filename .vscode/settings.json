@@ -4,12 +4,11 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "workbench.editor.labelFormat": "short",
   "[ruby]": {
-    "editor.defaultFormatter": "Shopify.ruby-lsp"
-  },
-  "[erb]": {
-    "editor.defaultFormatter": "elia.erb-formatter"
+    "editor.defaultFormatter": "Shopify.ruby-lsp",
+    "editor.formatOnSave": true
   },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "rubyLsp.formatter": "syntax_tree"
 }

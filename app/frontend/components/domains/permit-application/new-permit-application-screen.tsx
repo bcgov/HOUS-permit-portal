@@ -160,7 +160,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   <Controller
                     name="firstNations"
                     control={control}
-                    // rules={{ required: "This field is required" }}
                     render={({ field: { onChange, value } }) => (
                       <RadioGroup
                         onChange={(e) => {

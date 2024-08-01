@@ -30,19 +30,20 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def create
     copy_existing = requirement_template_params[:copy_existing]
-    @requirement_template =
-      if copy_existing &&
-           found_template =
-             RequirementTemplate.find_by(
-               activity_id: requirement_template_params[:activity_id],
-               activity_id: requirement_template_params[:activity_id],
-             )
+
+    if copy_existing
+      found_template =
+        RequirementTemplate.find_by!(
+          permit_type_id: requirement_template_params[:permit_type_id],
+          activity_id: requirement_template_params[:activity_id],
+        )
+      @requirement_template =
         RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
           requirement_template_params,
         )
-      else
-        RequirementTemplate.new(requirement_template_params.except(:copy_existing))
-      end
+    else
+      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
+    end
 
     authorize @requirement_template
 

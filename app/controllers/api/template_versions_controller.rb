@@ -32,7 +32,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def show_jurisdiction_template_version_customization
-    authorize @template_version, :show?
+    authorize @template_version
 
     return head :not_found if @jurisdiction_template_version_customization.blank?
 
@@ -42,7 +42,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def create_or_update_jurisdiction_template_version_customization
-    authorize @template_version, :show?
+    authorize @template_version
 
     @jurisdiction_template_version_customization =
       @template_version.jurisdiction_template_version_customizations.find_or_initialize_by(
@@ -67,7 +67,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def copy_jurisdiction_template_version_customization
-    authorize @template_version, :show?
+    authorize @template_version
     if copy_customization_params[:from_template_version_id]
       from_template_version = TemplateVersion.find(copy_customization_params[:from_template_version_id])
     elsif copy_customization_params[:from_non_first_nations] && @template_version.first_nations
@@ -101,7 +101,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def show_integration_mapping
-    authorize @template_version, :show?
+    authorize @template_version
 
     @integration_mapping = @template_version.integration_mappings.find_by(jurisdiction_id: params[:jurisdiction_id])
 
