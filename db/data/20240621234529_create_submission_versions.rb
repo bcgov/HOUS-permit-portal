@@ -11,6 +11,7 @@ class CreateSubmissionVersions < ActiveRecord::Migration[7.1]
           created_at: pa.submitted_at,
         )
       end
+    PermitApplication.reindex
   end
 
   def down

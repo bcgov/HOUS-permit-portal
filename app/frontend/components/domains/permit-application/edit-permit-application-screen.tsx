@@ -369,7 +369,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               onCompletedBlocksChange={setCompletedBlocks}
               triggerSave={handleSave}
               showHelpButton
-              isEditing
+              isEditing={currentPermitApplication?.isDraft}
               renderSaveButton={() => <SaveButton handleSave={handleSave} />}
             />
           </Flex>

@@ -40,7 +40,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
+    <Container maxW="container.xl" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
         {!currentJurisdiction.submissionInboxSetUp && (
           <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
@@ -63,7 +63,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Can>
         </Flex>
 
-        <SearchGrid templateColumns="120px 170px 1.6fr 1.5fr repeat(4, 1.3fr)">
+        <SearchGrid templateColumns="repeat(8, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
