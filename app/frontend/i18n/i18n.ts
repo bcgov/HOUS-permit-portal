@@ -362,12 +362,15 @@ const options = {
             howItWorksDescription:
               "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
             designatedSubmitters: "Designated submitter(s)",
-            authorCanSubmit:
+            authorCanSubmitWithOrganization:
               "Author of this application is also allowed to submit: <1>{{author}}</1> ({{organization}}).",
+            authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
             assignees: "Assignee(s)",
             assigneeHelperText:
               "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
             noDesignatedSubmitters: "None assigned",
+            assignedTo: "Assigned to",
+            assigneeEmail: "Email:",
           },
           popover: {
             triggerButton: "Assign ({{count}})",

@@ -1,5 +1,11 @@
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Avatar,
+  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -7,16 +13,21 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  Flex,
   HStack,
+  Link,
   Stack,
+  StackProps,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Users } from "@phosphor-icons/react"
+import { Envelope, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
+import { ICollaborator } from "../../../../models/collaborator"
 import { IPermitApplication } from "../../../../models/permit-application"
+import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType } from "../../../../types/enums"
 import { DesignatedSubmitterAssignmentPopover } from "./designated-submitter-assignment-popover"
@@ -66,6 +77,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
               <Text fontSize={"sm"}>{t("permitCollaboration.sidebar.howItWorksDescription")}</Text>
             </Stack>
             <DesignatedSubmitters permitApplication={permitApplication} collaborationType={collaborationType} />
+            <Assignees permitApplication={permitApplication} collaborationType={collaborationType} />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
@@ -76,47 +88,194 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
 const DesignatedSubmitters = observer(function DesignatedSubmitters({ permitApplication, collaborationType }: IProps) {
   const { t } = useTranslation()
   const delegateeCollaboration = permitApplication.getCollaborationDelegatee(collaborationType)
-  const isConfirmedUser =
-    !delegateeCollaboration?.collaborator.user?.isDiscarded && !delegateeCollaboration?.collaborator.user?.isUnconfirmed
-  const isEligibleForReInvite = delegateeCollaboration?.collaborator.user?.isSubmitter
 
+  let name = delegateeCollaboration?.collaborator?.user?.name
+  let organization = delegateeCollaboration?.collaborator?.user?.organization
   return (
     <Stack spacing={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>
         {t("permitCollaboration.sidebar.designatedSubmitters")}
       </Text>
-      <HStack
-        px={4}
-        py={3}
-        w={"full"}
-        border={"1px solid"}
-        borderColor={"border.light"}
-        borderRadius={"sm"}
-        minH={"60px"}
-        justifyContent={"space-between"}
-      >
-        <HStack spacing={4}>
-          <Avatar name={delegateeCollaboration?.collaborator?.user?.name} size={"xs"} />
-          {delegateeCollaboration ? (
-            <Stack spacing={1}>
-              <Text fontWeight={700}>{delegateeCollaboration.collaborator?.user?.name}</Text>
-              <Text fontSize={"sm"}>{delegateeCollaboration.collaborator?.user?.organization}</Text>
-              <Reinvite
-                permitCollaboration={delegateeCollaboration}
-                onReinvite={permitApplication.reinvitePermitCollaboration}
-              />
-            </Stack>
-          ) : (
-            <Text fontStyle={"italic"} color={"text.secondary"}>
-              {t("permitCollaboration.sidebar.noDesignatedSubmitters")}
-            </Text>
-          )}
-        </HStack>
-        <DesignatedSubmitterAssignmentPopover
-          permitApplication={permitApplication}
-          collaborationType={collaborationType}
+      <CollaborationCard
+        rightElement={
+          <DesignatedSubmitterAssignmentPopover
+            permitApplication={permitApplication}
+            collaborationType={collaborationType}
+          />
+        }
+        onReinvite={permitApplication.reinvitePermitCollaboration}
+        permitCollaboration={delegateeCollaboration}
+      />
+      <Text fontSize={"sm"} color={"text.secondary"}>
+        <Trans
+          t={t}
+          i18nKey={
+            organization
+              ? "permitCollaboration.sidebar.authorCanSubmitWithOrganization"
+              : "permitCollaboration.sidebar.authorCanSubmit"
+          }
+          components={{
+            1: <Text as={"span"} fontWeight={700} />,
+          }}
+          values={{
+            author: name,
+            organization: organization,
+          }}
         />
-      </HStack>
+      </Text>
     </Stack>
+  )
+})
+
+const CollaborationCard = observer(function CollaborationCard({
+  permitCollaboration,
+  onReinvite,
+  rightElement,
+  moreDetailsElement,
+  ...containerProps
+}: {
+  permitCollaboration?: IPermitCollaboration
+  onReinvite?: (collaborationId: string) => Promise<any>
+  rightElement?: React.ReactNode
+  moreDetailsElement?: React.ReactNode
+} & Partial<StackProps>) {
+  const { t } = useTranslation()
+  const name = permitCollaboration?.collaborator?.user?.name
+  const organization = permitCollaboration?.collaborator?.user?.organization
+
+  return (
+    <HStack
+      px={4}
+      py={3}
+      w={"full"}
+      border={"1px solid"}
+      borderColor={"border.light"}
+      borderRadius={"sm"}
+      minH={"60px"}
+      justifyContent={"space-between"}
+      {...containerProps}
+    >
+      <HStack spacing={4}>
+        <Avatar name={name} size={"xs"} />
+        {permitCollaboration ? (
+          <Stack spacing={1} alignItems={"flex-start"}>
+            <Text fontWeight={700}>{name}</Text>
+            <Text fontSize={"sm"}>{organization}</Text>
+            {onReinvite && <Reinvite permitCollaboration={permitCollaboration} onReinvite={onReinvite} />}
+            {moreDetailsElement}
+          </Stack>
+        ) : (
+          <Text fontStyle={"italic"} color={"text.secondary"}>
+            {t("permitCollaboration.sidebar.noDesignatedSubmitters")}
+          </Text>
+        )}
+      </HStack>
+      {rightElement}
+    </HStack>
+  )
+})
+
+const Assignees = observer(function Assignees({ permitApplication, collaborationType }: IProps) {
+  const { t } = useTranslation()
+  const sidebarAssigneeList = permitApplication.getSidebarAssigneesList(collaborationType)
+
+  return (
+    <Stack spacing={2}>
+      <Text as={"h3"} fontSize={"md"} fontWeight={700}>
+        {t("permitCollaboration.sidebar.assignees")}
+      </Text>
+      <Text fontSize={"sm"} color={"text.secondary"}>
+        {t("permitCollaboration.sidebar.assigneeHelperText")}
+      </Text>
+      <Stack>
+        {sidebarAssigneeList.map(({ collaborator, permitCollaborations }) => {
+          return (
+            <AssigneeAccordion
+              key={collaborator?.id}
+              permitApplication={permitApplication}
+              collaborator={collaborator}
+              permitCollaborations={permitCollaborations}
+            />
+          )
+        })}
+      </Stack>
+    </Stack>
+  )
+})
+
+const AssigneeAccordion = observer(function AssigneeAccordion({
+  collaborator,
+  permitCollaborations,
+  permitApplication,
+}: {
+  permitApplication: IPermitApplication
+  collaborator: ICollaborator
+  permitCollaborations: IPermitCollaboration[]
+}) {
+  const { t } = useTranslation()
+  const notificationEmail = collaborator?.user?.email
+
+  return (
+    <Accordion allowToggle>
+      <AccordionItem border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
+        {permitCollaborations?.[0] && (
+          <Box as={"h4"} mb={0}>
+            <AccordionButton
+              p={0}
+              border={"none"}
+              _expanded={{
+                bg: "greys.grey04",
+                ".collaboratorCardEmailContainer": {
+                  display: "flex",
+                },
+              }}
+            >
+              <CollaborationCard
+                border={"none"}
+                rightElement={<AccordionIcon />}
+                moreDetailsElement={
+                  notificationEmail ? (
+                    <HStack spacing={4} className={"collaboratorCardEmailContainer"} display={"none"}>
+                      <Text as={"span"} fontSize={"sm"} fontWeight={700}>
+                        {t("permitCollaboration.sidebar.assigneeEmail")}
+                      </Text>
+                      <Flex alignItems={"baseline"} color={"link"}>
+                        <Envelope
+                          size={14}
+                          style={{
+                            flexShrink: 0,
+                            color: "var(--chakra-colors-text-link)",
+                          }}
+                        />
+                        <Link
+                          ml={1}
+                          href={`mailto:${notificationEmail}`}
+                          fontSize={"sm"}
+                          color={"text.link"}
+                          wordBreak={"break-word"}
+                          overflowWrap={"break-word"}
+                          whiteSpace={"pre-wrap"}
+                          display={"inline-block"}
+                        >
+                          {notificationEmail}
+                        </Link>
+                      </Flex>
+                    </HStack>
+                  ) : undefined
+                }
+                permitCollaboration={permitCollaborations?.[0]}
+              />
+            </AccordionButton>
+          </Box>
+        )}
+        <AccordionPanel border={"none"} bg={"greys.grey04"}>
+          <Box w={"full"} bg={"white"} p={2} border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
+            <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
+              {t("permitCollaboration.sidebar.assignedTo")}
+            </Text>
+          </Box>
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
   )
 })

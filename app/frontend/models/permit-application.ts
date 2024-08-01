@@ -32,6 +32,7 @@ import {
 
 import { format } from "date-fns"
 import { compareSubmissionData } from "../utils/formio-helpers"
+import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
@@ -460,6 +461,36 @@ export const PermitApplicationModel = types.snapshotProcessor(
           (collaboration) => collaboration.collaborator.user.id,
           self.getCollaborationsByType(collaborationType)
         ).length
+      },
+    }))
+    .views((self) => ({
+      getSidebarAssigneesList(collaborationType: ECollaborationType) {
+        const assignees = self.getCollaborationAssignees(collaborationType)
+
+        return Object.values(
+          assignees.reduce<
+            Record<
+              string,
+              {
+                collaborator: ICollaborator
+                permitCollaborations: IPermitCollaboration[]
+              }
+            >
+          >((acc, collaboration) => {
+            const collaborator = collaboration.collaborator
+
+            if (!(collaborator.id in acc)) {
+              acc[collaborator.id] = {
+                collaborator,
+                permitCollaborations: [],
+              }
+            }
+
+            acc[collaborator.id].permitCollaborations.push(collaboration)
+
+            return acc
+          }, {})
+        )
       },
     }))
     .actions((self) => ({
