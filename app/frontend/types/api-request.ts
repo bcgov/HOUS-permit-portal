@@ -1,5 +1,12 @@
 import { ENumberUnit, ERequirementType, ETagType } from "./enums"
-import { IOption, IRevisionRequest, ISimplifiedRequirementsMap, ISiteConfiguration, TComputedCompliance } from "./types"
+import {
+  IOption,
+  IRevisionRequest,
+  ISimplifiedRequirementsMap,
+  ISiteConfiguration,
+  TComputedCompliance,
+  TConditional,
+} from "./types"
 
 export interface IFormConditional {
   when: string
@@ -19,7 +26,7 @@ export interface IRequirementAttributes {
     valueOptions?: IOption[]
     numberUnit?: ENumberUnit
     canAddMultipleContacts?: boolean
-    conditional?: IFormConditional
+    conditional?: IFormConditional | TConditional
     energyStepCode?: string
     computedCompliance?: TComputedCompliance
   }
@@ -28,6 +35,7 @@ export interface IRequirementAttributes {
 
 export interface IRequirementBlockParams {
   name: string
+  firstNations: boolean
   displayName: string
   displayDescription: string
   description?: string

@@ -10,6 +10,7 @@ export const RequirementBlockModel = types
   .model("RequirementBlockModel", {
     id: types.identifier,
     name: types.string,
+    firstNations: types.boolean,
     displayName: types.string,
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),

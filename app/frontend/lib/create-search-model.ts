@@ -73,7 +73,8 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         self.sort = sort
       },
       clearSort() {
-        setQueryParam("sort", undefined)
+        setQueryParam("sortField", undefined)
+        setQueryParam("sortDirection", undefined)
         self.sort = null
       },
     }))

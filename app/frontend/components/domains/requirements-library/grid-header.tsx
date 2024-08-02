@@ -15,12 +15,13 @@ export const GridHeaders = observer(function GridHeaders() {
   const { sort, getSortColumnHeader, toggleSort } = requirementBlockStore
   const { t } = useTranslation()
 
+  console.log()
   return (
     <Box display={"contents"} role={"rowgroup"}>
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 6"}
+          gridColumn={"span 7"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}

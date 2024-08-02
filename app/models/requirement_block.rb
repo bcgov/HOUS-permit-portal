@@ -29,6 +29,7 @@ class RequirementBlock < ApplicationRecord
     {
       updated_at: updated_at,
       name: name,
+      first_nations: first_nations,
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,

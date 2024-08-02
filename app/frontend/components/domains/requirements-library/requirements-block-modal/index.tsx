@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
+import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
@@ -54,6 +54,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     return requirementBlock
       ? {
           name: requirementBlock.name,
+          firstNations: requirementBlock.firstNations,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
           displayDescription: requirementBlock.displayDescription,
@@ -89,6 +90,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       const { conditional, ...restOfInputOptions } = ra?.inputOptions
 
+      const formConditional = conditional as IFormConditional
+
       const processedRequirementAttributes = {
         ...ra,
         inputOptions: {
@@ -96,7 +99,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         } as any,
       }
 
-      const shouldAppendConditional = conditional?.when && conditional?.operand && conditional?.then
+      const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
 
       const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
         ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
@@ -107,7 +110,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       if (isEnergyStepCodeDependency) {
         processedRequirementAttributes.inputOptions.conditional = conditional
       } else if (shouldAppendConditional) {
-        const cond = ra.inputOptions.conditional
+        const cond = ra.inputOptions.conditional as IFormConditional
         processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
           eq: cond.operand,

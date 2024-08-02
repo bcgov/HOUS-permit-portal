@@ -24,43 +24,48 @@ interface IPermitTypeRadioSelect extends FlexProps {
   fetchOptions: () => Promise<IOption<IPermitType>[]>
   onChange: (value) => void
   value: string
+  dependencyArray: any[]
 }
 
-export const PermitTypeRadioSelect = observer(({ onChange, value, fetchOptions, ...rest }: IPermitTypeRadioSelect) => {
-  const { getRadioProps } = useRadioGroup({
-    name: "permitType",
-    defaultValue: null,
-    onChange: onChange,
-  })
+export const PermitTypeRadioSelect = observer(
+  ({ onChange, value, fetchOptions, dependencyArray, ...rest }: IPermitTypeRadioSelect) => {
+    const { getRadioProps } = useRadioGroup({
+      name: "permitType",
+      defaultValue: null,
+      onChange: onChange,
+    })
 
-  const { permitClassificationStore } = useMst()
-  const { isPermitTypeLoading } = permitClassificationStore
+    const { permitClassificationStore } = useMst()
+    const { isPermitTypeLoading } = permitClassificationStore
 
-  const [permitTypeOptions, setPermitTypeOptions] = useState<IOption<IPermitType>[]>([])
+    const [permitTypeOptions, setPermitTypeOptions] = useState<IOption<IPermitType>[]>([])
 
-  useEffect(() => {
-    ;(async () => {
-      setPermitTypeOptions(await fetchOptions())
-    })()
-  }, [])
+    useEffect(() => {
+      ;(async () => {
+        setPermitTypeOptions(await fetchOptions())
+      })()
+    }, dependencyArray)
 
-  const { t } = useTranslation()
+    const { t } = useTranslation()
 
-  if (isPermitTypeLoading) return <SharedSpinner />
+    if (isPermitTypeLoading) return <SharedSpinner />
 
-  if (R.isEmpty(permitTypeOptions)) {
-    return <CustomMessageBox status="error" description={t("translation:permitApplication.new.noContactsAvailable")} />
+    if (R.isEmpty(permitTypeOptions)) {
+      return (
+        <CustomMessageBox status="error" description={t("translation:permitApplication.new.noContactsAvailable")} />
+      )
+    }
+
+    return (
+      <Flex gap={4} flexWrap="wrap" role="radiogroup" {...rest}>
+        {permitTypeOptions.map((option) => {
+          const radio = getRadioProps({ value: option.value.id })
+          return <PermitTypeRadioCard key={option.value.id} permitType={option.value} {...radio} />
+        })}
+      </Flex>
+    )
   }
-
-  return (
-    <Flex gap={4} flexWrap="wrap" role="radiogroup" {...rest}>
-      {permitTypeOptions.map((option) => {
-        const radio = getRadioProps({ value: option.value.id })
-        return <PermitTypeRadioCard key={option.value.id} permitType={option.value} {...radio} />
-      })}
-    </Flex>
-  )
-})
+)
 
 interface IPermitTypeRadioCardProps extends UseRadioProps {
   permitType: IPermitType

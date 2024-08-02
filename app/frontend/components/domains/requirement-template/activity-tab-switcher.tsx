@@ -1,12 +1,12 @@
 import { Tab, TabList, TabPanelProps, TabPanels, TabProps, Tabs, Text } from "@chakra-ui/react"
 import React, { ReactElement } from "react"
-import { IPermitType } from "../../../models/permit-classification"
+import { IActivity } from "../../../models/permit-classification"
 import { IOption } from "../../../types/types"
 
 interface IActivityTabSwitcherProps {
   selectedTabIndex: number
   navigateToActivityTab: (activityId: string, replace?: boolean) => void
-  enabledActivityOptions: IOption<IPermitType>[]
+  enabledActivityOptions: IOption<IActivity>[]
   children: ReactElement<TabPanelProps>[] | ReactElement<TabPanelProps>
 }
 

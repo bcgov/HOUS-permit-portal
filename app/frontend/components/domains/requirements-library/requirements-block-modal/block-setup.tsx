@@ -1,4 +1,15 @@
-import { Box, FormControl, FormHelperText, FormLabel, Input, Text, Textarea, TextProps, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Text,
+  Textarea,
+  TextProps,
+  VStack,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -89,6 +100,21 @@ export const BlockSetup = observer(function BlockSetup() {
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
         </FormControl>
+
+        <FormControl>
+          <Controller
+            name="firstNations"
+            control={control}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <Checkbox isChecked={value} onChange={onChange}>
+                  {t("requirementsLibrary.forFirstNations")}
+                </Checkbox>
+              )
+            }}
+          />
+        </FormControl>
+
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
           <Input bg={"white"} value={watch("sku")} isDisabled={true} />

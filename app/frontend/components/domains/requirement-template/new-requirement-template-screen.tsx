@@ -1,8 +1,8 @@
-import { Button, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Checkbox, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { FormProvider, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
+import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
@@ -11,6 +11,8 @@ import { TextFormControl } from "../../shared/form/input-form-control"
 
 export type TCreateRequirementTemplateFormData = {
   description: string
+  firstNations: boolean
+  copyExisting: boolean
   permitTypeId: string
   activityId: string
 }
@@ -28,13 +30,21 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
     mode: "onChange",
     defaultValues: {
       description: "",
+      firstNations: false,
+      copyExisting: false,
       permitTypeId: null,
       activityId: null,
     },
   })
 
   const navigate = useNavigate()
-  const { handleSubmit, formState } = formMethods
+  const { handleSubmit, formState, control } = formMethods
+
+  const firstNationsChecked = useWatch({
+    control,
+    name: "firstNations",
+    defaultValue: false,
+  })
 
   const { isSubmitting } = formState
 
@@ -70,6 +80,33 @@ export const NewRequirementTemplateScreen = observer(({}: INewRequirementTemplat
                 fieldName={"activityId"}
               />
             </Flex>
+            <Controller
+              name="firstNations"
+              control={control}
+              defaultValue={false}
+              render={({ field: { onChange, value } }) => (
+                <Checkbox isChecked={value} onChange={onChange}>
+                  <Trans
+                    i18nKey={"requirementTemplate.new.firstNationsLand"}
+                    components={{
+                      1: <Text as="strong" />,
+                    }}
+                  />
+                </Checkbox>
+              )}
+            />
+            {firstNationsChecked && (
+              <Controller
+                name="copyExisting"
+                control={control}
+                defaultValue={false}
+                render={({ field: { onChange, value } }) => (
+                  <Checkbox isChecked={value} onChange={onChange}>
+                    {t("requirementTemplate.new.copyExisting")}
+                  </Checkbox>
+                )}
+              />
+            )}
 
             <Flex direction="column" as="section" w="full">
               <TextFormControl label={t("requirementTemplate.fields.description")} fieldName={"description"} required />

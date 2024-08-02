@@ -11,7 +11,7 @@ import { VersionTag } from "../../../../shared/version-tag"
 import { SubNavBar } from "../../../navigation/sub-nav-bar"
 
 interface IProps {
-  requirementTemplate: Pick<IDenormalizedTemplate, "id" | "description" | "activity" | "permitType">
+  requirementTemplate: Pick<IDenormalizedTemplate, "id" | "description" | "activity" | "permitType" | "label">
   renderDescription?: () => JSX.Element
   status?: ETemplateVersionStatus
   versionDate?: Date
@@ -44,9 +44,7 @@ export const BuilderHeader = observer(function BuilderHeader({
         </Text>
       </HStack>
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
-        <Heading as="h1">
-          {requirementTemplate.permitType.name} | {requirementTemplate.activity.name}
-        </Heading>
+        <Heading as="h1">{requirementTemplate.label}</Heading>
         <HStack>
           <Text fontWeight={700}>{t("requirementTemplate.fields.description")}:</Text>
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}

@@ -8,6 +8,7 @@ import { ITemplateVersion } from "../../../models/template-version"
 import { ETemplateVersionStatus } from "../../../types/enums"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { TemplateStatusTag } from "../../shared/requirement-template/template-status-tag"
 import { can } from "../../shared/user/can"
@@ -55,7 +56,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
             <Flex w="full" as="section">
               <Stack spacing={3} flex={1}>
                 <Text as="h3" color={"text.link"} fontWeight={700} fontSize="xl">
-                  {`${templateVersion.denormalizedTemplateJson?.permitType?.name} | ${templateVersion.denormalizedTemplateJson?.activity?.name}`}
+                  {templateVersion.denormalizedTemplateJson.label}
                 </Text>
                 <Text fontSize={"sm"} color={"text.secondary"}>
                   {templateVersion.denormalizedTemplateJson?.description}
@@ -68,6 +69,7 @@ export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermi
                 </Text>
                 <HStack gap={4} align="center">
                   <VersionTag versionDate={templateVersion.versionDate} w="fit-content" />
+                  {templateVersion.denormalizedTemplateJson.firstNations && <FirstNationsTag />}
                   {showStatusTag && (
                     <TemplateStatusTag
                       status={templateVersion.status}
