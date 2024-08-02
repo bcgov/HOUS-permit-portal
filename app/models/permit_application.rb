@@ -189,6 +189,10 @@ class PermitApplication < ApplicationRecord
 
   def notifiable_users
     relevant_collaborators = [submitter]
+    designated_submitter =
+      users_by_collaboration_options(collaboration_type: :submission, collaborator_type: :delegatee).first
+
+    relevant_collaborators << designated_submitter if designated_submitter.present?
 
     if submitted?
       relevant_collaborators =
