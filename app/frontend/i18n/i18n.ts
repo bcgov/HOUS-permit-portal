@@ -353,6 +353,12 @@ const options = {
           view: "View Jurisdiction",
         },
         permitCollaboration: {
+          status: "Status",
+          blockStatus: {
+            draft: "Draft",
+            in_progress: "In progress",
+            ready: "Ready",
+          },
           sidebar: {
             triggerButton: "Collaborators ({{count}})",
             title: "Collaborators",

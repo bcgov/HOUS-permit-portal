@@ -168,6 +168,12 @@ export enum ENumberUnit {
   cad = "cad",
 }
 
+export enum EPermitBlockStatus {
+  draft = "draft",
+  inProgress = "in_progress",
+  ready = "ready",
+}
+
 export enum EStepCodeChecklistStage {
   preConstruction = "pre_construction",
   midConstruction = "mid_construction",
