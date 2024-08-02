@@ -328,6 +328,7 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
             }
             triggerButtonProps={{
               mt: 2,
+              display: canManage ? "block" : "none",
             }}
             title={t("permitCollaboration.sidebar.removeCollaboratorModal.title")}
             body={t("permitCollaboration.sidebar.removeCollaboratorModal.body")}
