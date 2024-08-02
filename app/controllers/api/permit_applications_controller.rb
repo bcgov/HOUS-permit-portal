@@ -15,6 +15,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   create_permit_collaboration
                   invite_new_collaborator
                   remove_collaborator_collaborations
+                  create_or_update_permit_block_status
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -306,6 +307,29 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
     else
       render_error "permit_application.remove_collaborator_collaborations_error"
+    end
+  end
+
+  def create_or_update_permit_block_status
+    @permit_block_status =
+      @permit_application.permit_block_statuses.find_or_initialize_by(
+        requirement_block_id: params.require(:requirement_block_id),
+        collaboration_type: params.require(:collaboration_type),
+      )
+
+    authorize @permit_block_status, policy_class: PermitApplicationPolicy
+
+    @permit_block_status.with_lock do
+      if @permit_block_status.update(status: params.require(:status))
+        render_success @permit_block_status,
+                       "permit_application.create_or_update_permit_block_status_success",
+                       { blueprint: PermitBlockStatusBlueprint }
+      else
+        render_error "permit_application.create_or_update_permit_block_status_error",
+                     message_opts: {
+                       error_message: @permit_block_status.errors.full_messages.join(", "),
+                     }
+      end
     end
   end
 

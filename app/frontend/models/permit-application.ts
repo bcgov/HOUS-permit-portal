@@ -7,6 +7,7 @@ import {
   ECollaborationType,
   ECollaboratorType,
   EPermitApplicationStatus,
+  EPermitBlockStatus,
   ERequirementChangeAction,
   ERequirementType,
 } from "../types/enums"
@@ -32,8 +33,10 @@ import {
 
 import { format } from "date-fns"
 import { compareSubmissionData } from "../utils/formio-helpers"
+import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
+import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
@@ -84,6 +87,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submissionVersions: types.array(types.frozen<ISubmissionVersion>()),
       selectedPastSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
       permitCollaborationMap: types.map(PermitCollaborationModel),
+      permitBlockStatusMap: types.map(PermitBlockStatusModel),
       isViewingPastRequests: types.optional(types.boolean, false),
     })
     .extend(withEnvironment())
@@ -110,8 +114,21 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get sortedSubmissionVersions() {
         return self.submissionVersions.slice().sort((a, b) => b.createdAt - a.createdAt)
       },
+      get permitBlockStatuses() {
+        return Array.from(self.permitBlockStatusMap.values())
+      },
     }))
     .views((self) => ({
+      getRequirementBlockIdToStatusMap(collaborationType: ECollaborationType) {
+        return self.permitBlockStatuses.reduce((acc, permitBlockStatus) => {
+          if (permitBlockStatus.collaborationType === collaborationType) {
+            acc[permitBlockStatus.requirementBlockId] = permitBlockStatus
+          }
+
+          return acc
+        }, {})
+      },
+
       get latestSubmissionVersion() {
         if (self.submissionVersions?.length === 0) {
           return null
@@ -120,6 +137,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
+      getPermitBlockStatus(collaborationType: ECollaborationType, requirementBlockId: string) {
+        return self.getRequirementBlockIdToStatusMap(collaborationType)[requirementBlockId]
+      },
       get previousSubmissionVersion() {
         if (self.submissionVersions.length <= 1) {
           return null
@@ -501,6 +521,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         self.permitCollaborationMap.put(permitCollaborationData)
       },
+      updatePermitBlockStatus(permitBlockStatus: IPermitBlockStatus) {
+        self.permitBlockStatusMap.put(permitBlockStatus)
+      },
     }))
     .actions((self) => ({
       setRevisionMode(revisionMode: boolean) {
@@ -563,6 +586,27 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
 
         return response.ok
+      }),
+      createOrUpdatePermitBlockStatus: flow(function* (
+        requirementBlockId: string,
+        status: EPermitBlockStatus,
+        collaborationType: ECollaborationType
+      ) {
+        const response = yield self.environment.api.createOrUpdatePermitBlockStatus(self.id, {
+          requirementBlockId,
+          status,
+          collaborationType,
+        })
+
+        if (!response.ok) {
+          return false
+        }
+
+        const { data: permitBlockStatus } = response.data
+
+        self.updatePermitBlockStatus(permitBlockStatus)
+
+        return self.permitBlockStatusMap.get(permitBlockStatus.id)
       }),
       inviteNewCollaborator: flow(function* (
         collaboratorType: ECollaboratorType,
@@ -763,10 +807,11 @@ export const PermitApplicationModel = types.snapshotProcessor(
       const processedSnapshot = { ...snapshot }
 
       if (Array.isArray(snapshot.permitCollaborations)) {
-        processedSnapshot.permitCollaborationMap = snapshot.permitCollaborations.reduce((acc, collaboration) => {
-          acc[collaboration.id] = collaboration
-          return acc
-        }, {})
+        processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
+      }
+
+      if (Array.isArray(snapshot.permitBlockStatuses)) {
+        processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
       }
 
       return processedSnapshot

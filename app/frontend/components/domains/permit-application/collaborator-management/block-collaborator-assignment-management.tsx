@@ -1,9 +1,9 @@
 import { Avatar, Box, HStack, Stack, Tooltip } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { IPermitApplication } from "../../../../models/permit-application"
-import { ECollaborationType } from "../../../../types/enums"
+import { ECollaborationType, EPermitBlockStatus } from "../../../../types/enums"
 import { BlockStatusSelect } from "../../../shared/select/selectors/block-status-select"
 import { CollaboratorAssignmentPopover } from "./collaborator-assignment-popover"
 
@@ -32,8 +32,12 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
   return (
     <>
       {createPortal(
-        <HStack mr={6} spacing={4} onClick={(e) => e.stopPropagation()}>
-          <BlockStatusSelect />
+        <HStack mr={6} spacing={6} onClick={(e) => e.stopPropagation()}>
+          <StatusSelect
+            permitApplication={permitApplication}
+            collaborationType={collaborationType}
+            requirementBlockId={requirementBlockId}
+          />
           <CollaboratorAssignmentPopover
             permitApplication={permitApplication}
             collaborationType={collaborationType}
@@ -67,4 +71,43 @@ export const BlockCollaboratorAssignmentManagement = observer(function BlockColl
       )}
     </>
   )
+})
+
+const StatusSelect = observer(function StatusSelect({
+  permitApplication,
+  collaborationType,
+  requirementBlockId,
+}: {
+  permitApplication: IPermitApplication
+  collaborationType: ECollaborationType
+  requirementBlockId: string
+}) {
+  const permitBlockStatus = permitApplication.getPermitBlockStatus(collaborationType, requirementBlockId)
+
+  const [status, setStatus] = useState<EPermitBlockStatus>(permitBlockStatus?.status || EPermitBlockStatus.draft)
+
+  useEffect(() => {
+    setStatus(permitBlockStatus?.status || EPermitBlockStatus.draft)
+  }, [permitBlockStatus?.status])
+
+  const onChange = async (newStatus: EPermitBlockStatus) => {
+    const originalStatus = permitBlockStatus?.status || EPermitBlockStatus.draft
+    try {
+      setStatus(newStatus)
+
+      const response = await permitApplication.createOrUpdatePermitBlockStatus(
+        requirementBlockId,
+        newStatus,
+        collaborationType
+      )
+
+      if (!response) {
+        setStatus(originalStatus)
+      }
+    } catch (e) {
+      setStatus(originalStatus)
+    }
+  }
+
+  return <BlockStatusSelect value={status} onChange={onChange} />
 })
