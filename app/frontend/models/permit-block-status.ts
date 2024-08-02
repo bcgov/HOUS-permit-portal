@@ -6,6 +6,7 @@ export const PermitBlockStatusModel = types.model("PermitBlockStatusModel", {
   collaborationType: types.enumeration(Object.values(ECollaborationType)),
   status: types.enumeration(Object.values(EPermitBlockStatus)),
   requirementBlockId: types.string,
+  permitApplicationId: types.string,
   createdAt: types.Date,
   updatedAt: types.Date,
 })

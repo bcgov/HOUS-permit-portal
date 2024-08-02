@@ -1,5 +1,6 @@
 import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
+import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
 import {
@@ -298,6 +299,7 @@ export interface ITemplateVersionUpdate {
 export type TSocketEventData =
   | IPermitApplicationComplianceUpdate
   | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitBlockStatus
   | INotification
   | ITemplateVersionUpdate
 

@@ -307,6 +307,7 @@ export enum ESocketEventTypes {
 export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
+  updatePermitBlockStatus = "update_permit_block_status",
 }
 
 export enum EEnabledElectiveFieldReason {
