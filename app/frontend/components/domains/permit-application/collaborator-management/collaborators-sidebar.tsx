@@ -15,13 +15,18 @@ import {
   DrawerOverlay,
   Flex,
   HStack,
+  IconButton,
   Link,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Stack,
   StackProps,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { Envelope, Users } from "@phosphor-icons/react"
+import { DotsThree, Envelope, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -30,6 +35,8 @@ import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
 import { ECollaborationType } from "../../../../types/enums"
+import { getRequirementBlockAccordionNodes } from "../../../../utils/formio-helpers"
+import { RequestLoadingButton } from "../../../shared/request-loading-button"
 import { DesignatedSubmitterAssignmentPopover } from "./designated-submitter-assignment-popover"
 import { Reinvite } from "./reinvite"
 
@@ -44,9 +51,11 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
 }: IProps) {
   const { t } = useTranslation()
   const { userStore } = useMst()
+  const currentUser = userStore.currentUser
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = useRef()
 
+  let canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
   return (
     <>
       <Button leftIcon={<Users />} variant={"primary"} onClick={onOpen}>
@@ -76,8 +85,16 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
               {/*TODO update copy*/}
               <Text fontSize={"sm"}>{t("permitCollaboration.sidebar.howItWorksDescription")}</Text>
             </Stack>
-            <DesignatedSubmitters permitApplication={permitApplication} collaborationType={collaborationType} />
-            <Assignees permitApplication={permitApplication} collaborationType={collaborationType} />
+            <DesignatedSubmitters
+              permitApplication={permitApplication}
+              collaborationType={collaborationType}
+              canManage={permitApplication.canUserManageCollaborators(currentUser, collaborationType)}
+            />
+            <Assignees
+              permitApplication={permitApplication}
+              collaborationType={collaborationType}
+              canManage={canManage}
+            />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
@@ -85,7 +102,13 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   )
 })
 
-const DesignatedSubmitters = observer(function DesignatedSubmitters({ permitApplication, collaborationType }: IProps) {
+const DesignatedSubmitters = observer(function DesignatedSubmitters({
+  permitApplication,
+  collaborationType,
+  canManage,
+}: IProps & {
+  canManage: boolean
+}) {
   const { t } = useTranslation()
   const delegateeCollaboration = permitApplication.getCollaborationDelegatee(collaborationType)
 
@@ -98,12 +121,14 @@ const DesignatedSubmitters = observer(function DesignatedSubmitters({ permitAppl
       </Text>
       <CollaborationCard
         rightElement={
-          <DesignatedSubmitterAssignmentPopover
-            permitApplication={permitApplication}
-            collaborationType={collaborationType}
-          />
+          canManage ? (
+            <DesignatedSubmitterAssignmentPopover
+              permitApplication={permitApplication}
+              collaborationType={collaborationType}
+            />
+          ) : undefined
         }
-        onReinvite={permitApplication.reinvitePermitCollaboration}
+        onReinvite={canManage ? permitApplication.reinvitePermitCollaboration : undefined}
         permitCollaboration={delegateeCollaboration}
       />
       <Text fontSize={"sm"} color={"text.secondary"}>
@@ -175,7 +200,11 @@ const CollaborationCard = observer(function CollaborationCard({
   )
 })
 
-const Assignees = observer(function Assignees({ permitApplication, collaborationType }: IProps) {
+const Assignees = observer(function Assignees({
+  permitApplication,
+  collaborationType,
+  canManage,
+}: IProps & { canManage: boolean }) {
   const { t } = useTranslation()
   const sidebarAssigneeList = permitApplication.getSidebarAssigneesList(collaborationType)
 
@@ -195,6 +224,7 @@ const Assignees = observer(function Assignees({ permitApplication, collaboration
               permitApplication={permitApplication}
               collaborator={collaborator}
               permitCollaborations={permitCollaborations}
+              canManage={canManage}
             />
           )
         })}
@@ -207,13 +237,22 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
   collaborator,
   permitCollaborations,
   permitApplication,
+  canManage,
 }: {
   permitApplication: IPermitApplication
   collaborator: ICollaborator
   permitCollaborations: IPermitCollaboration[]
+  canManage: boolean
 }) {
   const { t } = useTranslation()
+
   const notificationEmail = collaborator?.user?.email
+  const formioRequirementBlockAccordionNodes = getRequirementBlockAccordionNodes()
+  // This might happen if the an assignment happens in a previous version and the requirement block has been removed.
+  // We want to filter them out as they are not relevant to the current permit application and the user cannot navigate to them.
+  const filteredPermitCollaborations = permitCollaborations.filter((permitCollaboration) => {
+    return permitCollaboration?.assignedRequirementBlockName
+  })
 
   return (
     <Accordion allowToggle>
@@ -273,6 +312,50 @@ const AssigneeAccordion = observer(function AssigneeAccordion({
             <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
               {t("permitCollaboration.sidebar.assignedTo")}
             </Text>
+            <Box as={"ul"} listStyleType={"none"} spacing={0} pl={0} mt={3}>
+              {filteredPermitCollaborations.map((permitCollaboration) => {
+                const requirementBlockNode =
+                  formioRequirementBlockAccordionNodes[permitCollaboration.assignedRequirementBlockId]
+                const onNavigate = () => {
+                  requirementBlockNode?.scrollIntoView({ behavior: "smooth", block: "center" })
+                }
+                return (
+                  <HStack key={permitCollaboration.id} justifyContent={"space-between"} maxW={"calc(100% - 30px)"}>
+                    <Box as={"li"} fontSize={"sm"} maxW={"full"}>
+                      <Button variant={"link"} onClick={onNavigate} maxW={"full"} isDisabled={!requirementBlockNode}>
+                        <Text overflow={"hidden"} textOverflow={"ellipsis"} whiteSpace={"nowrap"} maxW={"full"}>
+                          {permitCollaboration.assignedRequirementBlockName}
+                        </Text>
+                      </Button>
+                    </Box>
+                    {canManage && (
+                      <Menu closeOnSelect={false}>
+                        <MenuButton
+                          as={IconButton}
+                          icon={<DotsThree size={14} />}
+                          color={"text.primary"}
+                          size={"xs"}
+                          aria-label={"unassign requirement block menu"}
+                          variant={"ghost"}
+                        />
+                        <MenuList minW={"84px"} py={0} borderRadius={"sm"}>
+                          <MenuItem
+                            as={RequestLoadingButton}
+                            fontSize={"sm"}
+                            border={"1px solid"}
+                            borderColor={"borders.medium"}
+                            borderRadius={"sm !important"}
+                            onClick={() => permitApplication.unassignPermitCollaboration(permitCollaboration.id)}
+                          >
+                            {t("permitCollaboration.popover.collaborations.unassignButton")}
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    )}
+                  </HStack>
+                )
+              })}
+            </Box>
           </Box>
         </AccordionPanel>
       </AccordionItem>
