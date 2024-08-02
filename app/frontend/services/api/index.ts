@@ -36,6 +36,7 @@ import {
   IUsersResponse,
 } from "../../types/api-responses"
 import {
+  ECollaborationType,
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
@@ -284,6 +285,28 @@ export class Api {
       `/permit_applications/${permitApplicationId}/permit_collaborations`,
       {
         permitCollaboration: params,
+      }
+    )
+  }
+
+  async removeCollaboratorCollaborationsFromPermitApplication(
+    permitApplicationId: string,
+    {
+      collaboratorId,
+      collaboratorType,
+      collaborationType,
+    }: {
+      collaboratorId: string
+      collaboratorType: ECollaboratorType
+      collaborationType: ECollaborationType
+    }
+  ) {
+    return this.client.delete<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations/remove_collaborator_collaborations`,
+      {
+        collaboratorId,
+        collaboratorType,
+        collaborationType,
       }
     )
   }

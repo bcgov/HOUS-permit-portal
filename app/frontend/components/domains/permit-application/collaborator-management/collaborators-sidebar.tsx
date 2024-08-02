@@ -34,8 +34,9 @@ import { ICollaborator } from "../../../../models/collaborator"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { IPermitCollaboration } from "../../../../models/permit-collaboration"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType } from "../../../../types/enums"
+import { ECollaborationType, ECollaboratorType } from "../../../../types/enums"
 import { getRequirementBlockAccordionNodes } from "../../../../utils/formio-helpers"
+import { RemoveConfirmationModal } from "../../../shared/modals/remove-confirmation-modal"
 import { RequestLoadingButton } from "../../../shared/request-loading-button"
 import { DesignatedSubmitterAssignmentPopover } from "./designated-submitter-assignment-popover"
 import { Reinvite } from "./reinvite"
@@ -152,6 +153,197 @@ const DesignatedSubmitters = observer(function DesignatedSubmitters({
   )
 })
 
+const Assignees = observer(function Assignees({
+  permitApplication,
+  collaborationType,
+  canManage,
+}: IProps & { canManage: boolean }) {
+  const { t } = useTranslation()
+  const sidebarAssigneeList = permitApplication.getSidebarAssigneesList(collaborationType)
+
+  return (
+    <Stack spacing={2}>
+      <Text as={"h3"} fontSize={"md"} fontWeight={700}>
+        {t("permitCollaboration.sidebar.assignees")}
+      </Text>
+      <Text fontSize={"sm"} color={"text.secondary"}>
+        {t("permitCollaboration.sidebar.assigneeHelperText")}
+      </Text>
+      <Stack>
+        {sidebarAssigneeList.map(({ collaborator, permitCollaborations }) => {
+          return (
+            <AssigneeAccordion
+              key={collaborator?.id}
+              permitApplication={permitApplication}
+              collaborator={collaborator}
+              permitCollaborations={permitCollaborations}
+              collaborationType={collaborationType}
+              canManage={canManage}
+            />
+          )
+        })}
+      </Stack>
+    </Stack>
+  )
+})
+
+const AssigneeAccordion = observer(function AssigneeAccordion({
+  collaborator,
+  collaborationType,
+  permitCollaborations,
+  permitApplication,
+  canManage,
+}: {
+  permitApplication: IPermitApplication
+  collaborator: ICollaborator
+  permitCollaborations: IPermitCollaboration[]
+  collaborationType: ECollaborationType
+  canManage: boolean
+}) {
+  const { t } = useTranslation()
+
+  const notificationEmail = collaborator?.user?.email
+  const formioRequirementBlockAccordionNodes = getRequirementBlockAccordionNodes()
+  // This might happen if the an assignment happens in a previous version and the requirement block has been removed.
+  // We want to filter them out as they are not relevant to the current permit application and the user cannot navigate to them.
+  const filteredPermitCollaborations = permitCollaborations.filter((permitCollaboration) => {
+    return permitCollaboration?.assignedRequirementBlockName
+  })
+
+  return (
+    <Accordion allowToggle>
+      <AccordionItem border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
+        {permitCollaborations?.[0] && (
+          <Box as={"h4"} mb={0}>
+            <AccordionButton
+              p={0}
+              border={"none"}
+              _expanded={{
+                bg: "greys.grey04",
+                ".collaboratorCardEmailContainer": {
+                  display: "flex",
+                },
+              }}
+            >
+              <CollaborationCard
+                border={"none"}
+                rightElement={<AccordionIcon />}
+                moreDetailsElement={
+                  notificationEmail ? (
+                    <HStack spacing={4} className={"collaboratorCardEmailContainer"} display={"none"}>
+                      <Text as={"span"} fontSize={"sm"} fontWeight={700}>
+                        {t("permitCollaboration.sidebar.assigneeEmail")}
+                      </Text>
+                      <Flex alignItems={"baseline"} color={"link"} onClick={(e) => e.stopPropagation()}>
+                        <Envelope
+                          size={14}
+                          style={{
+                            flexShrink: 0,
+                            color: "var(--chakra-colors-text-link)",
+                          }}
+                        />
+                        <Link
+                          ml={1}
+                          href={`mailto:${notificationEmail}`}
+                          fontSize={"sm"}
+                          color={"text.link"}
+                          wordBreak={"break-word"}
+                          overflowWrap={"break-word"}
+                          whiteSpace={"pre-wrap"}
+                          display={"inline-block"}
+                        >
+                          {notificationEmail}
+                        </Link>
+                      </Flex>
+                    </HStack>
+                  ) : undefined
+                }
+                permitCollaboration={permitCollaborations?.[0]}
+              />
+            </AccordionButton>
+          </Box>
+        )}
+        <AccordionPanel border={"none"} bg={"greys.grey04"} pb={2}>
+          <Box w={"full"} bg={"white"} p={2} border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
+            <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
+              {t("permitCollaboration.sidebar.assignedTo")}
+            </Text>
+            <Box as={"ul"} listStyleType={"none"} p={0} mt={3}>
+              {filteredPermitCollaborations.map((permitCollaboration) => {
+                const requirementBlockNode =
+                  formioRequirementBlockAccordionNodes[permitCollaboration.assignedRequirementBlockId]
+                const onNavigate = () => {
+                  requirementBlockNode?.scrollIntoView({ behavior: "smooth", block: "center" })
+                }
+                return (
+                  <HStack as={"li"} key={permitCollaboration.id} justifyContent={"space-between"}>
+                    <Button
+                      variant={"link"}
+                      onClick={onNavigate}
+                      size={"sm"}
+                      fontSize={"sm"}
+                      maxW={"full"}
+                      isDisabled={!requirementBlockNode}
+                    >
+                      <Text overflow={"hidden"} textOverflow={"ellipsis"} whiteSpace={"nowrap"} maxW={"full"}>
+                        {permitCollaboration.assignedRequirementBlockName}
+                      </Text>
+                    </Button>
+                    {canManage && (
+                      <Menu closeOnSelect={false}>
+                        <MenuButton
+                          as={IconButton}
+                          icon={<DotsThree size={14} />}
+                          color={"text.primary"}
+                          size={"xs"}
+                          aria-label={"unassign requirement block menu"}
+                          variant={"ghost"}
+                        />
+                        <MenuList minW={"84px"} py={0} borderRadius={"sm"}>
+                          <MenuItem
+                            as={RequestLoadingButton}
+                            fontSize={"sm"}
+                            border={"1px solid"}
+                            borderColor={"borders.medium"}
+                            borderRadius={"sm !important"}
+                            onClick={() => permitApplication.unassignPermitCollaboration(permitCollaboration.id)}
+                          >
+                            {t("permitCollaboration.popover.collaborations.unassignButton")}
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    )}
+                  </HStack>
+                )
+              })}
+            </Box>
+          </Box>
+          <RemoveConfirmationModal
+            onRemove={() =>
+              permitApplication.removeCollaboratorCollaborations(
+                collaborator.id,
+                ECollaboratorType.assignee,
+                collaborationType
+              )
+            }
+            triggerButtonProps={{
+              mt: 2,
+            }}
+            title={t("permitCollaboration.sidebar.removeCollaboratorModal.title")}
+            body={t("permitCollaboration.sidebar.removeCollaboratorModal.body")}
+            triggerText={t("permitCollaboration.sidebar.removeCollaboratorModal.triggerButton")}
+            renderConfirmationButton={({ onClick }) => (
+              <RequestLoadingButton onClick={onClick as () => Promise<any>} variant={"primary"}>
+                {t("ui.remove")}
+              </RequestLoadingButton>
+            )}
+          />
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
+  )
+})
+
 const CollaborationCard = observer(function CollaborationCard({
   permitCollaboration,
   onReinvite,
@@ -197,168 +389,5 @@ const CollaborationCard = observer(function CollaborationCard({
       </HStack>
       {rightElement}
     </HStack>
-  )
-})
-
-const Assignees = observer(function Assignees({
-  permitApplication,
-  collaborationType,
-  canManage,
-}: IProps & { canManage: boolean }) {
-  const { t } = useTranslation()
-  const sidebarAssigneeList = permitApplication.getSidebarAssigneesList(collaborationType)
-
-  return (
-    <Stack spacing={2}>
-      <Text as={"h3"} fontSize={"md"} fontWeight={700}>
-        {t("permitCollaboration.sidebar.assignees")}
-      </Text>
-      <Text fontSize={"sm"} color={"text.secondary"}>
-        {t("permitCollaboration.sidebar.assigneeHelperText")}
-      </Text>
-      <Stack>
-        {sidebarAssigneeList.map(({ collaborator, permitCollaborations }) => {
-          return (
-            <AssigneeAccordion
-              key={collaborator?.id}
-              permitApplication={permitApplication}
-              collaborator={collaborator}
-              permitCollaborations={permitCollaborations}
-              canManage={canManage}
-            />
-          )
-        })}
-      </Stack>
-    </Stack>
-  )
-})
-
-const AssigneeAccordion = observer(function AssigneeAccordion({
-  collaborator,
-  permitCollaborations,
-  permitApplication,
-  canManage,
-}: {
-  permitApplication: IPermitApplication
-  collaborator: ICollaborator
-  permitCollaborations: IPermitCollaboration[]
-  canManage: boolean
-}) {
-  const { t } = useTranslation()
-
-  const notificationEmail = collaborator?.user?.email
-  const formioRequirementBlockAccordionNodes = getRequirementBlockAccordionNodes()
-  // This might happen if the an assignment happens in a previous version and the requirement block has been removed.
-  // We want to filter them out as they are not relevant to the current permit application and the user cannot navigate to them.
-  const filteredPermitCollaborations = permitCollaborations.filter((permitCollaboration) => {
-    return permitCollaboration?.assignedRequirementBlockName
-  })
-
-  return (
-    <Accordion allowToggle>
-      <AccordionItem border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
-        {permitCollaborations?.[0] && (
-          <Box as={"h4"} mb={0}>
-            <AccordionButton
-              p={0}
-              border={"none"}
-              _expanded={{
-                bg: "greys.grey04",
-                ".collaboratorCardEmailContainer": {
-                  display: "flex",
-                },
-              }}
-            >
-              <CollaborationCard
-                border={"none"}
-                rightElement={<AccordionIcon />}
-                moreDetailsElement={
-                  notificationEmail ? (
-                    <HStack spacing={4} className={"collaboratorCardEmailContainer"} display={"none"}>
-                      <Text as={"span"} fontSize={"sm"} fontWeight={700}>
-                        {t("permitCollaboration.sidebar.assigneeEmail")}
-                      </Text>
-                      <Flex alignItems={"baseline"} color={"link"}>
-                        <Envelope
-                          size={14}
-                          style={{
-                            flexShrink: 0,
-                            color: "var(--chakra-colors-text-link)",
-                          }}
-                        />
-                        <Link
-                          ml={1}
-                          href={`mailto:${notificationEmail}`}
-                          fontSize={"sm"}
-                          color={"text.link"}
-                          wordBreak={"break-word"}
-                          overflowWrap={"break-word"}
-                          whiteSpace={"pre-wrap"}
-                          display={"inline-block"}
-                        >
-                          {notificationEmail}
-                        </Link>
-                      </Flex>
-                    </HStack>
-                  ) : undefined
-                }
-                permitCollaboration={permitCollaborations?.[0]}
-              />
-            </AccordionButton>
-          </Box>
-        )}
-        <AccordionPanel border={"none"} bg={"greys.grey04"}>
-          <Box w={"full"} bg={"white"} p={2} border={"1px solid"} borderColor={"border.light"} borderRadius={"sm"}>
-            <Text as={"h5"} fontSize={"sm"} fontWeight={700} textTransform={"uppercase"} color={"text.secondary"}>
-              {t("permitCollaboration.sidebar.assignedTo")}
-            </Text>
-            <Box as={"ul"} listStyleType={"none"} spacing={0} pl={0} mt={3}>
-              {filteredPermitCollaborations.map((permitCollaboration) => {
-                const requirementBlockNode =
-                  formioRequirementBlockAccordionNodes[permitCollaboration.assignedRequirementBlockId]
-                const onNavigate = () => {
-                  requirementBlockNode?.scrollIntoView({ behavior: "smooth", block: "center" })
-                }
-                return (
-                  <HStack key={permitCollaboration.id} justifyContent={"space-between"} maxW={"calc(100% - 30px)"}>
-                    <Box as={"li"} fontSize={"sm"} maxW={"full"}>
-                      <Button variant={"link"} onClick={onNavigate} maxW={"full"} isDisabled={!requirementBlockNode}>
-                        <Text overflow={"hidden"} textOverflow={"ellipsis"} whiteSpace={"nowrap"} maxW={"full"}>
-                          {permitCollaboration.assignedRequirementBlockName}
-                        </Text>
-                      </Button>
-                    </Box>
-                    {canManage && (
-                      <Menu closeOnSelect={false}>
-                        <MenuButton
-                          as={IconButton}
-                          icon={<DotsThree size={14} />}
-                          color={"text.primary"}
-                          size={"xs"}
-                          aria-label={"unassign requirement block menu"}
-                          variant={"ghost"}
-                        />
-                        <MenuList minW={"84px"} py={0} borderRadius={"sm"}>
-                          <MenuItem
-                            as={RequestLoadingButton}
-                            fontSize={"sm"}
-                            border={"1px solid"}
-                            borderColor={"borders.medium"}
-                            borderRadius={"sm !important"}
-                            onClick={() => permitApplication.unassignPermitCollaboration(permitCollaboration.id)}
-                          >
-                            {t("permitCollaboration.popover.collaborations.unassignButton")}
-                          </MenuItem>
-                        </MenuList>
-                      </Menu>
-                    )}
-                  </HStack>
-                )
-              })}
-            </Box>
-          </Box>
-        </AccordionPanel>
-      </AccordionItem>
-    </Accordion>
   )
 })

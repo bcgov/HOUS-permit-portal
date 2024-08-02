@@ -371,6 +371,11 @@ const options = {
             noDesignatedSubmitters: "None assigned",
             assignedTo: "Assigned to",
             assigneeEmail: "Email:",
+            removeCollaboratorModal: {
+              triggerButton: "Remove collaborator",
+              title: "Are you sure you want to remove this collaborator?",
+              body: "This action cannot be undone.",
+            },
           },
           popover: {
             triggerButton: "Assign ({{count}})",

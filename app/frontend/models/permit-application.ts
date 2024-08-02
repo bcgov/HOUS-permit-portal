@@ -545,6 +545,25 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return self.getPermitCollaboration(permitCollaboration.id)
       }),
+      removeCollaboratorCollaborations: flow(function* (
+        collaboratorId: string,
+        collaboratorType: ECollaboratorType,
+        collaborationType: ECollaborationType
+      ) {
+        const response = yield self.environment.api.removeCollaboratorCollaborationsFromPermitApplication(self.id, {
+          collaboratorId,
+          collaboratorType,
+          collaborationType,
+        })
+
+        if (response.ok) {
+          self.getCollaborationAssignees(collaborationType).forEach((collaboration) => {
+            collaboration.collaborator.id === collaboratorId && self.permitCollaborationMap.delete(collaboration.id)
+          })
+        }
+
+        return response.ok
+      }),
       inviteNewCollaborator: flow(function* (
         collaboratorType: ECollaboratorType,
         user: {

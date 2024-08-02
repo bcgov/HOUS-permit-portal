@@ -409,6 +409,12 @@ en:
       revision_request_finalize_error:
         title: Error
         message: "There was an error finalizing revision requests"
+      remove_collaborator_collaborations_success:
+        title: ""
+        message: "Collaborator successfully removed"
+      remove_collaborator_collaborations_error:
+        title: Error
+        message: "There was an error removing collaborator"
     permit_collaboration:
       destroy_success:
         title: ""
