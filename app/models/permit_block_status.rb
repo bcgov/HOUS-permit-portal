@@ -50,17 +50,13 @@ class PermitBlockStatus < ApplicationRecord
   def users_to_notify_status_ready
     users_to_notify = []
 
-    if submission?
-      users_to_notify << permit_application.submitter
-      users_to_notify +=
-        permit_application.users_by_collaboration_options(
-          collaboration_type: :submission,
-          collaborator_type: :delegatee,
-        )
-    else
-      users_to_notify +=
-        permit_application.jurisdiction.users.kept.where(role: %i[review_manager reviewer regional_review_manager])
-    end
+    users_to_notify << permit_application.submitter if submission?
+
+    users_to_notify +=
+      permit_application.users_by_collaboration_options(
+        collaboration_type: collaboration_type,
+        collaborator_type: :delegatee,
+      )
 
     users_to_notify.uniq
   end
@@ -78,6 +74,14 @@ class PermitBlockStatus < ApplicationRecord
           collaboration_type: :submission,
           collaborator_type: :assignee,
         ).pluck(:id)
+    else
+      user_ids_to_send +=
+        permit_application
+          .jurisdiction
+          .users
+          .kept
+          .where(role: %i[review_manager reviewer regional_review_manager])
+          .pluck(:id)
     end
 
     WebsocketBroadcaster.push_update_to_relevant_users(
