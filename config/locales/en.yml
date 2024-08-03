@@ -113,6 +113,7 @@ en:
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
+      notify_block_status_ready: "Requirement block status ready"
       notify_application_viewed: "Application update: %{permit_application_number}"
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"

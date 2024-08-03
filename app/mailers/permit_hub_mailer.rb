@@ -48,6 +48,14 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: @user.email, template_key: :notify_permit_collaboration)
   end
 
+  def notify_block_status_ready(permit_block_status:, user:, status_set_by: nil)
+    @permit_block_status = permit_block_status
+    @user = user
+    @status_set_by = status_set_by
+
+    send_user_mail(email: @user.email, template_key: :notify_block_status_ready)
+  end
+
   def notify_new_or_unconfirmed_permit_collaboration(permit_collaboration:, user:)
     @permit_collaboration = permit_collaboration
     @user = user

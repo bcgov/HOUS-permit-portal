@@ -319,6 +319,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
     authorize @permit_block_status, policy_class: PermitApplicationPolicy
 
+    @permit_block_status.set_by_user = current_user
+
     @permit_block_status.with_lock do
       if @permit_block_status.update(status: params.require(:status))
         render_success @permit_block_status,
