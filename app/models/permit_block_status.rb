@@ -10,6 +10,7 @@ class PermitBlockStatus < ApplicationRecord
 
   after_commit :send_status_change_websocket
   after_commit :send_status_ready_email
+  after_commit :send_status_ready_notification
 
   attr_accessor :set_by_user
 
@@ -17,10 +18,54 @@ class PermitBlockStatus < ApplicationRecord
     permit_application.template_version.requirement_blocks_json.dig(requirement_block_id, "name")
   end
 
-  private
-
-  def notification_users
+  def status_ready_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::PERMIT_BLOCK_STATUS_READY,
+      "action_text" =>
+        (
+          if set_by_user.present?
+            I18n.t(
+              "notification.permit_block_status.status_read_by_user",
+              number: permit_application.number,
+              requirement_block_name: requirement_block_name || "",
+              setter_name: set_by_user.name,
+            )
+          else
+            I18n.t(
+              "notification.permit_block_status.status_ready_no_user",
+              number: permit_application.number,
+              requirement_block_name: requirement_block_name || "",
+            )
+          end
+        ),
+      "object_data" => {
+        "permit_application_id" => permit_application.id,
+        "collaboration_type" => collaboration_type,
+        "requirement_block_name" => requirement_block_name,
+      },
+    }
   end
+
+  def users_to_notify_status_ready
+    users_to_notify = []
+
+    if submission?
+      users_to_notify << permit_application.submitter
+      users_to_notify +=
+        permit_application.users_by_collaboration_options(
+          collaboration_type: :submission,
+          collaborator_type: :delegatee,
+        )
+    else
+      users_to_notify +=
+        permit_application.jurisdiction.users.kept.where(role: %i[review_manager reviewer regional_review_manager])
+    end
+
+    users_to_notify.uniq
+  end
+
+  private
 
   def send_status_change_websocket
     return unless saved_change_to_status?
@@ -43,24 +88,6 @@ class PermitBlockStatus < ApplicationRecord
     )
   end
 
-  def users_to_notify_status_ready
-    users_to_notify = []
-
-    if submission?
-      users_to_notify << permit_application.submitter
-      users_to_notify +=
-        permit_application.users_by_collaboration_options(
-          collaboration_type: :submission,
-          collaborator_type: :delegatee,
-        )
-    else
-      users_to_notify +=
-        permit_application.jurisdiction.users.kept.where(role: %i[review_manager reviewer regional_review_manager])
-    end
-
-    users_to_notify.uniq
-  end
-
   def send_status_ready_email
     return unless saved_change_to_status? && ready?
 
@@ -71,5 +98,10 @@ class PermitBlockStatus < ApplicationRecord
         status_set_by: set_by_user,
       ).deliver_later
     end
+  end
+
+  def send_status_ready_notification
+    return unless saved_change_to_status? && ready?
+    NotificationService.publish_permit_block_status_ready_event(self)
   end
 end

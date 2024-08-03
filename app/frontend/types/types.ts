@@ -6,6 +6,7 @@ import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  ECollaborationType,
   ECollaboratorType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
@@ -276,6 +277,12 @@ export interface IPermitCollaborationNotificationObjectData {
   permitApplicationId?: string
   collaboratorType?: ECollaboratorType
   assignedRequirementBlockName?: string
+}
+
+export interface IPermitBlockStatusReadyNotificationObjectData {
+  permitApplicationId?: string
+  collaborationType: ECollaborationType
+  requirementBlockName?: string
 }
 
 export interface IMissingRequirementsMappingNotificationObjectData {
