@@ -366,7 +366,7 @@ const options = {
               "Collaborators can be invited to work on the different areas of the permit application form. Only the author can manage collaborators.",
             howItWorksTitle: "How it works",
             howItWorksDescription:
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+              "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already. Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to. Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
             designatedSubmitters: "Designated submitter(s)",
             authorCanSubmitWithOrganization:
               "Author of this application is also allowed to submit: <1>{{author}}</1> ({{organization}}).",
