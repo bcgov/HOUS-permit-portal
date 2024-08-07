@@ -72,7 +72,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                if is_current_user_submitter
                  permit_application_params
                else
-                 permit_collaboration_params
+                 submission_collaborator_permit_application_params
                end
              ),
            current_user: current_user,
@@ -360,7 +360,16 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def submission_collaborator_permit_application_params # permit application params collaborators can update if they are a collaborator during submission
-    params.require(:permit_application).permit(submission_data: {})
+    designated_submitter =
+      @permit_application.users_by_collaboration_options(
+        collaboration_type: :submission,
+        collaborator_type: :delegatee,
+      ).first
+    if designated_submitter&.id == current_user.id
+      params.require(:permit_application).permit(:nickname, submission_data: {})
+    else
+      params.require(:permit_application).permit(submission_data: {})
+    end
   end
 
   def permit_collaboration_params
