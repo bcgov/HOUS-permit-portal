@@ -105,7 +105,7 @@ class PermitBlockStatus < ApplicationRecord
         permit_block_status: self,
         user:,
         status_set_by: set_by_user,
-      ).deliver_later
+      )&.deliver_later
     end
   end
 

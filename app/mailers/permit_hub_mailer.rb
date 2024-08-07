@@ -16,9 +16,10 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "new_jurisdiction_membership")
   end
 
-  def notify_submitter_application_submitted(permit_application)
-    @user = permit_application.submitter
+  def notify_submitter_application_submitted(permit_application, user)
+    @user = user
     @permit_application = permit_application
+
     send_user_mail(email: @user.email, template_key: "notify_submitter_application_submitted")
   end
 
@@ -114,8 +115,8 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def notify_application_revisions_requested(permit_application)
-    @user = permit_application.submitter
+  def notify_application_revisions_requested(permit_application, user)
+    @user = user
     @permit_application = permit_application
     send_user_mail(
       email: @user.email,
