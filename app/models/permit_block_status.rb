@@ -61,6 +61,11 @@ class PermitBlockStatus < ApplicationRecord
     users_to_notify.uniq
   end
 
+  def block_exists?
+    # This can be nil if a new template version was published and the requirement block was deleted
+    permit_application.template_version.requirement_blocks_json&.key?(requirement_block_id)
+  end
+
   private
 
   def send_status_change_websocket

@@ -64,6 +64,11 @@ class PermitCollaboration < ApplicationRecord
     }
   end
 
+  def assigned_block_exists?
+    # This can be nil if a new template version was published and the requirement block was deleted
+    permit_application.template_version.requirement_blocks_json&.key?(assigned_requirement_block_id)
+  end
+
   private
 
   def reindex_permit_application

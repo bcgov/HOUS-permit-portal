@@ -53,7 +53,7 @@ class PermitHubMailer < ApplicationMailer
     @user = user
     @status_set_by = status_set_by
 
-    return unless @user.preference&.enable_email_collaboration_notification
+    return unless permit_block_status.block_exists? && @user.preference&.enable_email_collaboration_notification
 
     send_user_mail(email: @user.email, template_key: :notify_block_status_ready)
   end

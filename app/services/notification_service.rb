@@ -160,7 +160,7 @@ class NotificationService
   end
 
   def self.publish_permit_block_status_ready_event(permit_block_status)
-    return unless permit_block_status.ready?
+    return unless permit_block_status.ready? && permit_block_status.block_exists?
 
     notification_user_hash = {}
 
