@@ -372,7 +372,13 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </Button>
               </Stack>
             ) : (
-              <HStack gap={4}>
+              <HStack
+                flexDir={{
+                  base: "column",
+                  md: "row",
+                }}
+                gap={4}
+              >
                 <BrowserSearchPrompt />
                 <CollaboratorsSidebar
                   permitApplication={currentPermitApplication}
