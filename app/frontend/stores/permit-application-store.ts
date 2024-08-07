@@ -8,6 +8,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
+import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IUser } from "../models/user"
 import {
   ECustomEvents,
@@ -281,6 +282,9 @@ export const PermitApplicationStoreModel = types
 
           self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
           break
+        case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
+          payloadData = payload.data as IPermitBlockStatus
+          self.permitApplicationMap.get(payloadData?.permitApplicationId)?.updatePermitBlockStatus(payloadData)
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }

@@ -3,10 +3,11 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ENotificationActionType } from "../types/enums"
+import { ECollaborationType, ENotificationActionType } from "../types/enums"
 import {
   ILinkData,
   INotification,
+  IPermitBlockStatusReadyNotificationObjectData,
   IPermitCollaborationNotificationObjectData,
   IPermitNotificationObjectData,
   IUserPushPayload,
@@ -86,6 +87,17 @@ export const NotificationStoreModel = types
           {
             text: t("ui.show"),
             href: `/permit-applications/${collaborationData.permitApplicationId}/edit`,
+          },
+        ]
+      } else if (notification.actionType === ENotificationActionType.permitBlockStatusReady) {
+        const collaborationData = objectData as IPermitBlockStatusReadyNotificationObjectData
+        return [
+          {
+            text: t("ui.show"),
+            href:
+              collaborationData?.collaborationType === ECollaborationType.review
+                ? `/permit-applications/${collaborationData.permitApplicationId}`
+                : `/permit-applications/${collaborationData.permitApplicationId}/edit`,
           },
         ]
       } else if (

@@ -15,6 +15,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   create_permit_collaboration
                   invite_new_collaborator
                   remove_collaborator_collaborations
+                  create_or_update_permit_block_status
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -71,7 +72,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                if is_current_user_submitter
                  permit_application_params
                else
-                 permit_collaboration_params
+                 submission_collaborator_permit_application_params
                end
              ),
            current_user: current_user,
@@ -309,6 +310,31 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
+  def create_or_update_permit_block_status
+    @permit_block_status =
+      @permit_application.permit_block_statuses.find_or_initialize_by(
+        requirement_block_id: params.require(:requirement_block_id),
+        collaboration_type: params.require(:collaboration_type),
+      )
+
+    authorize @permit_block_status, policy_class: PermitApplicationPolicy
+
+    @permit_block_status.set_by_user = current_user
+
+    @permit_block_status.with_lock do
+      if @permit_block_status.update(status: params.require(:status))
+        render_success @permit_block_status,
+                       "permit_application.create_or_update_permit_block_status_success",
+                       { blueprint: PermitBlockStatusBlueprint }
+      else
+        render_error "permit_application.create_or_update_permit_block_status_error",
+                     message_opts: {
+                       error_message: @permit_block_status.errors.full_messages.join(", "),
+                     }
+      end
+    end
+  end
+
   private
 
   def show_blueprint_view_for(user)
@@ -334,7 +360,16 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def submission_collaborator_permit_application_params # permit application params collaborators can update if they are a collaborator during submission
-    params.require(:permit_application).permit(submission_data: {})
+    designated_submitter =
+      @permit_application.users_by_collaboration_options(
+        collaboration_type: :submission,
+        collaborator_type: :delegatee,
+      ).first
+    if designated_submitter&.id == current_user.id
+      params.require(:permit_application).permit(:nickname, submission_data: {})
+    else
+      params.require(:permit_application).permit(submission_data: {})
+    end
   end
 
   def permit_collaboration_params

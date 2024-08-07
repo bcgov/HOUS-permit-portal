@@ -84,7 +84,17 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
                 {t("permitCollaboration.sidebar.howItWorksTitle")}
               </Text>
               {/*TODO update copy*/}
-              <Text fontSize={"sm"}>{t("permitCollaboration.sidebar.howItWorksDescription")}</Text>
+              <Text fontSize={"sm"}>
+                {
+                  <Trans
+                    i18nKey={"permitCollaboration.sidebar.howItWorksDescription"}
+                    t={t}
+                    components={{
+                      1: <br />,
+                    }}
+                  />
+                }
+              </Text>
             </Stack>
             <DesignatedSubmitters
               permitApplication={permitApplication}

@@ -194,3 +194,14 @@ export const arrayEqualsAsSet = (a: string[], b: string[]): boolean => {
   }
   return true
 }
+
+export function convertResourceArrayToRecord<
+  ResourceT extends {
+    id: string
+  },
+>(resources: ResourceT[]): Record<string, ResourceT> {
+  return resources.reduce((acc, resource) => {
+    acc[resource.id] = resource
+    return acc
+  }, {})
+}

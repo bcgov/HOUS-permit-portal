@@ -23,6 +23,7 @@ class PermitApplication < ApplicationRecord
   has_many :submission_versions, dependent: :destroy
   has_many :permit_collaborations, dependent: :destroy
   has_many :collaborators, through: :permit_collaborations
+  has_many :permit_block_statuses, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
@@ -188,6 +189,10 @@ class PermitApplication < ApplicationRecord
 
   def notifiable_users
     relevant_collaborators = [submitter]
+    designated_submitter =
+      users_by_collaboration_options(collaboration_type: :submission, collaborator_type: :delegatee).first
+
+    relevant_collaborators << designated_submitter if designated_submitter.present?
 
     if submitted?
       relevant_collaborators =

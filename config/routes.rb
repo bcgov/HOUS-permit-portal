@@ -121,6 +121,7 @@ Rails.application.routes.draw do
     resources :permit_applications, only: %i[create update show] do
       post "generate_missing_pdfs", on: :member, to: "permit_applications#generate_missing_pdfs"
       post "permit_collaborations", on: :member, to: "permit_applications#create_permit_collaboration"
+      post "permit_block_status", on: :member, to: "permit_applications#create_or_update_permit_block_status"
       delete "permit_collaborations/remove_collaborator_collaborations",
              on: :member,
              to: "permit_applications#remove_collaborator_collaborations"

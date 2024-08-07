@@ -40,6 +40,7 @@ import {
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
+  EPermitBlockStatus,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   ETemplateVersionStatus,
@@ -306,6 +307,28 @@ export class Api {
       {
         collaboratorId,
         collaboratorType,
+        collaborationType,
+      }
+    )
+  }
+
+  async createOrUpdatePermitBlockStatus(
+    permitApplicationId: string,
+    {
+      requirementBlockId,
+      collaborationType,
+      status,
+    }: {
+      requirementBlockId: string
+      collaborationType: ECollaborationType
+      status: EPermitBlockStatus
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_block_status`,
+      {
+        requirementBlockId,
+        status,
         collaborationType,
       }
     )
