@@ -165,6 +165,8 @@ class NotificationService
     notification_user_hash = {}
 
     permit_block_status.users_to_notify_status_ready.each do |user|
+      next unless user.preference&.enable_in_app_collaboration_notification
+
       notification_user_hash[user.id] = permit_block_status.status_ready_notification_data
     end
 
