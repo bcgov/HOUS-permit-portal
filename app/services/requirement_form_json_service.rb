@@ -335,7 +335,7 @@ class RequirementFormJsonService
       custom_class: "contact-data-grid",
       key: key,
       type: "datagrid",
-      input: true,
+      input: false,
       components: [get_contact_field_set_form_json("#{key}|#{requirement.input_type}", true)],
     }
   end
