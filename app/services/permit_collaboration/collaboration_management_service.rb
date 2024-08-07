@@ -12,6 +12,14 @@ class PermitCollaboration::CollaborationManagementService
     assigned_requirement_block_id: nil
   )
     ActiveRecord::Base.transaction do
+      # a permit application can only have one delegatee, so we need to remove the existing one
+      if collaborator_type == "delegatee"
+        existing_delegatee_collaboration =
+          permit_application.permit_collaborations.where(collaborator_type: "delegatee")
+
+        existing_delegatee_collaboration.destroy_all if existing_delegatee_collaboration.length.positive?
+      end
+
       permit_collaboration =
         build_permit_collaboration(
           collaborator_id: collaborator_id,

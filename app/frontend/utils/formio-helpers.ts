@@ -1,4 +1,5 @@
 import * as R from "ramda"
+import { FORMIO_DATA_CLASS_PREFIX } from "../constants/formio-constants"
 import { IFormIORequirement, ISingleRequirementFormJson, ISubmissionData } from "../types/types"
 
 export const singleRequirementFormJson = (requirementJson: IFormIORequirement): ISingleRequirementFormJson => {
@@ -46,4 +47,33 @@ export const compareSubmissionData = (beforeSubmissionData: ISubmissionData, aft
   }
 
   return changedFields
+}
+
+export function getRequirementBlockAccordionNodes() {
+  const accordionNodes = document.querySelectorAll<HTMLDivElement>(".formio-component-panel")
+
+  const requirementBlockAssignmentNodes = Array.from(accordionNodes)
+    .filter((node) => {
+      return (
+        node.querySelector(".card-title") &&
+        Array.from(node.classList).find((c) => c.startsWith(FORMIO_DATA_CLASS_PREFIX))
+      )
+    })
+    .reduce<{
+      [requirementBlockId: string]: HTMLElement
+    }>((acc, node) => {
+      const titleNode = node.querySelector<HTMLElement>(".card-title")
+      const requirementBlockId = Array.from(node.classList)
+        .find((c) => c.startsWith(FORMIO_DATA_CLASS_PREFIX))
+        .split("|RB")
+        .at(-1)
+
+      if (requirementBlockId) {
+        acc[requirementBlockId] = titleNode
+      }
+
+      return acc
+    }, {})
+
+  return requirementBlockAssignmentNodes
 }

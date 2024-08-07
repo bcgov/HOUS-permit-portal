@@ -5,6 +5,7 @@ class PermitCollaborationBlueprint < Blueprinter::Base
   fields :collaboration_type, :collaborator_type, :assigned_requirement_block_id, :created_at, :updated_at
 
   view :base do
+    fields :assigned_requirement_block_name
     association :collaborator, blueprint: CollaboratorBlueprint
   end
 

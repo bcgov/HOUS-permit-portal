@@ -14,6 +14,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   update_revision_requests
                   create_permit_collaboration
                   invite_new_collaborator
+                  remove_collaborator_collaborations
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -286,6 +287,25 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      }
     else
       render_error "permit_application.revision_request_finalize_error"
+    end
+  end
+
+  def remove_collaborator_collaborations
+    authorize @permit_application
+
+    collaborations_to_remove =
+      @permit_application.permit_collaborations.where(
+        collaborator_id: params.require(:collaborator_id),
+        collaborator_type: params.require(:collaborator_type),
+        collaboration_type: params.require(:collaboration_type),
+      )
+
+    if collaborations_to_remove.destroy_all
+      render_success nil,
+                     "permit_application.remove_collaborator_collaborations_success",
+                     { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :extended } }
+    else
+      render_error "permit_application.remove_collaborator_collaborations_error"
     end
   end
 

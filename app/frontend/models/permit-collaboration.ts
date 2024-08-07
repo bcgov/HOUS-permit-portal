@@ -7,6 +7,7 @@ export const PermitCollaborationModel = types.snapshotProcessor(
     id: types.identifier,
     collaborationType: types.enumeration(Object.values(ECollaborationType)),
     collaboratorType: types.enumeration(Object.values(ECollaboratorType)),
+    assignedRequirementBlockName: types.maybeNull(types.string),
     assignedRequirementBlockId: types.maybeNull(types.string),
     collaborator: types.reference(types.late(() => CollaboratorModel)),
     createdAt: types.Date,

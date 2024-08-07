@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { Instance, cast, flow, types } from "mobx-state-tree"
+import { cast, flow, Instance, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -32,6 +32,7 @@ import {
 
 import { format } from "date-fns"
 import { compareSubmissionData } from "../utils/formio-helpers"
+import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
@@ -439,6 +440,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return delegateePermitCollaboration?.collaborator?.user?.id == user.id
       },
+      canUserManageCollaborators(user: IUser, collaborationType: ECollaborationType) {
+        if (collaborationType === ECollaborationType.review) {
+          return !self.isDraft && user.isReviewStaff && user.jurisdiction?.id === self.jurisdiction?.id
+        }
+
+        return self.isDraft && user?.id === self.submitter?.id
+      },
       delegateeUser(collaborationType: ECollaborationType) {
         return self.getCollaborationDelegatee(collaborationType)?.collaborator?.user
       },
@@ -446,6 +454,42 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return (
           self.getCollaborationAssignees(collaborationType)?.map((collaboration) => collaboration.collaborator.user) ??
           []
+        )
+      },
+      getCollaborationUniqueUserCount(collaborationType: ECollaborationType) {
+        return R.uniqBy(
+          (collaboration) => collaboration.collaborator.user.id,
+          self.getCollaborationsByType(collaborationType)
+        ).length
+      },
+    }))
+    .views((self) => ({
+      getSidebarAssigneesList(collaborationType: ECollaborationType) {
+        const assignees = self.getCollaborationAssignees(collaborationType)
+
+        return Object.values(
+          assignees.reduce<
+            Record<
+              string,
+              {
+                collaborator: ICollaborator
+                permitCollaborations: IPermitCollaboration[]
+              }
+            >
+          >((acc, collaboration) => {
+            const collaborator = collaboration.collaborator
+
+            if (!(collaborator.id in acc)) {
+              acc[collaborator.id] = {
+                collaborator,
+                permitCollaborations: [],
+              }
+            }
+
+            acc[collaborator.id].permitCollaborations.push(collaboration)
+
+            return acc
+          }, {})
         )
       },
     }))
@@ -485,12 +529,40 @@ export const PermitApplicationModel = types.snapshotProcessor(
           collaboratorType,
           assignedRequirementBlockId,
         })
-        if (response.ok) {
-          const { data: permitCollaboration } = response.data
-          self.updatePermitCollaboration(permitCollaboration)
-          return self.getPermitCollaboration(permitCollaboration.id)
+
+        if (!response.ok) {
+          return false
         }
-        return false
+
+        const { data: permitCollaboration } = response.data
+
+        if (permitCollaboration.collaboratorType === ECollaboratorType.delegatee) {
+          const existingDelegatee = self.getCollaborationDelegatee(permitCollaboration.collaborationType)
+
+          existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
+        }
+        self.updatePermitCollaboration(permitCollaboration)
+
+        return self.getPermitCollaboration(permitCollaboration.id)
+      }),
+      removeCollaboratorCollaborations: flow(function* (
+        collaboratorId: string,
+        collaboratorType: ECollaboratorType,
+        collaborationType: ECollaborationType
+      ) {
+        const response = yield self.environment.api.removeCollaboratorCollaborationsFromPermitApplication(self.id, {
+          collaboratorId,
+          collaboratorType,
+          collaborationType,
+        })
+
+        if (response.ok) {
+          self.getCollaborationAssignees(collaborationType).forEach((collaboration) => {
+            collaboration.collaborator.id === collaboratorId && self.permitCollaborationMap.delete(collaboration.id)
+          })
+        }
+
+        return response.ok
       }),
       inviteNewCollaborator: flow(function* (
         collaboratorType: ECollaboratorType,

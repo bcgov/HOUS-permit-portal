@@ -36,11 +36,12 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
+import { ChecklistSideBar } from "./checklist-sidebar"
 import {
   BlockCollaboratorAssignmentManagement,
   IRequirementBlockAssignmentNode,
-} from "./block-collaborator-assignment-management"
-import { ChecklistSideBar } from "./checklist-sidebar"
+} from "./collaborator-management/block-collaborator-assignment-management"
+import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
@@ -356,7 +357,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <BrowserSearchPrompt />
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
-                </Button>
+                </Button>{" "}
+                <CollaboratorsSidebar
+                  permitApplication={currentPermitApplication}
+                  collaborationType={ECollaborationType.submission}
+                />
                 <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
                   {t("permitApplication.show.backToInbox")}
@@ -365,6 +370,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             ) : (
               <HStack gap={4}>
                 <BrowserSearchPrompt />
+                <CollaboratorsSidebar
+                  permitApplication={currentPermitApplication}
+                  collaborationType={ECollaborationType.submission}
+                />
                 <Button variant="primary" onClick={handleClickFinishLater}>
                   {t("permitApplication.edit.saveDraft")}
                 </Button>

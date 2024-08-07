@@ -72,6 +72,16 @@ class PermitApplicationPolicy < ApplicationPolicy
     end
   end
 
+  def remove_collaborator_collaborations?
+    permit_application = record
+
+    if permit_application.draft?
+      permit_application.submitter_id == user.id
+    else
+      user.review_staff? && user.jurisdictions.find(permit_application.jurisdiction_id)
+    end
+  end
+
   def invite_new_collaborator?
     create_permit_collaboration?
   end
