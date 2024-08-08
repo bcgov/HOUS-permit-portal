@@ -8,6 +8,7 @@ class PermitCollaboration < ApplicationRecord
   before_validation :set_default_collaboration_type, on: :create
 
   after_save :reindex_permit_application
+  after_destroy :send_unassignment_notification
 
   validates :permit_application_id,
             uniqueness: {
@@ -32,7 +33,7 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def assigned_requirement_block_name
-    permit_application.template_version.requirement_blocks_json.dig(assigned_requirement_block_id, "name")
+    permit_application.template_version.requirement_blocks_json.dig(assigned_requirement_block_id, "name") || ""
   end
 
   def submission_collaboration_assignment_notification_data
@@ -64,9 +65,66 @@ class PermitCollaboration < ApplicationRecord
     }
   end
 
+  def submission_collaboration_unassignment_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_UNASSIGNMENT,
+      "action_text" =>
+        (
+          if delegatee?
+            I18n.t(
+              "notification.permit_collaboration.submission_delegatee_collaboration_unassignment_notification",
+              number: permit_application.number,
+            )
+          else
+            I18n.t(
+              "notification.permit_collaboration.submission_assignee_collaboration_unassignment_notification",
+              number: permit_application.number,
+              requirement_block_name: assigned_requirement_block_name,
+            )
+          end
+        ),
+      "object_data" => {
+        "permit_application_id" => permit_application.id,
+        "collaborator_type" => collaborator_type,
+        "assigned_requirement_block_name" => assigned_requirement_block_name,
+      },
+    }
+  end
+
   def assigned_block_exists?
     # This can be nil if a new template version was published and the requirement block was deleted
     permit_application.template_version.requirement_blocks_json&.key?(assigned_requirement_block_id)
+  end
+
+  def users_to_notify_unassigned
+    users_to_notify = []
+
+    users_to_notify << permit_application.submitter if submission?
+
+    # we only care about users with preference turned on for in app notification as unassigned notification
+    # is not sent via email
+
+    # add delegatee
+    users_to_notify +=
+      permit_application
+        .users_by_collaboration_options(collaboration_type: collaboration_type, collaborator_type: :delegatee)
+        .joins(:preference)
+        .where(preferences: { enable_in_app_collaboration_notification: true })
+
+    # add only assignees who are assigned to same requirement block
+
+    users_to_notify +=
+      permit_application
+        .users_by_collaboration_options(
+          collaboration_type: collaboration_type,
+          collaborator_type: :assignee,
+          assigned_requirement_block_id: requirement_block_id,
+        )
+        .joins(:preference)
+        .where(preferences: { enable_in_app_collaboration_notification: true })
+
+    users_to_notify.uniq
   end
 
   private
@@ -128,5 +186,11 @@ class PermitCollaboration < ApplicationRecord
     elsif collaborator && collaborator.collaboratorable_type == "User"
       self.collaboration_type ||= :submission
     end
+  end
+
+  def send_unassignment_notification
+    return unless submission? && collaborator&.user&.preference&.enable_in_app_collaboration_notification
+
+    NotificationService.publish_permit_collaboration_unassignment_event(self)
   end
 end

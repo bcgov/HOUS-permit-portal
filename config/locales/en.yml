@@ -570,6 +570,8 @@ en:
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
       submission_assignee_collaboration_notification: 'Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}'
+      submission_delegatee_collaboration_unassignment_notification: "You have been removed as a designated submitter for permit application %{number}."
+      submission_assignee_collaboration_unassignment_notification: 'You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'

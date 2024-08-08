@@ -159,6 +159,18 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_permit_collaboration_unassignment_event(permit_collaboration)
+    return unless permit_collaboration.submission?
+
+    collaborator_user_id = permit_collaboration.collaborator.user_id
+
+    notification_user_hash = {
+      collaborator_user_id => permit_collaboration.submission_collaboration_unassignment_notification_data,
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_permit_block_status_ready_event(permit_block_status)
     return unless permit_block_status.ready? && permit_block_status.block_exists?
 
