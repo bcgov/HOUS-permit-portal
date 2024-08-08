@@ -43,6 +43,8 @@ class User < ApplicationRecord
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
+  after_create :create_jurisdiction_collaborator
+  after_save :create_jurisdiction_collaborator, if: -> { saved_change_to_role? || saved_change_to_discarded_at? }
   before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
@@ -116,6 +118,18 @@ class User < ApplicationRecord
 
   def set_collaboration_invitation(permit_collaboration)
     self.collaboration_invitation = { permit_collaboration: permit_collaboration }
+  end
+
+  def create_jurisdiction_collaborator
+    return unless review_staff? && discarded_at.blank?
+
+    jurisdictions.each do |jurisdiction|
+      existing_collaborator = jurisdiction.collaborators.find_by_user_id(id)
+
+      next if existing_collaborator.present?
+
+      jurisdiction.collaborators.create(user: self)
+    end
   end
 
   private

@@ -76,11 +76,14 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
         <HStack justifyContent={"space-between"}>
           <ModelSearchInput
             searchModel={collaboratorStore as ISearch}
-            inputProps={{ w: "194px", placeholder: "Find" }}
+            inputGroupProps={{ w: transitionToInvite ? undefined : "100%" }}
+            inputProps={{ w: transitionToInvite ? "194px" : "100%", placeholder: "Find" }}
           />
-          <Button variant={"secondary"} leftIcon={<Plus />} size={"sm"} fontSize={"sm"} onClick={transitionToInvite}>
-            {t("permitCollaboration.popover.assignment.newContactButton")}
-          </Button>
+          {transitionToInvite && (
+            <Button variant={"secondary"} leftIcon={<Plus />} size={"sm"} fontSize={"sm"} onClick={transitionToInvite}>
+              {t("permitCollaboration.popover.assignment.newContactButton")}
+            </Button>
+          )}
         </HStack>
       </PopoverHeader>
       <PopoverBody p={4}>

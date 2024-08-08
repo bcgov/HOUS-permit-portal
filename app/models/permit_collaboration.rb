@@ -7,6 +7,7 @@ class PermitCollaboration < ApplicationRecord
 
   before_validation :set_default_collaboration_type, on: :create
 
+  after_initialize :set_default_collaboration_type
   after_save :reindex_permit_application
   after_destroy :send_unassignment_notification
 
@@ -149,12 +150,10 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def set_default_collaboration_type
-    return unless collaborator.present?
-
     if collaborator && collaborator.collaboratorable_type == "Jurisdiction"
-      self.collaboration_type ||= :review
+      self.collaboration_type = :review
     elsif collaborator && collaborator.collaboratorable_type == "User"
-      self.collaboration_type ||= :submission
+      self.collaboration_type = :submission
     end
   end
 

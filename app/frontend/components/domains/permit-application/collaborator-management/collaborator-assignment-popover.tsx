@@ -40,7 +40,7 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   collaborationType,
   requirementBlockId,
 }: IProps) {
-  const { userStore } = useMst()
+  const { userStore, collaboratorStore } = useMst()
   const { currentUser } = userStore
   const { t } = useTranslation()
   const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(
@@ -57,12 +57,25 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
 
   const changeScreen = (screen: EAssignmentPopoverScreen) => {
+    // review does have the ability to invite new collaborators. They should already be present for a jurisdiction
+    if (screen === EAssignmentPopoverScreen.collaboratorInvite && collaborationType === ECollaborationType.review) {
+      return
+    }
+
     setCurrentScreen(canManage ? screen : INITIAL_SCREEN)
 
     // This needs to be done as their is a focus loss issue when dynamically
     // changing the screen in the popover, causing close on blur to not work
     contentRef.current?.focus()
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      collaboratorStore.setSearchContext(collaborationType)
+    }
+
+    return () => collaboratorStore.setSearchContext(null)
+  }, [isOpen])
 
   useEffect(() => {
     if (isOpen) {
@@ -137,7 +150,11 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
               onClose={() => changeScreen(EAssignmentPopoverScreen.collaborations)}
               takenCollaboratorIds={existingCollaboratorIds}
               getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-              transitionToInvite={() => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)}
+              transitionToInvite={
+                canManage && collaborationType === ECollaborationType.submission
+                  ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)
+                  : undefined
+              }
             />
           )}
           {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && (
