@@ -60,7 +60,7 @@ class PermitApplication < ApplicationRecord
     PermitApplication::SubmissionDataService.new(self).formatted_submission_data(current_user: current_user)
   end
 
-  def users_by_collaboration_options(collaboration_type:, collaborator_type: nil)
+  def users_by_collaboration_options(collaboration_type:, collaborator_type: nil, assigned_requirement_block_id: nil)
     base_where_clause = {
       collaborations: {
         permit_collaborations: {
@@ -73,6 +73,10 @@ class PermitApplication < ApplicationRecord
     base_where_clause[:collaborations][:permit_collaborations][
       :collaborator_type
     ] = collaborator_type if collaborator_type.present?
+
+    base_where_clause[:collaborations][:permit_collaborations][
+      :assigned_requirement_block_id
+    ] = assigned_requirement_block_id if assigned_requirement_block_id.present?
 
     User.joins(collaborations: :permit_collaborations).where(base_where_clause).distinct
   end

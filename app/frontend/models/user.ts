@@ -143,4 +143,7 @@ export interface IPreference {
   enableEmailApplicationViewNotification: boolean
   enableInAppApplicationRevisionsRequestNotification: boolean
   enableEmailApplicationRevisionsRequestNotification: boolean
+
+  enableInAppCollaborationNotification: boolean
+  enableEmailCollaborationNotification: boolean
 }

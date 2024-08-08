@@ -381,6 +381,7 @@ export enum ENotificationActionType {
   scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
   submissionCollaborationAssignment = "submission_collaboration_assignment",
+  submissionCollaborationUnassignment = "submission_collaboration_unassignment",
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",

@@ -1313,6 +1313,7 @@ const options = {
             applicationSubmitted: "Application submitted to jurisdiction",
             applicationViewed: "Application viewed by jurisdiction",
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
+            collaboration: "Collaboration",
           },
           inApp: "In-App",
           email: "Email",

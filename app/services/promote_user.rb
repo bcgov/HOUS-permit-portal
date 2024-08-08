@@ -14,20 +14,22 @@ class PromoteUser
   private
 
   def merge_users
-    invited_user_params =
-      invited_user.slice(
-        %i[
-          role
-          invitation_token
-          invitation_created_at
-          invitation_sent_at
-          invitation_accepted_at
-          invitation_limit
-          invited_by_type
-          invited_by_id
-          invitations_count
-        ],
-      )
+    accepted_params = %i[
+      invitation_token
+      invitation_created_at
+      invitation_sent_at
+      invitation_accepted_at
+      invitation_limit
+      invited_by_type
+      invited_by_id
+      invitations_count
+    ]
+
+    # only allow role to be upgraded, and not downgraded to submitter
+    accepted_params << :role unless invited_user.submitter?
+
+    invited_user_params = invited_user.slice(accepted_params)
+
     jurisdiction_ids = existing_user.jurisdiction_ids + invited_user.jurisdiction_ids
     existing_user.assign_attributes(invited_user_params.merge({ jurisdiction_ids: }))
     if existing_user.valid?

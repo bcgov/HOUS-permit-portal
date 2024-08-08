@@ -52,13 +52,28 @@ class PermitBlockStatus < ApplicationRecord
 
     users_to_notify << permit_application.submitter if submission?
 
+    # add delegatee
     users_to_notify +=
       permit_application.users_by_collaboration_options(
         collaboration_type: collaboration_type,
         collaborator_type: :delegatee,
       )
 
+    # add only assignees who are assigned to same requirement block
+
+    users_to_notify +=
+      permit_application.users_by_collaboration_options(
+        collaboration_type: collaboration_type,
+        collaborator_type: :assignee,
+        assigned_requirement_block_id: requirement_block_id,
+      )
+
     users_to_notify.uniq
+  end
+
+  def block_exists?
+    # This can be nil if a new template version was published and the requirement block was deleted
+    permit_application.template_version.requirement_blocks_json&.key?(requirement_block_id)
   end
 
   private
@@ -68,13 +83,8 @@ class PermitBlockStatus < ApplicationRecord
 
     user_ids_to_send = users_to_notify_status_ready.pluck(:id)
 
-    if submission?
-      user_ids_to_send +=
-        permit_application.users_by_collaboration_options(
-          collaboration_type: :submission,
-          collaborator_type: :assignee,
-        ).pluck(:id)
-    else
+    if review?
+      # as all review staff have access to status we send the status update websocket regardless if they are a collaborator
       user_ids_to_send +=
         permit_application
           .jurisdiction
@@ -96,11 +106,13 @@ class PermitBlockStatus < ApplicationRecord
     return unless saved_change_to_status? && ready?
 
     users_to_notify_status_ready.each do |user|
+      next unless user.preference&.enable_email_collaboration_notification
+
       PermitHubMailer.notify_block_status_ready(
         permit_block_status: self,
         user:,
         status_set_by: set_by_user,
-      ).deliver_later
+      )&.deliver_later
     end
   end
 

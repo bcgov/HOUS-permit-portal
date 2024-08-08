@@ -96,7 +96,7 @@ class PermitCollaboration::CollaborationManagementService
         user: user,
       ).deliver_later
     else
-      PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration).deliver_later
+      PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration)&.deliver_later
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_02_180316) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_07_205749) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -353,6 +353,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_02_180316) do
               default: true
     t.boolean "enable_in_app_application_revisions_request_notification",
               default: true
+    t.boolean "enable_in_app_collaboration_notification", default: true
+    t.boolean "enable_email_collaboration_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
