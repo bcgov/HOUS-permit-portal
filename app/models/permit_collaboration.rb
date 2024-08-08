@@ -97,36 +97,6 @@ class PermitCollaboration < ApplicationRecord
     permit_application.template_version.requirement_blocks_json&.key?(assigned_requirement_block_id)
   end
 
-  def users_to_notify_unassigned
-    users_to_notify = []
-
-    users_to_notify << permit_application.submitter if submission?
-
-    # we only care about users with preference turned on for in app notification as unassigned notification
-    # is not sent via email
-
-    # add delegatee
-    users_to_notify +=
-      permit_application
-        .users_by_collaboration_options(collaboration_type: collaboration_type, collaborator_type: :delegatee)
-        .joins(:preference)
-        .where(preferences: { enable_in_app_collaboration_notification: true })
-
-    # add only assignees who are assigned to same requirement block
-
-    users_to_notify +=
-      permit_application
-        .users_by_collaboration_options(
-          collaboration_type: collaboration_type,
-          collaborator_type: :assignee,
-          assigned_requirement_block_id: requirement_block_id,
-        )
-        .joins(:preference)
-        .where(preferences: { enable_in_app_collaboration_notification: true })
-
-    users_to_notify.uniq
-  end
-
   private
 
   def reindex_permit_application
