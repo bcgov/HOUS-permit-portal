@@ -37,7 +37,11 @@ class PermitCollaboration::CollaborationManagementService
               )
       end
 
-      send_submission_collaboration_email!(permit_collaboration) if permit_collaboration.submission?
+      if permit_collaboration.submission?
+        send_submission_collaboration_email!(permit_collaboration)
+      else
+        PermitHubMailer.notify_permit_collaboration(permit_collaboration: permit_collaboration)&.deliver_later
+      end
 
       send_collaboration_assignment_notification(permit_collaboration)
 

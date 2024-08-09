@@ -82,10 +82,10 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
             color={"text.primary"}
           />
         </Flex>
-        <HStack justifyContent={"space-between"}>
+        <HStack justifyContent={"space-between"} spacing={4}>
           <ModelSearchInput
             searchModel={collaboratorStore as ISearch}
-            inputGroupProps={{ w: transitionToInvite ? undefined : "100%" }}
+            inputGroupProps={{ w: transitionToInvite ? "initial" : "100%" }}
             inputProps={{ w: transitionToInvite ? "194px" : "100%", placeholder: "Find" }}
           />
           {transitionToInvite && (
