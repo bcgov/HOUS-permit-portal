@@ -109,5 +109,15 @@ const StatusSelect = observer(function StatusSelect({
     }
   }
 
-  return <BlockStatusSelect value={status} onChange={onChange} />
+  const isDisabled =
+    collaborationType === ECollaborationType.review ? !permitApplication.isSubmitted : !permitApplication.isDraft
+
+  return (
+    <BlockStatusSelect
+      value={status}
+      onChange={onChange}
+      isSelectionDisabled={isDisabled}
+      isTriggerDisabled={isDisabled}
+    />
+  )
 })
