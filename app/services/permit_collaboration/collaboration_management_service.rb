@@ -37,10 +37,9 @@ class PermitCollaboration::CollaborationManagementService
               )
       end
 
-      if permit_collaboration.submission?
-        send_submission_collaboration_email!(permit_collaboration)
-        send_submission_collaboration_notification(permit_collaboration)
-      end
+      send_submission_collaboration_email!(permit_collaboration) if permit_collaboration.submission?
+
+      send_collaboration_assignment_notification(permit_collaboration)
 
       permit_collaboration
     end
@@ -102,8 +101,8 @@ class PermitCollaboration::CollaborationManagementService
 
   private
 
-  def send_submission_collaboration_notification(permit_collaboration)
-    NotificationService.publish_permit_collaboration_event(permit_collaboration)
+  def send_collaboration_assignment_notification(permit_collaboration)
+    NotificationService.publish_permit_collaboration_assignment_event(permit_collaboration)
   end
 
   def build_permit_collaboration(collaborator_id:, collaborator_type:, assigned_requirement_block_id: nil)
