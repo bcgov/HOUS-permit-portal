@@ -16,6 +16,7 @@ import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/p
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
 import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
+import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
 import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
@@ -211,13 +212,22 @@ export const ReviewPermitApplicationScreen = observer(() => {
               renderTopButtons={() => {
                 return (
                   !revisionMode && (
-                    <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
-                      {currentPermitApplication.isRevisionsRequested
-                        ? t("permitApplication.show.viewRevisionRequests")
-                        : t("permitApplication.show.requestRevisions")}{" "}
-                      {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
-                        `(${currentPermitApplication.latestRevisionRequests.length})`}
-                    </Button>
+                    <HStack spacing={6}>
+                      <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
+                        {currentPermitApplication.isRevisionsRequested
+                          ? t("permitApplication.show.viewRevisionRequests")
+                          : t("permitApplication.show.requestRevisions")}{" "}
+                        {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
+                          `(${currentPermitApplication.latestRevisionRequests.length})`}
+                      </Button>
+                      <CollaboratorsSidebar
+                        permitApplication={currentPermitApplication}
+                        collaborationType={ECollaborationType.review}
+                        triggerButtonProps={{
+                          variant: "secondary",
+                        }}
+                      />
+                    </HStack>
                   )
                 )
               }}

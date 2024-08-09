@@ -7,6 +7,7 @@ import {
   Avatar,
   Box,
   Button,
+  ButtonProps,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -44,11 +45,13 @@ import { Reinvite } from "./reinvite"
 interface IProps {
   permitApplication: IPermitApplication
   collaborationType: ECollaborationType
+  triggerButtonProps?: Partial<ButtonProps>
 }
 
 export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   collaborationType,
   permitApplication,
+  triggerButtonProps,
 }: IProps) {
   const { t } = useTranslation()
   const { userStore } = useMst()
@@ -59,7 +62,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
   let canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
   return (
     <>
-      <Button leftIcon={<Users />} variant={"primary"} onClick={onOpen}>
+      <Button leftIcon={<Users />} variant={"primary"} onClick={onOpen} {...triggerButtonProps}>
         {t("permitCollaboration.sidebar.triggerButton", {
           count: permitApplication.getCollaborationUniqueUserCount(collaborationType),
         })}
@@ -77,7 +80,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
 
           <DrawerBody as={Stack} spacing={8}>
             <Text color={"text.secondary"} mt={6}>
-              {t("permitCollaboration.sidebar.description")}
+              {t(`permitCollaboration.sidebar.description.${collaborationType}`)}
             </Text>
             <Stack borderLeft={"4px solid"} borderColor={"theme.blueAlt"} px={6} py={3} bg={"theme.blueLight"}>
               <Text fontSize={"lg"} fontWeight={700} color={"theme.blueAlt"}>
@@ -87,7 +90,7 @@ export const CollaboratorsSidebar = observer(function CollaboratorsSidebar({
               <Text fontSize={"sm"}>
                 {
                   <Trans
-                    i18nKey={"permitCollaboration.sidebar.howItWorksDescription"}
+                    i18nKey={`permitCollaboration.sidebar.howItWorksDescription.${collaborationType}`}
                     t={t}
                     components={{
                       1: <br />,
@@ -125,10 +128,11 @@ const DesignatedSubmitters = observer(function DesignatedSubmitters({
 
   let name = delegateeCollaboration?.collaborator?.user?.name
   let organization = delegateeCollaboration?.collaborator?.user?.organization
+  const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
   return (
     <Stack spacing={2}>
       <Text as={"h3"} fontSize={"md"} fontWeight={700}>
-        {t("permitCollaboration.sidebar.designatedSubmitters")}
+        {t(`permitCollaboration.sidebar.designated${isSubmissionCollaboration ? "Submitters" : "Reviewers"}`)}
       </Text>
       <CollaborationCard
         rightElement={
@@ -142,23 +146,25 @@ const DesignatedSubmitters = observer(function DesignatedSubmitters({
         onReinvite={canManage ? permitApplication.reinvitePermitCollaboration : undefined}
         permitCollaboration={delegateeCollaboration}
       />
-      <Text fontSize={"sm"} color={"text.secondary"}>
-        <Trans
-          t={t}
-          i18nKey={
-            organization
-              ? "permitCollaboration.sidebar.authorCanSubmitWithOrganization"
-              : "permitCollaboration.sidebar.authorCanSubmit"
-          }
-          components={{
-            1: <Text as={"span"} fontWeight={700} />,
-          }}
-          values={{
-            author: name,
-            organization: organization,
-          }}
-        />
-      </Text>
+      {isSubmissionCollaboration && (
+        <Text fontSize={"sm"} color={"text.secondary"}>
+          <Trans
+            t={t}
+            i18nKey={
+              organization
+                ? "permitCollaboration.sidebar.authorCanSubmitWithOrganization"
+                : "permitCollaboration.sidebar.authorCanSubmit"
+            }
+            components={{
+              1: <Text as={"span"} fontWeight={700} />,
+            }}
+            values={{
+              author: name,
+              organization: organization,
+            }}
+          />
+        </Text>
+      )}
     </Stack>
   )
 })

@@ -40,7 +40,7 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
 
   const changeScreen = (screen: TDesignatedSubmitterAssignmentPopoverScreen) => {
-    if (!canManage) {
+    if (!canManage || (!isSubmissionCollaboration && screen === EAssignmentPopoverScreen.collaboratorInvite)) {
       return
     }
 
@@ -86,6 +86,7 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
   const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
     permitApplication.inviteNewCollaborator(ECollaboratorType.delegatee, user)
 
+  const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
   return (
     <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onPopoverClose} onOpen={onOpen} strategy={"fixed"}>
       <PopoverTrigger>
@@ -116,7 +117,9 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
             onClose={onClose}
             takenCollaboratorIds={existingCollaboratorIds}
             getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-            transitionToInvite={() => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)}
+            transitionToInvite={
+              isSubmissionCollaboration ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite) : undefined
+            }
             takenCollaboratorStrategy={"include"}
             onUnselect={async () => {
               if (!existingDelegateeCollaboration) return
@@ -124,9 +127,10 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
               const response = await permitApplication.unassignPermitCollaboration(existingDelegateeCollaboration.id)
               response && onClose()
             }}
+            collaborationType={collaborationType}
           />
         )}
-        {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && (
+        {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && isSubmissionCollaboration && (
           <CollaboratorInvite
             onClose={() => changeScreen(INITIAL_SCREEN)}
             onInviteSuccess={onClose}

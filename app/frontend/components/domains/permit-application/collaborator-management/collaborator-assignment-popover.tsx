@@ -71,14 +71,6 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
 
   useEffect(() => {
     if (isOpen) {
-      collaboratorStore.setSearchContext(collaborationType)
-    }
-
-    return () => collaboratorStore.setSearchContext(null)
-  }, [isOpen])
-
-  useEffect(() => {
-    if (isOpen) {
       changeScreen(INITIAL_SCREEN)
       setOpenAssignmentConfirmationModals(new Set())
     }
@@ -155,16 +147,19 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
                   ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)
                   : undefined
               }
+              collaborationType={collaborationType}
             />
           )}
-          {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && (
-            <CollaboratorInvite
-              onInviteSuccess={() => changeScreen(EAssignmentPopoverScreen.collaborations)}
-              onClose={() => changeScreen(EAssignmentPopoverScreen.collaborationAssignment)}
-              onInvite={onInviteCollaborator}
-              confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
-            />
-          )}
+          {canManage &&
+            currentScreen === EAssignmentPopoverScreen.collaboratorInvite &&
+            collaborationType === ECollaborationType.submission && (
+              <CollaboratorInvite
+                onInviteSuccess={() => changeScreen(EAssignmentPopoverScreen.collaborations)}
+                onClose={() => changeScreen(EAssignmentPopoverScreen.collaborationAssignment)}
+                onInvite={onInviteCollaborator}
+                confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
+              />
+            )}
         </PopoverContent>
       </Portal>
     </Popover>
