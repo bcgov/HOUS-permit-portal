@@ -84,7 +84,6 @@ export const JurisdictionSelect = observer(function ({
         onChange(option?.value)
       }}
       value={selectedOption}
-      defaultValue={selectedOption}
       components={{
         Control,
         Option,
