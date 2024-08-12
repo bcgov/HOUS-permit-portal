@@ -7,8 +7,8 @@ class PermitApplication < ApplicationRecord
 
   SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter]
 
-  searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
-             word_start: %i[number nickname full_address permit_classifications submitter status]
+  searchkick searchable: %i[number nickname full_address permit_classifications submitter status review_delegatee_name],
+             word_start: %i[number nickname full_address permit_classifications submitter status review_delegatee_name]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
@@ -133,6 +133,8 @@ class PermitApplication < ApplicationRecord
       using_current_template_version: using_current_template_version,
       user_ids_with_submission_edit_permissions:
         [submitter.id] + users_by_collaboration_options(collaboration_type: :submission).pluck(:id),
+      review_delegatee_name:
+        users_by_collaboration_options(collaboration_type: :review, collaborator_type: :delegatee).first&.name,
     }
   end
 
