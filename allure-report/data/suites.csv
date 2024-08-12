@@ -1,6 +1,0 @@
-"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
-"passed","Sun Jul 28 15:01:07 PDT 2024","Sun Jul 28 15:02:31 PDT 2024","83733","","Login As Review Manager","","Login As Review Manager"," Login"," Login",""
-"broken","Sun Jul 28 14:57:23 PDT 2024","Sun Jul 28 14:57:28 PDT 2024","5240","","API tests","","API tests","API test","API test",""
-"passed","Sun Jul 28 14:58:36 PDT 2024","Sun Jul 28 14:59:41 PDT 2024","64150","","Login As Regional Review Manager","","Login As Regional Review Manager"," Login"," Login",""
-"passed","Sun Jul 28 15:00:04 PDT 2024","Sun Jul 28 15:01:05 PDT 2024","61615","","Login As Submitter","","Login As Submitter"," Login"," Login",""
-"failed","Sun Jul 28 14:59:42 PDT 2024","Sun Jul 28 15:00:02 PDT 2024","19772","","Login As Super Admin","","Login As Super Admin"," Login"," Login",""

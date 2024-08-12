@@ -59,3 +59,8 @@ node_modules
 deleteme.*
 
 /devops/docker/**/*.tar.gz
+
+/allure-report/
+/allure-results/
+/cypress/downloads/
+/cypress/screenshots/
