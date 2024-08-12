@@ -12,6 +12,7 @@ export class CustomLinkBlot extends Inline {
 
     node.setAttribute("href", value?.href)
     node.setAttribute("target", "_blank")
+    node.setAttribute("rel", "noopener noreferrer")
 
     Object.getOwnPropertyNames(value).forEach((attributeName) => {
       if (attributeName.includes("data-")) {
@@ -25,6 +26,8 @@ export class CustomLinkBlot extends Inline {
   static value(node: HTMLAnchorElement) {
     const val = {
       href: node.getAttribute("href"),
+      target: node.getAttribute("target"),
+      rel: node.getAttribute("rel"),
     }
 
     node.getAttributeNames().forEach((attributeName) => {
