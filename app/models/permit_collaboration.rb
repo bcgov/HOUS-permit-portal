@@ -7,6 +7,7 @@ class PermitCollaboration < ApplicationRecord
 
   before_validation :set_default_collaboration_type, on: :create
 
+  after_initialize :set_default_collaboration_type
   after_save :reindex_permit_application
   after_destroy :send_unassignment_notification
 
@@ -36,25 +37,47 @@ class PermitCollaboration < ApplicationRecord
     permit_application.template_version.requirement_blocks_json.dig(assigned_requirement_block_id, "name") || ""
   end
 
-  def submission_collaboration_assignment_notification_data
+  def collaboration_assignment_notification_data
     {
       "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_ASSIGNMENT,
+      "action_type" =>
+        (
+          if submission?
+            Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_ASSIGNMENT
+          else
+            Constants::NotificationActionTypes::REVIEW_COLLABORATION_ASSIGNMENT
+          end
+        ),
       "action_text" =>
         (
           if delegatee?
-            I18n.t(
-              "notification.permit_collaboration.submission_delegatee_collaboration_notification",
-              number: permit_application.number,
-              author_name: permit_application.submitter.name,
-            )
+            if submission?
+              I18n.t(
+                "notification.permit_collaboration.submission_delegatee_collaboration_notification",
+                number: permit_application.number,
+                author_name: permit_application.submitter.name,
+              )
+            else
+              I18n.t(
+                "notification.permit_collaboration.review_delegatee_collaboration_notification",
+                number: permit_application.number,
+              )
+            end
           else
-            I18n.t(
-              "notification.permit_collaboration.submission_assignee_collaboration_notification",
-              number: permit_application.number,
-              requirement_block_name: assigned_requirement_block_name,
-              author_name: permit_application.submitter.name,
-            )
+            if submission?
+              I18n.t(
+                "notification.permit_collaboration.submission_assignee_collaboration_notification",
+                number: permit_application.number,
+                requirement_block_name: assigned_requirement_block_name,
+                author_name: permit_application.submitter.name,
+              )
+            else
+              I18n.t(
+                "notification.permit_collaboration.review_assignee_collaboration_notification",
+                number: permit_application.number,
+                requirement_block_name: assigned_requirement_block_name,
+              )
+            end
           end
         ),
       "object_data" => {
@@ -65,20 +88,27 @@ class PermitCollaboration < ApplicationRecord
     }
   end
 
-  def submission_collaboration_unassignment_notification_data
+  def collaboration_unassignment_notification_data
     {
       "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_UNASSIGNMENT,
+      "action_type" =>
+        (
+          if submission?
+            Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_UNASSIGNMENT
+          else
+            Constants::NotificationActionTypes::REVIEW_COLLABORATION_UNASSIGNMENT
+          end
+        ),
       "action_text" =>
         (
           if delegatee?
             I18n.t(
-              "notification.permit_collaboration.submission_delegatee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.#{collaboration_type.to_s}_delegatee_collaboration_unassignment_notification",
               number: permit_application.number,
             )
           else
             I18n.t(
-              "notification.permit_collaboration.submission_assignee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.#{collaboration_type.to_s}_assignee_collaboration_unassignment_notification",
               number: permit_application.number,
               requirement_block_name: assigned_requirement_block_name,
             )
@@ -149,17 +179,15 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def set_default_collaboration_type
-    return unless collaborator.present?
-
     if collaborator && collaborator.collaboratorable_type == "Jurisdiction"
-      self.collaboration_type ||= :review
+      self.collaboration_type = :review
     elsif collaborator && collaborator.collaboratorable_type == "User"
-      self.collaboration_type ||= :submission
+      self.collaboration_type = :submission
     end
   end
 
   def send_unassignment_notification
-    return unless submission? && collaborator&.user&.preference&.enable_in_app_collaboration_notification
+    return unless collaborator&.user&.preference&.enable_in_app_collaboration_notification
 
     NotificationService.publish_permit_collaboration_unassignment_event(self)
   end

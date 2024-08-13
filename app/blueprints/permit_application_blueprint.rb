@@ -33,6 +33,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
     include_view :base
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    # only the delegatee is needed for the inbox screen
+    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base do |pa, _options|
+      pa.permit_collaborations.where(collaboration_type: :review, collaborator_type: :delegatee)
+    end
     association :submitter, blueprint: UserBlueprint, view: :minimal
   end
 
@@ -56,11 +60,14 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
+
+    # TODO: filter out data based on collaborator/user permissions
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
     association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
+    # TODO: filter out data based on collaborator/user permissions
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
   end
 

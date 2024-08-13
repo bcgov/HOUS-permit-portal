@@ -82,15 +82,25 @@ export const NotificationStoreModel = types
           },
         ]
       } else if (
-        notification.actionType === ENotificationActionType.submissionCollaborationAssignment ||
-        notification.actionType === ENotificationActionType.submissionCollaborationUnassignment
+        [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.submissionCollaborationUnassignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationUnassignment,
+        ].includes(notification.actionType)
       ) {
         const collaborationData = objectData as IPermitCollaborationNotificationObjectData
-        return notification.actionType === ENotificationActionType.submissionCollaborationAssignment
+        return [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+        ].includes(notification.actionType)
           ? [
               {
                 text: t("ui.show"),
-                href: `/permit-applications/${collaborationData.permitApplicationId}/edit`,
+                href:
+                  notification.actionType === ENotificationActionType.submissionCollaborationAssignment
+                    ? `/permit-applications/${collaborationData.permitApplicationId}/edit`
+                    : `/permit-applications/${collaborationData.permitApplicationId}`,
               },
             ]
           : []

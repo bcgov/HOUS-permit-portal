@@ -9,7 +9,8 @@ import { EPermitBlockStatus } from "../../../../types/enums"
 interface IProps {
   value: EPermitBlockStatus | undefined
   onChange: (value: EPermitBlockStatus) => void
-  isDisabled?: boolean
+  isTriggerDisabled?: boolean
+  isSelectionDisabled?: boolean
 }
 
 const statuses = Object.values(EPermitBlockStatus)
@@ -23,7 +24,8 @@ const statusColors = {
 export const BlockStatusSelect = observer(function BlockStatusSelect({
   value = EPermitBlockStatus.draft,
   onChange,
-  isDisabled,
+  isSelectionDisabled,
+  isTriggerDisabled,
 }: IProps) {
   const { t } = useTranslation()
   const btnRef = useRef<HTMLButtonElement>()
@@ -60,9 +62,6 @@ export const BlockStatusSelect = observer(function BlockStatusSelect({
           px={2}
           py={0}
           h={"fit-content"}
-          _disabled={{
-            bg: "greys.grey10",
-          }}
           border={"1px solid"}
           borderColor="border.base"
           bg={statusColors[value]}
@@ -71,6 +70,7 @@ export const BlockStatusSelect = observer(function BlockStatusSelect({
           }}
           rightIcon={<CaretDown />}
           onClick={(e) => e.stopPropagation()}
+          isDisabled={isTriggerDisabled}
         >
           {getLabel(value)}
         </MenuButton>
@@ -96,7 +96,7 @@ export const BlockStatusSelect = observer(function BlockStatusSelect({
                 onClick={() => onChange(status)}
                 aria-selected={value === status}
                 p={2}
-                isDisabled={isDisabled}
+                isDisabled={isSelectionDisabled}
               >
                 {getLabel(status)}
               </MenuItem>

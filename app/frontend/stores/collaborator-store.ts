@@ -7,7 +7,7 @@ import { withRootStore } from "../lib/with-root-store"
 import { CollaboratorModel, ICollaborator } from "../models/collaborator"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IUser } from "../models/user"
-import { ECollaboratorableType } from "../types/enums"
+import { ECollaborationType, ECollaboratorableType } from "../types/enums"
 import { TSearchParams } from "../types/types"
 
 export const CollaboratorStoreModel = types
@@ -15,6 +15,7 @@ export const CollaboratorStoreModel = types
     types.model("CollaboratorStore", {
       collaboratorMap: types.map(CollaboratorModel),
       collaboratorSearchList: types.array(types.reference(CollaboratorModel)),
+      searchContext: types.maybeNull(types.enumeration(Object.values(ECollaborationType))),
     }),
     createSearchModel<never>("searchCollaborators", undefined, true)
   )
@@ -79,6 +80,9 @@ export const CollaboratorStoreModel = types
     addCollaborator(collaborator: ICollaborator) {
       self.collaboratorMap.put(collaborator)
     },
+    setSearchContext(context: ECollaborationType | null) {
+      self.searchContext = context
+    },
   }))
   .actions((self) => ({
     searchCollaborators: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -98,7 +102,10 @@ export const CollaboratorStoreModel = types
         perPage: opts?.countPerPage ?? self.countPerPage,
       } as TSearchParams<never, never>
 
-      const response = yield self.environment.api.fetchCollaboratorsByCollaboratorable(currentUser.id, searchParams)
+      const response = yield self.environment.api.fetchCollaboratorsByCollaboratorable(
+        self.searchContext === ECollaborationType.review ? currentUser.jurisdiction?.id : currentUser.id,
+        searchParams
+      )
 
       if (response.ok) {
         self.mergeUpdateAll(response.data.data, "collaboratorMap")

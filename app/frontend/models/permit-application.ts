@@ -462,7 +462,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       canUserManageCollaborators(user: IUser, collaborationType: ECollaborationType) {
         if (collaborationType === ECollaborationType.review) {
-          return !self.isDraft && user.isReviewStaff && user.jurisdiction?.id === self.jurisdiction?.id
+          return !self.isDraft && user.isReviewStaff
         }
 
         return self.isDraft && user?.id === self.submitter?.id
