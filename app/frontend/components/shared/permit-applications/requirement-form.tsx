@@ -177,7 +177,7 @@ export const RequirementForm = observer(
 
     const handleOpenStepCode = async (_event) => {
       await triggerSave?.()
-      navigate("step-code", { state: { background: location } })
+      navigate("step-code", { state: { enableStepCodeRoute: true } })
     }
 
     const handleOpenContactAutofill = async (event) => {
@@ -392,7 +392,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-            can't be mutated*/
+                                                                                                            can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
