@@ -4,6 +4,13 @@
 # or operating system, you probably want to add a global ignore instead:
 #   git config --global core.excludesfile '~/.gitignore_global'
 
+# Force LF line endings for all Ruby files
+*.rb text eol=lf
+# Force LF line endings for shell scripts
+*.sh text eol=lf
+# Automatically normalize text files
+* text=auto
+
 # Ignore bundler config.
 /.bundle
 
