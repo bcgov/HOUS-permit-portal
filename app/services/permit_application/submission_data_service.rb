@@ -61,13 +61,7 @@ class PermitApplication::SubmissionDataService
 
     permissions = permit_application.submission_requirement_block_edit_permissions(user_id: user.id)
 
-    if permissions == :all ||
-         (
-           permit_application.submitted? && user.review_staff? &&
-             user.jurisdictions.find_by(id: permit_application.jurisdiction_id).present?
-         )
-      return formatted_data
-    end
+    return formatted_data if permissions == :all
 
     return {} if permissions.blank?
 

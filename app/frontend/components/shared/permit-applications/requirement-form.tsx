@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import { ECollaborationType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -67,6 +68,11 @@ export const RequirementForm = observer(
     const boxRef = useRef<HTMLDivElement>(null)
     const { userStore } = useMst()
     const { currentUser } = userStore
+    const userShouldSeeApplicationDiff =
+      permitApplication.shouldShowNewVersionWarning &&
+      (currentUser?.id === permitApplication.submitter?.id ||
+        currentUser?.id ===
+          permitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
@@ -97,7 +103,7 @@ export const RequirementForm = observer(
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (!usingCurrentTemplateVersion && currentUser.shouldSeeApplicationDiff) {
+      if (!usingCurrentTemplateVersion && userShouldSeeApplicationDiff) {
         permitApplication.fetchDiff()
       }
     }, [usingCurrentTemplateVersion])
@@ -304,6 +310,7 @@ export const RequirementForm = observer(
         permitApplication.updateVersion()
       }
     }
+    const showVersionDiffContactWarning = permitApplication.shouldShowNewVersionWarning && !userShouldSeeApplicationDiff
     return (
       <>
         <Flex
@@ -334,6 +341,7 @@ export const RequirementForm = observer(
           )}
           <ErrorsBox data={errorBoxData} />
           {permitApplication.shouldShowApplicationDiff(isEditing) &&
+            userShouldSeeApplicationDiff &&
             (permitApplication.diff ? (
               <CompareRequirementsBox
                 data={infoBoxData}
@@ -356,6 +364,9 @@ export const RequirementForm = observer(
             />
           )}
 
+          {showVersionDiffContactWarning && (
+            <CustomMessageBox description={t("permitApplication.show.versionDiffContactWarning")} status="warning" />
+          )}
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
@@ -370,6 +381,7 @@ export const RequirementForm = observer(
               status="info"
             />
           )}
+
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
@@ -383,7 +395,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
