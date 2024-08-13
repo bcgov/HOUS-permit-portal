@@ -5,8 +5,8 @@ class PermitApplication::SubmissionDataService
     @permit_application = permit_application
   end
 
-  def formatted_submission_data(current_user:)
-    submission_data = permit_application.submission_data
+  def formatted_submission_data(current_user:, submission_data: nil)
+    submission_data ||= permit_application.submission_data
 
     filtered_submission =
       filter_submission_data_based_on_user_permissions(submission_data: submission_data, user: current_user)

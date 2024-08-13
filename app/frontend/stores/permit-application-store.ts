@@ -232,9 +232,9 @@ export const PermitApplicationStoreModel = types
       }
       return response.ok
     }),
-    fetchPermitApplication: flow(function* (id: string) {
+    fetchPermitApplication: flow(function* (id: string, review?: boolean) {
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
-      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
+      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id, review)
       if (ok && response.data) {
         const permitApplication = response.data
 

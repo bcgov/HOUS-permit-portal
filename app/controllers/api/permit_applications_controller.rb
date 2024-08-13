@@ -338,7 +338,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
   private
 
   def show_blueprint_view_for(user)
-    user.review_staff? ? :jurisdiction_review_extended : :extended
+    if params[:review] && user.review_staff?
+      :jurisdiction_review_extended
+    else
+      :extended
+    end
   end
 
   def set_permit_application
