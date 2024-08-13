@@ -81,14 +81,29 @@ export const NotificationStoreModel = types
             )}`,
           },
         ]
-      } else if (notification.actionType === ENotificationActionType.submissionCollaborationAssignment) {
+      } else if (
+        [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.submissionCollaborationUnassignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationUnassignment,
+        ].includes(notification.actionType)
+      ) {
         const collaborationData = objectData as IPermitCollaborationNotificationObjectData
         return [
-          {
-            text: t("ui.show"),
-            href: `/permit-applications/${collaborationData.permitApplicationId}/edit`,
-          },
-        ]
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+        ].includes(notification.actionType)
+          ? [
+              {
+                text: t("ui.show"),
+                href:
+                  notification.actionType === ENotificationActionType.submissionCollaborationAssignment
+                    ? `/permit-applications/${collaborationData.permitApplicationId}/edit`
+                    : `/permit-applications/${collaborationData.permitApplicationId}`,
+              },
+            ]
+          : []
       } else if (notification.actionType === ENotificationActionType.permitBlockStatusReady) {
         const collaborationData = objectData as IPermitBlockStatusReadyNotificationObjectData
         return [

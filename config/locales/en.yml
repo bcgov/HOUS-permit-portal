@@ -563,16 +563,22 @@ en:
       new_version_notification: 'A new version of "%{template_label}" has been published'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
     permit_application:
-      submission_notification: "Your application %{number} has been recieved by %{jurisdiction_name} and is pending review."
-      resubmission_notification: "Your revised application %{number} has been recieved by %{jurisdiction_name} and is pending review."
+      submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
+      resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
       submission_assignee_collaboration_notification: 'Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}'
+      review_delegatee_collaboration_notification: "You have been assigned as a designated reviewer for permit application %{number}."
+      review_assignee_collaboration_notification: 'You have been assigned to review requirement “%{requirement_block_name}” for permit application %{number}'
+      submission_delegatee_collaboration_unassignment_notification: "You have been removed as a designated submitter for permit application %{number}."
+      submission_assignee_collaboration_unassignment_notification: 'You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
+      review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
+      review_assignee_collaboration_unassignment_notification: 'You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
     permit_block_status:
-      status_read_by_user: "Requirement “%{requirement_block_name}” status set to ready by %{setter_name} for permit application %{number}"
-      status_ready_no_user: "Requirement “%{requirement_block_name}” status set to ready for permit application %{number}"
+      status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
+      status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

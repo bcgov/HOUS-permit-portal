@@ -9,7 +9,7 @@
           <p>Hello <%= @resource.email %>!</p>
 
           <p>You have been invited to join the BC Building Permit Hub
-            app <%= @resource.collaboration_invitation[:permit_collaboration].present? ? " to collaborate on a permit application by #{@resource.collaboration_invitation[:permit_collaboration].inviter_name}." : "." %></p>
+            app.</p>
 
           <p><%= link_to 'Accept invitation', accept_invitation_url(invitation_token: @token), class: "btn btn-primary" %></p>
 

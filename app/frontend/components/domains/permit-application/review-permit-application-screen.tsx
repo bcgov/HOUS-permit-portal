@@ -6,6 +6,7 @@ import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { ECollaborationType } from "../../../types/enums"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -14,6 +15,9 @@ import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-se
 import { PermitApplicationViewedAtTag } from "../../shared/permit-applications/permit-application-viewed-at-tag"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
+import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
+import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
+import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
@@ -26,6 +30,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
   const formRef = useRef(null)
+  const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
+    formRef,
+  })
   const navigate = useNavigate()
   const { control, reset, handleSubmit } = useForm<IReferenceNumberForm>({
     defaultValues: {
@@ -205,16 +212,26 @@ export const ReviewPermitApplicationScreen = observer(() => {
               renderTopButtons={() => {
                 return (
                   !revisionMode && (
-                    <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
-                      {currentPermitApplication.isRevisionsRequested
-                        ? t("permitApplication.show.viewRevisionRequests")
-                        : t("permitApplication.show.requestRevisions")}{" "}
-                      {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
-                        `(${currentPermitApplication.latestRevisionRequests.length})`}
-                    </Button>
+                    <HStack spacing={6}>
+                      <Button variant="callout" leftIcon={<NotePencil />} onClick={() => setRevisionMode(true)}>
+                        {currentPermitApplication.isRevisionsRequested
+                          ? t("permitApplication.show.viewRevisionRequests")
+                          : t("permitApplication.show.requestRevisions")}{" "}
+                        {currentPermitApplication?.latestRevisionRequests?.length > 0 &&
+                          `(${currentPermitApplication.latestRevisionRequests.length})`}
+                      </Button>
+                      <CollaboratorsSidebar
+                        permitApplication={currentPermitApplication}
+                        collaborationType={ECollaborationType.review}
+                        triggerButtonProps={{
+                          variant: "secondary",
+                        }}
+                      />
+                    </HStack>
                   )
                 )
               }}
+              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
         )}
@@ -227,6 +244,16 @@ export const ReviewPermitApplicationScreen = observer(() => {
           permitApplication={currentPermitApplication}
         />
       )}
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
+        return (
+          <BlockCollaboratorAssignmentManagement
+            key={requirementBlockAssignmentNode.requirementBlockId}
+            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+            permitApplication={currentPermitApplication}
+            collaborationType={ECollaborationType.review}
+          />
+        )
+      })}
     </Box>
   )
 })

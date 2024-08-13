@@ -15,6 +15,7 @@ import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { ISearch } from "../../../../lib/create-search-model"
 import { useMst } from "../../../../setup/root"
+import { ECollaborationType } from "../../../../types/enums"
 import { ModelSearchInput } from "../../../shared/base/model-search-input"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { RequestLoadingButton } from "../../../shared/request-loading-button"
@@ -27,6 +28,7 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
   getConfirmationModalDisclosureProps,
   transitionToInvite,
   takenCollaboratorStrategy = "exclude",
+  collaborationType,
 }: {
   onSelect: (collaboratorId?: string) => Promise<void>
   onUnselect?: (collaboratorId?: string) => Promise<void>
@@ -37,6 +39,7 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
     collaboratorId: string
   ) => Partial<Omit<ReturnType<typeof useDisclosure>, "onToggle">>
   transitionToInvite?: () => void
+  collaborationType: ECollaborationType
 }) {
   const { collaboratorStore } = useMst()
   const collaboratorSearchList =
@@ -46,14 +49,20 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
   const { t } = useTranslation()
 
   useEffect(() => {
+    collaboratorStore.setSearchContext(collaborationType)
+
+    return () => collaboratorStore.setSearchContext(null)
+  }, [])
+
+  useEffect(() => {
     collaboratorStore.search()
     return () => collaboratorStore.setQuery(null)
   }, [])
 
   const onSelectCreator = (collaboratorId: string) => {
-    return async (onClose: () => void) => {
+    return async (onClose?: () => void) => {
       await onSelect(collaboratorId)
-      onClose()
+      onClose?.()
     }
   }
 
@@ -73,21 +82,26 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
             color={"text.primary"}
           />
         </Flex>
-        <HStack justifyContent={"space-between"}>
+        <HStack justifyContent={"space-between"} spacing={4}>
           <ModelSearchInput
             searchModel={collaboratorStore as ISearch}
-            inputProps={{ w: "194px", placeholder: "Find" }}
+            inputGroupProps={{ w: transitionToInvite ? "initial" : "100%" }}
+            inputProps={{ w: transitionToInvite ? "194px" : "100%", placeholder: "Find" }}
           />
-          <Button variant={"secondary"} leftIcon={<Plus />} size={"sm"} fontSize={"sm"} onClick={transitionToInvite}>
-            {t("permitCollaboration.popover.assignment.newContactButton")}
-          </Button>
+          {transitionToInvite && (
+            <Button variant={"secondary"} leftIcon={<Plus />} size={"sm"} fontSize={"sm"} onClick={transitionToInvite}>
+              {t("permitCollaboration.popover.assignment.newContactButton")}
+            </Button>
+          )}
         </HStack>
       </PopoverHeader>
       <PopoverBody p={4}>
         <Stack as={"ul"} w={"full"} listStyleType={"none"} pl={0}>
           {collaboratorSearchList.length === 0 && (
             <Text textAlign={"center"} fontSize={"sm"} color={"text.secondary"} fontStyle={"italic"}>
-              {t("permitCollaboration.popover.assignment.noResultsText")}
+              {t(
+                `permitCollaboration.popover.assignment.noResultsText.${transitionToInvite ? "invitable" : "default"}`
+              )}
             </Text>
           )}
           {collaboratorSearchList.map((collaborator) => {
@@ -120,7 +134,7 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
                   >
                     {t("permitCollaboration.popover.collaborations.unassignButton")}
                   </Button>
-                ) : (
+                ) : collaborationType === ECollaborationType.submission ? (
                   <ConfirmationModal
                     title={t("permitCollaboration.popover.assignment.inviteWarning.title")}
                     body={t("permitCollaboration.popover.assignment.inviteWarning.body")}
@@ -149,6 +163,17 @@ export const CollaborationAssignmentPopoverContent = observer(function Collabora
                       maxW: "700px",
                     }}
                   />
+                ) : (
+                  <RequestLoadingButton
+                    variant={"ghost"}
+                    color={"text.link"}
+                    size={"sm"}
+                    fontWeight={"semibold"}
+                    fontSize={"sm"}
+                    onClick={() => onSelectCreator(collaborator.id)()}
+                  >
+                    {t("ui.select")}
+                  </RequestLoadingButton>
                 )}
               </Text>
             )

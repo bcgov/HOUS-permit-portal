@@ -1,4 +1,5 @@
-import { Button, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@chakra-ui/react"
+import { Avatar, Button, IconButton, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@chakra-ui/react"
+import { Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -12,6 +13,7 @@ import { EAssignmentPopoverScreen } from "./types"
 interface IProps {
   permitApplication: IPermitApplication
   collaborationType: ECollaborationType
+  avatarTrigger?: boolean
 }
 
 const INITIAL_SCREEN = EAssignmentPopoverScreen.collaborationAssignment
@@ -20,9 +22,10 @@ type TDesignatedSubmitterAssignmentPopoverScreen =
   | EAssignmentPopoverScreen.collaborationAssignment
   | EAssignmentPopoverScreen.collaboratorInvite
 
-export const DesignatedSubmitterAssignmentPopover = observer(function DesignatedSubmitterAssignmentPopover({
+export const DesignatedCollaboratorAssignmentPopover = observer(function DesignatedSubmitterAssignmentPopover({
   permitApplication,
   collaborationType,
+  avatarTrigger,
 }: IProps) {
   const { userStore } = useMst()
   const { currentUser } = userStore
@@ -40,7 +43,7 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
 
   const changeScreen = (screen: TDesignatedSubmitterAssignmentPopoverScreen) => {
-    if (!canManage) {
+    if (!canManage || (!isSubmissionCollaboration && screen === EAssignmentPopoverScreen.collaboratorInvite)) {
       return
     }
 
@@ -86,25 +89,35 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
   const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
     permitApplication.inviteNewCollaborator(ECollaboratorType.delegatee, user)
 
+  const isSubmissionCollaboration = collaborationType === ECollaborationType.submission
+
+  const triggerButtonProps = {
+    onClick: (e) => e.stopPropagation(),
+    onKeyDown: (e) => e.stopPropagation(),
+    isDisabled: !canManage,
+  }
   return (
     <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onPopoverClose} onOpen={onOpen} strategy={"fixed"}>
       <PopoverTrigger>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation()
-          }}
-          onKeyDown={(e) => {
-            e.stopPropagation()
-          }}
-          variant={"link"}
-          isDisabled={!canManage}
-          textDecoration={"underline"}
-          fontSize={"sm"}
-        >
-          {existingDelegateeCollaboration
-            ? t("permitCollaboration.popover.designatedSubmitterChangeButton")
-            : t("ui.select")}
-        </Button>
+        {avatarTrigger ? (
+          <IconButton
+            variant={"ghost"}
+            icon={
+              existingDelegateeCollaboration ? (
+                <Avatar name={existingDelegateeCollaboration?.collaborator?.user?.name} size={"sm"} />
+              ) : (
+                <Plus />
+              )
+            }
+            aria-label={"designated assignee selector"}
+          />
+        ) : (
+          <Button variant={"link"} textDecoration={"underline"} fontSize={"sm"} {...triggerButtonProps}>
+            {existingDelegateeCollaboration
+              ? t("permitCollaboration.popover.designatedSubmitterChangeButton")
+              : t("ui.select")}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent w={"370px"} maxW={"370px"} ref={contentRef}>
         {canManage && currentScreen === EAssignmentPopoverScreen.collaborationAssignment && (
@@ -116,7 +129,9 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
             onClose={onClose}
             takenCollaboratorIds={existingCollaboratorIds}
             getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-            transitionToInvite={() => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)}
+            transitionToInvite={
+              isSubmissionCollaboration ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite) : undefined
+            }
             takenCollaboratorStrategy={"include"}
             onUnselect={async () => {
               if (!existingDelegateeCollaboration) return
@@ -124,9 +139,10 @@ export const DesignatedSubmitterAssignmentPopover = observer(function Designated
               const response = await permitApplication.unassignPermitCollaboration(existingDelegateeCollaboration.id)
               response && onClose()
             }}
+            collaborationType={collaborationType}
           />
         )}
-        {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && (
+        {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && isSubmissionCollaboration && (
           <CollaboratorInvite
             onClose={() => changeScreen(INITIAL_SCREEN)}
             onInviteSuccess={onClose}

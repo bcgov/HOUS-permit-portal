@@ -11,9 +11,9 @@
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>
             ,</p>
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
-            A requirement block status has been set to <span style="font-style: italic">"ready"</span> in a permit
-            application
-            for <%= @permit_block_status.collaboration_type %>.
+            A requirement block status has been set to <span style="font-style: italic">"ready"</span> in
+            a <%= @permit_block_status.submission? ? "permit
+            application" : "submitted permit application" %> for <%= @permit_block_status.collaboration_type %>.
           </p>
 
           <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Application

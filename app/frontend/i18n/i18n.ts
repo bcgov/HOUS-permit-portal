@@ -362,12 +362,20 @@ const options = {
           sidebar: {
             triggerButton: "Collaborators ({{count}})",
             title: "Collaborators",
-            description:
-              "Collaborators can be invited to work on the different areas of the permit application form. Only the author can manage collaborators.",
+            description: {
+              submission:
+                "Collaborators can be invited to work on the different areas of the permit application form. Only the author can manage collaborators.",
+              review: "Collaborators can be invited to work on the different areas of the permit application form.",
+            },
             howItWorksTitle: "How it works",
-            howItWorksDescription:
-              "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
+            howItWorksDescription: {
+              submission:
+                "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
+              review:
+                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to “Ready”. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
+            },
             designatedSubmitters: "Designated submitter(s)",
+            designatedReviewers: "Designated reviewer(s)",
             authorCanSubmitWithOrganization:
               "Author of this application is also allowed to submit: <1>{{author}}</1> ({{organization}}).",
             authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
@@ -402,7 +410,11 @@ const options = {
                 body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
               },
               newContactButton: "New contact",
-              noResultsText: "No results found. Invite new collaborators by clicking the button above",
+              noResultsText: {
+                invitable: "No results found. Invite new collaborators by clicking the button above.",
+                default: "No results found.",
+              },
+
               unassiggn: "Unselect",
             },
             collaboratorInvite: {
@@ -1313,6 +1325,7 @@ const options = {
             applicationSubmitted: "Application submitted to jurisdiction",
             applicationViewed: "Application viewed by jurisdiction",
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
+            collaboration: "Collaboration",
           },
           inApp: "In-App",
           email: "Email",

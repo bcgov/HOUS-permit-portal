@@ -40,7 +40,7 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   collaborationType,
   requirementBlockId,
 }: IProps) {
-  const { userStore } = useMst()
+  const { userStore, collaboratorStore } = useMst()
   const { currentUser } = userStore
   const { t } = useTranslation()
   const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(
@@ -57,6 +57,11 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
 
   const changeScreen = (screen: EAssignmentPopoverScreen) => {
+    // review does have the ability to invite new collaborators. They should already be present for a jurisdiction
+    if (screen === EAssignmentPopoverScreen.collaboratorInvite && collaborationType === ECollaborationType.review) {
+      return
+    }
+
     setCurrentScreen(canManage ? screen : INITIAL_SCREEN)
 
     // This needs to be done as their is a focus loss issue when dynamically
@@ -137,17 +142,24 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
               onClose={() => changeScreen(EAssignmentPopoverScreen.collaborations)}
               takenCollaboratorIds={existingCollaboratorIds}
               getConfirmationModalDisclosureProps={createAssignmentConfirmationModalDisclosureProps}
-              transitionToInvite={() => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)}
+              transitionToInvite={
+                canManage && collaborationType === ECollaborationType.submission
+                  ? () => changeScreen(EAssignmentPopoverScreen.collaboratorInvite)
+                  : undefined
+              }
+              collaborationType={collaborationType}
             />
           )}
-          {canManage && currentScreen === EAssignmentPopoverScreen.collaboratorInvite && (
-            <CollaboratorInvite
-              onInviteSuccess={() => changeScreen(EAssignmentPopoverScreen.collaborations)}
-              onClose={() => changeScreen(EAssignmentPopoverScreen.collaborationAssignment)}
-              onInvite={onInviteCollaborator}
-              confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
-            />
-          )}
+          {canManage &&
+            currentScreen === EAssignmentPopoverScreen.collaboratorInvite &&
+            collaborationType === ECollaborationType.submission && (
+              <CollaboratorInvite
+                onInviteSuccess={() => changeScreen(EAssignmentPopoverScreen.collaborations)}
+                onClose={() => changeScreen(EAssignmentPopoverScreen.collaborationAssignment)}
+                onInvite={onInviteCollaborator}
+                confirmationModalDisclosureProps={createConfirmationModalDisclosureProps}
+              />
+            )}
         </PopoverContent>
       </Portal>
     </Popover>
