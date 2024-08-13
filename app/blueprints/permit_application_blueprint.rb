@@ -61,18 +61,24 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
-    # TODO: filter out data based on collaborator/user permissions
-    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint do |pa, options|
+      pa.supporting_documents_for_submitter_based_on_user_permissions(user: options[:current_user])
+    end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
     association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
-    # TODO: filter out data based on collaborator/user permissions
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
   end
 
   view :jurisdiction_review_extended do
     include_view :extended
+    # reinclude fields to show all data for reviewers, which were filtered out in the extended view due to collaboration
+    field :form_json
+    field :submission_data do |pa, options|
+      pa.formatted_submission_data
+    end
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :review_extended
   end
 

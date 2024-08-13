@@ -574,6 +574,8 @@ const options = {
           show: {
             wasSubmitted: "Application was submitted on {{ date }} to {{ jurisdictionName }}",
             submittingTo: "You're applying to the {{ jurisdictionName }}",
+            versionDiffContactWarning:
+              "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",

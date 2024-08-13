@@ -236,7 +236,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
-  const canCurrentUserSubmit =
+  const doesUserHaveSubmissionPermission =
     currentUser?.id === currentPermitApplication.submitter?.id ||
     currentUser?.id ===
       currentPermitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id
@@ -267,11 +267,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={!canCurrentUserSubmit || isSubmitted}
+                        isDisabled={!doesUserHaveSubmissionPermission || isSubmitted}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
-                            display: !canCurrentUserSubmit || isSubmitted ? "none" : "block",
+                            display: !doesUserHaveSubmissionPermission || isSubmitted ? "none" : "block",
                           },
                         }}
                         editableInputProps={{
@@ -326,7 +326,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   permitApplication={currentPermitApplication}
                   collaborationType={ECollaborationType.submission}
                 />
-                <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                {doesUserHaveSubmissionPermission && (
+                  <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                )}
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
                   {t("permitApplication.show.backToInbox")}
                 </Button>

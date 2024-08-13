@@ -27,7 +27,7 @@ interface IReferenceNumberForm {
 }
 
 export const ReviewPermitApplicationScreen = observer(() => {
-  const { currentPermitApplication, error } = usePermitApplication()
+  const { currentPermitApplication, error } = usePermitApplication({ review: true })
   const { t } = useTranslation()
   const formRef = useRef(null)
   const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({

@@ -5,8 +5,8 @@ class PermitApplication::SubmissionDataService
     @permit_application = permit_application
   end
 
-  def formatted_submission_data(current_user:)
-    submission_data = permit_application.submission_data
+  def formatted_submission_data(current_user:, submission_data: nil)
+    submission_data ||= permit_application.submission_data
 
     filtered_submission =
       filter_submission_data_based_on_user_permissions(submission_data: submission_data, user: current_user)
@@ -61,13 +61,7 @@ class PermitApplication::SubmissionDataService
 
     permissions = permit_application.submission_requirement_block_edit_permissions(user_id: user.id)
 
-    if permissions == :all ||
-         (
-           permit_application.submitted? && user.review_staff? &&
-             user.jurisdictions.find_by(id: permit_application.jurisdiction_id).present?
-         )
-      return formatted_data
-    end
+    return formatted_data if permissions == :all
 
     return {} if permissions.blank?
 

@@ -56,6 +56,24 @@ class PermitApplication < ApplicationRecord
 
   COMPLETION_SECTION_KEY = "section-completion-key"
 
+  def supporting_documents_for_submitter_based_on_user_permissions(user: nil)
+    return supporting_documents if user.blank?
+
+    permissions = submission_requirement_block_edit_permissions(user_id: user.id)
+
+    return supporting_documents if permissions == :all
+
+    return [] if permissions.blank?
+
+    supporting_documents.select do |s|
+      return false if s.data_key.blank?
+
+      rb_id = s.data_key[/RB([a-zA-Z0-9\-]+)/, 1]
+
+      permissions.include?(rb_id)
+    end
+  end
+
   def formatted_submission_data(current_user: nil)
     PermitApplication::SubmissionDataService.new(self).formatted_submission_data(current_user: current_user)
   end

@@ -30,7 +30,14 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def update_version?
-    record.draft? ? record.submitter == user : user.review_staff?
+    permit_application = record
+    designated_submitter =
+      permit_application.users_by_collaboration_options(
+        collaboration_type: :submission,
+        collaborator_type: :delegatee,
+      ).first
+
+    record.draft? ? (record.submitter == user || designated_submitter == user) : user.review_staff?
   end
 
   def update_revision_requests?

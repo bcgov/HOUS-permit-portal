@@ -122,8 +122,8 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
   }
 
-  async fetchPermitApplication(id) {
-    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
+  async fetchPermitApplication(id: string, review?: boolean) {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, { review })
   }
 
   async viewPermitApplication(id) {

@@ -85,16 +85,8 @@ class PermitApplication::FormJsonService
         end
         .compact
 
-    # If the user is not passed in, or the user is a review staff in the same jurisdiction and the permit application is submitted
-    # then we don't remove requirement blocks based on further collaboration permissions. This is because review staff
-    # in the same jurisdiction should be able to all the blocks during review.
-    if current_user.blank? ||
-         (
-           current_user.review_staff? && permit_application.submitted? &&
-             current_user.jurisdictions.find_by(id: permit_application.jurisdiction_id).present?
-         )
-      return @empty_block_ids
-    end
+    # If the user is not passed in then we don't remove requirement blocks based on further collaboration permissions.
+    return @empty_block_ids if current_user.blank?
 
     permissions = permit_application.submission_requirement_block_edit_permissions(user_id: current_user.id)
 
