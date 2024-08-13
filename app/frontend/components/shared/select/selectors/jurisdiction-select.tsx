@@ -75,7 +75,6 @@ export const JurisdictionSelect = observer(function ({
       ...provided,
       ...(stylesToMerge?.valueContainer ?? {}),
     }),
-    // Add other custom styles as needed
   }
 
   return (
