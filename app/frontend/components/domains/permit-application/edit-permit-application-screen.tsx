@@ -326,7 +326,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                   permitApplication={currentPermitApplication}
                   collaborationType={ECollaborationType.submission}
                 />
-                <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                {doesUserHaveSubmissionPermission && (
+                  <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                )}
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
                   {t("permitApplication.show.backToInbox")}
                 </Button>
