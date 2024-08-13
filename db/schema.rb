@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_02_180316) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -237,6 +237,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"],
             name: "index_permit_applications_on_template_version_id"
+  end
+
+  create_table "permit_block_statuses",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "permit_application_id", null: false
+    t.string "requirement_block_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "collaboration_type", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[permit_application_id requirement_block_id collaboration_type],
+            name: "index_block_statuses_on_app_id_and_block_id_and_collab_type",
+            unique: true
+    t.index ["permit_application_id"],
+            name: "index_permit_block_statuses_on_permit_application_id"
   end
 
   create_table "permit_classifications",
@@ -852,6 +869,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_type_required_steps", "jurisdictions"

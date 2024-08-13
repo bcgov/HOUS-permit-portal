@@ -60,6 +60,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
     association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
+    association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
   end
 

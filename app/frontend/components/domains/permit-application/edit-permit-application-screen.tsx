@@ -276,7 +276,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
-  const isCurrentUserSubmitter = currentUser?.id === currentPermitApplication.submitter?.id
+  const canCurrentUserSubmit =
+    currentUser?.id === currentPermitApplication.submitter?.id ||
+    currentUser?.id ===
+      currentPermitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id
+
   return (
     <Box as="main" id="submitter-view-permit">
       {!isStepCode && (
@@ -303,11 +307,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={!isCurrentUserSubmitter || isSubmitted}
+                        isDisabled={!canCurrentUserSubmit || isSubmitted}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
-                            display: !isCurrentUserSubmitter || isSubmitted ? "none" : "block",
+                            display: !canCurrentUserSubmit || isSubmitted ? "none" : "block",
                           },
                         }}
                         editableInputProps={{
@@ -368,7 +372,13 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 </Button>
               </Stack>
             ) : (
-              <HStack gap={4}>
+              <HStack
+                flexDir={{
+                  base: "column",
+                  md: "row",
+                }}
+                gap={4}
+              >
                 <BrowserSearchPrompt />
                 <CollaboratorsSidebar
                   permitApplication={currentPermitApplication}

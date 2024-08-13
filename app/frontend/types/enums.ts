@@ -168,6 +168,12 @@ export enum ENumberUnit {
   cad = "cad",
 }
 
+export enum EPermitBlockStatus {
+  draft = "draft",
+  inProgress = "in_progress",
+  ready = "ready",
+}
+
 export enum EStepCodeChecklistStage {
   preConstruction = "pre_construction",
   midConstruction = "mid_construction",
@@ -301,6 +307,7 @@ export enum ESocketEventTypes {
 export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
+  updatePermitBlockStatus = "update_permit_block_status",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -374,6 +381,7 @@ export enum ENotificationActionType {
   scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
   submissionCollaborationAssignment = "submission_collaboration_assignment",
+  permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",

@@ -63,10 +63,11 @@ class PermitApplicationPolicy < ApplicationPolicy
     permit_collaboration = record
 
     if permit_collaboration.submission?
-      permit_collaboration.permit_application.submitter == user
+      permit_collaboration.permit_application.submitter == user && permit_collaboration.permit_application.draft?
     elsif permit_collaboration.review?
       (user.review_staff?) &&
-        user.jurisdictions.find_by(id: permit_collaboration.permit_application.jurisdiction_id).present?
+        user.jurisdictions.find_by(id: permit_collaboration.permit_application.jurisdiction_id).present? &&
+        permit_collaboration.permit_application.submitted?
     else
       false
     end
@@ -83,7 +84,30 @@ class PermitApplicationPolicy < ApplicationPolicy
   end
 
   def invite_new_collaborator?
-    create_permit_collaboration?
+    permit_collaboration = record
+
+    # New collaborators (i.e new user in the system) can only be invited for submission collaborations
+    return false if permit_collaboration.review?
+
+    permit_collaboration.permit_application.submitter == user && permit_collaboration.permit_application.draft?
+  end
+
+  def create_or_update_permit_block_status?
+    permit_block_status = record
+
+    if permit_block_status.submission?
+      block_permissions =
+        permit_block_status.permit_application.submission_requirement_block_edit_permissions(user_id: user.id)
+
+      permit_block_status.permit_application.draft? && block_permissions.present? &&
+        (block_permissions == :all || block_permissions.include?(permit_block_status.requirement_block_id))
+    elsif permit_block_status.review?
+      (user.review_staff?) &&
+        user.jurisdictions.find_by(id: permit_block_status.permit_application.jurisdiction_id).present? &&
+        permit_block_status.permit_application.submitted?
+    else
+      false
+    end
   end
 
   # we may want to separate an admin update to a secondary policy

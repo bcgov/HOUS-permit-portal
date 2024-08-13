@@ -159,6 +159,18 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_permit_block_status_ready_event(permit_block_status)
+    return unless permit_block_status.ready?
+
+    notification_user_hash = {}
+
+    permit_block_status.users_to_notify_status_ready.each do |user|
+      notification_user_hash[user.id] = permit_block_status.status_ready_notification_data
+    end
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
   def self.publish_application_submission_event(permit_application)
     notification_user_hash = {}
     notification_user_hash[permit_application.submitter_id] = permit_application.submit_event_notification_data
