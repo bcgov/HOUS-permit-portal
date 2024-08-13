@@ -17,6 +17,7 @@ x-env-vars: &default-env-vars
 services:
   app:
     image: hous-permit-portal-dev:latest
+    pull_policy: "never"
     build:
       context: .
       dockerfile: ./devops/docker/app/Dockerfile.dev
@@ -29,13 +30,13 @@ services:
       - postgres
       - redis
       - elasticsearch
-      - vite
     environment:
       <<: *default-env-vars
     command: bash -c "rm -f tmp/pids/server.pid && ./bin/rails server -b '0.0.0.0'"
 
   vite:
     image: hous-permit-portal-dev:latest
+    pull_policy: "never"
     working_dir: /app
     volumes:
       - .:/app
@@ -44,9 +45,12 @@ services:
       VITE_RUBY_HOST: "0.0.0.0"
     ports:
       - "3036:3036"
+    depends_on:
+      - app
 
   sidekiq:
     image: hous-permit-portal-dev:latest
+    pull_policy: "never"
     working_dir: /app
     env_file: .env.docker_compose
     volumes:
@@ -54,9 +58,12 @@ services:
     environment:
       <<: *default-env-vars
     command: "bundle exec sidekiq"
+    depends_on:
+      - app
 
   anycable-rpc:
     image: hous-permit-portal-dev:latest
+    pull_policy: "never"
     command: bundle exec anycable
     volumes:
       - .:/app
@@ -69,6 +76,7 @@ services:
       - "50051:50051"
     depends_on:
       - redis
+      - app
 
   anycable-go:
     image: anycable/anycable-go:1.4.8
