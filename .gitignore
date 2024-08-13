@@ -39,9 +39,7 @@ yarn-debug.log*
 public/uploads/
 
 .env
-.env.qa
-.env.staging
-.env.production
+.env.*
 
 dump.rdb
 
@@ -64,3 +62,5 @@ deleteme.*
 /allure-results/
 /cypress/downloads/
 /cypress/screenshots/
+
+.npm/
