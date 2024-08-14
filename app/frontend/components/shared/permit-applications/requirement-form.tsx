@@ -1,19 +1,4 @@
-import {
-  Box,
-  Button,
-  Center,
-  Flex,
-  Heading,
-  Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Box, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
 import { format } from "date-fns"
@@ -24,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import { ECollaborationType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -35,6 +21,7 @@ import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
+import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
 
 interface IRequirementFormProps {
   permitApplication?: IPermitApplication
@@ -45,6 +32,7 @@ interface IRequirementFormProps {
   renderSaveButton?: () => JSX.Element
   isEditing?: boolean
   renderTopButtons?: () => React.ReactNode
+  updateCollaborationAssignmentNodes?: () => void
 }
 
 export const RequirementForm = observer(
@@ -56,6 +44,7 @@ export const RequirementForm = observer(
     renderTopButtons,
     renderSaveButton,
     isEditing = false,
+    updateCollaborationAssignmentNodes,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -79,6 +68,11 @@ export const RequirementForm = observer(
     const boxRef = useRef<HTMLDivElement>(null)
     const { userStore } = useMst()
     const { currentUser } = userStore
+    const userShouldSeeApplicationDiff =
+      permitApplication.shouldShowNewVersionWarning &&
+      (currentUser?.id === permitApplication.submitter?.id ||
+        currentUser?.id ===
+          permitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
@@ -109,7 +103,7 @@ export const RequirementForm = observer(
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (permitApplication?.shouldShowApplicationDiff(isEditing)) {
+      if (permitApplication?.shouldShowApplicationDiff(isEditing) && userShouldSeeApplicationDiff) {
         permitApplication.fetchDiff()
       }
     }, [usingCurrentTemplateVersion])
@@ -272,6 +266,9 @@ export const RequirementForm = observer(
 
     const onInitialized = (event) => {
       if (!formRef.current) return
+
+      updateCollaborationAssignmentNodes?.()
+
       if (onCompletedBlocksChange) {
         onCompletedBlocksChange(getCompletedBlocksFromForm(formRef.current))
       }
@@ -313,6 +310,7 @@ export const RequirementForm = observer(
         permitApplication.updateVersion()
       }
     }
+    const showVersionDiffContactWarning = permitApplication.shouldShowNewVersionWarning && !userShouldSeeApplicationDiff
     return (
       <>
         <Flex
@@ -322,8 +320,8 @@ export const RequirementForm = observer(
           className={`form-wrapper ${floatErrorBox ? "float-on" : "float-off"}`}
           mb="40vh"
           mx="auto"
-          pl={{ lg: "8" }}
-          pr={{ base: "0", xl: "var(--app-permit-form-right-white-space)" }}
+          pl={{ base: "10" }}
+          pr={{ base: "10", xl: "var(--app-permit-form-right-white-space)" }}
           width="full"
           maxWidth="container.lg"
           gap={8}
@@ -343,6 +341,7 @@ export const RequirementForm = observer(
           )}
           <ErrorsBox data={errorBoxData} />
           {permitApplication.shouldShowApplicationDiff(isEditing) &&
+            userShouldSeeApplicationDiff &&
             (permitApplication.diff ? (
               <CompareRequirementsBox
                 data={infoBoxData}
@@ -365,6 +364,9 @@ export const RequirementForm = observer(
             />
           )}
 
+          {showVersionDiffContactWarning && (
+            <CustomMessageBox description={t("permitApplication.show.versionDiffContactWarning")} status="warning" />
+          )}
           {permitApplication?.isSubmitted ? (
             <CustomMessageBox
               description={t("permitApplication.show.wasSubmitted", {
@@ -379,6 +381,7 @@ export const RequirementForm = observer(
               status="info"
             />
           )}
+
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}
@@ -392,7 +395,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-            can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
@@ -408,40 +411,12 @@ export const RequirementForm = observer(
           renderSaveButton={renderSaveButton}
         />
         {isOpen && (
-          <Modal onClose={onClose} isOpen={isOpen} size="2xl">
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>
-                <ModalCloseButton fontSize="11px" />
-              </ModalHeader>
-              <ModalBody py={6}>
-                <Flex direction="column" gap={8}>
-                  <Heading as="h3">{t("permitApplication.new.ready")}</Heading>
-                  <Box
-                    borderRadius="md"
-                    border="1px solid"
-                    borderColor="semantic.warning"
-                    backgroundColor="semantic.warningLight"
-                    px={6}
-                    py={3}
-                  >
-                    <Heading as="h3" fontSize="lg">
-                      {t("permitApplication.new.bySubmitting")}
-                    </Heading>
-                    <Text>{t("permitApplication.new.confirmation")}</Text>
-                  </Box>
-                  <Flex justify="center" gap={6}>
-                    <Button onClick={onModalSubmit} variant="primary">
-                      {t("ui.submit")}
-                    </Button>
-                    <Button onClick={onClose} variant="secondary">
-                      {t("ui.neverMind")}
-                    </Button>
-                  </Flex>
-                </Flex>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
+          <PermitApplicationSubmitModal
+            permitApplication={permitApplication}
+            isOpen={isOpen}
+            onClose={onClose}
+            onSubmit={onModalSubmit}
+          />
         )}
         {isContactsOpen && (
           <ContactModal

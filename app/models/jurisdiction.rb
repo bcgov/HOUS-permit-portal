@@ -22,6 +22,7 @@ class Jurisdiction < ApplicationRecord
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :permit_type_required_steps, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -181,6 +182,10 @@ class Jurisdiction < ApplicationRecord
     relevant_template_versions.each do |template_version|
       integration_mappings.create(template_version: template_version)
     end
+  end
+
+  def blueprint
+    JurisdictionBlueprint
   end
 
   private

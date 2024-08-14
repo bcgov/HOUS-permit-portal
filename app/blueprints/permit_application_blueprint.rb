@@ -21,6 +21,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :base
+    association :submitter, blueprint: UserBlueprint, view: :minimal
 
     field :indexed_using_current_template_version do |pa, options|
       # Indexed data is used to prevent N extra queries on every search
@@ -30,29 +31,54 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :jurisdiction_review_inbox do
     include_view :base
-    association :submitter, blueprint: UserBlueprint, view: :base
+
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    # only the delegatee is needed for the inbox screen
+    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base do |pa, _options|
+      pa.permit_collaborations.where(collaboration_type: :review, collaborator_type: :delegatee)
+    end
+    association :submitter, blueprint: UserBlueprint, view: :minimal
   end
 
   view :extended do
     include_view :base
-    fields :form_json, :submission_data, :formatted_compliance_data, :front_end_form_update, :form_customizations
+    fields :formatted_compliance_data, :front_end_form_update, :form_customizations
+
+    association :submitter, blueprint: UserBlueprint, view: :minimal
 
     field :is_fully_loaded do |pa, options|
       true
     end
 
-    association :submitter, blueprint: UserBlueprint, view: :base
+    field :form_json do |pa, options|
+      pa.form_json(current_user: options[:current_user])
+    end
+
+    field :submission_data do |pa, options|
+      pa.formatted_submission_data(current_user: options[:current_user])
+    end
+
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
-    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint do |pa, options|
+      pa.supporting_documents_for_submitter_based_on_user_permissions(user: options[:current_user])
+    end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
+    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
+    association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
   end
 
   view :jurisdiction_review_extended do
     include_view :extended
+    # reinclude fields to show all data for reviewers, which were filtered out in the extended view due to collaboration
+    field :form_json
+    field :submission_data do |pa, options|
+      pa.formatted_submission_data
+    end
+    association :supporting_documents, blueprint: SupportingDocumentBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :review_extended
   end
 

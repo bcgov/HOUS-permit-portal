@@ -3,8 +3,8 @@ import {
   Button,
   Divider,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Spacer,
   Stack,
   Text,
@@ -22,8 +22,9 @@ import { useNavigate } from "react-router-dom"
 import { requirementTypeToFormioType } from "../../../constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
+import { useMst } from "../../../setup/root"
 import { ICustomEventMap } from "../../../types/dom"
-import { ECustomEvents, ERequirementType } from "../../../types/enums"
+import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
 import { handleScrollToBottom } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { ErrorScreen } from "../../shared/base/error-screen"
@@ -32,8 +33,12 @@ import { EditableInputWithControls } from "../../shared/editable-input-with-cont
 import { FloatingHelpDrawer } from "../../shared/floating-help-drawer"
 import { BrowserSearchPrompt } from "../../shared/permit-applications/browser-search-prompt"
 import { PermitApplicationStatusTag } from "../../shared/permit-applications/permit-application-status-tag"
+import { PermitApplicationSubmitModal } from "../../shared/permit-applications/permit-application-submit-modal"
 import { RequirementForm } from "../../shared/permit-applications/requirement-form"
 import { ChecklistSideBar } from "./checklist-sidebar"
+import { BlockCollaboratorAssignmentManagement } from "./collaborator-management/block-collaborator-assignment-management"
+import { CollaboratorsSidebar } from "./collaborator-management/collaborators-sidebar"
+import { useCollaborationAssignmentNodes } from "./collaborator-management/hooks/use-collaboration-assignment-nodes"
 import { ContactSummaryModal } from "./contact-summary-modal"
 import { RevisionSideBar } from "./revision-sidebar"
 import { SubmissionDownloadModal } from "./submission-download-modal"
@@ -45,6 +50,8 @@ type TPermitApplicationMetadataForm = {
 }
 
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
+  const { userStore } = useMst()
+  const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
   const { t } = useTranslation()
   const formRef = useRef(null)
@@ -61,6 +68,14 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [processEventOnLoad, setProcessEventOnLoad] = useState<CustomEvent | null>(null)
+  const { requirementBlockAssignmentNodes, updateRequirementBlockAssignmentNode } = useCollaborationAssignmentNodes({
+    formRef,
+  })
+  const {
+    isOpen: isSubmitBlockedModalOpen,
+    onOpen: onSubmitBlockedModalOpen,
+    onClose: onSubmitBlockedModalClose,
+  } = useDisclosure()
 
   const handlePermitApplicationUpdate = (_event: ICustomEventMap[ECustomEvents.handlePermitApplicationUpdate]) => {
     if (formRef.current) {
@@ -221,6 +236,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const { permitTypeAndActivity, formJson, number, isSubmitted, isDirty, setIsDirty, isRevisionsRequested } =
     currentPermitApplication
 
+  const doesUserHaveSubmissionPermission =
+    currentUser?.id === currentPermitApplication.submitter?.id ||
+    currentUser?.id ===
+      currentPermitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id
+
   return (
     <Box as="main" id="submitter-view-permit">
       {!isStepCode && (
@@ -247,11 +267,11 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                         w="full"
                         initialHint={t("permitApplication.edit.clickToWriteNickname")}
                         value={nicknameWatch || ""}
-                        isDisabled={isSubmitted}
+                        isDisabled={!doesUserHaveSubmissionPermission || isSubmitted}
                         controlsProps={{
                           iconButtonProps: {
                             color: "greys.white",
-                            display: isSubmitted ? "none" : "block",
+                            display: !doesUserHaveSubmissionPermission || isSubmitted ? "none" : "block",
                           },
                         }}
                         editableInputProps={{
@@ -301,21 +321,51 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <BrowserSearchPrompt />
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
-                </Button>
-                <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                </Button>{" "}
+                <CollaboratorsSidebar
+                  permitApplication={currentPermitApplication}
+                  collaborationType={ECollaborationType.submission}
+                />
+                {doesUserHaveSubmissionPermission && (
+                  <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+                )}
                 <Button rightIcon={<CaretRight />} onClick={() => navigate("/")}>
                   {t("permitApplication.show.backToInbox")}
                 </Button>
               </Stack>
             ) : (
-              <HStack gap={4}>
+              <HStack
+                flexDir={{
+                  base: "column",
+                  md: "row",
+                }}
+                gap={4}
+              >
                 <BrowserSearchPrompt />
+                <CollaboratorsSidebar
+                  permitApplication={currentPermitApplication}
+                  collaborationType={ECollaborationType.submission}
+                />
                 <Button variant="primary" onClick={handleClickFinishLater}>
                   {t("permitApplication.edit.saveDraft")}
                 </Button>
-                <Button rightIcon={<CaretRight />} onClick={handleScrollToBottom}>
+                <Button
+                  rightIcon={<CaretRight />}
+                  onClick={
+                    currentPermitApplication.canUserSubmit(currentUser)
+                      ? handleScrollToBottom
+                      : onSubmitBlockedModalOpen
+                  }
+                >
                   {t("permitApplication.edit.submit")}
                 </Button>
+                {!currentPermitApplication.canUserSubmit(currentUser) && isSubmitBlockedModalOpen && (
+                  <PermitApplicationSubmitModal
+                    permitApplication={currentPermitApplication}
+                    isOpen={isSubmitBlockedModalOpen}
+                    onClose={onSubmitBlockedModalClose}
+                  />
+                )}
               </HStack>
             )}
             <FloatingHelpDrawer top={permitHeaderHeight + 20} position="absolute" />
@@ -371,6 +421,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
               showHelpButton
               isEditing={currentPermitApplication?.isDraft}
               renderSaveButton={() => <SaveButton handleSave={handleSave} />}
+              updateCollaborationAssignmentNodes={updateRequirementBlockAssignmentNode}
             />
           </Flex>
         )}
@@ -383,6 +434,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           permitApplication={currentPermitApplication}
         />
       )}
+      {requirementBlockAssignmentNodes.map((requirementBlockAssignmentNode) => {
+        return (
+          <BlockCollaboratorAssignmentManagement
+            key={requirementBlockAssignmentNode.requirementBlockId}
+            requirementBlockAssignmentNode={requirementBlockAssignmentNode}
+            permitApplication={currentPermitApplication}
+            collaborationType={ECollaborationType.submission}
+          />
+        )
+      })}
     </Box>
   )
 })
