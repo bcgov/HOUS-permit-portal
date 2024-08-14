@@ -100,6 +100,7 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
 
         expect(response).to have_http_status(:success)
         new_template = RequirementTemplate.last
+        # For some reason this spec is prone to failing on github action
         expect(new_template.description).to eq("a copied template with first nations")
         expect(new_template.requirement_template_sections.map(&:name)).to match_array(
           ["existing section one", "existing section two"],
