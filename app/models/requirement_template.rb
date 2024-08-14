@@ -37,10 +37,6 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
 
-  def requirement_template_label
-    requirement_template.label
-  end
-
   def label
     "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end

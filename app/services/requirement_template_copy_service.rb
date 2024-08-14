@@ -22,8 +22,6 @@ class RequirementTemplateCopyService
       requirement_template.requirement_template_sections.each do |section|
         new_section = new_template.requirement_template_sections.build(name: section.name, position: section.position)
 
-        section.save!
-
         # Associate existing requirement blocks with the new section
         section.requirement_blocks.each { |block| new_section.requirement_blocks << block }
       end

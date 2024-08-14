@@ -88,7 +88,7 @@ export const TemplateVersionModel = types
         self.environment.api.fetchJurisdictionTemplateVersionCustomization(self.id, jurisdictionId)
       )
       if (!response.ok) {
-        return response
+        return response.ok
       }
 
       const customization = response.data.data
@@ -98,14 +98,14 @@ export const TemplateVersionModel = types
         self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customizationModel)
       }
 
-      return response
+      return response.ok
     }),
     copyJurisdictionTemplateVersionElectives: flow(function* (jurisdictionId: string) {
       const response = yield* toGenerator(
         self.environment.api.copyJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, true, false, true)
       )
       if (!response.ok) {
-        return response
+        return response.ok
       }
 
       const customization = response.data.data
@@ -115,14 +115,14 @@ export const TemplateVersionModel = types
         self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customizationModel)
       }
 
-      return response
+      return response.ok
     }),
     copyJurisdictionTemplateVersionTips: flow(function* (jurisdictionId: string) {
       const response = yield* toGenerator(
         self.environment.api.copyJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, false, true, true)
       )
       if (!response.ok) {
-        return response
+        return response.ok
       }
 
       const customization = response.data.data
@@ -132,7 +132,7 @@ export const TemplateVersionModel = types
         self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customizationModel)
       }
 
-      return response
+      return response.ok
     }),
     fetchIntegrationMapping: flow(function* (jurisdictionId: string) {
       const response = yield* toGenerator(self.environment.api.fetchIntegrationMapping(self.id, jurisdictionId))
