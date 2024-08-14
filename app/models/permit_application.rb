@@ -12,7 +12,6 @@ class PermitApplication < ApplicationRecord
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
-
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version

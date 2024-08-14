@@ -8,6 +8,7 @@ import {
   IRevisionRequest,
   ITemplateVersionDiff,
 } from "../types/types"
+import { isNonRequirementKey } from "./formio-helpers"
 
 const findComponentsByType = (components, type) => {
   let foundComponents = []
@@ -220,6 +221,8 @@ export const combineRevisionButtons = (
     section.components.forEach((block: IFormIOBlock) => {
       for (let i = 0; i < block.components.length; i++) {
         const requirement = block.components[i]
+
+        if (isNonRequirementKey(requirement.key)) continue
         if (section.id === COMPLETTION_SECTION_ID) continue
 
         if (revisionRequestRequirementKeys.includes(requirement.key) || isInReview) {

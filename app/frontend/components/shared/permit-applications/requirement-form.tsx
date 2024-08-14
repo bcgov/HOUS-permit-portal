@@ -103,7 +103,7 @@ export const RequirementForm = observer(
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (!usingCurrentTemplateVersion && userShouldSeeApplicationDiff) {
+      if (permitApplication?.shouldShowApplicationDiff(isEditing) && userShouldSeeApplicationDiff) {
         permitApplication.fetchDiff()
       }
     }, [usingCurrentTemplateVersion])
@@ -350,7 +350,7 @@ export const RequirementForm = observer(
                 handleClickDismiss={() => {
                   permitApplication.resetDiff()
                 }}
-                isUpdatable
+                isUpdatable={permitApplication.isDraft}
               />
             ) : (
               <SharedSpinner position="fixed" right={24} top="50vh" zIndex={12} />

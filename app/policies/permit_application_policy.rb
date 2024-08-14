@@ -37,7 +37,7 @@ class PermitApplicationPolicy < ApplicationPolicy
         collaborator_type: :delegatee,
       ).first
 
-    record.draft? ? (record.submitter == user || designated_submitter == user) : user.review_staff?
+    record.draft? && (record.submitter == user || designated_submitter == user)
   end
 
   def update_revision_requests?

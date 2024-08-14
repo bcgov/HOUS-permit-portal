@@ -330,10 +330,6 @@ const options = {
             regionalDistrictName: "Regional district",
             submissionInboxSetUp: "Accepting submissions",
           },
-          submissionEmailConfirmed: {
-            heading: "Email confirmed!",
-            description: "You will start to receive permit applications shortly",
-          },
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
@@ -1329,6 +1325,10 @@ const options = {
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
             collaboration: "Collaboration",
           },
+          emailConfirmed: {
+            heading: "Email confirmed!",
+            description: "You will receive updates and notifications at the confirmed email address.",
+          },
           inApp: "In-App",
           email: "Email",
           // Leave in snake case so we can use: t(`user.roles.${role}`)
@@ -1761,6 +1761,7 @@ const options = {
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
+            acceptInvitation: "Accept invitation",
           },
         },
         automatedCompliance: {

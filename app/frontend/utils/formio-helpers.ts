@@ -13,6 +13,12 @@ export const singleRequirementFormJson = (requirementJson: IFormIORequirement): 
   }
 }
 
+export const isNonRequirementKey = (key: string) => {
+  const nonRequirementSuffixes = ["revision-button", "change-marker"]
+
+  return nonRequirementSuffixes.some((suf) => key.endsWith(suf))
+}
+
 export const singleRequirementSubmissionData = (submissionData: any, requirementKey: string) => {
   const sectionKey = Object.keys(submissionData.data).find((sk) => submissionData.data[sk][requirementKey])
   if (!sectionKey) return { data: { [requirementKey]: null } }
