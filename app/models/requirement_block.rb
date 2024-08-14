@@ -1,5 +1,6 @@
 class RequirementBlock < ApplicationRecord
   include HtmlSanitizeAttributes
+  include Discard::Model
 
   sanitizable :display_description
   searchkick searchable: %i[name requirement_labels associations configurations],
