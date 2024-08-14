@@ -3,8 +3,15 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ENotificationActionType } from "../types/enums"
-import { ILinkData, INotification, IPermitNotificationObjectData, IUserPushPayload } from "../types/types"
+import { ECollaborationType, ENotificationActionType } from "../types/enums"
+import {
+  ILinkData,
+  INotification,
+  IPermitBlockStatusReadyNotificationObjectData,
+  IPermitCollaborationNotificationObjectData,
+  IPermitNotificationObjectData,
+  IUserPushPayload,
+} from "../types/types"
 
 export const NotificationStoreModel = types
   .model("NotificationStoreModel")
@@ -41,7 +48,6 @@ export const NotificationStoreModel = types
       let objectData = notification.objectData
       const draftFilterUriComponent = encodeURIComponent(self.rootStore.permitApplicationStore.draftStatuses.join(","))
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
-        objectData = objectData as IPermitNotificationObjectData
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
@@ -63,7 +69,6 @@ export const NotificationStoreModel = types
 
         return linkData
       } else if (notification.actionType === ENotificationActionType.customizationUpdate) {
-        objectData = objectData as IPermitNotificationObjectData
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
@@ -74,6 +79,40 @@ export const NotificationStoreModel = types
                 message: t("permitApplication.reviewCustomizedMessage"),
               })
             )}`,
+          },
+        ]
+      } else if (
+        [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.submissionCollaborationUnassignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationUnassignment,
+        ].includes(notification.actionType)
+      ) {
+        const collaborationData = objectData as IPermitCollaborationNotificationObjectData
+        return [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+        ].includes(notification.actionType)
+          ? [
+              {
+                text: t("ui.show"),
+                href:
+                  notification.actionType === ENotificationActionType.submissionCollaborationAssignment
+                    ? `/permit-applications/${collaborationData.permitApplicationId}/edit`
+                    : `/permit-applications/${collaborationData.permitApplicationId}`,
+              },
+            ]
+          : []
+      } else if (notification.actionType === ENotificationActionType.permitBlockStatusReady) {
+        const collaborationData = objectData as IPermitBlockStatusReadyNotificationObjectData
+        return [
+          {
+            text: t("ui.show"),
+            href:
+              collaborationData?.collaborationType === ECollaborationType.review
+                ? `/permit-applications/${collaborationData.permitApplicationId}`
+                : `/permit-applications/${collaborationData.permitApplicationId}/edit`,
           },
         ]
       } else if (

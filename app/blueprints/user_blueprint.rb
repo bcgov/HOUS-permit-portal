@@ -2,7 +2,7 @@ class UserBlueprint < Blueprinter::Base
   identifier :id
 
   view :minimal do
-    fields :email, :role, :first_name, :last_name, :organization, :certified, :discarded_at
+    fields :email, :role, :first_name, :last_name, :organization, :certified, :confirmed_at, :discarded_at
   end
 
   view :base do
@@ -12,7 +12,6 @@ class UserBlueprint < Blueprinter::Base
            :omniauth_email,
            :omniauth_provider,
            :created_at,
-           :confirmed_at,
            :confirmation_sent_at,
            :discarded_at,
            :last_sign_in_at

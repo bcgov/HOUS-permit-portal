@@ -1,0 +1,2 @@
+class PermitCollaborationError < StandardError
+end

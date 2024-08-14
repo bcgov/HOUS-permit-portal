@@ -170,6 +170,12 @@ export enum ENumberUnit {
   cad = "cad",
 }
 
+export enum EPermitBlockStatus {
+  draft = "draft",
+  inProgress = "in_progress",
+  ready = "ready",
+}
+
 export enum EStepCodeChecklistStage {
   preConstruction = "pre_construction",
   midConstruction = "mid_construction",
@@ -303,6 +309,7 @@ export enum ESocketEventTypes {
 export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
+  updatePermitBlockStatus = "update_permit_block_status",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -375,7 +382,27 @@ export enum ENotificationActionType {
   publishedTemplateMissingRequirementsMapping = "published_template_missing_requirements_mapping",
   scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
+  submissionCollaborationAssignment = "submission_collaboration_assignment",
+  submissionCollaborationUnassignment = "submission_collaboration_unassignment",
+  reviewCollaborationAssignment = "review_collaboration_assignment",
+  reviewCollaborationUnassignment = "review_collaboration_unassignment",
+  permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
   applicationView = "application_view",
+}
+
+export enum ECollaboratorableType {
+  Jurisdiction = "Jurisdiction",
+  User = "User",
+}
+
+export enum ECollaborationType {
+  submission = "submission",
+  review = "review",
+}
+
+export enum ECollaboratorType {
+  delegatee = "delegatee",
+  assignee = "assignee",
 }

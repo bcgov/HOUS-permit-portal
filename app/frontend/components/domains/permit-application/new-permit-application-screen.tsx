@@ -263,11 +263,11 @@ export const PinModeInputs = ({ disabled }) => {
                 <InputGroup w="full">
                   <JurisdictionSelect
                     onChange={(value) => {
-                      addJurisdiction(value)
+                      if (value) addJurisdiction(value)
                       onChange(value)
                     }}
                     onFetch={() => setValue("jurisdiction", null)}
-                    selectedOption={{ label: value?.reverseQualifiedName, value }}
+                    selectedOption={value ? { label: value?.reverseQualifiedName, value } : null}
                     menuPortalTarget={document.body}
                   />
                 </InputGroup>
