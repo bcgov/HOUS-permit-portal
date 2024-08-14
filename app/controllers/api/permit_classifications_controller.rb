@@ -25,6 +25,11 @@ class Api::PermitClassificationsController < Api::ApplicationController
             :activity_id
           ].present?
 
+          query =
+            query.where(first_nations: classification_option_params[:first_nations]) if !classification_option_params[
+            :first_nations
+          ].nil?
+
           # &:activities or &:permit_types
           query.map(&classification_option_params[:type].underscore.to_sym).uniq
         else
@@ -42,6 +47,6 @@ class Api::PermitClassificationsController < Api::ApplicationController
   private
 
   def classification_option_params
-    params.permit(%i[type pid published permit_type_id activity_id jurisdiction_id])
+    params.permit(%i[type pid published permit_type_id activity_id jurisdiction_id first_nations])
   end
 end

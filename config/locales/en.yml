@@ -33,6 +33,8 @@ en:
       contact:
         cell: "Mobile no."
         phone: "Phone no."
+      requirement_template:
+        first_nations: "First Nations"
     errors:
       models:
         site_configuration:
@@ -55,6 +57,7 @@ en:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
+          nonunique_classification: "There can only be one Requirement Template per permit type, activity, and first nations combination"
         requirement_block:
           attributes:
             requirements:

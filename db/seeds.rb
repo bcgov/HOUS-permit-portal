@@ -173,6 +173,9 @@ if PermitApplication.first.blank?
     RequirementsFromXlsxSeeder.seed_medium
   end
 
+  # Remove any invalid records that prevent saving of the template
+  RequirementBlock.find_each { |block| block.destroy unless block.valid? }
+
   # Energy Step Code Reference Tables
   StepCode::MEUIReferencesSeeder.seed!
   StepCode::TEDIReferencesSeeder.seed!
