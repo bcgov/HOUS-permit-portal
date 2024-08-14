@@ -34,6 +34,7 @@ class RequirementBlock < ApplicationRecord
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,
+      discarded: discarded_at.present?,
     }
   end
 
