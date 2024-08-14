@@ -64,7 +64,7 @@ module Api::Concerns::Search::PermitApplications
         status: %i[newly_submitted resubmitted],
       }
     else
-      where = { submitter_id: current_user.id }
+      where = { user_ids_with_submission_edit_permissions: current_user.id }
     end
     ret = (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
 

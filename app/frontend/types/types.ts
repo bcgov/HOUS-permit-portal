@@ -1,10 +1,13 @@
 import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
+import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  ECollaborationType,
+  ECollaboratorType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
   EEnergyStep,
@@ -270,6 +273,18 @@ export interface IPermitNotificationObjectData {
   // Add future notification data here
 }
 
+export interface IPermitCollaborationNotificationObjectData {
+  permitApplicationId?: string
+  collaboratorType?: ECollaboratorType
+  assignedRequirementBlockName?: string
+}
+
+export interface IPermitBlockStatusReadyNotificationObjectData {
+  permitApplicationId?: string
+  collaborationType: ECollaborationType
+  requirementBlockName?: string
+}
+
 export interface IMissingRequirementsMappingNotificationObjectData {
   templateVersionId: string
 }
@@ -278,7 +293,10 @@ export interface INotification {
   id: string
   actionType: ENotificationActionType
   actionText: string
-  objectData?: IPermitNotificationObjectData | IMissingRequirementsMappingNotificationObjectData
+  objectData?:
+    | IPermitNotificationObjectData
+    | IMissingRequirementsMappingNotificationObjectData
+    | IPermitCollaborationNotificationObjectData
 }
 
 export interface ITemplateVersionUpdate {
@@ -288,6 +306,7 @@ export interface ITemplateVersionUpdate {
 export type TSocketEventData =
   | IPermitApplicationComplianceUpdate
   | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitBlockStatus
   | INotification
   | ITemplateVersionUpdate
 
@@ -482,6 +501,7 @@ export interface ISubmissionVersion {
   viewedAt?: Date
   createdAt: number
 }
+
 export interface IPermitTypeRequiredStep {
   id?: string
   default: boolean

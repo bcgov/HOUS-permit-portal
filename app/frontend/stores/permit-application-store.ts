@@ -8,6 +8,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
+import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IUser } from "../models/user"
 import {
   ECustomEvents,
@@ -91,6 +92,12 @@ export const PermitApplicationStoreModel = types
           self.rootStore.templateVersionStore.mergeUpdate(pad.templateVersion, "templateVersionMap")
         pad.publishedTemplateVersion &&
           self.rootStore.templateVersionStore.mergeUpdate(pad.publishedTemplateVersion, "templateVersionMap")
+        pad.permitCollaborations &&
+          self.rootStore.collaboratorStore.mergeUpdateAll(
+            // @ts-ignore
+            R.map(R.prop("collaborator"), pad.permitCollaborations),
+            "collaboratorMap"
+          )
       }
 
       return R.mergeRight(pad, {
@@ -138,6 +145,18 @@ export const PermitApplicationStoreModel = types
           permitApplicationsData.map((pa) => pa.stepCode)
         ),
         "stepCodesMap"
+      )
+
+      self.rootStore.collaboratorStore.mergeUpdateAll(
+        // @ts-ignore
+        R.pipe(
+          R.map(R.prop("permitCollaborations")),
+          R.reject(R.isNil),
+          R.flatten,
+          R.map(R.prop("collaborator")),
+          R.uniqBy((c) => c.id)
+        )(permitApplicationsData),
+        "collaboratorMap"
       )
 
       // Already merged associations here.
@@ -213,9 +232,9 @@ export const PermitApplicationStoreModel = types
       }
       return response.ok
     }),
-    fetchPermitApplication: flow(function* (id: string) {
+    fetchPermitApplication: flow(function* (id: string, review?: boolean) {
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
-      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
+      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id, review)
       if (ok && response.data) {
         const permitApplication = response.data
 
@@ -263,6 +282,9 @@ export const PermitApplicationStoreModel = types
 
           self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
           break
+        case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
+          payloadData = payload.data as IPermitBlockStatus
+          self.permitApplicationMap.get(payloadData?.permitApplicationId)?.updatePermitBlockStatus(payloadData)
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }
