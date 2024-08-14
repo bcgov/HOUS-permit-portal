@@ -26,27 +26,15 @@ services:
       - .:/app
     ports:
       - "3000:3000"
+      - "3036:3036"
     depends_on:
       - postgres
       - redis
       - elasticsearch
     environment:
       <<: *default-env-vars
-    command: bash -c "rm -f tmp/pids/server.pid && ./bin/rails server -b '0.0.0.0'"
-
-  vite:
-    image: hous-permit-portal-dev:latest
-    pull_policy: "never"
-    working_dir: /app
-    volumes:
-      - .:/app
-    command: "./bin/vite dev"
-    environment:
-      VITE_RUBY_HOST: "0.0.0.0"
-    ports:
-      - "3036:3036"
-    depends_on:
-      - app
+      VITE_RUBY_HOST: "0.0.0.0" # run vite in the same service for easy access, and HMR
+    command: bash -c "rm -f tmp/pids/server.pid && ./bin/rails server -b '0.0.0.0' & ./bin/vite dev"
 
   sidekiq:
     image: hous-permit-portal-dev:latest
