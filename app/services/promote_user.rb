@@ -29,10 +29,11 @@ class PromoteUser
         ],
       )
     jurisdiction_ids = existing_user.jurisdiction_ids + invited_user.jurisdiction_ids
-    existing_user.assign_attributes(invited_user_params.merge({ jurisdiction_ids: }))
+    existing_user.assign_attributes(invited_user_params)
     if existing_user.valid?
       ActiveRecord::Base.transaction do
         invited_user.destroy!
+        existing_user.jurisdiction_ids = jurisdiction_ids
         existing_user.save!
       end
     end

@@ -87,17 +87,16 @@ const FormComponent = function ApplicationPDFFormComponent({
   switch (component.type) {
     case EComponentType.container: {
       dataPath = [component.key]
-      const componentFields = fields(component.components || component.columns)
+      const { components, columns } = component
+      const componentFields = fields(components || columns)
       const isValid = !R.isEmpty(component.title.trim()) && componentFields.length > 0
       if (!isValid) return null
-      const { components } = component
       const firstChild: any = R.head(components)
       const additionalChildren: any = R.tail(components)
-      const firstChildFields = fields(firstChild.components)
 
       return (
         <View>
-          <View wrap={firstChildFields.length > 6}>
+          <View>
             <ContainerHeader component={component} />
             <FormComponent component={firstChild} dataPath={dataPath} permitApplication={permitApplication} />
           </View>
@@ -113,7 +112,6 @@ const FormComponent = function ApplicationPDFFormComponent({
       )
     }
     case EComponentType.panel: {
-      const numFields = fields(component.components).length
       return (
         <View
           style={{
@@ -121,7 +119,6 @@ const FormComponent = function ApplicationPDFFormComponent({
             marginBottom: 24,
             width: "100%",
           }}
-          wrap={numFields > 5}
         >
           <PanelHeader component={component} />
           {component.components && (
