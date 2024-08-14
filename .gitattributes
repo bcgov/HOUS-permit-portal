@@ -2,7 +2,12 @@ db/templates/Core[[:space:]]Permit[[:space:]]Requirements[[:space:]]List.xlsx fi
 
 # Force LF line endings for all Ruby files
 *.rb text eol=lf
+
 # Force LF line endings for shell scripts
 *.sh text eol=lf
+
+# Force LF line endings for all files in the bin directory
+bin/* text eol=lf
+
 # Automatically normalize text files
 * text=auto
