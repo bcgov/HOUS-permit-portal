@@ -1,10 +1,11 @@
 class PermitApplication::FormJsonService
   attr_accessor :form_json
-  attr_reader :permit_application
+  attr_reader :permit_application, :current_user
 
-  def initialize(permit_application:)
+  def initialize(permit_application:, current_user: nil)
     @permit_application = permit_application
     @form_json = permit_application.template_version.form_json.deep_dup
+    @current_user = current_user
   end
 
   def call
@@ -83,5 +84,18 @@ class PermitApplication::FormJsonService
           rb_id unless any_enabled_elective_field_valid
         end
         .compact
+
+    # If the user is not passed in then we don't remove requirement blocks based on further collaboration permissions.
+    return @empty_block_ids if current_user.blank?
+
+    permissions = permit_application.submission_requirement_block_edit_permissions(user_id: current_user.id)
+
+    return @empty_block_ids if permissions == :all
+
+    requirement_block_ids = permit_application&.template_version&.requirement_blocks_json&.keys || []
+
+    @empty_block_ids = (@empty_block_ids + (requirement_block_ids - permissions)).uniq
+
+    @empty_block_ids
   end
 end

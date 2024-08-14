@@ -132,6 +132,7 @@ const options = {
           },
         },
         ui: {
+          okay: "Okay",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
@@ -230,6 +231,7 @@ const options = {
           customize: "Customize",
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
+          proceed: "Proceed",
         },
         notification: {
           title: "Notifications",
@@ -328,10 +330,6 @@ const options = {
             regionalDistrictName: "Regional district",
             submissionInboxSetUp: "Accepting submissions",
           },
-          submissionEmailConfirmed: {
-            heading: "Email confirmed!",
-            description: "You will start to receive permit applications shortly",
-          },
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
@@ -350,7 +348,85 @@ const options = {
           search: "Search jurisdictions",
           view: "View Jurisdiction",
         },
+        permitCollaboration: {
+          status: "Status",
+          blockStatus: {
+            draft: "Draft",
+            in_progress: "In progress",
+            ready: "Ready",
+          },
+          sidebar: {
+            triggerButton: "Collaborators ({{count}})",
+            title: "Collaborators",
+            description: {
+              submission:
+                "Collaborators can be invited to work on the different areas of the permit application form. Only the author can manage collaborators.",
+              review: "Collaborators can be invited to work on the different areas of the permit application form.",
+            },
+            howItWorksTitle: "How it works",
+            howItWorksDescription: {
+              submission:
+                "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
+              review:
+                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to “Ready”. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
+            },
+            designatedSubmitters: "Designated submitter(s)",
+            designatedReviewers: "Designated reviewer(s)",
+            authorCanSubmitWithOrganization:
+              "Author of this application is also allowed to submit: <1>{{author}}</1> ({{organization}}).",
+            authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
+            assignees: "Assignee(s)",
+            assigneeHelperText:
+              "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
+            noDesignatedSubmitters: "None assigned",
+            assignedTo: "Assigned to",
+            assigneeEmail: "Email:",
+            removeCollaboratorModal: {
+              triggerButton: "Remove collaborator",
+              title: "Are you sure you want to remove this collaborator?",
+              body: "This action cannot be undone.",
+            },
+          },
+          popover: {
+            triggerButton: "Assign ({{count}})",
+            designatedSubmitterChangeButton: "Change",
+            collaborations: {
+              title: "Collaborators",
+              assignButton: "Assign",
+              unassignButton: "Unassign",
+              unconfirmed: "Unconfirmed.",
+              resendInvite: "Resend invite?",
+              inEligibleForReInvite: "Ineligible for re-invite.",
+            },
+            assignment: {
+              title: "Assign collaborator",
+              noneAssigned: "None assigned",
+              inviteWarning: {
+                title: "Assign a collaborator?",
+                body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
+              },
+              newContactButton: "New contact",
+              noResultsText: {
+                invitable: "No results found. Invite new collaborators by clicking the button above.",
+                default: "No results found.",
+              },
+
+              unassiggn: "Unselect",
+            },
+            collaboratorInvite: {
+              title: "New contact",
+              inviteButton: "Invite collaborator",
+            },
+          },
+        },
         permitApplication: {
+          submissionBlockModal: {
+            title: "Trying to submit this application?",
+            description:
+              "Only the designated submitter or the author can submit this permit application. Please contact that person to continue.",
+            designatedSubmitter: "Designated submitter",
+            author: "Author",
+          },
           browserSearch: {
             prompt: "Find specific form fields by using your web browser search: press keyboard shortcut",
             windows: "Windows: <1>Ctrl</1> + <1>F</1>",
@@ -365,6 +441,12 @@ const options = {
           reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
           reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
           newVersionPublished: "New version of template has been published - please review changes",
+          card: {
+            collaborateButton: "Collaborate",
+            collaborationCalloutDraft:
+              "<1>{{authorName}} has assigned you to this permit.</1> Collaborate on this permit application.",
+            collaborationCalloutSubmitted: "<1>{{authorName}} assigned you to this permit.</1>",
+          },
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
@@ -489,6 +571,8 @@ const options = {
           show: {
             wasSubmitted: "Application was submitted on {{ date }} to {{ jurisdictionName }}",
             submittingTo: "You're applying to the {{ jurisdictionName }}",
+            versionDiffContactWarning:
+              "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
@@ -1062,7 +1146,7 @@ const options = {
         home: {
           jurisdictionsTitle: "Jurisdictions",
           siteConfigurationTitle: "Configuration management",
-          jurisdictionsDescription:
+          jurisdictionsubription:
             "Administer Review Managers and their roles within local jurisdictions through the Building Permit Hub. This includes inviting or removing managers, managing overall jurisdictions, customizing community pages, and handling jurisdiction-specific settings.",
           permitTemplateCatalogueTitle: "Permit templates catalogue",
           reportingTitle: "Reporting",
@@ -1242,6 +1326,11 @@ const options = {
             applicationSubmitted: "Application submitted to jurisdiction",
             applicationViewed: "Application viewed by jurisdiction",
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
+            collaboration: "Collaboration",
+          },
+          emailConfirmed: {
+            heading: "Email confirmed!",
+            description: "You will receive updates and notifications at the confirmed email address.",
           },
           inApp: "In-App",
           email: "Email",
@@ -1683,6 +1772,7 @@ const options = {
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
+            acceptInvitation: "Accept invitation",
           },
         },
         automatedCompliance: {

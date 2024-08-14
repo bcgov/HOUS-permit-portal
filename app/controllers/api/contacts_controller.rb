@@ -48,7 +48,7 @@ class Api::ContactsController < Api::ApplicationController
     if @contact.destroy
       render_success @contact, "contact.destroy_success", { blueprint: ContactBlueprint }
     else
-      render_error "contact.destroy_success", message_opts: { error_message: @contact.errors.full_messages.join(", ") }
+      render_error "contact.destroy_error", message_opts: { error_message: @contact.errors.full_messages.join(", ") }
     end
   end
 

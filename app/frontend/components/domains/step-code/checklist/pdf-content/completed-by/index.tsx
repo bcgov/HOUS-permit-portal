@@ -15,6 +15,7 @@ import { VStack } from "../shared/v-stack"
 interface IProps {
   checklist: IStepCodeChecklist
 }
+
 export const CompletedBy = function StepCodeChecklistPDFCompletedBy({ checklist }: IProps) {
   return (
     <Panel heading={t(`${i18nPrefix}.heading`)} break>
@@ -30,7 +31,15 @@ export const CompletedBy = function StepCodeChecklistPDFCompletedBy({ checklist 
           width: "100%",
         }}
       >
-        <Text style={{ fontWeight: "bold", fontSize: 12, marginBottom: 6 }}>{t(`${i18nPrefix}.energyAdvisor`)}</Text>
+        <Text
+          style={{
+            fontWeight: "bold",
+            fontSize: 12,
+            marginBottom: 6,
+          }}
+        >
+          {t(`${i18nPrefix}.energyAdvisor`)}
+        </Text>
         <HStack style={{ width: "100%" }}>
           <Field label={t(`${i18nPrefix}.name`)} value={checklist.completedBy} style={{ flex: 1 }} />
           <Field label={t(`${i18nPrefix}.company`)} value={checklist.completedByCompany} style={{ flex: 1 }} />

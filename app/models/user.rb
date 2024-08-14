@@ -30,6 +30,8 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
   has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
+  has_many :collaborations, foreign_key: "user_id", class_name: "Collaborator", dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
@@ -41,10 +43,13 @@ class User < ApplicationRecord
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
+  after_create :create_jurisdiction_collaborator
+  after_save :create_jurisdiction_collaborator, if: -> { saved_change_to_role? || saved_change_to_discarded_at? }
   before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
+  attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
 
   def confirmation_required?
     false
@@ -105,6 +110,26 @@ class User < ApplicationRecord
 
   def role_name
     role.gsub("_", " ")
+  end
+
+  def blueprint
+    UserBlueprint
+  end
+
+  def set_collaboration_invitation(permit_collaboration)
+    self.collaboration_invitation = { permit_collaboration: permit_collaboration }
+  end
+
+  def create_jurisdiction_collaborator
+    return unless review_staff? && discarded_at.blank?
+
+    jurisdictions.each do |jurisdiction|
+      existing_collaborator = jurisdiction.collaborators.find_by_user_id(id)
+
+      next if existing_collaborator.present?
+
+      jurisdiction.collaborators.create(user: self)
+    end
   end
 
   private

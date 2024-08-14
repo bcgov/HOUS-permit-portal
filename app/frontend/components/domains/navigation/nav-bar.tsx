@@ -174,7 +174,7 @@ export const NavBar = observer(function NavBar() {
           </Flex>
         </Container>
       </Box>
-      {!R.isEmpty(criticalNotifications) && criticalNotifications.map((cn) => <ActionRequiredBox notification={cn} />)}
+      {!R.isEmpty(criticalNotifications) && <ActionRequiredBox notification={criticalNotifications[0]} />}
 
       {!shouldHideSubNavbarForPath(path) && loggedIn && <SubNavBar />}
     </PopoverProvider>
