@@ -99,7 +99,7 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
         }.to change(RequirementTemplate, :count).by(1)
 
         expect(response).to have_http_status(:success)
-        new_template = RequirementTemplate.last
+        new_template = RequirementTemplate.order(created_at: :asc).last
         # For some reason this spec is prone to failing on github action
         expect(new_template.description).to eq("a copied template with first nations")
         expect(new_template.requirement_template_sections.map(&:name)).to match_array(

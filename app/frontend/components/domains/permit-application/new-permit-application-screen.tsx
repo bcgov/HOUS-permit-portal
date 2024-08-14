@@ -165,7 +165,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                         onChange={(e) => {
                           return onChange(e === "true")
                         }}
-                        value={value ? "true" : "false"}
+                        value={R.isNil(value) ? null : value ? "true" : "false"}
                       >
                         <Radio value="true">{t("ui.yes")}</Radio>
                         <Radio value="false" ml={4}>
