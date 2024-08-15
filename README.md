@@ -49,7 +49,7 @@ After installation run both the `anycable-go` websocket server as well as the RP
 
 ### Notorius - Digital Seal Validation
 
-- For local development, ensure you have the right test endpoint.  The dev / test / production environments are set up with a licensed version running in its own container.
+- For local development, ensure you have the right test endpoint. The dev / test / production environments are set up with a licensed version running in its own container.
 
 ### Local - File storage setup
 
@@ -152,3 +152,11 @@ bundle exec rspec
 Some other notes
 
 - For digital seal tests, the we have not uploaded documents with the real document to the repo, but captured the request responses
+
+## ERD generation
+
+- To generate up to date erd diagrams, make sure you have graphiviz installed locally
+
+```
+bundle exec erd
+```
