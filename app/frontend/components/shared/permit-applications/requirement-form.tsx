@@ -1,10 +1,11 @@
-import { Box, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Center, Flex, Link, Text, useDisclosure } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import * as R from "ramda"
 import React, { useEffect, useRef, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -377,8 +378,39 @@ export const RequirementForm = observer(
             />
           ) : (
             <CustomMessageBox
-              description={t("permitApplication.show.submittingTo", { jurisdictionName: jurisdiction.qualifiedName })}
+              title={t("permitApplication.show.submittingTo.title", { jurisdictionName: jurisdiction.qualifiedName })}
+              description={
+                <Trans
+                  t={t}
+                  i18nKey={"permitApplication.show.submittingTo.description"}
+                  components={{
+                    1: (
+                      <Button
+                        sx={{
+                          span: {
+                            ml: 0,
+                          },
+                        }}
+                        as={Link}
+                        rightIcon={<ArrowSquareOut />}
+                        href={
+                          "https://www2.gov.bc.ca/gov/content/governments/local-governments/planning-land-use/land-use-regulation/zoning-bylaws"
+                        }
+                        variant={"link"}
+                        target="_blank"
+                        color={"text.primary !important"}
+                        rel="noopener noreferrer"
+                      />
+                    ),
+                  }}
+                />
+              }
               status="info"
+              headingProps={{
+                fontSize: "md !important",
+                mb: 0,
+              }}
+              fontSize={"sm"}
             />
           )}
 
@@ -395,7 +427,7 @@ export const RequirementForm = observer(
             form={formattedFormJson}
             formReady={formReady}
             /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        can't be mutated*/
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}
