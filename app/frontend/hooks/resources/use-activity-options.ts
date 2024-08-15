@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { IPermitType } from "../../models/permit-classification"
+import { IActivity } from "../../models/permit-classification"
 import { useMst } from "../../setup/root"
 import { IOption } from "../../types/types"
 
@@ -8,7 +8,7 @@ export function useActivityOptions({ customErrorMessage }: { customErrorMessage?
   const { t } = useTranslation()
   const { permitClassificationStore } = useMst()
   const { fetchActivityOptions } = permitClassificationStore
-  const [activityOptions, setActivityOptions] = React.useState<IOption<IPermitType>[] | null>(null)
+  const [activityOptions, setActivityOptions] = React.useState<IOption<IActivity>[] | null>(null)
   const [error, setError] = React.useState<Error | undefined>()
 
   useEffect(() => {

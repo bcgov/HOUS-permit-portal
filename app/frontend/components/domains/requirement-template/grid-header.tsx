@@ -18,7 +18,7 @@ export const GridHeaders = observer(function GridHeaders() {
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
-          gridColumn={"span 6"}
+          gridColumn={"span 7"}
           p={6}
           bg={"greys.grey10"}
           justifyContent={"space-between"}

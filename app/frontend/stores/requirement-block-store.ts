@@ -45,6 +45,8 @@ export const RequirementBlockStoreModel = types
       switch (field) {
         case ERequirementLibrarySortFields.name:
           return t("requirementsLibrary.fields.name")
+        case ERequirementLibrarySortFields.firstNations:
+          return t("requirementsLibrary.fields.firstNations")
         case ERequirementLibrarySortFields.associations:
           return t("requirementsLibrary.fields.associations")
         case ERequirementLibrarySortFields.requirementLabels:
