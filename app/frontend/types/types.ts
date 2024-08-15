@@ -273,6 +273,14 @@ export interface IPermitNotificationObjectData {
   // Add future notification data here
 }
 
+export interface IRequirementTemplateNotificationObjectData {
+  requirementTemplateId?: string
+}
+
+export interface ITemplateVersionNotificationObjectData {
+  templateVersionId?: string
+}
+
 export interface IPermitCollaborationNotificationObjectData {
   permitApplicationId?: string
   collaboratorType?: ECollaboratorType
@@ -297,6 +305,8 @@ export interface INotification {
     | IPermitNotificationObjectData
     | IMissingRequirementsMappingNotificationObjectData
     | IPermitCollaborationNotificationObjectData
+    | ITemplateVersionNotificationObjectData
+    | IRequirementTemplateNotificationObjectData
 }
 
 export interface ITemplateVersionUpdate {

@@ -241,7 +241,6 @@ GEM
       thor
       tilt
     hashie (5.0.0)
-    hiredis (0.6.3)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     image_processing (1.12.2)
@@ -482,14 +481,13 @@ GEM
       concurrent-ruby (~> 1.0, >= 1.0.5)
       sidekiq (>= 7.0.0, < 8.0.0)
       thor (>= 1.0, < 3.0)
-    simple-feed (3.1.2)
+    simple-feed (3.2.0)
       activesupport
       awesome_print
       base62-rb
       colored2
       connection_pool (~> 2)
       hashie
-      hiredis
       redis
       sorted_set
       tty-box
@@ -634,7 +632,7 @@ DEPENDENCIES
   sidekiq (~> 7.2.4)
   sidekiq-cron (~> 1.12)
   sidekiq-unique-jobs (~> 8.0)
-  simple-feed (~> 3.1.2)
+  simple-feed (~> 3.2.0)
   syntax_tree (~> 6.2)
   syntax_tree-haml (~> 4.0)
   syntax_tree-rbs (~> 1.0)
