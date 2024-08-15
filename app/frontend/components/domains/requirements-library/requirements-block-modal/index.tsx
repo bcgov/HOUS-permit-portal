@@ -8,9 +8,11 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Tag,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
+import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -36,12 +38,14 @@ interface IRequirementsBlockProps {
   requirementBlock?: IRequirementBlock | IDenormalizedRequirementBlock
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
+  withOptionsMenu?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   requirementBlock,
   showEditWarning,
   triggerButtonProps,
+  withOptionsMenu,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
@@ -180,8 +184,29 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         <Modal onClose={handleClose} isOpen>
           <ModalOverlay />
           <FormProvider {...formProps}>
-            <ModalContent as={"form"} w={"min(1170px, 95%)"} maxW={"full"} py={9}>
+            <ModalContent as={"form"} w={"min(1170px, 95%)"} maxW={"full"} py={9} pb={12}>
               <ModalCloseButton fontSize={"11px"} />
+              {(requirementBlock as IRequirementBlock)?.isDiscarded && (
+                <Tag
+                  borderRadius="sm"
+                  border="1px solid"
+                  borderColor={"semantic.error"}
+                  backgroundColor={"semantic.errorLight"}
+                  w={"fit-content"}
+                  py={1}
+                  px={2}
+                  color={"semantic.error"}
+                  ml={"2.75rem"}
+                  mb={2}
+                >
+                  <HStack>
+                    <Archive />
+                    <Text textTransform={"capitalize"} fontSize={"sm"}>
+                      {t("requirementsLibrary.modals.archived")}
+                    </Text>
+                  </HStack>
+                </Tag>
+              )}
               <ModalHeader display={"flex"} justifyContent={"space-between"} p={0} px={"2.75rem"}>
                 <Text as={"h2"} fontSize={"2xl"}>
                   {t(`requirementsLibrary.modals.${requirementBlock ? "edit" : "create"}.title`)}
@@ -191,7 +216,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                     variant={"primary"}
                     isDisabled={isSubmitting || !isValid}
                     isLoading={isSubmitting}
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleSubmit(onSubmit)()
+                    }}
                   >
                     {t("ui.onlySave")}
                   </Button>
@@ -205,7 +233,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.editWarning")} />
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
-                  <BlockSetup />
+                  <BlockSetup
+                    requirementBlock={
+                      (requirementBlock as IRequirementBlock)?.restore
+                        ? (requirementBlock as IRequirementBlock)
+                        : undefined
+                    }
+                    withOptionsMenu={withOptionsMenu}
+                  />
                   <FieldsSetup requirementBlock={requirementBlock} />
                 </HStack>
               </ModalBody>
