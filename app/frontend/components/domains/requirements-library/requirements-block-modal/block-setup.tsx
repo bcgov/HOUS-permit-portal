@@ -14,15 +14,23 @@ import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
+import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
 
 const helperTextStyles: Partial<TextProps> = {
   color: "border.base",
 }
 
-export const BlockSetup = observer(function BlockSetup() {
+export const BlockSetup = observer(function BlockSetup({
+  requirementBlock,
+  withOptionsMenu,
+}: {
+  requirementBlock?: IRequirementBlock
+  withOptionsMenu?: boolean
+}) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
   const { register, control, watch } = useFormContext<IRequirementBlockForm>()
@@ -122,6 +130,9 @@ export const BlockSetup = observer(function BlockSetup() {
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
         </FormControl>
+        {requirementBlock && withOptionsMenu && (
+          <BlockSetupOptionsMenu requirementBlock={requirementBlock} searchModel={requirementBlockStore} />
+        )}
       </VStack>
     </Box>
   )

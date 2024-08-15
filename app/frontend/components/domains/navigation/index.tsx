@@ -257,6 +257,7 @@ const AppRoutes = observer(() => {
   const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
+  const enableStepCodeRoute = location.state?.enableStepCodeRoute
 
   const { currentUser } = userStore
   const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
@@ -465,7 +466,7 @@ const AppRoutes = observer(() => {
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
-      {background && (
+      {enableStepCodeRoute && (
         <Routes>
           <Route path="/permit-applications/:permitApplicationId/edit/step-code" element={<StepCodeForm />} />
         </Routes>

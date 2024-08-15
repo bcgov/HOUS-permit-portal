@@ -230,6 +230,14 @@ export class Api {
     return this.client.put<IRequirementBlockResponse>(`/requirement_blocks/${id}`, { requirementBlock: params })
   }
 
+  async archiveRequirementBlock(id: string) {
+    return this.client.delete<IRequirementBlockResponse>(`/requirement_blocks/${id}`)
+  }
+
+  async restoreRequirementBlock(id: string) {
+    return this.client.post<IRequirementBlockResponse>(`/requirement_blocks/${id}/restore`)
+  }
+
   async updateProfile(params) {
     return this.client.patch<ApiResponse<IUser>>("/profile", { user: params })
   }

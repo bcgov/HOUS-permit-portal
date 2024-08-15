@@ -111,6 +111,7 @@ export const RequirementBlockStoreModel = types
           query: self.query,
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
+          showArchived: self.showArchived,
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )

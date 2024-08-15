@@ -10,6 +10,8 @@ import {
   IPermitBlockStatusReadyNotificationObjectData,
   IPermitCollaborationNotificationObjectData,
   IPermitNotificationObjectData,
+  IRequirementTemplateNotificationObjectData,
+  ITemplateVersionNotificationObjectData,
   IUserPushPayload,
 } from "../types/types"
 
@@ -51,7 +53,7 @@ export const NotificationStoreModel = types
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${(objectData as IRequirementTemplateNotificationObjectData).requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewOutdatedTitle"),
@@ -63,7 +65,7 @@ export const NotificationStoreModel = types
         if (currentUser.isManager) {
           linkData.push({
             text: t("permitApplication.reviewUpdatedEditLink"),
-            href: `/digital-building-permits/${objectData.templateVersionId}/edit?compare=true`,
+            href: `/digital-building-permits/${(objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit?compare=true`,
           })
         }
 
@@ -72,7 +74,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${(objectData as IRequirementTemplateNotificationObjectData).requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewCustomizedTitle"),
@@ -124,7 +126,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: "View integration mapping",
-            href: `/api-settings/api-mappings/digital-building-permits/${objectData.templateVersionId}/edit`,
+            href: `/api-settings/api-mappings/digital-building-permits/${(objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit`,
           },
         ]
       } else if (
