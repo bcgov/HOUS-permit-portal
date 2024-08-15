@@ -638,6 +638,7 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            archived: "Archived",
             unlabeled: "Unlabeled",
             defaultContactLabel: "Contact",
             canAddMultipleContacts: "Submitter can add multiple contacts",
@@ -650,6 +651,11 @@ const options = {
             },
             edit: {
               title: "Edit requirement block",
+              options: "Options",
+              removeConfirmationModal: {
+                title: "Confirm you want to archive this requirement block.",
+                body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
+              },
             },
             clickToWriteDisplayName: "Click to write display name",
             blockSetupTitle: "Block setup",

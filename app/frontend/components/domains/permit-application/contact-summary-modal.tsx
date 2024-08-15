@@ -97,6 +97,8 @@ export const ContactSummaryModal = ({ isOpen, onOpen, onClose, permitApplication
 
 function EnergyAdvisor({ checklist }) {
   const { completedBy, completedByEmail, completedByPhone, completedByAddress } = checklist
+  if (!(completedBy || completedByEmail || completedByPhone || completedByAddress)) return <></>
+
   return (
     <Contact
       title={t("stepCodeChecklist.edit.completedBy.energyAdvisor")}

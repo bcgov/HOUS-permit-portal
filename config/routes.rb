@@ -51,7 +51,8 @@ Rails.application.routes.draw do
         to: "permit_type_submission_contacts#confirm",
         as: :permit_type_submission_contact_confirmation
 
-    resources :requirement_blocks, only: %i[create show update] do
+    resources :requirement_blocks, only: %i[create show update destroy] do
+      post "restore", on: :member, to: "requirement_blocks#restore"
       post "search", on: :collection, to: "requirement_blocks#index"
       get "auto_compliance_module_configurations",
           on: :collection,
