@@ -17,7 +17,7 @@ class PermitClassificationSeeder
         type: "PermitType",
       },
       {
-        name: "High density appartment buildings",
+        name: "High density apartment buildings",
         code: "high_residential",
         description: "Highest density residential structures",
         enabled: true,

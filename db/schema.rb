@@ -80,12 +80,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_07_205749) do
             name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
-  end
-
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -372,6 +366,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_07_205749) do
     t.string "sku"
     t.string "display_name", null: false
     t.string "display_description"
+    t.boolean "first_nations", default: false
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
@@ -400,6 +395,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_07_205749) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.datetime "discarded_at"
+    t.boolean "first_nations", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"],
             name: "index_requirement_templates_on_discarded_at"

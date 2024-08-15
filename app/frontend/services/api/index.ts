@@ -151,8 +151,9 @@ export class Api {
   async fetchPermitClassificationOptions(
     type,
     published = false,
-    permit_type_id: string = null,
-    activity_id: string = null,
+    firstNations = false,
+    permitTypeId: string = null,
+    activityId: string = null,
     pid: string = null,
     jurisdictionId: string = null
   ) {
@@ -161,8 +162,9 @@ export class Api {
       {
         type,
         published,
-        permit_type_id,
-        activity_id,
+        firstNations,
+        permitTypeId,
+        activityId,
         pid,
         jurisdictionId,
       }
@@ -582,6 +584,20 @@ export class Api {
   async downloadCustomizationCsv(templateVersionId: string, jurisdictionId: string) {
     return this.client.get<BlobPart>(
       `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/download_customization_csv`
+    )
+  }
+
+  async copyJurisdictionTemplateVersionCustomization(
+    templateVersionId: string,
+    jurisdictionId: string,
+    includeElectives: boolean,
+    includeTips: boolean,
+    fromNonFirstNations?: boolean,
+    fromTemplateVersionId?: string
+  ) {
+    return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/copy_jurisdiction_template_version_customization`,
+      { includeElectives, includeTips, fromTemplateVersionId, fromNonFirstNations }
     )
   }
 
