@@ -3,7 +3,7 @@
 class Api::RequirementBlocksController < Api::ApplicationController
   include Api::Concerns::Search::RequirementBlocks
 
-  before_action :set_requirement_block, only: %i[show update destroy]
+  before_action :set_requirement_block, only: %i[show update destroy restore]
   skip_after_action :verify_policy_scoped, only: [:index]
 
   def index
@@ -58,10 +58,23 @@ class Api::RequirementBlocksController < Api::ApplicationController
   def destroy
     authorize @requirement_block
 
-    if @requirement_block.destroy
-      render json: {}, status: :ok
+    if @requirement_block.discard
+      render_success @requirement_block, "requirement_block.destroy_success", { blueprint: RequirementBlockBlueprint }
     else
-      render_error "requirement_block.delete_error",
+      render_error "requirement_block.destroy_error",
+                   message_opts: {
+                     error_message: @requirement_block.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def restore
+    authorize @requirement_block
+
+    if @requirement_block.undiscard
+      render_success @requirement_block, "requirement_block.restore_success", { blueprint: RequirementBlockBlueprint }
+    else
+      render_error "requirement_block.restore_error",
                    message_opts: {
                      error_message: @requirement_block.errors.full_messages.join(", "),
                    }

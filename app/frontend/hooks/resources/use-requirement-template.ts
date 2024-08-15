@@ -20,17 +20,15 @@ export const useRequirementTemplate = () => {
       return
     }
 
-    if (!requirementTemplate || !requirementTemplate.isFullyLoaded) {
-      ;(async () => {
-        try {
-          const isSuccess = await requirementTemplateStore.fetchRequirementTemplate(requirementTemplateId)
+    ;(async () => {
+      try {
+        const isSuccess = await requirementTemplateStore.fetchRequirementTemplate(requirementTemplateId)
 
-          !isSuccess && setError(new Error(t("errors.fetchRequirementTemplate")))
-        } catch (e) {
-          setError(e instanceof Error ? e : new Error(t("errors.fetchRequirementTemplate")))
-        }
-      })()
-    }
+        !isSuccess && setError(new Error(t("errors.fetchRequirementTemplate")))
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(t("errors.fetchRequirementTemplate")))
+      }
+    })()
   }, [requirementTemplateId, requirementTemplate, pathname])
 
   return { requirementTemplate, error }

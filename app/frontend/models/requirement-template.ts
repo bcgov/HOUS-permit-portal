@@ -113,6 +113,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
+      setIsFullyLoaded(val: boolean) {
+        self.isFullyLoaded = val
+      },
       addDeprecatedTemplateVersionReference(templateVersionId: string) {
         self.deprecatedTemplateVersions.unshift(templateVersionId)
         self.deprecatedTemplateVersions.sort((a, b) => b.versionDate.getTime() - a.versionDate.getTime())

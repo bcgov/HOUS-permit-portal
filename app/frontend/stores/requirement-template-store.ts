@@ -92,6 +92,10 @@ export const RequirementTemplateStoreModel = types
       return response.ok
     }),
     fetchRequirementTemplate: flow(function* (id: string) {
+      const existingRequirementTemplate = self.requirementTemplateMap.get(id)
+
+      existingRequirementTemplate?.setIsFullyLoaded(false)
+
       const response = yield* toGenerator(self.environment.api.fetchRequirementTemplate(id))
 
       if (response.ok) {
@@ -99,7 +103,11 @@ export const RequirementTemplateStoreModel = types
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
 
-        return self.requirementTemplateMap.get(templateData.id)
+        const updatedRequirementTemplate = self.requirementTemplateMap.get(templateData.id)
+
+        updatedRequirementTemplate?.setIsFullyLoaded(true)
+
+        return updatedRequirementTemplate
       }
 
       return response.ok
