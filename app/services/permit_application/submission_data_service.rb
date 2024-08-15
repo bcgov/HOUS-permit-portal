@@ -55,15 +55,16 @@ class PermitApplication::SubmissionDataService
   private
 
   def filter_submission_data_based_on_user_permissions(submission_data:, user:)
-    return submission_data unless user.present?
+    formatted_data = submission_data&.deep_dup || { "data" => {} }
+    formatted_data["data"] ||= {}
 
-    formatted_data = submission_data.deep_dup
+    return formatted_data unless user.present?
 
     permissions = permit_application.submission_requirement_block_edit_permissions(user_id: user.id)
 
     return formatted_data if permissions == :all
 
-    return {} if permissions.blank?
+    return { "data" => {} } if permissions.blank?
 
     formatted_data["data"].each do |_section_key, section_values|
       section_values.delete_if do |key, _value|
