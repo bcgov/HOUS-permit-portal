@@ -570,7 +570,11 @@ const options = {
           },
           show: {
             wasSubmitted: "Application was submitted on {{ date }} to {{ jurisdictionName }}",
-            submittingTo: "You're applying to the {{ jurisdictionName }}",
+            submittingTo: {
+              title: "You're applying to the {{ jurisdictionName }}",
+              description:
+                "Please verify that this building permit is in compliance with <1>local zoning bylaws</1> for this specific location.",
+            },
             versionDiffContactWarning:
               "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
