@@ -47,6 +47,10 @@ After installation run both the `anycable-go` websocket server as well as the RP
 - RPC Server: `bundle exec anycable`
 - Anycable-Go Sockets: `anycable-go --port=8080`
 
+### Notorius - Digital Seal Validation
+
+- For local development, ensure you have the right test endpoint. The dev / test / production environments are set up with a licensed version running in its own container.
+
 ### Local - File storage setup
 
 - For the local environment, if you want to test the full file upload process, you would want to run a local version of minio to simulate the object storage environment.
@@ -148,3 +152,11 @@ bundle exec rspec
 Some other notes
 
 - For digital seal tests, the we have not uploaded documents with the real document to the repo, but captured the request responses
+
+## ERD generation
+
+- To generate up to date erd diagrams, make sure you have graphiviz installed locally
+
+```
+bundle exec erd
+```
