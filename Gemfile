@@ -117,6 +117,7 @@ group :development do
   gem "syntax_tree-haml", "~> 4.0"
   gem "syntax_tree-rbs", "~> 1.0"
   gem "letter_opener", "~> 1.8"
+  gem 'rails-erd', '~> 1.5'
 end
 
 gem "faraday-multipart", "~> 1.0"
