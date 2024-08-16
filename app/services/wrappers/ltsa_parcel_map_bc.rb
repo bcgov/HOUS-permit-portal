@@ -138,6 +138,8 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
       wkid = parsed_response.dig("spatialReference", "wkid")
 
+      raise Errors::FeatureAttributesRetrievalError if !valid_wkid?(wkid)
+
       geometry_coords = parsed_response.dig("features", 0, "geometry", "rings", 0)
 
       if (geometry_coords)
@@ -220,5 +222,11 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     else
       raise Errors::FeatureAttributesRetrievalError
     end
+  end
+
+  ALLOWED_WKIDS = [102_190, 3005, 4326].freeze
+
+  def valid_wkid?(wkid)
+    ALLOWED_WKIDS.include?(wkid.to_i)
   end
 end
