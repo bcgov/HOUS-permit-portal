@@ -206,7 +206,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     {t("permitApplication.new.workTypeHeading")}
                   </Heading>
                   <ActivityList
-                    fetchOptions={() => fetchActivityOptions(true, permitTypeIdWatch)}
+                    fetchOptions={() => fetchActivityOptions(true, firstNationsWatch, permitTypeIdWatch)}
                     permitTypeId={permitTypeIdWatch}
                   />
                 </Flex>
