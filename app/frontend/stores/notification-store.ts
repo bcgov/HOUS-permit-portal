@@ -3,8 +3,17 @@ import { flow, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ENotificationActionType } from "../types/enums"
-import { ILinkData, INotification, IPermitNotificationObjectData, IUserPushPayload } from "../types/types"
+import { ECollaborationType, ENotificationActionType } from "../types/enums"
+import {
+  ILinkData,
+  INotification,
+  IPermitBlockStatusReadyNotificationObjectData,
+  IPermitCollaborationNotificationObjectData,
+  IPermitNotificationObjectData,
+  IRequirementTemplateNotificationObjectData,
+  ITemplateVersionNotificationObjectData,
+  IUserPushPayload,
+} from "../types/types"
 
 export const NotificationStoreModel = types
   .model("NotificationStoreModel")
@@ -41,11 +50,10 @@ export const NotificationStoreModel = types
       let objectData = notification.objectData
       const draftFilterUriComponent = encodeURIComponent(self.rootStore.permitApplicationStore.draftStatuses.join(","))
       if (notification.actionType === ENotificationActionType.newTemplateVersionPublish) {
-        objectData = objectData as IPermitNotificationObjectData
         const linkData = [
           {
             text: t("permitApplication.reviewOutdatedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${(objectData as IRequirementTemplateNotificationObjectData).requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewOutdatedTitle"),
@@ -57,23 +65,56 @@ export const NotificationStoreModel = types
         if (currentUser.isManager) {
           linkData.push({
             text: t("permitApplication.reviewUpdatedEditLink"),
-            href: `/digital-building-permits/${objectData.templateVersionId}/edit?compare=true`,
+            href: `/digital-building-permits/${(objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit?compare=true`,
           })
         }
 
         return linkData
       } else if (notification.actionType === ENotificationActionType.customizationUpdate) {
-        objectData = objectData as IPermitNotificationObjectData
         return [
           {
             text: t("permitApplication.reviewCustomizedSubmissionLink"),
-            href: `/permit-applications?requirementTemplateId=${objectData.requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
+            href: `/permit-applications?requirementTemplateId=${(objectData as IRequirementTemplateNotificationObjectData).requirementTemplateId}&status=${draftFilterUriComponent}&flash=${encodeURIComponent(
               JSON.stringify({
                 type: "success",
                 title: t("permitApplication.reviewCustomizedTitle"),
                 message: t("permitApplication.reviewCustomizedMessage"),
               })
             )}`,
+          },
+        ]
+      } else if (
+        [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.submissionCollaborationUnassignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationUnassignment,
+        ].includes(notification.actionType)
+      ) {
+        const collaborationData = objectData as IPermitCollaborationNotificationObjectData
+        return [
+          ENotificationActionType.submissionCollaborationAssignment,
+          ENotificationActionType.reviewCollaborationAssignment,
+        ].includes(notification.actionType)
+          ? [
+              {
+                text: t("ui.show"),
+                href:
+                  notification.actionType === ENotificationActionType.submissionCollaborationAssignment
+                    ? `/permit-applications/${collaborationData.permitApplicationId}/edit`
+                    : `/permit-applications/${collaborationData.permitApplicationId}`,
+              },
+            ]
+          : []
+      } else if (notification.actionType === ENotificationActionType.permitBlockStatusReady) {
+        const collaborationData = objectData as IPermitBlockStatusReadyNotificationObjectData
+        return [
+          {
+            text: t("ui.show"),
+            href:
+              collaborationData?.collaborationType === ECollaborationType.review
+                ? `/permit-applications/${collaborationData.permitApplicationId}`
+                : `/permit-applications/${collaborationData.permitApplicationId}/edit`,
           },
         ]
       } else if (
@@ -85,7 +126,7 @@ export const NotificationStoreModel = types
         return [
           {
             text: "View integration mapping",
-            href: `/api-settings/api-mappings/digital-building-permits/${objectData.templateVersionId}/edit`,
+            href: `/api-settings/api-mappings/digital-building-permits/${(objectData as ITemplateVersionNotificationObjectData).templateVersionId}/edit`,
           },
         ]
       } else if (

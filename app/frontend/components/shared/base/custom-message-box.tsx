@@ -1,9 +1,10 @@
-import { Box, Flex, FlexProps, Heading, Text, ToastProps } from "@chakra-ui/react"
+import { Box, Flex, FlexProps, Heading, HeadingProps, Text, ToastProps } from "@chakra-ui/react"
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 
 interface ICustomMessageBoxProps extends Omit<ToastProps, "id" | "position" | "title">, FlexProps {
   children?: React.ReactNode
+  headingProps?: Partial<HeadingProps>
 }
 
 const iconMap = {
@@ -13,7 +14,14 @@ const iconMap = {
   info: <Info size={24} aria-label={"info icon"} />,
 }
 
-export const CustomMessageBox = ({ title, description, status, children, ...rest }: ICustomMessageBoxProps) => {
+export const CustomMessageBox = ({
+  title,
+  description,
+  status,
+  children,
+  headingProps,
+  ...rest
+}: ICustomMessageBoxProps) => {
   return (
     <Flex
       direction="column"
@@ -29,7 +37,7 @@ export const CustomMessageBox = ({ title, description, status, children, ...rest
         <Box color={`semantic.${status}`}>{iconMap[status]}</Box>
         <Flex direction="column" gap={2}>
           {title && (
-            <Heading as="h3" fontSize="md">
+            <Heading as="h3" fontSize="md" {...headingProps}>
               {title}
             </Heading>
           )}

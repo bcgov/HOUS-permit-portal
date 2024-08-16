@@ -65,12 +65,18 @@ export const PermitClassificationStoreModel = types
     }),
   }))
   .actions((self) => ({
-    fetchPermitTypeOptions: flow(function* (publishedOnly = false, pid = null, jurisdictionId = null) {
+    fetchPermitTypeOptions: flow(function* (
+      publishedOnly = false,
+      firstNations = null,
+      pid = null,
+      jurisdictionId = null
+    ) {
       self.isPermitTypeLoading = true
       const response = yield* toGenerator(
         self.environment.api.fetchPermitClassificationOptions(
           EPermitClassificationType.PermitType,
           publishedOnly,
+          firstNations,
           null,
           null,
           pid,
@@ -80,13 +86,14 @@ export const PermitClassificationStoreModel = types
       self.isPermitTypeLoading = false
       return (response?.data?.data ?? []) as IOption<IPermitType>[]
     }),
-    fetchActivityOptions: flow(function* (publishedOnly = false, activityId = null) {
+    fetchActivityOptions: flow(function* (publishedOnly = false, firstNations = null, permitTypeId = null) {
       self.isActivityLoading = true
       const response = yield* toGenerator(
         self.environment.api.fetchPermitClassificationOptions(
           EPermitClassificationType.Activity,
           publishedOnly,
-          activityId
+          firstNations,
+          permitTypeId
         )
       )
       self.isActivityLoading = false

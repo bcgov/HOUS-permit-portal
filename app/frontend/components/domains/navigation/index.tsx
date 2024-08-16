@@ -370,10 +370,11 @@ const AppRoutes = observer(() => {
     </>
   )
 
+  const mustAcceptEula = loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin
   return (
     <>
       <Routes location={background || location}>
-        {loggedIn && !currentUser.eulaAccepted && !currentUser.isSuperAdmin && (
+        {mustAcceptEula && (
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
         )}
@@ -386,10 +387,11 @@ const AppRoutes = observer(() => {
         ) : (
           <Route path="/" element={<RedirectScreen path="/welcome" />} />
         )}
-        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+        <Route
+          element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
+        >
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
             <Route path="step-code" element={<StepCodeForm />} />
           </Route>
@@ -399,14 +401,19 @@ const AppRoutes = observer(() => {
           />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn} />}>
+          <Route path="/profile" element={<ProfileScreen />} />
+        </Route>
+
         <Route
           element={
             <ProtectedRoute
               isAllowed={
                 loggedIn &&
+                !mustAcceptEula &&
                 (currentUser.isReviewManager || currentUser.isRegionalReviewManager || currentUser.isSuperAdmin)
               }
-              redirectPath={loggedIn && "/not-found"}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
         >
@@ -423,7 +430,10 @@ const AppRoutes = observer(() => {
 
         <Route
           element={
-            <ProtectedRoute isAllowed={loggedIn && currentUser.isReviewStaff} redirectPath={loggedIn && "/not-found"} />
+            <ProtectedRoute
+              isAllowed={loggedIn && !mustAcceptEula && currentUser.isReviewStaff}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
+            />
           }
         >
           {managerOrReviewerRoutes}
@@ -432,8 +442,8 @@ const AppRoutes = observer(() => {
         <Route
           element={
             <ProtectedRoute
-              isAllowed={loggedIn && currentUser.isReviewStaff && !currentUser.isReviewer}
-              redirectPath={loggedIn && "/not-found"}
+              isAllowed={loggedIn && !mustAcceptEula && currentUser.isReviewStaff && !currentUser.isReviewer}
+              redirectPath={(mustAcceptEula && "/") || (loggedIn && "/not-found")}
             />
           }
         >

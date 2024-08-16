@@ -1,7 +1,18 @@
-import { Box, ButtonProps, Flex, HStack, ListItem, StackProps, Tag, UnorderedList, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  ButtonProps,
+  Flex,
+  HStack,
+  ListItem,
+  StackProps,
+  Tag,
+  Text,
+  UnorderedList,
+  VStack,
+} from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useSearch } from "../../../hooks/use-search"
 import { ISearch } from "../../../lib/create-search-model"
@@ -15,6 +26,7 @@ import { SearchGrid } from "../../shared/grid/search-grid"
 import { SearchGridItem } from "../../shared/grid/search-grid-item"
 import { HasAutomatedComplianceTag } from "../../shared/has-automated-compliance-tag"
 import { HasConditionalTag } from "../../shared/has-conditional-tag"
+import { YesNoTag } from "../../shared/yes-no-tag"
 import { GridHeaders } from "./grid-header"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -38,12 +50,20 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
+    showArchived,
   } = requirementBlockStore
 
-  useSearch(requirementBlockStore as ISearch)
+  useSearch(requirementBlockStore as ISearch, [showArchived])
+
+  useEffect(() => {
+    return () => {
+      requirementBlockStore.setShowArchived(false)
+    }
+  }, [])
+
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
-      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(4, 1fr) max(230px) 80px" pos={"relative"}>
+      <SearchGrid gridRowClassName={ROW_CLASS_NAME} templateColumns="repeat(7, 1fr)" pos={"relative"}>
         <GridHeaders />
 
         {isSearching ? (
@@ -54,8 +74,16 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
           tableRequirementBlocks.map((requirementBlock) => {
             return (
               <Box key={requirementBlock.id} className={ROW_CLASS_NAME} role={"row"} display={"contents"}>
-                <SearchGridItem fontWeight={700} minW="250px">
-                  {requirementBlock.name}
+                <SearchGridItem minW="250px">
+                  <Flex direction="column">
+                    <Text as={"span"} fontWeight={700}>
+                      {requirementBlock.name}
+                    </Text>
+                    <Text as={"span"}>{requirementBlock.description}</Text>
+                  </Flex>
+                </SearchGridItem>
+                <SearchGridItem fontWeight={700} minW="35px">
+                  <YesNoTag boolean={requirementBlock.firstNations} />
                 </SearchGridItem>
                 <SearchGridItem maxW="190px">
                   <HStack as={"ul"} wrap={"wrap"} spacing={1}>
@@ -91,7 +119,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
-                    <RequirementsBlockModal requirementBlock={requirementBlock} />
+                    <RequirementsBlockModal withOptionsMenu requirementBlock={requirementBlock} />
                   )}
                 </SearchGridItem>
               </Box>

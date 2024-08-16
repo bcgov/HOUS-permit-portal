@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_14_195936) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -35,6 +35,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "collaborators",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "collaboratorable_type", null: false
+    t.uuid "collaboratorable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[collaboratorable_type collaboratorable_id],
+            name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
+    t.index %w[collaboratorable_type collaboratorable_id],
+            name: "index_collaborators_on_collaboratorable"
+    t.index ["user_id"], name: "index_collaborators_on_user_id"
   end
 
   create_table "contacts",
@@ -62,12 +78,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "end_user_license_agreements",
@@ -223,6 +233,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
             name: "index_permit_applications_on_template_version_id"
   end
 
+  create_table "permit_block_statuses",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "permit_application_id", null: false
+    t.string "requirement_block_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "collaboration_type", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[permit_application_id requirement_block_id collaboration_type],
+            name: "index_block_statuses_on_app_id_and_block_id_and_collab_type",
+            unique: true
+    t.index ["permit_application_id"],
+            name: "index_permit_block_statuses_on_permit_application_id"
+  end
+
   create_table "permit_classifications",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -234,6 +261,36 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.string "description"
     t.boolean "enabled"
     t.integer "code"
+  end
+
+  create_table "permit_collaborations",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "collaborator_id", null: false
+    t.uuid "permit_application_id", null: false
+    t.integer "collaboration_type", default: 0
+    t.integer "collaborator_type", default: 0
+    t.string "assigned_requirement_block_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collaboration_type"],
+            name: "index_permit_collaborations_on_collaboration_type"
+    t.index ["collaborator_id"],
+            name: "index_permit_collaborations_on_collaborator_id"
+    t.index ["collaborator_type"],
+            name: "index_permit_collaborations_on_collaborator_type"
+    t.index %w[
+              permit_application_id
+              collaborator_id
+              collaboration_type
+              collaborator_type
+              assigned_requirement_block_id
+            ],
+            name: "index_permit_collaborations_on_unique_columns",
+            unique: true
+    t.index ["permit_application_id"],
+            name: "index_permit_collaborations_on_permit_application_id"
   end
 
   create_table "permit_type_required_steps",
@@ -290,6 +347,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
               default: true
     t.boolean "enable_in_app_application_revisions_request_notification",
               default: true
+    t.boolean "enable_in_app_collaboration_notification", default: true
+    t.boolean "enable_email_collaboration_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -307,6 +366,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.string "sku"
     t.string "display_name", null: false
     t.string "display_description"
+    t.boolean "first_nations", default: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
@@ -335,6 +397,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.datetime "discarded_at"
+    t.boolean "first_nations", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"],
             name: "index_requirement_templates_on_discarded_at"
@@ -784,6 +847,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "collaborators", "users"
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -805,6 +869,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_18_160238) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_block_statuses", "permit_applications"
+  add_foreign_key "permit_collaborations", "collaborators"
+  add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
                   "permit_classifications",

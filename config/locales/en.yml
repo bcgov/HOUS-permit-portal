@@ -33,6 +33,8 @@ en:
       contact:
         cell: "Mobile no."
         phone: "Phone no."
+      requirement_template:
+        first_nations: "First Nations"
     errors:
       models:
         site_configuration:
@@ -55,6 +57,7 @@ en:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
+          nonunique_classification: "There can only be one Requirement Template per permit type, activity, and first nations combination"
         requirement_block:
           attributes:
             requirements:
@@ -87,6 +90,23 @@ en:
           attributes:
             user:
               incorrect_role: "User must be review staff"
+        permit_collaboration:
+          attributes:
+            base:
+              delegatee_already_exits: "There can only be one delegatee for a permit application"
+              must_be_draft_for_submission: "permit application must be in draft state for submission collaboration"
+              must_be_submitted_for_review: "permit application must be in submitted state for review collaboration"
+            assigned_requirement_block_id:
+              does_not_exist: "does not exist in the permit application"
+            collaborator:
+              cannot_be_author: "cannot be the author of the permit application"
+              must_be_same_jurisdiction: "must be of the same jurisdiction as the permit application"
+        collaborator:
+          attributes:
+            user:
+              incorrect_jurisdiction: "must be from the same jurisdiction as the permit application for review collaboration"
+              incorrect_user: "cannot be the same as the requester for submission collaboration"
+              submission_collaborator_must_be_submitter: "ineligible collaborator for submission collaboration"
   application_mailer:
     subject_start: "Building Permit Hub"
     subjects:
@@ -97,11 +117,14 @@ en:
       notify_new_integration_mapping: "New API mappings available"
       notify_missing_integration_mapping: "Missing API mappings"
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
+      notify_block_status_ready: "Requirement block status ready"
       notify_application_viewed: "Application update: %{permit_application_number}"
       notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
       remind_reviewer: "Your report on outstanding permit applications"
       permit_type_submission_contact_confirm: "Confirm submission inbox email"
       new_jurisdiction_membership: "New jurisdiction membership"
+      notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
+      notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
   arbitrary_message_construct:
     devise:
       failure:
@@ -258,9 +281,18 @@ en:
       update_error:
         title: Error
         message: "%{error_message}"
-      delete_error:
+      destroy_success:
+        title: ""
+        message: The requirement block was archived successfully
+      destroy_error:
         title: Error
-        message: "Something went wrong deleting the requirement block"
+        message: "There was an error archiving the requirement block"
+      restore_success:
+        title: ""
+        message: The requirement block was restored successfully
+      restore_error:
+        title: "Error"
+        message: "There was an error restoring the requirement block"
     external_api_key:
       create_error:
         title: Create Error
@@ -367,6 +399,12 @@ en:
       save_success:
         title: ""
         message: "Permit application successfully updated!"
+      assign_collaborator_success:
+        title: ""
+        message: "Collaborator successfully assigned!"
+      assign_collaborator_error:
+        title: ""
+        message: "%{error_message}"
       update_version_succes:
         title: ""
         message: "Permit application successfully updated to new version!"
@@ -385,6 +423,31 @@ en:
       revision_request_finalize_error:
         title: Error
         message: "There was an error finalizing revision requests"
+      remove_collaborator_collaborations_success:
+        title: ""
+        message: "Collaborator successfully removed"
+      remove_collaborator_collaborations_error:
+        title: Error
+        message: "There was an error removing collaborator"
+      create_or_update_permit_block_status_success:
+        title: ""
+        message: "Permit block status successfully updated"
+      create_or_update_permit_block_status_error:
+        title: Error
+        message: "There was an error updating permit block status"
+    permit_collaboration:
+      destroy_success:
+        title: ""
+        message: "Collaborator unassigned successfully!"
+      destroy_error:
+        title: Error unassigning permit_collaboration
+        message: "%{error_message}"
+      re_invite_success:
+        title: ""
+        message: "Collaborator re-invited successfully!"
+      re_invite_error:
+        title: ""
+        message: "%{error_message}"
     site_configuration:
       update_success:
         title: ""
@@ -467,6 +530,12 @@ en:
         incorrect_value_extraction_field: "incorrect extraction field for %{module_name} automated compliance module"
         incorrect_options_map: "incorrect options map for %{module_name} automated compliance module"
         default_settings_not_valid: "computed compliance is not populated with default settings for %{module_name} automated compliance module"
+    permit_collaboration:
+      collaboration_management:
+        add_collaborator_error: "Failed to add collaborator: %{error_message}"
+        assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
+        create_user_error: "Failed to invite user to collaborate: %{error_message}"
+        submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -507,10 +576,22 @@ en:
       new_version_notification: 'A new version of "%{template_label}" has been published'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
     permit_application:
-      submission_notification: "Your application %{number} has been recieved by %{jurisdiction_name} and is pending review."
-      resubmission_notification: "Your revised application %{number} has been recieved by %{jurisdiction_name} and is pending review."
+      submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
+      resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
+    permit_collaboration:
+      submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
+      submission_assignee_collaboration_notification: 'Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}'
+      review_delegatee_collaboration_notification: "You have been assigned as a designated reviewer for permit application %{number}."
+      review_assignee_collaboration_notification: 'You have been assigned to review requirement “%{requirement_block_name}” for permit application %{number}'
+      submission_delegatee_collaboration_unassignment_notification: "You have been removed as a designated submitter for permit application %{number}."
+      submission_assignee_collaboration_unassignment_notification: 'You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
+      review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
+      review_assignee_collaboration_unassignment_notification: 'You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
+    permit_block_status:
+      status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
+      status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
       scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."

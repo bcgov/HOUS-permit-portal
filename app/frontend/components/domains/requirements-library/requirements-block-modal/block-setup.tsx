@@ -1,17 +1,36 @@
-import { Box, FormControl, FormHelperText, FormLabel, Input, Text, Textarea, TextProps, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Input,
+  Text,
+  Textarea,
+  TextProps,
+  VStack,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
+import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
 
 const helperTextStyles: Partial<TextProps> = {
   color: "border.base",
 }
 
-export const BlockSetup = observer(function BlockSetup() {
+export const BlockSetup = observer(function BlockSetup({
+  requirementBlock,
+  withOptionsMenu,
+}: {
+  requirementBlock?: IRequirementBlock
+  withOptionsMenu?: boolean
+}) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
   const { register, control, watch } = useFormContext<IRequirementBlockForm>()
@@ -89,6 +108,21 @@ export const BlockSetup = observer(function BlockSetup() {
             {t("requirementsLibrary.fieldDescriptions.associations")}
           </FormHelperText>
         </FormControl>
+
+        <FormControl>
+          <Controller
+            name="firstNations"
+            control={control}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <Checkbox isChecked={value} onChange={onChange}>
+                  {t("requirementsLibrary.forFirstNations")}
+                </Checkbox>
+              )
+            }}
+          />
+        </FormControl>
+
         <FormControl isReadOnly={true}>
           <FormLabel>{t("requirementsLibrary.fields.requirementSku")}</FormLabel>
           <Input bg={"white"} value={watch("sku")} isDisabled={true} />
@@ -96,6 +130,9 @@ export const BlockSetup = observer(function BlockSetup() {
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
         </FormControl>
+        {requirementBlock && withOptionsMenu && (
+          <BlockSetupOptionsMenu requirementBlock={requirementBlock} searchModel={requirementBlockStore} />
+        )}
       </VStack>
     </Box>
   )

@@ -29,7 +29,22 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def create
-    @requirement_template = RequirementTemplate.build(requirement_template_params)
+    copy_existing = requirement_template_params[:copy_existing]
+
+    if copy_existing
+      found_template =
+        RequirementTemplate.find_by!(
+          permit_type_id: requirement_template_params[:permit_type_id],
+          activity_id: requirement_template_params[:activity_id],
+        )
+      @requirement_template =
+        RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
+          requirement_template_params,
+        )
+    else
+      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
+    end
+
     authorize @requirement_template
 
     if @requirement_template.save
@@ -177,6 +192,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     permitted_params =
       params.require(:requirement_template).permit(
         :description,
+        :first_nations,
+        :copy_existing,
         :activity_id,
         :permit_type_id,
         requirement_template_sections_attributes: [

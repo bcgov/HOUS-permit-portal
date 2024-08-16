@@ -61,6 +61,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
       discardedAt: types.maybeNull(types.Date),
+      firstNations: types.boolean,
       requirementTemplateSectionMap: types.map(RequirementTemplateSectionModel),
       sortedRequirementTemplateSections: types.array(types.safeReference(RequirementTemplateSectionModel)),
       createdAt: types.Date,
@@ -112,6 +113,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
+      setIsFullyLoaded(val: boolean) {
+        self.isFullyLoaded = val
+      },
       addDeprecatedTemplateVersionReference(templateVersionId: string) {
         self.deprecatedTemplateVersions.unshift(templateVersionId)
         self.deprecatedTemplateVersions.sort((a, b) => b.versionDate.getTime() - a.versionDate.getTime())

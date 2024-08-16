@@ -51,7 +51,8 @@ Rails.application.routes.draw do
         to: "permit_type_submission_contacts#confirm",
         as: :permit_type_submission_contact_confirmation
 
-    resources :requirement_blocks, only: %i[create show update] do
+    resources :requirement_blocks, only: %i[create show update destroy] do
+      post "restore", on: :member, to: "requirement_blocks#restore"
       post "search", on: :collection, to: "requirement_blocks#index"
       get "auto_compliance_module_configurations",
           on: :collection,
@@ -84,6 +85,8 @@ Rails.application.routes.draw do
               to: "template_versions#show_jurisdiction_template_version_customization"
           post "jurisdiction_template_version_customization",
                to: "template_versions#create_or_update_jurisdiction_template_version_customization"
+          post "copy_jurisdiction_template_version_customization",
+               to: "template_versions#copy_jurisdiction_template_version_customization"
           get "download_customization_csv", to: "template_versions#download_customization_csv"
           get "download_customization_json", to: "template_versions#download_customization_json"
           get "integration_mapping", to: "template_versions#show_integration_mapping"
@@ -120,6 +123,12 @@ Rails.application.routes.draw do
 
     resources :permit_applications, only: %i[create update show] do
       post "generate_missing_pdfs", on: :member, to: "permit_applications#generate_missing_pdfs"
+      post "permit_collaborations", on: :member, to: "permit_applications#create_permit_collaboration"
+      post "permit_block_status", on: :member, to: "permit_applications#create_or_update_permit_block_status"
+      delete "permit_collaborations/remove_collaborator_collaborations",
+             on: :member,
+             to: "permit_applications#remove_collaborator_collaborations"
+      post "permit_collaborations/invite", on: :member, to: "permit_applications#invite_new_collaborator"
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
@@ -127,6 +136,10 @@ Rails.application.routes.draw do
       patch "update_version", on: :member
       patch "revision_requests", on: :member, to: "permit_applications#update_revision_requests"
       post "revision_requests/finalize", on: :member, to: "permit_applications#finalize_revision_requests"
+    end
+
+    resources :permit_collaborations, only: %i[destroy] do
+      post "reinvite", on: :member, to: "permit_collaborations#reinvite"
     end
 
     patch "profile", to: "users#profile"
@@ -160,6 +173,14 @@ Rails.application.routes.draw do
 
     resources :external_api_keys do
       post "revoke", on: :member
+    end
+
+    resources :collaborators, only: %i[] do
+      collection do
+        resources :collaboratorable, only: %i[] do
+          post "search", to: "collaborators#collaborator_search"
+        end
+      end
     end
   end
 

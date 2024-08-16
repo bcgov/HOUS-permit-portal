@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 import { FormSwitch } from "../../shared/form-switch"
 import { GridHeader } from "../../shared/grid/grid-header"
-import { RemoveConfirmationModal } from "../../shared/remove-confirmation-modal"
+import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 
 export const GridHeaders = observer(function GridHeaders() {
   const { jurisdictionStore, userStore } = useMst()
