@@ -81,6 +81,7 @@ en:
               bceid_taken: BCeID is associated with an existing account. To use this BCeID with a different account, contact %{jurisdiction} to deactivate the existing account.
               idir_taken: IDIR is associated with an existing account. To use this IDIR with a different account, contact your administrator to deactivate the existing account.
               single_jurisdiction: Only regional review managers can access multiple jurisdictions.
+              admin_role_change: Super admins cannot be converted into other user types.
             jurisdictions:
               reviewers_only: can only be added to review staff
             password:
@@ -597,4 +598,4 @@ en:
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
-    step_code_summary_csv_headers: "Jurisdiction,Permit type,Work type,Enabled/disabled,Energy step code level,Zero carbon level "
+    step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy step code level,Zero carbon level"
