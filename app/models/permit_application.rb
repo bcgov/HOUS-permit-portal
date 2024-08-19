@@ -5,7 +5,7 @@ class PermitApplication < ApplicationRecord
   include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
 
-  SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter]
+  SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter permit_collaborations]
 
   searchkick searchable: %i[number nickname full_address permit_classifications submitter status review_delegatee_name],
              word_start: %i[number nickname full_address permit_classifications submitter status review_delegatee_name]

@@ -43,13 +43,14 @@ class User < ApplicationRecord
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
   after_commit :reindex_jurisdiction_user_size
-  after_create :create_jurisdiction_collaborator
-  after_save :create_jurisdiction_collaborator, if: -> { saved_change_to_role? || saved_change_to_discarded_at? }
   before_save :create_default_preference
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
   attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
+
+  after_discard { destroy_jurisdiction_collaborator }
+  after_save :create_jurisdiction_collaborator, if: :saved_change_to_discarded_at
 
   def confirmation_required?
     false
@@ -121,10 +122,10 @@ class User < ApplicationRecord
   end
 
   def create_jurisdiction_collaborator
-    return unless review_staff? && discarded_at.blank?
+    return unless review_staff? && kept?
 
     jurisdictions.each do |jurisdiction|
-      existing_collaborator = jurisdiction.collaborators.find_by_user_id(id)
+      existing_collaborator = jurisdiction.collaborators.find_by(user_id: id)
 
       next if existing_collaborator.present?
 
@@ -133,6 +134,18 @@ class User < ApplicationRecord
   end
 
   private
+
+  def destroy_jurisdiction_collaborator
+    return unless discarded?
+
+    jurisdictions.each do |jurisdiction|
+      existing_collaborator = jurisdiction.collaborators.find_by(user_id: id)
+
+      next unless existing_collaborator.present?
+
+      existing_collaborator.destroy
+    end
+  end
 
   def create_default_preference
     return unless preference.blank?

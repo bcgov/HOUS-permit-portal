@@ -105,7 +105,7 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
     permitApplication.inviteNewCollaborator(ECollaboratorType.assignee, user, requirementBlockId)
 
   return (
-    <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onPopoverClose} onOpen={onOpen}>
+    <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onPopoverClose} onOpen={onOpen} isLazy>
       <PopoverTrigger>
         <Button
           onClick={(e) => {
