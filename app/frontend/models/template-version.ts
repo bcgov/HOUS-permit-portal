@@ -88,7 +88,7 @@ export const TemplateVersionModel = types
         self.environment.api.fetchJurisdictionTemplateVersionCustomization(self.id, jurisdictionId)
       )
       if (!response.ok) {
-        return response.ok
+        return response
       }
 
       const customization = response.data.data
@@ -98,7 +98,7 @@ export const TemplateVersionModel = types
         self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customizationModel)
       }
 
-      return response.ok
+      return response
     }),
     copyJurisdictionTemplateVersionElectives: flow(function* (jurisdictionId: string) {
       const response = yield* toGenerator(

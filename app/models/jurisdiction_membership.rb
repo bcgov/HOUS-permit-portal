@@ -4,7 +4,7 @@ class JurisdictionMembership < ApplicationRecord
 
   after_commit :reindex_jurisdiction, on: %i[create update destroy]
   after_commit :create_jurisdiction_collaborator, on: %i[create update]
-  after_commit :destroy_jurisdiction_collaborator, on: %i[update]
+  after_commit :destroy_jurisdiction_collaborator, on: %i[destroy]
 
   private
 

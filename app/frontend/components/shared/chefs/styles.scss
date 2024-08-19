@@ -527,8 +527,9 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition: background-color 200ms ease-in-out,
-      border-color 200ms ease-in-out;
+      transition:
+        background-color 200ms ease-in-out,
+        border-color 200ms ease-in-out;
 
       a {
         color: inherit;
@@ -599,10 +600,16 @@
     }
   }
 
-  .contact-data-grid {
+  .contact-data-grid,
+  .multi-data-grid {
     border: none;
+    overflow: visible;
 
     .contact-field-set {
+      margin-top: 0;
+    }
+
+    .multi-field-set {
       margin-top: 0;
     }
 
@@ -664,7 +671,8 @@
     }
   }
 
-  .contact-field-set {
+  .contact-field-set,
+  .multi-field-set {
     .fieldset-body {
       border: 1px solid var(--chakra-colors-border-light);
       padding-inline: var(--chakra-space-6);
@@ -767,7 +775,7 @@
       content: "Answer changed";
       position: absolute;
       font-weight: 200;
-      top: 50%;
+      top: 0;
       padding-left: 20px;
       padding-right: 4px;
       padding-top: 4px;
