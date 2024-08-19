@@ -97,7 +97,14 @@ export const DesignatedCollaboratorAssignmentPopover = observer(function Designa
     isDisabled: !canManage,
   }
   return (
-    <Popover placement={"bottom-start"} isOpen={isOpen} onClose={onPopoverClose} onOpen={onOpen} strategy={"fixed"}>
+    <Popover
+      placement={"bottom-start"}
+      isOpen={isOpen}
+      onClose={onPopoverClose}
+      onOpen={onOpen}
+      strategy={"fixed"}
+      isLazy
+    >
       <PopoverTrigger>
         {avatarTrigger ? (
           <IconButton

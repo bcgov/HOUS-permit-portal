@@ -9,8 +9,6 @@ import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMountStatus } from "../../../hooks/use-mount-status"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst } from "../../../setup/root"
-import { ECollaborationType } from "../../../types/enums"
 import { IErrorsBoxData } from "../../../types/types"
 import { getCompletedBlocksFromForm, getRequirementByKey } from "../../../utils/formio-component-traversal"
 import { singleRequirementFormJson, singleRequirementSubmissionData } from "../../../utils/formio-helpers"
@@ -61,19 +59,15 @@ export const RequirementForm = observer(
       isViewingPastRequests,
     } = permitApplication
 
+    const shouldShowDiff = permitApplication?.shouldShowApplicationDiff(isEditing)
+    const userShouldSeeDiff = permitApplication?.currentUserShouldSeeApplicationDiff
+
     const pastVersion = isViewingPastRequests ? selectedPastSubmissionVersion : previousSubmissionVersion
     const isMounted = useMountStatus()
     const { t } = useTranslation()
     const navigate = useNavigate()
     const { isOpen, onOpen, onClose } = useDisclosure()
     const boxRef = useRef<HTMLDivElement>(null)
-    const { userStore } = useMst()
-    const { currentUser } = userStore
-    const userShouldSeeApplicationDiff =
-      permitApplication.shouldShowNewVersionWarning &&
-      (currentUser?.id === permitApplication.submitter?.id ||
-        currentUser?.id ===
-          permitApplication?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id)
 
     const [wrapperClickCount, setWrapperClickCount] = useState(0)
     const [errorBoxData, setErrorBoxData] = useState<IErrorsBoxData[]>([]) // an array of Labels and links to the component
@@ -104,7 +98,7 @@ export const RequirementForm = observer(
     const infoBoxData = permitApplication.diffToInfoBoxData
 
     useEffect(() => {
-      if (permitApplication?.shouldShowApplicationDiff(isEditing) && userShouldSeeApplicationDiff) {
+      if (shouldShowDiff && userShouldSeeDiff) {
         permitApplication.fetchDiff()
       }
     }, [usingCurrentTemplateVersion])
@@ -279,8 +273,8 @@ export const RequirementForm = observer(
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
 
-      rootComponent.on("componentError", (error) => {
-        // when a form field has an error, we update the state of ErrorBox with the new error information
+      rootComponent.on("change", (_) => {
+        // whenever a form data changes, we update the state of ErrorBox with the new error information
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
       })
 
@@ -296,7 +290,7 @@ export const RequirementForm = observer(
 
     let permitAppOptions = {
       ...defaultOptions,
-      ...(isDraft ? { readOnly: permitApplication?.shouldShowApplicationDiff(isEditing) } : { readOnly: false }),
+      ...(isDraft ? { readOnly: shouldShowDiff } : { readOnly: false }),
       // readonly loggic depends on formattedJson for submitted applications
     }
     permitAppOptions.componentOptions.simplefile.config["formCustomOptions"] = {
@@ -311,7 +305,7 @@ export const RequirementForm = observer(
         permitApplication.updateVersion()
       }
     }
-    const showVersionDiffContactWarning = permitApplication.shouldShowNewVersionWarning && !userShouldSeeApplicationDiff
+    const showVersionDiffContactWarning = shouldShowDiff && !userShouldSeeDiff
     return (
       <>
         <Flex
@@ -341,8 +335,8 @@ export const RequirementForm = observer(
             </Center>
           )}
           <ErrorsBox data={errorBoxData} />
-          {permitApplication.shouldShowApplicationDiff(isEditing) &&
-            userShouldSeeApplicationDiff &&
+          {shouldShowDiff &&
+            userShouldSeeDiff &&
             (permitApplication.diff ? (
               <CompareRequirementsBox
                 data={infoBoxData}
@@ -364,7 +358,6 @@ export const RequirementForm = observer(
               status="warning"
             />
           )}
-
           {showVersionDiffContactWarning && (
             <CustomMessageBox description={t("permitApplication.show.versionDiffContactWarning")} status="warning" />
           )}
@@ -413,7 +406,6 @@ export const RequirementForm = observer(
               fontSize={"sm"}
             />
           )}
-
           <Box bg="greys.grey03" p={3} borderRadius="sm">
             <Text fontStyle="italic">
               {t("site.foippaWarning")}

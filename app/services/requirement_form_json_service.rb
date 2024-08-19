@@ -94,7 +94,7 @@ class RequirementFormJsonService
       if requirement.input_type_general_contact? || requirement.input_type_professional_contact?
         get_contact_form_json(requirement_block_key)
       elsif requirement.input_type_pid_info?
-        get_pid_info_components(requirement_block_key)
+        get_pid_info_components(requirement_block_key, requirement.required)
       else
         {
           id: requirement.id,
@@ -358,6 +358,9 @@ class RequirementFormJsonService
         widget: {
           type: "input",
         },
+        validate: {
+          required: required,
+        },
       }.merge!(DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type.to_sym])
     else
       {
@@ -375,14 +378,14 @@ class RequirementFormJsonService
     end
   end
 
-  def get_pid_info_components(requirement_block_key = requirement&.requirement_block&.key)
+  def get_pid_info_components(requirement_block_key = requirement&.requirement_block&.key, required = false)
     return {} unless requirement.input_type_pid_info?
     key = "#{requirement.key(requirement_block_key)}|additional_pid_info"
     component = {
       legend: requirement.label,
-      key: requirement_block_key,
+      key: key,
       type: "fieldset",
-      custom_class: "contact-field-set",
+      custom_class: "multi-field-set",
       label: requirement.label,
       hideLabel: true,
       input: false,
@@ -391,25 +394,25 @@ class RequirementFormJsonService
         get_columns_form_json(
           "pid_entry_columns",
           [
-            get_nested_info_component(:pid, requirement_block_key, "PID", false),
+            get_nested_info_component(:pid, requirement_block_key, "PID", required),
             get_nested_info_component(:folio_number, requirement_block_key, "Folio Number", false),
             get_nested_info_component(:address, requirement_block_key, "Address", false, :address),
           ],
         ),
       ],
     }
-    multi_data_grid_from_json(requirement_block_key, component, true, "Add #{requirement.label}")
+    multi_data_grid_form_json(key, component, true, "Add #{requirement.label}")
   end
 
-  #this is a generic mulitgrid for a single component
-  def multi_data_grid_from_json(
+  # this is a generic mulitgrid for a single component
+  def multi_data_grid_form_json(
     override_key,
     component,
     initEmpty = true,
     addMoreText = I18n.t("formio.requirement.multi_grid.default_add")
   )
     {
-      label: "Additional #{requirement.label}(s)",
+      label: requirement.label,
       id: requirement.id,
       reorder: false,
       addAnother: addMoreText,
@@ -417,12 +420,12 @@ class RequirementFormJsonService
       layoutFixed: false,
       enableRowGroups: false,
       initEmpty: initEmpty,
-      hideLabel: false,
+      hideLabel: true,
       tableView: false,
-      custom_class: "contact-data-grid",
+      custom_class: "multi-data-grid",
       key: override_key,
       type: "datagrid",
-      input: true,
+      input: false,
       components: [component],
     }
   end
