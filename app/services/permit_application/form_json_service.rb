@@ -83,12 +83,12 @@ class PermitApplication::FormJsonService
           # remove the block if no enabled elective fields are valid
           rb_id unless any_enabled_elective_field_valid
         end
-        .compact
+        .compact || []
 
     # If the user is not passed in then we don't remove requirement blocks based on further collaboration permissions.
     return @empty_block_ids if current_user.blank?
 
-    permissions = permit_application.submission_requirement_block_edit_permissions(user_id: current_user.id)
+    permissions = permit_application.submission_requirement_block_edit_permissions(user_id: current_user.id) || []
 
     return @empty_block_ids if permissions == :all
 
