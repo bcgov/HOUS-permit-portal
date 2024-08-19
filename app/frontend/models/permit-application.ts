@@ -287,9 +287,6 @@ export const PermitApplicationModel = types.snapshotProcessor(
       shouldShowApplicationDiff(isEditing: boolean) {
         return isEditing && (!self.usingCurrentTemplateVersion || self.showingCompareAfter)
       },
-      get shouldShowNewVersionWarning() {
-        return !self.usingCurrentTemplateVersion && self.isDraft
-      },
       get contacts() {
         // traverses the nest form json components
         // and collects the label for contact requirements
@@ -427,6 +424,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
+      get currentUserShouldSeeApplicationDiff() {
+        const currentUser = self.rootStore.userStore.currentUser
+        return (
+          currentUser?.id === self.submitter?.id ||
+          currentUser?.id === self?.getCollaborationDelegatee(ECollaborationType.submission)?.collaborator?.user?.id
+        )
+      },
       getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
         return self
           .getCollaborationAssignees(collaborationType)
