@@ -156,14 +156,10 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
-  def permit_type_required_steps_by_classification(activity = nil, permit_type = nil)
-    return JurisdictionTemplateStepCode.none unless activity && permit_type
+  def permit_type_required_steps_by_classification(permit_type = nil)
+    return PermitTypeRequiredStep.none unless permit_type
 
-    requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type, discarded_at: nil)
-
-    return JurisdictionTemplateStepCode.none unless requirement_template
-
-    permit_type_required_steps.where(requirement_template: requirement_template)
+    permit_type_required_steps.where(permit_type: permit_type)
   end
 
   def create_integration_mappings

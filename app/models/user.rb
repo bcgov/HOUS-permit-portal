@@ -36,6 +36,7 @@ class User < ApplicationRecord
   accepts_nested_attributes_for :preference
 
   # Validations
+  validate :valid_role_change, if: :role_changed?, on: :update
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
   validate :unique_omniauth_uid
@@ -193,5 +194,9 @@ class User < ApplicationRecord
   def single_jurisdiction
     return if jurisdictions.count <= 1
     errors.add(:base, :single_jurisdiction)
+  end
+
+  def valid_role_change
+    errors.add(:base, :admin_role_change) if role_was.to_sym == :super_admin
   end
 end

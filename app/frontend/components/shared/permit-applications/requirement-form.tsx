@@ -426,8 +426,7 @@ export const RequirementForm = observer(
             key={permitApplication.formFormatKey}
             form={formattedFormJson}
             formReady={formReady}
-            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    can't be mutated*/
+            /* Needs cloned submissionData otherwise it's not possible to use data grid as mst props can't be mutated*/
             submission={unsavedSubmissionData}
             onSubmit={onFormSubmit}
             options={permitAppOptions}

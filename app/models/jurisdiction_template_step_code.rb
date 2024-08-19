@@ -1,2 +1,0 @@
-class JurisdictionTemplateStepCode < ApplicationRecord
-end
