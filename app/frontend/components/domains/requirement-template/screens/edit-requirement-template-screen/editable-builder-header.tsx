@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
-import { useFormContext } from "react-hook-form"
+import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
 import { ETemplateVersionStatus } from "../../../../../types/enums"
@@ -15,8 +15,10 @@ interface IProps {
 
 export const EditableBuilderHeader = observer(function EditableBuilderHeader({ requirementTemplate }: IProps) {
   const { t } = useTranslation()
-  const { register, watch, setValue } = useFormContext<IRequirementTemplateForm>()
-  const watchedDescription = watch("description")
+  const { control, register, watch, setValue } = useFormContext<IRequirementTemplateForm>()
+  const {
+    field: { value: description, onChange: onDescriptionChange },
+  } = useController({ control, name: "description" })
   return (
     <BuilderHeader
       breadCrumbs={[
@@ -34,14 +36,15 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
       renderDescription={() => (
         <EditableInputWithControls
           initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
-          value={watchedDescription || ""}
+          value={description || ""}
           editableInputProps={{
-            ...register("description"),
             "aria-label": "Edit Template Description",
           }}
-          color={R.isEmpty(watchedDescription) ? "text.link" : undefined}
+          color={R.isEmpty(description) ? "text.link" : undefined}
           aria-label={"Edit Template Description"}
-          onCancel={(previousValue) => setValue("description", previousValue)}
+          onChange={onDescriptionChange}
+          onSubmit={onDescriptionChange}
+          onCancel={onDescriptionChange}
         />
       )}
     />
