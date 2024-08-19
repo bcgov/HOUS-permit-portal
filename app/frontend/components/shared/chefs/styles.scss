@@ -603,7 +603,7 @@
   .contact-data-grid,
   .multi-data-grid {
     border: none;
-    overflow-x: hidden;
+    overflow: visible;
 
     .contact-field-set {
       margin-top: 0;
@@ -775,7 +775,7 @@
       content: "Answer changed";
       position: absolute;
       font-weight: 200;
-      top: 50%;
+      top: 0;
       padding-left: 20px;
       padding-right: 4px;
       padding-top: 4px;
