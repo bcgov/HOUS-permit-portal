@@ -279,8 +279,8 @@ export const RequirementForm = observer(
     const formReady = (rootComponent) => {
       formRef.current = rootComponent
 
-      rootComponent.on("componentError", (error) => {
-        // when a form field has an error, we update the state of ErrorBox with the new error information
+      rootComponent.on("change", (_) => {
+        // whenever a form data changes, we update the state of ErrorBox with the new error information
         setErrorBoxData(mapErrorBoxData(formRef.current.errors))
       })
 
