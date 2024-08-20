@@ -48,6 +48,7 @@ interface IFormComponentProps {
   component: any
   dataPath?: string[]
 }
+
 const FormComponent = function ApplicationPDFFormComponent({
   permitApplication,
   component,
@@ -149,14 +150,19 @@ const FormComponent = function ApplicationPDFFormComponent({
       )
     }
     case EComponentType.datagrid: {
+      const values: any[] = (R.path([...dataPath, component.key], permitApplication.submissionData.data) ?? []) as any[]
+
+      const dataGridChildComponent = component?.components?.[0]
+
       return (
         <>
-          {component.components &&
-            component.components.map((child) => (
+          {dataGridChildComponent &&
+            Array.isArray(values) &&
+            values.map((value, index) => (
               <FormComponent
                 key={generateUUID()}
-                component={child}
-                dataPath={[...dataPath, component.key, 0]}
+                component={dataGridChildComponent}
+                dataPath={[...dataPath, component.key, index]}
                 permitApplication={permitApplication}
               />
             ))}
@@ -288,7 +294,16 @@ const PanelHeader = function ApplicationPDFPanelHeader({ component }) {
 const ChecklistField = function ApplicationPDFPanelChecklistField({ options, label }) {
   return (
     <View style={{ gap: 4, paddingTop: 4 }} wrap={false}>
-      <Text style={{ fontSize: 12, color: theme.colors.text.primary, paddingBottom: 4, marginBottom: 4 }}>{label}</Text>
+      <Text
+        style={{
+          fontSize: 12,
+          color: theme.colors.text.primary,
+          paddingBottom: 4,
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </Text>
       <View style={{ gap: 8 }}>
         {Object.keys(options).map((key) => {
           return <Checkbox key={key} isChecked={options[key]} label={key} />
