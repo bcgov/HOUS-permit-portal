@@ -182,7 +182,7 @@ export function SectionsDnd({ sections, onDone, onCancel }: IProps) {
         top="0"
         right="0"
         bottom="0"
-        left={"sidebar.width"}
+        left={"var(--app-sidebar-width)"}
 
         // hide the form side so user can focus on drag /up down and can't click the form accordions (in sections-display)
       >
