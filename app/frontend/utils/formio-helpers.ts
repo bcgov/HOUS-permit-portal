@@ -33,18 +33,13 @@ export const isFieldSetKey = (key: string) => {
 export const compareSubmissionData = (beforeSubmissionData: ISubmissionData, afterSubmissionData: ISubmissionData) => {
   const changedFields: string[] = []
 
-  // Helper function to compare two values
-  const isDifferent = (value1: any, value2: any): boolean => {
-    return !R.equals(value1, value2)
-  }
-
   for (const sectionKey in afterSubmissionData.data) {
     if (afterSubmissionData.data.hasOwnProperty(sectionKey)) {
       const afterSection = afterSubmissionData.data[sectionKey]
       const beforeSection = beforeSubmissionData.data[sectionKey] || {}
 
       for (const fieldKey in afterSection) {
-        if (!afterSection.hasOwnProperty(fieldKey) || !isDifferent(afterSection[fieldKey], beforeSection[fieldKey]))
+        if (!afterSection.hasOwnProperty(fieldKey) || R.equals(afterSection[fieldKey], beforeSection[fieldKey]))
           continue
 
         changedFields.push(fieldKey)

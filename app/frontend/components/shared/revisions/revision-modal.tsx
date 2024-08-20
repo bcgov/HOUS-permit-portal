@@ -120,6 +120,8 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
   const requirementSubmission =
     revisionRequestDefault?.submissionJson ?? revisionRequest?.submissionJson ?? submissionJson
 
+  const selectedLabel = revisionReasonOptions.find((opt) => opt.value === reasonCode)?.label
+
   return (
     <Modal onClose={handleClose} isOpen={isOpen} size="lg">
       <ModalOverlay />
@@ -135,24 +137,21 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
           <Flex direction="column" gap={4}>
             <FormControl>
               <FormLabel>{t("permitApplication.show.revision.reasonFor")}</FormLabel>
-              <Select
-                placeholder={t("ui.pleaseSelect")}
-                value={reasonCode}
-                onChange={(e) => setReasonCode(e.target.value)}
-                isDisabled={isRevisionsRequested}
-                sx={{
-                  _disabled: {
-                    color: "text.primary",
-                    cursor: "not-allowed",
-                  },
-                }}
-              >
-                {revisionReasonOptions.map((opt) => (
-                  <option value={opt.value} key={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </Select>
+              {isRevisionsRequested ? (
+                <Textarea disabled={true}>{selectedLabel}</Textarea>
+              ) : (
+                <Select
+                  placeholder={t("ui.pleaseSelect")}
+                  value={reasonCode}
+                  onChange={(e) => setReasonCode(e.target.value)}
+                >
+                  {revisionReasonOptions.map((opt) => (
+                    <option value={opt.value} key={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </Select>
+              )}
             </FormControl>
             <FormControl>
               <FormLabel>{t("permitApplication.show.revision.comment")}</FormLabel>
