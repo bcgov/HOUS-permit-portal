@@ -13,7 +13,7 @@ interface IProps {
 export const PermitApplicationPDFViewer = observer(function PermitApplicationPDFViewer({ mode }: IProps) {
   // permitApplication must be passed as props to <Content> due to a limitation of react-pdf
   // see: https://github.com/diegomura/react-pdf/issues/2263#issuecomment-1511800981
-  const { currentPermitApplication } = usePermitApplication()
+  const { currentPermitApplication } = usePermitApplication({ review: true })
 
   return mode == "pdf" ? (
     <PDFViewer height="750px" width="100%">

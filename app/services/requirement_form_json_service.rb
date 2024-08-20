@@ -396,9 +396,9 @@ class RequirementFormJsonService
           [
             get_nested_info_component(:pid, requirement_block_key, "PID", required),
             get_nested_info_component(:folio_number, requirement_block_key, "Folio Number", false),
-            get_nested_info_component(:address, requirement_block_key, "Address", false, :address),
           ],
         ),
+        get_nested_info_component(:address, requirement_block_key, "Address", false, :address),
       ],
     }
     multi_data_grid_form_json(key, component, true, "Add #{requirement.label}")
