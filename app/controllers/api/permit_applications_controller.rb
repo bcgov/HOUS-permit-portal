@@ -358,6 +358,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :nickname,
       :pin,
       :pid,
+      :first_nations,
       submission_data: {
       },
     )

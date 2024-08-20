@@ -16,7 +16,7 @@ export const Reinvite = observer(function Reinvite({ permitCollaboration, onRein
     !permitCollaboration.collaborator.user?.isDiscarded && !permitCollaboration.collaborator.user?.isUnconfirmed
   const isEligibleForReinvite = permitCollaboration.collaborator.user?.isSubmitter
   return isConfirmedUser ? null : (
-    <Text fontSize={"xs"} color={"text.secondary"}>
+    <Text fontSize={"xs"} color={"text.secondary"} ml={2}>
       {isEligibleForReinvite ? (
         <>
           {t("permitCollaboration.popover.collaborations.unconfirmed")}
