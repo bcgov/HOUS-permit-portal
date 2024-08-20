@@ -14,7 +14,7 @@ ENV RAILS_ENV="development" \
 
 # Install packages needed for both building and running the application
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python postgresql-client libproj-dev libgeos-dev proj-bin netcat && \
+    apt-get install --no-install-recommends -y build-essential curl git libpq-dev libvips node-gyp pkg-config python postgresql-client libproj-dev libgeos-dev proj-bin netcat xvfb libatk1.0-0 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 libpango-1.0-0 libgdk-pixbuf2.0-0 libgtk-3-0 libnss3 libxss1 libx11-xcb1 libxtst6 wget gnupg2 chromium && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Ruby gems
