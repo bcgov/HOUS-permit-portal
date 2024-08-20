@@ -80,6 +80,8 @@ class Api::TemplateVersionsController < Api::ApplicationController
       from_template_version = requirement_template.published_template_version
     end
 
+    render_error("misc.not_found_error", status: :not_found) and return if from_template_version.nil?
+
     if @jurisdiction_template_version_customization =
          CustomizationCopyService.new(
            from_template_version,
@@ -98,10 +100,12 @@ class Api::TemplateVersionsController < Api::ApplicationController
                      error_message: @jurisdiction_template_version_customization.errors.full_messages.join(", "),
                    }
     end
+  rescue ActiveRecord::RecordNotFound
+    render_error("misc.not_found_error", status: :not_found) and return
   end
 
   def show_integration_mapping
-    authorize @template_version
+    authorize @template_version, :show?
 
     @integration_mapping = @template_version.integration_mappings.find_by(jurisdiction_id: params[:jurisdiction_id])
 
