@@ -67,7 +67,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def copy_jurisdiction_template_version_customization
-    authorize @template_version, :show?
+    authorize @template_version
     if copy_customization_params[:from_template_version_id]
       from_template_version = TemplateVersion.find(copy_customization_params[:from_template_version_id])
     elsif copy_customization_params[:from_non_first_nations] && @template_version.first_nations
