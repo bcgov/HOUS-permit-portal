@@ -188,7 +188,7 @@ class PermitApplication < ApplicationRecord
 
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    RequirementTemplate.published_requirement_template_version(activity, permit_type)
+    RequirementTemplate.published_requirement_template_version(activity, permit_type, first_nations)
   end
 
   def form_customizations

@@ -115,8 +115,8 @@ class RequirementTemplate < ApplicationRecord
     )
   end
 
-  def self.published_requirement_template_version(activity, permit_type)
-    find_by(activity: activity, permit_type: permit_type).published_template_version
+  def self.published_requirement_template_version(activity, permit_type, first_nations)
+    find_by(activity: activity, permit_type: permit_type, first_nations: first_nations).published_template_version
   rescue NoMethodError => e
     rails.logger.error e.message
   end

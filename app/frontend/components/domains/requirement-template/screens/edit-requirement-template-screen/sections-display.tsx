@@ -80,7 +80,6 @@ const SectionDisplay = observer(
       control,
     })
 
-    const watchedSections = watch(`requirementTemplateSectionsAttributes`)
     const watchedSectionBlocks = watch(
       `requirementTemplateSectionsAttributes.${sectionIndex}.templateSectionBlocksAttributes`
     )
@@ -88,6 +87,7 @@ const SectionDisplay = observer(
     const watchedSectionName = watch(`requirementTemplateSectionsAttributes.${sectionIndex}.name`)
 
     const [editableSectionName, setEditableSectionName] = React.useState<string>(watchedSectionName ?? "")
+    const [isInEditMode, setIsInEditMode] = React.useState<boolean>(false)
 
     useEffect(() => {
       setEditableSectionName(watchedSectionName)
@@ -112,15 +112,22 @@ const SectionDisplay = observer(
             w={"fit-content"}
             fontWeight={700}
             fontSize={"2xl"}
-            className="edit-template-yellowBarHeader"
+            className={"edit-template-yellowBarHeader"}
+            sx={{
+              "&::before": {
+                borderTop: isInEditMode ? "none" : undefined,
+              },
+            }}
             initialHint={t("ui.clickToEdit")}
             value={editableSectionName}
             onChange={setEditableSectionName}
+            onEdit={() => setIsInEditMode(true)}
             onSubmit={(nextValue) => {
               setValue(`requirementTemplateSectionsAttributes.${sectionIndex}.name`, nextValue)
             }}
             color={R.isEmpty(editableSectionName) ? "text.link" : undefined}
             aria-label={"Edit Section Name"}
+            onBlur={() => setIsInEditMode(false)}
             onCancel={(previousValue) => {
               setEditableSectionName(previousValue)
             }}
