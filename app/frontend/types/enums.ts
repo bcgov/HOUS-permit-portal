@@ -151,11 +151,11 @@ export enum ERequirementType {
   signature = "signature",
   textArea = "textarea",
   energyStepCode = "energy_step_code",
+  pidInfo = "pid_info",
   phone = "phone",
   email = "email",
   generalContact = "general_contact",
   professionalContact = "professional_contact",
-  pidInfo = "pid_info",
 }
 
 export enum ENumberUnit {
