@@ -32,7 +32,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def show_jurisdiction_template_version_customization
-    authorize @template_version
+    authorize @template_version, :show?
 
     return head :not_found if @jurisdiction_template_version_customization.blank?
 
@@ -42,7 +42,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def create_or_update_jurisdiction_template_version_customization
-    authorize @template_version
+    authorize @template_version, :show?
 
     @jurisdiction_template_version_customization =
       @template_version.jurisdiction_template_version_customizations.find_or_initialize_by(

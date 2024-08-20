@@ -97,12 +97,24 @@ export const RevisionSideBar = observer(
     }
 
     const [topHeight, setTopHeight] = useState<number>()
-    const submitBoxHeight = 145
 
     useEffect(() => {
-      const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
-      setTopHeight(permitHeaderHeight)
-    }, [isMounted, window.innerWidth, window.innerHeight])
+      const updateTopHeight = () => {
+        const permitHeaderHeight = document.getElementById("permitHeader")?.offsetHeight
+        setTopHeight(permitHeaderHeight)
+      }
+
+      // Call the function to set the initial value
+      updateTopHeight()
+
+      // Add event listener for window resize
+      window.addEventListener("resize", updateTopHeight)
+
+      // Clean up the event listener on component unmount
+      return () => {
+        window.removeEventListener("resize", updateTopHeight)
+      }
+    }, [isMounted])
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -269,7 +281,7 @@ export const RevisionSideBar = observer(
                 position="sticky"
                 bottom={0}
                 left={0}
-                maxH={submitBoxHeight}
+                maxH={145}
                 bg="theme.yellowLight"
                 flex={1}
               >

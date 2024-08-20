@@ -43,10 +43,6 @@ class TemplateVersionPolicy < ApplicationPolicy
     show?
   end
 
-  def show_jurisdiction_template_version_customization?
-    show?
-  end
-
   def show_integration_mapping?
     show?
   end

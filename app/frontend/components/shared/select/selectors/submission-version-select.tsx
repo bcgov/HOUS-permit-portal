@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import Select from "react-select"
 import { IOption, ISubmissionVersion } from "../../../../types/types"
 
@@ -13,9 +13,13 @@ const SubmissionVersionSelect: React.FC<SubmissionVersionSelectProps> = ({ optio
     onChange(option ? option.value : null)
   }
 
+  const sortedOptions = useMemo(() => {
+    return options.sort((a, b) => b.value.createdAt - a.value.createdAt)
+  }, [options])
+
   useEffect(() => {
-    if (options.length > 0 && !value) {
-      const defaultOption = options[0]
+    if (sortedOptions.length > 0 && !value) {
+      const defaultOption = sortedOptions[0]
 
       onChange(defaultOption.value)
     }
@@ -23,7 +27,7 @@ const SubmissionVersionSelect: React.FC<SubmissionVersionSelectProps> = ({ optio
 
   return (
     <Select
-      options={options}
+      options={sortedOptions}
       getOptionLabel={(option) => option.label}
       onChange={handleChange}
       value={options.find((option) => option.value.id === value?.id)}
