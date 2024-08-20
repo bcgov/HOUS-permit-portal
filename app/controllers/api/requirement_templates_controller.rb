@@ -33,10 +33,14 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     if copy_existing
       found_template =
-        RequirementTemplate.find_by!(
+        RequirementTemplate.find_by(
           permit_type_id: requirement_template_params[:permit_type_id],
           activity_id: requirement_template_params[:activity_id],
         )
+      if found_template.nil?
+        authorize :requirement_template, :create?
+        render_error("misc.not_found_error", status: :not_found) and return
+      end
       @requirement_template =
         RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
           requirement_template_params,
