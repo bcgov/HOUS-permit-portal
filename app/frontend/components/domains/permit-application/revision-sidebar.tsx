@@ -311,7 +311,7 @@ export const RevisionSideBar = observer(
             revisionRequestDefault={revisionRequestDefault}
             onSave={handleSubmit(onSaveRevision)}
             isRevisionsRequested={permitApplication.isRevisionsRequested}
-            disableInput={forSubmitter}
+            disableInput={forSubmitter || isViewingPastRequests}
           />
         )}
         {sendRevisionContainerRef && tabIndex == 0 && (
