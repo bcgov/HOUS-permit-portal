@@ -53,7 +53,7 @@ export const InviteScreen = observer(({}: IInviteScreenProps) => {
   const { handleSubmit, formState, control, reset } = formMethods
 
   // Update the form's default values when currentJurisdiction.id changes
-  // This happens when navigating from the jurisdiciton creation
+  // This happens when navigating from the jurisdiction creation
   useEffect(() => {
     reset({
       users: [defaultUserValues],

@@ -57,7 +57,7 @@ export const NewJurisdictionScreen = observer(() => {
   const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
-    const submissionData = { ...formData, regionalDistrictId: formData.regionalDistrict.id }
+    const submissionData = { ...formData, regionalDistrictId: formData.regionalDistrict?.id }
     const createdJurisdiction = (await createJurisdiction(submissionData)) as IJurisdiction
     if (createdJurisdiction) {
       setJurisdiction(createdJurisdiction)
