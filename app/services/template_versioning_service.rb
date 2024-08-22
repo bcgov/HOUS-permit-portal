@@ -92,8 +92,6 @@ class TemplateVersioningService
 
     ModelCallbackJob.perform_async(template_version.class.name, template_version.id, "force_publish_now!")
 
-    template_version = publish_version!(template_version, true)
-
     template_version
   end
 

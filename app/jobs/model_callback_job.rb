@@ -8,7 +8,7 @@ class ModelCallbackJob
                   }
 
   def perform(model_name, model_id, callback_name)
-    model = model_name.constantize.find(model_id)
+    model = model_name.constantize.find_by_id(model_id)
 
     return if model.blank?
 
