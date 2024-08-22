@@ -78,6 +78,7 @@ class User < ApplicationRecord
       updated_at: updated_at,
       created_at: created_at,
       role: role,
+      name: name,
       first_name: first_name,
       last_name: last_name,
       email: email,
