@@ -8,9 +8,9 @@ module FormSupportingDocuments
              ->(permit_application) { where(id: permit_application.supporting_doc_ids_from_submission_data) },
              class_name: "SupportingDocument"
 
-    CHECKLIST_PDF_DATA_KEY = "step_code_checklist_pdf"
-    PERMIT_APP_PDF_DATA_KEY = "permit_application_pdf"
-    STATIC_DOCUMENT_DATA_KEYS = [PERMIT_APP_PDF_DATA_KEY, CHECKLIST_PDF_DATA_KEY].freeze
+    CHECKLIST_PDF_DATA_KEY = SupportingDocument::CHECKLIST_PDF_DATA_KEY
+    PERMIT_APP_PDF_DATA_KEY = SupportingDocument::APPLICATION_PDF_DATA_KEY
+    STATIC_DOCUMENT_DATA_KEYS = SupportingDocument::STATIC_DOCUMENT_DATA_KEYS
 
     has_many :inactive_supporting_documents,
              ->(permit_application) do

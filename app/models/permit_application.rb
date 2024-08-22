@@ -304,14 +304,13 @@ class PermitApplication < ApplicationRecord
 
     missing_pdfs = []
 
-    application_pdf = supporting_documents.find_by(data_key: PERMIT_APP_PDF_DATA_KEY)
+    submission_versions.each do |submission_version|
+      version_missing_pdfs = submission_version.missing_pdfs
 
-    missing_pdfs << PERMIT_APP_PDF_DATA_KEY if application_pdf.blank?
+      next if version_missing_pdfs.empty?
 
-    return missing_pdfs unless step_code&.pre_construction_checklist
-
-    checklist_pdf = supporting_documents.find_by(data_key: CHECKLIST_PDF_DATA_KEY)
-    missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
+      missing_pdfs += version_missing_pdfs
+    end
 
     missing_pdfs
   end

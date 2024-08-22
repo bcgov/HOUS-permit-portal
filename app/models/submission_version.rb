@@ -1,11 +1,30 @@
 class SubmissionVersion < ApplicationRecord
   belongs_to :permit_application
   has_many :revision_requests, dependent: :destroy
-  has_one :version_pdf, class_name: "SupportingDocument", dependent: :destroy
+  has_many :supporting_documents, dependent: :destroy
 
   accepts_nested_attributes_for :revision_requests, allow_destroy: true
 
   after_commit :notify_user_application_viewed
+
+  def missing_pdfs
+    missing_data_keys = []
+
+    unless supporting_documents.find_by(data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY).present?
+      missing_data_keys << "#{SupportingDocument::APPLICATION_PDF_DATA_KEY}_#{id}"
+    end
+
+    unless step_code_checklist_json.empty? ||
+             supporting_documents.find_by(data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY).present?
+      missing_data_keys << "#{SupportingDocument::CHECKLIST_PDF_DATA_KEY}_#{id}"
+    end
+
+    missing_data_keys
+  end
+
+  def missing_pdfs?
+    !missing_pdfs.empty?
+  end
 
   def formatted_submission_data(current_user: nil)
     PermitApplication::SubmissionDataService.new(permit_application).formatted_submission_data(
