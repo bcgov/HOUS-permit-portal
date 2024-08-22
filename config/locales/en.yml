@@ -75,6 +75,7 @@ en:
               max_size: "must not be larger than %{max_size} bytes"
             data_key:
               duplicate: "file already exists for this permit application"
+              submission_version_data_key: "data key must contain permit pdf prefix if it belongs to a submission version"
         user:
           attributes:
             base:

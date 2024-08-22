@@ -1,14 +1,18 @@
 class SupportingDocument < ApplicationRecord
   belongs_to :permit_application
+  belongs_to :submission_version, optional: true, inverse_of: :version_pdf
+
   include FileUploader.Attachment(:file)
 
   validate :unique_data_key
+  validate :validate_submission_version_data_key
 
   scope :file_ids_with_regex, ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
   scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data IS NULL") }
+  validates :submission_version_id, uniqueness: { scope: :permit_application_id, allow_nil: true }
 
-  APPLICATION_PDF_DATA_KEY = :permit_application_pdf
-  CHECKLIST_PDF_DATA_KEY = :step_code_checklist_pdf
+  APPLICATION_PDF_DATA_KEY = "permit_application_pdf"
+  CHECKLIST_PDF_DATA_KEY = "step_code_checklist_pdf"
 
   def last_signer
     if compliance_data["result"] &&
@@ -87,11 +91,23 @@ class SupportingDocument < ApplicationRecord
     )
   end
 
-  UNIQUE_DATA_KEYS = %i[permit_application_pdf step_code_checklist_pdf]
+  UNIQUE_DATA_KEYS = [APPLICATION_PDF_DATA_KEY, CHECKLIST_PDF_DATA_KEY].freeze
 
   def unique_data_key
+    return
     return unless UNIQUE_DATA_KEYS.include?(data_key)
-    return if !permit_application.supporting_documents.not(self).find_by(data_key: data_key)
-    self.errors.add(:data_key, i18n.t("errors.models.supporting_documents.attributes.data_key.duplicate"))
+
+    return unless permit_application.supporting_documents.where.not(id: self.id).find_by(data_key: data_key).present?
+
+    self.errors.add(:data_key, I18n.t("errors.models.supporting_document.attributes.data_key.duplicate"))
+  end
+
+  def validate_submission_version_data_key
+    return if submission_version.present? && data_key.start_with?(APPLICATION_PDF_DATA_KEY)
+
+    self.errors.add(
+      :data_key,
+      I18n.t("errors.models.supporting_document.attributes.data_key.submission_version_data_key"),
+    )
   end
 end

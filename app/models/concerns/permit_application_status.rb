@@ -58,6 +58,8 @@ module PermitApplicationStatus
 
       submission_versions.create!(form_json: self.form_json, submission_data: self.submission_data)
 
+      zip_and_upload_supporting_documents
+
       send_submit_notifications
     end
   end

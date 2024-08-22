@@ -8,8 +8,8 @@ module FormSupportingDocuments
              ->(permit_application) { where(id: permit_application.supporting_doc_ids_from_submission_data) },
              class_name: "SupportingDocument"
 
-    CHECKLIST_PDF_DATA_KEY = :step_code_checklist_pdf
-    PERMIT_APP_PDF_DATA_KEY = :permit_application_pdf
+    CHECKLIST_PDF_DATA_KEY = "step_code_checklist_pdf"
+    PERMIT_APP_PDF_DATA_KEY = "permit_application_pdf"
     STATIC_DOCUMENT_DATA_KEYS = [PERMIT_APP_PDF_DATA_KEY, CHECKLIST_PDF_DATA_KEY].freeze
 
     has_many :inactive_supporting_documents,
@@ -90,7 +90,7 @@ module FormSupportingDocuments
   private
 
   def zip_and_upload_supporting_documents
-    return unless submitted? && zipfile_data.blank?
+    return unless submitted?
 
     ZipfileJob.perform_async(id)
   end

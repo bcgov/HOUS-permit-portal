@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_20_211514) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_21_223810) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -675,8 +675,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_20_211514) do
     t.datetime "updated_at", null: false
     t.jsonb "compliance_data", default: {}, null: false
     t.string "data_key"
+    t.uuid "submission_version_id"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"
+    t.index ["submission_version_id"],
+            name: "index_supporting_documents_on_submission_version_id"
   end
 
   create_table "taggings",
@@ -903,6 +906,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_20_211514) do
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
+  add_foreign_key "supporting_documents", "submission_versions"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"

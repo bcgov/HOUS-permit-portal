@@ -47,7 +47,6 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
