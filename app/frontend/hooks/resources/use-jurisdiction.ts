@@ -24,6 +24,7 @@ export const useJurisdiction = () => {
     "/jurisdictions/:jurisdictionId/configuration-management/submissions-inbox-setup",
     "/jurisdictions/:jurisdictionId/configuration-management/energy-step",
     "/jurisdictions/:jurisdictionId/users",
+    "/jurisdictions/:jurisdictionId/users/invite",
     "/jurisdictions/:jurisdictionId/api-settings",
   ]
 

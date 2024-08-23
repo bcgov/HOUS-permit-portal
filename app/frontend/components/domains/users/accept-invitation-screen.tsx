@@ -45,8 +45,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
 
-  const { invitedByEmail, jurisdiction, isSuperAdmin, email, role } = invitedUser
-
+  const { invitedByEmail, invitedToJurisdiction, isSuperAdmin, email, role } = invitedUser
   return (
     <CenterContainer>
       <Flex
@@ -59,15 +58,15 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
         bg="greys.white"
       >
         <Heading as="h1">{t("user.acceptInvitation")}</Heading>
-        {invitedByEmail && jurisdiction ? (
+        {invitedByEmail && invitedToJurisdiction ? (
           <>
             <Text>
               <Trans i18nKey="user.invitedBy" values={{ email: invitedByEmail }} />
             </Text>
 
-            <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm">
+            <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm" textAlign="center">
               <Heading as="h2" m={0}>
-                {jurisdiction.qualifiedName}
+                {invitedToJurisdiction.qualifiedName}
               </Heading>
               <Text>{t("user.invitedAs")}</Text>
               <Text fontWeight="bold">{t(`user.roles.${role as EUserRoles}`)}</Text>
@@ -149,12 +148,14 @@ function InvalidTokenMessage() {
 const AcceptInviteForm = observer(function AcceptInviteForm() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { userStore } = useMst()
+  const { userStore, uiStore } = useMst()
+  const { updateRmJurisdictionSelectKey } = uiStore
   const { currentUser } = userStore
   const { handleSubmit, formState } = useForm()
   const { isSubmitting } = formState
 
   const onSubmit = async () => {
+    updateRmJurisdictionSelectKey()
     await currentUser.acceptInvitation(searchParams.get("invitation_token"))
     navigate("/")
   }
