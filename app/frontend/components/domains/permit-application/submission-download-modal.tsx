@@ -34,7 +34,7 @@ export const SubmissionDownloadModal = observer(
   ({ permitApplication, renderTrigger }: ISubmissionDownloadModalProps) => {
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
-    const { supportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
+    const { allSubmissionVersionCompletedSupportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
     const checklist = stepCode?.preConstructionChecklist
 
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -102,7 +102,7 @@ export const SubmissionDownloadModal = observer(
                       {permitApplication.missingPdfs.map((pdfKey) => (
                         <MissingPdf key={pdfKey} pdfKey={pdfKey} />
                       ))}
-                      {supportingDocuments.map((doc) => (
+                      {allSubmissionVersionCompletedSupportingDocuments.map((doc) => (
                         <FileDownloadLink key={doc.fileUrl} url={doc.fileUrl} name={doc.fileName} size={doc.fileSize} />
                       ))}
                     </VStack>

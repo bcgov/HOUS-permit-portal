@@ -62,7 +62,17 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint do |pa, options|
-      pa.supporting_documents_for_submitter_based_on_user_permissions(user: options[:current_user])
+      pa.supporting_documents_for_submitter_based_on_user_permissions(
+        pa.supporting_documents,
+        user: options[:current_user],
+      )
+    end
+    association :all_submission_version_completed_supporting_documents,
+                blueprint: SupportingDocumentBlueprint do |pa, options|
+      pa.supporting_documents_for_submitter_based_on_user_permissions(
+        pa.all_submission_version_completed_supporting_documents,
+        user: options[:current_user],
+      )
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
@@ -94,7 +104,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :submission_data do |pa, options|
       pa.formatted_submission_data
     end
-    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    association :all_submission_version_completed_supporting_documents, blueprint: SupportingDocumentBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :review_extended
   end
 

@@ -54,7 +54,7 @@ class PermitApplication < ApplicationRecord
 
   COMPLETION_SECTION_KEY = "section-completion-key"
 
-  def supporting_documents_for_submitter_based_on_user_permissions(user: nil)
+  def supporting_documents_for_submitter_based_on_user_permissions(supporting_documents, user: nil)
     return supporting_documents if user.blank?
 
     permissions = submission_requirement_block_edit_permissions(user_id: user.id)
