@@ -34,7 +34,12 @@ module ExternalApi::Concerns::Search::PermitApplications
     params.permit(
       :page,
       :per_page,
-      constraints: [:permit_classifications, submitted_at: %i[gt lt gte lte]],
+      constraints: [
+        :permit_classifications,
+        :status,
+        submitted_at: %i[gt lt gte lte],
+        resubmitted_at: %i[gt lt gte lte],
+      ],
       sort: %i[field direction],
     )
   end
@@ -55,7 +60,9 @@ module ExternalApi::Concerns::Search::PermitApplications
   def permit_application_where_clause
     constraints = permit_application_search_params[:constraints]
 
-    where = { status: %i[newly_submitted resubmitted], jurisdiction_id: current_external_api_key.jurisdiction_id }
+    where = { jurisdiction_id: current_external_api_key.jurisdiction_id }
+
+    where[:status] = %i[newly_submitted resubmitted] if constraints.blank? || constraints[:status].blank?
 
     where.merge!(constraints.to_h.deep_symbolize_keys) if constraints.present?
 
