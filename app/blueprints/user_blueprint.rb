@@ -45,7 +45,7 @@ class UserBlueprint < Blueprinter::Base
     end
 
     association :invited_to_jurisdiction, blueprint: JurisdictionBlueprint, view: :minimal do |user, _options|
-      user.jurisdiction_memberships.order(updated_at: :desc).first.jurisdiction
+      user.jurisdiction_memberships&.order(updated_at: :desc)&.first&.jurisdiction
     end
   end
 end
