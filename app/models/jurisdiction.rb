@@ -10,6 +10,7 @@ class Jurisdiction < ApplicationRecord
              text_start: %i[name reverse_qualified_name qualified_name]
 
   # Associations
+  has_one :preference
   has_many :permit_applications
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
