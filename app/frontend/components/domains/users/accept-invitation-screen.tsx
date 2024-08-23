@@ -45,7 +45,8 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
   const { sessionStore } = useMst()
   const { loggedIn } = sessionStore
 
-  const { invitedByEmail, invitedToJurisdiction, isSuperAdmin, email, role } = invitedUser
+  const { invitedByEmail, invitedToJurisdiction, isSuperAdmin, email, role, jurisdiction } = invitedUser
+  const defaultedJurisdiction = invitedToJurisdiction ?? jurisdiction
   return (
     <CenterContainer>
       <Flex
@@ -58,7 +59,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
         bg="greys.white"
       >
         <Heading as="h1">{t("user.acceptInvitation")}</Heading>
-        {invitedByEmail && invitedToJurisdiction ? (
+        {invitedByEmail && defaultedJurisdiction ? (
           <>
             <Text>
               <Trans i18nKey="user.invitedBy" values={{ email: invitedByEmail }} />
@@ -66,7 +67,7 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
 
             <VStack spacing={4} w="full" p={4} bg="theme.blueLight" rounded="sm" textAlign="center">
               <Heading as="h2" m={0}>
-                {invitedToJurisdiction.qualifiedName}
+                {defaultedJurisdiction.qualifiedName}
               </Heading>
               <Text>{t("user.invitedAs")}</Text>
               <Text fontWeight="bold">{t(`user.roles.${role as EUserRoles}`)}</Text>
