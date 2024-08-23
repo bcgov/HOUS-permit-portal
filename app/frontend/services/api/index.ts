@@ -77,6 +77,13 @@ export class Api {
     })
 
     this.client.addRequestTransform((request) => {
+      // csrfToken is set as readable cookie by backend, send it in every request
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("CSRF-TOKEN="))
+        ?.split("=")[1]
+
+      request.headers["X-CSRF-Token"] = csrfToken
       request.params = decamelizeRequest(request.params)
       request.data = decamelizeRequest(request.data)
     })
