@@ -1,10 +1,13 @@
 import {
   Button,
   Flex,
+  Heading,
   Modal,
   ModalBody,
+  ModalCloseButton,
   ModalContent,
   ModalFooter,
+  ModalHeader,
   ModalOverlay,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -32,10 +35,16 @@ export const PreviousSubmissionModal: React.FC<IPreviousSubmissionModalProps> = 
       <ModalOverlay />
 
       <ModalContent mt={48}>
-        <ModalBody py={6}>
+        <ModalHeader textAlign="center">
+          <ModalCloseButton fontSize="11px" />
+          <Heading as="h3" fontSize="xl">
+            {t("permitApplication.show.revision.originallySubmitted")}
+          </Heading>
+        </ModalHeader>
+        <ModalBody>
           <SingleRequirementForm requirementJson={requirementJson} submissionJson={submissionJson} />
           <ModalFooter>
-            <Flex width="full" justify="center" gap={4}>
+            <Flex width="full" justify="center">
               <Button variant="secondary" onClick={onClose}>
                 {t("ui.ok")}
               </Button>

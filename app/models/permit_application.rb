@@ -204,6 +204,7 @@ class PermitApplication < ApplicationRecord
 
   def update_viewed_at
     latest_submission_version.update(viewed_at: Time.current)
+    reindex
   end
 
   def number_prefix
