@@ -482,7 +482,10 @@ class PermitApplication < ApplicationRecord
 
   def submitter_must_have_role
     unless submitter&.submitter?
-      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+      errors.add(
+        :submitter,
+        I18n.t("activerecord.errors.models.permit_application.attributes.submitter.incorrect_role"),
+      )
     end
   end
 

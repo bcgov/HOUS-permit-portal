@@ -17,11 +17,9 @@ class PdfGenerationJob
     [args[0]]
   end
 
-  def perform(permit_application_id, regenerate_all = true)
+  def perform(permit_application_id)
     permit_application = PermitApplication.find(permit_application_id)
     return if permit_application.blank?
-
-    checklist = permit_application&.step_code&.pre_construction_checklist
 
     generation_directory_path = Rails.root.join("tmp/files")
     asset_directory_path = Rails.root.join("public")
@@ -32,24 +30,67 @@ class PdfGenerationJob
       puts "Directory created: #{generation_directory_path}"
     end
 
-    application_filename = "permit_application_#{permit_application_id}.pdf"
-    step_code_filename = "step_code_checklist_#{permit_application_id}.pdf"
+    submission_version_with_missing_pdfs = permit_application.submission_versions.select(&:missing_pdfs?)
 
-    # Convert data to JSON string
-    pdf_json_data = {
-      permitApplication:
-        camelize_response(PermitApplicationBlueprint.render_as_json(permit_application, view: :extended)),
-      checklist: checklist && camelize_response(StepCodeChecklistBlueprint.render_as_json(checklist, view: :extended)),
-      meta: {
-        generationPaths: {
-          permitApplication: generation_directory_path.join(application_filename).to_s,
-          stepCodeChecklist: checklist && generation_directory_path.join(step_code_filename).to_s,
-        },
-        assetDirectoryPath: asset_directory_path.to_s,
-      },
-    }.to_json
+    submission_versions_data =
+      submission_version_with_missing_pdfs.map do |submission_version|
+        # Convert data to JSON string
+        application_filename = "permit_application_#{permit_application.id}_v#{submission_version.version_number}.pdf"
+        step_code_filename = "step_code_checklist_#{permit_application.id}_v#{submission_version.version_number}.pdf"
 
-    json_filename = "#{generation_directory_path}/pdf_json_data_#{permit_application_id}.json"
+        should_permit_application_pdf_be_generated = submission_version.missing_permit_application_pdf?
+        should_checklist_pdf_be_generated = submission_version.missing_step_code_checklist_pdf?
+
+        pdf_json_data = {
+          permitApplication:
+            camelize_response(
+              PermitApplicationBlueprint.render_as_json(
+                permit_application,
+                view: :pdf_generation,
+                form_json: submission_version.form_json,
+                submission_data: submission_version.formatted_submission_data,
+                submitted_at: submission_version.created_at,
+              ),
+            ),
+          checklist:
+            submission_version.has_step_code_checklist? &&
+              camelize_response(submission_version.step_code_checklist_json),
+          meta: {
+            generationPaths: {
+              permitApplication:
+                should_permit_application_pdf_be_generated && generation_directory_path.join(application_filename).to_s,
+              stepCodeChecklist:
+                should_checklist_pdf_be_generated && generation_directory_path.join(step_code_filename).to_s,
+            },
+            assetDirectoryPath: asset_directory_path.to_s,
+          },
+        }.to_json
+
+        {
+          submission_version: submission_version,
+          pdf_json_data: pdf_json_data,
+          application_filename: application_filename,
+          step_code_filename: step_code_filename,
+          should_permit_application_pdf_be_generated: should_permit_application_pdf_be_generated,
+          should_checklist_pdf_be_generated: should_checklist_pdf_be_generated,
+        }
+      end
+
+    submission_versions_data.each do |submission_version_data|
+      generate_pdfs(submission_version_data, generation_directory_path)
+    end
+  end
+
+  def generate_pdfs(submission_version_data, generation_directory_path)
+    submission_version = submission_version_data[:submission_version]
+    pdf_json_data = submission_version_data[:pdf_json_data]
+    application_filename = submission_version_data[:application_filename]
+    step_code_filename = submission_version_data[:step_code_filename]
+    should_permit_application_pdf_be_generated = submission_version_data[:should_permit_application_pdf_be_generated]
+    should_checklist_pdf_be_generated = submission_version_data[:should_checklist_pdf_be_generated]
+
+    json_filename = "#{generation_directory_path}/pdf_json_data_#{submission_version.id}.json"
+
     File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
 
     # Run Node.js script as a child process, passing JSON data as an argument
@@ -73,15 +114,24 @@ class PdfGenerationJob
 
         # Check for errors or handle output based on the exit status
         if exit_status.success?
-          pdfs = [{ fname: application_filename, key: PermitApplication::PERMIT_APP_PDF_DATA_KEY }]
-          pdfs << { fname: step_code_filename, key: PermitApplication::CHECKLIST_PDF_DATA_KEY } if checklist
+          pdfs = []
+          if should_permit_application_pdf_be_generated
+            pdfs << { fname: application_filename, key: PermitApplication::PERMIT_APP_PDF_DATA_KEY }
+          end
+          if should_checklist_pdf_be_generated
+            pdfs << { fname: step_code_filename, key: PermitApplication::CHECKLIST_PDF_DATA_KEY }
+          end
+
           pdfs.each do |pdf|
             path = "#{generation_directory_path}/#{pdf[:fname]}"
             file = File.open(path)
-            # build first to ensure permit_application_id is set (required by file uploader)
-            doc = permit_application.supporting_documents.where(data_key: pdf[:key]).first_or_initialize
+            doc =
+              submission_version
+                .supporting_documents
+                .where(permit_application_id: submission_version.permit_application_id, data_key: pdf[:key])
+                .first_or_initialize
 
-            doc.update!(data_key: pdf[:key], file:) if doc.file.blank? || regenerate_all
+            doc.update(file:) if doc.file.blank?
 
             File.delete(path)
           end

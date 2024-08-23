@@ -160,16 +160,21 @@ const FileDownloadLink = function ApplicationFileDownloadLink({ url, name, size 
 function MissingPdf({ pdfKey }: { pdfKey: "permit_application_pdf" }) {
   const { t } = useTranslation()
 
-  const missingPdfKeyToLabel = {
-    permit_application_pdf: t("permitApplication.show.missingPdfLabels.permitApplication"),
-    step_code_checklist_pdf: t("permitApplication.show.missingPdfLabels.stepCode"),
+  const getMissingPdfLabel = () => {
+    if (pdfKey.startsWith("permit_application_pdf")) {
+      return t("permitApplication.show.missingPdfLabels.permitApplication")
+    }
+
+    if (pdfKey.startsWith("step_code_checklist_pdf")) {
+      return t("permitApplication.show.missingPdfLabels.stepCode")
+    }
   }
   return (
     <Flex w="full" align="center" justify="space-between" pl={1}>
       <HStack spacing={3}>
         <FileArrowDown size={16} />
         <Text as={"span"} color={"semantic.error"}>
-          {t("permitApplication.show.fetchingMissingPdf", { missingPdf: missingPdfKeyToLabel[pdfKey] || pdfKey })}
+          {t("permitApplication.show.fetchingMissingPdf", { missingPdf: getMissingPdfLabel() || pdfKey })}
         </Text>
       </HStack>
 

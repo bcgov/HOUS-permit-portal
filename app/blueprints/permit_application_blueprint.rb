@@ -71,6 +71,22 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
   end
 
+  view :pdf_generation do
+    include_view :extended
+
+    field :form_json do |pa, options|
+      options[:form_json].present? ? options[:form_json] : pa.form_json
+    end
+
+    field :submitted_at do |pa, options|
+      options[:submitted_at].present? ? options[:submitted_at] : pa.submitted_at
+    end
+
+    field :submission_data do |pa, options|
+      options[:submission_data].present? ? options[:submission_data] : pa.formatted_submission_data
+    end
+  end
+
   view :jurisdiction_review_extended do
     include_view :extended
     # reinclude fields to show all data for reviewers, which were filtered out in the extended view due to collaboration

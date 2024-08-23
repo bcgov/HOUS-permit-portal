@@ -26,6 +26,13 @@ module FormSupportingDocuments
                )
              end,
              class_name: "SupportingDocument"
+    has_many :all_submission_version_completed_supporting_documents,
+             ->(permit_application) do
+               where(id: permit_application.supporting_doc_ids_from_all_versions_submission_data).or(
+                 where(data_key: STATIC_DOCUMENT_DATA_KEYS),
+               )
+             end,
+             class_name: "SupportingDocument"
     accepts_nested_attributes_for :supporting_documents, allow_destroy: true
   end
 
@@ -33,6 +40,21 @@ module FormSupportingDocuments
     find_file_fields_and_transform!(submission_data, []) do |file_field_key, file_array|
       file_array.map { |fa| fa["model_id"] }
     end
+  end
+
+  def supporting_doc_ids_from_all_versions_submission_data
+    doc_ids = []
+
+    submission_versions.map do |sv|
+      version_doc_ids =
+        find_file_fields_and_transform!(sv.formatted_submission_data, []) do |_file_field_key, file_array|
+          file_array.map { |fa| fa["model_id"] }
+        end
+
+      doc_ids += version_doc_ids if version_doc_ids.is_a?(Array)
+    end
+
+    doc_ids
   end
 
   def formatted_compliance_data

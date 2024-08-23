@@ -59,7 +59,21 @@ class SupportingDocument < ApplicationRecord
   end
 
   def standardized_filename
-    "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}.#{file_data["id"].split(".").last}"
+    name = "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}"
+
+    extension = file_data["id"].split(".").last
+
+    # appending id to ensure uniqueness
+    name =
+      (
+        if submission_version.present?
+          "#{name}_v#{submission_version.version_number}_#{id}"
+        else
+          "#{name}_#{id}"
+        end
+      )
+
+    "#{name}.#{extension}"
   end
 
   def summarizeString(parsed_signature)
@@ -93,11 +107,11 @@ class SupportingDocument < ApplicationRecord
   STATIC_DOCUMENT_DATA_KEYS = [APPLICATION_PDF_DATA_KEY, CHECKLIST_PDF_DATA_KEY].freeze
 
   def validate_submission_version_data_key
-    return if submission_version.present? && STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
+    return unless submission_version.present? && !STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
 
     self.errors.add(
       :data_key,
-      I18n.t("errors.models.supporting_document.attributes.data_key.submission_version_data_key"),
+      I18n.t("activerecord.errors.models.supporting_document.attributes.data_key.submission_version_data_key"),
     )
   end
 end
