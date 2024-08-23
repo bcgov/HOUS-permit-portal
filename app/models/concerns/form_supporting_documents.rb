@@ -30,7 +30,7 @@ module FormSupportingDocuments
              ->(permit_application) do
                where(id: permit_application.supporting_doc_ids_from_all_versions_submission_data).or(
                  where(data_key: STATIC_DOCUMENT_DATA_KEYS),
-               )
+               ).order(created_at: :desc)
              end,
              class_name: "SupportingDocument"
     accepts_nested_attributes_for :supporting_documents, allow_destroy: true
