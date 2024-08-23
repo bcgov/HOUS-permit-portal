@@ -46,6 +46,7 @@ export const RegionalRMJurisdictionSelect = observer(function RegionalRMJurisdic
               borderBottomWidth: 0,
               borderColor: "var(--chakra-colors-border-base)",
               boxShadow: "none",
+              //@ts-ignore
               "&:hover": {
                 border: "1px solid var(--chakra-colors-border-base)",
               },

@@ -24,12 +24,15 @@ class Jurisdiction::UserInviter
         self.results[:email_taken] << user
       elsif user && is_regional_rm && jurisdiction_id = user_params[:jurisdiction_id]
         user.update(role: :regional_review_manager) if !user.regional_review_manager?
-        user
-          .jurisdiction_memberships
-          .where(jurisdiction_id:)
-          .first_or_create do |m|
-            PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later if user.confirmed?
-          end
+        membership =
+          user
+            .jurisdiction_memberships
+            .where(jurisdiction_id:)
+            .first_or_create do |m|
+              PermitHubMailer.new_jurisdiction_membership(user, jurisdiction_id).deliver_later if user.confirmed?
+            end
+        # The purpose of touch is to allow the jurisdiction to be obtained in the user blueprint invited_user view
+        membership.touch
         user.invite!(inviter) if !user.confirmed?
         self.results[:invited] << user
       else

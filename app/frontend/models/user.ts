@@ -2,7 +2,7 @@ import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EOmniauthProvider, EUserRoles } from "../types/enums"
-import { JurisdictionModel } from "./jurisdiction"
+import { IJurisdiction, JurisdictionModel } from "./jurisdiction"
 
 export const UserModel = types
   .model("UserModel")
@@ -27,6 +27,7 @@ export const UserModel = types
     eulaAccepted: types.maybeNull(types.boolean),
     invitedByEmail: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
+    invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
   })
   .extend(withRootStore())
   .extend(withEnvironment())

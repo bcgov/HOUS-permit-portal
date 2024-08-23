@@ -1,5 +1,6 @@
 import { Instance, types } from "mobx-state-tree"
 import queryString from "query-string"
+import { v4 as uuidv4 } from "uuid"
 import { withRootStore } from "../lib/with-root-store"
 import { FlashMessageModel } from "../models/flash-message"
 
@@ -8,6 +9,7 @@ export const UIStoreModel = types
   .props({
     flashMessage: types.optional(FlashMessageModel, {}),
     currentlySelectedJurisdictionId: types.maybeNull(types.string),
+    rmJurisdictionSelectKey: types.optional(types.string, uuidv4()),
   })
   .extend(withRootStore())
   .views((self) => ({}))
@@ -34,6 +36,9 @@ export const UIStoreModel = types
   .actions((self) => ({
     setCurrentlySelectedJurisdictionId(id: string) {
       self.currentlySelectedJurisdictionId = id
+    },
+    updateRmJurisdictionSelectKey() {
+      self.rmJurisdictionSelectKey = uuidv4()
     },
     afterCreate() {
       self.showQueryParamFlash()

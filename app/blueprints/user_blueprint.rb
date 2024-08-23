@@ -43,5 +43,9 @@ class UserBlueprint < Blueprinter::Base
     field :invited_by_email do |user, _options|
       user.invited_by&.email
     end
+
+    association :invited_to_jurisdiction, blueprint: JurisdictionBlueprint, view: :minimal do |user, _options|
+      user.jurisdiction_memberships&.order(updated_at: :desc)&.first&.jurisdiction
+    end
   end
 end

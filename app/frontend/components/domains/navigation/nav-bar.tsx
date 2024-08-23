@@ -85,11 +85,12 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore } = useMst()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { criticalNotifications } = notificationStore
+  const { rmJurisdictionSelectKey } = uiStore
 
   const location = useLocation()
   const path = location.pathname
@@ -150,7 +151,7 @@ export const NavBar = observer(function NavBar() {
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
-                  <RegionalRMJurisdictionSelect />
+                  <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
                 </VStack>
               )}
               {currentUser?.isSuperAdmin && (
