@@ -1,4 +1,4 @@
-import { Container, Divider, Flex, Heading, Icon, Tag, Text, VStack } from "@chakra-ui/react"
+import { Container, Divider, Flex, Heading, Icon, Image, Tag, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -32,6 +32,14 @@ export const SuccessfulSubmissionScreen = observer(() => {
         <Flex direction="column" bg="greys.grey04" w="full" p={8} gap={8} borderRadius="md">
           <Heading variant="yellowline">{t("permitApplication.new.whatsNextTitle")}</Heading>
           <Text fontSize="lg">{t("permitApplication.new.whatsNext")}</Text>
+          <Image
+            src="/images/timeline/timeline-graphic-4.png"
+            alt="thumbnail for timeline"
+            w="950px"
+            h="425px"
+            bg="semantic.infoLight"
+            objectFit="cover"
+          />
           <Divider borderColor="greys.grey02" />
           <Flex direction="column" gap={4}>
             <Text>
