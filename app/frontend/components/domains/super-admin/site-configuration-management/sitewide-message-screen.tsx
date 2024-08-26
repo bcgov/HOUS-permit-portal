@@ -69,6 +69,7 @@ export const SitewideMessageScreen = observer(function SitewideMessageScreen() {
                       label={t("siteConfiguration.sitewideMessage.label")}
                       fieldName="sitewideMessage"
                       hint={t("siteConfiguration.sitewideMessage.hint")}
+                      showOptional={false}
                     />
                   </Flex>
                   <FormControl display="flex" alignItems="center" w="fit-content" gap={2}>

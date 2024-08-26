@@ -16,6 +16,7 @@ export type TGenericDisplayProps<TFieldValues extends FieldValues> = {
     key: string
     label: string
     containerProps?: BoxProps
+    required?: boolean
   }>
   containerProps?: BoxProps
   editableInput?: JSX.Element

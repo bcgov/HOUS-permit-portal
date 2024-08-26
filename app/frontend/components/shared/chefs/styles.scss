@@ -449,6 +449,18 @@
     }
   }
 
+  // removes asterisk
+  .field-required:after {
+    display: none;
+  }
+
+
+  // adds optional text for non required input labels
+  .col-form-label:not(.field-required):not(.formio-section-container > .col-form-label):after {
+    content: "(optional)"
+  }
+
+
   .compliance {
     font-size: var(--chakra-fontSizes-xs);
     color: $bcgov-font;
@@ -527,9 +539,8 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition:
-        background-color 200ms ease-in-out,
-        border-color 200ms ease-in-out;
+      transition: background-color 200ms ease-in-out,
+      border-color 200ms ease-in-out;
 
       a {
         color: inherit;
@@ -894,12 +905,14 @@
     padding-left: 45px !important;
   }
 }
+
 .formio-component-panel {
   legend,
   .form-group > label {
     margin-bottom: 8px;
     max-width: fit-content;
   }
+
   .fieldset-body label {
     border-bottom: 0;
     margin-bottom: 0px;
