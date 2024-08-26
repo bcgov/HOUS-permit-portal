@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
+import { useQuery } from "../../../hooks/use-query"
 import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
@@ -37,7 +38,12 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     hasResetableFilters,
   } = permitApplicationStore
 
-  useSearch(permitApplicationStore, [])
+  const query = useQuery()
+
+  const requirementTemplateId = query.get("requirementTemplateId")
+  const templateVersionId = query.get("templateVersionId")
+
+  useSearch(permitApplicationStore, [requirementTemplateId || "", templateVersionId || ""])
   useFlashQueryParam()
   const resetQueryParams = useResetQueryParams()
 
