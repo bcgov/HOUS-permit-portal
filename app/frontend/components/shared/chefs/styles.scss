@@ -675,8 +675,14 @@
         font-size: var(--chakra-fontSizes-xs);
         margin-right: var(--chakra-space-2);
       }
+    }
 
-      &:after {
+    @media (min-width: 766px) {
+      .formio-button-remove-row {
+        padding: var(--chakra-space-2); /* Add padding */
+      }
+
+      .formio-button-remove-row:after {
         content: "Remove";
       }
     }

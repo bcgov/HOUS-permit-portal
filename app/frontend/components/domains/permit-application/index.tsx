@@ -64,7 +64,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
               {/* @ts-ignore */}
               {t(`permitApplication.statusGroup.${statusFilterToGroup || EPermitApplicationStatusGroup.draft}`)}
             </Heading>
-            <Flex align="flex-end" gap={4}>
+            <Flex align="flex-end" gap={4} direction={{ base: "column", md: "row" }}>
               {hasResetableFilters && (
                 <Button variant="link" mb={2} onClick={resetQueryParams}>
                   {t("ui.resetFilters")}
