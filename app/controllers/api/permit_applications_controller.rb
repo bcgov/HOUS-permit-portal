@@ -269,7 +269,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def generate_missing_pdfs
     authorize @permit_application
 
-    ZipfileJob.perform_async(@permit_application.id, false)
+    ZipfileJob.perform_async(@permit_application.id)
 
     head :ok
   end
