@@ -21,7 +21,7 @@ export const ValueExtractionFieldSelect = observer(function ValueExtractionField
 }: IProps) {
   const { t } = useTranslation()
   return (
-    <FormControl isRequired>
+    <FormControl>
       <FormLabel
         id={VALUE_EXTRACTION_FIELD_SELECT_LABEL_ID}
         htmlFor={VALUE_EXTRACTION_FIELD_SELECT_ID}

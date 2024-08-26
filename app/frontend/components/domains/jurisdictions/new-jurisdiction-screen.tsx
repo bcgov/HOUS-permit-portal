@@ -155,13 +155,16 @@ export const NewJurisdictionScreen = observer(() => {
                         render={({ field: { onChange, value } }) => {
                           return (
                             <FormControl w="full" zIndex={1}>
-                              <FormLabel>{t("jurisdiction.fields.regionalDistrictName")}</FormLabel>
+                              <FormLabel>{`${t("jurisdiction.fields.regionalDistrictName")} ${t("ui.optional")}`}</FormLabel>
                               <InputGroup w="full">
                                 <JurisdictionSelect
                                   onChange={onChange}
                                   isDisabled={localityTypeWatch == regionalDistrictLocalityType}
                                   filters={{ type: EJurisdictionTypes.regionalDistrict }}
-                                  selectedOption={{ label: value?.reverseQualifiedName, value }}
+                                  selectedOption={{
+                                    label: value?.reverseQualifiedName,
+                                    value,
+                                  }}
                                   menuPortalTarget={document.body}
                                 />
                               </InputGroup>

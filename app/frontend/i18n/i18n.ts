@@ -52,7 +52,7 @@ const options = {
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
           userLastNameLabel: "Last name",
-          organizationLabel: "Organization (optional)",
+          organizationLabel: "Organization",
           organizationHelpText: "(if applicable)",
           register: "Register for account",
           registerButton: "Register",

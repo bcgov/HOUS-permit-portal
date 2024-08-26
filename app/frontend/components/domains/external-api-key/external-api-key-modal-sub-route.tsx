@@ -155,6 +155,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   label={t("externalApiKey.fieldLabels.revokedAt")}
                   fieldName={"revokedAt"}
                   inputProps={{ readOnly: true }}
+                  showOptional={false}
                   isReadOnly
                 />
               </GridItem>

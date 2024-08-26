@@ -1,5 +1,4 @@
 import {
-  Box,
   Flex,
   FormControl,
   FormControlProps,
@@ -11,8 +10,9 @@ import {
   InputGroup,
   InputLeftElement,
   InputProps,
+  Text,
 } from "@chakra-ui/react"
-import { AsteriskSimple, Envelope, X } from "@phosphor-icons/react"
+import { Envelope, X } from "@phosphor-icons/react"
 import React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -30,6 +30,7 @@ interface IEmailFormControlProps extends FormControlProps {
   handleRemove?: () => void
   inputProps?: InputProps
   inputRightElement?: JSX.Element
+  showOptional?: boolean
 }
 
 export const EmailFormControl = ({
@@ -43,6 +44,7 @@ export const EmailFormControl = ({
   handleRemove,
   inputProps,
   inputRightElement,
+  showOptional = true,
   ...rest
 }: IEmailFormControlProps) => {
   const { register, formState } = useFormContext()
@@ -55,10 +57,10 @@ export const EmailFormControl = ({
         {!hideLabel && (
           <>
             <FormLabel>{label || t("auth.emailLabel")}</FormLabel>
-            {required && (
-              <Box color="semantic.error" ml={-2} mb={2}>
-                <AsteriskSimple />
-              </Box>
+            {!required && showOptional && (
+              <Text ml={-2} mb={2}>
+                {t("ui.optional")}
+              </Text>
             )}
           </>
         )}
