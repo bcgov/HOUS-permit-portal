@@ -69,9 +69,9 @@ export function ReorderList() {
       const oldIndex = watchedRequirements.findIndex((r) => r.id === active.id)
       const newIndex = watchedRequirements.findIndex((r) => r.id === over.id)
 
-      // have to use reset, and array move instead of move from useFieldArray. This is because the move
+      // have to use setValue, and array move instead of move from useFieldArray. This is because the move
       // causes some weird behaviour where the sub fields are not updated correctly
-      reset({ requirementsAttributes: arrayMove(R.clone(watchedRequirements), oldIndex, newIndex) })
+      setValue("requirementsAttributes", arrayMove(R.clone(watchedRequirements), oldIndex, newIndex))
     }
   }
 }
