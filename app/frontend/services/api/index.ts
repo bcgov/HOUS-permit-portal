@@ -57,6 +57,7 @@ import {
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
+import { getCsrfToken } from "../../utils/utility-functions"
 
 export class Api {
   client: ApisauceInstance
@@ -77,13 +78,7 @@ export class Api {
     })
 
     this.client.addRequestTransform((request) => {
-      // csrfToken is set as readable cookie by backend, send it in every request
-      const csrfToken = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("CSRF-TOKEN="))
-        ?.split("=")[1]
-
-      request.headers["X-CSRF-Token"] = csrfToken
+      request.headers["X-CSRF-Token"] = getCsrfToken()
       request.params = decamelizeRequest(request.params)
       request.data = decamelizeRequest(request.data)
     })
