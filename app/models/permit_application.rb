@@ -139,6 +139,7 @@ class PermitApplication < ApplicationRecord
       permit_classifications: "#{permit_type.name} #{activity.name}",
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
+      resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction.id,
@@ -297,7 +298,19 @@ class PermitApplication < ApplicationRecord
     jurisdiction
       .active_external_api_keys
       .where.not(webhook_url: [nil, ""]) # Only send webhooks to keys with a webhook URL
-      .each { |external_api_key| PermitWebhookJob.perform_async(external_api_key.id, "permit_submitted", id) }
+      .each do |external_api_key|
+        PermitWebhookJob.perform_async(
+          external_api_key.id,
+          (
+            if newly_submitted?
+              Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+            else
+              Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+            end
+          ),
+          id,
+        )
+      end
   end
 
   def missing_pdfs

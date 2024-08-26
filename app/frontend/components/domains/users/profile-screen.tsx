@@ -112,6 +112,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       inAppControl: "preferenceAttributes.enableInAppCollaborationNotification",
       emailControl: "preferenceAttributes.enableEmailCollaborationNotification",
     },
+    {
+      event: t("user.notifications.integrationMapping"),
+      inAppControl: "preferenceAttributes.enableInAppIntegrationMappingNotification",
+      emailControl: "preferenceAttributes.enableEmailIntegrationMappingNotification",
+    },
   ]
 
   return (

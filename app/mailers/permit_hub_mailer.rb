@@ -27,7 +27,8 @@ class PermitHubMailer < ApplicationMailer
     @user = user
     @template_version = integration_mapping.template_version
 
-    unless integration_mapping.jurisdiction.external_api_enabled? &&
+    unless @user.preference&.enable_email_integration_mapping_notification &&
+             integration_mapping.jurisdiction.external_api_enabled? &&
              (@user.review_manager? || @user.regional_review_manager?) &&
              (@template_version.published? || @template_version.scheduled?)
       return

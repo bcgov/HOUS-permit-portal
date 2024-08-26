@@ -136,7 +136,17 @@ class IntegrationMapping < ApplicationRecord
 
     Rails.cache.write(event_id, true, expires_in: 5.minutes)
 
-    users_to_notify = jurisdiction.users.kept.where(role: %w[review_manager regional_review_manager])
+    users_to_notify =
+      jurisdiction
+        .users
+        .kept
+        .includes(:preference)
+        .where(
+          role: %w[review_manager regional_review_manager],
+          preferences: {
+            enable_email_integration_mapping_notification: true,
+          },
+        )
 
     users_to_notify.each do |u|
       PermitHubMailer.notify_integration_mapping(user: u, integration_mapping: self)&.deliver_later
