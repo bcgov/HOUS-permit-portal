@@ -53,7 +53,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
     <Flex direction="column" w="full" bg="greys.white">
       <Flex
         align="center"
-        h="364px"
+        h={{ base: "728px", sm: "364px" }}
         bgImage="/images/header-background.jpeg"
         bgPosition="center 60%"
         bgRepeat="no-repeat"
@@ -99,7 +99,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               gap={6}
               color="greys.white"
               flex={1}
-              minW="lg"
+              minW={{ base: "0", md: "50%" }}
             >
               <Heading as="h2">{t("landing.accessMyPermits")}</Heading>
               <Text>{t("landing.accessExplanation")}</Text>
@@ -255,7 +255,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
 
   return (
     <Flex gap={6} direction={{ base: "column", md: "row" }}>
-      <Flex bg="white" w="lg" p={6} gap={4} borderRadius="md">
+      <Flex bg="white" p={6} gap={4} borderRadius="md" w="full">
         <FormProvider {...formMethods}>
           <form style={{ width: "100%" }}>
             <Flex direction="column" gap={6}>
@@ -297,7 +297,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
       <Center
         bg={jurisdiction ? "theme.blueAlt" : "greys.white"}
         minH={243}
-        w="lg"
+        w="full"
         gap={4}
         borderRadius="md"
         color={jurisdiction ? "greys.white" : "theme.secondary"}
@@ -341,7 +341,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
             </RouterLinkButton>
           </VStack>
         ) : (
-          <VStack gap={6}>
+          <VStack gap={6} p={6}>
             <Center h={50}>{fetchingJurisdiction ? <SharedSpinner /> : <MapPin size={40} />}</Center>
             <Text fontStyle="italic" textAlign="center">
               {t("landing.reqsVary")}
