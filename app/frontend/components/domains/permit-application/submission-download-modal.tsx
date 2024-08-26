@@ -31,10 +31,11 @@ import { LoadingIcon } from "../../shared/loading-icon"
 export interface ISubmissionDownloadModalProps {
   permitApplication: IPermitApplication
   renderTrigger?: (onOpen: () => void) => React.ReactNode
+  review?: boolean
 }
 
 export const SubmissionDownloadModal = observer(
-  ({ permitApplication, renderTrigger }: ISubmissionDownloadModalProps) => {
+  ({ permitApplication, renderTrigger, review }: ISubmissionDownloadModalProps) => {
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { allSubmissionVersionCompletedSupportingDocuments, zipfileUrl, zipfileName, stepCode } = permitApplication
@@ -46,7 +47,7 @@ export const SubmissionDownloadModal = observer(
       if (!isOpen) return
 
       if (!permitApplication?.isFullyLoaded) {
-        permitApplicationStore.fetchPermitApplication(permitApplication?.id)
+        permitApplicationStore.fetchPermitApplication(permitApplication?.id, review)
       }
     }, [permitApplication?.isFullyLoaded, isOpen])
 
@@ -79,7 +80,7 @@ export const SubmissionDownloadModal = observer(
 
         <Modal onClose={onClose} isOpen={isOpen} size="md" scrollBehavior="inside">
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent maxW={"container.md"}>
             {!permitApplication?.isFullyLoaded ? (
               <SharedSpinner />
             ) : (

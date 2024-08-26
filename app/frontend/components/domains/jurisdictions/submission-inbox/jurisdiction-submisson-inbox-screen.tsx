@@ -134,6 +134,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                               onClick={onOpen}
                             />
                           )}
+                          review
                         />
                       </HStack>
                       <RouterLinkButton
