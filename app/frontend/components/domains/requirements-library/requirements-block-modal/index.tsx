@@ -184,7 +184,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         <Modal onClose={handleClose} isOpen>
           <ModalOverlay />
           <FormProvider {...formProps}>
-            <ModalContent as={"form"} w={"min(1170px, 95%)"} maxW={"full"} py={9} pb={12}>
+            <ModalContent
+              as={"form"}
+              w={"min(1170px, 95%)"}
+              maxW={"full"}
+              py={9}
+              pb={12}
+              onClick={(e) => e.stopPropagation()}
+            >
               <ModalCloseButton fontSize={"11px"} />
               {(requirementBlock as IRequirementBlock)?.isDiscarded && (
                 <Tag
