@@ -1338,6 +1338,7 @@ const options = {
             applicationViewed: "Application viewed by jurisdiction",
             applicationRevisionsRequested: "Revisions requested by jurisdiction",
             collaboration: "Collaboration",
+            integrationMapping: "API integration mapping",
           },
           emailConfirmed: {
             heading: "Email confirmed!",
