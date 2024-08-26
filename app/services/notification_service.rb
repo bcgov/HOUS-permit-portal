@@ -105,14 +105,8 @@ class NotificationService
       integration_mapping
         .jurisdiction
         .users
-        .includes(:preference)
         &.kept
-        &.where(
-          role: %i[review_manager regional_review_manager],
-          preferences: {
-            enable_in_app_integration_mapping_notification: true,
-          },
-        )
+        &.where(role: %i[review_manager regional_review_manager])
         &.pluck(:id) || []
 
     notification_hash =

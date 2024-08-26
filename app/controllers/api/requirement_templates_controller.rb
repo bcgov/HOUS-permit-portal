@@ -113,8 +113,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     success = false
     error_message = ""
 
-    published_template_version = nil
-
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
         error_message = @requirement_template.errors.full_messages.join(", ")
@@ -137,13 +135,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if success
       render_success @requirement_template,
                      "requirement_template.force_publish_now_success",
-                     {
-                       blueprint: RequirementTemplateBlueprint,
-                       blueprint_opts: {
-                         view: :extended,
-                         published_template_version: published_template_version,
-                       },
-                     }
+                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
     else
       render_error "requirement_template.force_publish_now_error", message_opts: { error_message: error_message }
     end

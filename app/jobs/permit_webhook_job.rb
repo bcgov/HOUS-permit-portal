@@ -7,9 +7,6 @@ class PermitWebhookJob
 
     service = PermitWebhookService.new(external_api_key)
 
-    if event_type == Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED ||
-         event_type == Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
-      service.send_submitted_event(permit_application_id)
-    end
+    service.send_submitted_event(permit_application_id) if event_type == "permit_submitted"
   end
 end

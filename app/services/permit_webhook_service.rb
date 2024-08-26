@@ -34,14 +34,7 @@ and name: #{external_api_key.name}",
     end
 
     payload = {
-      event:
-        (
-          if permit_application.newly_submitted?
-            Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
-          else
-            Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
-          end
-        ),
+      event: "permit_submitted",
       payload: {
         permit_id: permit_id,
         submitted_at: permit_application.submitted_at,
@@ -59,7 +52,7 @@ and name: #{external_api_key.name}",
       response.success?
     rescue Faraday::Error => e
       raise PermitWebhookError.new(
-              "Failed to send #{payload[:event]} webhook to #{external_api_key.webhook_url}: #{e.message}",
+              "Failed to send permit_submitted webhook to #{external_api_key.webhook_url}: #{e.message}",
             )
     end
   end

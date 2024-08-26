@@ -31,23 +31,15 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
                 in: :body,
                 schema: {
                   type: :object,
-                  description:
-                    "Filters permit applications by status, submitted date, resubmitted_date and permit classifications",
+                  description: "Filters permit applications by submitted date and permit classifications",
                   properties: {
                     permit_classifications: {
                       description: "Filters by permit classifications",
                       type: :string,
                     },
-                    status: {
-                      type: :string,
-                      enum: %w[newly_submitted resubmitted],
-                      description:
-                        "Filters by submitted status. Newly submitted: permit applications submitted for the first time. Resubmitted: permit applications resubmitted after a revision request.",
-                    },
                     submitted_at: {
                       type: :object,
-                      description:
-                        "Filters by submitted date. This is the date the permit application was first submitted. Example format `2024-04-30T13:22:41-07:00`",
+                      description: "Filters by submitted date",
                       properties: {
                         gt: {
                           type: :string,
@@ -68,34 +60,6 @@ RSpec.describe "external_api/v1/permit_applications", type: :request, openapi_sp
                           type: :string,
                           format: "date-time",
                           description: "Less than or equal to: submitted date is less than or equal to this date",
-                        },
-                      },
-                    },
-                    resubmitted_at: {
-                      type: :object,
-                      description:
-                        "Filters by resubmitted date. This is the date the permit application was most recently resubmitted. Example format `2024-04-30T13:22:41-07:00`",
-                      properties: {
-                        gt: {
-                          type: :string,
-                          format: "date-time",
-                          description: "Greater than: resubmitted date is greater than this date",
-                        },
-                        lt: {
-                          type: :string,
-                          format: "date-time",
-                          description: "Less than: resubmitted date is less than this date",
-                        },
-                        gte: {
-                          type: :string,
-                          format: "date-time",
-                          description:
-                            "Greater than or equal to: resubmitted date is greater than or equal to this date",
-                        },
-                        lte: {
-                          type: :string,
-                          format: "date-time",
-                          description: "Less than or equal to: resubmitted date is less than or equal to this date",
                         },
                       },
                     },

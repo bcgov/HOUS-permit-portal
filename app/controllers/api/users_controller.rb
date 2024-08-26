@@ -159,8 +159,6 @@ class Api::UsersController < Api::ApplicationController
         enable_in_app_application_revisions_request_notification
         enable_in_app_collaboration_notification
         enable_email_collaboration_notification
-        enable_in_app_integration_mapping_notification
-        enable_email_integration_mapping_notification
       ],
     )
   end
