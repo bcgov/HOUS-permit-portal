@@ -41,6 +41,9 @@ export const CollaboratorInvite = observer(function CollaboratorCreate({
 
   const onSubmit = handleSubmit(async (values) => {
     const response = await onInvite?.(values)
+
+    confirmationModalDisclosureProps?.onClose?.()
+
     response && onInviteSuccess()
   })
 
