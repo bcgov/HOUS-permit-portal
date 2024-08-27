@@ -1,12 +1,7 @@
 class Api::ApplicationController < ActionController::API
-  include ActionController::Cookies
-  include ActionController::RequestForgeryProtection
   include BaseControllerMethods
   include Pundit::Authorization
 
-  protect_from_forgery with: :exception
-
-  before_action :log_csrf_token
   before_action :authenticate_user!
   before_action :check_for_archived_user
   before_action :store_currents
@@ -16,28 +11,11 @@ class Api::ApplicationController < ActionController::API
 
   after_action :verify_authorized, except: %i[index], unless: :skip_pundit?
   after_action :verify_policy_scoped, only: %i[index], unless: :skip_pundit?
-  after_action :set_csrf_cookie
 
   def index
     # This parent application controller throws errors from above after_actions
     # if the subclass does not implement this method. This is provided as a fallback.
     raise NotImplementedError, "The index method is not implemented."
-  end
-
-  private
-
-  def set_csrf_cookie
-    cookies["CSRF-TOKEN"] = {
-      value: form_authenticity_token,
-      secure: Rails.env.production?,
-      httponly: false, # Allow frontend to read the cookie
-      same_site: :lax,
-    }
-  end
-
-  def log_csrf_token
-    Rails.logger.debug "Session CSRF Token: #{session[:_csrf_token]}"
-    Rails.logger.debug "Request CSRF Token: #{request.headers["X-CSRF-Token"]}"
   end
 
   protected

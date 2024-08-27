@@ -1,6 +1,16 @@
 module BaseControllerMethods
   extend ActiveSupport::Concern
 
+  included do
+    include ActionController::Cookies
+    include ActionController::RequestForgeryProtection
+
+    before_action :log_csrf_token
+
+    protect_from_forgery with: :exception
+    after_action :set_csrf_cookie
+  end
+
   def frontend_flash_message(message_key, message_type, opts = {})
     msg = ArbitraryMessageConstruct.message(key: message_key, type: message_type, options: opts[:message_opts]).to_json
     { flash: msg }
@@ -69,6 +79,20 @@ module BaseControllerMethods
   end
 
   private
+
+  def set_csrf_cookie
+    cookies["CSRF-TOKEN"] = {
+      value: form_authenticity_token,
+      secure: Rails.env.production?,
+      httponly: false, # Allow frontend to read the cookie
+      same_site: :lax,
+    }
+  end
+
+  def log_csrf_token
+    Rails.logger.debug "Session CSRF Token: #{session[:_csrf_token]}"
+    Rails.logger.debug "Request CSRF Token: #{request.headers["X-CSRF-Token"]}"
+  end
 
   def default_meta(message)
     meta = {}
