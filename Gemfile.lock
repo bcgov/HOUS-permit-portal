@@ -420,7 +420,7 @@ GEM
     responders (3.1.1)
       actionpack (>= 5.2)
       railties (>= 5.2)
-    rexml (3.3.5)
+    rexml (3.3.6)
       strscan
     rgeo (3.0.1)
     rgeo-proj4 (4.0.0)
