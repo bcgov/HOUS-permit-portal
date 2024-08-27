@@ -205,3 +205,11 @@ export function convertResourceArrayToRecord<
     return acc
   }, {})
 }
+
+export function getCsrfToken() {
+  // csrfToken is set as readable cookie by backend, send it in every request
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("CSRF-TOKEN="))
+    ?.split("=")[1]
+}
