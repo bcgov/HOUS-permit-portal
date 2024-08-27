@@ -4,7 +4,7 @@ class Api::ApplicationController < ActionController::API
   include BaseControllerMethods
   include Pundit::Authorization
 
-  protect_from_forgery with: :exception
+  # protect_from_forgery with: :exception
 
   before_action :authenticate_user!
   before_action :check_for_archived_user
@@ -30,16 +30,14 @@ class Api::ApplicationController < ActionController::API
       value: form_authenticity_token,
       secure: Rails.env.production?,
       httponly: false, # Allow frontend to read the cookie
-      same_site: :lax
+      same_site: :lax,
     }
   end
 
   protected
 
   def check_for_archived_user
-    if current_user&.discarded?
-      render_error("misc.user_not_authorized_error", {}, nil) and return
-    end
+    render_error("misc.user_not_authorized_error", {}, nil) and return if current_user&.discarded?
   end
 
   def apply_search_authorization(results, policy_action = action_name)
@@ -54,7 +52,7 @@ class Api::ApplicationController < ActionController::API
     render_error(
       "misc.user_not_authorized_error",
       { message_opts: { error_message: exception.message }, status: 403 },
-      exception
+      exception,
     ) and return
   end
 
