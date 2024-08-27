@@ -10,7 +10,7 @@ import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
 import { EUserSortFields } from "../types/enums"
 import { IEULA } from "../types/types"
-import { toCamelCase } from "../utils/utility-functions"
+import { convertToDate, toCamelCase } from "../utils/utility-functions"
 
 export const UserStoreModel = types
   .compose(
@@ -96,7 +96,11 @@ export const UserStoreModel = types
     fetchEULA: flow(function* () {
       const response = yield self.environment.api.getEULA()
       if (response.ok) {
-        self.eula = response.data.data
+        const eula = response.data.data
+        eula.createdAt = convertToDate(eula.createdAt)
+
+        self.eula = eula
+
         return true
       }
     }),

@@ -1,3 +1,4 @@
 class EndUserLicenseAgreementBlueprint < Blueprinter::Base
-  fields :content
+  identifier :id
+  fields :content, :created_at
 end

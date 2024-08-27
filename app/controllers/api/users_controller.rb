@@ -67,6 +67,13 @@ class Api::UsersController < Api::ApplicationController
     end
   end
 
+  def license_agreements
+    @user = current_user
+    authorize current_user
+
+    render_success @user, nil, { blueprint: UserBlueprint, blueprint_opts: { view: :accepted_license_agreements } }
+  end
+
   def destroy
     authorize @user
     if @user.discard

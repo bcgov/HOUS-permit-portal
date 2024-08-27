@@ -2,6 +2,8 @@ import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EOmniauthProvider, EUserRoles } from "../types/enums"
+import { ILicenseAgreement } from "../types/types"
+import { convertToDate } from "../utils/utility-functions"
 import { IJurisdiction, JurisdictionModel } from "./jurisdiction"
 
 export const UserModel = types
@@ -28,6 +30,7 @@ export const UserModel = types
     invitedByEmail: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
     invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
+    licenseAgreements: types.maybeNull(types.frozen<ILicenseAgreement[]>()),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -74,6 +77,14 @@ export const UserModel = types
     },
   }))
   .actions((self) => ({
+    setLicenseAgreements(licenseAgreements: ILicenseAgreement[]) {
+      self.licenseAgreements = licenseAgreements?.map((licenseAgreement) => ({
+        ...licenseAgreement,
+        acceptedAt: convertToDate(licenseAgreement.acceptedAt),
+      }))
+    },
+  }))
+  .actions((self) => ({
     destroy: flow(function* () {
       const response = yield self.environment.api.destroyUser(self.id)
       if (response.ok) applySnapshot(self, response.data.data)
@@ -103,6 +114,17 @@ export const UserModel = types
       if (response.ok) {
         self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
       }
+      return response.ok
+    }),
+    fetchAcceptedEulas: flow(function* () {
+      const response = yield self.environment.api.fetchCurrentUserAcceptedEulas()
+
+      if (response.ok) {
+        const licenseAgreements = response.data.data?.licenseAgreements
+
+        Array.isArray(licenseAgreements) && self.setLicenseAgreements(licenseAgreements)
+      }
+
       return response.ok
     }),
     acceptInvitation: flow(function* (invitationToken: string) {
