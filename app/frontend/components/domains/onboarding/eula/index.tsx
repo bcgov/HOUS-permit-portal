@@ -39,11 +39,13 @@ export const EULAScreen = observer(function EULAScreen() {
             <Box maxW="4xl" overflow="hidden" sx={{ ".quill": { height: "100%", overflow: "auto" } }}>
               <Editor value={eula.content} readOnly={true} modules={{ toolbar: false }} />
             </Box>
-            <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 0, flexBasis: "auto" }}>
-              <Button variant="primary" type="submit" isLoading={isLoading} isDisabled={!isValid || isLoading}>
-                {t("eula.accept")}
-              </Button>
-            </form>
+            {!userStore.currentUser.eulaAccepted && (
+              <form onSubmit={handleSubmit(onSubmit)} style={{ flex: 0, flexBasis: "auto" }}>
+                <Button variant="primary" type="submit" isLoading={isLoading} isDisabled={!isValid || isLoading}>
+                  {t("eula.accept")}
+                </Button>
+              </form>
+            )}
           </>
         )}
       </Suspense>

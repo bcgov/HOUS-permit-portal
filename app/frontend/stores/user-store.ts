@@ -97,7 +97,10 @@ export const UserStoreModel = types
       const response = yield self.environment.api.getEULA()
       if (response.ok) {
         const eula = response.data.data
-        eula.createdAt = convertToDate(eula.createdAt)
+
+        if (eula) {
+          eula.createdAt = convertToDate(eula.createdAt)
+        }
 
         self.eula = eula
 
