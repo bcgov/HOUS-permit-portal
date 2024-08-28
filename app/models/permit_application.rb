@@ -7,8 +7,8 @@ class PermitApplication < ApplicationRecord
 
   SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter permit_collaborations]
 
-  searchkick searchable: %i[number nickname full_address permit_classifications submitter status review_delegatee_name],
-             word_start: %i[number nickname full_address permit_classifications submitter status review_delegatee_name]
+  searchkick word_middle: %i[nickname full_address permit_classifications submitter status review_delegatee_name],
+             text_end: %i[number]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction

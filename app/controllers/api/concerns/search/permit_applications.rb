@@ -5,6 +5,15 @@ module Api::Concerns::Search::PermitApplications
     search_conditions = {
       order: permit_application_order,
       match: :word_start,
+      fields: [
+        { number: :text_end },
+        { nickname: :word_middle },
+        { full_address: :word_middle },
+        { permit_classifications: :word_middle },
+        { submitter: :word_middle },
+        { status: :word_middle },
+        { review_delegatee_name: :word_middle },
+      ],
       where: permit_application_where_clause,
       page: permit_application_search_params[:page],
       per_page:
