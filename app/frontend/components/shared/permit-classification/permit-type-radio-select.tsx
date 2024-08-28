@@ -79,7 +79,7 @@ export const PermitTypeRadioCard = (props: IPermitTypeRadioCardProps) => {
   const checkbox = getRadioProps()
 
   return (
-    <Box as="label" role="radio">
+    <Box as="label" role="radio" w="full">
       <input aria-label={`${permitType.name} selector`} {...input} />
       <Flex
         {...checkbox}
@@ -105,9 +105,7 @@ export const PermitTypeRadioCard = (props: IPermitTypeRadioCardProps) => {
               {permitType.name}
             </Heading>
           </Flex>
-          <Text alignSelf="center" mt={2}>
-            {permitType.description}
-          </Text>
+          <Text mt={2}>{permitType.description}</Text>
         </Flex>
         <Flex justifyContent="center" width="full" bg="semantic.infoLight">
           <Image width="40" src={permitType.imageUrl} alt={permitType.name} objectFit="contain" />

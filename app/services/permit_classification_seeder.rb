@@ -3,9 +3,10 @@ class PermitClassificationSeeder
     # Define Classification data
     classifications = [
       {
-        name: "1-4 Unit detached housing",
+        name: "Small-scale/Multi-unit housing (Part 9 BCBC)",
         code: "low_residential",
-        description: "1-4 units: Detatched dwellings, duplexes",
+        description:
+          "Single detached, duplex, triplex / fourplex / townhouse, secondary suite, accessory dwelling unit (ADU) e.g. garden suite",
         enabled: true,
         type: "PermitType",
       },
@@ -13,7 +14,7 @@ class PermitClassificationSeeder
         name: "4+ Unit housing",
         code: "medium_residential",
         description: "Part 9 townhouses, small apartment buildings",
-        enabled: true,
+        enabled: false,
         type: "PermitType",
       },
       {
