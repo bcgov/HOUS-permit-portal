@@ -26,7 +26,6 @@ export const useCurrentUserLicenseAgreements = ({ customErrorMessage }: { custom
           setError(new Error(customErrorMessage ?? t("errors.fetchCurrentUserLicenseAgreements")))
         }
       } catch (_e) {
-        console.log("xyd 2", _e)
         setError(new Error(customErrorMessage ?? t("errors.fetchCurrentUserLicenseAgreements")))
       } finally {
         setIsLoading(false)
