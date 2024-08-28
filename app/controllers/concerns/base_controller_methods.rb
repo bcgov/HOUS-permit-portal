@@ -5,8 +5,6 @@ module BaseControllerMethods
     include ActionController::Cookies
     include ActionController::RequestForgeryProtection
 
-    before_action :log_csrf_token
-
     protect_from_forgery with: :exception
     after_action :set_csrf_cookie
   end
@@ -89,10 +87,7 @@ module BaseControllerMethods
     }
   end
 
-  def log_csrf_token
-    Rails.logger.debug "Session CSRF Token: #{session[:_csrf_token]}"
-    Rails.logger.debug "Request CSRF Token: #{request.headers["X-CSRF-Token"]}"
-  end
+  private
 
   def default_meta(message)
     meta = {}
