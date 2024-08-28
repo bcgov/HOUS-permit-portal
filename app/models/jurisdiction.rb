@@ -139,7 +139,7 @@ class Jurisdiction < ApplicationRecord
 
   def submission_inbox_set_up
     # preload all of the permit_types and contacts for efficiency
-    permit_types = PermitType.all.to_a
+    permit_types = PermitType.enabled.to_a
     contacts = permit_type_submission_contacts.where.not(email: nil).where.not(confirmed_at: nil).to_a
 
     permit_types.all? { |permit_type| contacts.any? { |contact| contact.permit_type_id == permit_type.id } }
@@ -155,6 +155,10 @@ class Jurisdiction < ApplicationRecord
 
   def active_external_api_keys
     external_api_keys.active
+  end
+
+  def enabled_permit_type_required_steps()
+    permit_type_required_steps.joins(:permit_type).where(permit_classifications: { enabled: true })
   end
 
   def permit_type_required_steps_by_classification(permit_type = nil)

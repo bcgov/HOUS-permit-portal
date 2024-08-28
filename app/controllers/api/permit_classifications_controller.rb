@@ -16,6 +16,8 @@ class Api::PermitClassificationsController < Api::ApplicationController
             query = query.where(permit_type_id: permit_type_ids)
           end
 
+          query = query.where(enabled: true)
+
           query =
             query.where(permit_type_id: classification_option_params[:permit_type_id]) if classification_option_params[
             :permit_type_id
@@ -31,9 +33,9 @@ class Api::PermitClassificationsController < Api::ApplicationController
           ].nil?
 
           # &:activities or &:permit_types
-          query.map(&classification_option_params[:type].underscore.to_sym).uniq
+          query.map(&classification_option_params[:type].underscore.to_sym).filter { |c| c.enabled? }.uniq
         else
-          PermitClassification.where(type: classification_option_params[:type])
+          PermitClassification.where(type: classification_option_params[:type], enabled: true)
         end
 
       options = permit_classifications.map { |pc| { label: pc.name, value: pc } }
