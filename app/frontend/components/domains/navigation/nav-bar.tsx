@@ -130,7 +130,7 @@ export const NavBar = observer(function NavBar() {
               </Text>
               <Spacer />
             </Show>
-            <HStack gap={3} w="full">
+            <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
               {/* todo: navbar search? */}
               {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
@@ -289,7 +289,6 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
   return (
     <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)} computePositionOnMount>
-      <Spacer />
       <Show below="md">
         <MenuButton
           as={IconButton}
