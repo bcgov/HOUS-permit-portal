@@ -72,7 +72,7 @@ function EditableControls({
         <Button {...getSubmitButtonProps()} variant={"primary"} {...saveButtonProps}>
           {saveTextContent}
         </Button>
-        <Button {...getCancelButtonProps()} variant={"secondary"} {...cancelButtonProps}>
+        <Button {...getCancelButtonProps()} variant={"primaryInverse"} {...cancelButtonProps}>
           {cancelTextContent}
         </Button>
       </ButtonGroup>
@@ -137,13 +137,14 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
         setIsInEditMode(false)
         onCancel?.(previousValue)
       }}
-      onBlur={(e) => {
+      onBlur={(value) => {
         setIsInEditMode(false)
-        onBlur?.(e)
+        onBlur?.(value)
       }}
-      onSubmit={(e) => {
+      onSubmit={(value) => {
         setIsInEditMode(false)
-        editableProps.onSubmit?.(e)
+        // @ts-ignore
+        editableInputProps.onSubmit?.(value)
       }}
       {...editableProps}
     >
