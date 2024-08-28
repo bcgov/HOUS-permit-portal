@@ -186,7 +186,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                         render={({ field: { onChange, value } }) => {
                           return (
                             <PermitTypeRadioSelect
-                              w="full"
+                              w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
                                 return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch)
                               }}
