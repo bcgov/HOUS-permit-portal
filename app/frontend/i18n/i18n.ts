@@ -218,7 +218,7 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
-          emailPlaceholder: "email@example.com",
+          emailPlaceholder: "Please enter an email",
           urlPlaceholder: "https://",
           showOlder: "Show older",
           seeMore: "See more",
@@ -552,7 +552,7 @@ const options = {
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailable:
-              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.”",
+              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
