@@ -242,6 +242,18 @@ const options = {
           title: "End-User License Agreement",
           accept: "Accept agreement",
         },
+        userEulas: {
+          title: "End user license agreement",
+          viewAgreement: "View agreement",
+          view: "View",
+          actionRequired: "Action required",
+          acceptedOn: "You accepted this agreement on {{date}} at {{time}}.",
+          pastAgreementsModal: {
+            title: "Past end user license agreements",
+            triggerButton: "See past",
+            acceptedOn: "Accepted on {{ timestamp }}",
+          },
+        },
         contact: {
           create: "New contact",
           edit: "Edit contact",
@@ -1259,6 +1271,7 @@ const options = {
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
+          fetchCurrentUserLicenseAgreements: "Something went wrong fetching license agreements",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchBuildingPermit: "Something went wrong fetching building permit",
@@ -1785,6 +1798,7 @@ const options = {
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
             acceptInvitation: "Accept invitation",
+            eula: "End user license agreement",
           },
         },
         automatedCompliance: {

@@ -5,6 +5,10 @@ class UserBlueprint < Blueprinter::Base
     fields :email, :role, :first_name, :last_name, :organization, :certified, :confirmed_at, :discarded_at
   end
 
+  view :accepted_license_agreements do
+    association :license_agreements, blueprint: UserLicenseAgreementBlueprint
+  end
+
   view :base do
     include_view :minimal
     fields :unconfirmed_email,
