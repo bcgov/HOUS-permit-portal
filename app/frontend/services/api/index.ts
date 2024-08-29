@@ -622,4 +622,8 @@ export class Api {
   async resetLastReadNotifications() {
     return this.client.post(`/notifications/reset_last_read`)
   }
+
+  async fetchCurrentUserAcceptedEulas() {
+    return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
+  }
 }

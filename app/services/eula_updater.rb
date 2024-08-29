@@ -1,5 +1,5 @@
 class EulaUpdater
-  def self.run
+  def self.run(should_override_existing: true)
     # Define the path where EULA content files are stored
     content_path = Rails.root.join("eulas")
 
@@ -16,7 +16,14 @@ class EulaUpdater
         html_content = File.read(file_path)
 
         # Find or initialize the EULA record for the variant
-        eula = EndUserLicenseAgreement.find_or_initialize_by(active: true, variant: variant)
+        eula =
+          (
+            if should_override_existing
+              EndUserLicenseAgreement.find_or_initialize_by(active: true, variant: variant)
+            else
+              EndUserLicenseAgreement.build(active: true, variant: variant)
+            end
+          )
 
         # Update the content
         eula.content = html_content.gsub("\u0000", "")
