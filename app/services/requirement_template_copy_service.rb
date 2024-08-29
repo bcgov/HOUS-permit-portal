@@ -17,7 +17,10 @@ class RequirementTemplateCopyService
         )
 
       # Save the new template first to get its ID
-      new_template.save!
+      new_template.save
+
+      return new_template unless new_template.valid?
+
       # Clone the sections and associate them with the new template
       requirement_template.requirement_template_sections.each do |section|
         new_section = new_template.requirement_template_sections.build(name: section.name, position: section.position)
@@ -27,8 +30,5 @@ class RequirementTemplateCopyService
       end
       new_template
     end
-  rescue ActiveRecord::RecordInvalid => e
-    puts "Failed to copy requirement template: #{e.message}"
-    nil
   end
 end
