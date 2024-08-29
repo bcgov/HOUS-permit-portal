@@ -87,7 +87,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
     }
 
     try {
-      const response = await currentPermitApplication.update({ referenceNumber: referenceNumberToSave })
+      const response = await currentPermitApplication.update({
+        referenceNumber: referenceNumberToSave,
+        review: true,
+      })
 
       !response.ok && onReferenceNumberChange(referenceNumberSnapshot)
     } catch (e) {

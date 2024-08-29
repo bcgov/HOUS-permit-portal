@@ -270,9 +270,10 @@ export class Api {
     )
   }
 
-  async updatePermitApplication(id, params) {
+  async updatePermitApplication(id, params, review?: boolean) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, {
       permitApplication: params,
+      review,
     })
   }
 
