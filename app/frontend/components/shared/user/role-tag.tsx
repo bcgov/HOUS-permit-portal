@@ -9,6 +9,7 @@ interface IRoleTagProps {
 
 const roleColors: { [key in EUserRoles]: string } = {
   [EUserRoles.submitter]: "transparent",
+  [EUserRoles.regionalReviewManager]: "hover.blue",
   [EUserRoles.reviewManager]: "hover.blue",
   [EUserRoles.reviewer]: "greys.grey20",
   [EUserRoles.superAdmin]: "transparent",
@@ -16,6 +17,7 @@ const roleColors: { [key in EUserRoles]: string } = {
 
 const roleBorderColors: { [key in EUserRoles]: string } = {
   [EUserRoles.submitter]: "transparent",
+  [EUserRoles.regionalReviewManager]: "focus",
   [EUserRoles.reviewManager]: "focus",
   [EUserRoles.reviewer]: "greys.grey90",
   [EUserRoles.superAdmin]: "transparent",
@@ -33,6 +35,7 @@ export const RoleTag = ({ role }: IRoleTagProps) => {
       borderColor={borderColor}
       backgroundColor={color}
       textTransform="capitalize"
+      textAlign="center"
     >
       {t(`user.roles.${role}`)}
     </Tag>

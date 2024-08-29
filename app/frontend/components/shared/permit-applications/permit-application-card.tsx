@@ -35,6 +35,8 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
 
   const { usingCurrentTemplateVersion } = permitApplication
 
+  const showNewVersionWarning = !usingCurrentTemplateVersion && !permitApplication.isSubmitted
+
   const isSubmissionCollaboration = permitApplication.submitter?.id !== currentUser?.id
 
   const routingButtonText = (() => {
@@ -45,11 +47,11 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
 
   return (
     <Flex
-      bg={usingCurrentTemplateVersion ? "greys.white" : "semantic.warningLight"}
+      bg={showNewVersionWarning ? "semantic.warningLight" : "greys.white"}
       direction="column"
       borderRadius="lg"
       border="1px solid"
-      borderColor={usingCurrentTemplateVersion ? "border.light" : "semantic.warning"}
+      borderColor={showNewVersionWarning ? "semantic.warning" : "border.light"}
       p={6}
       align="center"
       gap={4}
@@ -86,7 +88,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           </Flex>
         </Show>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
-          {!usingCurrentTemplateVersion && (
+          {showNewVersionWarning && (
             <Flex bg="semantic.warning" {...calloutBannerContainerProps}>
               <Warning size={14} />
               <Text {...calloutBannerTextProps}>

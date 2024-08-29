@@ -524,7 +524,7 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
-            forFirstNations: "Is this permit for first nations lands?",
+            forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
             applicationDisclaimerInstruction:
