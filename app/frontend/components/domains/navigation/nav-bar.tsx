@@ -111,16 +111,18 @@ export const NavBar = observer(function NavBar() {
       >
         <Container maxW="container.lg" p={2} px={{ base: 2, md: 4 }}>
           <Flex align="center" gap={2} w="full">
-            <Show above="md">
-              <RouterLink to="/welcome">
+            <RouterLink to="/welcome">
+              <Box w={134}>
                 <Image
-                  fit="cover"
+                  fit="contain"
                   htmlHeight="64px"
                   htmlWidth="166px"
                   alt={t("site.linkHome")}
                   src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
                 />
-              </RouterLink>
+              </Box>
+            </RouterLink>
+            <Show above="md">
               <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
                 {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Text>
