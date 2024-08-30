@@ -8,12 +8,14 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IJurisdiction } from "../models/jurisdiction"
 import { IPermitApplication, PermitApplicationModel } from "../models/permit-application"
+import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IUser } from "../models/user"
 import {
   ECustomEvents,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationSortFields,
   EPermitApplicationStatus,
+  EPermitApplicationStatusGroup,
 } from "../types/enums"
 import {
   IPermitApplicationComplianceUpdate,
@@ -24,8 +26,8 @@ import {
 } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
-const filterableStatuses = Object.values(EPermitApplicationStatus)
-export type TFilterableStatus = (typeof filterableStatuses)[number]
+const filterableStatus = Object.values(EPermitApplicationStatus)
+export type TFilterableStatus = (typeof filterableStatus)[number]
 
 export const PermitApplicationStoreModel = types
   .compose(
@@ -33,7 +35,10 @@ export const PermitApplicationStoreModel = types
       permitApplicationMap: types.map(PermitApplicationModel),
       tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
       currentPermitApplication: types.maybeNull(types.reference(PermitApplicationModel)),
-      statusFilter: types.optional(types.enumeration(filterableStatuses), EPermitApplicationStatus.draft),
+      statusFilter: types.optional(types.array(types.enumeration(filterableStatus)), [
+        EPermitApplicationStatus.newDraft,
+        EPermitApplicationStatus.revisionsRequested,
+      ]),
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.maybeNull(types.string),
     }),
@@ -42,6 +47,14 @@ export const PermitApplicationStoreModel = types
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
+  .views((self) => ({
+    get draftStatuses() {
+      return [EPermitApplicationStatus.newDraft, EPermitApplicationStatus.revisionsRequested]
+    },
+    get submittedStatuses() {
+      return [EPermitApplicationStatus.newlySubmitted, EPermitApplicationStatus.resubmitted]
+    },
+  }))
   .views((self) => ({
     getSortColumnHeader(field: EPermitApplicationSortFields) {
       // @ts-ignore
@@ -59,6 +72,13 @@ export const PermitApplicationStoreModel = types
     get hasResetableFilters() {
       return !R.isNil(self.templateVersionIdFilter) || !R.isNil(self.requirementTemplateIdFilter)
     },
+    get statusFilterToGroup(): EPermitApplicationStatusGroup {
+      const map = {
+        [self.draftStatuses.join(",")]: EPermitApplicationStatusGroup.draft,
+        [self.submittedStatuses.join(",")]: EPermitApplicationStatusGroup.submitted,
+      }
+      return map[self.statusFilter.join(",")]
+    },
   }))
   .actions((self) => ({
     __beforeMergeUpdate(permitApplicationData) {
@@ -72,6 +92,12 @@ export const PermitApplicationStoreModel = types
           self.rootStore.templateVersionStore.mergeUpdate(pad.templateVersion, "templateVersionMap")
         pad.publishedTemplateVersion &&
           self.rootStore.templateVersionStore.mergeUpdate(pad.publishedTemplateVersion, "templateVersionMap")
+        pad.permitCollaborations &&
+          self.rootStore.collaboratorStore.mergeUpdateAll(
+            // @ts-ignore
+            R.map(R.prop("collaborator"), pad.permitCollaborations),
+            "collaboratorMap"
+          )
       }
 
       return R.mergeRight(pad, {
@@ -121,6 +147,18 @@ export const PermitApplicationStoreModel = types
         "stepCodesMap"
       )
 
+      self.rootStore.collaboratorStore.mergeUpdateAll(
+        // @ts-ignore
+        R.pipe(
+          R.map(R.prop("permitCollaborations")),
+          R.reject(R.isNil),
+          R.flatten,
+          R.map(R.prop("collaborator")),
+          R.uniqBy((c) => c.id)
+        )(permitApplicationsData),
+        "collaboratorMap"
+      )
+
       // Already merged associations here.
       // Since beforeMergeUpdateAll internally uses beforeMergeUpdate, we need to skip the association merges
       // to reduce duplication of work
@@ -138,11 +176,11 @@ export const PermitApplicationStoreModel = types
     addPermitApplication(permitapplication: IPermitApplication) {
       self.permitApplicationMap.put(permitapplication)
     },
-    setStatusFilter(status: TFilterableStatus) {
-      if (!status) return
-
-      setQueryParam("status", status)
-      self.statusFilter = status
+    setStatusFilter(statuses: TFilterableStatus[] | undefined) {
+      if (!statuses) return
+      setQueryParam("status", statuses)
+      // @ts-ignore
+      self.statusFilter = statuses
     },
   }))
   .actions((self) => ({
@@ -162,7 +200,6 @@ export const PermitApplicationStoreModel = types
       if (opts?.reset) {
         self.resetPages()
       }
-
       const searchParams = {
         query: self.query,
         sort: self.sort,
@@ -194,9 +231,9 @@ export const PermitApplicationStoreModel = types
       }
       return response.ok
     }),
-    fetchPermitApplication: flow(function* (id: string) {
+    fetchPermitApplication: flow(function* (id: string, review?: boolean) {
       // If the user is review staff, we still need to hit the show endpoint to update viewedAt
-      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id)
+      const { ok, data: response } = yield self.environment.api.fetchPermitApplication(id, review)
       if (ok && response.data) {
         const permitApplication = response.data
 
@@ -208,7 +245,7 @@ export const PermitApplicationStoreModel = types
     }),
 
     setPermitApplicationFilters(queryParams: URLSearchParams) {
-      const statusFilter = queryParams.get("status") as TFilterableStatus
+      const statusFilter = queryParams.get("status")?.split(",") as TFilterableStatus[]
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
 
@@ -244,6 +281,9 @@ export const PermitApplicationStoreModel = types
 
           self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
           break
+        case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
+          payloadData = payload.data as IPermitBlockStatus
+          self.permitApplicationMap.get(payloadData?.permitApplicationId)?.updatePermitBlockStatus(payloadData)
         default:
           import.meta.env.DEV && console.log(`Unknown event type ${payload.eventType}`)
       }

@@ -203,12 +203,6 @@ export const FieldsSetup = observer(function FieldsSetup({
             onCancel={onDisplayNameChange}
             color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
             aria-label={"Edit Display Name"}
-            sx={{
-              ":after": {
-                content: "'*'",
-                color: "var(--chakra-colors-red-500)",
-              },
-            }}
             flex={1}
           />
           <Button size={"xs"} variant={isInReorderMode ? "primary" : "secondary"} onClick={onToggle}>

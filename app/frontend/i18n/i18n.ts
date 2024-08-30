@@ -52,7 +52,7 @@ const options = {
           emailLabel: "Email address",
           userFirstNameLabel: "First name",
           userLastNameLabel: "Last name",
-          organizationLabel: "Organization (optional)",
+          organizationLabel: "Organization",
           organizationHelpText: "(if applicable)",
           register: "Register for account",
           registerButton: "Register",
@@ -132,9 +132,11 @@ const options = {
           },
         },
         ui: {
+          okay: "Okay",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
+          confirmation: "Are you sure you want to proceed?",
           sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
           ok: "OK",
@@ -149,6 +151,7 @@ const options = {
           preview: "Preview",
           back: "Back",
           backToInbox: "Back to inbox",
+          backHome: "Back to home",
           yes: "Yes",
           no: "No",
           show: "Show",
@@ -184,6 +187,7 @@ const options = {
           never: "never",
           submit: "Submit",
           select: "Select",
+          selected: "selected",
           notAvailable: "Not available yet",
           notApplicable: "Not applicable",
           isRequired: "{{field}} is required",
@@ -197,6 +201,7 @@ const options = {
           collapseAll: "Collapse all",
           toTop: "Go to top",
           confirm: "Confirm",
+          modifiedBy: "Modified by",
           searchAddresses: "Search addresses",
           typeToSearch: "Begin typing to search",
           close: "Close",
@@ -208,12 +213,12 @@ const options = {
           reset: "Reset",
           autofill: "Autofill",
           help: "Help",
-          pleaseSelect: "please select",
+          pleaseSelect: "Please select",
           checked: "Checked",
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
-          emailPlaceholder: "email@example.com",
+          emailPlaceholder: "Please enter an email",
           urlPlaceholder: "https://",
           showOlder: "Show older",
           seeMore: "See more",
@@ -224,6 +229,9 @@ const options = {
           actionRequired: "Action required",
           resetFilters: "Reset filters",
           customize: "Customize",
+          acknowledgeAndDismiss: "Acknowledge and dismiss",
+          markedForRemoval: 'Click "Save changes" to confirm removal',
+          proceed: "Proceed",
         },
         notification: {
           title: "Notifications",
@@ -233,6 +241,18 @@ const options = {
         eula: {
           title: "End-User License Agreement",
           accept: "Accept agreement",
+        },
+        userEulas: {
+          title: "End user license agreement",
+          viewAgreement: "View agreement",
+          view: "View",
+          actionRequired: "Action required",
+          acceptedOn: "You accepted this agreement on {{date}} at {{time}}.",
+          pastAgreementsModal: {
+            title: "Past end user license agreements",
+            triggerButton: "See past",
+            acceptedOn: "Accepted on {{ timestamp }}",
+          },
         },
         contact: {
           create: "New contact",
@@ -322,10 +342,6 @@ const options = {
             regionalDistrictName: "Regional district",
             submissionInboxSetUp: "Accepting submissions",
           },
-          submissionEmailConfirmed: {
-            heading: "Email confirmed!",
-            description: "You will start to receive permit applications shortly",
-          },
           lat: "Latitude",
           lng: "Longitude",
           title: "Local housing permits",
@@ -344,7 +360,85 @@ const options = {
           search: "Search jurisdictions",
           view: "View Jurisdiction",
         },
+        permitCollaboration: {
+          status: "Status",
+          blockStatus: {
+            draft: "Draft",
+            in_progress: "In progress",
+            ready: "Ready",
+          },
+          sidebar: {
+            triggerButton: "Collaborators ({{count}})",
+            title: "Collaborators",
+            description: {
+              submission:
+                "Collaborators can be invited to work on the different areas of the permit application form. Only the author can manage collaborators.",
+              review: "Collaborators can be invited to work on the different areas of the permit application form.",
+            },
+            howItWorksTitle: "How it works",
+            howItWorksDescription: {
+              submission:
+                "The collaboration feature allows the author of a permit application to invite collaborators by email. Invited collaborators must register for an account through BCeID if they do not have one already.<1/><1/> Collaborators can view and contribute only to the requirement blocks they are assigned. Notifications are sent to the collaborators when they are assigned to a requirement block, and their avatars are displayed next to the blocks they are assigned to.<1/><1/> Additionally, the designated submitter has access to the entire application and can submit it on behalf of the author. The author can manage and remove collaborators as needed.",
+              review:
+                "The collaboration feature allows reviewers of a submitted permit application to invite additional reviewers, provided they are already part of the jurisdiction.<1/><1/> Reviewers can view and contribute to the assigned requirement blocks and update the status of each block. Notifications are sent when reviewers are assigned to a requirement block or when the status changes to “Ready”. Avatars are displayed next to the blocks to indicate who is assigned. Status updates are visible only to reviewers within the local jurisdiction.<1/><1/> The designated reviewer serves as the primary contact internally at the local jurisdiction, responsible for overseeing the submitted permit application.",
+            },
+            designatedSubmitters: "Designated submitter(s)",
+            designatedReviewers: "Designated reviewer(s)",
+            authorCanSubmitWithOrganization:
+              "Author of this application is also allowed to submit: <1>{{author}}</1> ({{organization}}).",
+            authorCanSubmit: "Author of this application is also allowed to submit: <1>{{author}}</1>.",
+            assignees: "Assignee(s)",
+            assigneeHelperText:
+              "To assign collaborators, look for the grey header at the top of each requirement block and click “Assign”.",
+            noDesignatedSubmitters: "None assigned",
+            assignedTo: "Assigned to",
+            assigneeEmail: "Email:",
+            removeCollaboratorModal: {
+              triggerButton: "Remove collaborator",
+              title: "Are you sure you want to remove this collaborator?",
+              body: "This action cannot be undone.",
+            },
+          },
+          popover: {
+            triggerButton: "Assign ({{count}})",
+            designatedSubmitterChangeButton: "Change",
+            collaborations: {
+              title: "Collaborators",
+              assignButton: "Assign",
+              unassignButton: "Unassign",
+              unconfirmed: "Unconfirmed.",
+              resendInvite: "Resend invite?",
+              inEligibleForReInvite: "Ineligible for re-invite.",
+            },
+            assignment: {
+              title: "Assign collaborator",
+              noneAssigned: "None assigned",
+              inviteWarning: {
+                title: "Assign a collaborator?",
+                body: "When you are inviting collaborators to participate in a building permit application through our system, it’s important to understand the specific roles and permissions involved. Only the person who creates the permit application, referred to as the “author,” has the ability to invite collaborators. These collaborators are then only able to access specific sections of the application—those that they are specifically assigned to. Importantly, while the author and one person they designate (Designated Submitter) can submit the completed application, all collaborators must have a verified Building Permit HUB account using BCeID to ensure security. Additionally, the author retains the exclusive right to remove or reassign collaborators. This ensures that control over the application remains centralized while still allowing for collaborative input where necessary.",
+              },
+              newContactButton: "New contact",
+              noResultsText: {
+                invitable: "No results found. Invite new collaborators by clicking the button above.",
+                default: "No results found.",
+              },
+
+              unassiggn: "Unselect",
+            },
+            collaboratorInvite: {
+              title: "New contact",
+              inviteButton: "Invite collaborator",
+            },
+          },
+        },
         permitApplication: {
+          submissionBlockModal: {
+            title: "Trying to submit this application?",
+            description:
+              "Only the designated submitter or the author can submit this permit application. Please contact that person to continue.",
+            designatedSubmitter: "Designated submitter",
+            author: "Author",
+          },
           browserSearch: {
             prompt: "Find specific form fields by using your web browser search: press keyboard shortcut",
             windows: "Windows: <1>Ctrl</1> + <1>F</1>",
@@ -359,6 +453,12 @@ const options = {
           reviewCustomizedTitle: "Filters applied to show applications that have new customizations added",
           reviewCustomizedMessage: "Filters have been applied. Please review the draft applications below.",
           newVersionPublished: "New version of template has been published - please review changes",
+          card: {
+            collaborateButton: "Collaborate",
+            collaborationCalloutDraft:
+              "<1>{{authorName}} has assigned you to this permit.</1> Collaborate on this permit application.",
+            collaborationCalloutSubmitted: "<1>{{authorName}} assigned you to this permit.</1>",
+          },
           referenceNumber: "Reference #",
           pdf: {
             for: "Permit application for",
@@ -378,6 +478,7 @@ const options = {
           drafts: "Draft Permits",
           startedOn: "Started on",
           lastUpdated: "Last updated",
+          viewedOn: "Viewed on",
           seeBestPractices_CTA: "See best practices",
           seeBestPractices_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
@@ -388,7 +489,14 @@ const options = {
           addressLabel: "Address",
           viewed: "Viewed",
           notViewed: "New",
+          newlyRevised: "Newly revised",
           status: {
+            new_draft: "Draft",
+            newly_submitted: "Submitted",
+            resubmitted: "Resubmitted",
+            revisions_requested: "Revisions Requested",
+          },
+          statusGroup: {
             draft: "Draft permits",
             submitted: "Submitted permits",
           },
@@ -416,6 +524,7 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
+            forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
             applicationDisclaimerInstruction:
@@ -454,7 +563,8 @@ const options = {
             confirmation:
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
-            noContactsAvailable: "Sorry, the Building Permit Hub doesn't support this jurisdiction yet.",
+            noContactsAvailable:
+              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -473,7 +583,13 @@ const options = {
           },
           show: {
             wasSubmitted: "Application was submitted on {{ date }} to {{ jurisdictionName }}",
-            submittingTo: "You're applying to the {{ jurisdictionName }}",
+            submittingTo: {
+              title: "You're applying to the {{ jurisdictionName }}",
+              description:
+                "Please verify that this building permit is in compliance with <1>local zoning bylaws</1> for this specific location.",
+            },
+            versionDiffContactWarning:
+              "A new version of the permit is available. Please ask author or designated submitter to review and acknowledge changes to proceed.",
             contactsSummary: "Contacts summary",
             downloadApplication: "Download application",
             fetchingMissingPdf: "Fetching {{missingPdf}}...",
@@ -487,13 +603,42 @@ const options = {
             downloadZip: "Download attached files",
             downloadForm: "Download application form",
             downloadStepCode: "Download step code checklist",
+            requestRevisions: "Request revisions",
+            viewRevisionRequests: "View revision requests",
+            requestingRevisions: "Requesting revisions",
+            requestedRevisions: "Requested revisions",
+            pleaseFix: "Please fix the requested revisions and re-submit your application",
+            onlySpecified:
+              "Only the the specified fields highlighted below (in yellow) and their corresponding blocks can be edited",
+            showList: "Show list",
+            hideList: "Hide list",
             backToInbox: "Back to inbox",
+            locateRevisions: "Locate each requested revision by clicking the links below.",
+            revisionsWereRequested: "Revisions to this application were requested on {{date}}",
+            clickQuestion: "Click on the question(s) or requirement(s) you want the submitter to revise.",
+            revision: {
+              newRevision: "New revision",
+              pastRequests: "Past requests",
+              reason: "Reason",
+              reasonCode: "Reason code",
+              revisionRequest: "Revision request",
+              reasonFor: "Reason for revision",
+              comment: "Comment (Optional)",
+              useButton: "Use this reason",
+              maxCharacters: "Maximum 350 characters",
+              send: "Send to submitter",
+              confirmHeader: "Send this list of revisions to the submitter?",
+              originallySubmitted: "Previously submitted",
+              confirmMessage: "The submitter will receive a notification end email about the changes you've requested.",
+            },
           },
         },
         requirementsLibrary: {
+          addAnother: "Add",
           addAnotherPerson: "Add another person",
           elective: "Elective",
           hasElective: "Has elective(s)",
+          forFirstNations: "Intended for First Nations",
           hasConditionalLogic: "Has conditional logic",
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
@@ -510,6 +655,7 @@ const options = {
             dummyOption: "Option",
           },
           modals: {
+            archived: "Archived",
             unlabeled: "Unlabeled",
             defaultContactLabel: "Contact",
             canAddMultipleContacts: "Submitter can add multiple contacts",
@@ -522,6 +668,11 @@ const options = {
             },
             edit: {
               title: "Edit requirement block",
+              options: "Options",
+              removeConfirmationModal: {
+                title: "Confirm you want to archive this requirement block.",
+                body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
+              },
             },
             clickToWriteDisplayName: "Click to write display name",
             blockSetupTitle: "Block setup",
@@ -586,6 +737,7 @@ const options = {
           },
           fields: {
             name: "Name",
+            firstNations: "First Nations",
             description: "Description",
             associations: "Associations",
             formFields: "Form fields",
@@ -617,6 +769,7 @@ const options = {
             email: "E-mail",
             energyStepCode: "Energy Step Code",
             stepCodePackageFile: "Design package file for energy step code",
+            pidInfo: "Pid Info",
           },
           contactFieldItemLabels: {
             firstName: "First name",
@@ -1118,6 +1271,7 @@ const options = {
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
+          fetchCurrentUserLicenseAgreements: "Something went wrong fetching license agreements",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchBuildingPermit: "Something went wrong fetching building permit",
@@ -1193,6 +1347,15 @@ const options = {
             enableNotification: "Enable notification",
             templateChanged: "Changes to permit requirements",
             templateCustomized: "Jurisdiction customizations to permit requirements",
+            applicationSubmitted: "Application submitted to jurisdiction",
+            applicationViewed: "Application viewed by jurisdiction",
+            applicationRevisionsRequested: "Revisions requested by jurisdiction",
+            collaboration: "Collaboration",
+            integrationMapping: "API integration mapping",
+          },
+          emailConfirmed: {
+            heading: "Email confirmed!",
+            description: "You will receive updates and notifications at the confirmed email address.",
           },
           inApp: "In-App",
           email: "Email",
@@ -1222,6 +1385,11 @@ const options = {
           added: "added",
           removed: "removed",
           edit: {
+            options: {
+              button: "Options",
+              copyTips: "Import tips from ({{ templateLabel }})",
+              copyElectives: "Import electives from ({{ templateLabel }})",
+            },
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
@@ -1281,6 +1449,7 @@ const options = {
             status: "Status",
             permitType: "Permit type",
             activity: "Work type",
+            firstNations: "First Nations",
             description: "Description",
             currentVersion: "Current version",
             jurisdictionsSize: "Used by",
@@ -1306,6 +1475,8 @@ const options = {
             descriptionHelpText:
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
+            firstNationsLand: "This permit is intended <1>only for First Nations land</1>",
+            copyExisting: "Copy from existing template of this permit and work type if available",
           },
           versionSidebar: {
             triggerButton: "Versions",
@@ -1414,6 +1585,16 @@ const options = {
             hint: "This message will appear at the top of each page for all users.",
             settings: "Site-wide message settings",
           },
+          revisionReasonsAttributesSetup: {
+            title: "Revision reasons",
+            description: "Setup reasons to be applied to revision requests",
+            options: "Selectable options",
+            fields: {
+              reasonCode: "Reason code",
+              reasonDescription: "Reason description",
+              descriptionHint: "A short descriptor for the reason",
+            },
+          },
           helpDrawerSetup: {
             title: "Help drawer links",
             description: "Setup links to show in the help drawer for all users",
@@ -1520,6 +1701,10 @@ const options = {
           linkHome: "Navigate home",
           didYouFind: "Did you find what you were looking for?",
           thankYouForResponse: "Thank you for your response!",
+          actionRequired: {
+            application_revisions_request:
+              "You have received a request for revisions on application <1 />. Please revise before resubmitting (you won't lose your place in line).",
+          },
           govFeedbackResponseNoReasons: {
             unclear: "This information is unclear",
             missingInfo: "This page is missing the information I need",
@@ -1575,6 +1760,7 @@ const options = {
           needMoreHelp: "Need more help?",
           pleaseContact: "Please contact your local government for questions related to your permit application.",
           forHelp: "For help with the Building Permit Hub please contact:",
+          reviewNotifications: "Review notifications",
           breadcrumb: {
             latest: "Latest",
             profile: "Profile",
@@ -1607,8 +1793,12 @@ const options = {
             reporting: "Reporting",
             exportTemplateSummary: "Export template summary",
             helpDrawerSetup: "Help drawer setup",
+            revisionReasonsAttributesSetup: "Revision reason setup",
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
+            revisionReasonSetup: "Revision reason setup",
+            acceptInvitation: "Accept invitation",
+            eula: "End user license agreement",
           },
         },
         automatedCompliance: {

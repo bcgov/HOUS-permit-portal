@@ -35,18 +35,27 @@ export const GenericFieldDisplay = observer(function GroupedFieldDisplay({
   editorContainerProps,
 }: IGroupedFieldProps) {
   const { t } = useTranslation()
+  const isRequired = label && required
   return (
-    <FormControl w={"100%"} isReadOnly isRequired={label && required} {...containerProps}>
+    <FormControl w={"100%"} isReadOnly {...containerProps}>
       <FormLabel
         {...defaultLabelProps}
         {...(labelProps as FormLabelProps)}
         color={!label && showAddLabelIndicator ? "error" : undefined}
+        sx={{
+          ":after": {
+            content: `"${t("ui.optional")}"`,
+            ml: 1.5,
+            display: !isRequired ? "inline" : "none",
+          },
+        }}
       >
         {label ??
           (showAddLabelIndicator
             ? `${t("requirementsLibrary.modals.addLabel")} *`
             : getRequirementTypeLabel(requirementType, matchesStepCodePackageRequirementCode))}
       </FormLabel>
+
       {inputDisplay}
       {!isQuillEmpty(helperText) && (
         <EditorWithPreview

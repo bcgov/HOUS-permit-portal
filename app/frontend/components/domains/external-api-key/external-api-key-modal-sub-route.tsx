@@ -30,7 +30,7 @@ import { useMst } from "../../../setup/root"
 import { IExternalApiKeyParams } from "../../../types/api-request"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { DatePickerFormControl, TextFormControl, UrlFormControl } from "../../shared/form/input-form-control"
-import { RemoveConfirmationModal } from "../../shared/remove-confirmation-modal"
+import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 
 interface IProps {}
 
@@ -155,6 +155,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   label={t("externalApiKey.fieldLabels.revokedAt")}
                   fieldName={"revokedAt"}
                   inputProps={{ readOnly: true }}
+                  showOptional={false}
                   isReadOnly
                 />
               </GridItem>

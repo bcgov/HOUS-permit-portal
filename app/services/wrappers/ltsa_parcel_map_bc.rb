@@ -138,6 +138,8 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
       wkid = parsed_response.dig("spatialReference", "wkid")
 
+      raise Errors::FeatureAttributesRetrievalError if !valid_wkid?(wkid)
+
       geometry_coords = parsed_response.dig("features", 0, "geometry", "rings", 0)
 
       if (geometry_coords)
@@ -193,6 +195,7 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
           'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]',
       )
     else
+      raise StandardError unless wkid.is_a?(Integer)
       #fetch the proj4 string from website
       espg = Faraday.new("https://epsg.io")
       response_proj4 = espg.get("#{wkid}.proj4")
@@ -220,5 +223,11 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     else
       raise Errors::FeatureAttributesRetrievalError
     end
+  end
+
+  ALLOWED_WKIDS = [102_190, 3005, 4326].freeze
+
+  def valid_wkid?(wkid)
+    ALLOWED_WKIDS.include?(wkid.to_i)
   end
 end

@@ -21,6 +21,13 @@ export enum EPermitClassificationCode {
 }
 
 export enum EPermitApplicationStatus {
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+}
+
+export enum EPermitApplicationStatusGroup {
   draft = "draft",
   submitted = "submitted",
 }
@@ -47,6 +54,7 @@ export enum EUserRoles {
 
 export enum ERequirementLibrarySortFields {
   name = "name",
+  firstNations = "first_nations",
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
@@ -78,6 +86,7 @@ export enum EUserSortFields {
 export enum ERequirementTemplateSortFields {
   permitType = "permit_type",
   activity = "activity",
+  firstNations = "first_nations",
   description = "description",
   currentVersion = "current_version",
   jurisdictionsSize = "jurisdictions_size",
@@ -105,10 +114,12 @@ export enum EPermitApplicationSubmitterSortFields {
   permitClassification = "permit_classification",
   submitter = "submitter",
   submittedAt = "submitted_at",
+  viewedAt = "viewed_at",
   status = "status",
 }
 
 export enum EPermitApplicationReviewerSortFields {
+  status = "status",
   number = "number",
   referenceNumber = "reference_number",
   permitClassification = "permit_classification",
@@ -140,6 +151,7 @@ export enum ERequirementType {
   signature = "signature",
   textArea = "textarea",
   energyStepCode = "energy_step_code",
+  pidInfo = "pid_info",
   phone = "phone",
   email = "email",
   generalContact = "general_contact",
@@ -156,6 +168,12 @@ export enum ENumberUnit {
   sqm = "sqm",
   sqft = "sqft",
   cad = "cad",
+}
+
+export enum EPermitBlockStatus {
+  draft = "draft",
+  inProgress = "in_progress",
+  ready = "ready",
 }
 
 export enum EStepCodeChecklistStage {
@@ -291,6 +309,7 @@ export enum ESocketEventTypes {
 export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
+  updatePermitBlockStatus = "update_permit_block_status",
 }
 
 export enum EEnabledElectiveFieldReason {
@@ -301,6 +320,8 @@ export enum EEnabledElectiveFieldReason {
 
 export enum ECustomEvents {
   handlePermitApplicationUpdate = "handlePermitApplicationUpdate",
+  openRequestRevision = "openRequestRevision",
+  openPreviousSubmission = "openPreviousSubmission",
 }
 
 export enum EExportFormat {
@@ -361,4 +382,27 @@ export enum ENotificationActionType {
   publishedTemplateMissingRequirementsMapping = "published_template_missing_requirements_mapping",
   scheduledTemplateMissingRequirementsMapping = "scheduled_template_missing_requirements_mapping",
   customizationUpdate = "customization_update",
+  submissionCollaborationAssignment = "submission_collaboration_assignment",
+  submissionCollaborationUnassignment = "submission_collaboration_unassignment",
+  reviewCollaborationAssignment = "review_collaboration_assignment",
+  reviewCollaborationUnassignment = "review_collaboration_unassignment",
+  permitBlockStatusReady = "permit_block_status_ready",
+  applicationSubmission = "application_submission",
+  applicationRevisionsRequest = "application_revisions_request",
+  applicationView = "application_view",
+}
+
+export enum ECollaboratorableType {
+  Jurisdiction = "Jurisdiction",
+  User = "User",
+}
+
+export enum ECollaborationType {
+  submission = "submission",
+  review = "review",
+}
+
+export enum ECollaboratorType {
+  delegatee = "delegatee",
+  assignee = "assignee",
 }

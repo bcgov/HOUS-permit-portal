@@ -7,13 +7,15 @@ class Api::StorageController < Api::ApplicationController
     set_rack_response FileUploader.presign_response(:cache, request.env)
   end
 
-  AUTHORIZED_S3_MODELS = %w[SupportingDocument StepCode]
+  AUTHORIZED_S3_MODELS = { "SupportingDocument" => SupportingDocument, "StepCode" => StepCode }.freeze
+
   def download
     if params[:id].start_with?("cache/")
       url = Shrine.storages[:cache].url(params[:id].slice(6..-1), public: false, expires_in: 3600)
       render json: { url: }, status: :ok
-    elsif params[:model_id] && AUTHORIZED_S3_MODELS.include?(params[:model])
-      record = params[:model].safe_constantize.find(params[:model_id])
+    elsif params[:model_id] && AUTHORIZED_S3_MODELS[params[:model]]
+      record_class = AUTHORIZED_S3_MODELS[params[:model]]
+      record = record_class.find(params[:model_id])
       authorize record
       render json: { url: record.file_url }, status: :ok
     else

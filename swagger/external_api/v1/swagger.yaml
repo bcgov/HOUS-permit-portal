@@ -5,38 +5,43 @@ info:
   version: v1
   description: "### API documentation overview\nThis document provides detailed information
     about the APIs available for external integrators to query and retrieve submitted
-    permit applications.\nIt also includes specifications on webhook events that notify
-    your systems in real-time.\n\n### Data scope:\nThe permit applications returned
-    by these APIs are limited to those within the jurisdiction associated with the
-    API key used for the request. This\nensures that each integrator has access solely
-    to relevant data.\n\n### Integration steps:\nTo integrate with our APIs, please
-    contact the Building Permit Hub team to enable your API access. Your local jurisdiction
-    can then obtain the API key\nand register your webhook URL in their configuration
-    settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>\nfor
-    further assistance.\n\n### Authentication and authorization: \nAccess to these
-    APIs is controlled via an API key, which must be included in the Authorization
-    header as a Bearer token like so:\n```\nAuthorization: Bearer {Your_API_Key_Here}\n```\nPlease
-    note that a unique API key is required for each jurisdiction you wish to access,
-    enhancing security and data integrity.\n\n### Rate limits:\nTo ensure fair usage,
-    the API is rate-limited to 100 requests per minute per API key and 300 requests
-    per IP in a 3 minute interval. Exceeding these\nlimits will result in a 429 response.
-    If this occurs, we recommend spacing out your requests. Continued exceeding of
-    rate limits\nmay necessitate further contact with the building permit hub team.\n\n###
-    Api base path:\nThe base path for all API endpoints is `/external_api/v1`.\n\n###
-    Server information for testing:\nBy default the requests from the documentation
-    will be sent to the current environment servers. For testing purposes, you can
-    specify a different server using the {serverUrl} variable. \nDuring your integration
-    testing phase, you have the flexibility to use custom URLs by configuring the
-    serverUrl variable. This allows you to\ntailor the API environment to better suit
-    your development needs. Ensure that your custom URLs are configured correctly
-    to avoid any connectivity or data access issues.\n\n### Special considerations:\nFor
-    security purposes, any API response that includes a file URL will have a signed
-    URL. These files will be available for download for a limited time (1 hour).\nWe
-    recommend downloading the file immediately upon receiving the URL to avoid any
-    issues. If necessary, you can always call the API again to retrieve a \nnew file
-    URL.\n\n### Visual aids and examples:\nFor a better understanding of how our APIs
-    work, including webhook setups and request handling, please refer to the code
-    examples included later\nin this document.\n"
+    and resubmitted permit applications.\nIt also includes specifications on webhook
+    events that notify your systems in real-time.\n\n### Data scope:\nThe permit applications
+    returned by these APIs are limited to those within the jurisdiction associated
+    with the API key used for the request. This\nensures that each integrator has
+    access solely to relevant data.\n\n### Integration steps:\nTo integrate with our
+    APIs, please contact the Building Permit Hub team to enable your API access. Your
+    local jurisdiction can then obtain the API key\nand register your webhook URL
+    in their configuration settings on the building permit hub. You can reach us directly
+    at <digital.codes.permits@gov.bc.ca>\nfor further assistance.\n\n### Authentication
+    and authorization:\nAccess to these APIs is controlled via an API key, which must
+    be included in the Authorization header as a Bearer token like so:\n```\nAuthorization:
+    Bearer {Your_API_Key_Here}\n```\nPlease note that a unique API key is required
+    for each jurisdiction you wish to access, enhancing security and data integrity.\n\n###
+    Rate limits:\nTo ensure fair usage, the API is rate-limited to 100 requests per
+    minute per API key and 300 requests per IP in a 3 minute interval. Exceeding these\nlimits
+    will result in a 429 response. If this occurs, we recommend spacing out your requests.
+    Continued exceeding of rate limits\nmay necessitate further contact with the building
+    permit hub team.\n\n### Api base path:\nThe base path for all API endpoints is
+    `/external_api/v1`.\n\n### Server information for testing:\nBy default the requests
+    from the documentation will be sent to the current environment servers. For testing
+    purposes, you can specify a different server using the {serverUrl} variable.\nDuring
+    your integration testing phase, you have the flexibility to use custom URLs by
+    configuring the serverUrl variable. This allows you to\ntailor the API environment
+    to better suit your development needs. Ensure that your custom URLs are configured
+    correctly to avoid any connectivity or data access issues.\n\n### Special considerations:\nA
+    returned permit application will have a status of either `newly_submitted` for
+    permit applications submitted for the first time, or `resubmitted` for\npermit
+    applications that have been resubmitted due to revision requests. The `resubmitted_at`
+    field will indicate the timestamp of the latest resubmission.\nWhile there may
+    be multiple resubmissions, the submission data payload returned will reflect the
+    most recent submission data. \n\nFor security purposes, any API response that
+    includes a file URL will have a signed URL. These files will be available for
+    download for a limited time (1 hour).\nWe recommend downloading the file immediately
+    upon receiving the URL to avoid any issues. If necessary, you can always call
+    the API again to retrieve a\nnew file URL.\n\n### Visual aids and examples:\nFor
+    a better understanding of how our APIs work, including webhook setups and request
+    handling, please refer to the code examples included later\nin this document.\n"
 webhooks:
   permit_submitted:
     tags:
@@ -47,6 +52,36 @@ webhooks:
           ### Request body:
           This webhook sends information about a recently submitted permit
                   application in a JSON format to the webhook URL specified by the external integrator.
+          It includes
+                  the permit application ID, which can be used to fetch the complete details of the permit application using the
+                  `GET/permit_applications/{id}` endpoint.
+
+          ### Retries:
+          If the webhook does not receive a 200 status response
+                  from the external integrator, it will attempt to resend the notification up to 8 times using an exponential backoff
+                  strategy. This ensures multiple attempts to deliver the webhook in case of temporary issues on the receiving end.
+
+
+          ### Expected responses:
+          The external integrator is expected to return a 200 status code to confirm successful receipt
+                  of the data. This acknowledgment indicates that the payload was received and processed without issues
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/WebhookPayload"
+      responses:
+        '200':
+          description: The external integrator should return a 200 status to indicate
+            that the data was received successfully.
+  permit_resubmitted:
+    tags:
+    - Webhooks
+    post:
+      requestBody:
+        description: |-
+          ### Request body:
+          This webhook sends information about a recently resubmitted permit
+                  application. A permit can be resubmitted due to revision requests. After resubmission a payload is sent in JSON format to the webhook URL specified by the external integrator.
           It includes
                   the permit application ID, which can be used to fetch the complete details of the permit application using the
                   `GET/permit_applications/{id}` endpoint.
@@ -121,15 +156,24 @@ paths:
           application/json:
             schema:
               type: object
-              description: Filters permit applications by submitted date and permit
-                classifications
+              description: Filters permit applications by status, submitted date,
+                resubmitted_date and permit classifications
               properties:
                 permit_classifications:
                   description: Filters by permit classifications
                   type: string
+                status:
+                  type: string
+                  enum:
+                  - newly_submitted
+                  - resubmitted
+                  description: 'Filters by submitted status. Newly submitted: permit
+                    applications submitted for the first time. Resubmitted: permit
+                    applications resubmitted after a revision request.'
                 submitted_at:
                   type: object
-                  description: Filters by submitted date
+                  description: Filters by submitted date. This is the date the permit
+                    application was first submitted. Example format `2024-04-30T13:22:41-07:00`
                   properties:
                     gt:
                       type: string
@@ -149,6 +193,31 @@ paths:
                       type: string
                       format: date-time
                       description: 'Less than or equal to: submitted date is less
+                        than or equal to this date'
+                resubmitted_at:
+                  type: object
+                  description: Filters by resubmitted date. This is the date the permit
+                    application was most recently resubmitted. Example format `2024-04-30T13:22:41-07:00`
+                  properties:
+                    gt:
+                      type: string
+                      format: date-time
+                      description: 'Greater than: resubmitted date is greater than
+                        this date'
+                    lt:
+                      type: string
+                      format: date-time
+                      description: 'Less than: resubmitted date is less than this
+                        date'
+                    gte:
+                      type: string
+                      format: date-time
+                      description: 'Greater than or equal to: resubmitted date is
+                        greater than or equal to this date'
+                    lte:
+                      type: string
+                      format: date-time
+                      description: 'Less than or equal to: resubmitted date is less
                         than or equal to this date'
   "/permit_applications/{id}":
     get:
@@ -271,7 +340,16 @@ components:
         submitted_at:
           type: number
           format: int64
-          description: Datetime in milliseconds since the epoch (Unix time)
+          description: Datetime in milliseconds since the epoch (Unix time). This
+            is the timestamp when the permit application was first submitted.
+        resubmitted_at:
+          type: number
+          format: int64
+          description: 'Datetime in milliseconds since the epoch (Unix time). This
+            is the timestamp when the permit application was last resubmitted due
+            to a revision request. Note: there might be multiple resubmissions for
+            a permit application, but this date is the last resubmission date.'
+          nullable: true
         permit_classifications:
           type: string
           description: This is the combined permit type and activity (work) type of
@@ -296,8 +374,9 @@ components:
           nullable: true
     SubmissionData:
       type: object
-      description: 'The submitted permit application data. Note: the keys are the
-        requirement block codes.'
+      description: 'The submitted permit application data. This will reflect the most
+        recent submitted data in case of resubmission. Note: the keys are the requirement
+        block codes.'
       additionalProperties:
         type: object
         properties:
@@ -352,6 +431,7 @@ components:
                   - energy_step_code
                   - general_contact
                   - professional_contact
+                  - pid_info
                   description: The input type for this requirement.
                 value:
                   description: The submitted value for this requirement.
@@ -553,6 +633,7 @@ components:
           type: string
           enum:
           - permit_submitted
+          - permit_resubmitted
           description: The event type.
         payload:
           type: object
@@ -563,8 +644,8 @@ components:
             submitted_at:
               type: integer
               format: int64
-              description: The timestamp of when the permit application was submitted.
-                This is in milliseconds since the epoch (UNIX time).
+              description: The timestamp of when the permit application was submitted
+                or resubmitted. This is in milliseconds since the epoch (UNIX time).
 formats:
 - json
 - yaml

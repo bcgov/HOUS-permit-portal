@@ -19,6 +19,7 @@ module Api::Concerns::Search::JurisdictionPermitApplications
               nil
             end
           ),
+        includes: PermitApplication::SEARCH_INCLUDES,
       )
   end
 

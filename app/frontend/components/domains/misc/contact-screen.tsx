@@ -69,6 +69,7 @@ export const ContactScreen = () => {
         <Link
           href="https://www2.gov.bc.ca/gov/content/home/get-help-with-government-services"
           target="_blank"
+          rel="noopener noreferrer"
           isExternal
           ml="1"
         >

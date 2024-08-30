@@ -3,9 +3,10 @@ class PermitClassificationSeeder
     # Define Classification data
     classifications = [
       {
-        name: "1-4 Unit detached housing",
+        name: "Small-scale/Multi-unit housing (Part 9 BCBC)",
         code: "low_residential",
-        description: "1-4 units: Detatched dwellings, duplexes",
+        description:
+          "Single detached, duplex, triplex / fourplex / townhouse, secondary suite, accessory dwelling unit (ADU) e.g. garden suite",
         enabled: true,
         type: "PermitType",
       },
@@ -17,10 +18,10 @@ class PermitClassificationSeeder
         type: "PermitType",
       },
       {
-        name: "High density appartment buildings",
+        name: "High density apartment buildings",
         code: "high_residential",
         description: "Highest density residential structures",
-        enabled: false,
+        enabled: true,
         type: "PermitType",
       },
       {
@@ -36,21 +37,23 @@ class PermitClassificationSeeder
         code: "addition_alteration_renovation",
         description:
           "Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).",
-        enabled: false,
+        enabled: true,
         type: "Activity",
       },
       {
         name: "Site Alteration",
         code: "site_alteration",
-        description: "Lorem ipsum TODO add description",
-        enabled: false,
+        description:
+          "Modifies land contours through grading, excavation, or preparation for construction projects. This process involves adjusting the earth to support new structures or landscaping.",
+        enabled: true,
         type: "Activity",
       },
       {
         name: "Demolition",
         code: "demolition",
-        description: "Lorem ipsum TODO add description",
-        enabled: false,
+        description:
+          "Involves the systematic tearing down of buildings and other structures, including clearing debris and preparing the site for future construction or restoration activities.",
+        enabled: true,
         type: "Activity",
       },
     ]
@@ -67,5 +70,8 @@ class PermitClassificationSeeder
         PermitClassification.create!(classification_attrs)
       end
     end
+
+    PermitApplication.reindex
+    RequirementTemplate.reindex
   end
 end

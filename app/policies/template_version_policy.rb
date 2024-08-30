@@ -35,7 +35,7 @@ class TemplateVersionPolicy < ApplicationPolicy
     show?
   end
 
-  def compare_requirements?
+  def copy_jurisdiction_template_version_customization?
     show?
   end
 

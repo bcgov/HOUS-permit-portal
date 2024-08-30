@@ -8,9 +8,11 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Tag,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
+import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect } from "react"
@@ -19,7 +21,7 @@ import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
-import { IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
+import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
@@ -36,12 +38,14 @@ interface IRequirementsBlockProps {
   requirementBlock?: IRequirementBlock | IDenormalizedRequirementBlock
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
+  withOptionsMenu?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   requirementBlock,
   showEditWarning,
   triggerButtonProps,
+  withOptionsMenu,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
@@ -54,6 +58,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     return requirementBlock
       ? {
           name: requirementBlock.name,
+          firstNations: requirementBlock.firstNations,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
           displayDescription: requirementBlock.displayDescription,
@@ -89,6 +94,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
 
       const { conditional, ...restOfInputOptions } = ra?.inputOptions
 
+      const formConditional = conditional as IFormConditional
+
       const processedRequirementAttributes = {
         ...ra,
         inputOptions: {
@@ -96,7 +103,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         } as any,
       }
 
-      const shouldAppendConditional = conditional?.when && conditional?.operand && conditional?.then
+      const shouldAppendConditional = formConditional?.when && formConditional?.operand && formConditional?.then
 
       const isEnergyStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
         ra.requirementCode as EEnergyStepCodeDependencyRequirementCode
@@ -107,7 +114,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       if (isEnergyStepCodeDependency) {
         processedRequirementAttributes.inputOptions.conditional = conditional
       } else if (shouldAppendConditional) {
-        const cond = ra.inputOptions.conditional
+        const cond = ra.inputOptions.conditional as IFormConditional
         processedRequirementAttributes.inputOptions.conditional = {
           when: cond.when,
           eq: cond.operand,
@@ -177,8 +184,36 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
         <Modal onClose={handleClose} isOpen>
           <ModalOverlay />
           <FormProvider {...formProps}>
-            <ModalContent as={"form"} w={"min(1170px, 95%)"} maxW={"full"} py={9}>
+            <ModalContent
+              as={"form"}
+              w={"min(1170px, 95%)"}
+              maxW={"full"}
+              py={9}
+              pb={12}
+              onClick={(e) => e.stopPropagation()}
+            >
               <ModalCloseButton fontSize={"11px"} />
+              {(requirementBlock as IRequirementBlock)?.isDiscarded && (
+                <Tag
+                  borderRadius="sm"
+                  border="1px solid"
+                  borderColor={"semantic.error"}
+                  backgroundColor={"semantic.errorLight"}
+                  w={"fit-content"}
+                  py={1}
+                  px={2}
+                  color={"semantic.error"}
+                  ml={"2.75rem"}
+                  mb={2}
+                >
+                  <HStack>
+                    <Archive />
+                    <Text textTransform={"capitalize"} fontSize={"sm"}>
+                      {t("requirementsLibrary.modals.archived")}
+                    </Text>
+                  </HStack>
+                </Tag>
+              )}
               <ModalHeader display={"flex"} justifyContent={"space-between"} p={0} px={"2.75rem"}>
                 <Text as={"h2"} fontSize={"2xl"}>
                   {t(`requirementsLibrary.modals.${requirementBlock ? "edit" : "create"}.title`)}
@@ -188,7 +223,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                     variant={"primary"}
                     isDisabled={isSubmitting || !isValid}
                     isLoading={isSubmitting}
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleSubmit(onSubmit)()
+                    }}
                   >
                     {t("ui.onlySave")}
                   </Button>
@@ -202,7 +240,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.editWarning")} />
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
-                  <BlockSetup />
+                  <BlockSetup
+                    requirementBlock={
+                      (requirementBlock as IRequirementBlock)?.restore
+                        ? (requirementBlock as IRequirementBlock)
+                        : undefined
+                    }
+                    withOptionsMenu={withOptionsMenu}
+                  />
                   <FieldsSetup requirementBlock={requirementBlock} />
                 </HStack>
               </ModalBody>

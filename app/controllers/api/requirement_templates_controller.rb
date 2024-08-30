@@ -29,9 +29,27 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def create
-    @requirement_template = RequirementTemplate.build(requirement_template_params)
-    authorize @requirement_template
+    copy_existing = requirement_template_params[:copy_existing]
 
+    if copy_existing
+      found_template =
+        RequirementTemplate.find_by(
+          permit_type_id: requirement_template_params[:permit_type_id],
+          activity_id: requirement_template_params[:activity_id],
+        )
+      if found_template.nil?
+        authorize :requirement_template, :create?
+        render_error("misc.not_found_error", status: :not_found) and return
+      end
+      @requirement_template =
+        RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
+          requirement_template_params,
+        )
+    else
+      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
+    end
+
+    authorize @requirement_template
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.create_success",
@@ -94,6 +112,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     success = false
     error_message = ""
 
+    published_template_version = nil
+
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
         error_message = @requirement_template.errors.full_messages.join(", ")
@@ -116,7 +136,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if success
       render_success @requirement_template,
                      "requirement_template.force_publish_now_success",
-                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         published_template_version: published_template_version,
+                       },
+                     }
     else
       render_error "requirement_template.force_publish_now_error", message_opts: { error_message: error_message }
     end
@@ -177,6 +203,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     permitted_params =
       params.require(:requirement_template).permit(
         :description,
+        :first_nations,
+        :copy_existing,
         :activity_id,
         :permit_type_id,
         requirement_template_sections_attributes: [

@@ -28,7 +28,7 @@ class SupportingDocumentsZipper
 
   def create_zip_file
     Zip::File.open(file_path, Zip::File::CREATE) do |zipfile|
-      permit_application.completed_supporting_documents.each do |document|
+      permit_application.all_submission_version_completed_supporting_documents.each do |document|
         file_path = download_file(document)
         zipfile.add(document.standardized_filename, file_path) if file_path
       end
@@ -52,12 +52,18 @@ class SupportingDocumentsZipper
     document.save unless document.id.present?
     temp_file = Tempfile.new(["download", File.extname(document.id)])
     temp_file.binmode
-    URI.open(document.file_url) { |file| temp_file.write(file.read) }
+    url = URI.parse(document.file_url)
+    Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == "https") do |http|
+      request = Net::HTTP::Get.new(url)
+      http.request(request) { |response| response.read_body { |chunk| temp_file.write(chunk) } }
+    end
     temp_file.close
     temp_files << temp_file.path
     temp_file.path
   rescue => e
     Rails.logger.error("Failed to download file: #{document.file_url} with error: #{e.message}")
+    temp_file&.close
+    temp_file&.unlink
     nil
   end
 

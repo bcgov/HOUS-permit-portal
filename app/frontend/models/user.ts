@@ -2,7 +2,9 @@ import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EOmniauthProvider, EUserRoles } from "../types/enums"
-import { JurisdictionModel } from "./jurisdiction"
+import { ILicenseAgreement } from "../types/types"
+import { convertToDate } from "../utils/utility-functions"
+import { IJurisdiction, JurisdictionModel } from "./jurisdiction"
 
 export const UserModel = types
   .model("UserModel")
@@ -27,6 +29,8 @@ export const UserModel = types
     eulaAccepted: types.maybeNull(types.boolean),
     invitedByEmail: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
+    invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
+    licenseAgreements: types.maybeNull(types.frozen<ILicenseAgreement[]>()),
   })
   .extend(withRootStore())
   .extend(withEnvironment())
@@ -71,8 +75,13 @@ export const UserModel = types
         self.jurisdictions[0]
       )
     },
-    get shouldSeeApplicationDiff() {
-      return self.role == EUserRoles.submitter
+  }))
+  .actions((self) => ({
+    setLicenseAgreements(licenseAgreements: ILicenseAgreement[]) {
+      self.licenseAgreements = licenseAgreements?.map((licenseAgreement) => ({
+        ...licenseAgreement,
+        acceptedAt: convertToDate(licenseAgreement.acceptedAt),
+      }))
     },
   }))
   .actions((self) => ({
@@ -107,6 +116,17 @@ export const UserModel = types
       }
       return response.ok
     }),
+    fetchAcceptedEulas: flow(function* () {
+      const response = yield self.environment.api.fetchCurrentUserAcceptedEulas()
+
+      if (response.ok) {
+        const licenseAgreements = response.data.data?.licenseAgreements
+
+        Array.isArray(licenseAgreements) && self.setLicenseAgreements(licenseAgreements)
+      }
+
+      return response.ok
+    }),
     acceptInvitation: flow(function* (invitationToken: string) {
       const response = yield self.environment.api.acceptInvitation(self.id, { invitationToken })
       if (response.ok) {
@@ -136,5 +156,17 @@ export interface IPreference {
   enableInAppNewTemplateVersionPublishNotification: boolean
   enableEmailNewTemplateVersionPublishNotification: boolean
   enableInAppCustomizationUpdateNotification: boolean
-  enableEmailCustomizationUpdateNotification: boolean
+
+  enableInAppApplicationSubmissionNotification: boolean
+  enableEmailApplicationSubmissionNotification: boolean
+  enableInAppApplicationViewNotification: boolean
+  enableEmailApplicationViewNotification: boolean
+  enableInAppApplicationRevisionsRequestNotification: boolean
+  enableEmailApplicationRevisionsRequestNotification: boolean
+
+  enableInAppCollaborationNotification: boolean
+  enableEmailCollaborationNotification: boolean
+
+  enableInAppIntegrationMappingNotification: boolean
+  enableEmailIntegrationMappingNotification: boolean
 }

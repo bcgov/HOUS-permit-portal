@@ -59,7 +59,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   title={t(`${i18nPrefix}.submissionsInboxSetup.title`)}
                   description={t(`${i18nPrefix}.submissionsInboxSetup.description`)}
                   linkText={t("ui.edit")}
-                  icon={<Tray size="24px" color="--var(chakra-colors-text-primary)" />}
+                  icon={<Tray size="24px" color="var(--chakra-colors-text-primary)" />}
                   href="submissions-inbox-setup"
                   h="full"
                 />
@@ -69,7 +69,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   title={t(`${i18nPrefix}.stepCodeRequirements.title`)}
                   description={t(`${i18nPrefix}.stepCodeRequirements.description`)}
                   linkText={t("ui.edit")}
-                  icon={<FileText size="24px" color="--var(chakra-colors-text-primary)" />}
+                  icon={<FileText size="24px" color="var(--chakra-colors-text-primary)" />}
                   href="energy-step"
                   h="full"
                 />
@@ -79,7 +79,7 @@ export const ConfigurationManagementScreen = observer(function ConfigurationMana
                   title={t(`${i18nPrefix}.jurisdictionAbout.title`)}
                   description={t(`${i18nPrefix}.jurisdictionAbout.description`)}
                   linkText={t("ui.edit")}
-                  icon={<Info size="24px" color="--var(chakra-colors-text-primary)" />}
+                  icon={<Info size="24px" color="var(--chakra-colors-text-primary)" />}
                   href={`/jurisdictions/${currentJurisdiction.slug}`}
                   h="full"
                 />

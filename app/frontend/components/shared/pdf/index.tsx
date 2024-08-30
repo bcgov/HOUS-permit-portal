@@ -2,6 +2,17 @@ import { Document, Font } from "@react-pdf/renderer"
 import React from "react"
 import { theme } from "../../../styles/theme"
 
+const chunkSubstr = (str, size) => {
+  const numChunks = Math.ceil(str.length / size)
+  const chunks = new Array(numChunks)
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substring(o, size)
+  }
+
+  return chunks
+}
+
 export function PDFDocument({ assetDirectoryPath, children }) {
   const srcPrefix = import.meta.env.SSR ? assetDirectoryPath : ""
   Font.register({
@@ -39,5 +50,16 @@ export function PDFDocument({ assetDirectoryPath, children }) {
       },
     ],
   })
+
+  Font.registerHyphenationCallback((word) => {
+    word = word || ""
+
+    if (word.length > 16) {
+      return chunkSubstr(word, 14)
+    } else {
+      return [word]
+    }
+  })
+
   return <Document style={{ fontFamily: "BC Sans", color: theme.colors.text.primary }}>{children}</Document>
 }

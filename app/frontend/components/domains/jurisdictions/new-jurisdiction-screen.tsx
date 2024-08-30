@@ -57,7 +57,7 @@ export const NewJurisdictionScreen = observer(() => {
   const { isSubmitting, isValid } = formState
 
   const onSubmit = async (formData) => {
-    const submissionData = { ...formData, regionalDistrictId: formData.regionalDistrict.id }
+    const submissionData = { ...formData, regionalDistrictId: formData.regionalDistrict?.id }
     const createdJurisdiction = (await createJurisdiction(submissionData)) as IJurisdiction
     if (createdJurisdiction) {
       setJurisdiction(createdJurisdiction)
@@ -155,13 +155,16 @@ export const NewJurisdictionScreen = observer(() => {
                         render={({ field: { onChange, value } }) => {
                           return (
                             <FormControl w="full" zIndex={1}>
-                              <FormLabel>{t("jurisdiction.fields.regionalDistrictName")}</FormLabel>
+                              <FormLabel>{`${t("jurisdiction.fields.regionalDistrictName")} ${t("ui.optional")}`}</FormLabel>
                               <InputGroup w="full">
                                 <JurisdictionSelect
                                   onChange={onChange}
                                   isDisabled={localityTypeWatch == regionalDistrictLocalityType}
                                   filters={{ type: EJurisdictionTypes.regionalDistrict }}
-                                  selectedOption={{ label: value?.reverseQualifiedName, value }}
+                                  selectedOption={{
+                                    label: value?.reverseQualifiedName,
+                                    value,
+                                  }}
                                   menuPortalTarget={document.body}
                                 />
                               </InputGroup>

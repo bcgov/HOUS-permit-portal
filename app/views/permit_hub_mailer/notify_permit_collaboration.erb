@@ -1,0 +1,163 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+        <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">
+            Welcome you have been invited to Collaborate in the Building Permit Hub
+          </h1>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>
+            ,</p>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Congratulations you have been invited to Collaborate on
+            a <%= @permit_collaboration.review? ? "submitted permit application" : "permit application" %> in Building
+            Permit Hub!
+            <% if @permit_collaboration.submission? %>Depending on your
+              role, you may either update specific requirements or have broader responsibilities as a designated
+              submitter.
+            <% end %>
+          </p>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Application
+            details:</h2>
+
+          <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;">
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Application
+                    #
+                  </dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <a href="<%= @permit_collaboration.permit_application.submitter_frontend_url %>" style="color: #1a5a96; text-decoration: underline;"><%= @permit_collaboration.permit_application.number %></a>
+                  </dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Author</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_collaboration.permit_application.submitter.name %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Permit
+                    Type
+                  </dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @permit_collaboration.permit_application.permit_type_and_activity %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Collaboration
+                    Type
+                  </dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;">
+                    <% if @permit_collaboration.review? && @permit_collaboration.delegatee? %>
+                      Designated reviewer
+                    <% else %>
+                      <%= @permit_collaboration.delegatee? ? "Designated submitter" : "Assigned to specific requirements" %></dd>
+                    <% end %>
+                    <% if @permit_collaboration.assignee? && @permit_collaboration.assigned_requirement_block_name.present? %>
+
+                      <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Assigned
+                        requirement block
+                      </dt>
+                      <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @permit_collaboration.assigned_requirement_block_name %></dd>
+                    <% end %>
+
+                    </dl>
+              </td>
+            </tr>
+          </table>
+
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Next
+            steps:</h2>
+          <ol style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+            <% if @permit_collaboration.submission? %>
+              <li style="list-style-position: initial; margin-left: 5px;">
+                <strong>Access the Building Permit Hub:</strong> Use your BCeID to log in and collaborate on the permit
+                application.
+                <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" style="color: #1a5a96; text-decoration: underline;">Login
+                  to Building Permit
+                  Hub</a>.
+              </li>
+              <li style="list-style-position: initial; margin-left: 5px;"><strong>Navigate to Your Dashboard:</strong>
+                Once logged in, your
+                personalized dashboard will allow you to view and manage permit applications you are collaborating on.
+              </li>
+            <% else %>
+              <li style="list-style-position: initial; margin-left: 5px;">Log into the
+                <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" style="color: #1a5a96; text-decoration: underline;">Building
+                  Permit Hub</a></li>
+              <li style="list-style-position: initial; margin-left: 5px;">Review and download the pending application
+              </li>
+            <% end %>
+          </ol>
+
+          <% if @permit_collaboration.submission? %>
+            <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Important
+              notes:</h2>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+              <li style="list-style-position: initial; margin-left: 5px;">You will only be able to view and edit the
+                requirement blocks specifically assigned to you.
+              </li>
+              <li style="list-style-position: initial; margin-left: 5px;">Designated submitter and author of the permit
+                can submit the entire application.
+              </li>
+            </ul>
+
+            <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Why
+              collaborate?</h2>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              Collaborating on this platform enables you to:
+            </p>
+            <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+              <li style="list-style-position: initial; margin-left: 5px;">View and contribute to permit applications you
+                have been invited to.
+              </li>
+              <li style="list-style-position: initial; margin-left: 5px;">Interact with other professionals and
+                stakeholders.
+              </li>
+              <li style="list-style-position: initial; margin-left: 5px;">Ensure accurate and efficient permit
+                processing.
+              </li>
+            </ul>
+
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              For any questions or further clarification, please do not hesitate to contact your local government or the
+              Building Permit Hub support team.
+            </p>
+          <% else %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              Your prompt review and action are appreciated to create a smooth and efficient permit application process.
+            </p>
+
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+              <tbody>
+              <tr>
+                <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: auto; width: auto;">
+                    <tbody>
+                    <tr>
+                      <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent">
+                        <a href="<%= FrontendUrlHelper.frontend_url("/login") %>" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">Login
+                          to Building Permit Hub</a></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          <% end %>
+
+          <br>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Best regards,<br><br>
+            The Building Permit Hub Team
+          </p>
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<!-- END MAIN CONTENT AREA -->

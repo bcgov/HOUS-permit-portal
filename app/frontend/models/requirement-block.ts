@@ -10,6 +10,7 @@ export const RequirementBlockModel = types
   .model("RequirementBlockModel", {
     id: types.identifier,
     name: types.string,
+    firstNations: types.boolean,
     displayName: types.string,
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),
@@ -18,6 +19,7 @@ export const RequirementBlockModel = types
     sku: types.string,
     createdAt: types.Date,
     updatedAt: types.Date,
+    discardedAt: types.maybeNull(types.Date),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -86,6 +88,9 @@ export const RequirementBlockModel = types
     getRequirementByRequirementCode(requirementCode: string) {
       return self.requirements.find((requirement) => requirement.requirementCode === requirementCode)
     },
+    get isDiscarded() {
+      return self.discardedAt !== null
+    },
   }))
   .actions((self) => ({
     update: flow(function* (requirementParams: IRequirementBlockParams) {
@@ -95,6 +100,16 @@ export const RequirementBlockModel = types
         applySnapshot(self, response.data.data)
       }
 
+      return response.ok
+    }),
+    destroy: flow(function* () {
+      const response = yield self.environment.api.archiveRequirementBlock(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
+      return response.ok
+    }),
+    restore: flow(function* () {
+      const response = yield self.environment.api.restoreRequirementBlock(self.id)
+      if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
   }))

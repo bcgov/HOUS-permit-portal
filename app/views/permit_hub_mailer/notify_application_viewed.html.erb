@@ -1,0 +1,73 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+      <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">Permit application update:</h1>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">Dear <%= @user.name %>,</p>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Your permit application has been viewed:
+          </p>
+
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Application details:</h2>
+            <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;">
+                  
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Jurisdiction</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_application.jurisdiction.qualified_name %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Application #</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><a href="<%= @permit_application.submitter_frontend_url %>" style="color: #1a5a96; text-decoration: underline;"><%= @permit_application.number %></a></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Current status</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_application.status.titleize %></dd>
+                  
+
+                  <% if @permit_application.viewed_at.present? %>
+                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Viewed on</dt>
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_application.formatted_viewed_at %></dd>
+                  <% end %>
+
+                  <% if @permit_application.reference_number.present? %>
+                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px; text-align: left;">Local reference #</dt>
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @permit_application.reference_number %></dd>
+                  <% end %>
+
+                </dl>
+              </td>
+            </tr>
+          </table>
+          
+          <h2 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; margin-top: 24px; margin-bottom: 16px; text-align: left; font-size: 22px;">Next steps:</h2>
+
+          <ul style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px; padding-left: 24px;">
+            <li style="list-style-position: initial; margin-left: 5px;">Local Jurisdiction will contact you with further details.</li>
+            <li style="list-style-position: initial; margin-left: 5px;">Please contact them if you do not hear back within a estimate of 3 weeks.</li>
+          </ul>
+
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              If you have any questions or difficulties during your application status, please contact the local jurisdiction you applied to.
+          </p>
+
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              Thank you,<br><br>
+              The Building Permit Hub Team
+          </p>
+          
+
+          
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<!-- END MAIN CONTENT AREA -->

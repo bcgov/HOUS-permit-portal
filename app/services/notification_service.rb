@@ -73,7 +73,7 @@ class NotificationService
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
-          status: "draft",
+          status: PermitApplication.draft_statuses,
           users: {
             preferences: {
               enable_in_app_new_template_version_publish_notification: true,
@@ -105,8 +105,14 @@ class NotificationService
       integration_mapping
         .jurisdiction
         .users
+        .includes(:preference)
         &.kept
-        &.where(role: %i[review_manager regional_review_manager])
+        &.where(
+          role: %i[review_manager regional_review_manager],
+          preferences: {
+            enable_in_app_integration_mapping_notification: true,
+          },
+        )
         &.pluck(:id) || []
 
     notification_hash =
@@ -129,7 +135,7 @@ class NotificationService
           template_versions: {
             requirement_template_id: template_version.requirement_template_id,
           },
-          status: "draft",
+          status: PermitApplication.draft_statuses,
           users: {
             preferences: {
               enable_in_app_customization_update_notification: true,
@@ -147,9 +153,121 @@ class NotificationService
     NotificationPushJob.perform_async(notification_user_hash)
   end
 
+  def self.publish_permit_collaboration_assignment_event(permit_collaboration)
+    collaborator_user_id = permit_collaboration.collaborator.user_id
+
+    notification_user_hash = { collaborator_user_id => permit_collaboration.collaboration_assignment_notification_data }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_permit_collaboration_unassignment_event(permit_collaboration)
+    collaborator_user_id = permit_collaboration.collaborator.user_id
+
+    notification_user_hash = {
+      collaborator_user_id => permit_collaboration.collaboration_unassignment_notification_data,
+    }
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_permit_block_status_ready_event(permit_block_status)
+    return unless permit_block_status.ready? && permit_block_status.block_exists?
+
+    notification_user_hash = {}
+
+    permit_block_status.users_to_notify_status_ready.each do |user|
+      next unless user.preference&.enable_in_app_collaboration_notification
+
+      notification_user_hash[user.id] = permit_block_status.status_ready_notification_data
+    end
+
+    NotificationPushJob.perform_async(notification_user_hash)
+  end
+
+  def self.publish_application_submission_event(permit_application)
+    notification_user_hash = {}
+
+    users_that_can_submit = [permit_application.submitter]
+
+    designated_submitter_user =
+      permit_application.users_by_collaboration_options(
+        collaboration_type: :submission,
+        collaborator_type: :delegatee,
+      ).first
+    assignee_users =
+      permit_application.users_by_collaboration_options(collaboration_type: :submission, collaborator_type: :assignee)
+
+    users_that_can_submit << designated_submitter_user if designated_submitter_user.present?
+
+    users_that_can_submit.each do |user|
+      if user.preference&.enable_in_app_application_submission_notification
+        notification_user_hash[user.id] = permit_application.submit_event_notification_data
+      end
+
+      if user.preference&.enable_email_application_submission_notification
+        PermitHubMailer.notify_submitter_application_submitted(permit_application, user)&.deliver_later
+      end
+    end
+
+    # assignees to be notified
+    assignee_users.each do |user|
+      # skip the designated submitter as they have already been added and use a different preference settings
+      next if user.id == designated_submitter_user&.id
+
+      if user.preference&.enable_in_app_collaboration_notification
+        notification_user_hash[user.id] = permit_application.submit_event_notification_data
+      end
+
+      if user.preference&.enable_email_collaboration_notification
+        PermitHubMailer.notify_submitter_application_submitted(permit_application, user)&.deliver_later
+      end
+    end
+
+    NotificationPushJob.perform_async(notification_user_hash) unless notification_user_hash.empty?
+  end
+
+  def self.publish_application_revisions_request_event(permit_application)
+    notification_user_hash = {}
+
+    users_that_can_submit = [permit_application.submitter]
+
+    designated_submitter_user =
+      permit_application.users_by_collaboration_options(
+        collaboration_type: :submission,
+        collaborator_type: :delegatee,
+      ).first
+
+    users_that_can_submit << designated_submitter_user if designated_submitter_user.present?
+
+    users_that_can_submit.each do |user|
+      if user.preference&.enable_in_app_application_revisions_request_notification
+        notification_user_hash[user.id] = permit_application.revisions_request_event_notification_data
+      end
+
+      if user.preference&.enable_email_application_revisions_request_notification
+        PermitHubMailer.notify_application_revisions_requested(permit_application, user)&.deliver_later
+      end
+    end
+
+    NotificationPushJob.perform_async(notification_user_hash) unless notification_user_hash.empty?
+  end
+
+  def self.publish_application_view_event(permit_application)
+    notification_user_hash = {}
+    notification_user_hash[
+      permit_application.submitter_id
+    ] = permit_application.application_view_event_notification_data
+    preference = permit_application.submitter.preference
+    if preference.enable_email_application_view_notification
+      PermitHubMailer.notify_application_viewed(permit_application).deliver_later
+    end
+    NotificationPushJob.perform_async(notification_user_hash) if preference.enable_in_app_application_view_notification
+  end
+
   private
 
-  # this is just a wrapper around the activity's metadat methods
+  # this is just a wrapper around the activity's metadata methods
   # since in the case of a single instance it returns a specific return type (eg. Integer)
   # but in the case of multiple user_ids the activity is a hash object
   def self.activity_metadata(user_id, activity_obj, method)

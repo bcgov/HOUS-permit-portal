@@ -23,6 +23,7 @@ import React from "react"
 import { ENumberUnit, ERequirementContactFieldItemType, ERequirementType } from "../../../../types/enums"
 import { GenericContactDisplay } from "./generic-contact-display"
 import { GenericFieldDisplay } from "./generic-field-display"
+import { GenericMultiDisplay } from "./generic-multi-display"
 
 export type TRequirementFieldDisplayProps = {
   matchesStepCodePackageRequirementCode?: boolean
@@ -39,7 +40,7 @@ export type TRequirementFieldDisplayProps = {
     formControlProps?: FormControlProps
     switchProps?: SwitchProps
   }
-  showAddPersonButton?: boolean
+  showAddButton?: boolean
   requirementType: ERequirementType
   showAddLabelIndicator?: boolean
   required?: boolean
@@ -244,6 +245,42 @@ const requirementsComponentMap = {
 
   [ERequirementType.energyStepCode](props: TRequirementFieldDisplayProps) {
     return <GenericFieldDisplay inputDisplay={<DummyStepCodeInput />} {...props} />
+  },
+
+  [ERequirementType.pidInfo](props: TRequirementFieldDisplayProps) {
+    const pidInfoFieldItemTypes: Array<{
+      type: ERequirementType
+      key: string
+      label: string
+      containerProps?: BoxProps
+      required?: boolean
+    }> = [
+      {
+        type: ERequirementType.text,
+        key: "pid",
+        label: "PID",
+        required: props?.required,
+      }, //pid or pin?
+      {
+        type: ERequirementType.text,
+        key: "folio_number",
+        label: "Folio Number",
+      }, //folio
+      {
+        type: ERequirementType.address,
+        key: "address",
+        label: "Address",
+        containerProps: {
+          gridColumn: "1 / span 2",
+          sx: {
+            ".chakra-form-control input": {
+              maxW: "full",
+            },
+          },
+        },
+      },
+    ]
+    return <GenericMultiDisplay fieldItems={pidInfoFieldItemTypes} {...props} showAddButton={true} />
   },
 
   [ERequirementType.generalContact](props: TRequirementFieldDisplayProps) {

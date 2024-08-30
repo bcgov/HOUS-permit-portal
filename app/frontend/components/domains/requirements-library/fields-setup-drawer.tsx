@@ -33,9 +33,6 @@ interface IProps {
   }>
 }
 
-// TODO: remove when backend for these types is implemented
-const DISABLED_TYPE_OPTIONS = [{ requirementType: ERequirementType.address }]
-
 export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   defaultButtonProps,
   renderTriggerButton,
@@ -48,7 +45,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   const disabledTypeOptions: Array<{
     requirementType: ERequirementType
     isStepCodePackageFileRequirement?: boolean
-  }> = [...DISABLED_TYPE_OPTIONS, ...disabledRequirementTypeOptions]
+  }> = disabledRequirementTypeOptions
 
   const requirementTypeOptions = Object.values(ERequirementType).reduce<
     {
@@ -83,7 +80,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
       )}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW={"550px"}>
+        <DrawerContent maxW={"685px"}>
           <DrawerCloseButton fontSize={"xs"} />
           <DrawerHeader color={"greys.white"} backgroundColor={"theme.blueAlt"} p={6} pt={10} fontSize={"2xl"}>
             {t("ui.add")}...
@@ -97,7 +94,10 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
             </Flex>
             <Flex flexDir={"column"} w={"full"}>
               {requirementTypeOptions
-                .filter(({ requirementType }) => hasRequirementFieldDisplayComponent(requirementType))
+                .filter(
+                  ({ requirementType }) =>
+                    hasRequirementFieldDisplayComponent(requirementType) && requirementType !== ERequirementType.address // filtering address for now because the back-end formio side of the address field is not yet implemented completely
+                )
                 .map(({ requirementType, isStepCodePackageFileRequirement = false }) => (
                   <HStack
                     key={`${requirementType}${isStepCodePackageFileRequirement ? "_stepCodePackage" : ""}`}
@@ -118,6 +118,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
                       matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirement}
                     />
                     <Button
+                      minW="76px"
                       variant={"primary"}
                       rightIcon={<CaretRight />}
                       isDisabled={

@@ -1,9 +1,10 @@
 import { Box, Flex, Image, Link, Show, Spacer, Text } from "@chakra-ui/react"
-import { ArrowSquareOut, CaretRight, Pencil, Warning } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretRight, Info, Pencil, Users, Warning } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import React from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
+import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationStatusTag } from "./permit-application-status-tag"
@@ -12,19 +13,45 @@ interface IPermitApplicationCardProps {
   permitApplication: IPermitApplication
 }
 
+const calloutBannerContainerProps = {
+  py: "0.375rem",
+  px: 2,
+  align: "center",
+  gap: "0.375rem",
+  w: "fit-content",
+  borderRadius: "sm",
+}
+
+const calloutBannerTextProps = {
+  fontSize: "sm",
+  numOfLines: 2,
+}
+
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
-  const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt } = permitApplication
+  const { id, nickname, permitTypeAndActivity, number, createdAt, updatedAt, viewedAt } = permitApplication
+  const { userStore } = useMst()
+  const currentUser = userStore.currentUser
   const { t } = useTranslation()
 
-  const { shouldShowNewVersionWarning, isDraft } = permitApplication
+  const { usingCurrentTemplateVersion } = permitApplication
+
+  const showNewVersionWarning = !usingCurrentTemplateVersion && !permitApplication.isSubmitted
+
+  const isSubmissionCollaboration = permitApplication.submitter?.id !== currentUser?.id
+
+  const routingButtonText = (() => {
+    if (permitApplication.isSubmitted) return t("ui.view")
+
+    return isSubmissionCollaboration ? t("permitApplication.card.collaborateButton") : t("ui.resume")
+  })()
 
   return (
     <Flex
-      bg={shouldShowNewVersionWarning ? "semantic.warningLight" : "greys.white"}
+      bg={showNewVersionWarning ? "semantic.warningLight" : "greys.white"}
       direction="column"
       borderRadius="lg"
       border="1px solid"
-      borderColor={shouldShowNewVersionWarning ? "semantic.warning" : "border.light"}
+      borderColor={showNewVersionWarning ? "semantic.warning" : "border.light"}
       p={6}
       align="center"
       gap={4}
@@ -61,15 +88,34 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
           </Flex>
         </Show>
         <Flex direction="column" gap={2} flex={{ base: 0, md: 5 }} maxW={{ base: "100%", md: "75%" }}>
-          {shouldShowNewVersionWarning && (
-            <Flex p={1} px={2} bg="semantic.warning" align="center" gap={2} w="fit-content" borderRadius="sm">
-              <Warning size={24} />
-              <Text noOfLines={2}>
+          {showNewVersionWarning && (
+            <Flex bg="semantic.warning" {...calloutBannerContainerProps}>
+              <Warning size={14} />
+              <Text {...calloutBannerTextProps}>
                 <Text as="span" fontWeight="bold">
                   {t("ui.actionRequired")}
                 </Text>
                 {": "}
                 {t("permitApplication.newVersionPublished")}
+              </Text>
+            </Flex>
+          )}
+          {isSubmissionCollaboration && (
+            <Flex bg="semantic.info" color={"white"} {...calloutBannerContainerProps}>
+              <Info size={14} />
+              <Text {...calloutBannerTextProps}>
+                <Trans
+                  i18nKey={
+                    permitApplication.isDraft
+                      ? "permitApplication.card.collaborationCalloutDraft"
+                      : "permitApplication.card.collaborationCalloutSubmitted"
+                  }
+                  t={t}
+                  components={{ 1: <Text as="span" fontWeight="bold" /> }}
+                  values={{
+                    authorName: permitApplication.submitter?.name,
+                  }}
+                />
               </Text>
             </Flex>
           )}
@@ -116,6 +162,24 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
               </Show>
               {format(updatedAt, "MMM d, yyyy")}
             </Text>
+            {viewedAt && (
+              <>
+                <Show above="md">
+                  <Text>{"  |  "}</Text>
+                </Show>
+                <Show below="md">
+                  <Spacer />
+                </Show>
+                <Text>
+                  {t("permitApplication.viewedOn")}
+                  <Text as="span">{":  "}</Text>
+                  <Show below="md">
+                    <br />
+                  </Show>
+                  {format(viewedAt, "MMM d, yyyy")}
+                </Text>
+              </>
+            )}
           </Flex>
           <Flex direction={{ base: "column", md: "row" }} gap={4}>
             <Link href={t("permitApplication.seeBestPractices_link")} isExternal>
@@ -144,9 +208,9 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
             to={`/permit-applications/${id}/edit`}
             variant="primary"
             w={{ base: "full", md: "fit-content" }}
-            leftIcon={<Pencil />}
+            leftIcon={!permitApplication.isSubmitted && isSubmissionCollaboration ? <Users /> : <Pencil />}
           >
-            {permitApplication.isSubmitted ? t("ui.view") : t("ui.resume")}
+            {routingButtonText}
           </RouterLinkButton>
         </Flex>
       </Flex>

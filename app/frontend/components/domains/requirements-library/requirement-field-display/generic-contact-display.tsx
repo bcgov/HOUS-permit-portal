@@ -26,7 +26,7 @@ export function GenericContactDisplay<TFieldValues>({
   containerProps,
   renderHeading,
   addMultipleContactProps,
-  showAddPersonButton,
+  showAddButton,
   required,
 }: TGenericContactDisplayProps<TFieldValues>) {
   const { t } = useTranslation()
@@ -108,7 +108,7 @@ export function GenericContactDisplay<TFieldValues>({
         </FormControl>
       )}
 
-      {showAddPersonButton && (
+      {showAddButton && (
         <Button
           variant={"secondary"}
           leftIcon={<Plus />}

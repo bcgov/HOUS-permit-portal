@@ -1,5 +1,6 @@
 class RequirementBlock < ApplicationRecord
   include HtmlSanitizeAttributes
+  include Discard::Model
 
   sanitizable :display_description
   searchkick searchable: %i[name requirement_labels associations configurations],
@@ -23,15 +24,21 @@ class RequirementBlock < ApplicationRecord
 
   before_validation :set_sku, on: :create
 
+  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+
   acts_as_taggable_on :associations
+
+  after_discard { template_section_blocks.destroy_all }
 
   def search_data
     {
       updated_at: updated_at,
       name: name,
+      first_nations: first_nations,
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,
+      discarded: discarded_at.present?,
     }
   end
 
@@ -79,6 +86,10 @@ class RequirementBlock < ApplicationRecord
   end
 
   private
+
+  def refresh_search_index
+    RequirementBlock.search_index.refresh
+  end
 
   def validate_requirements_conditional
     requirements.each do |requirement|

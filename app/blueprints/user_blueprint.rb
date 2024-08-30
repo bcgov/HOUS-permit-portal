@@ -1,19 +1,21 @@
 class UserBlueprint < Blueprinter::Base
   identifier :id
 
+  view :minimal do
+    fields :email, :role, :first_name, :last_name, :organization, :certified, :confirmed_at, :discarded_at
+  end
+
+  view :accepted_license_agreements do
+    association :license_agreements, blueprint: UserLicenseAgreementBlueprint
+  end
+
   view :base do
-    fields :email,
-           :unconfirmed_email,
-           :role,
+    include_view :minimal
+    fields :unconfirmed_email,
            :omniauth_username,
            :omniauth_email,
            :omniauth_provider,
-           :first_name,
-           :last_name,
-           :certified,
-           :organization,
            :created_at,
-           :confirmed_at,
            :confirmation_sent_at,
            :discarded_at,
            :last_sign_in_at
@@ -44,6 +46,10 @@ class UserBlueprint < Blueprinter::Base
 
     field :invited_by_email do |user, _options|
       user.invited_by&.email
+    end
+
+    association :invited_to_jurisdiction, blueprint: JurisdictionBlueprint, view: :minimal do |user, _options|
+      user.jurisdiction_memberships&.order(updated_at: :desc)&.first&.jurisdiction
     end
   end
 end

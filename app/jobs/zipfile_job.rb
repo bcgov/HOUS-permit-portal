@@ -13,15 +13,15 @@ class ZipfileJob
     [args[0]]
   end
 
-  def perform(permit_application_id, regenerate_all_pdfs = true)
-    PdfGenerationJob.new.perform(permit_application_id, regenerate_all_pdfs)
+  def perform(permit_application_id)
+    PdfGenerationJob.new.perform(permit_application_id)
     SupportingDocumentsZipper.new(permit_application_id).perform
 
     permit_application = PermitApplication.find_by_id(permit_application_id)
 
     if permit_application.present?
       WebsocketBroadcaster.push_update_to_relevant_users(
-        permit_application.collaborators.pluck(:id),
+        permit_application.notifiable_users.pluck(:id),
         Constants::Websockets::Events::PermitApplication::DOMAIN,
         Constants::Websockets::Events::PermitApplication::TYPES[:update_supporting_documents],
         PermitApplicationBlueprint.render_as_hash(permit_application.reload, { view: :supporting_docs_update }),

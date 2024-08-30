@@ -5,10 +5,13 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  Image,
   Input,
   InputGroup,
   Link,
   ListItem,
+  Radio,
+  RadioGroup,
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
@@ -43,6 +46,7 @@ export type TCreatePermitApplicationFormData = {
   activityId: string
   jurisdiction: IJurisdiction
   site?: IOption
+  firstNations: boolean
 }
 
 export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScreenProps) => {
@@ -56,6 +60,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       activityId: "",
       site: null as IOption,
       jurisdiction: null as IJurisdiction,
+      firstNations: null,
     },
   })
   const { handleSubmit, formState, control, watch, register, setValue } = formMethods
@@ -84,6 +89,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const pinWatch = watch("pin")
   const siteWatch = watch("site")
   const jurisdictionWatch = watch("jurisdiction")
+  const firstNationsWatch = watch("firstNations")
 
   useEffect(() => {
     if (R.isNil(siteWatch?.value) && !pidWatch) return
@@ -151,23 +157,48 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {jurisdictionWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={2}>
-                  <Heading as="h2" variant="yellowline">
-                    {t("permitApplication.new.permitTypeHeading")}
-                  </Heading>
+                  <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
                   <Controller
-                    name="permitTypeId"
+                    name="firstNations"
                     control={control}
-                    render={({ field: { onChange, value } }) => {
-                      return (
-                        <PermitTypeRadioSelect
-                          w="full"
-                          fetchOptions={() => fetchPermitTypeOptions(true, pidWatch, jurisdictionWatch)}
-                          onChange={onChange}
-                          value={value}
-                        />
-                      )
-                    }}
+                    render={({ field: { onChange, value } }) => (
+                      <RadioGroup
+                        onChange={(e) => {
+                          return onChange(e === "true")
+                        }}
+                        value={R.isNil(value) ? null : value ? "true" : "false"}
+                      >
+                        <Radio value="true">{t("ui.yes")}</Radio>
+                        <Radio value="false" ml={4}>
+                          {t("ui.no")}
+                        </Radio>
+                      </RadioGroup>
+                    )}
                   />
+                  {!R.isNil(firstNationsWatch) && (
+                    <>
+                      <Heading as="h2" variant="yellowline">
+                        {t("permitApplication.new.permitTypeHeading")}
+                      </Heading>
+                      <Controller
+                        name="permitTypeId"
+                        control={control}
+                        render={({ field: { onChange, value } }) => {
+                          return (
+                            <PermitTypeRadioSelect
+                              w={{ base: "full", md: "50%" }}
+                              fetchOptions={() => {
+                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch)
+                              }}
+                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionWatch]}
+                              onChange={onChange}
+                              value={value}
+                            />
+                          )
+                        }}
+                      />
+                    </>
+                  )}
                 </Flex>
               )}
               {permitTypeIdWatch && (
@@ -176,7 +207,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     {t("permitApplication.new.workTypeHeading")}
                   </Heading>
                   <ActivityList
-                    fetchOptions={() => fetchActivityOptions(true, permitTypeIdWatch)}
+                    fetchOptions={() => fetchActivityOptions(true, firstNationsWatch, permitTypeIdWatch)}
                     permitTypeId={permitTypeIdWatch}
                   />
                 </Flex>
@@ -233,11 +264,11 @@ export const PinModeInputs = ({ disabled }) => {
                 <InputGroup w="full">
                   <JurisdictionSelect
                     onChange={(value) => {
-                      addJurisdiction(value)
+                      if (value) addJurisdiction(value)
                       onChange(value)
                     }}
                     onFetch={() => setValue("jurisdiction", null)}
-                    selectedOption={{ label: value?.reverseQualifiedName, value }}
+                    selectedOption={value ? { label: value?.reverseQualifiedName, value } : null}
                     menuPortalTarget={document.body}
                   />
                 </InputGroup>
@@ -258,25 +289,44 @@ const DisclaimerInfo = () => {
   }) as Array<{ text: string; href: string }>
 
   return (
-    <Box width="full" mx="auto" mt="10" mb="10" border="1px solid" borderColor="border.light" borderRadius="md" p="6">
+    <Flex
+      direction="column"
+      width="full"
+      mx="auto"
+      border="1px solid"
+      borderColor="border.light"
+      borderRadius="md"
+      p="6"
+    >
       <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
-      <UnorderedList ml="0" mt="4">
-        {applicationDisclaimers.map((disclaimer) => {
-          return (
-            <ListItem key={disclaimer.href}>
-              <Link href={disclaimer.href} isExternal>
-                {disclaimer.text}
-                <ArrowSquareOut />
-              </Link>
-            </ListItem>
-          )
-        })}
-      </UnorderedList>
-      <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
-      <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
-        {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
-        <ArrowSquareOut />
-      </Link>
-    </Box>
+      <Flex align="center" mt={6} flexDirection={{ base: "column", md: "row" }}>
+        <Box w={{ base: "100%", md: "40%" }}>
+          <UnorderedList ml="0" mt="4">
+            {applicationDisclaimers.map((disclaimer) => {
+              return (
+                <ListItem key={disclaimer.href}>
+                  <Link href={disclaimer.href} isExternal>
+                    {disclaimer.text}
+                    <ArrowSquareOut />
+                  </Link>
+                </ListItem>
+              )
+            })}
+          </UnorderedList>
+          <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
+          <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
+            {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
+            <ArrowSquareOut />
+          </Link>
+        </Box>
+        <Image
+          src="/images/timeline/timeline-graphic-full.gif"
+          alt="thumbnail for timeline"
+          w={{ base: "100%", md: "60%" }}
+          bg="semantic.infoLight"
+          objectFit="contain"
+        />
+      </Flex>
+    </Flex>
   )
 }

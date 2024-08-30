@@ -408,6 +408,7 @@
     > .form-group:not(:empty) {
       // each form field inside a block
       margin-bottom: var(--chakra-space-6);
+
       &.formio-component-select .form-group,
       input {
         max-width: var(--chakra-sizes-container-sm);
@@ -447,6 +448,18 @@
       }
     }
   }
+
+  // removes asterisk
+  .field-required:after {
+    display: none;
+  }
+
+
+  // adds optional text for non required input labels
+  .col-form-label:not(.field-required):not(.formio-section-container > .col-form-label):after {
+    content: "(optional)"
+  }
+
 
   .compliance {
     font-size: var(--chakra-fontSizes-xs);
@@ -526,9 +539,8 @@
       font-size: var(--chakra-fontSizes-sm);
       border-radius: var(--chakra-radii-md);
       margin-bottom: 0.5rem;
-      transition:
-        background-color 200ms ease-in-out,
-        border-color 200ms ease-in-out;
+      transition: background-color 200ms ease-in-out,
+      border-color 200ms ease-in-out;
 
       a {
         color: inherit;
@@ -599,10 +611,16 @@
     }
   }
 
-  .contact-data-grid {
+  .contact-data-grid,
+  .multi-data-grid {
     border: none;
+    overflow: visible;
 
     .contact-field-set {
+      margin-top: 0;
+    }
+
+    .multi-field-set {
       margin-top: 0;
     }
 
@@ -657,14 +675,21 @@
         font-size: var(--chakra-fontSizes-xs);
         margin-right: var(--chakra-space-2);
       }
+    }
 
-      &:after {
+    @media (min-width: 766px) {
+      .formio-button-remove-row {
+        padding: var(--chakra-space-2); /* Add padding */
+      }
+
+      .formio-button-remove-row:after {
         content: "Remove";
       }
     }
   }
 
-  .contact-field-set {
+  .contact-field-set,
+  .multi-field-set {
     .fieldset-body {
       border: 1px solid var(--chakra-colors-border-light);
       padding-inline: var(--chakra-space-6);
@@ -719,6 +744,68 @@
     }
   }
 
+  .btn.revision-button {
+    background: var(--chakra-colors-theme-yellow);
+    color: var(--chakra-colors-border-dark);
+    padding: 15px;
+    padding-right: 18px;
+    position: absolute;
+    left: -40px;
+    top: 7px;
+    z-index: 0;
+
+    &:hover {
+      background: var(--chakra-colors-darken-100);
+    }
+
+    &::before {
+      content: "\f044"; // This is the content code for a specific icon, example here
+      font-family: "FontAwesome"; // Ensure you are using the correct font-family
+      position: absolute;
+      font-weight: 200;
+      left: 10px; // Adjust based on padding and size
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px; // Icon size
+      color: inherit; // Icon color
+    }
+  }
+
+  .btn.submission-change-marker {
+    background: transparent !important;
+    color: var(--chakra-colors-border-dark);
+    padding: 15px;
+    position: absolute;
+    top: 7px;
+    right: 126px;
+    z-index: 1;
+
+    &:hover {
+      background: transparent;
+    }
+
+    &::before {
+      background: var(--chakra-colors-theme-yellow) !important;
+      color: var(--chakra-colors-text-primary);
+      text-transform: uppercase;
+      text-decoration: underline;
+      content: "Answer changed";
+      position: absolute;
+      font-weight: 200;
+      top: 0;
+      padding-left: 20px;
+      padding-right: 4px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+      transform: translateY(-50%);
+      font-size: 14px;
+      width: "fit-content";
+      white-space: nowrap;
+      overflow: hidden;
+      clip-path: polygon(0% 50%, 10% 0%, 100% 0%, 100% 100%, 10% 100%);
+    }
+  }
+
   // ERROR STATES
 
   .formio-error-wrapper:not(:empty) {
@@ -761,6 +848,12 @@
 }
 
 #requirement-form-wrapper {
+  .card-title {
+    display: inline-grid;
+    width: 100%;
+    grid-template-columns: 1fr auto 20px;
+  }
+
   // style default error box that to look similar to our floating error alert box
   [id^="error-list-"].alert.alert-danger {
     padding-top: var(--chakra-space-7);
@@ -810,6 +903,35 @@
   &.float-off .floating-side-box {
     opacity: 0;
     transform: translateX(200px);
+  }
+}
+
+#permitApplicationFieldsContainer.revision-mode {
+  .card-body {
+    padding-left: 45px !important;
+  }
+}
+
+.formio-component-panel {
+  legend,
+  .form-group > label {
+    margin-bottom: 8px;
+    max-width: fit-content;
+  }
+
+  .fieldset-body label {
+    border-bottom: 0;
+    margin-bottom: 0px;
+    background-color: transparent !important;
+  }
+
+  .revision-requested legend,
+  .form-group.revision-requested > label,
+  .form-group.revision-requested > .checkbox > label {
+    border-bottom: 2px solid;
+    border-color: var(--chakra-colors-theme-yellow);
+    border-color: var(--chakra-colors-semantic-error);
+    background-color: var(--chakra-colors-semantic-warningLight);
   }
 }
 
@@ -871,6 +993,12 @@
 
 .added-in-diff.formio-hidden::after {
   @include hidden-diff-explainer("A hidden field has been added that is currently not required for your application.");
+}
+
+.single-requirement-form {
+  button {
+    display: none;
+  }
 }
 
 /* ======================================

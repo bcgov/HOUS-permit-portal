@@ -35,7 +35,7 @@ RSpec.configure do |config|
         version: "v1",
         description: <<-DESC,
 ### API documentation overview
-This document provides detailed information about the APIs available for external integrators to query and retrieve submitted permit applications.
+This document provides detailed information about the APIs available for external integrators to query and retrieve submitted and resubmitted permit applications.
 It also includes specifications on webhook events that notify your systems in real-time.
 
 ### Data scope:
@@ -47,7 +47,7 @@ To integrate with our APIs, please contact the Building Permit Hub team to enabl
 and register your webhook URL in their configuration settings on the building permit hub. You can reach us directly at <digital.codes.permits@gov.bc.ca>
 for further assistance.
 
-### Authentication and authorization: 
+### Authentication and authorization:
 Access to these APIs is controlled via an API key, which must be included in the Authorization header as a Bearer token like so:
 ```
 Authorization: Bearer {Your_API_Key_Here}
@@ -63,13 +63,17 @@ may necessitate further contact with the building permit hub team.
 The base path for all API endpoints is `/external_api/v1`.
 
 ### Server information for testing:
-By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable. 
+By default the requests from the documentation will be sent to the current environment servers. For testing purposes, you can specify a different server using the {serverUrl} variable.
 During your integration testing phase, you have the flexibility to use custom URLs by configuring the serverUrl variable. This allows you to
 tailor the API environment to better suit your development needs. Ensure that your custom URLs are configured correctly to avoid any connectivity or data access issues.
 
 ### Special considerations:
+A returned permit application will have a status of either `newly_submitted` for permit applications submitted for the first time, or `resubmitted` for
+permit applications that have been resubmitted due to revision requests. The `resubmitted_at` field will indicate the timestamp of the latest resubmission.
+While there may be multiple resubmissions, the submission data payload returned will reflect the most recent submission data. 
+
 For security purposes, any API response that includes a file URL will have a signed URL. These files will be available for download for a limited time (1 hour).
-We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a 
+We recommend downloading the file immediately upon receiving the URL to avoid any issues. If necessary, you can always call the API again to retrieve a
 new file URL.
 
 ### Visual aids and examples:
@@ -85,6 +89,35 @@ in this document.
               description:
                 "### Request body:\nThis webhook sends information about a recently submitted permit
         application in a JSON format to the webhook URL specified by the external integrator.\nIt includes
+        the permit application ID, which can be used to fetch the complete details of the permit application using the
+        `GET/permit_applications/{id}` endpoint.\n\n### Retries:\nIf the webhook does not receive a 200 status response
+        from the external integrator, it will attempt to resend the notification up to 8 times using an exponential backoff
+        strategy. This ensures multiple attempts to deliver the webhook in case of temporary issues on the receiving end.\n\n
+### Expected responses:\nThe external integrator is expected to return a 200 status code to confirm successful receipt
+        of the data. This acknowledgment indicates that the payload was received and processed without issues",
+              content: {
+                "application/json" => {
+                  schema: {
+                    "$ref" => "#/components/schemas/WebhookPayload",
+                  },
+                },
+              },
+            },
+            responses: {
+              "200" => {
+                description:
+                  "The external integrator should return a 200 status to indicate that the data was received successfully.",
+              },
+            },
+          },
+        },
+        permit_resubmitted: {
+          tags: ["Webhooks"],
+          post: {
+            requestBody: {
+              description:
+                "### Request body:\nThis webhook sends information about a recently resubmitted permit
+        application. A permit can be resubmitted due to revision requests. After resubmission a payload is sent in JSON format to the webhook URL specified by the external integrator.\nIt includes
         the permit application ID, which can be used to fetch the complete details of the permit application using the
         `GET/permit_applications/{id}` endpoint.\n\n### Retries:\nIf the webhook does not receive a 200 status response
         from the external integrator, it will attempt to resend the notification up to 8 times using an exponential backoff
@@ -157,7 +190,15 @@ in this document.
               submitted_at: {
                 type: :number,
                 format: :int64, # Indicates that it's an integer representing time in milliseconds since epoch
-                description: "Datetime in milliseconds since the epoch (Unix time)",
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time). This is the timestamp when the permit application was first submitted.",
+              },
+              resubmitted_at: {
+                type: :number,
+                format: :int64, # Indicates that it's an integer representing time in milliseconds since epoch
+                description:
+                  "Datetime in milliseconds since the epoch (Unix time). This is the timestamp when the permit application was last resubmitted due to a revision request. Note: there might be multiple resubmissions for a permit application, but this date is the last resubmission date.",
+                nullable: true,
               },
               permit_classifications: {
                 type: :string,
@@ -192,7 +233,8 @@ in this document.
           },
           SubmissionData: {
             type: :object,
-            description: "The submitted permit application data. Note: the keys are the requirement block codes.",
+            description:
+              "The submitted permit application data. This will reflect the most recent submitted data in case of resubmission. Note: the keys are the requirement block codes.",
             additionalProperties: {
               type: :object,
               properties: {
@@ -481,7 +523,7 @@ in this document.
             properties: {
               event: {
                 type: :string,
-                enum: %w[permit_submitted],
+                enum: %w[permit_submitted permit_resubmitted],
                 description: "The event type.",
               },
               payload: {
@@ -495,7 +537,7 @@ in this document.
                     type: :integer,
                     format: "int64",
                     description:
-                      "The timestamp of when the permit application was submitted. This is in milliseconds since the epoch (UNIX time).",
+                      "The timestamp of when the permit application was submitted or resubmitted. This is in milliseconds since the epoch (UNIX time).",
                   },
                 },
               },

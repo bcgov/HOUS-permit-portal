@@ -8,12 +8,15 @@
           <h1>You've been invited</h1>
           <p>Hello <%= @resource.email %>!</p>
 
-          <p>You have been invited to join the BC Building Permit Hub app.</p>
+          <p>You have been invited to join the BC Building Permit Hub
+            app.</p>
 
           <p><%= link_to 'Accept invitation', accept_invitation_url(invitation_token: @token), class: "btn btn-primary" %></p>
-          
+
           <p>–––</p>
-          <p><a href="<%= @root_url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: bold;">The Building Permit Hub Team</a></p>
+          <p>
+            <a href="<%= @root_url %>" target="_blank" style="color: inherit; text-decoration: none; font-weight: bold;">The
+              Building Permit Hub Team</a></p>
 
         </td>
         <!-- END OF CONTENT ROW -->

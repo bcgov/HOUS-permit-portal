@@ -4,7 +4,7 @@ import { useLocation, useParams } from "react-router-dom"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
-export const usePermitApplication = () => {
+export const usePermitApplication = ({ review }: { review?: boolean } = {}) => {
   const { permitApplicationId } = useParams()
   const { pathname } = useLocation()
   const { permitApplicationStore } = useMst()
@@ -19,7 +19,7 @@ export const usePermitApplication = () => {
       try {
         setCurrentPermitApplication(null)
         if (isUUID(permitApplicationId)) {
-          let permitApplication = await fetchPermitApplication(permitApplicationId)
+          let permitApplication = await fetchPermitApplication(permitApplicationId, review)
           if (permitApplication) {
             setCurrentPermitApplication(permitApplicationId)
           }

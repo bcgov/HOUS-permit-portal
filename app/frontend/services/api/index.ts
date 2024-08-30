@@ -1,5 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
+import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
@@ -9,6 +10,7 @@ import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
+import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
@@ -24,6 +26,7 @@ import {
 import {
   IAcceptInvitationResponse,
   IApiResponse,
+  ICollaboratorSearchResponse,
   IJurisdictionPermitApplicationResponse,
   IJurisdictionResponse,
   INotificationResponse,
@@ -33,8 +36,11 @@ import {
   IUsersResponse,
 } from "../../types/api-responses"
 import {
+  ECollaborationType,
+  ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
+  EPermitBlockStatus,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
   ETemplateVersionStatus,
@@ -51,6 +57,7 @@ import {
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
+import { getCsrfToken } from "../../utils/utility-functions"
 
 export class Api {
   client: ApisauceInstance
@@ -71,6 +78,7 @@ export class Api {
     })
 
     this.client.addRequestTransform((request) => {
+      request.headers["X-CSRF-Token"] = getCsrfToken()
       request.params = decamelizeRequest(request.params)
       request.data = decamelizeRequest(request.data)
     })
@@ -116,8 +124,8 @@ export class Api {
     return this.client.get<ApiResponse<IJurisdiction>>(`/jurisdictions/${id}`)
   }
 
-  async fetchPermitApplication(id) {
-    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`)
+  async fetchPermitApplication(id: string, review?: boolean) {
+    return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, { review })
   }
 
   async viewPermitApplication(id) {
@@ -145,8 +153,9 @@ export class Api {
   async fetchPermitClassificationOptions(
     type,
     published = false,
-    permit_type_id: string = null,
-    activity_id: string = null,
+    firstNations = false,
+    permitTypeId: string = null,
+    activityId: string = null,
     pid: string = null,
     jurisdictionId: string = null
   ) {
@@ -155,8 +164,9 @@ export class Api {
       {
         type,
         published,
-        permit_type_id,
-        activity_id,
+        firstNations,
+        permitTypeId,
+        activityId,
         pid,
         jurisdictionId,
       }
@@ -193,6 +203,13 @@ export class Api {
     return this.client.post<IJurisdictionPermitApplicationResponse>(`/permit_applications/search`, params)
   }
 
+  async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
+    return this.client.post<ICollaboratorSearchResponse>(
+      `/collaborators/collaboratorable/${collaboratorableId}/search`,
+      params
+    )
+  }
+
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
     params?: TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
@@ -213,6 +230,14 @@ export class Api {
 
   async updateRequirementBlock(id: string, params: Partial<IRequirementBlockParams>) {
     return this.client.put<IRequirementBlockResponse>(`/requirement_blocks/${id}`, { requirementBlock: params })
+  }
+
+  async archiveRequirementBlock(id: string) {
+    return this.client.delete<IRequirementBlockResponse>(`/requirement_blocks/${id}`)
+  }
+
+  async restoreRequirementBlock(id: string) {
+    return this.client.post<IRequirementBlockResponse>(`/requirement_blocks/${id}/restore`)
   }
 
   async updateProfile(params) {
@@ -245,14 +270,111 @@ export class Api {
     )
   }
 
-  async updatePermitApplication(id, params) {
+  async updatePermitApplication(id, params, review?: boolean) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, {
       permitApplication: params,
+      review,
+    })
+  }
+
+  async updateRevisionRequests(id, params: IRevisionRequestForm) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests`, {
+      submissionVersion: params,
     })
   }
 
   async updatePermitApplicationVersion(id) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/update_version`)
+  }
+
+  async assignCollaboratorToPermitApplication(
+    permitApplicationId: string,
+    params: {
+      collaboratorId: string
+      collaboratorType: ECollaboratorType
+      assignedRequirementBlockId?: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations`,
+      {
+        permitCollaboration: params,
+      }
+    )
+  }
+
+  async removeCollaboratorCollaborationsFromPermitApplication(
+    permitApplicationId: string,
+    {
+      collaboratorId,
+      collaboratorType,
+      collaborationType,
+    }: {
+      collaboratorId: string
+      collaboratorType: ECollaboratorType
+      collaborationType: ECollaborationType
+    }
+  ) {
+    return this.client.delete<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations/remove_collaborator_collaborations`,
+      {
+        collaboratorId,
+        collaboratorType,
+        collaborationType,
+      }
+    )
+  }
+
+  async createOrUpdatePermitBlockStatus(
+    permitApplicationId: string,
+    {
+      requirementBlockId,
+      collaborationType,
+      status,
+    }: {
+      requirementBlockId: string
+      collaborationType: ECollaborationType
+      status: EPermitBlockStatus
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_block_status`,
+      {
+        requirementBlockId,
+        status,
+        collaborationType,
+      }
+    )
+  }
+
+  async inviteNewCollaboratorToPermitApplication(
+    permitApplicationId: string,
+    params: {
+      user: {
+        email: string
+        firstName: string
+        lastName: string
+      }
+      collaboratorType: ECollaboratorType
+      assignedRequirementBlockId?: string
+    }
+  ) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_applications/${permitApplicationId}/permit_collaborations/invite`,
+      {
+        collaboratorInvite: params,
+      }
+    )
+  }
+
+  async unassignPermitCollaboration(id: string) {
+    return this.client.delete<ApiResponse<IPermitCollaboration>>(`/permit_collaborations/${id}`)
+  }
+
+  async reinvitePermitCollaboration(permitCollaborationId: string) {
+    return this.client.post<ApiResponse<IPermitCollaboration>>(
+      `/permit_collaborations/${permitCollaborationId}/reinvite`
+    )
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {
@@ -263,6 +385,10 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submit`, {
       permitApplication: params,
     })
+  }
+
+  async finalizeRevisionRequests(id) {
+    return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
   async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
@@ -472,6 +598,20 @@ export class Api {
     )
   }
 
+  async copyJurisdictionTemplateVersionCustomization(
+    templateVersionId: string,
+    jurisdictionId: string,
+    includeElectives: boolean,
+    includeTips: boolean,
+    fromNonFirstNations?: boolean,
+    fromTemplateVersionId?: string
+  ) {
+    return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateVersionId}/jurisdictions/${jurisdictionId}/copy_jurisdiction_template_version_customization`,
+      { includeElectives, includeTips, fromTemplateVersionId, fromNonFirstNations }
+    )
+  }
+
   async downloadRequirementSummaryCsv(templateVersionId: string) {
     return this.client.get<BlobPart>(`/template_versions/${templateVersionId}/download_requirement_summary_csv`)
   }
@@ -482,5 +622,9 @@ export class Api {
 
   async resetLastReadNotifications() {
     return this.client.post(`/notifications/reset_last_read`)
+  }
+
+  async fetchCurrentUserAcceptedEulas() {
+    return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
   }
 }

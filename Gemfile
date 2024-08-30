@@ -73,7 +73,7 @@ gem "nokogiri", ">= 1.16.5"
 gem "rdoc", ">= 6.6.3.1"
 gem "rack", ">= 3.0.9.1"
 gem "uppy-s3_multipart", "~> 1.2"
-gem "simple-feed", "~> 3.1.2"
+gem "simple-feed", "~> 3.2.0"
 # For external api docs
 gem "rswag-api", "~> 2.13"
 gem "rswag-ui", "~> 2.13"
@@ -83,6 +83,7 @@ gem "rswag-ui", "~> 2.13"
 gem "rgeo", "~> 3.0.1"
 # brew install proj
 gem "rgeo-proj4", "~> 4.0.0"
+gem "aasm", "~> 5.5.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -116,6 +117,7 @@ group :development do
   gem "syntax_tree-haml", "~> 4.0"
   gem "syntax_tree-rbs", "~> 1.0"
   gem "letter_opener", "~> 1.8"
+  gem 'rails-erd', '~> 1.5'
 end
 
 gem "faraday-multipart", "~> 1.0"

@@ -24,6 +24,7 @@ import {
 import { isQuillEmpty } from "../../../utils/utility-functions"
 import { Editor } from "../../shared/editor/editor"
 import { ElectiveTag } from "../../shared/elective-tag"
+import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
@@ -110,6 +111,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               )}
             </HStack>
             <HStack spacing={2}>
+              <Box mr={2}>{requirementBlock.firstNations && <FirstNationsTag />}</Box>
               {isOpen && isEditable && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}
@@ -124,7 +126,6 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                 />
               )}
               {isEditable && renderEdit?.()}
-
               <IconButton variant="unstyled" aria-label="Collapse or expand accordion">
                 <AccordionIcon color={"text.primary"} />
               </IconButton>
@@ -220,7 +221,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                         selectProps={{
                           maxW: "339px",
                         }}
-                        showAddPersonButton={!!requirement?.inputOptions?.canAddMultipleContacts}
+                        showAddButton={!!requirement?.inputOptions?.canAddMultipleContacts}
                         required={requirement.required}
                       />
                       {requirement?.elective && <ElectiveTag position="absolute" right="0" top="0" />}

@@ -3,12 +3,15 @@ class PermitApplication < ApplicationRecord
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
   include ZipfileUploader.Attachment(:zipfile)
-  searchkick searchable: %i[number nickname full_address permit_classifications submitter status],
-             word_start: %i[number nickname full_address permit_classifications submitter status]
+  include PermitApplicationStatus
+
+  SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter permit_collaborations]
+
+  searchkick word_middle: %i[nickname full_address permit_classifications submitter status review_delegatee_name],
+             text_end: %i[number]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
-
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
@@ -16,6 +19,12 @@ class PermitApplication < ApplicationRecord
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
   has_one :step_code
+  has_many :submission_versions, dependent: :destroy
+  has_many :permit_collaborations, dependent: :destroy
+  has_many :collaborators, through: :permit_collaborations
+  has_many :permit_block_statuses, dependent: :destroy
+
+  scope :submitted, -> { joins(:submission_versions).distinct }
 
   # Custom validation
 
@@ -24,8 +33,6 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
-
-  enum status: { draft: 0, submitted: 1 }, _default: 0
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -37,18 +44,75 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_save :set_submitted_at, if: :status_changed?
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :notify_user_application_updated
-  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
+  after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
-  def form_json
-    result = PermitApplication::FormJsonService.new(permit_application: self).call
+  COMPLETION_SECTION_KEY = "section-completion-key"
+
+  def supporting_documents_for_submitter_based_on_user_permissions(supporting_documents, user: nil)
+    return supporting_documents if user.blank?
+
+    permissions = submission_requirement_block_edit_permissions(user_id: user.id)
+
+    return supporting_documents if permissions == :all
+
+    return [] if permissions.blank?
+
+    supporting_documents.select do |s|
+      return false if s.data_key.blank?
+
+      rb_id = s.data_key[/RB([a-zA-Z0-9\-]+)/, 1]
+
+      permissions.include?(rb_id)
+    end
+  end
+
+  def formatted_submission_data(current_user: nil)
+    PermitApplication::SubmissionDataService.new(self).formatted_submission_data(current_user: current_user)
+  end
+
+  def users_by_collaboration_options(collaboration_type:, collaborator_type: nil, assigned_requirement_block_id: nil)
+    base_where_clause = {
+      collaborations: {
+        permit_collaborations: {
+          collaboration_type: collaboration_type,
+          permit_application_id: id,
+        },
+      },
+    }
+
+    base_where_clause[:collaborations][:permit_collaborations][
+      :collaborator_type
+    ] = collaborator_type if collaborator_type.present?
+
+    base_where_clause[:collaborations][:permit_collaborations][
+      :assigned_requirement_block_id
+    ] = assigned_requirement_block_id if assigned_requirement_block_id.present?
+
+    User.joins(collaborations: :permit_collaborations).where(base_where_clause).distinct
+  end
+
+  # Helper method to get the latest SubmissionVersion
+  def latest_submission_version
+    submission_versions.order(created_at: :desc).first
+  end
+
+  def earliest_submission_version
+    submission_versions.order(created_at: :desc).last
+  end
+
+  # Method to get all revision requests from the latest SubmissionVersion
+  def revision_requests
+    latest_submission_version&.revision_requests || RevisionRequest.none
+  end
+
+  def form_json(current_user: nil)
+    result = PermitApplication::FormJsonService.new(permit_application: self, current_user:).call
     result.form_json
   end
 
@@ -61,6 +125,13 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def update_with_submission_data_merge(permit_application_params:, current_user: nil)
+    PermitApplication::SubmissionDataService.new(self).update_with_submission_data_merge(
+      permit_application_params:,
+      current_user:,
+    )
+  end
+
   def search_data
     {
       number: number,
@@ -68,6 +139,7 @@ class PermitApplication < ApplicationRecord
       permit_classifications: "#{permit_type.name} #{activity.name}",
       submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
+      resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction.id,
@@ -76,7 +148,30 @@ class PermitApplication < ApplicationRecord
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       using_current_template_version: using_current_template_version,
+      user_ids_with_submission_edit_permissions:
+        [submitter.id] + users_by_collaboration_options(collaboration_type: :submission).pluck(:id),
+      review_delegatee_name:
+        users_by_collaboration_options(collaboration_type: :review, collaborator_type: :delegatee).first&.name,
     }
+  end
+
+  def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
+    users_by_collaboration_options(collaboration_type:, collaborator_type:).exists?(id: user_id)
+  end
+
+  def submission_requirement_block_edit_permissions(user_id:)
+    return nil if submitter_id != user_id && !collaborator?(user_id:, collaboration_type: :submission)
+
+    if submitter_id == user_id ||
+         collaborator?(user_id:, collaboration_type: :submission, collaborator_type: :delegatee)
+      return :all
+    end
+
+    permit_collaborations
+      .joins(:collaborator)
+      .where(collaboration_type: :submission, collaborators: { user_id: })
+      .map(&:assigned_requirement_block_id)
+      .compact
   end
 
   def indexed_using_current_template_version
@@ -93,7 +188,7 @@ class PermitApplication < ApplicationRecord
 
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    RequirementTemplate.published_requirement_template_version(activity, permit_type)
+    RequirementTemplate.published_requirement_template_version(activity, permit_type, first_nations)
   end
 
   def form_customizations
@@ -108,15 +203,20 @@ class PermitApplication < ApplicationRecord
   end
 
   def update_viewed_at
-    update(viewed_at: Time.current)
+    latest_submission_version.update(viewed_at: Time.current)
+    reindex
   end
 
   def number_prefix
     jurisdiction.prefix
   end
 
-  def collaborators
+  def notifiable_users
     relevant_collaborators = [submitter]
+    designated_submitter =
+      users_by_collaboration_options(collaboration_type: :submission, collaborator_type: :delegatee).first
+
+    relevant_collaborators << designated_submitter if designated_submitter.present?
 
     if submitted?
       relevant_collaborators =
@@ -160,6 +260,14 @@ class PermitApplication < ApplicationRecord
     viewed_at&.strftime("%Y-%m-%d")
   end
 
+  def formatted_revisions_requested_at
+    revisions_requested_at&.strftime("%Y-%m-%d")
+  end
+
+  def formatted_resubmitted_at
+    resubmitted_at&.strftime("%Y-%m-%d")
+  end
+
   def permit_type_and_activity
     "#{activity.name} - #{permit_type.name}".strip
   end
@@ -169,7 +277,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def send_submit_notifications
-    PermitHubMailer.notify_submitter_application_submitted(submitter, self).deliver_later
+    # All submission related emails and in-app notifications are handled by this method
+    NotificationService.publish_application_submission_event(self)
     confirmed_permit_type_submission_contacts.each do |permit_type_submission_contact|
       PermitHubMailer.notify_reviewer_application_received(permit_type_submission_contact, self).deliver_later
     end
@@ -189,7 +298,19 @@ class PermitApplication < ApplicationRecord
     jurisdiction
       .active_external_api_keys
       .where.not(webhook_url: [nil, ""]) # Only send webhooks to keys with a webhook URL
-      .each { |external_api_key| PermitWebhookJob.perform_async(external_api_key.id, "permit_submitted", id) }
+      .each do |external_api_key|
+        PermitWebhookJob.perform_async(
+          external_api_key.id,
+          (
+            if newly_submitted?
+              Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+            else
+              Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+            end
+          ),
+          id,
+        )
+      end
   end
 
   def missing_pdfs
@@ -197,16 +318,86 @@ class PermitApplication < ApplicationRecord
 
     missing_pdfs = []
 
-    application_pdf = supporting_documents.find_by(data_key: PERMIT_APP_PDF_DATA_KEY)
+    submission_versions.each do |submission_version|
+      version_missing_pdfs = submission_version.missing_pdfs
 
-    missing_pdfs << PERMIT_APP_PDF_DATA_KEY if application_pdf.blank?
+      next if version_missing_pdfs.empty?
 
-    return missing_pdfs unless step_code&.pre_construction_checklist
-
-    checklist_pdf = supporting_documents.find_by(data_key: CHECKLIST_PDF_DATA_KEY)
-    missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
+      missing_pdfs += version_missing_pdfs
+    end
 
     missing_pdfs
+  end
+
+  def viewed_at
+    latest_submission_version&.viewed_at
+  end
+
+  def submitted_at
+    return nil if submission_versions.length < 1
+    return earliest_submission_version.created_at
+  end
+
+  def resubmitted_at
+    return nil if submission_versions.length <= 1
+    return latest_submission_version.created_at
+  end
+
+  def submit_event_notification_data
+    i18n_key =
+      (
+        if resubmitted_at.present?
+          "notification.permit_application.resubmission_notification"
+        else
+          "notification.permit_application.submission_notification"
+        end
+      )
+
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_SUBMISSION,
+      "action_text" => "#{I18n.t(i18n_key, number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
+  def revisions_request_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_REVISIONS_REQUEST,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.revisions_request_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+        "permit_application_number" => number,
+      },
+    }
+  end
+
+  def application_view_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_VIEW,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.view_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
+  end
+
+  def application_reference_updated_event_notification_data
+    {
+      "id" => SecureRandom.uuid,
+      "action_type" => Constants::NotificationActionTypes::APPLICATION_REFERENCE_UPDATED,
+      "action_text" =>
+        "#{I18n.t("notification.permit_application.reference_updated_notification", number: number, jurisdiction_name: jurisdiction_name)}",
+      "object_data" => {
+        "permit_application_id" => id,
+      },
+    }
   end
 
   def step_code_requirements
@@ -220,6 +411,10 @@ class PermitApplication < ApplicationRecord
   end
 
   private
+
+  def update_collaboration_assignments
+    # TODO: Implement this method to remove collaborations for missing requirement block when a new template is published
+  end
 
   def assign_default_nickname
     self.nickname = "#{jurisdiction_qualified_name}: #{full_address || pid || pin || id}" if self.nickname.blank?
@@ -287,13 +482,9 @@ class PermitApplication < ApplicationRecord
     self.form_customizations_snapshot = current_customizations
   end
 
-  def notify_user_application_updated
+  def notify_user_reference_number_updated
     return if new_record?
-    viewed_at_change = previous_changes.dig("viewed_at")
-    # Check if the `viewed_at` was `nil` before the change and is now not `nil`.
-    if (viewed_at_change&.first.nil? && viewed_at_change&.last.present?) || saved_change_to_reference_number?
-      PermitHubMailer.notify_application_updated(submitter, self).deliver_later
-    end
+    NotificationService.publish_application_view_event(self)
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -303,14 +494,12 @@ class PermitApplication < ApplicationRecord
     jurisdiction.reindex
   end
 
-  def set_submitted_at
-    # Check if the status changed to 'submitted' and `submitted_at` is nil to avoid overwriting the timestamp.
-    self.submitted_at = Time.current if submitted? && submitted_at.nil?
-  end
-
   def submitter_must_have_role
     unless submitter&.submitter?
-      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+      errors.add(
+        :submitter,
+        I18n.t("activerecord.errors.models.permit_application.attributes.submitter.incorrect_role"),
+      )
     end
   end
 

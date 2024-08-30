@@ -33,12 +33,12 @@ class RequirementTemplate < ApplicationRecord
   # This is a workaround needed to validate step code related errors
   attr_accessor :requirement_template_sections_attributes_copy
 
-  validate :unique_permit_and_activity_for_undiscarded, on: :create
+  validate :unique_classification_for_undiscarded, on: :create
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
 
   def label
-    "#{permit_type.name} | #{activity.name}"
+    "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end
 
   def key
@@ -115,8 +115,8 @@ class RequirementTemplate < ApplicationRecord
     )
   end
 
-  def self.published_requirement_template_version(activity, permit_type)
-    find_by(activity: activity, permit_type: permit_type).published_template_version
+  def self.published_requirement_template_version(activity, permit_type, first_nations)
+    find_by(activity: activity, permit_type: permit_type, first_nations: first_nations).published_template_version
   rescue NoMethodError => e
     rails.logger.error e.message
   end
@@ -124,6 +124,7 @@ class RequirementTemplate < ApplicationRecord
   def search_data
     {
       description: description,
+      first_nations: first_nations,
       current_version: published_template_version&.version_date,
       permit_type: permit_type.name,
       activity: activity.name,
@@ -218,11 +219,16 @@ class RequirementTemplate < ApplicationRecord
     errors.add(:base, :duplicate_step_code_package) if has_duplicate_step_code_package_file_requirements
   end
 
-  def unique_permit_and_activity_for_undiscarded
+  def unique_classification_for_undiscarded
     existing_record =
-      RequirementTemplate.find_by(permit_type_id: permit_type_id, activity_id: activity_id, discarded_at: nil)
+      RequirementTemplate.find_by(
+        permit_type_id: permit_type_id,
+        activity_id: activity_id,
+        first_nations: first_nations,
+        discarded_at: nil,
+      )
     if existing_record.present?
-      errors.add(:base, "There can only be one Requirement Template per permit_type and activity combination")
+      errors.add(:base, I18n.t("activerecord.errors.models.requirement_template.nonunique_classification"))
     end
   end
 

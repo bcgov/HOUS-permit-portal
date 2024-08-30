@@ -15,7 +15,13 @@ module HtmlSanitizeAttributes
   end
 
   def sanitize_html(html)
-    ActionController::Base.helpers.sanitize(html)
+    # This allows target="_blank" and rel="noopener noreferrer" to be set.
+
+    ActionController::Base.helpers.sanitize(
+      html,
+      tags: Rails::Html::WhiteListSanitizer.allowed_tags,
+      attributes: Rails::Html::WhiteListSanitizer.allowed_attributes + %w[target rel],
+    )
   end
 
   class_methods do

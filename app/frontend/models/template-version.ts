@@ -18,6 +18,7 @@ export const TemplateVersionModel = types
     deprecationReason: types.maybeNull(types.enumeration(Object.values(EDeprecationReason))),
     versionDate: types.Date,
     label: types.string,
+    firstNations: types.boolean,
     updatedAt: types.Date,
     denormalizedTemplateJson: types.maybeNull(types.frozen<IDenormalizedTemplate>()),
     requirementBlocksJson: types.maybeNull(types.frozen<Record<string, IDenormalizedRequirementBlock>>()),
@@ -40,6 +41,11 @@ export const TemplateVersionModel = types
     get isDeprecated() {
       return self.status === ETemplateVersionStatus.deprecated
     },
+
+    get nonFirstNationLabel() {
+      return self.label.replace(/\s\(First Nations\)/g, "")
+    },
+
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {
       return self.templateVersionCustomizationsByJurisdiction.get(jurisdictionId)
     },
@@ -93,6 +99,40 @@ export const TemplateVersionModel = types
       }
 
       return response
+    }),
+    copyJurisdictionTemplateVersionElectives: flow(function* (jurisdictionId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.copyJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, true, false, true)
+      )
+      if (!response.ok) {
+        return response.ok
+      }
+
+      const customization = response.data.data
+
+      if (customization) {
+        const customizationModel = JurisdictionTemplateVersionCustomizationModel.create(customization)
+        self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customizationModel)
+      }
+
+      return response.ok
+    }),
+    copyJurisdictionTemplateVersionTips: flow(function* (jurisdictionId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.copyJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, false, true, true)
+      )
+      if (!response.ok) {
+        return response.ok
+      }
+
+      const customization = response.data.data
+
+      if (customization) {
+        const customizationModel = JurisdictionTemplateVersionCustomizationModel.create(customization)
+        self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customizationModel)
+      }
+
+      return response.ok
     }),
     fetchIntegrationMapping: flow(function* (jurisdictionId: string) {
       const response = yield* toGenerator(self.environment.api.fetchIntegrationMapping(self.id, jurisdictionId))

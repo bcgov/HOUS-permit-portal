@@ -12,6 +12,7 @@ class Api::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
     if @user&.valid? && @user&.persisted?
       sign_in(resource_name, @user, store: false)
+      request.reset_csrf_token # explicitly reset the CSRF token here for CSRF Fixation protection (we are not using Devise's config.clean_up_csrf_token_on_authentication because it is causing issues)
       redirect_to root_path
     else
       redirect_to login_path(

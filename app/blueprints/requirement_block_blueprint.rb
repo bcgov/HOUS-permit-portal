@@ -1,6 +1,7 @@
 class RequirementBlockBlueprint < Blueprinter::Base
   identifier :id
   fields :name,
+         :first_nations,
          :sku,
          :description,
          :display_name,
@@ -8,7 +9,8 @@ class RequirementBlockBlueprint < Blueprinter::Base
          :sign_off_role,
          :reviewer_role,
          :created_at,
-         :updated_at
+         :updated_at,
+         :discarded_at
 
   field :association_list, name: :associations
 

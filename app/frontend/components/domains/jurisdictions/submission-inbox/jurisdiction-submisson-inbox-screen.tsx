@@ -1,4 +1,4 @@
-import { Box, Button, Container, Flex, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Container, Flex, Heading, HStack, IconButton, Stack, Text, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut, Download } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -9,6 +9,7 @@ import { usePermitClassificationsLoad } from "../../../../hooks/resources/use-pe
 import { useSearch } from "../../../../hooks/use-search"
 import { IPermitApplication } from "../../../../models/permit-application"
 import { useMst } from "../../../../setup/root"
+import { ECollaborationType } from "../../../../types/enums"
 import { CalloutBanner } from "../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { Paginator } from "../../../shared/base/inputs/paginator"
@@ -19,8 +20,10 @@ import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLink } from "../../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { PermitApplicationViewedAtTag } from "../../../shared/permit-applications/permit-application-viewed-at-tag"
 import { Can } from "../../../shared/user/can"
+import { DesignatedCollaboratorAssignmentPopover } from "../../permit-application/collaborator-management/designated-collaborator-assignment-popover"
 import { SubmissionDownloadModal } from "../../permit-application/submission-download-modal"
 import { GridHeaders } from "./grid-header"
 
@@ -39,7 +42,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
   if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />
 
   return (
-    <Container maxW="container.lg" p={8} as={"main"}>
+    <Container maxW="container.xl" p={8} as={"main"}>
       <VStack align={"start"} spacing={5} w={"full"} h={"full"}>
         {!currentJurisdiction.submissionInboxSetUp && (
           <CalloutBanner type={"error"} title={t("permitApplication.submissionInbox.contactInviteWarning")} />
@@ -62,7 +65,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
           </Can>
         </Flex>
 
-        <SearchGrid templateColumns="170px 1.2fr 1.5fr repeat(4, 1fr)">
+        <SearchGrid templateColumns="repeat(8, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -78,8 +81,11 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                   role={"row"}
                   display={"contents"}
                 >
+                  <SearchGridItem>
+                    <PermitApplicationStatusTag permitApplication={pa} />
+                  </SearchGridItem>
                   <SearchGridItem>{pa.number}</SearchGridItem>
-                  <SearchGridItem>{pa.referenceNumber}</SearchGridItem>
+                  <SearchGridItem wordBreak={"break-word"}>{pa.referenceNumber}</SearchGridItem>
                   <SearchGridItem>
                     <Flex direction="column">
                       <Text fontWeight={700}>{pa.permitType.name}</Text>
@@ -111,20 +117,34 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
                     )}
                   </SearchGridItem>
                   <SearchGridItem gap={2}>
-                    <SubmissionDownloadModal
-                      permitApplication={pa}
-                      renderTrigger={(onOpen) => (
-                        <IconButton variant="secondary" icon={<Download />} aria-label={"download"} onClick={onOpen} />
-                      )}
-                    />
-
-                    <RouterLinkButton
-                      variant="primary"
-                      rightIcon={<ArrowSquareOut />}
-                      to={`/permit-applications/${pa.id}`}
-                    >
-                      {t("ui.view")}
-                    </RouterLinkButton>
+                    <Stack>
+                      <HStack>
+                        <DesignatedCollaboratorAssignmentPopover
+                          permitApplication={pa}
+                          collaborationType={ECollaborationType.review}
+                          avatarTrigger
+                        />
+                        <SubmissionDownloadModal
+                          permitApplication={pa}
+                          renderTrigger={(onOpen) => (
+                            <IconButton
+                              variant="secondary"
+                              icon={<Download />}
+                              aria-label={"download"}
+                              onClick={onOpen}
+                            />
+                          )}
+                          review
+                        />
+                      </HStack>
+                      <RouterLinkButton
+                        variant="primary"
+                        rightIcon={<ArrowSquareOut />}
+                        to={`/permit-applications/${pa.id}`}
+                      >
+                        {t("ui.view")}
+                      </RouterLinkButton>
+                    </Stack>
                   </SearchGridItem>
                 </Box>
               )

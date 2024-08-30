@@ -10,6 +10,7 @@ class Jurisdiction < ApplicationRecord
              text_start: %i[name reverse_qualified_name qualified_name]
 
   # Associations
+  has_one :preference
   has_many :permit_applications
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
@@ -22,6 +23,7 @@ class Jurisdiction < ApplicationRecord
   has_many :external_api_keys, dependent: :destroy
   has_many :integration_mappings
   has_many :permit_type_required_steps, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
@@ -155,14 +157,10 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
-  def permit_type_required_steps_by_classification(activity = nil, permit_type = nil)
-    return JurisdictionTemplateStepCode.none unless activity && permit_type
+  def permit_type_required_steps_by_classification(permit_type = nil)
+    return PermitTypeRequiredStep.none unless permit_type
 
-    requirement_template = RequirementTemplate.find_by(activity: activity, permit_type: permit_type, discarded_at: nil)
-
-    return JurisdictionTemplateStepCode.none unless requirement_template
-
-    permit_type_required_steps.where(requirement_template: requirement_template)
+    permit_type_required_steps.where(permit_type: permit_type)
   end
 
   def create_integration_mappings
@@ -181,6 +179,10 @@ class Jurisdiction < ApplicationRecord
     relevant_template_versions.each do |template_version|
       integration_mappings.create(template_version: template_version)
     end
+  end
+
+  def blueprint
+    JurisdictionBlueprint
   end
 
   private

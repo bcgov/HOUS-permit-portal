@@ -45,6 +45,8 @@ export const RequirementBlockStoreModel = types
       switch (field) {
         case ERequirementLibrarySortFields.name:
           return t("requirementsLibrary.fields.name")
+        case ERequirementLibrarySortFields.firstNations:
+          return t("requirementsLibrary.fields.firstNations")
         case ERequirementLibrarySortFields.associations:
           return t("requirementsLibrary.fields.associations")
         case ERequirementLibrarySortFields.requirementLabels:
@@ -109,6 +111,7 @@ export const RequirementBlockStoreModel = types
           query: self.query,
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
+          showArchived: self.showArchived,
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )

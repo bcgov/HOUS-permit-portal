@@ -54,12 +54,13 @@ export function toCamelCase(input: string): string {
   )
 }
 
-export function setQueryParam(key: string, value: string) {
+export function setQueryParam(key: string, value: string | string[]) {
   const searchParams = new URLSearchParams(window.location.search)
   if (!value) {
     searchParams.delete(key)
   } else {
-    searchParams.set(key, encodeURIComponent(value))
+    // @ts-ignore
+    searchParams.set(key, value)
   }
   const stringParams = searchParams.toString()
   window.history.replaceState({}, "", `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`)
@@ -182,4 +183,40 @@ export function removePrefix(str: string, prefix: string) {
 
 export async function delay(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+}
+
+export const arrayEqualsAsSet = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false
+  const setA = new Set(a)
+  const setB = new Set(b)
+  for (let item of setA) {
+    if (!setB.has(item)) return false
+  }
+  return true
+}
+
+export function convertResourceArrayToRecord<
+  ResourceT extends {
+    id: string
+  },
+>(resources: ResourceT[]): Record<string, ResourceT> {
+  return resources.reduce((acc, resource) => {
+    acc[resource.id] = resource
+    return acc
+  }, {})
+}
+
+export function getCsrfToken() {
+  // csrfToken is set as readable cookie by backend, send it in every request
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("CSRF-TOKEN="))
+    ?.split("=")[1]
+}
+
+export function convertToDate(property: any) {
+  if (!(property instanceof Date)) {
+    return new Date(property)
+  }
+  return property
 }

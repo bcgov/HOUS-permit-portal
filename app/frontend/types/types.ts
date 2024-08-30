@@ -1,10 +1,13 @@
 import { Theme } from "@chakra-ui/react"
 import { IPermitApplication } from "../models/permit-application"
+import { IPermitBlockStatus } from "../models/permit-block-status"
 import { IActivity, IPermitType } from "../models/permit-classification"
 import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  ECollaborationType,
+  ECollaboratorType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
   EEnergyStep,
@@ -25,6 +28,7 @@ import {
   EStepCodeCompliancePath,
   EStepCodeEPCTestingTargetType,
   ETemplateVersionStatus,
+  EUserRoles,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
@@ -105,6 +109,12 @@ export interface IFormJson {
   components: IFormIOSection[]
 }
 
+export interface ISingleRequirementFormJson {
+  id: string
+  key: string
+  components: IFormIORequirement[]
+}
+
 export interface IFormIOSection {
   id: string
   key: string
@@ -126,14 +136,20 @@ export interface IFormIOBlock {
 }
 
 export interface IFormIORequirement {
-  id: string
-  key: string
+  id?: string
+  key?: string
   type: string
-  input: true
-  validation: { required: boolean }
+  input?: true
+  validation?: { required: boolean }
   label: string
   widget?: any
+  action?: string
   customClass?: string
+  disabled?: boolean
+  customConditional?: string
+  conditional?: any
+  components?: IFormIORequirement[]
+  persistent?: string
 }
 
 export interface ISubmissionData {
@@ -155,6 +171,7 @@ export interface IDenormalizedRequirement {
 export interface IDenormalizedRequirementBlock {
   id: string
   name: string
+  firstNations: boolean
   sku: string
   formJson?: IFormIOBlock
   description?: string
@@ -176,6 +193,7 @@ export interface IDenormalizedRequirementTemplateSection {
 
 export interface IDenormalizedTemplate {
   id: string
+  label: string
   description?: string
   permitType: IPermitType
   activity: IActivity
@@ -239,13 +257,15 @@ export interface IDownloadableFile {
 }
 
 export interface IEULA {
+  id: string
   content: string
+  createdAt: Date
 }
 
-export interface INotification {
-  title: string
-  description: string
-  at: string
+export interface ILicenseAgreement {
+  id: string
+  agreement: IEULA
+  acceptedAt: Date
 }
 
 export interface IPermitApplicationComplianceUpdate {
@@ -258,8 +278,29 @@ export interface IPermitNotificationObjectData {
   templateVersionId?: string
   previousTemplateVersionId?: string
   requirementTemplateId?: string
-  recentPermitApplicationId?: string
+  permitApplicationId?: string
+  permitApplicationNumber?: string
   // Add future notification data here
+}
+
+export interface IRequirementTemplateNotificationObjectData {
+  requirementTemplateId?: string
+}
+
+export interface ITemplateVersionNotificationObjectData {
+  templateVersionId?: string
+}
+
+export interface IPermitCollaborationNotificationObjectData {
+  permitApplicationId?: string
+  collaboratorType?: ECollaboratorType
+  assignedRequirementBlockName?: string
+}
+
+export interface IPermitBlockStatusReadyNotificationObjectData {
+  permitApplicationId?: string
+  collaborationType: ECollaborationType
+  requirementBlockName?: string
 }
 
 export interface IMissingRequirementsMappingNotificationObjectData {
@@ -270,7 +311,12 @@ export interface INotification {
   id: string
   actionType: ENotificationActionType
   actionText: string
-  objectData?: IPermitNotificationObjectData | IMissingRequirementsMappingNotificationObjectData
+  objectData?:
+    | IPermitNotificationObjectData
+    | IMissingRequirementsMappingNotificationObjectData
+    | IPermitCollaborationNotificationObjectData
+    | ITemplateVersionNotificationObjectData
+    | IRequirementTemplateNotificationObjectData
 }
 
 export interface ITemplateVersionUpdate {
@@ -280,6 +326,7 @@ export interface ITemplateVersionUpdate {
 export type TSocketEventData =
   | IPermitApplicationComplianceUpdate
   | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitBlockStatus
   | INotification
   | ITemplateVersionUpdate
 
@@ -303,8 +350,13 @@ export interface IUserPushPayload {
   }
 }
 
-export interface ISiteConfiguration {
+export type TSiteWideMessageConfiguration = {
   displaySitewideMessage: boolean
+  sitewideMessage: string | null
+}
+
+export interface ISiteConfiguration extends TSiteWideMessageConfiguration {
+  helpLinkItems: IHelpLinkItems
 }
 
 export interface IContact {
@@ -410,7 +462,7 @@ export interface IJurisdictionSearchFilters {
 export interface IPermitApplicationSearchFilters {
   requirementTemplateId?: string
   templateVersionId?: string
-  status?: EPermitApplicationStatus
+  status?: EPermitApplicationStatus[]
 }
 
 export interface ITemplateVersionDiff {
@@ -438,6 +490,36 @@ export type TChakraColor = keyof Theme["colors"]
 export interface ILinkData {
   text: string
   href: string
+}
+
+export interface IRevisionRequest {
+  id: string
+  reasonCode: string
+  requirementJson: IFormIORequirement
+  submissionJson: any
+  comment: string
+  user?: IMinimalFrozenUser
+  createdAt: number
+}
+
+export interface IMinimalFrozenUser {
+  id: string
+  email: string
+  role: EUserRoles
+  firstName: string
+  lastName: string
+  organization?: string
+  certified: boolean
+  discardedAt?: Date
+}
+
+export interface ISubmissionVersion {
+  id: string
+  formJson: IFormJson
+  submissionData: ISubmissionData
+  revisionRequests: IRevisionRequest[]
+  viewedAt?: Date
+  createdAt: number
 }
 
 export interface IPermitTypeRequiredStep {

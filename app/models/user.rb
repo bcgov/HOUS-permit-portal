@@ -30,6 +30,8 @@ class User < ApplicationRecord
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
   has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
+  has_many :collaborators, as: :collaboratorable, dependent: :destroy
+  has_many :collaborations, foreign_key: "user_id", class_name: "Collaborator", dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
@@ -46,6 +48,10 @@ class User < ApplicationRecord
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
+  attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
+
+  after_discard { destroy_jurisdiction_collaborator }
+  after_save :create_jurisdiction_collaborator, if: :saved_change_to_discarded_at
 
   def confirmation_required?
     false
@@ -72,6 +78,7 @@ class User < ApplicationRecord
       updated_at: updated_at,
       created_at: created_at,
       role: role,
+      name: name,
       first_name: first_name,
       last_name: last_name,
       email: email,
@@ -108,7 +115,39 @@ class User < ApplicationRecord
     role.gsub("_", " ")
   end
 
+  def blueprint
+    UserBlueprint
+  end
+
+  def set_collaboration_invitation(permit_collaboration)
+    self.collaboration_invitation = { permit_collaboration: permit_collaboration }
+  end
+
+  def create_jurisdiction_collaborator
+    return unless review_staff? && kept?
+
+    jurisdictions.each do |jurisdiction|
+      existing_collaborator = jurisdiction.collaborators.find_by(user_id: id)
+
+      next if existing_collaborator.present?
+
+      jurisdiction.collaborators.create(user: self)
+    end
+  end
+
   private
+
+  def destroy_jurisdiction_collaborator
+    return unless discarded?
+
+    jurisdictions.each do |jurisdiction|
+      existing_collaborator = jurisdiction.collaborators.find_by(user_id: id)
+
+      next unless existing_collaborator.present?
+
+      existing_collaborator.destroy
+    end
+  end
 
   def create_default_preference
     return unless preference.blank?

@@ -66,6 +66,44 @@ class Api::TemplateVersionsController < Api::ApplicationController
     end
   end
 
+  def copy_jurisdiction_template_version_customization
+    authorize @template_version
+    if copy_customization_params[:from_template_version_id]
+      from_template_version = TemplateVersion.find(copy_customization_params[:from_template_version_id])
+    elsif copy_customization_params[:from_non_first_nations] && @template_version.first_nations
+      requirement_template =
+        RequirementTemplate.find_by(
+          activity: @template_version.activity,
+          permit_type: @template_version.permit_type,
+          first_nations: false,
+        )
+      from_template_version = requirement_template.published_template_version
+    end
+
+    render_error("misc.not_found_error", status: :not_found) and return if from_template_version.nil?
+
+    if @jurisdiction_template_version_customization =
+         CustomizationCopyService.new(
+           from_template_version,
+           @template_version,
+           Jurisdiction.find(copy_customization_params[:jurisdiction_id]),
+         ).merge_copy_customizations(
+           copy_customization_params[:include_electives],
+           copy_customization_params[:include_tips],
+         )
+      render_success @jurisdiction_template_version_customization,
+                     "jurisdiction_template_version_customization.update_success",
+                     { blueprint: JurisdictionTemplateVersionCustomizationBlueprint }
+    else
+      render_error "jurisdiction_template_version_customization.update_error",
+                   message_opts: {
+                     error_message: @jurisdiction_template_version_customization.errors.full_messages.join(", "),
+                   }
+    end
+  rescue ActiveRecord::RecordNotFound
+    render_error("misc.not_found_error", status: :not_found) and return
+  end
+
   def show_integration_mapping
     authorize @template_version, :show?
 
@@ -116,6 +154,19 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   private
+
+  def copy_customization_params
+    params.permit(
+      %i[
+        template_version_id
+        jurisdiction_id
+        from_template_version_id
+        from_non_first_nations
+        include_tips
+        include_electives
+      ],
+    )
+  end
 
   def compare_requirements_params
     params.permit(:previous_version_id)

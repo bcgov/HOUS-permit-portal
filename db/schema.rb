@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_27_194924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -35,6 +35,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
                force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "collaborators",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "collaboratorable_type", null: false
+    t.uuid "collaboratorable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[collaboratorable_type collaboratorable_id],
+            name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
+    t.index %w[collaboratorable_type collaboratorable_id],
+            name: "index_collaborators_on_collaboratorable"
+    t.index ["user_id"], name: "index_collaborators_on_user_id"
   end
 
   create_table "contacts",
@@ -62,6 +78,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
   end
 
   create_table "end_user_license_agreements",
@@ -195,7 +217,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.string "pin"
     t.jsonb "submission_data"
     t.string "number"
-    t.datetime "submitted_at"
     t.datetime "signed_off_at"
     t.string "nickname"
     t.datetime "viewed_at"
@@ -204,6 +225,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.jsonb "form_customizations_snapshot"
     t.string "reference_number"
     t.jsonb "compliance_data", default: {}, null: false
+    t.datetime "revisions_requested_at", precision: nil
+    t.boolean "first_nations", default: false
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -217,6 +240,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
             name: "index_permit_applications_on_template_version_id"
   end
 
+  create_table "permit_block_statuses",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "permit_application_id", null: false
+    t.string "requirement_block_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "collaboration_type", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[permit_application_id requirement_block_id collaboration_type],
+            name: "index_block_statuses_on_app_id_and_block_id_and_collab_type",
+            unique: true
+    t.index ["permit_application_id"],
+            name: "index_permit_block_statuses_on_permit_application_id"
+  end
+
   create_table "permit_classifications",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -228,6 +268,36 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.string "description"
     t.boolean "enabled"
     t.integer "code"
+  end
+
+  create_table "permit_collaborations",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "collaborator_id", null: false
+    t.uuid "permit_application_id", null: false
+    t.integer "collaboration_type", default: 0
+    t.integer "collaborator_type", default: 0
+    t.string "assigned_requirement_block_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collaboration_type"],
+            name: "index_permit_collaborations_on_collaboration_type"
+    t.index ["collaborator_id"],
+            name: "index_permit_collaborations_on_collaborator_id"
+    t.index ["collaborator_type"],
+            name: "index_permit_collaborations_on_collaborator_type"
+    t.index %w[
+              permit_application_id
+              collaborator_id
+              collaboration_type
+              collaborator_type
+              assigned_requirement_block_id
+            ],
+            name: "index_permit_collaborations_on_unique_columns",
+            unique: true
+    t.index ["permit_application_id"],
+            name: "index_permit_collaborations_on_permit_application_id"
   end
 
   create_table "permit_type_required_steps",
@@ -276,6 +346,18 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.boolean "enable_email_customization_update_notification", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "enable_email_application_submission_notification", default: true
+    t.boolean "enable_in_app_application_submission_notification", default: true
+    t.boolean "enable_email_application_view_notification", default: true
+    t.boolean "enable_in_app_application_view_notification", default: true
+    t.boolean "enable_email_application_revisions_request_notification",
+              default: true
+    t.boolean "enable_in_app_application_revisions_request_notification",
+              default: true
+    t.boolean "enable_in_app_collaboration_notification", default: true
+    t.boolean "enable_email_collaboration_notification", default: true
+    t.boolean "enable_in_app_integration_mapping_notification", default: true
+    t.boolean "enable_email_integration_mapping_notification", default: true
     t.index ["user_id"], name: "index_preferences_on_user_id"
   end
 
@@ -293,6 +375,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.string "sku"
     t.string "display_name", null: false
     t.string "display_description"
+    t.boolean "first_nations", default: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
@@ -321,6 +406,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.datetime "discarded_at"
+    t.boolean "first_nations", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["discarded_at"],
             name: "index_requirement_templates_on_discarded_at"
@@ -348,6 +434,41 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.boolean "elective", default: false
     t.index ["requirement_block_id"],
             name: "index_requirements_on_requirement_block_id"
+  end
+
+  create_table "revision_reasons",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.string "reason_code", limit: 64
+    t.string "description"
+    t.uuid "site_configuration_id", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "_discard"
+    t.index ["reason_code"],
+            name: "index_revision_reasons_on_reason_code",
+            unique: true
+    t.index ["site_configuration_id"],
+            name: "index_revision_reasons_on_site_configuration_id"
+  end
+
+  create_table "revision_requests",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.string "reason_code", limit: 64
+    t.jsonb "requirement_json"
+    t.jsonb "submission_json"
+    t.string "comment", limit: 350
+    t.uuid "submission_version_id", null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["submission_version_id"],
+            name: "index_revision_requests_on_submission_version_id"
+    t.index ["user_id"], name: "index_revision_requests_on_user_id"
   end
 
   create_table "site_configurations",
@@ -390,6 +511,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
               }
             },
             null: false
+    t.jsonb "revision_reason_options"
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -537,6 +659,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
             name: "index_step_codes_on_permit_application_id"
   end
 
+  create_table "submission_versions",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.jsonb "form_json"
+    t.jsonb "submission_data"
+    t.uuid "permit_application_id", null: false
+    t.datetime "viewed_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "step_code_checklist_json", default: {}
+    t.index ["permit_application_id"],
+            name: "index_submission_versions_on_permit_application_id"
+  end
+
   create_table "supporting_documents",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -547,8 +684,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
     t.datetime "updated_at", null: false
     t.jsonb "compliance_data", default: {}, null: false
     t.string "data_key"
+    t.uuid "submission_version_id"
     t.index ["permit_application_id"],
             name: "index_supporting_documents_on_permit_application_id"
+    t.index ["submission_version_id"],
+            name: "index_supporting_documents_on_submission_version_id"
   end
 
   create_table "taggings",
@@ -657,7 +797,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
                force: :cascade do |t|
     t.uuid "user_id", null: false
     t.uuid "agreement_id", null: false
-    t.date "accepted_at", null: false
+    t.datetime "accepted_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["agreement_id"],
@@ -720,6 +860,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
   end
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
+  add_foreign_key "collaborators", "users"
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -741,6 +882,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
                   column: "permit_type_id"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
+  add_foreign_key "permit_block_statuses", "permit_applications"
+  add_foreign_key "permit_collaborations", "collaborators"
+  add_foreign_key "permit_collaborations", "permit_applications"
   add_foreign_key "permit_type_required_steps", "jurisdictions"
   add_foreign_key "permit_type_required_steps",
                   "permit_classifications",
@@ -758,6 +902,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "requirements", "requirement_blocks"
+  add_foreign_key "revision_reasons", "site_configurations"
+  add_foreign_key "revision_requests", "submission_versions"
+  add_foreign_key "revision_requests", "users"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",
@@ -766,7 +913,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_004144) do
   add_foreign_key "step_code_checklists", "step_codes"
   add_foreign_key "step_code_data_entries", "step_codes"
   add_foreign_key "step_codes", "permit_applications"
+  add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
+  add_foreign_key "supporting_documents", "submission_versions"
   add_foreign_key "taggings", "tags"
   add_foreign_key "template_section_blocks", "requirement_blocks"
   add_foreign_key "template_section_blocks", "requirement_template_sections"

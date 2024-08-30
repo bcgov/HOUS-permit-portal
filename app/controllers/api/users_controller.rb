@@ -67,6 +67,13 @@ class Api::UsersController < Api::ApplicationController
     end
   end
 
+  def license_agreements
+    @user = current_user
+    authorize current_user
+
+    render_success @user, nil, { blueprint: UserBlueprint, blueprint_opts: { view: :accepted_license_agreements } }
+  end
+
   def destroy
     authorize @user
     if @user.discard
@@ -151,6 +158,16 @@ class Api::UsersController < Api::ApplicationController
       preference_attributes: %i[
         enable_in_app_new_template_version_publish_notification
         enable_in_app_customization_update_notification
+        enable_email_application_submission_notification
+        enable_in_app_application_submission_notification
+        enable_email_application_view_notification
+        enable_in_app_application_view_notification
+        enable_email_application_revisions_request_notification
+        enable_in_app_application_revisions_request_notification
+        enable_in_app_collaboration_notification
+        enable_email_collaboration_notification
+        enable_in_app_integration_mapping_notification
+        enable_email_integration_mapping_notification
       ],
     )
   end

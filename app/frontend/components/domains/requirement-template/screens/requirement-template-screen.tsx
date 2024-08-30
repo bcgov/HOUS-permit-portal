@@ -12,6 +12,7 @@ import { SearchGrid } from "../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
 import { VersionTag } from "../../../shared/version-tag"
+import { YesNoTag } from "../../../shared/yes-no-tag"
 import { GridHeaders } from "../grid-header"
 import { TemplateVersionsSidebar } from "../template-versions-sidebar"
 
@@ -48,7 +49,7 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="repeat(2, 1fr) 2fr repeat(3, 1fr)">
+        <SearchGrid templateColumns="repeat(3, 1fr) 2fr repeat(3, 1fr)">
           <GridHeaders />
 
           {isSearching ? (
@@ -61,6 +62,9 @@ export const RequirementTemplatesScreen = observer(function RequirementTemplate(
                 <Box key={rt.id} className={"requirements-template-grid-row"} role={"row"} display={"contents"}>
                   <SearchGridItem fontWeight="bold">{rt.permitType.name}</SearchGridItem>
                   <SearchGridItem fontWeight="bold">{rt.activity.name}</SearchGridItem>
+                  <SearchGridItem>
+                    <YesNoTag boolean={rt.firstNations} />
+                  </SearchGridItem>
                   <SearchGridItem>{rt.description}</SearchGridItem>
                   <SearchGridItem>
                     {rt.publishedTemplateVersion?.versionDate ? (

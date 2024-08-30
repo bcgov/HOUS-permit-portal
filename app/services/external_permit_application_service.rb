@@ -238,8 +238,12 @@ class ExternalPermitApplicationService
   def form_remaining_energy_step_code_submission_data
     return nil unless permit_application.present?
 
+    latest_submission_version = permit_application.latest_submission_version
+
+    return nil unless latest_submission_version.present?
+
     checklist_document =
-      permit_application.supporting_documents.find_by(data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY)
+      latest_submission_version.supporting_documents.find_by(data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY)
 
     return nil unless checklist_document.present?
 

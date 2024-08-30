@@ -2,13 +2,13 @@ import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakr
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useSearch } from "../../../hooks/use-search"
-
 import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
+import { useQuery } from "../../../hooks/use-query"
 import { useResetQueryParams } from "../../../hooks/use-reset-query-params"
+import { useSearch } from "../../../hooks/use-search"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
-import { EPermitApplicationStatus, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
+import { EPermitApplicationStatusGroup, EPermitApplicationSubmitterSortFields } from "../../../types/enums"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
 import { Paginator } from "../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
@@ -34,11 +34,16 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     handleCountPerPageChange,
     handlePageChange,
     isSearching,
-    statusFilter,
+    statusFilterToGroup,
     hasResetableFilters,
   } = permitApplicationStore
 
-  useSearch(permitApplicationStore, [])
+  const query = useQuery()
+
+  const requirementTemplateId = query.get("requirementTemplateId")
+  const templateVersionId = query.get("templateVersionId")
+
+  useSearch(permitApplicationStore, [requirementTemplateId || "", templateVersionId || ""])
   useFlashQueryParam()
   const resetQueryParams = useResetQueryParams()
 
@@ -61,8 +66,11 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
             justify="space-between"
             direction={{ base: "column", md: "row" }}
           >
-            <Heading as="h2">{t(`permitApplication.status.${statusFilter || EPermitApplicationStatus.draft}`)}</Heading>
-            <Flex align="flex-end" gap={4}>
+            <Heading as="h2">
+              {/* @ts-ignore */}
+              {t(`permitApplication.statusGroup.${statusFilterToGroup || EPermitApplicationStatusGroup.draft}`)}
+            </Heading>
+            <Flex align="flex-end" gap={4} direction={{ base: "column", md: "row" }}>
               {hasResetableFilters && (
                 <Button variant="link" mb={2} onClick={resetQueryParams}>
                   {t("ui.resetFilters")}

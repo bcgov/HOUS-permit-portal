@@ -16,17 +16,19 @@ class PermitHubMailer < ApplicationMailer
     send_user_mail(email: user.email, template_key: "new_jurisdiction_membership")
   end
 
-  def notify_submitter_application_submitted(user, permit_application)
+  def notify_submitter_application_submitted(permit_application, user)
     @user = user
     @permit_application = permit_application
-    send_user_mail(email: user.email, template_key: "notify_submitter_application_submitted")
+
+    send_user_mail(email: @user.email, template_key: "notify_submitter_application_submitted")
   end
 
   def notify_integration_mapping(user:, integration_mapping:)
     @user = user
     @template_version = integration_mapping.template_version
 
-    unless integration_mapping.jurisdiction.external_api_enabled? &&
+    unless @user.preference&.enable_email_integration_mapping_notification &&
+             integration_mapping.jurisdiction.external_api_enabled? &&
              (@user.review_manager? || @user.regional_review_manager?) &&
              (@template_version.published? || @template_version.scheduled?)
       return
@@ -37,6 +39,43 @@ class PermitHubMailer < ApplicationMailer
     template_key = "notify_#{@template_version.scheduled? ? "new" : "missing"}_integration_mapping"
 
     send_user_mail(email: user.email, template_key: template_key)
+  end
+
+  def notify_permit_collaboration(permit_collaboration:)
+    @permit_collaboration = permit_collaboration
+    @user = permit_collaboration.collaborator.user
+
+    return unless permit_collaboration.permit_application
+
+    send_user_mail(email: @user.email, template_key: :notify_permit_collaboration)
+  end
+
+  def notify_block_status_ready(permit_block_status:, user:, status_set_by: nil)
+    @permit_block_status = permit_block_status
+    @user = user
+    @status_set_by = status_set_by
+
+    return unless permit_block_status.block_exists? && @user.preference&.enable_email_collaboration_notification
+
+    send_user_mail(email: @user.email, template_key: :notify_block_status_ready)
+  end
+
+  def notify_new_or_unconfirmed_permit_collaboration(permit_collaboration:, user:)
+    @permit_collaboration = permit_collaboration
+    @user = user
+
+    return unless @permit_collaboration.permit_application
+
+    if !@user.discarded? && @user.submitter?
+      @user.skip_confirmation_notification!
+      @user.skip_invitation = true
+      @user.invite!(@permit_collaboration.collaborator.collaboratorable)
+      @user.invitation_sent_at = Time.now
+
+      @user.save!
+    end
+
+    send_mail(email: @user.email, template_key: :notify_new_or_unconfirmed_permit_collaboration)
   end
 
   def notify_integration_mapping_external(external_api_key:, template_version:)
@@ -65,12 +104,24 @@ class PermitHubMailer < ApplicationMailer
     )
   end
 
-  def notify_application_updated(user, permit_application)
+  def notify_application_viewed(permit_application)
+    @user = permit_application.submitter
+    @permit_application = permit_application
+    send_user_mail(
+      email: @user.email,
+      template_key: "notify_application_viewed",
+      subject_i18n_params: {
+        permit_application_number: permit_application.number,
+      },
+    )
+  end
+
+  def notify_application_revisions_requested(permit_application, user)
     @user = user
     @permit_application = permit_application
     send_user_mail(
-      email: user.email,
-      template_key: "notify_application_updated",
+      email: @user.email,
+      template_key: "notify_application_revisions_requested",
       subject_i18n_params: {
         permit_application_number: permit_application.number,
       },
