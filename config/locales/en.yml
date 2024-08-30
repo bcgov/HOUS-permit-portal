@@ -52,12 +52,12 @@ en:
               incorrect_role: "must have the submitter role"
             jurisdiction:
               no_contact: "not available."
-            pid_or_pin: "must have a pid or pin."
+            pid_or_pin: "must have a PID or PIN."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
-          nonunique_classification: "There can only be one Requirement Template per permit type, activity, and first nations combination"
+          nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
         requirement_block:
           attributes:
             requirements:
@@ -75,6 +75,7 @@ en:
               max_size: "must not be larger than %{max_size} bytes"
             data_key:
               duplicate: "file already exists for this permit application"
+              submission_version_data_key: "data key must be permit application pdf key or step code checklist pdf key if it belongs to a submission version"
         user:
           attributes:
             base:
@@ -165,7 +166,7 @@ en:
         message: Error encountered fetching site options
       pid_error:
         title: Error
-        message: Error encountered fetching pid for address
+        message: Error encountered fetching PID for address
       jurisdiction_error:
         title: Error
         message: Jurisdiction could not be determined. Please manually enter your jurisdiction.
@@ -582,13 +583,13 @@ en:
       view_notification: "%{jurisdiction_name} has viewed your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
-      submission_assignee_collaboration_notification: 'Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}'
+      submission_assignee_collaboration_notification: "Collaboration request from %{author_name} on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_notification: "You have been assigned as a designated reviewer for permit application %{number}."
-      review_assignee_collaboration_notification: 'You have been assigned to review requirement “%{requirement_block_name}” for permit application %{number}'
+      review_assignee_collaboration_notification: "You have been assigned to review requirement “%{requirement_block_name}” for permit application %{number}"
       submission_delegatee_collaboration_unassignment_notification: "You have been removed as a designated submitter for permit application %{number}."
-      submission_assignee_collaboration_unassignment_notification: 'You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
+      submission_assignee_collaboration_unassignment_notification: "You have been removed as a collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
       review_delegatee_collaboration_unassignment_notification: "You have been removed as a designated reviewer for permit application %{number}."
-      review_assignee_collaboration_unassignment_notification: 'You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}'
+      review_assignee_collaboration_unassignment_notification: "You have been removed as a review collaborator on requirement “%{requirement_block_name}” for permit application %{number}"
     permit_block_status:
       status_read_by_user: 'Requirement “%{requirement_block_name}” status set to "ready" by %{setter_name} for permit application %{number}'
       status_ready_no_user: 'Requirement “%{requirement_block_name}” status set to "ready" for permit application %{number}'

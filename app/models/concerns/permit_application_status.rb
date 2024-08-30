@@ -56,7 +56,22 @@ module PermitApplicationStatus
     def handle_submission
       update(signed_off_at: Time.current)
 
-      submission_versions.create!(form_json: self.form_json, submission_data: self.submission_data)
+      checklist = step_code&.pre_construction_checklist
+
+      submission_versions.create!(
+        form_json: self.form_json,
+        submission_data: self.submission_data,
+        step_code_checklist_json:
+          (
+            if checklist.present?
+              StepCodeChecklistBlueprint.render_as_hash(checklist, view: :extended)
+            else
+              nil
+            end
+          ),
+      )
+
+      zip_and_upload_supporting_documents
 
       send_submit_notifications
     end

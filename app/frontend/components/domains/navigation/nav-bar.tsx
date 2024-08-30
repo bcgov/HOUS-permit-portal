@@ -5,6 +5,7 @@ import {
   Flex,
   HStack,
   Heading,
+  IconButton,
   Image,
   Link,
   Menu,
@@ -85,11 +86,12 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore } = useMst()
+  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { criticalNotifications } = notificationStore
+  const { rmJurisdictionSelectKey } = uiStore
 
   const location = useLocation()
   const path = location.pathname
@@ -107,28 +109,28 @@ export const NavBar = observer(function NavBar() {
         borderColor="border.light"
         shadow="elevations.elevation01"
       >
-        <Container maxW="container.lg">
-          <Flex align="center" gap={2}>
-            <RouterLink to="/welcome">
-              <Image
-                fit="cover"
-                htmlHeight="64px"
-                htmlWidth="166px"
-                alt={t("site.linkHome")}
-                src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
-              />
-            </RouterLink>
+        <Container maxW="container.lg" p={2} px={{ base: 2, md: 4 }}>
+          <Flex align="center" gap={2} w="full">
             <Show above="md">
-              <Text fontSize="2xl" fontWeight="normal" mb="0">
+              <RouterLink to="/welcome">
+                <Image
+                  fit="cover"
+                  htmlHeight="64px"
+                  htmlWidth="166px"
+                  alt={t("site.linkHome")}
+                  src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
+                />
+              </RouterLink>
+              <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
                 {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Text>
 
               <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
                 {t("site.beta")}
               </Text>
+              <Spacer />
             </Show>
-            <Spacer />
-            <HStack gap={3}>
+            <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
               {/* todo: navbar search? */}
               {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
@@ -150,7 +152,7 @@ export const NavBar = observer(function NavBar() {
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
                     {t(`user.roles.${currentUser.role as EUserRoles}`)}
                   </Text>
-                  <RegionalRMJurisdictionSelect />
+                  <RegionalRMJurisdictionSelect key={rmJurisdictionSelectKey} />
                 </VStack>
               )}
               {currentUser?.isSuperAdmin && (
@@ -287,18 +289,33 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
 
   return (
     <Menu onClose={() => setIsMenuOpen(false)} onOpen={() => setIsMenuOpen(true)} computePositionOnMount>
-      <MenuButton
-        as={Button}
-        borderRadius="lg"
-        border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
-        borderWidth="1px"
-        p={3}
-        variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
-        aria-label="menu dropdown button"
-        leftIcon={<List size={16} weight="bold" />}
-      >
-        {t("site.menu")}
-      </MenuButton>
+      <Show below="md">
+        <MenuButton
+          as={IconButton}
+          borderRadius="lg"
+          border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
+          borderWidth="1px"
+          p={3}
+          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
+          aria-label="menu dropdown button"
+          icon={<List size={16} weight="bold" />}
+        />
+      </Show>
+
+      <Show above="md">
+        <MenuButton
+          as={Button}
+          borderRadius="lg"
+          border={currentUser?.isSubmitter || !loggedIn ? "solid black" : "solid white"}
+          borderWidth="1px"
+          p={3}
+          variant={currentUser?.isSubmitter || !loggedIn ? "primaryInverse" : "primary"}
+          aria-label="menu dropdown button"
+          leftIcon={<List size={16} weight="bold" />}
+        >
+          {t("site.menu")}
+        </MenuButton>
+      </Show>
 
       <Portal>
         <Box color="text.primary" className={isMenuOpen && "show-menu-overlay-background"}>

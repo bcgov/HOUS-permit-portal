@@ -46,7 +46,7 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
         expect(response).to have_http_status(:bad_request)
         expect(json_response["meta"]["message"]).to include(
           "message" =>
-            "There can only be one Requirement Template per permit type, activity, and first nations combination",
+            "There can only be one requirement template per permit type, activity, and First Nations combination",
           "title" => "Error",
           "type" => "error",
         )

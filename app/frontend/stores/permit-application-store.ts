@@ -200,7 +200,6 @@ export const PermitApplicationStoreModel = types
       if (opts?.reset) {
         self.resetPages()
       }
-
       const searchParams = {
         query: self.query,
         sort: self.sort,

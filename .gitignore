@@ -32,6 +32,7 @@
 /public/packs
 /public/packs-test
 /node_modules
+/node_modules.*
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
@@ -39,9 +40,7 @@ yarn-debug.log*
 public/uploads/
 
 .env
-.env.qa
-.env.staging
-.env.production
+.env.*
 
 dump.rdb
 
@@ -59,3 +58,10 @@ node_modules
 deleteme.*
 
 /devops/docker/**/*.tar.gz
+
+/allure-report/
+/allure-results/
+/cypress/downloads/
+/cypress/screenshots/
+
+.npm/

@@ -285,7 +285,7 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                             },
                           }),
 
-                          onBlur: () => {
+                          onSubmit: () => {
                             handleSave()
                           },
                           "aria-label": "Edit Nickname",

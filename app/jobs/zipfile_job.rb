@@ -13,8 +13,8 @@ class ZipfileJob
     [args[0]]
   end
 
-  def perform(permit_application_id, regenerate_all_pdfs = true)
-    PdfGenerationJob.new.perform(permit_application_id, regenerate_all_pdfs)
+  def perform(permit_application_id)
+    PdfGenerationJob.new.perform(permit_application_id)
     SupportingDocumentsZipper.new(permit_application_id).perform
 
     permit_application = PermitApplication.find_by_id(permit_application_id)

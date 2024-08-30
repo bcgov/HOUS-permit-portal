@@ -5,6 +5,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  Image,
   Input,
   InputGroup,
   Link,
@@ -185,7 +186,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                         render={({ field: { onChange, value } }) => {
                           return (
                             <PermitTypeRadioSelect
-                              w="full"
+                              w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
                                 return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch)
                               }}
@@ -288,25 +289,44 @@ const DisclaimerInfo = () => {
   }) as Array<{ text: string; href: string }>
 
   return (
-    <Box width="full" mx="auto" mt="10" mb="10" border="1px solid" borderColor="border.light" borderRadius="md" p="6">
+    <Flex
+      direction="column"
+      width="full"
+      mx="auto"
+      border="1px solid"
+      borderColor="border.light"
+      borderRadius="md"
+      p="6"
+    >
       <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
-      <UnorderedList ml="0" mt="4">
-        {applicationDisclaimers.map((disclaimer) => {
-          return (
-            <ListItem key={disclaimer.href}>
-              <Link href={disclaimer.href} isExternal>
-                {disclaimer.text}
-                <ArrowSquareOut />
-              </Link>
-            </ListItem>
-          )
-        })}
-      </UnorderedList>
-      <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
-      <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
-        {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
-        <ArrowSquareOut />
-      </Link>
-    </Box>
+      <Flex align="center" mt={6} flexDirection={{ base: "column", md: "row" }}>
+        <Box w={{ base: "100%", md: "40%" }}>
+          <UnorderedList ml="0" mt="4">
+            {applicationDisclaimers.map((disclaimer) => {
+              return (
+                <ListItem key={disclaimer.href}>
+                  <Link href={disclaimer.href} isExternal>
+                    {disclaimer.text}
+                    <ArrowSquareOut />
+                  </Link>
+                </ListItem>
+              )
+            })}
+          </UnorderedList>
+          <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
+          <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
+            {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
+            <ArrowSquareOut />
+          </Link>
+        </Box>
+        <Image
+          src="/images/timeline/timeline-graphic-full.gif"
+          alt="thumbnail for timeline"
+          w={{ base: "100%", md: "60%" }}
+          bg="semantic.infoLight"
+          objectFit="contain"
+        />
+      </Flex>
+    </Flex>
   )
 }

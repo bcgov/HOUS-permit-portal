@@ -76,6 +76,10 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
     }
   }, [isOpen])
 
+  useEffect(() => {
+    contentRef?.current?.focus()
+  }, [currentScreen])
+
   const onPopoverClose = () => {
     if (openAssignmentConfirmationModals.size > 0 || createConfirmationModalDisclosureProps.isOpen) {
       return
@@ -91,6 +95,9 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
     setOpenAssignmentConfirmationModals((prev) => {
       const newSet = new Set([...prev])
       newSet.delete(collaboratorId)
+
+      contentRef.current?.focus()
+
       return newSet
     })
   }
@@ -130,7 +137,17 @@ export const CollaboratorAssignmentPopover = observer(function AssignmentPopover
               transitionToAssign={
                 canManage ? () => changeScreen(EAssignmentPopoverScreen.collaborationAssignment) : undefined
               }
-              onUnassign={canManage ? permitApplication.unassignPermitCollaboration : undefined}
+              onUnassign={
+                canManage
+                  ? async (permitCollaborationId) => {
+                      try {
+                        await permitApplication.unassignPermitCollaboration(permitCollaborationId)
+                      } finally {
+                        contentRef.current?.focus()
+                      }
+                    }
+                  : undefined
+              }
               onReinvite={permitApplication.reinvitePermitCollaboration}
             />
           )}

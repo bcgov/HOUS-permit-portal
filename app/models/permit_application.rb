@@ -7,8 +7,8 @@ class PermitApplication < ApplicationRecord
 
   SEARCH_INCLUDES = %i[permit_type submission_versions step_code activity jurisdiction submitter permit_collaborations]
 
-  searchkick searchable: %i[number nickname full_address permit_classifications submitter status review_delegatee_name],
-             word_start: %i[number nickname full_address permit_classifications submitter status review_delegatee_name]
+  searchkick word_middle: %i[nickname full_address permit_classifications submitter status review_delegatee_name],
+             text_end: %i[number]
 
   belongs_to :submitter, class_name: "User"
   belongs_to :jurisdiction
@@ -47,7 +47,6 @@ class PermitApplication < ApplicationRecord
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :zip_and_upload_supporting_documents, if: :saved_change_to_status?
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
@@ -55,7 +54,7 @@ class PermitApplication < ApplicationRecord
 
   COMPLETION_SECTION_KEY = "section-completion-key"
 
-  def supporting_documents_for_submitter_based_on_user_permissions(user: nil)
+  def supporting_documents_for_submitter_based_on_user_permissions(supporting_documents, user: nil)
     return supporting_documents if user.blank?
 
     permissions = submission_requirement_block_edit_permissions(user_id: user.id)
@@ -205,6 +204,7 @@ class PermitApplication < ApplicationRecord
 
   def update_viewed_at
     latest_submission_version.update(viewed_at: Time.current)
+    reindex
   end
 
   def number_prefix
@@ -318,14 +318,13 @@ class PermitApplication < ApplicationRecord
 
     missing_pdfs = []
 
-    application_pdf = supporting_documents.find_by(data_key: PERMIT_APP_PDF_DATA_KEY)
+    submission_versions.each do |submission_version|
+      version_missing_pdfs = submission_version.missing_pdfs
 
-    missing_pdfs << PERMIT_APP_PDF_DATA_KEY if application_pdf.blank?
+      next if version_missing_pdfs.empty?
 
-    return missing_pdfs unless step_code&.pre_construction_checklist
-
-    checklist_pdf = supporting_documents.find_by(data_key: CHECKLIST_PDF_DATA_KEY)
-    missing_pdfs << CHECKLIST_PDF_DATA_KEY if checklist_pdf.blank?
+      missing_pdfs += version_missing_pdfs
+    end
 
     missing_pdfs
   end
@@ -497,7 +496,10 @@ class PermitApplication < ApplicationRecord
 
   def submitter_must_have_role
     unless submitter&.submitter?
-      errors.add(:submitter, I18n.t("errors.models.permit_application.attributes.submitter.incorrect_role"))
+      errors.add(
+        :submitter,
+        I18n.t("activerecord.errors.models.permit_application.attributes.submitter.incorrect_role"),
+      )
     end
   end
 

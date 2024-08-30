@@ -60,7 +60,7 @@ export const BlockSetup = observer(function BlockSetup({
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
           {t("requirementsLibrary.modals.internalUse")}
         </Text>
-        <FormControl mt={1} isRequired>
+        <FormControl mt={1}>
           <FormLabel>{t("requirementsLibrary.fields.name")}</FormLabel>
           <Input bg={"white"} {...register("name", { required: true })} />
         </FormControl>
@@ -77,7 +77,16 @@ export const BlockSetup = observer(function BlockSetup({
           </FormHelperText>
         </FormControl>
         <FormControl>
-          <FormLabel>{t("requirementsLibrary.fields.associations")}</FormLabel>
+          <FormLabel
+            sx={{
+              ":after": {
+                content: `"${t("ui.optional")}"`,
+                ml: 1.5,
+              },
+            }}
+          >
+            {t("requirementsLibrary.fields.associations")}
+          </FormLabel>
           <Controller
             name="associationList"
             control={control}

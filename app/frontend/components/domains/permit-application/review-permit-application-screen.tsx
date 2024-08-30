@@ -87,7 +87,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
     }
 
     try {
-      const response = await currentPermitApplication.update({ referenceNumber: referenceNumberToSave })
+      const response = await currentPermitApplication.update({
+        referenceNumber: referenceNumberToSave,
+        review: true,
+      })
 
       !response.ok && onReferenceNumberChange(referenceNumberSnapshot)
     } catch (e) {
@@ -148,7 +151,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
             <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
               {t("permitApplication.show.contactsSummary")}
             </Button>
-            <SubmissionDownloadModal permitApplication={currentPermitApplication} />
+            <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
             <Button
               rightIcon={<CaretRight />}
               onClick={() => navigate(`/jurisdictions/${currentPermitApplication.jurisdiction.slug}/submission-inbox`)}

@@ -3,6 +3,10 @@ class UserPolicy < ApplicationPolicy
     user.id == record.id
   end
 
+  def license_agreements?
+    profile?
+  end
+
   def update?
     user.manager? && record_in_users_jurisdictions?
   end
@@ -55,6 +59,7 @@ class UserPolicy < ApplicationPolicy
   def reinvite?
     invite?
   end
+
   class Scope < Scope
     # NOTE: Be explicit about which records you allow access to!
     # def resolve
