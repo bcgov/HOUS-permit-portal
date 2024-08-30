@@ -53,15 +53,15 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
     <Flex direction="column" w="full" bg="greys.white">
       <Flex
         align="center"
-        h={{ base: "728px", sm: "364px" }}
+        h={{ base: "calc(100vh - 200px)", sm: "364px" }}
         bgImage="/images/header-background.jpeg"
         bgPosition="center 60%"
         bgRepeat="no-repeat"
         bgSize="cover"
         bgColor="theme.blue"
       >
-        <Box bgColor="theme.blueShadedLight" w="full" height="full">
-          <Container maxW="container.lg" py={16} px={8}>
+        <Flex direction="column" justify="center" bgColor="theme.blueShadedLight" w="full" height="full">
+          <Container maxW="container.lg" px={8}>
             <Flex
               direction="column"
               p={8}
@@ -79,7 +79,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Text fontSize="lg">{t("landing.intro")}</Text>
             </Flex>
           </Container>
-        </Box>
+        </Flex>
       </Flex>
       <Container maxW="container.lg" py={16} px={8}>
         <Flex as="section" direction="column" gap={20}>
