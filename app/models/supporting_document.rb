@@ -1,14 +1,17 @@
 class SupportingDocument < ApplicationRecord
   belongs_to :permit_application
+  belongs_to :submission_version, optional: true
+
   include FileUploader.Attachment(:file)
 
-  validate :unique_data_key
+  validate :validate_submission_version_data_key
 
   scope :file_ids_with_regex, ->(regex_pattern) { where("file_data ->> 'id' ~ ?", regex_pattern) }
   scope :without_compliance, -> { where("compliance_data = '{}' OR compliance_data IS NULL") }
+  validates :submission_version_id, uniqueness: { scope: %i[permit_application_id data_key], allow_nil: true }
 
-  APPLICATION_PDF_DATA_KEY = :permit_application_pdf
-  CHECKLIST_PDF_DATA_KEY = :step_code_checklist_pdf
+  APPLICATION_PDF_DATA_KEY = "permit_application_pdf"
+  CHECKLIST_PDF_DATA_KEY = "step_code_checklist_pdf"
 
   def last_signer
     if compliance_data["result"] &&
@@ -56,7 +59,21 @@ class SupportingDocument < ApplicationRecord
   end
 
   def standardized_filename
-    "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}.#{file_data["id"].split(".").last}"
+    name = "#{permit_application.number}_#{data_key.split("|").last.gsub("_file", "")}"
+
+    extension = file_data["id"].split(".").last
+
+    # appending id to ensure uniqueness
+    name =
+      (
+        if submission_version.present?
+          "#{name}_v#{submission_version.version_number}_#{id}"
+        else
+          "#{name}_#{id}"
+        end
+      )
+
+    "#{name}.#{extension}"
   end
 
   def summarizeString(parsed_signature)
@@ -87,11 +104,14 @@ class SupportingDocument < ApplicationRecord
     )
   end
 
-  UNIQUE_DATA_KEYS = %i[permit_application_pdf step_code_checklist_pdf]
+  STATIC_DOCUMENT_DATA_KEYS = [APPLICATION_PDF_DATA_KEY, CHECKLIST_PDF_DATA_KEY].freeze
 
-  def unique_data_key
-    return unless UNIQUE_DATA_KEYS.include?(data_key)
-    return if !permit_application.supporting_documents.not(self).find_by(data_key: data_key)
-    self.errors.add(:data_key, i18n.t("errors.models.supporting_documents.attributes.data_key.duplicate"))
+  def validate_submission_version_data_key
+    return unless submission_version.present? && !STATIC_DOCUMENT_DATA_KEYS.include?(data_key)
+
+    self.errors.add(
+      :data_key,
+      I18n.t("activerecord.errors.models.supporting_document.attributes.data_key.submission_version_data_key"),
+    )
   end
 end

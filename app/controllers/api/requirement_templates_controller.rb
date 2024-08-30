@@ -50,7 +50,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
 
     authorize @requirement_template
-
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.create_success",

@@ -5,6 +5,15 @@ module Api::Concerns::Search::PermitApplications
     search_conditions = {
       order: permit_application_order,
       match: :word_start,
+      fields: [
+        { number: :text_end },
+        { nickname: :word_middle },
+        { full_address: :word_middle },
+        { permit_classifications: :word_middle },
+        { submitter: :word_middle },
+        { status: :word_middle },
+        { review_delegatee_name: :word_middle },
+      ],
       where: permit_application_where_clause,
       page: permit_application_search_params[:page],
       per_page:
@@ -17,7 +26,6 @@ module Api::Concerns::Search::PermitApplications
         ),
       includes: PermitApplication::SEARCH_INCLUDES,
     }
-
     @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
   end
 
@@ -28,11 +36,7 @@ module Api::Concerns::Search::PermitApplications
       :query,
       :page,
       :per_page,
-      filters: {
-        status: [],
-        template_version_id: :template_version_id,
-        requirement_template_id: :requirement_template_id,
-      },
+      filters: [:requirement_template_id, :template_version_id, { status: [] }],
       sort: %i[field direction],
     )
   end

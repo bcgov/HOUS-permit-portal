@@ -33,6 +33,7 @@ import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { EmailFormControl } from "../../shared/form/email-form-control"
 import { TextFormControl } from "../../shared/form/input-form-control"
+import { UserEulas } from "../../shared/user-eulas"
 
 interface IProfileScreenProps {}
 
@@ -334,6 +335,8 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                 </Tbody>
               </Table>
             </Section>
+
+            {!currentUser.isSuperAdmin && <UserEulas />}
 
             <Flex as="section" gap={4} mt={4}>
               <Button variant="primary" type="submit" isLoading={isSubmitting} loadingText={t("ui.loading")}>

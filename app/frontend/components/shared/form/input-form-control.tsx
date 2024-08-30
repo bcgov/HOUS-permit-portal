@@ -1,5 +1,4 @@
 import {
-  Box,
   FormControl,
   FormControlProps,
   FormErrorMessage,
@@ -11,9 +10,10 @@ import {
   InputLeftElement,
   InputProps,
   InputRightElement,
+  Text,
   Textarea,
 } from "@chakra-ui/react"
-import { AsteriskSimple, Phone } from "@phosphor-icons/react"
+import { Phone } from "@phosphor-icons/react"
 import { t } from "i18next"
 import * as R from "ramda"
 import React from "react"
@@ -34,6 +34,7 @@ interface IInputFormControlProps<TInputProps = Partial<InputProps>> extends Form
   inputProps?: TInputProps
   key?: string
   LabelInfo?: () => JSX.Element
+  showOptional?: boolean
 }
 
 export const TextFormControl = (props: IInputFormControlProps) => {
@@ -97,6 +98,7 @@ export const DatePickerFormControl = ({
   rightElement,
   inputProps = {},
   key = fieldName,
+  showOptional = true,
   ...rest
 }: IInputFormControlProps<Partial<IDatePickerProps>>) => {
   const { control, formState } = useFormContext()
@@ -119,10 +121,10 @@ export const DatePickerFormControl = ({
       {label && (
         <HStack gap={0}>
           <FormLabel id={id}>{label} </FormLabel>
-          {required && (
-            <Box color="semantic.error" ml={-2} mb={2}>
-              <AsteriskSimple />
-            </Box>
+          {!required && showOptional && (
+            <Text ml={-2} mb={2}>
+              {t("ui.optional")}
+            </Text>
           )}
         </HStack>
       )}
@@ -178,6 +180,7 @@ const InputFormControl = ({
   inputProps = {},
   key = fieldName,
   LabelInfo,
+  showOptional = true,
   ...rest
 }: IInputFormControlProps) => {
   const { register, formState } = useFormContext()
@@ -193,10 +196,10 @@ const InputFormControl = ({
       {label && (
         <HStack gap={0}>
           <FormLabel>{label} </FormLabel>
-          {required && (
-            <Box color="semantic.error" ml={-2} mb={2}>
-              <AsteriskSimple />
-            </Box>
+          {!required && showOptional && (
+            <Text ml={-2} mb={2}>
+              {t("ui.optional")}
+            </Text>
           )}
           {LabelInfo && <LabelInfo />}
         </HStack>

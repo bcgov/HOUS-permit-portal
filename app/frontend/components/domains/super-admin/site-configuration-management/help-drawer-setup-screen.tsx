@@ -92,6 +92,7 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
                               inputProps={{
                                 placeholder: t("ui.urlPlaceholder"),
                               }}
+                              showOptional={false}
                             />
                           </Flex>
                           <Flex gap={4}>
@@ -100,6 +101,7 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
                               label={t("siteConfiguration.helpDrawerSetup.fields.title")}
                               fieldName={`helpLinkItems.${key}.title`}
                               hint={t("siteConfiguration.helpDrawerSetup.fields.titleHint")}
+                              showOptional={false}
                             />
                             <TextAreaFormControl
                               flex={2}
@@ -110,6 +112,7 @@ export const HelpDrawerSetupScreen = observer(function HelpDrawerSetupScreen() {
                                 minH: "40px",
                                 height: "40px",
                               }}
+                              showOptional={false}
                             />
                           </Flex>
                         </Flex>

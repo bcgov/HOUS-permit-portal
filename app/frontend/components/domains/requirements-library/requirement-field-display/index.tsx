@@ -253,9 +253,19 @@ const requirementsComponentMap = {
       key: string
       label: string
       containerProps?: BoxProps
+      required?: boolean
     }> = [
-      { type: ERequirementType.text, key: "pid", label: "PID" }, //pid or pin?
-      { type: ERequirementType.text, key: "folio_number", label: "Folio Number" }, //folio
+      {
+        type: ERequirementType.text,
+        key: "pid",
+        label: "PID",
+        required: props?.required,
+      }, //pid or pin?
+      {
+        type: ERequirementType.text,
+        key: "folio_number",
+        label: "Folio Number",
+      }, //folio
       {
         type: ERequirementType.address,
         key: "address",

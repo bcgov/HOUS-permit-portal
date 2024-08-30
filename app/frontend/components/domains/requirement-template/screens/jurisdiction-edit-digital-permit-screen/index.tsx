@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Flex, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex, Menu, MenuButton, MenuItem, MenuList, Spacer } from "@chakra-ui/react"
 import { CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -203,12 +203,12 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             justifyContent="space-between"
             boxShadow="elevations.elevation02"
           >
-            <Menu>
-              <MenuButton as={Button} rightIcon={<CaretDown />} variant="ghost">
-                {t("requirementTemplate.edit.options.button")}
-              </MenuButton>
-              <MenuList>
-                {templateVersion.firstNations && (
+            {templateVersion.firstNations ? (
+              <Menu>
+                <MenuButton as={Button} rightIcon={<CaretDown />} variant="ghost">
+                  {t("requirementTemplate.edit.options.button")}
+                </MenuButton>
+                <MenuList>
                   <>
                     <MenuItem onClick={handleCopyTips}>
                       {t("requirementTemplate.edit.options.copyTips", {
@@ -221,9 +221,11 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                       })}
                     </MenuItem>
                   </>
-                )}
-              </MenuList>
-            </Menu>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Spacer />
+            )}
             <ButtonGroup>
               <BrowserSearchPrompt color="text.primary" />
               <Button
@@ -262,11 +264,13 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                   triggerButtonProps={{
                     isDisabled: isSubmitting,
                   }}
-                  onResetDefault={(requirementBlockId) =>
-                    jurisdictionTemplateVersionCustomization?.customizations?.requirementBlockChanges?.[
-                      requirementBlockId
-                    ]
-                  }
+                  onResetDefault={(requirementBlockId) => {
+                    return (
+                      jurisdictionTemplateVersionCustomization?.customizations?.requirementBlockChanges?.[
+                        requirementBlockId
+                      ] || {}
+                    )
+                  }}
                 />
               )
             }}

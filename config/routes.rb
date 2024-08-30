@@ -143,6 +143,10 @@ Rails.application.routes.draw do
     end
 
     patch "profile", to: "users#profile"
+
+    resources :users, only: %i[] do
+      get "current_user/license_agreements", on: :collection, to: "users#license_agreements"
+    end
     resources :users, only: %i[destroy update] do
       patch "restore", on: :member
       patch "accept_eula", on: :member

@@ -62,13 +62,39 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint do |pa, options|
-      pa.supporting_documents_for_submitter_based_on_user_permissions(user: options[:current_user])
+      pa.supporting_documents_for_submitter_based_on_user_permissions(
+        pa.supporting_documents,
+        user: options[:current_user],
+      )
+    end
+    association :all_submission_version_completed_supporting_documents,
+                blueprint: SupportingDocumentBlueprint do |pa, options|
+      pa.supporting_documents_for_submitter_based_on_user_permissions(
+        pa.all_submission_version_completed_supporting_documents,
+        user: options[:current_user],
+      )
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
     association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
+  end
+
+  view :pdf_generation do
+    include_view :extended
+
+    field :form_json do |pa, options|
+      options[:form_json].present? ? options[:form_json] : pa.form_json
+    end
+
+    field :submitted_at do |pa, options|
+      options[:submitted_at].present? ? options[:submitted_at] : pa.submitted_at
+    end
+
+    field :submission_data do |pa, options|
+      options[:submission_data].present? ? options[:submission_data] : pa.formatted_submission_data
+    end
   end
 
   view :jurisdiction_review_extended do
@@ -78,7 +104,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :submission_data do |pa, options|
       pa.formatted_submission_data
     end
-    association :supporting_documents, blueprint: SupportingDocumentBlueprint
+    association :all_submission_version_completed_supporting_documents, blueprint: SupportingDocumentBlueprint
     association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :review_extended
   end
 

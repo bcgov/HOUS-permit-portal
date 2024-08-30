@@ -206,7 +206,7 @@ export const RevisionSideBar = observer(
       return Array.from((selectedPastSubmissionVersion?.revisionRequests as IRevisionRequest[]) ?? []).sort((a, b) => {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       })
-    }, [JSON.stringify(selectedPastSubmissionVersion?.revisionRequests)])
+    }, [selectedPastSubmissionVersion?.revisionRequests])
 
     return (
       <>
@@ -216,7 +216,7 @@ export const RevisionSideBar = observer(
             direction="column"
             boxShadow="md"
             borderRight="1px solid"
-            borderRightColor="theme.yellow"
+            borderRightColor="border.light"
             width={"sidebar.width"}
             position="sticky"
             top={topHeight}

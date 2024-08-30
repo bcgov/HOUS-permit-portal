@@ -2,6 +2,7 @@ import {
   FILE_UPLOAD_CHUNK_SIZE_IN_BYTES,
   MAX_NUMBER_OF_PARTS,
 } from "../components/shared/chefs/additional-formio/constant"
+import { getCsrfToken } from "./utility-functions"
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
@@ -104,6 +105,7 @@ export const requestMultipart = async (file, fileName) => {
       method: "POST",
       credentials: "same-origin",
       headers: {
+        "X-CSRF-Token": getCsrfToken(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -154,11 +156,11 @@ export const completeMultipart = async (uploadId, key, parts) => {
       key: key,
       parts: parts,
     })
-
     return fetch(`/api/storage/s3/multipart/${uploadId}/complete`, {
       method: "POST",
       credentials: "same-origin",
       headers: {
+        "X-CSRF-Token": getCsrfToken(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -228,11 +230,11 @@ export const persistFileUpload = async (persistFileUploadAction, persistFileUplo
   //fileKey specifies the key identifier inside form io for the owner of this file
 
   //multifile would do a loop of these responses
-
   try {
     const response = await fetch(persistFileUploadUrl, {
       method: persistFileUploadAction,
       headers: {
+        "X-CSRF-Token": getCsrfToken(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },

@@ -1,4 +1,4 @@
-import { Box, FormLabel } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { ISingleRequirementFormJson } from "../../../types/types"
@@ -14,7 +14,6 @@ export const SingleRequirementForm: React.FC<SingleRequirementFormProps> = ({ re
 
   return (
     <Box className="form-wrapper single-requirement-form">
-      <FormLabel>{t("permitApplication.show.revision.originallySubmitted")}</FormLabel>
       <Form form={requirementJson} submission={submissionJson} options={{ readOnly: true }} />
     </Box>
   )

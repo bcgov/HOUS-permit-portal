@@ -72,6 +72,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       updatedAt: types.Date,
       stepCode: types.maybeNull(types.reference(StepCodeModel)),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
+      allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),
       zipfileName: types.maybeNull(types.string),
       zipfileUrl: types.maybeNull(types.string),
@@ -692,9 +693,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
       },
-      update: flow(function* ({ autosave, ...params }) {
+      update: flow(function* ({ autosave, review, ...params }) {
         self.isLoading = true
-        const response = yield self.environment.api.updatePermitApplication(self.id, params)
+        const response = yield self.environment.api.updatePermitApplication(self.id, params, review)
         if (response.ok) {
           const { data: permitApplication } = response.data
           if (!autosave) {
