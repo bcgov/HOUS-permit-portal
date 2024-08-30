@@ -10,6 +10,9 @@ class ExternalApi::ApplicationController < ActionController::API
 
   rescue_from Pundit::NotAuthorizedError, with: :external_api_key_not_authorized
 
+  # skip because this is API only controller, not connecting to any SPA
+  skip_forgery_protection
+
   def pundit_user
     current_external_api_key
   end
