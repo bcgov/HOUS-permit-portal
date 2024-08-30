@@ -53,7 +53,7 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
     <Flex direction="column" w="full" bg="greys.white">
       <Flex
         align="center"
-        h={{ base: "calc(100vh - 68px)", sm: "364px" }}
+        h={{ base: "calc(100vh - 200px)", sm: "364px" }}
         bgImage="/images/header-background.jpeg"
         bgPosition="center 60%"
         bgRepeat="no-repeat"
