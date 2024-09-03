@@ -481,7 +481,7 @@ const options = {
           viewedOn: "Viewed on",
           seeBestPractices_CTA: "See best practices",
           seeBestPractices_link:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub#practices",
           searchKnowledge_CTA: "Ask a question",
           searchKnowledge_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
