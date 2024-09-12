@@ -147,21 +147,36 @@ class IntegrationMapping < ApplicationRecord
             enable_email_integration_mapping_notification: true,
           },
         )
+    users_to_notify.uniq.each do |user|
+      unless user.preference&.enable_email_integration_mapping_notification && jurisdiction.external_api_enabled? &&
+               (user.review_manager? || user.regional_review_manager?) &&
+               (template_version.published? || template_version.scheduled?)
+        return
+      end
 
-    users_to_notify.each do |u|
-      PermitHubMailer.notify_integration_mapping(user: u, integration_mapping: self)&.deliver_later
+      IntegrationMappingNotification.create(
+        notifiable: user,
+        front_end_path: front_end_edit_path,
+        template_version: template_version, # Associate the template version
+      )
     end
 
     external_api_keys = ExternalApiKey.active.where(jurisdiction: jurisdiction)
 
     # Notify external API key integrations
-    external_api_keys.each do |eak|
-      next unless eak.notification_email.present?
+    external_api_keys.uniq.each do |external_api_key|
+      next unless external_api_key.notification_email.present?
 
-      PermitHubMailer.notify_integration_mapping_external(
-        external_api_key: eak,
-        template_version: template_version,
-      )&.deliver_later
+      unless external_api_key.notification_email.present? && external_api_key.jurisdiction.external_api_enabled? &&
+               (template_version.published? || template_version.scheduled?)
+        return
+      end
+
+      # Create a notification record instead of sending the email immediately
+      IntegrationMappingNotification.create(
+        notifiable: external_api_key,
+        template_version: template_version, # Associate the template version
+      )
     end
   end
 

@@ -1,6 +1,8 @@
 class ExternalApiKey < ApplicationRecord
   include ValidateUrlAttributes
 
+  has_many :integration_mapping_notifications, as: :notifiable, dependent: :destroy
+
   url_validatable :webhook_url
 
   scope :active,
@@ -26,6 +28,10 @@ NULL",
   before_create :generate_token
 
   encrypts :token, deterministic: true
+
+  def email
+    notification_email
+  end
 
   def expired?
     expired_at.present? && expired_at < Time.now
