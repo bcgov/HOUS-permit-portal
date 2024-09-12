@@ -120,7 +120,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
             </Text>
           </DrawerHeader>
 
-          <DrawerBody px={8}>
+          <DrawerBody px={8} pb={0}>
             <FormProvider {...formMethods}>
               {showManageFieldsView ? (
                 <ManageElectiveFieldsView
@@ -314,7 +314,15 @@ const ManageElectiveFieldsView = ({
         })}
       </Stack>
 
-      <ButtonGroup size={"md"} justifyContent={"flex-start"} gap={6} pb="6">
+      <ButtonGroup
+        size={"md"}
+        justifyContent={"flex-start"}
+        py={6}
+        gap={6}
+        position="sticky"
+        bottom={0}
+        bg="greys.white"
+      >
         <Button
           variant={"primary"}
           onClick={() => onAddFields([...new Set(enabledFieldIds)], enabledFieldReasons)}
