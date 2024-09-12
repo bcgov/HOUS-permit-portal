@@ -95,7 +95,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      {
                        blueprint: PermitApplicationBlueprint,
                        blueprint_opts: {
-                         view: :extended,
+                         view: show_blueprint_view_for(current_user),
                          current_user: current_user,
                        },
                      }

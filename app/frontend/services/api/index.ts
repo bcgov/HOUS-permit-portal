@@ -270,9 +270,10 @@ export class Api {
     )
   }
 
-  async updatePermitApplication(id, params) {
+  async updatePermitApplication(id, params, review?: boolean) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, {
       permitApplication: params,
+      review,
     })
   }
 
@@ -621,5 +622,9 @@ export class Api {
 
   async resetLastReadNotifications() {
     return this.client.post(`/notifications/reset_last_read`)
+  }
+
+  async fetchCurrentUserAcceptedEulas() {
+    return this.client.get<ApiResponse<IUser>>(`/users/current_user/license_agreements`)
   }
 }

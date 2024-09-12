@@ -62,6 +62,9 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+  #
+  config.before { allow_any_instance_of(Api::ApplicationController).to receive(:verify_authenticity_token) }
+  config.before { allow_any_instance_of(ExternalApi::ApplicationController).to receive(:verify_authenticity_token) }
 
   Devise::Mailer.delivery_method = :test
   Devise::Mailer.perform_deliveries = false

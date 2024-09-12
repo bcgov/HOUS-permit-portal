@@ -254,7 +254,7 @@ const JurisdictionSearch = observer(({}: IJurisdictionSearchProps) => {
   }, [siteWatch?.value])
 
   return (
-    <Flex gap={6} direction={{ base: "column", md: "row" }}>
+    <Flex gap={6} direction={{ base: "column", md: "row" }} w="full">
       <Flex bg="white" p={6} gap={4} borderRadius="md" w="full">
         <FormProvider {...formMethods}>
           <form style={{ width: "100%" }}>

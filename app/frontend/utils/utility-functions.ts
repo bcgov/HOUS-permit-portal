@@ -213,3 +213,10 @@ export function getCsrfToken() {
     .find((row) => row.startsWith("CSRF-TOKEN="))
     ?.split("=")[1]
 }
+
+export function convertToDate(property: any) {
+  if (!(property instanceof Date)) {
+    return new Date(property)
+  }
+  return property
+}

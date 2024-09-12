@@ -70,5 +70,8 @@ class PermitClassificationSeeder
         PermitClassification.create!(classification_attrs)
       end
     end
+
+    PermitApplication.reindex
+    RequirementTemplate.reindex
   end
 end

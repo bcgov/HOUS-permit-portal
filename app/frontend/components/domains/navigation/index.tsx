@@ -405,6 +405,10 @@ const AppRoutes = observer(() => {
           <Route path="/profile" element={<ProfileScreen />} />
         </Route>
 
+        <Route element={<ProtectedRoute isAllowed={loggedIn && !currentUser?.isSuperAdmin} />}>
+          <Route path="/profile/eula" element={<EULAScreen withClose />} />
+        </Route>
+
         <Route
           element={
             <ProtectedRoute

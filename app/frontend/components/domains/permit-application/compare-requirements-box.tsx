@@ -14,7 +14,6 @@ import { CaretDown, CaretUp, Warning } from "@phosphor-icons/react"
 import * as R from "ramda"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { useMst } from "../../../setup/root"
 import { ICompareRequirementsBoxData, ICompareRequirementsBoxDiff } from "../../../types/types"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
@@ -35,8 +34,6 @@ export const CompareRequirementsBox = ({
   isUpdatable,
 }: ICompareRequirementsBoxDataProps) => {
   const { t } = useTranslation()
-  const { userStore } = useMst()
-  const { currentUser } = userStore
 
   const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true })
   return (
@@ -109,7 +106,7 @@ export const CompareRequirementsBox = ({
         </Text>
 
         <Flex direction="column" mt={4}>
-          {(showingCompareAfter || !currentUser.isSubmitter) && (
+          {(showingCompareAfter || !isUpdatable) && (
             <>
               <Heading as="h3">{t("requirementTemplate.edit.diffBox.added")}</Heading>
               <Divider borderColor="black" my={0} />

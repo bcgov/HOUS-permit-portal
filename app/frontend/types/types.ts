@@ -257,7 +257,15 @@ export interface IDownloadableFile {
 }
 
 export interface IEULA {
+  id: string
   content: string
+  createdAt: Date
+}
+
+export interface ILicenseAgreement {
+  id: string
+  agreement: IEULA
+  acceptedAt: Date
 }
 
 export interface IPermitApplicationComplianceUpdate {

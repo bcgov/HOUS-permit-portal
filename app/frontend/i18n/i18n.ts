@@ -218,7 +218,7 @@ const options = {
           unchecked: "Unhecked",
           showAdvanced: "Show advanced",
           hideAdvanced: "Hide advanced",
-          emailPlaceholder: "email@example.com",
+          emailPlaceholder: "Please enter an email",
           urlPlaceholder: "https://",
           showOlder: "Show older",
           seeMore: "See more",
@@ -241,6 +241,18 @@ const options = {
         eula: {
           title: "End-User License Agreement",
           accept: "Accept agreement",
+        },
+        userEulas: {
+          title: "End user license agreement",
+          viewAgreement: "View agreement",
+          view: "View",
+          actionRequired: "Action required",
+          acceptedOn: "You accepted this agreement on {{date}} at {{time}}.",
+          pastAgreementsModal: {
+            title: "Past end user license agreements",
+            triggerButton: "See past",
+            acceptedOn: "Accepted on {{ timestamp }}",
+          },
         },
         contact: {
           create: "New contact",
@@ -512,7 +524,7 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
-            forFirstNations: "Is this permit for first nations lands?",
+            forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
             applicationDisclaimerInstruction:
@@ -552,7 +564,7 @@ const options = {
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailable:
-              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.”",
+              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -1259,6 +1271,7 @@ const options = {
           fetchWorkTypeOptions: "Something went wrong fetching the work type options",
           fetchRequirementTemplate: "Something went wrong fetching the requirement template",
           fetchTemplateVersion: "Something went wrong fetching the template version",
+          fetchCurrentUserLicenseAgreements: "Something went wrong fetching license agreements",
           fetchTemplateVersions: "Something went wrong fetching template versions",
           fetchBuildingPermits: "Something went wrong fetching building permits",
           fetchBuildingPermit: "Something went wrong fetching building permit",
@@ -1785,6 +1798,7 @@ const options = {
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
             acceptInvitation: "Accept invitation",
+            eula: "End user license agreement",
           },
         },
         automatedCompliance: {
