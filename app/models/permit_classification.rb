@@ -4,6 +4,8 @@ class PermitClassification < ApplicationRecord
   validates :code, presence: true, uniqueness: :true
   validates :name, presence: true
 
+  scope :enabled, -> { where(enabled: true) }
+
   enum code: %i[
          low_residential
          medium_residential
