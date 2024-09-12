@@ -9,7 +9,7 @@ class PermitClassificationPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.all
+      scope.enabled
     end
   end
 end

@@ -9,7 +9,13 @@ class Api::PermitClassificationsController < Api::ApplicationController
     begin
       permit_classifications =
         if classification_option_params[:published].present?
-          query = RequirementTemplate.with_published_version.includes(:permit_type).includes(:activity)
+          query =
+            RequirementTemplate
+              .with_published_version
+              .joins(:permit_type)
+              .joins(:activity)
+              .where(permit_classifications: { enabled: true })
+
           if classification_option_params[:jurisdiction_id].present?
             jurisdiction = Jurisdiction.find(classification_option_params[:jurisdiction_id])
             permit_type_ids = jurisdiction.permit_type_submission_contacts.pluck(:permit_type_id)
@@ -33,13 +39,14 @@ class Api::PermitClassificationsController < Api::ApplicationController
           # &:activities or &:permit_types
           query.map(&classification_option_params[:type].underscore.to_sym).uniq
         else
-          PermitClassification.where(type: classification_option_params[:type])
+          PermitClassification.where(type: classification_option_params[:type], enabled: true)
         end
 
       options = permit_classifications.map { |pc| { label: pc.name, value: pc } }
 
       render_success options, nil, { blueprint: PermitClassificationOptionBlueprint }
     rescue StandardError => e
+      binding.pry
       render_error "permit_classification.options_error", {}, e and return
     end
   end
