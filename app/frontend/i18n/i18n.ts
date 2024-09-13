@@ -1556,12 +1556,21 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
+              filterLabel: "Search electives",
+              sortLabel: "Sort by",
+              filterPlaceholder: "Search electives",
+              sortOptions: {
+                labelAsc: "Elective (A-Z)",
+                labelDesc: "Elective (Z-A)",
+                reasonAsc: "Reason (A-Z)",
+                reasonDesc: "Reason (Z-A)",
+              },
               manageFieldsButton: "Manage elective field(s)",
               resetToDefaults: "Reset to defaults",
               selectFieldsTitle: "Select elective fields",
               electiveFormFields: "Elective form fields",
               addSelectedButton: "Add selected",
-              reason: "Reason",
+              reason: "Reason:",
               reasonLabels: {
                 placeholder: "Select a reason",
                 bylaw: "Bylaw",
