@@ -26,6 +26,12 @@ class PermitApplication < ApplicationRecord
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
+  scope :sandboxed, -> { unscoped.where(sandboxed: true) }
+  scope :live, -> { unscoped.where(sandboxed: false) }
+
+  # Setting default_scope to filter non-sandboxed records by default
+  default_scope { where(sandboxed: false) }
+
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact
@@ -152,6 +158,7 @@ class PermitApplication < ApplicationRecord
         [submitter.id] + users_by_collaboration_options(collaboration_type: :submission).pluck(:id),
       review_delegatee_name:
         users_by_collaboration_options(collaboration_type: :review, collaborator_type: :delegatee).first&.name,
+      sandboxed: sandboxed,
     }
   end
 

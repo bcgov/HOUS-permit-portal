@@ -189,6 +189,13 @@ class Jurisdiction < ApplicationRecord
     JurisdictionBlueprint
   end
 
+  def template_version_customization(template_version)
+    jurisdiction_template_version_customizations.find_by!(
+      template_version_id: template_version.id,
+      sandboxed: sandbox_mode,
+    )
+  end
+
   private
 
   def create_integration_mappings_async

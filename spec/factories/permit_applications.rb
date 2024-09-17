@@ -8,6 +8,7 @@ FactoryBot.define do
     sequence(:nickname) { |n| "Permit Application Nickname #{n}" }
     association :template_version
     pid { "999999999" }
+    sandboxed { false }
 
     trait :newly_submitted do
       status { :newly_submitted }
