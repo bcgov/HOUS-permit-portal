@@ -13,11 +13,22 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   belongs_to :template_version
 
   before_save :sanitize_tip
-  validates_uniqueness_of :template_version_id, scope: :jurisdiction_id
+  # Ensure that for each jurisdiction and template_version, there is at most one sandboxed and one non-sandboxed customization
+  validates :sandboxed,
+            uniqueness: {
+              scope: %i[jurisdiction_id template_version_id],
+              message:
+                I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.sandboxed_uniqueness"),
+            }
   after_commit :reindex_jurisdiction_templates_used_size
   after_commit :publish_customization_event, on: %i[update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
+
+  scope :sandboxed, -> { unscoped.where(sandboxed: true) }
+
+  # Setting default_scope to filter non-sandboxed records by default
+  default_scope { where(sandboxed: false) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 

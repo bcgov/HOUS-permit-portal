@@ -177,8 +177,9 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def set_jurisdiction_template_version_customization
-    @jurisdiction_template_version_customization =
-      @template_version.jurisdiction_template_version_customizations.find_by(jurisdiction_id: params[:jurisdiction_id])
+    jurisdiction = Jurisdiction.find!(params[:jurisdiction_id])
+
+    @jurisdiction_template_version_customization = jurisdiction.template_version_customization(@template_version)
   end
 
   def jurisdiction_template_version_customization_params
