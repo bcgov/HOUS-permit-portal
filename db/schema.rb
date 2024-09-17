@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_17_204819) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -171,6 +171,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.uuid "template_version_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "sandboxed", default: false, null: false
+    t.index %w[jurisdiction_id template_version_id sandboxed],
+            name: "index_jtvcs_on_juris_id_and_template_vers_id_and_sandboxed",
+            unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
     t.index ["template_version_id"],
             name: "idx_on_template_version_id_8359a99333"
@@ -197,6 +201,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.string "slug"
     t.integer "map_zoom"
     t.boolean "external_api_enabled", default: false
+    t.boolean "sandbox_mode", default: false, null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -245,6 +250,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
+    t.boolean "sandboxed", default: false, null: false
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
