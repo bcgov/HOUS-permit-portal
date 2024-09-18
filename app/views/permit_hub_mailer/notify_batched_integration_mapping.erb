@@ -1,0 +1,140 @@
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+        <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            <%= @user.present? ? "Dear #{@user.name}," : "Hello," %>
+          </p>
+
+          <% 
+            # Group notifications
+            missing_notifications = @notifications.select { |n| n.template_version.published? }.uniq { |n| n.template_version_id }
+            new_notifications = @notifications.select { |n| n.template_version.scheduled? }.uniq { |n| n.template_version_id }
+          %>
+
+          <!-- Missing API Mappings Section -->
+          <% if missing_notifications.any? %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">
+              Missing API mappings
+            </h1>
+
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              <%= @user.present? ? "There are missing API mappings for your permit applications in the Building Permit Hub:" : "There are missing API mappings for published permit applications in the Building Permit Hub:" %>
+            </p>
+
+            <% missing_notifications.each do |notification| %>
+              <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+                <tr>
+                  <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                    <dl class="table-like" style="margin: 0;">
+
+                      <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">
+                        Permit Type
+                      </dt>
+                      <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;">
+                        <%= notification.template_version.label %>
+                      </dd>
+
+                      <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">
+                        Published Date
+                      </dt>
+                      <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                        <%= notification.template_version.version_date %>
+                      </dd>
+                    </dl>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; padding-top: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <!-- Review API Mapping Link -->
+                    <% if @user.present? %>
+                      <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">
+                        <a href="<%= FrontendUrlHelper.frontend_url(notification.front_end_path.present? ? notification.front_end_path : "/login") %>" target="_blank" rel="noopener" style="color: #1a5a96; text-decoration: underline;">
+                          Review API Mapping
+                        </a>
+                      </p>
+                    <% end %>
+                    </dd>
+                  </td>
+                </tr>
+              </table>
+
+            <% end %>
+          <% end %>
+
+          <!-- New API Mappings Available Section -->
+          <% if new_notifications.any? %>
+            <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 48px;">
+              New API mappings available
+            </h1>
+
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              There is a new API mapping scheduled for upcoming permit applications in the Building Permit Hub:
+            </p>
+
+            <% new_notifications.each do |notification| %>
+              <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+                <tr>
+                  <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                    <dl class="table-like" style="margin: 0;">
+
+                      <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">
+                        Permit Type
+                      </dt>
+                      <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;">
+                        <%= notification.template_version.label %>
+                      </dd>
+
+                      <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">
+                        Scheduled Date Change
+                      </dt>
+                      <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                        <%= notification.template_version.version_date %>
+                      </dd>
+                    </dl>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; padding-top: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <!-- Review API Mapping Link -->
+                    <% if @user.present? %>
+                      <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0;">
+                        <a href="<%= FrontendUrlHelper.frontend_url(notification.front_end_path.present? ? notification.front_end_path : "/login") %>" target="_blank" rel="noopener" style="color: #1a5a96; text-decoration: underline;">
+                          Review API Mapping
+                        </a>
+                      </p>
+                    <% end %>
+                    </dd>
+                  </td>
+                </tr>
+              </table>
+            <% end %>
+          <% end %>
+
+          <% if @jurisdiction_name.present? %>
+            <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+              Please contact your local jurisdiction
+              partner <%= @jurisdiction_name %>
+              to update
+              the mapping, to
+              ensure there are no interruptions for your integration.
+            </p>
+          <% end %>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            Thank you,<br><br>
+            The Building Permit Hub Team
+          </p>
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<!-- END MAIN CONTENT AREA -->
