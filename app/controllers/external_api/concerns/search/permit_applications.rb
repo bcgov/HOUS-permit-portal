@@ -60,7 +60,10 @@ module ExternalApi::Concerns::Search::PermitApplications
   def permit_application_where_clause
     constraints = permit_application_search_params[:constraints]
 
-    where = { jurisdiction_id: current_external_api_key.jurisdiction_id }
+    where = {
+      jurisdiction_id: current_external_api_key.jurisdiction_id,
+      sandboxed: current_external_api_key.jurisdiction.sandbox_mode,
+    }
 
     where[:status] = %i[newly_submitted resubmitted] if constraints.blank? || constraints[:status].blank?
 

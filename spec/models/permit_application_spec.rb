@@ -24,37 +24,33 @@ RSpec.describe PermitApplication, type: :model do
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
     let!(:sandboxed_application) { create(:permit_application, sandboxed: true) }
-    let!(:non_sandboxed_application) { create(:permit_application, sandboxed: false) }
+    let!(:live_application) { create(:permit_application, sandboxed: false) }
 
     describe ".all" do
-      it "returns only non-sandboxed permit applications due to default_scope" do
-        expect(PermitApplication.all).to include(non_sandboxed_application)
-        expect(PermitApplication.all).not_to include(sandboxed_application)
+      it "returns only non-sandboxed permit applications due to live scope" do
+        expect(PermitApplication.live).to include(live_application)
+        expect(PermitApplication.live).not_to include(sandboxed_application)
       end
     end
 
     describe ".sandboxed" do
       it "returns only sandboxed permit applications" do
         expect(PermitApplication.sandboxed).to include(sandboxed_application)
-        expect(PermitApplication.sandboxed).not_to include(non_sandboxed_application)
+        expect(PermitApplication.sandboxed).not_to include(live_application)
       end
     end
 
-    describe ".not_sandboxed" do
+    describe ".live" do
       it "returns only non-sandboxed permit applications" do
-        expect(PermitApplication.all).to include(non_sandboxed_application)
-        expect(PermitApplication.all).not_to include(sandboxed_application)
+        expect(PermitApplication.live).to include(live_application)
+        expect(PermitApplication.live).not_to include(sandboxed_application)
       end
     end
 
     describe "Default Scope" do
-      it "excludes sandboxed permit applications from default queries" do
-        expect(PermitApplication.all).not_to include(sandboxed_application)
-      end
-
-      it "includes sandboxed permit applications when using unscoped" do
-        expect(PermitApplication.unscoped).to include(sandboxed_application)
-        expect(PermitApplication.unscoped).to include(non_sandboxed_application)
+      it "includes all permit applications" do
+        expect(PermitApplication.all).to include(sandboxed_application)
+        expect(PermitApplication.all).to include(live_application)
       end
     end
   end

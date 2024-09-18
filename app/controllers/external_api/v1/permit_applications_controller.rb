@@ -3,6 +3,7 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
 
   before_action :set_permit_application, only: :show
   before_action :set_template_version, only: :show_integration_mapping
+  before_action :set_jurisdiction, only: :index
 
   def index
     perform_permit_application_search
@@ -46,6 +47,10 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
   end
 
   private
+
+  def set_permit_application
+    @jurisdiction = Jurisdiction.find(current_external_api_key.jurisdiction_id)
+  end
 
   def set_permit_application
     @permit_application = PermitApplication.find(params[:id])
