@@ -8,7 +8,10 @@ FactoryBot.define do
     look_out_html { "<p>Some lookout</p>" }
     contact_summary_html { "<p>Some lookout</p>" }
     external_api_enabled { false }
-    sandbox_mode { false }
+
+    after(:build) do |jurisdiction|
+      jurisdiction.sandboxes << FactoryBot.build(:sandbox, jurisdiction: jurisdiction) if jurisdiction.sandboxes.empty?
+    end
 
     after(:create) do |jurisdiction|
       create(:permit_type_submission_contact, jurisdiction: jurisdiction)

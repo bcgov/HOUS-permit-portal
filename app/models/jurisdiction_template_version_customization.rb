@@ -9,24 +9,39 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   # Where the key to requirement_block_changes object is the id of the requirement_block affected.
   # Where the elective_fields are the ids of the requirement_fields that are elective and have been
   # enabled
+  belongs_to :sandbox, optional: true
   belongs_to :jurisdiction
   belongs_to :template_version
 
   before_save :sanitize_tip
-  # Ensure that for each jurisdiction and template_version, there is at most one sandboxed and one non-sandboxed customization
-  validates :sandboxed,
-            uniqueness: {
-              scope: %i[jurisdiction_id template_version_id],
-              message:
-                I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.sandboxed_uniqueness"),
-            }
+  # Ensure that there is no two customizations with the same sandbox, jurisdiction, and template_version
+  class JurisdictionTemplateVersionCustomization < ApplicationRecord
+    # Validate uniqueness when sandbox_id is present
+    validates :sandbox_id,
+              uniqueness: {
+                scope: %i[jurisdiction_id template_version_id],
+                message:
+                  I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.sandbox_uniqueness"),
+              },
+              unless: -> { sandbox_id.nil? }
+
+    # Validate uniqueness when sandbox_id is nil
+    validates :jurisdiction_id,
+              uniqueness: {
+                scope: [:template_version_id],
+                message:
+                  I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.sandbox_uniqueness"),
+              },
+              if: -> { sandbox_id.nil? }
+  end
+
   after_commit :reindex_jurisdiction_templates_used_size
   after_commit :publish_customization_event, on: %i[update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
 
-  scope :sandboxed, -> { where(sandboxed: true) }
-  scope :live, -> { where(sandboxed: false) }
+  scope :sandboxed, -> { where.not(sandbox_id: nil) }
+  scope :live, -> { where(sandbox_id: nil) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 

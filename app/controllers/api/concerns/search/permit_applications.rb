@@ -64,12 +64,12 @@ module Api::Concerns::Search::PermitApplications
     if @jurisdiction
       where = {
         jurisdiction_id: @jurisdiction.id,
-        sandboxed: @jurisdiction.sandbox_mode,
+        sandbox_id: current_sandbox_id,
         # Overrides status filter, reorder the code if necessary
         status: %i[newly_submitted resubmitted],
       }
     else
-      where = { user_ids_with_submission_edit_permissions: current_user.id, sandboxed: false }
+      where = { user_ids_with_submission_edit_permissions: current_user.id, sandbox_id: nil }
     end
     ret = (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
 

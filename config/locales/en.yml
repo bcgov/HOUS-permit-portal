@@ -37,8 +37,10 @@ en:
         first_nations: "First Nations"
     errors:
       models:
+        jurisdiction:
+          no_sandboxes: "Jurisdiction must have at least one sandbox."
         jurisdiction_template_version_customizations:
-          sandboxed_uniqueness: "already exists for this jurisdiction and template version."
+          sandbox_uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
           single_record: "There can only be one SiteConfiguration record."
           attributes:
