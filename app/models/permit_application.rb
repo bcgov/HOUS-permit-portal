@@ -26,9 +26,8 @@ class PermitApplication < ApplicationRecord
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
-  # Setting default_scope to filter non-sandboxed records by default
-  default_scope { where(sandboxed: false) }
-  scope :sandboxed, -> { unscoped.where(sandboxed: true) }
+  scope :sandboxed, -> { where(sandboxed: true) }
+  scope :live, -> { where(sandboxed: false) }
 
   # Custom validation
 

@@ -184,14 +184,14 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
             )
           expect(sandboxed_customization).to be_valid
 
-          non_sandboxed_customization =
+          live_customization =
             create(
               :jurisdiction_template_version_customization,
               jurisdiction: jurisdiction,
               template_version: template_version,
               sandboxed: false,
             )
-          expect(non_sandboxed_customization).to be_valid
+          expect(live_customization).to be_valid
         end
       end
 
@@ -212,19 +212,19 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
 
     describe "Scopes" do
       let!(:sandboxed_customization) { create(:jurisdiction_template_version_customization, sandboxed: true) }
-      let!(:non_sandboxed_customization) { create(:jurisdiction_template_version_customization, sandboxed: false) }
+      let!(:live_customization) { create(:jurisdiction_template_version_customization, sandboxed: false) }
 
       describe ".sandboxed" do
         it "returns only sandboxed customizations" do
           expect(JurisdictionTemplateVersionCustomization.sandboxed).to include(sandboxed_customization)
-          expect(JurisdictionTemplateVersionCustomization.sandboxed).not_to include(non_sandboxed_customization)
+          expect(JurisdictionTemplateVersionCustomization.sandboxed).not_to include(live_customization)
         end
       end
 
-      describe "default scoppe" do
+      describe ".live" do
         it "returns only non-sandboxed customizations" do
-          expect(JurisdictionTemplateVersionCustomization.all).to include(non_sandboxed_customization)
-          expect(JurisdictionTemplateVersionCustomization.all).not_to include(sandboxed_customization)
+          expect(JurisdictionTemplateVersionCustomization.live).to include(live_customization)
+          expect(JurisdictionTemplateVersionCustomization.live).not_to include(sandboxed_customization)
         end
       end
     end

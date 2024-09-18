@@ -25,10 +25,8 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   validate :ensure_reason_set_for_enabled_elective_fields
 
-  scope :sandboxed, -> { unscoped.where(sandboxed: true) }
-
-  # Setting default_scope to filter non-sandboxed records by default
-  default_scope { where(sandboxed: false) }
+  scope :sandboxed, -> { where(sandboxed: true) }
+  scope :live, -> { where(sandboxed: false) }
 
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 

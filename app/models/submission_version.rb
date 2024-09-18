@@ -7,6 +7,12 @@ class SubmissionVersion < ApplicationRecord
 
   after_commit :notify_user_application_viewed
 
+  delegate :sandboxed?, to: :permit_application
+
+  scope :sandboxed, -> { joins(:permit_application).where(permit_applications: { sandboxed: true }) }
+
+  scope :live, -> { joins(:permit_application).where(permit_applications: { sandboxed: false }) }
+
   def missing_pdfs
     missing_data_keys = []
 
