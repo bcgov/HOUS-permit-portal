@@ -61,4 +61,36 @@ RSpec.describe Jurisdiction, type: :model do
       end
     end
   end
+  describe "validations" do
+    context "when there is at least one sandbox" do
+      it "is valid" do
+        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
+        expect(jurisdiction).to be_valid
+        expect(jurisdiction.sandboxes.size).to eq(1)
+      end
+
+      it "allows multiple sandboxes" do
+        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
+        3.times { jurisdiction.sandboxes.build }
+        expect(jurisdiction).to be_valid
+        expect(jurisdiction.sandboxes.size).to eq(3)
+      end
+    end
+  end
+
+  describe "callbacks" do
+    context "before validation" do
+      it "builds a sandbox if none exist" do
+        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
+        expect { jurisdiction.valid? }.to change { jurisdiction.sandboxes.size }.from(0).to(1)
+        expect(jurisdiction.sandboxes.first).to be_a_new(Sandbox)
+      end
+
+      it "does not build a sandbox if at least one exists" do
+        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
+        jurisdiction.sandboxes.build
+        expect { jurisdiction.valid? }.not_to change { jurisdiction.sandboxes.size }
+      end
+    end
+  end
 end

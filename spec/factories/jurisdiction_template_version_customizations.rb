@@ -3,6 +3,6 @@ FactoryBot.define do
     customizations { "{}" }
     association :jurisdiction, factory: :sub_district
     association :template_version
-    sandboxed { false }
+    sandbox { nil }
   end
 end

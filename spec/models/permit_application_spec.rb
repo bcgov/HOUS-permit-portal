@@ -23,8 +23,10 @@ RSpec.describe PermitApplication, type: :model do
 
   describe "Scopes" do
     # Create sandboxed and non-sandboxed permit applications
-    let!(:sandboxed_application) { create(:permit_application, sandboxed: true) }
-    let!(:live_application) { create(:permit_application, sandboxed: false) }
+    let!(:jurisdiction) { create(:sub_district) }
+    let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+    let!(:sandboxed_application) { create(:permit_application, sandbox: sandbox) }
+    let!(:live_application) { create(:permit_application) }
 
     describe ".all" do
       it "returns only non-sandboxed permit applications due to live scope" do

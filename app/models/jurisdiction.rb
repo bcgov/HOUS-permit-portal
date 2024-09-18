@@ -24,9 +24,16 @@ class Jurisdiction < ApplicationRecord
   has_many :integration_mappings
   has_many :permit_type_required_steps, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
+  has_many :sandboxes, dependent: :destroy
 
   validates :name, uniqueness: { scope: :locality_type, case_sensitive: false }
   validates :locality_type, presence: true
+
+  # Validation to ensure at least one sandbox exists
+  validate :must_have_one_sandbox
+
+  # Callback to ensure a sandbox exists
+  before_validation :ensure_one_sandbox
 
   before_validation :normalize_locality_type
   before_validation :normalize_name
@@ -44,6 +51,10 @@ class Jurisdiction < ApplicationRecord
   accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
 
   before_create :assign_unique_prefix
+
+  def customizations
+    jurisdiction_template_version_customizations
+  end
 
   def regional_review_managers
     users&.kept&.regional_review_manager
@@ -189,11 +200,12 @@ class Jurisdiction < ApplicationRecord
     JurisdictionBlueprint
   end
 
-  def template_version_customization(template_version)
-    jurisdiction_template_version_customizations.find_by!(
-      template_version_id: template_version.id,
-      sandboxed: sandbox_mode,
-    )
+  def template_version_customization(template_version, sandbox = nil)
+    jurisdiction_template_version_customizations.find_by!(template_version_id: template_version.id, sandbox: sandbox)
+  end
+
+  def default_sandbox
+    sandboxes.find_by(default: true)
   end
 
   private
@@ -267,5 +279,15 @@ class Jurisdiction < ApplicationRecord
     normalized.sub!(/\s+(the|of)\z/, "")
 
     self.locality_type = normalized
+  end
+
+  # Callback method to ensure a default sandbox is created
+  def ensure_one_sandbox
+    sandboxes.build if sandboxes.empty?
+  end
+
+  # Custom validation method
+  def must_have_one_sandbox
+    errors.add(:base, I18n.t("activerecord.errors.models.jurisdiction.no_sandboxes")) if sandboxes.empty?
   end
 end
