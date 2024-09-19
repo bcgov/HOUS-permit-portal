@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -396,7 +396,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.boolean "first_nations", default: false
     t.datetime "discarded_at"
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
-    t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+    t.index %w[name first_nations],
+            name: "index_requirement_blocks_on_name_and_first_nations",
+            unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
