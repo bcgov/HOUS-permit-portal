@@ -44,13 +44,8 @@ class Api::ApplicationController < ActionController::API
     redirect_to root_path if current_user && !current_user.confirmed?
   end
 
-  # Helper method to access the JWT payload
-  def jwt_payload
-    @jwt_payload ||= request.env["warden-jwt_auth.token"]
-  end
-
-  # Method to retrieve the 'sandbox_id' from the JWT payload
+  # Method to retrieve the current sandbox ID from request headers
   def current_sandbox_id
-    jwt_payload&.dig("sandbox_id")
+    request.headers["X-Sandbox-ID"]
   end
 end

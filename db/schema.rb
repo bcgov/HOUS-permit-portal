@@ -501,6 +501,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_215642) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
+    t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"

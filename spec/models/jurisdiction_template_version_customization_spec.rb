@@ -135,7 +135,7 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
             )
           expect(duplicate_customization).not_to be_valid
           expect(duplicate_customization.errors.full_messages).to include(
-            "Sandbox already exists for this jurisdiction and template version.",
+            "already exists for this jurisdiction and template version.",
           )
         end
       end
@@ -165,13 +165,13 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
             )
           expect(duplicate_customization).not_to be_valid
           expect(duplicate_customization.errors.full_messages).to include(
-            "Sandbox already exists for this jurisdiction and template version.",
+            "already exists for this jurisdiction and template version.",
           )
         end
       end
 
       context "when sandboxed varies" do
-        it "allows one sandboxed and one non-sandboxed customization for the same jurisdiction and template version" do
+        it "allows sandboxed and non-sandboxed customization for the same jurisdiction and template version" do
           sandboxed_customization =
             create(
               :jurisdiction_template_version_customization,
