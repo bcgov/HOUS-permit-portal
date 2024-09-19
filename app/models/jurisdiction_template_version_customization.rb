@@ -15,25 +15,8 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   before_save :sanitize_tip
   # Ensure that there is no two customizations with the same sandbox, jurisdiction, and template_version
-  class JurisdictionTemplateVersionCustomization < ApplicationRecord
-    # Validate uniqueness when sandbox_id is present
-    validates :sandbox_id,
-              uniqueness: {
-                scope: %i[jurisdiction_id template_version_id],
-                message:
-                  I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.sandbox_uniqueness"),
-              },
-              unless: -> { sandbox_id.nil? }
 
-    # Validate uniqueness when sandbox_id is nil
-    validates :jurisdiction_id,
-              uniqueness: {
-                scope: [:template_version_id],
-                message:
-                  I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.sandbox_uniqueness"),
-              },
-              if: -> { sandbox_id.nil? }
-  end
+  validate :unique_combination_of_jurisdiction_sandbox_and_template_version
 
   after_commit :reindex_jurisdiction_templates_used_size
   after_commit :publish_customization_event, on: %i[update]
@@ -151,5 +134,23 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
   def publish_customization_event
     NotificationService.publish_customization_update_event(self)
+  end
+
+  def unique_combination_of_jurisdiction_sandbox_and_template_version
+    # Construct the query for finding duplicates
+    existing_record =
+      JurisdictionTemplateVersionCustomization.where(
+        jurisdiction_id: jurisdiction_id,
+        template_version_id: template_version_id,
+        sandbox_id: sandbox_id,
+      )
+
+    # Allow updates on the same record (ignore self)
+    existing_record = existing_record.where.not(id: id) if persisted?
+
+    # If such a record exists, add an error
+    if existing_record.exists?
+      errors.add(:base, I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.uniqueness"))
+    end
   end
 end

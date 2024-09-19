@@ -204,10 +204,6 @@ class Jurisdiction < ApplicationRecord
     jurisdiction_template_version_customizations.find_by!(template_version_id: template_version.id, sandbox: sandbox)
   end
 
-  def default_sandbox
-    sandboxes.find_by(default: true)
-  end
-
   private
 
   def create_integration_mappings_async
@@ -283,7 +279,7 @@ class Jurisdiction < ApplicationRecord
 
   # Callback method to ensure a default sandbox is created
   def ensure_one_sandbox
-    sandboxes.build if sandboxes.empty?
+    sandboxes.build(name: "Default Sandbox") if sandboxes.empty?
   end
 
   # Custom validation method

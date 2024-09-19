@@ -40,7 +40,7 @@ en:
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
         jurisdiction_template_version_customizations:
-          sandbox_uniqueness: "already exists for this jurisdiction and template version."
+          uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
           single_record: "There can only be one SiteConfiguration record."
           attributes:
