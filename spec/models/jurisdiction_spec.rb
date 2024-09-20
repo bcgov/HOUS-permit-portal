@@ -69,11 +69,14 @@ RSpec.describe Jurisdiction, type: :model do
         expect(jurisdiction.sandboxes.size).to eq(1)
       end
 
-      it "allows multiple sandboxes" do
-        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
-        3.times { jurisdiction.sandboxes.build }
+      it "allows multiple sandboxes with unique names" do
+        jurisdiction = create(:sub_district, name: "Townsville", locality_type: "city")
+
+        # Build 3 sandboxes with unique names for this jurisdiction
+        3.times { jurisdiction.sandboxes.build(attributes_for(:sandbox)) }
+
         expect(jurisdiction).to be_valid
-        expect(jurisdiction.sandboxes.size).to eq(3)
+        expect(jurisdiction.sandboxes.size).to eq(4)
       end
     end
   end
