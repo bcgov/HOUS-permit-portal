@@ -190,8 +190,8 @@ export const LandingScreen = observer(({}: ILandingScreenProps) => {
               <Button
                 as="a"
                 variant={"primary"}
-                href={"/Building Permit Hub Structure_May 16_2024.pdf"}
-                download={"Building Permit Hub Structure_May 16_2024.pdf"}
+                href={"/pdfs/BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
+                download={"BPH-Standardized List of Requirements V.2024.09.01 - SEP 2024.pdf"}
                 mt={2}
                 leftIcon={<Download />}
               >
