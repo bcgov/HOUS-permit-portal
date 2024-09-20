@@ -15,6 +15,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
+  belongs_to :sandbox, optional: true
 
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
@@ -25,6 +26,9 @@ class PermitApplication < ApplicationRecord
   has_many :permit_block_statuses, dependent: :destroy
 
   scope :submitted, -> { joins(:submission_versions).distinct }
+
+  scope :sandboxed, -> { where.not(sandbox_id: nil) }
+  scope :live, -> { where(sandbox_id: nil) }
 
   # Custom validation
 
@@ -152,6 +156,7 @@ class PermitApplication < ApplicationRecord
         [submitter.id] + users_by_collaboration_options(collaboration_type: :submission).pluck(:id),
       review_delegatee_name:
         users_by_collaboration_options(collaboration_type: :review, collaborator_type: :delegatee).first&.name,
+      sandbox_id: sandbox_id,
     }
   end
 

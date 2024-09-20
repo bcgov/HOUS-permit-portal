@@ -45,7 +45,6 @@ RSpec.describe Api::TemplateVersionsController, type: :controller do
                from_non_first_nations: true,
                include_electives: true,
              }
-
         expect(response).to have_http_status(:success)
         new_customization = JurisdictionTemplateVersionCustomization.order(created_at: :desc).first
         block_changes = new_customization.customizations["requirement_block_changes"]

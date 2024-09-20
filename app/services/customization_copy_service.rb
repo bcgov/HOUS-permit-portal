@@ -1,10 +1,11 @@
 class CustomizationCopyService
-  attr_accessor :from_template_version, :to_template_version, :jurisdiction
+  attr_accessor :from_template_version, :to_template_version, :jurisdiction, :sandbox_id
 
-  def initialize(from_template_version, to_template_version, jurisdiction)
+  def initialize(from_template_version, to_template_version, jurisdiction, sandbox_id)
     @from_template_version = from_template_version
     @to_template_version = to_template_version
     @jurisdiction = jurisdiction
+    @sandbox_id = sandbox_id
   end
 
   def merge_copy_customizations(include_electives, include_tips)
@@ -29,6 +30,7 @@ class CustomizationCopyService
     JurisdictionTemplateVersionCustomization.find_by!(
       template_version_id: template_version.id,
       jurisdiction_id: @jurisdiction.id,
+      sandbox_id: @sandbox_id,
     )
   end
 
@@ -36,6 +38,7 @@ class CustomizationCopyService
     JurisdictionTemplateVersionCustomization.find_or_create_by!(
       template_version_id: template_version.id,
       jurisdiction_id: @jurisdiction.id,
+      sandbox_id: @sandbox_id,
     ) { |customization| customization.customizations = { "requirement_block_changes" => {} } }
   end
 

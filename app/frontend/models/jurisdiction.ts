@@ -9,6 +9,7 @@ import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
 import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
+import { SandboxModel } from "./sandbox"
 
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
@@ -40,6 +41,7 @@ export const JurisdictionModel = types
     externalApiEnabled: types.optional(types.boolean, false),
     submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
+    sandboxMap: types.map(SandboxModel),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -119,6 +121,15 @@ export const JurisdictionModel = types
         self.mergeUpdate(data, "externalApiKeysMap")
 
         return data
+      }
+
+      return response.ok
+    }),
+    fetchSandboxes: flow(function* () {
+      const response = yield* toGenerator(self.environment.api.fetchSandboxes(self.id))
+
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "sandboxMap")
       }
 
       return response.ok

@@ -4,6 +4,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
   before_action :set_jurisdiction_template_version_customization,
                 only: %i[
                   show_jurisdiction_template_version_customization
+                  create_or_update_jurisdiction_template_version_customization
                   show_integration_mapping
                   download_customization_csv
                   download_customization_json
@@ -44,11 +45,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
   def create_or_update_jurisdiction_template_version_customization
     authorize @template_version, :show?
 
-    @jurisdiction_template_version_customization =
-      @template_version.jurisdiction_template_version_customizations.find_or_initialize_by(
-        jurisdiction_id: params[:jurisdiction_id],
-      )
-
     authorize @jurisdiction_template_version_customization, policy_class: TemplateVersionPolicy
 
     # add a db lock in case multiple reviewers are updating this db row
@@ -87,6 +83,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
            from_template_version,
            @template_version,
            Jurisdiction.find(copy_customization_params[:jurisdiction_id]),
+           current_sandbox_id,
          ).merge_copy_customizations(
            copy_customization_params[:include_electives],
            copy_customization_params[:include_tips],
@@ -178,7 +175,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def set_jurisdiction_template_version_customization
     @jurisdiction_template_version_customization =
-      @template_version.jurisdiction_template_version_customizations.find_by(jurisdiction_id: params[:jurisdiction_id])
+      @template_version.jurisdiction_template_version_customizations.find_by(
+        jurisdiction_id: params[:jurisdiction_id],
+        sandbox_id: current_sandbox_id,
+      )
   end
 
   def jurisdiction_template_version_customization_params

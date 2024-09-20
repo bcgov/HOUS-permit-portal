@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_18_215642) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -171,7 +171,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.uuid "template_version_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "sandbox_id"
+    t.index "jurisdiction_id, template_version_id, COALESCE(sandbox_id, '00000000-0000-0000-0000-000000000000'::uuid)",
+            name: "index_jtvcs_unique_on_jurisdiction_template_sandbox",
+            unique: true
     t.index ["jurisdiction_id"], name: "idx_on_jurisdiction_id_57cd0a7ea7"
+    t.index ["sandbox_id"], name: "idx_on_sandbox_id_e5e6ef72b0"
     t.index ["template_version_id"],
             name: "idx_on_template_version_id_8359a99333"
   end
@@ -245,6 +250,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
+    t.uuid "sandbox_id"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -253,6 +259,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
             unique: true
     t.index ["permit_type_id"],
             name: "index_permit_applications_on_permit_type_id"
+    t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"],
             name: "index_permit_applications_on_template_version_id"
@@ -487,6 +494,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
     t.index ["submission_version_id"],
             name: "index_revision_requests_on_submission_version_id"
     t.index ["user_id"], name: "index_revision_requests_on_user_id"
+  end
+
+  create_table "sandboxes",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "jurisdiction_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
   end
 
   create_table "site_configurations",
@@ -887,6 +905,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
+  add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "template_versions"
   add_foreign_key "jurisdictions",
@@ -899,6 +918,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
   add_foreign_key "permit_applications",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
@@ -924,6 +944,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_12_190655) do
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
+  add_foreign_key "sandboxes", "jurisdictions"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",

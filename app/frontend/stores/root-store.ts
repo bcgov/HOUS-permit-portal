@@ -11,6 +11,7 @@ import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-a
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
+import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
 import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
@@ -36,6 +37,7 @@ export const RootStoreModel = types
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
+    sandboxStore: types.optional(SandboxStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -53,6 +55,11 @@ export const RootStoreModel = types
       yield makePersistable(self.uiStore, {
         name: `${self.userStore.currentUser?.id}-UIStore`,
         properties: ["currentlySelectedJurisdictionId"],
+        storage: localStorage,
+      })
+      yield makePersistable(self.sandboxStore, {
+        name: `${self.userStore.currentUser?.id}-SandboxStore`,
+        properties: ["sandboxId"],
         storage: localStorage,
       })
       protect(self)
@@ -91,6 +98,7 @@ export interface IRootStore extends IStateTreeNode {
   contactStore: IContactStore
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
+  sandboxStore: ISandboxStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void
