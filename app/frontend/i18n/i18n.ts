@@ -232,6 +232,7 @@ const options = {
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
+          copyNoun: "Copy",
         },
         notification: {
           title: "Notifications",
@@ -669,6 +670,7 @@ const options = {
             edit: {
               title: "Edit requirement block",
               options: "Options",
+              copy: "Copy this block",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",

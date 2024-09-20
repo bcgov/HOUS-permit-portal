@@ -139,9 +139,7 @@ export const BlockSetup = observer(function BlockSetup({
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
         </FormControl>
-        {requirementBlock && withOptionsMenu && (
-          <BlockSetupOptionsMenu requirementBlock={requirementBlock} searchModel={requirementBlockStore} />
-        )}
+        {requirementBlock && withOptionsMenu && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />}
       </VStack>
     </Box>
   )
