@@ -66,6 +66,9 @@ class PermitApplication < ApplicationRecord
   after_commit :notify_user_reference_number_updated,
                if: :saved_change_to_reference_number?
 
+  scope :with_submitter_role,
+        -> { joins(:submitter).where(users: { role: "submitter" }) }
+
   scope :unviewed,
         -> do
           where(status: :submitted, viewed_at: nil).order(submitted_at: :asc)
@@ -504,6 +507,22 @@ class PermitApplication < ApplicationRecord
         PermitApplication
           .with_submitter_role
           .where(jurisdiction: j)
+          .group(:status)
+          .count
+
+      {
+        "draft" => (row["new_draft"] || 0) + (row["revisions_requested"] || 0), # nil defaults to 0
+        "submitted" => (row["newly_submitted"] || 0) + (row["resubmitted"] || 0)
+      }.merge({ name: j.qualified_name })
+    end
+  end
+
+  def self.count_by_jurisdiction_and_status
+    Jurisdiction.all.map do |j|
+      row =
+        PermitApplication
+          .joins(:submitter)
+          .where(jurisdiction: j, users: { role: "submitter" })
           .group(:status)
           .count
 
