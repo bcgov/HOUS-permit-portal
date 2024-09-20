@@ -48,10 +48,6 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
   private
 
   def set_permit_application
-    @jurisdiction = Jurisdiction.find(current_external_api_key.jurisdiction_id)
-  end
-
-  def set_permit_application
     @permit_application = PermitApplication.find(params[:id])
   end
 
