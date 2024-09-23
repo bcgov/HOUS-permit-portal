@@ -47,6 +47,9 @@ export const JurisdictionModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
+    get sandboxes() {
+      return Array.from(self.sandboxMap.values())
+    },
     get externalApiKeys() {
       return Array.from(self.externalApiKeysMap.values()).sort((a, b) => (b.createdAt as any) - (a.createdAt as any))
     },
@@ -92,6 +95,9 @@ export const JurisdictionModel = types
 
       return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
     },
+    get defaultSandbox() {
+      return !R.isEmpty(self.sandboxes) ? self.sandboxes[0] : null
+    },
   }))
   .actions((self) => ({
     setTablePermitApplications: (permitApplications) => {
@@ -121,15 +127,6 @@ export const JurisdictionModel = types
         self.mergeUpdate(data, "externalApiKeysMap")
 
         return data
-      }
-
-      return response.ok
-    }),
-    fetchSandboxes: flow(function* () {
-      const response = yield* toGenerator(self.environment.api.fetchSandboxes(self.id))
-
-      if (response.ok) {
-        self.mergeUpdateAll(response.data.data, "sandboxMap")
       }
 
       return response.ok

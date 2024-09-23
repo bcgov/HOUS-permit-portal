@@ -59,7 +59,7 @@ export const RootStoreModel = types
       })
       yield makePersistable(self.sandboxStore, {
         name: `${self.userStore.currentUser?.id}-SandboxStore`,
-        properties: ["sandboxId"],
+        properties: ["currentSandbox"],
         storage: localStorage,
       })
       protect(self)

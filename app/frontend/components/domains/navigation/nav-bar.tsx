@@ -36,6 +36,7 @@ import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
+import { SandboxSwitch } from "./sandbox-switch"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -147,6 +148,7 @@ export const NavBar = observer(function NavBar() {
                   </Text>
                 </Flex>
               )}
+
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
@@ -253,6 +255,14 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     </MenuGroup>
   )
 
+  const reviewStaffOnlyItems = (
+    <MenuGroup>
+      <MenuItem>
+        <SandboxSwitch />
+      </MenuItem>
+    </MenuGroup>
+  )
+
   const reviewManagerOnlyItems = (
     <MenuGroup>
       <NavMenuItem
@@ -331,6 +341,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                   )}
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                  {currentUser?.isReviewStaff && reviewStaffOnlyItems}
                   {(currentUser?.isReviewManager || currentUser?.isRegionalReviewManager) && reviewManagerOnlyItems}
                   {(currentUser?.isSuperAdmin ||
                     currentUser?.isReviewManager ||

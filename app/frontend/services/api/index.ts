@@ -12,7 +12,6 @@ import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IRequirementTemplate } from "../../models/requirement-template"
-import { ISandbox } from "../../models/sandbox"
 import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
@@ -553,10 +552,6 @@ export class Api {
 
   async fetchExternalApiKey(externalApiKeyId: string) {
     return this.client.get<ApiResponse<IExternalApiKey>>(`/external_api_keys/${externalApiKeyId}`)
-  }
-
-  async fetchSandboxes(jurisdictionId: string) {
-    return this.client.get<ApiResponse<ISandbox[]>>(`/jurisdictions/${jurisdictionId}/sandboxes`)
   }
 
   async createExternalApiKey(externalApiKey: IExternalApiKeyParams) {

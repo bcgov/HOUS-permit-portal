@@ -26,7 +26,6 @@ class JurisdictionBlueprint < Blueprinter::Base
     association :contacts, blueprint: ContactBlueprint
     association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
     association :permit_type_required_steps, blueprint: PermitTypeRequiredStepBlueprint
-    association :sandboxes, blueprint: SandboxBlueprint
 
     association :permit_type_required_steps, blueprint: PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
       jurisdiction.enabled_permit_type_required_steps
@@ -35,5 +34,10 @@ class JurisdictionBlueprint < Blueprinter::Base
 
   view :minimal do
     fields :qualified_name, :external_api_enabled, :submission_inbox_set_up
+  end
+
+  view :extended do
+    include_view :base
+    association :sandboxes, blueprint: SandboxBlueprint
   end
 end
