@@ -1,55 +1,38 @@
 import { reaction } from "mobx"
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
+import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { ISandbox, SandboxModel } from "../models/sandbox"
+import { SandboxModel } from "../models/sandbox"
 
 export const SandboxStoreModel = types
   .model("SandboxStoreModel")
   .props({
-    currentSandbox: types.maybeNull(types.reference(SandboxModel)),
-    active: types.optional(types.boolean, false),
+    sandboxMap: types.map(SandboxModel),
+    currentSandboxId: types.maybeNull(types.string),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
-  .views((self) => ({}))
-  .actions((self) => ({
-    clearSandboxId: () => {
-      self.currentSandbox = null
-
-      self.environment.api.client.addRequestTransform((request) => {
-        if (self.currentSandbox) {
-          request.headers["X-Sandbox-ID"] = null
-        }
-      })
+  .extend(withMerge())
+  .views((self) => ({
+    get currentSandbox() {
+      return self.sandboxMap.get(self.currentSandboxId)
+    },
+  }))
+  .views((self) => ({
+    get sandboxes() {
+      return Array.from(self.sandboxMap.values())
     },
   }))
   .actions((self) => ({
-    setCurrentSandbox: flow(function* (sandbox: ISandbox = null) {
-      if (self.active) {
-        sandbox ??= self.rootStore.userStore.currentUser.jurisdiction.defaultSandbox
-        self.currentSandbox = sandbox
-
-        // Add a request interceptor to include sandbox_id in headers
-        self.environment.api.client.addRequestTransform((request) => {
-          if (self.currentSandbox) {
-            request.headers["X-Sandbox-ID"] = self.currentSandbox
-          }
-        })
-      } else {
-        self.clearSandboxId()
-      }
-    }),
+    clearSandboxId: () => {
+      self.currentSandboxId = null
+    },
   }))
   .actions((self) => ({
-    activate: flow(function* () {
-      self.active = true
-      yield self.setCurrentSandbox()
-    }),
-    deactivate: flow(function* () {
-      self.active = false
-      self.clearSandboxId()
-    }),
+    setCurrentSandboxId: (sandboxId: string = null) => {
+      self.currentSandboxId = sandboxId
+    },
   }))
   .actions((self) => ({
     afterCreate() {
@@ -57,9 +40,7 @@ export const SandboxStoreModel = types
       reaction(
         () => self.rootStore.uiStore.currentlySelectedJurisdictionId,
         (newJurisdictionId) => {
-          if (self.active) {
-            self.setCurrentSandbox()
-          }
+          self.clearSandboxId()
         }
       )
     },

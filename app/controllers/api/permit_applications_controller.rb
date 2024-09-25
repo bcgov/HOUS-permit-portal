@@ -197,9 +197,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def create
     @permit_application =
-      PermitApplication.build(
-        permit_application_params.to_h.merge(submitter: current_user, sandbox_id: determine_sandbox_id),
-      )
+      PermitApplication.build(permit_application_params.to_h.merge(submitter: current_user, sandbox: current_sandbox))
     authorize @permit_application
     if @permit_application.save
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
@@ -339,20 +337,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   private
-
-  # Determine sandbox_id based on the user's role
-  def determine_sandbox_id
-    if current_user.super_admin? && permit_application_params[:into_sandbox]
-      # Fetch :sandboxId from the permitted params
-      Jurisdiction.find(permit_application_params[:jurisdiction_id]).default_sandbox.id
-    elsif current_user.review_staff?
-      # Use current_sandbox_id for review_staff
-      current_sandbox_id
-    else
-      # Set sandbox_id to nil for all other users
-      nil
-    end
-  end
 
   def show_blueprint_view_for(user)
     if params[:review] && user.review_staff?

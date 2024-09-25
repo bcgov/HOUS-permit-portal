@@ -12,7 +12,6 @@ import {
   ListItem,
   Radio,
   RadioGroup,
-  Switch,
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
@@ -32,6 +31,7 @@ import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
+import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { Can } from "../../shared/user/can"
 
@@ -49,7 +49,7 @@ export type TCreatePermitApplicationFormData = {
   jurisdiction: IJurisdiction
   site?: IOption
   firstNations: boolean
-  intoSandbox: boolean
+  sandboxId: string
 }
 
 export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScreenProps) => {
@@ -64,7 +64,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       site: null as IOption,
       jurisdiction: null as IJurisdiction,
       firstNations: null,
-      intoSandbox: false,
+      sandboxId: null,
     },
   })
   const { handleSubmit, formState, control, watch, register, setValue } = formMethods
@@ -132,28 +132,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={12} w="full" bg="greys.white">
-              <Can action="jurisdiction:create">
-                <Flex as="section" direction="column" gap={4}>
-                  <Heading as="h2" variant="yellowline">
-                    {t("permitApplication.new.intoSandboxHeading")}
-                  </Heading>
-
-                  <Controller
-                    name="intoSandbox"
-                    control={control}
-                    defaultValue={false} // Set a default value if necessary
-                    render={({ field: { onChange, value } }) => (
-                      <FormControl display="flex" alignItems="center">
-                        <FormLabel htmlFor="intoSandbox" mb="0">
-                          {t("permitApplication.new.intoSandboxLabel")}
-                        </FormLabel>
-                        <Switch id="intoSandbox" isChecked={value} onChange={(e) => onChange(e.target.checked)} />
-                      </FormControl>
-                    )}
-                  />
-                </Flex>
-              </Can>
-
               <Flex as="section" direction="column" gap={4}>
                 <Heading as="h2" variant="yellowline">
                   {t("permitApplication.new.locationHeading")}
@@ -183,6 +161,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {jurisdictionWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={2}>
+                  {JSON.stringify(jurisdictionWatch, null, 2)}
                   <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
                   <Controller
                     name="firstNations"
@@ -224,6 +203,34 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                         }}
                       />
                     </>
+                  )}
+                  {jurisdictionWatch?.sandboxOptions && (
+                    <Can action="jurisdiction:create">
+                      <Flex as="section" direction="column" gap={4}>
+                        <Heading as="h2" variant="yellowline">
+                          {t("permitApplication.new.sandboxIdHeading")}
+                        </Heading>
+
+                        <Controller
+                          name="sandboxId"
+                          control={control}
+                          defaultValue={null} // Set a default value if necessary
+                          render={({ field: { onChange, value } }) => (
+                            <FormControl display="flex" alignItems="center">
+                              <FormLabel htmlFor="intoSandbox" mb="0">
+                                {t("permitApplication.new.selectSandboxLabel")}
+                              </FormLabel>
+
+                              <SandboxSelect
+                                value={value}
+                                onChange={onChange}
+                                options={jurisdictionWatch?.sandboxOptions}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </Flex>
+                    </Can>
                   )}
                 </Flex>
               )}

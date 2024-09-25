@@ -35,8 +35,8 @@ import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
+import { NavSandboxSelect } from "./nav-sandbox-select"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
-import { SandboxSwitch } from "./sandbox-switch"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -130,6 +130,7 @@ export const NavBar = observer(function NavBar() {
                 {t("site.beta")}
               </Text>
               <Spacer />
+              {currentUser?.isReviewStaff && <NavSandboxSelect />}
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
@@ -255,13 +256,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     </MenuGroup>
   )
 
-  const reviewStaffOnlyItems = (
-    <MenuGroup>
-      <MenuItem>
-        <SandboxSwitch />
-      </MenuItem>
-    </MenuGroup>
-  )
+  const reviewStaffOnlyItems = <></>
 
   const reviewManagerOnlyItems = (
     <MenuGroup>

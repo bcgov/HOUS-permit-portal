@@ -524,8 +524,8 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
-            intoSandboxHeading: "Submit into Sandbox",
-            intoSandboxLabel: "Turn on if populating default sandbox",
+            sandboxIdHeading: "Submit into Sandbox",
+            selectSandboxLabel: "Select a sandbox to submit into",
             forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
@@ -636,7 +636,8 @@ const options = {
           },
         },
         sandbox: {
-          sandboxMode: "Sandbox Mode",
+          formLabel: "Sandbox",
+          live: "Live",
         },
         requirementsLibrary: {
           addAnother: "Add",

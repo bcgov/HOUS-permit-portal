@@ -66,7 +66,7 @@ RSpec.describe Jurisdiction, type: :model do
       it "is valid" do
         jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
         expect(jurisdiction).to be_valid
-        expect(jurisdiction.sandboxes.size).to eq(1)
+        expect(jurisdiction.sandboxes.size).to eq(2)
       end
 
       it "allows multiple sandboxes with unique names" do
@@ -76,23 +76,20 @@ RSpec.describe Jurisdiction, type: :model do
         3.times { jurisdiction.sandboxes.build(attributes_for(:sandbox)) }
 
         expect(jurisdiction).to be_valid
-        expect(jurisdiction.sandboxes.size).to eq(4)
+        expect(jurisdiction.sandboxes.size).to eq(5)
       end
     end
   end
 
   describe "callbacks" do
     context "before validation" do
-      it "builds a sandbox if none exist" do
+      let!(:published_sandbox) { create(:sandbox, :published) }
+      let!(:scheduled_sandbox) { create(:sandbox, :scheduled) }
+      it "builds two sandboxes if none exist" do
         jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
-        expect { jurisdiction.valid? }.to change { jurisdiction.sandboxes.size }.from(0).to(1)
+        expect { jurisdiction.valid? }.to change { jurisdiction.sandboxes.size }.from(0).to(2)
         expect(jurisdiction.sandboxes.first).to be_a_new(Sandbox)
-      end
-
-      it "does not build a sandbox if at least one exists" do
-        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
-        jurisdiction.sandboxes.build
-        expect { jurisdiction.valid? }.not_to change { jurisdiction.sandboxes.size }
+        expect(jurisdiction.sandboxes.second).to be_a_new(Sandbox)
       end
     end
   end

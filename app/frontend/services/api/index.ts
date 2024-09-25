@@ -82,6 +82,11 @@ export class Api {
       request.params = decamelizeRequest(request.params)
       request.data = decamelizeRequest(request.data)
     })
+
+    this.client.addRequestTransform((request) => {
+      const persistedSandboxValues = JSON.parse(localStorage.getItem("SandboxStore"))
+      request.headers["X-Sandbox-ID"] = persistedSandboxValues.currentSandboxId
+    })
   }
 
   addMonitor(monitor: Monitor) {

@@ -30,6 +30,10 @@ class RequirementBlock < ApplicationRecord
 
   after_discard { template_section_blocks.destroy_all }
 
+  def sections
+    requirement_template_sections
+  end
+
   def search_data
     {
       updated_at: updated_at,

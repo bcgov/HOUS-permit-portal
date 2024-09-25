@@ -6,7 +6,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
-import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { IContact, IOption, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 import { SandboxModel } from "./sandbox"
@@ -41,15 +41,12 @@ export const JurisdictionModel = types
     externalApiEnabled: types.optional(types.boolean, false),
     submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
-    sandboxMap: types.map(SandboxModel),
+    sandboxes: types.array(types.reference(SandboxModel)),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
-    get sandboxes() {
-      return Array.from(self.sandboxMap.values())
-    },
     get externalApiKeys() {
       return Array.from(self.externalApiKeysMap.values()).sort((a, b) => (b.createdAt as any) - (a.createdAt as any))
     },
@@ -86,6 +83,11 @@ export const JurisdictionModel = types
         ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
         : t(`${i18nPrefix}.notRequired`)
     },
+    get sandboxOptions(): IOption[] {
+      return self.sandboxes
+        .map((s) => ({ label: s.name, value: s.id }))
+        .concat([{ label: t("sandbox.live"), value: null }])
+    },
   }))
   .views((self) => ({
     get requiredStepsByPermitType() {
@@ -94,9 +96,6 @@ export const JurisdictionModel = types
       const toPermitType = ({ permitTypeId }) => permitTypeId
 
       return R.reduceBy(groupRequirements, [], toPermitType, self.permitTypeRequiredSteps)
-    },
-    get defaultSandbox() {
-      return !R.isEmpty(self.sandboxes) ? self.sandboxes[0] : null
     },
   }))
   .actions((self) => ({

@@ -79,11 +79,12 @@ class Api::TemplateVersionsController < Api::ApplicationController
     render_error("misc.not_found_error", status: :not_found) and return if from_template_version.nil?
 
     if @jurisdiction_template_version_customization =
+         # TODO: TEST COPY SERVICE
          CustomizationCopyService.new(
            from_template_version,
            @template_version,
            Jurisdiction.find(copy_customization_params[:jurisdiction_id]),
-           current_sandbox_id,
+           current_sandbox,
          ).merge_copy_customizations(
            copy_customization_params[:include_electives],
            copy_customization_params[:include_tips],
@@ -152,6 +153,20 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   private
 
+  def template_version_sandbox_scope
+    if user.super_admin?
+      TemplateVersion
+    elsif user.review_manager? || user.regional_review_manager?
+      if sandbox&.template_version_status_scope.present?
+        TemplateVersion.by_status(sandbox.template_version_status_scope)
+      else
+        TemplateVersion
+      end
+    else
+      template_versions.by_status("published")
+    end
+  end
+
   def copy_customization_params
     params.permit(
       %i[
@@ -175,9 +190,9 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def set_jurisdiction_template_version_customization
     @jurisdiction_template_version_customization =
-      @template_version.jurisdiction_template_version_customizations.find_by(
+      @template_version.jurisdiction_template_version_customizations.find_or_create_by(
         jurisdiction_id: params[:jurisdiction_id],
-        sandbox_id: current_sandbox_id,
+        sandbox: current_sandbox,
       )
   end
 

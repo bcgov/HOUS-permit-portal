@@ -45,7 +45,12 @@ class Api::ApplicationController < ActionController::API
   end
 
   # Method to retrieve the current sandbox ID from request headers
-  def current_sandbox_id
-    request.headers["X-Sandbox-ID"]
+
+  def current_sandbox
+    @current_sandbox ||= Sandbox.find_by_id(request.headers["X-Sandbox-ID"])
+  end
+
+  def pundit_user
+    UserContext.new(current_user, current_sandbox)
   end
 end

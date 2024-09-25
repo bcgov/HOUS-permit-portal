@@ -32,8 +32,8 @@ class Jurisdiction < ApplicationRecord
   # Validation to ensure at least one sandbox exists
   validate :must_have_one_sandbox
 
-  # Callback to ensure a sandbox exists
-  before_validation :ensure_one_sandbox
+  # Callback to ensure default sandboxes exist
+  before_validation :ensure_default_sandboxes
 
   before_validation :normalize_locality_type
   before_validation :normalize_name
@@ -53,6 +53,7 @@ class Jurisdiction < ApplicationRecord
   before_create :assign_unique_prefix
 
   def customizations
+    # Convenience method to prevent carpal tunnel syndrome
     jurisdiction_template_version_customizations
   end
 
@@ -204,10 +205,6 @@ class Jurisdiction < ApplicationRecord
     jurisdiction_template_version_customizations.find_by!(template_version_id: template_version.id, sandbox: sandbox)
   end
 
-  def default_sandbox
-    sandboxes.order(created_at: :asc).first
-  end
-
   private
 
   def create_integration_mappings_async
@@ -282,8 +279,9 @@ class Jurisdiction < ApplicationRecord
   end
 
   # Callback method to ensure a default sandbox is created
-  def ensure_one_sandbox
-    sandboxes.build(name: "#{qualified_name} Default Sandbox") if sandboxes.empty?
+  def ensure_default_sandboxes
+    sandboxes.build(name: "Published Sandbox", template_version_status_scope: :published) if sandboxes.published.empty?
+    sandboxes.build(name: "Scheduled Sandbox", template_version_status_scope: :scheduled) if sandboxes.scheduled.empty?
   end
 
   # Custom validation method
