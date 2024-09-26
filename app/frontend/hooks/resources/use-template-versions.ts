@@ -7,38 +7,37 @@ import { ETemplateVersionStatus } from "../../types/enums"
 export const useTemplateVersions = ({
   activityId,
   customErrorMessage,
-  status = ETemplateVersionStatus.published,
+  status,
 }: {
   activityId?: string
   customErrorMessage?: string
   status?: ETemplateVersionStatus
 }) => {
-  const [hasLoaded, setHasLoaded] = useState(false)
   const [error, setError] = useState<Error | undefined>(undefined)
-  const { templateVersionStore } = useMst()
+  const { templateVersionStore, sandboxStore } = useMst()
+  const { currentSandbox } = sandboxStore
+  const { getTemplateVersionsByActivityId, getTemplateVersionsByStatus, fetchTemplateVersions, isLoading } =
+    templateVersionStore
+  status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
+
   const templateVersions = (
-    activityId
-      ? templateVersionStore.getTemplateVersionsByActivityId(activityId, status)
-      : templateVersionStore.getTemplateVersionsByStatus(status)
+    activityId ? getTemplateVersionsByActivityId(activityId, status) : getTemplateVersionsByStatus(status)
   ) as ITemplateVersion[]
   const { t } = useTranslation()
 
   useEffect(() => {
-    if (!hasLoaded) {
-      ;(async () => {
-        const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
+    ;(async () => {
+      const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
 
-        try {
-          const isSuccess = await templateVersionStore.fetchTemplateVersions(activityId, status)
+      try {
+        const isSuccess = await fetchTemplateVersions(activityId, status)
 
-          isSuccess && setHasLoaded(true)
-          !isSuccess && setError(new Error(errorMessage))
-        } catch (e) {
-          setError(e instanceof Error ? e : new Error(errorMessage))
-        }
-      })()
-    }
-  }, [hasLoaded, activityId])
+        !isSuccess && setError(new Error(errorMessage))
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(errorMessage))
+      }
+    })()
+  }, [activityId, currentSandbox?.id])
 
-  return { templateVersions, error, hasLoaded }
+  return { templateVersions, error, isLoading }
 }

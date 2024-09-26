@@ -70,14 +70,7 @@ class Api::GeocoderController < Api::ApplicationController
       render_error "geocoder.jurisdiction_ltsa_error", {}, e and return unless attributes.present?
       jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?
-      render_success jurisdiction,
-                     nil,
-                     {
-                       blueprint: JurisdictionBlueprint,
-                       blueprint_opts: {
-                         view: current_user.super_admin? ? :extended : :base,
-                       },
-                     }
+      render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     rescue StandardError => e
       render_error "geocoder.jurisdiction_error", {}, e and return
     end

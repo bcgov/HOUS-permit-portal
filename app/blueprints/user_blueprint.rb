@@ -36,7 +36,7 @@ class UserBlueprint < Blueprinter::Base
   view :extended do
     include_view :base
     include_view :current_user
-    association :jurisdictions, blueprint: JurisdictionBlueprint, view: :extended
+    association :jurisdictions, blueprint: JurisdictionBlueprint, view: :base
   end
 
   view :invited_user do

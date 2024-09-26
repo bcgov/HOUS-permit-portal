@@ -12,7 +12,6 @@ class Api::TemplateVersionsController < Api::ApplicationController
 
   def index
     status = params[:status] || "published"
-
     @template_versions =
       if params[:activity_id].present?
         policy_scope(TemplateVersion)

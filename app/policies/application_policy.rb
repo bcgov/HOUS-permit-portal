@@ -38,10 +38,11 @@ class ApplicationPolicy
   end
 
   class Scope
-    attr_accessor :user, :scope
+    attr_accessor :user, :sandbox, :scope
 
-    def initialize(user, scope)
-      @user = user
+    def initialize(user_context, scope)
+      @user = user_context.user
+      @sandbox = user_context.sandbox
       @scope = scope
     end
 

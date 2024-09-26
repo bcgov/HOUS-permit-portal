@@ -184,8 +184,8 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
-    createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
-      const { ok, data: response } = yield self.environment.api.createPermitApplication(formData)
+    createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData, sandboxId: string = null) {
+      const { ok, data: response } = yield self.environment.api.createPermitApplication(formData, sandboxId)
       if (ok && response.data) {
         self.mergeUpdate(response.data, "permitApplicationMap")
         return response.data

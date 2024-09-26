@@ -5,7 +5,7 @@ RSpec.describe PermitApplicationPolicy do
 
   subject { described_class.new(UserContext.new(user, sandbox), draft_permit_application) }
 
-  let(:resolved_scope) { described_class::Scope.new(user, PermitApplication.all).resolve }
+  let(:resolved_scope) { described_class::Scope.new(UserContext.new(user, sandbox), PermitApplication.all).resolve }
 
   let(:user) { FactoryBot.create(:user) }
   let(:submitter) { FactoryBot.create(:user, :submitter) }

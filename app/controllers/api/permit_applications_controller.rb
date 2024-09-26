@@ -177,7 +177,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
              submission_collaborator_permit_application_params
            end
          ),
-       ) && @permit_application.submit!
+       ) && @permit_application.submit
       render_success @permit_application,
                      nil,
                      {
@@ -197,7 +197,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def create
     @permit_application =
-      PermitApplication.build(permit_application_params.to_h.merge(submitter: current_user, sandbox: current_sandbox))
+      PermitApplication.build(
+        permit_application_params.to_h.merge(submitter: current_user, sandbox_id: determine_sandbox_id),
+      )
     authorize @permit_application
     if @permit_application.save
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
@@ -338,6 +340,12 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   private
 
+  def determine_sandbox_id
+    return permit_application_params[:sandbox_id] if current_user.super_admin?
+
+    current_sandbox&.id
+  end
+
   def show_blueprint_view_for(user)
     if params[:review] && user.review_staff?
       :jurisdiction_review_extended
@@ -360,7 +368,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
       :pin,
       :pid,
       :first_nations,
-      :sandboxId,
+      :sandbox_id,
       submission_data: {
       },
     )
