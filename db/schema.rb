@@ -403,7 +403,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_215642) do
     t.boolean "first_nations", default: false
     t.datetime "discarded_at"
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
-    t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+    t.index %w[name first_nations],
+            name: "index_requirement_blocks_on_name_and_first_nations",
+            unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
