@@ -84,9 +84,7 @@ export const JurisdictionModel = types
         : t(`${i18nPrefix}.notRequired`)
     },
     get sandboxOptions(): IOption[] {
-      return self.sandboxes
-        .map((s) => ({ label: s.name, value: s.id }))
-        .concat([{ label: t("sandbox.live"), value: null }])
+      return self.sandboxes.map((s) => ({ label: s.name, value: s.id }))
     },
   }))
   .views((self) => ({

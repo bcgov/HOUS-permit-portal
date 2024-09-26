@@ -51,12 +51,12 @@ export const JurisdictionStoreModel = types
         self.rootStore.sandboxStore.mergeUpdateAll(jurisdiction.sandboxes, "sandboxMap")
       }
       return R.mergeRight(jurisdiction, {
-        sandboxes: jurisdiction.sandboxes.map((sandbox) => sandbox.id),
+        sandboxes: jurisdiction.sandboxes?.map((sandbox) => sandbox.id),
       })
     },
     // Action to add a new Jurisdiction
     addJurisdiction(jurisdiction: IJurisdiction) {
-      self.jurisdictionMap.put(jurisdiction)
+      self.mergeUpdate(jurisdiction, "jurisdictionMap")
     },
     // Action to remove a Jurisdiction
     removeJurisdiction(id: string) {
