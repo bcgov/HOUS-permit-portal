@@ -193,6 +193,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      error_message: @permit_application.errors.full_messages.join(", "),
                    }
     end
+  rescue AASM::InvalidTransition
+    render_error "permit_application.submit_state_error", message_opts: {}
   end
 
   def create
