@@ -517,6 +517,12 @@ export class Api {
     )
   }
 
+  async promoteJurisdictionTemplateVersionCustomization(templateId: string, jurisdictionId: string) {
+    return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization/promote`
+    )
+  }
+
   async unscheduleTemplateVersion(templateId: string) {
     return this.client.post<ApiResponse<ITemplateVersion>>(
       `requirement_templates/template_versions/${templateId}/unschedule`
