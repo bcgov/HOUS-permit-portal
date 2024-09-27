@@ -22,7 +22,14 @@ class RequirementTemplate < ApplicationRecord
   has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
 
   # Scope to get RequirementTemplates with a published template version
-  scope :with_published_version, -> { joins(:published_template_version) }
+  scope :with_scoped_version,
+        ->(sandbox) do
+          joins(:template_versions).where(
+            template_versions: {
+              status: sandbox&.template_version_status_scope || :published,
+            },
+          )
+        end
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
 

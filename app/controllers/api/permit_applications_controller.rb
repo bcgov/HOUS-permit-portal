@@ -197,9 +197,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def create
     @permit_application =
-      PermitApplication.build(
-        permit_application_params.to_h.merge(submitter: current_user, sandbox_id: determine_sandbox_id),
-      )
+      PermitApplication.build(permit_application_params.to_h.merge(submitter: current_user, sandbox: current_sandbox))
     authorize @permit_application
     if @permit_application.save
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
@@ -339,12 +337,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   private
-
-  def determine_sandbox_id
-    return permit_application_params[:sandbox_id] if current_user.super_admin?
-
-    current_sandbox&.id
-  end
 
   def show_blueprint_view_for(user)
     if params[:review] && user.review_staff?
