@@ -51,7 +51,7 @@ en:
             submitter:
               incorrect_role: "must have the submitter role"
             jurisdiction:
-              no_contact: "not available."
+              no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
             pid_or_pin: "must have a PID or PIN."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
