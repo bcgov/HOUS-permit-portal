@@ -35,6 +35,7 @@ import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
+import { NavSandboxSelect } from "./nav-sandbox-select"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
@@ -129,6 +130,7 @@ export const NavBar = observer(function NavBar() {
                 {t("site.beta")}
               </Text>
               <Spacer />
+              {currentUser?.isReviewStaff && <NavSandboxSelect />}
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
@@ -147,6 +149,7 @@ export const NavBar = observer(function NavBar() {
                   </Text>
                 </Flex>
               )}
+
               {currentUser?.isRegionalReviewManager && (
                 <VStack align="flex-end" gap={1}>
                   <Text color="whiteAlpha.700" textAlign="right" variant="tiny_uppercase">
@@ -253,6 +256,8 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     </MenuGroup>
   )
 
+  const reviewStaffOnlyItems = <></>
+
   const reviewManagerOnlyItems = (
     <MenuGroup>
       <NavMenuItem
@@ -331,6 +336,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                   )}
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
+                  {currentUser?.isReviewStaff && reviewStaffOnlyItems}
                   {(currentUser?.isReviewManager || currentUser?.isRegionalReviewManager) && reviewManagerOnlyItems}
                   {(currentUser?.isSuperAdmin ||
                     currentUser?.isReviewManager ||

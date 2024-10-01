@@ -1,9 +1,11 @@
 require "rails_helper"
 
 RSpec.describe PermitApplicationPolicy do
-  subject { described_class.new(user, draft_permit_application) }
+  let(:sandbox) { FactoryBot.create(:sandbox) }
 
-  let(:resolved_scope) { described_class::Scope.new(user, PermitApplication.all).resolve }
+  subject { described_class.new(UserContext.new(user, sandbox), draft_permit_application) }
+
+  let(:resolved_scope) { described_class::Scope.new(UserContext.new(user, sandbox), PermitApplication.all).resolve }
 
   let(:user) { FactoryBot.create(:user) }
   let(:submitter) { FactoryBot.create(:user, :submitter) }
@@ -60,12 +62,12 @@ RSpec.describe PermitApplicationPolicy do
 
   context "for a submitter with a submitted permit application" do
     let(:user) { submitter }
-
+    let(:sandbox) { FactoryBot.create(:sandbox) }
     let(:submitted_permit_application) do
       FactoryBot.create(:permit_application, :newly_submitted, submitter: submitter)
     end
 
-    subject { described_class.new(submitter, submitted_permit_application) }
+    subject { described_class.new(UserContext.new(user, sandbox), submitted_permit_application) }
 
     it "does not permit update" do
       expect(subject.update?).to be false

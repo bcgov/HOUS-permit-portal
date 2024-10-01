@@ -57,6 +57,8 @@ export const withMerge =
        * @typeParam T - Typeof the MST Model
        */
       mergeUpdateAll(resourceData: T[], collectionName: string) {
+        if (!resourceData) return
+
         let resourceDataToUpdate = resourceData
         if (self["__beforeMergeUpdateAll"]) {
           resourceDataToUpdate = self["__beforeMergeUpdateAll"](resourceData)

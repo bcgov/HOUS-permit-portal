@@ -1,28 +1,32 @@
-import { Button, Menu, MenuButton, MenuList } from "@chakra-ui/react"
-import { Archive, CaretDown, ClockClockwise } from "@phosphor-icons/react"
+import { Button, Divider, Menu, MenuButton, MenuList } from "@chakra-ui/react"
+import { Archive, CaretDown, ClockClockwise, Copy } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { ISearch } from "../../../lib/create-search-model"
 import { IRequirementBlock } from "../../../models/requirement-block"
+import { useMst } from "../../../setup/root"
 import { ManageMenuItemButton } from "../../shared/base/manage-menu-item"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 
-interface IProps<TSearchModel extends ISearch> {
+interface IBlockSetupOptionsMenuProps {
   requirementBlock: IRequirementBlock
-  searchModel?: TSearchModel
 }
 
-export const BlockSetupOptionsMenu = observer(function BlockSetupOptionsMenu<TSearchModel extends ISearch>({
+export const BlockSetupOptionsMenu = observer(function BlockSetupOptionsMenu({
   requirementBlock,
-  searchModel,
-}: IProps<TSearchModel>) {
+}: IBlockSetupOptionsMenuProps) {
+  const { requirementBlockStore } = useMst()
+
   const handleRemove = async () => {
-    if (await requirementBlock.destroy()) searchModel?.search()
+    if (await requirementBlock.destroy()) requirementBlockStore?.search()
   }
 
   const handleRestore = async () => {
-    if (await requirementBlock.restore()) searchModel?.search()
+    if (await requirementBlock.restore()) requirementBlockStore?.search()
+  }
+
+  const handleCopy = async () => {
+    if (await requirementBlockStore.copyRequirementBlock(requirementBlock)) requirementBlockStore?.search()
   }
 
   return (
@@ -42,6 +46,10 @@ export const BlockSetupOptionsMenu = observer(function BlockSetupOptionsMenu<TSe
       </MenuButton>
 
       <MenuList>
+        <ManageMenuItemButton onClick={handleCopy} leftIcon={<Copy size={16} />}>
+          {t("requirementsLibrary.modals.edit.copy")}
+        </ManageMenuItemButton>
+        <Divider color="border.light" />
         {requirementBlock.isDiscarded ? (
           <ManageMenuItemButton
             color="semantic.success"

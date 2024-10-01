@@ -4,7 +4,7 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
   before_action :set_jurisdiction,
-                only: %i[show update search_users search_permit_applications update_external_api_enabled sandboxes]
+                only: %i[show update search_users search_permit_applications update_external_api_enabled]
   skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
   skip_before_action :authenticate_user!, only: %i[show index jurisdiction_options]
 
@@ -140,12 +140,6 @@ class Api::JurisdictionsController < Api::ApplicationController
                        view: :jurisdiction_review_inbox,
                      },
                    }
-  end
-
-  def sandboxes
-    authorize @jurisdiction
-
-    render_success @jurisdiction.sandboxes, nil, { blueprint: SandboxBlueprint, blueprint_opts: {} }
   end
 
   def jurisdiction_options

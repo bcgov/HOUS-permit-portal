@@ -4,7 +4,11 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show?
-    !record.scheduled? || (user.super_admin? || user.review_manager? || user.regional_review_manager?)
+    if sandbox.nil? || sandbox.published?
+      !record.scheduled? || user.super_admin?
+    elsif sandbox.scheduled?
+      record.scheduled?
+    end
   end
 
   def show_jurisdiction_template_version_customization?
@@ -46,8 +50,9 @@ class TemplateVersionPolicy < ApplicationPolicy
           .joins(requirement_template: :activity)
           .where(requirement_templates: { discarded_at: nil })
           .where.not(status: "deprecated")
-
-      if user.super_admin? || user.review_manager? || user.regional_review_manager?
+      if sandbox.present?
+        template_versions.for_sandbox(sandbox)
+      elsif user.super_admin? || user.review_manager? || user.regional_review_manager?
         template_versions
       else
         template_versions.where(status: "published")

@@ -28,20 +28,20 @@ interface IProps {
 export const DigitalBuildingPermitsList = observer(function DigitalBuildingPermitsList({
   activityId,
   renderButton,
-  status = ETemplateVersionStatus.published,
+  status,
   statusDisplayOptions,
 }: IProps) {
   const { t } = useTranslation()
-  const { error, templateVersions, hasLoaded } = useTemplateVersions({
+  const { error, templateVersions, isLoading } = useTemplateVersions({
     activityId,
-    status,
     customErrorMessage: t("errors.fetchBuildingPermits"),
+    status,
   })
   const { showStatus = false, showVersionDate = true } = statusDisplayOptions || {}
   const showStatusTag = showStatus || can("requirementTemplate:manage")
 
   if (error) return <ErrorScreen error={error} />
-  if (!hasLoaded) return <LoadingScreen />
+  if (isLoading) return <LoadingScreen />
 
   return (
     <Stack as="section" w={"min(100%, 866px)"} px={6}>

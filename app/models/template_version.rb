@@ -26,6 +26,13 @@ class TemplateVersion < ApplicationRecord
   after_save :create_integration_mappings
   after_save :notify_users_of_missing_requirements_mappings
 
+  scope :for_sandbox, ->(sandbox) { where(status: sandbox.template_version_status_scope) }
+
+  def customizations
+    # Convenience method to prevent carpal tunnel syndrome
+    jurisdiction_template_version_customizations
+  end
+
   def version_date_in_province_time
     version_date.in_time_zone("Pacific Time (US & Canada)").to_time
   end

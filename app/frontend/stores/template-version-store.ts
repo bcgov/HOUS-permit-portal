@@ -11,6 +11,7 @@ export const TemplateVersionStoreModel = types
   .props({
     templateVersionMap: types.map(TemplateVersionModel),
     templateVersionsByActivityId: types.map(types.array(types.safeReference(TemplateVersionModel))),
+    isLoading: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -37,6 +38,7 @@ export const TemplateVersionStoreModel = types
   }))
   .actions((self) => ({
     fetchTemplateVersions: flow(function* (activityId?: string, status?: ETemplateVersionStatus) {
+      self.isLoading = true
       const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(activityId, status))
 
       if (response.ok) {
@@ -53,7 +55,7 @@ export const TemplateVersionStoreModel = types
             templateVersions.map((templateVersion) => templateVersion.id)
           )
       }
-
+      self.isLoading = false
       return response.ok
     }),
 

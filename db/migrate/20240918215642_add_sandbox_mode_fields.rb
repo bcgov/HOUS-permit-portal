@@ -4,6 +4,7 @@ class AddSandboxModeFields < ActiveRecord::Migration[7.1]
     create_table :sandboxes, id: :uuid do |t|
       t.references :jurisdiction, null: false, foreign_key: true, type: :uuid
       t.string :name, null: false
+      t.integer :template_version_status_scope, null: false, default: 0
       t.timestamps
     end
 
