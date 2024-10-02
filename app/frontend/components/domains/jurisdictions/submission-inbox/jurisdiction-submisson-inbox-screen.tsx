@@ -74,6 +74,8 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
             </Flex>
           ) : (
             currentJurisdiction.tablePermitApplications.map((pa: IPermitApplication) => {
+              if (!pa.submitter) return <></>
+
               return (
                 <Box
                   key={pa.id}

@@ -337,6 +337,13 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
+  def download_application_metrics_csv
+    authorize :permit_application, :download_application_metrics_csv?
+
+    csv_data = PermitApplicationExportService.new.application_metrics_csv
+    send_data csv_data, type: "text/csv"
+  end
+
   private
 
   def show_blueprint_view_for(user)
