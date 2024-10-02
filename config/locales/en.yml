@@ -415,6 +415,9 @@ en:
       submit_error:
         title: Error
         message: "%{error_message}"
+      submit_state_error:
+        title: Error
+        message: "This application has already been submitted"
       outdated_error:
         title: Error
         message: "Please refresh the page. A new template version is available."
