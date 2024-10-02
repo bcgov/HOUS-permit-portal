@@ -91,6 +91,26 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
+    downloadApplicationMetrics: flow(function* () {
+      try {
+        const response = yield* toGenerator(self.environment.api.downloadApplicationMetricsCsv())
+        if (!response.ok) {
+          return response.ok
+        }
+
+        const blobData = response.data
+        const fileName = `${t("reporting.applicationMetrics.filename")}.csv`
+        const mimeType = "text/csv"
+        startBlobDownload(blobData, mimeType, fileName)
+
+        return response
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download permit application metrics:`, error)
+        }
+        throw error
+      }
+    }),
   }))
 
 export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {}

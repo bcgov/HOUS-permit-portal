@@ -12,7 +12,7 @@ import { GridHeaders } from "./grid-header"
 export const ReportingScreen = observer(() => {
   const { t } = useTranslation()
   const { stepCodeStore } = useMst()
-  const { downloadStepCodeSummary } = stepCodeStore
+  const { downloadStepCodeSummary, downloadApplicationMetrics } = stepCodeStore
 
   const [filter, setFilter] = useState("")
 
@@ -42,6 +42,11 @@ export const ReportingScreen = observer(() => {
       name: t("reporting.stepCodeSummary.name"),
       description: t("reporting.stepCodeSummary.description"),
       onClick: downloadStepCodeSummary,
+    },
+    {
+      name: t("reporting.applicationMetrics.name"),
+      description: t("reporting.applicationMetrics.description"),
+      onClick: downloadApplicationMetrics,
     },
   ]
 

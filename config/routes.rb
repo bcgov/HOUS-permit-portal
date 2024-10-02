@@ -136,6 +136,9 @@ Rails.application.routes.draw do
       patch "update_version", on: :member
       patch "revision_requests", on: :member, to: "permit_applications#update_revision_requests"
       post "revision_requests/finalize", on: :member, to: "permit_applications#finalize_revision_requests"
+      get "download_application_metrics_csv",
+          on: :collection,
+          to: "permit_applications#download_application_metrics_csv"
     end
 
     resources :permit_collaborations, only: %i[destroy] do

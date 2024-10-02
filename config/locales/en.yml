@@ -51,7 +51,7 @@ en:
             submitter:
               incorrect_role: "must have the submitter role"
             jurisdiction:
-              no_contact: "not available."
+              no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
             pid_or_pin: "must have a PID or PIN."
         requirement_template:
           step_code_package_required: '"Energy step code" is required to have the Design package energy step code file'
@@ -415,6 +415,9 @@ en:
       submit_error:
         title: Error
         message: "%{error_message}"
+      submit_state_error:
+        title: Error
+        message: "This application has already been submitted"
       outdated_error:
         title: Error
         message: "Please refresh the page. A new template version is available."
@@ -600,3 +603,4 @@ en:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"
     requirement_summary_csv_headers: "Field Name,Is Elective,Used By (Number of Jurisdictions),Reason: Bylaw Count, Reason: Zoning count,Reason: Policy Count"
     step_code_summary_csv_headers: "Jurisdiction,Permit type,Enabled/disabled,Energy step code level,Zero carbon level"
+    application_metrics_csv_headers: "Jurisdiction,In draft,In inbox"
