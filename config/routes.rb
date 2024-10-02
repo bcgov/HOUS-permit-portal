@@ -85,6 +85,8 @@ Rails.application.routes.draw do
               to: "template_versions#show_jurisdiction_template_version_customization"
           post "jurisdiction_template_version_customization",
                to: "template_versions#create_or_update_jurisdiction_template_version_customization"
+          post "jurisdiction_template_version_customization/promote",
+               to: "template_versions#promote_jurisdiction_template_version_customization"
           post "copy_jurisdiction_template_version_customization",
                to: "template_versions#copy_jurisdiction_template_version_customization"
           get "download_customization_csv", to: "template_versions#download_customization_csv"

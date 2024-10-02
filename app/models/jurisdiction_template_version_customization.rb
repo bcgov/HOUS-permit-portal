@@ -86,6 +86,18 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
       .count
   end
 
+  def promote
+    # Find or create a record with same jurisdiction_id and template_version_id but with sandbox_id == nil
+    target_record =
+      JurisdictionTemplateVersionCustomization.find_or_create_by(
+        jurisdiction_id: self.jurisdiction_id,
+        template_version_id: self.template_version_id,
+        sandbox_id: nil,
+      )
+    target_record.customizations = self.customizations
+    target_record.save!
+  end
+
   private
 
   def reindex_jurisdiction_templates_used_size

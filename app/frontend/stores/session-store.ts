@@ -37,6 +37,9 @@ export const SessionStoreModel = types
         self.rootStore.subscribeToUserChannel()
 
         if (opts.redirectToRoot) window.location.replace("/")
+
+        // Clear any temporarily set sandbox IDs for super admins
+        if (!self.rootStore.sandboxStore.shouldPersistSandboxId) self.rootStore.sandboxStore.clearSandboxId()
         return true
       }
       return false

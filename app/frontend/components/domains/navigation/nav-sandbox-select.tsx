@@ -13,7 +13,7 @@ export const NavSandboxSelect = observer(function NavSandboxSelect() {
 
   return (
     <FormControl display="flex" alignItems="center">
-      <FormLabel htmlFor="sandbox-switch" mb="0" color="white">
+      <FormLabel htmlFor="sandbox-select" mb="0" color="white">
         {t("sandbox.formLabel")}
       </FormLabel>
       <SandboxSelect

@@ -137,6 +137,7 @@ const options = {
           delete: "Delete",
           confirmDelete: "Confirm delete",
           confirmation: "Are you sure you want to proceed?",
+          confirmOverwrite: "Are you sure you want to save and overwrite this item?",
           sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
           ok: "OK",
@@ -1398,6 +1399,9 @@ const options = {
               copyTips: "Import tips from ({{ templateLabel }})",
               copyElectives: "Import electives from ({{ templateLabel }})",
             },
+            promoteElectives: "Save and promote",
+            promoteElectivesMessage:
+              "This will publish your sandboxed customizations and overwrite your non-sandboxed live electives!",
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",

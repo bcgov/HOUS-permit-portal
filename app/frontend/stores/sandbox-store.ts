@@ -18,6 +18,9 @@ export const SandboxStoreModel = types
     get currentSandbox() {
       return self.sandboxMap.get(self.currentSandboxId)
     },
+    get shouldPersistSandboxId() {
+      return self.rootStore.userStore.currentUser.isReviewStaff
+    },
   }))
   .views((self) => ({
     get sandboxes() {

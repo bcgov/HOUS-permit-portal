@@ -130,7 +130,6 @@ export const NavBar = observer(function NavBar() {
                 {t("site.beta")}
               </Text>
               <Spacer />
-              {currentUser?.isReviewStaff && <NavSandboxSelect />}
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
@@ -176,6 +175,7 @@ export const NavBar = observer(function NavBar() {
               )}
               <NavBarMenu />
             </HStack>
+            {currentUser?.isReviewStaff && <NavSandboxSelect />}
           </Flex>
         </Container>
       </Box>
