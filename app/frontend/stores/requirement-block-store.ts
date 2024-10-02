@@ -18,7 +18,7 @@ import {
   TAutoComplianceModuleConfigurations,
   TValueExtractorAutoComplianceModuleConfiguration,
 } from "../types/types"
-import { isValueExtractorModuleConfiguration } from "../utils/utility-functions"
+import { incrementLastWord, isValueExtractorModuleConfiguration } from "../utils/utility-functions"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -178,7 +178,7 @@ export const RequirementBlockStoreModel = types
           const { id, ...rest } = attr
           return rest
         }),
-        name: `${requirementBlock.name} ${t("ui.copyNoun")}`,
+        name: incrementLastWord(requirementBlock.name),
       }
 
       return yield self.createRequirementBlock(clonedParams)

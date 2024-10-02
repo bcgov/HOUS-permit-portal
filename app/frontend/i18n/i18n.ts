@@ -565,7 +565,7 @@ const options = {
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailable:
-              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
+              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -1648,6 +1648,13 @@ const options = {
             description: "A summary of step code requirements by jurisdictions",
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
+          },
+          applicationMetrics: {
+            name: "Permit application metrics",
+            description:
+              "Submitted and draft applications by jurisdiction, excluding submissions created by employee accounts",
+            title: "Submitted and draft applications by jurisdiction",
+            filename: "Submitted and draft applications by jurisdiction",
           },
           columnHeaders: {
             name: "Name",
