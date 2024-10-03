@@ -242,3 +242,9 @@ export function incrementLastWord(input: string): string {
   // Join the array back into a string and return
   return words.join(" ")
 }
+
+export function formatPidValue(pid?: string) {
+  if (!pid) return null
+
+  return pid.replace(/[^a-zA-Z0-9]/g, "")
+}

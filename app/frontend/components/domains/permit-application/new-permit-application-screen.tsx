@@ -105,14 +105,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
         setValue("jurisdiction", jurisdiction)
-
-        if (R.isNil(siteWatch?.value) && pidWatch) {
-          //the pid is valid, lets try to fill in the address based on the PID
-          const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
-          if (siteDetails) {
-            setValue("site", siteDetails)
-          }
-        }
       } else {
         setPinMode(true)
         setValue("jurisdiction", null)
