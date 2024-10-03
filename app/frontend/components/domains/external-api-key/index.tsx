@@ -145,7 +145,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
                   target={"_blank"}
                   rel="noopener noreferrer"
                 >
-                  Access the API Documentation
+                  {t("externalApiKey.index.accessDocs")}
                 </Link>
               ),
             }}

@@ -1,6 +1,7 @@
 class Jurisdiction < ApplicationRecord
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
+  include JurisdictionExternalApiState
 
   BASE_INCLUDES = %i[permit_type_submission_contacts contacts permit_type_required_steps]
 
@@ -31,9 +32,9 @@ class Jurisdiction < ApplicationRecord
   before_validation :normalize_locality_type
   before_validation :normalize_name
   before_validation :set_type_based_on_locality
+
   before_save :sanitize_html_fields
 
-  after_save :create_integration_mappings_async, if: :saved_change_to_external_api_enabled?
   after_create :create_permit_type_required_steps
 
   accepts_nested_attributes_for :contacts
@@ -190,16 +191,6 @@ class Jurisdiction < ApplicationRecord
   end
 
   private
-
-  def create_integration_mappings_async
-    return unless external_api_enabled?
-
-    if Rails.env.test?
-      ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
-    else
-      ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
-    end
-  end
 
   def create_permit_type_required_steps
     PermitType.all.each do |permit_type|

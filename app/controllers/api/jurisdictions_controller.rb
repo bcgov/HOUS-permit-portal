@@ -51,21 +51,48 @@ class Api::JurisdictionsController < Api::ApplicationController
   def update_external_api_enabled
     authorize @jurisdiction, :update_external_api_enabled?
 
-    if @jurisdiction.update(external_api_enabled: update_external_api_enabled_params)
-      render_success @jurisdiction,
-                     (
-                       if @jurisdiction.external_api_enabled?
-                         "jurisdiction.external_api_enabled_success"
-                       else
-                         "jurisdiction.external_api_disabled_success"
-                       end
-                     ),
-                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :minimal } }
-    else
-      render_error "jurisdiction.update_external_api_enabled_error",
-                   message_opts: {
-                     error_message: @jurisdiction.errors.full_messages.join(", "),
-                   }
+    desired_enabled = update_external_api_enabled_params
+
+    begin
+      if desired_enabled
+        # Attempt to enable external API
+        if @jurisdiction.g_off?
+          @jurisdiction.enable_external_api!(current_user)
+        elsif @jurisdiction.j_off?
+          @jurisdiction.enable_again_external_api!(current_user)
+        elsif @jurisdiction.j_on?
+          # Already enabled; no action needed
+        end
+      else
+        # Attempt to disable external API
+        if @jurisdiction.j_on?
+          if current_user.super_admin?
+            @jurisdiction.reset_external_api!(current_user)
+          else
+            @jurisdiction.disable_external_api!(current_user)
+          end
+        elsif @jurisdiction.j_off?
+          @jurisdiction.reset_external_api!(current_user)
+        elsif @jurisdiction.g_off?
+          # Already disabled; no action needed
+          # Optionally, you can choose to return a specific message
+        end
+      end
+
+      # Determine the appropriate success message based on the new state
+      message =
+        case @jurisdiction.external_api_state
+        when "j_on"
+          "jurisdiction.external_api_enabled_success"
+        when "j_off", "g_off"
+          "jurisdiction.external_api_disabled_success"
+        else
+          "jurisdiction.update_success"
+        end
+
+      render_success @jurisdiction, message, { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :minimal } }
+    rescue AASM::InvalidTransition, StandardError
+      render_error "jurisdiction.update_external_api_enabled_error", message_opts: {}
     end
   end
 

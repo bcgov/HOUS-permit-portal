@@ -69,22 +69,18 @@ export const GridHeaders = observer(function GridHeaders() {
 })
 
 const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
-  const { jurisdictionStore, userStore } = useMst()
+  const { jurisdictionStore } = useMst()
   const { currentJurisdiction } = jurisdictionStore
-  const { currentUser } = userStore
   const { t } = useTranslation()
 
-  const isDisabled =
-    (currentUser.isReviewManager || currentUser.isRegionalReviewManager) && !currentJurisdiction.externalApiEnabled
   const shouldUseDisableConfirmationModal =
-    !isDisabled && currentJurisdiction.externalApiEnabled && currentJurisdiction.externalApiKeysMap.size > 0
+    currentJurisdiction.externalApiEnabled && currentJurisdiction.externalApiKeysMap.size > 0
 
   return shouldUseDisableConfirmationModal ? (
     <RemoveConfirmationModal
       renderTriggerButton={({ onClick }) => (
         <ExternalApiEnabledSwitch
           externalApiEnabled={currentJurisdiction.externalApiEnabled}
-          isDisabled={isDisabled}
           // @ts-ignore
           onChange={onClick}
         />
@@ -97,7 +93,6 @@ const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
   ) : (
     <ExternalApiEnabledSwitch
       externalApiEnabled={currentJurisdiction.externalApiEnabled}
-      isDisabled={isDisabled}
       onChange={currentJurisdiction.toggleExternalApiEnabled}
     />
   )

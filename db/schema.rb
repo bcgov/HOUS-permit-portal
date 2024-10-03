@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -196,7 +196,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
     t.string "prefix", null: false
     t.string "slug"
     t.integer "map_zoom"
-    t.boolean "external_api_enabled", default: false
+    t.string "external_api_state", default: "g_off", null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -245,6 +245,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
+    t.uuid "sandbox_id"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -253,6 +254,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
             unique: true
     t.index ["permit_type_id"],
             name: "index_permit_applications_on_permit_type_id"
+    t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"],
             name: "index_permit_applications_on_template_version_id"
@@ -889,6 +891,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
+  add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "template_versions"
   add_foreign_key "jurisdictions",
@@ -901,6 +904,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
   add_foreign_key "permit_applications",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
@@ -926,6 +930,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
+  add_foreign_key "sandboxes", "jurisdictions"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",
