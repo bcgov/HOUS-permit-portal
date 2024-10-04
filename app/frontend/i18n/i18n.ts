@@ -641,6 +641,13 @@ const options = {
           formLabel: "Sandbox",
           live: "Live",
         },
+        earlyAccessRequirementsLibrary: {
+          index: {
+            title: "Early access requirements library",
+            description: "List of all Early Access Requirement Blocks in the system that can be used inside Templates.",
+            tableHeading: "previews",
+          },
+        },
         requirementsLibrary: {
           addAnother: "Add",
           addAnotherPerson: "Add another person",
@@ -1189,6 +1196,12 @@ const options = {
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
             "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
+          earlyAccess: {
+            title: "Early Access",
+            adminDescription: "{TODO early access description}",
+            previews: { title: "Early access previews", description: "{TODO preview description}" },
+            requirements: { title: "Early access requirements", description: "{TODO requiremet description}" },
+          },
           configurationManagement: {
             title: "Configuration management",
             reviewManagerDescription:
@@ -1388,6 +1401,24 @@ const options = {
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
         },
+        earlyAccessRequirementTemplate: {
+          index: {
+            tableHeading: "Previews",
+            title: "Early access templates catalogue",
+            invitationInfo: "TODO: Invitation info. Ensure that you invite specific users to your previews.",
+            createButton: "Create new early access template",
+            seeArchivedButton: "See archived",
+          },
+          fields: {
+            nickname: "Nickname",
+            permitType: "Permit type",
+            activity: "Work type",
+            firstNations: "First nations?",
+            sharedWith: "Shared with",
+            updatedAt: "Updated at",
+            assignee: "Assigned",
+          },
+        },
         requirementTemplate: {
           compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
           changed: "changed",
@@ -1477,7 +1508,7 @@ const options = {
             tableHeading: "Templates",
             title: "Permit templates catalogue",
             description:
-              "List of all permit templates in the system that's been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
+              "List of all permit templates in the system that's been created by the Super Admin. Only published templates will be visible to jurisdictions and submitters.",
             createButton: "Create new template",
             seeArchivedButton: "See archived",
           },
@@ -1820,6 +1851,7 @@ const options = {
             revisionReasonSetup: "Revision reason setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
+            earlyAccess: "Early access",
           },
         },
         automatedCompliance: {

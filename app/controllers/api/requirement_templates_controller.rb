@@ -1,6 +1,5 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
-
   before_action :set_requirement_template, only: %i[show destroy restore update schedule force_publish_now]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
@@ -207,6 +206,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :copy_existing,
         :activity_id,
         :permit_type_id,
+        :type,
         requirement_template_sections_attributes: [
           :id,
           :name,

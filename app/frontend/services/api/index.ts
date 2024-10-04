@@ -38,6 +38,7 @@ import {
 import {
   ECollaborationType,
   ECollaboratorType,
+  EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
@@ -396,7 +397,9 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
-  async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
+  async fetchRequirementTemplates(
+    params?: TSearchParams<ERequirementTemplateSortFields | EEarlyAccessRequirementTemplateSortFields>
+  ) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 

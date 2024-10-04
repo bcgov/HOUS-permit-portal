@@ -35,7 +35,6 @@ import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
-import { NavSandboxSelect } from "./nav-sandbox-select"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
@@ -175,7 +174,8 @@ export const NavBar = observer(function NavBar() {
               )}
               <NavBarMenu />
             </HStack>
-            {currentUser?.isReviewStaff && <NavSandboxSelect />}
+            {/* TODO: Enable sandboxes */}
+            {/* {currentUser?.isReviewStaff && <NavSandboxSelect />} */}
           </Flex>
         </Container>
       </Box>

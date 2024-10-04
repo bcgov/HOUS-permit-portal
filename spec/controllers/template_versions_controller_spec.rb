@@ -4,9 +4,9 @@ RSpec.describe Api::TemplateVersionsController, type: :controller do
   let!(:jurisdiction) { create(:sub_district) }
   let!(:review_manager) { create(:user, :review_manager, jurisdiction: jurisdiction) }
 
-  let!(:non_first_nations_template) { create(:requirement_template, first_nations: false) }
+  let!(:non_first_nations_template) { create(:live_requirement_template, first_nations: false) }
   let!(:non_first_nations_version) { create(:template_version, requirement_template: non_first_nations_template) }
-  let!(:first_nations_template) { create(:requirement_template, first_nations: true) }
+  let!(:first_nations_template) { create(:live_requirement_template, first_nations: true) }
   let!(:first_nations_version) { create(:template_version, requirement_template: first_nations_template) }
 
   let!(:customization) do

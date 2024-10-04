@@ -199,6 +199,24 @@ const ExportTemplateSummaryScreen = lazy(() =>
   }))
 )
 
+const EarlyAccessScreen = lazy(() =>
+  import("../super-admin/early-access/early-access-screen").then((module) => ({
+    default: module.EarlyAccessScreen,
+  }))
+)
+
+const EarlyAccessRequirementTemplatesScreen = lazy(() =>
+  import("../super-admin/early-access/requirement-templates").then((module) => ({
+    default: module.EarlyAccessRequirementTemplatesScreen,
+  }))
+)
+
+const EarlyAccessRequirementsLibraryScreen = lazy(() =>
+  import("../super-admin/early-access/requirements-library").then((module) => ({
+    default: module.EarlyAccessRequirementsLibraryScreen,
+  }))
+)
+
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -209,6 +227,7 @@ const ProfileScreen = lazy(() =>
 const RedirectScreen = lazy(() =>
   import("../../shared/base/redirect-screen").then((module) => ({ default: module.RedirectScreen }))
 )
+
 const Footer = lazy(() => import("../../shared/base/footer").then((module) => ({ default: module.Footer })))
 
 export const Navigation = observer(() => {
@@ -285,7 +304,9 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
+      <Route path="/early-access/requirements-library" element={<EarlyAccessRequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
+      <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
@@ -297,6 +318,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
+      <Route path="/early-access" element={<EarlyAccessScreen />} />
     </>
   )
 
