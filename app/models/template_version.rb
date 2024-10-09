@@ -26,10 +26,6 @@ class TemplateVersion < ApplicationRecord
   after_save :create_integration_mappings
   after_save :notify_users_of_missing_requirements_mappings
 
-  def formatted_permit_classifications
-    "#{permit_type.name} - #{activity.name}"
-  end
-
   def version_date_in_province_time
     version_date.in_time_zone("Pacific Time (US & Canada)").to_time
   end
@@ -91,7 +87,7 @@ class TemplateVersion < ApplicationRecord
   def create_integration_mappings
     return unless !deprecation_reason_unscheduled?
 
-    api_enabled_jurisdictions = Jurisdiction.where(external_api_enabled: true)
+    api_enabled_jurisdictions = Jurisdiction.where(external_api_state: "j_on")
 
     existing_mapping_jurisdiction_ids = integration_mappings.pluck(:jurisdiction_id)
 
@@ -128,7 +124,7 @@ class TemplateVersion < ApplicationRecord
   def notify_users_of_missing_requirements_mappings
     return unless saved_change_to_status? && (published? || scheduled?)
     relevant_integration_mappings =
-      integration_mappings.joins(:jurisdiction).where({ jurisdictions: { external_api_enabled: true } })
+      integration_mappings.joins(:jurisdiction).where({ jurisdictions: { external_api_state: "j_on" } })
 
     relevant_integration_mappings.each { |im| im.send_missing_requirements_mapping_communication }
   end

@@ -25,6 +25,7 @@ class User < ApplicationRecord
   # Associations
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :jurisdictions, through: :jurisdiction_memberships
+  has_many :integration_mapping_notifications, as: :notifiable, dependent: :destroy
 
   has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
   has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction

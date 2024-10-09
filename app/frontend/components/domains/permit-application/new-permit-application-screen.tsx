@@ -105,14 +105,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
         setValue("jurisdiction", jurisdiction)
-
-        if (R.isNil(siteWatch?.value) && pidWatch) {
-          //the pid is valid, lets try to fill in the address based on the PID
-          const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
-          if (siteDetails) {
-            setValue("site", siteDetails)
-          }
-        }
       } else {
         setPinMode(true)
         setValue("jurisdiction", null)
@@ -188,9 +180,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                             <PermitTypeRadioSelect
                               w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
-                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch)
+                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch.id)
                               }}
-                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionWatch]}
+                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionWatch.id]}
                               onChange={onChange}
                               value={value}
                             />
@@ -299,9 +291,9 @@ const DisclaimerInfo = () => {
       p="6"
     >
       <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
-      <Flex align="center" mt={6} flexDirection={{ base: "column", md: "row" }}>
+      <Flex align="center" my={3} flexDirection={{ base: "column", md: "row" }}>
         <Box w={{ base: "100%", md: "40%" }}>
-          <UnorderedList ml="0" mt="4">
+          <UnorderedList ml="0">
             {applicationDisclaimers.map((disclaimer) => {
               return (
                 <ListItem key={disclaimer.href}>

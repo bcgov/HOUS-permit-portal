@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_27_194924) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -116,6 +116,24 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_194924) do
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
+  create_table "integration_mapping_notifications",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.string "notifiable_type", null: false
+    t.uuid "notifiable_id", null: false
+    t.uuid "template_version_id", null: false
+    t.string "front_end_path"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[notifiable_type notifiable_id],
+            name: "index_integration_mapping_notifications_on_notifiable"
+    t.index ["template_version_id"],
+            name:
+              "index_integration_mapping_notifications_on_template_version_id"
+  end
+
   create_table "integration_mappings",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -178,7 +196,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_194924) do
     t.string "prefix", null: false
     t.string "slug"
     t.integer "map_zoom"
-    t.boolean "external_api_enabled", default: false
+    t.string "external_api_state", default: "g_off", null: false
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -378,7 +396,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_194924) do
     t.boolean "first_nations", default: false
     t.datetime "discarded_at"
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
-    t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+    t.index %w[name first_nations],
+            name: "index_requirement_blocks_on_name_and_first_nations",
+            unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
@@ -862,6 +882,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_27_194924) do
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "collaborators", "users"
   add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
   add_foreign_key "jurisdiction_memberships", "jurisdictions"

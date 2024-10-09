@@ -4,7 +4,7 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { RequirementBlockModel } from "../models/requirement-block"
+import { IRequirementBlock, RequirementBlockModel } from "../models/requirement-block"
 import { IRequirementBlockParams } from "../types/api-request"
 import {
   EAutoComplianceModule,
@@ -18,7 +18,7 @@ import {
   TAutoComplianceModuleConfigurations,
   TValueExtractorAutoComplianceModuleConfiguration,
 } from "../types/types"
-import { isValueExtractorModuleConfiguration } from "../utils/utility-functions"
+import { incrementLastWord, isValueExtractorModuleConfiguration } from "../utils/utility-functions"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -136,11 +136,9 @@ export const RequirementBlockStoreModel = types
 
         // Get latest data for current page, sort and filters
         yield self.fetchRequirementBlocks()
-
-        return true
       }
 
-      return false
+      return response.ok
     }),
     searchAssociations: flow(function* (query: string) {
       const response = yield* toGenerator(
@@ -168,6 +166,22 @@ export const RequirementBlockStoreModel = types
       self.isAutoComplianceModuleOptionsLoading = false
 
       return self.autoComplianceModuleConfigurations
+    }),
+  }))
+  .actions((self) => ({
+    copyRequirementBlock: flow(function* (requirementBlock: IRequirementBlock) {
+      const { id, requirements, ...copyableRequirementsAttributes } = requirementBlock
+
+      const clonedParams: IRequirementBlockParams = {
+        ...copyableRequirementsAttributes,
+        requirementsAttributes: requirementBlock.requirements?.map((attr) => {
+          const { id, ...rest } = attr
+          return rest
+        }),
+        name: incrementLastWord(requirementBlock.name),
+      }
+
+      return yield self.createRequirementBlock(clonedParams)
     }),
   }))
 

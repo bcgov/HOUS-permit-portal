@@ -73,7 +73,7 @@ RSpec.describe MockExternalApiController, type: :controller do
 
     it "returns 401 unauthorized with existing token, if corresponding jurisdiction did not enable api" do
       expired_external_api_key =
-        create(:external_api_key, jurisdiction: create(:sub_district, external_api_enabled: false))
+        create(:external_api_key, jurisdiction: create(:sub_district, external_api_state: "g_off"))
 
       request.headers["Authorization"] = "Bearer #{expired_external_api_key.token}"
 

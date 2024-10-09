@@ -193,6 +193,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      error_message: @permit_application.errors.full_messages.join(", "),
                    }
     end
+  rescue AASM::InvalidTransition
+    render_error "permit_application.submit_state_error", message_opts: {}
   end
 
   def create
@@ -333,6 +335,13 @@ class Api::PermitApplicationsController < Api::ApplicationController
                      }
       end
     end
+  end
+
+  def download_application_metrics_csv
+    authorize :permit_application, :download_application_metrics_csv?
+
+    csv_data = PermitApplicationExportService.new.application_metrics_csv
+    send_data csv_data, type: "text/csv"
   end
 
   private

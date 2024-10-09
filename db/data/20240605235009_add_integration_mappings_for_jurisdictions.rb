@@ -2,7 +2,7 @@
 
 class AddIntegrationMappingsForJurisdictions < ActiveRecord::Migration[7.1]
   def up
-    jurisdictions_wit_api_enabled = Jurisdiction.where(external_api_enabled: true)
+    jurisdictions_wit_api_enabled = Jurisdiction.where(external_api_state: "j_on")
 
     jurisdictions_wit_api_enabled.each { |jurisdiction| jurisdiction.create_integration_mappings }
   end

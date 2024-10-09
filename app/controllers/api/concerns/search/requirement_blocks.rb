@@ -19,6 +19,7 @@ module Api::Concerns::Search::RequirementBlocks
               nil
             end
           ),
+        includes: %i[taggings requirements],
       )
   end
 

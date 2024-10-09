@@ -232,6 +232,7 @@ const options = {
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
+          copyNoun: "Copy",
         },
         notification: {
           title: "Notifications",
@@ -481,7 +482,7 @@ const options = {
           viewedOn: "Viewed on",
           seeBestPractices_CTA: "See best practices",
           seeBestPractices_link:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub#practices",
           searchKnowledge_CTA: "Ask a question",
           searchKnowledge_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
@@ -564,7 +565,7 @@ const options = {
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailable:
-              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
+              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
@@ -669,6 +670,7 @@ const options = {
             edit: {
               title: "Edit requirement block",
               options: "Options",
+              copy: "Copy this block",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
@@ -1556,12 +1558,21 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
+              filterLabel: "Search electives",
+              sortLabel: "Sort by",
+              filterPlaceholder: "Search electives",
+              sortOptions: {
+                labelAsc: "Elective (A-Z)",
+                labelDesc: "Elective (Z-A)",
+                reasonAsc: "Reason (A-Z)",
+                reasonDesc: "Reason (Z-A)",
+              },
               manageFieldsButton: "Manage elective field(s)",
               resetToDefaults: "Reset to defaults",
               selectFieldsTitle: "Select elective fields",
               electiveFormFields: "Elective form fields",
               addSelectedButton: "Add selected",
-              reason: "Reason",
+              reason: "Reason:",
               reasonLabels: {
                 placeholder: "Select a reason",
                 bylaw: "Bylaw",
@@ -1638,6 +1649,13 @@ const options = {
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
           },
+          applicationMetrics: {
+            name: "Permit application metrics",
+            description:
+              "Submitted and draft applications by jurisdiction, excluding submissions created by employee accounts",
+            title: "Submitted and draft applications by jurisdiction",
+            filename: "Submitted and draft applications by jurisdiction",
+          },
           columnHeaders: {
             name: "Name",
             description: "Description",
@@ -1648,6 +1666,7 @@ const options = {
             createExternalApiKey: "Create new API key",
             enabled: "Enabled",
             disabled: "Disabled",
+            accessDocs: "Access the API Documentation",
             table: {
               heading: "API keys",
             },

@@ -50,6 +50,8 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
+  scope :with_submitter_role, -> { joins(:submitter).where(users: { role: "submitter" }) }
+
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
   COMPLETION_SECTION_KEY = "section-completion-key"
@@ -408,6 +410,31 @@ class PermitApplication < ApplicationRecord
     custom_requirements = step_code_requirements.customizations
 
     custom_requirements.empty? || custom_requirements.any? { |r| r.energy_step_required || r.zero_carbon_step_required }
+  end
+
+  def self.count_by_jurisdiction_and_status
+    # Perform a single query to aggregate counts grouped by jurisdiction_id and status
+    counts =
+      PermitApplication.joins(:submitter).where(users: { role: "submitter" }).group(:jurisdiction_id, :status).count
+
+    # Organize counts by jurisdiction_id
+    jurisdiction_counts =
+      counts.each_with_object(Hash.new { |h, k| h[k] = {} }) do |((jurisdiction_id, status), count), acc|
+        acc[jurisdiction_id][status] = count
+      end
+
+    # Preload all jurisdictions to avoid additional queries
+    jurisdictions = Jurisdiction.select(:id, :name, :locality_type).index_by(&:id)
+
+    # Transform the organized counts into the desired format
+    jurisdictions.values.map do |jurisdiction|
+      counts_for_jurisdiction = jurisdiction_counts[jurisdiction.id] || {}
+      {
+        name: jurisdiction.qualified_name,
+        draft: (counts_for_jurisdiction["new_draft"] || 0) + (counts_for_jurisdiction["revisions_requested"] || 0),
+        submitted: (counts_for_jurisdiction["newly_submitted"] || 0) + (counts_for_jurisdiction["resubmitted"] || 0),
+      }
+    end
   end
 
   private
