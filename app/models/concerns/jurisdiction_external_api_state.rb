@@ -10,23 +10,18 @@ module JurisdictionExternalApiState
     include AASM
 
     aasm column: "external_api_state", enum: true do
-      state :g_off, initial: true
-      state :j_on
-      state :j_off
+      state :g_off, initial: true ## global off
+      state :j_on ## jurisdiction on
+      state :j_off ## jurisdiction off
 
-      # Transition from g_off to j_on
+      # Transition from g_off or j_off to j_on
       event :_enable_external_api do
-        transitions from: :g_off, to: :j_on
+        transitions from: %i[g_off j_off], to: :j_on
       end
 
       # Transition from j_on to j_off
       event :_disable_external_api do
         transitions from: :j_on, to: :j_off
-      end
-
-      # Transition from j_off to j_on
-      event :_enable_again_external_api do
-        transitions from: :j_off, to: :j_on
       end
 
       # Transition from j_on or j_off to g_off
@@ -35,41 +30,21 @@ module JurisdictionExternalApiState
       end
     end
 
-    # Define methods to check user permissions
-    # These methods will receive the user performing the action
-    # We'll define a context for the user when triggering events
-
-    # Custom methods to handle transitions with user context
-    def enable_external_api!(user)
-      if user.super_admin?
-        _enable_external_api!
-      else
-        raise Pundit::NotAuthorizedError, I18n.t("misc.user_not_authorized_error")
+    def update_external_api_state!(enable_external_api:, allow_reset: false)
+      # if the external API is already in the desired state, return
+      if (enable_external_api && j_on?) || (!enable_external_api && g_off?) ||
+           (!enable_external_api && j_off? && !allow_reset)
+        return
       end
-    end
 
-    def disable_external_api!(user)
-      if user.manager?
-        _disable_external_api!
-      else
-        raise Pundit::NotAuthorizedError, I18n.t("misc.user_not_authorized_error")
-      end
-    end
+      desired_event =
+        if enable_external_api
+          :_enable_external_api
+        else
+          allow_reset ? :_reset_external_api : :_disable_external_api
+        end
 
-    def enable_again_external_api!(user)
-      if user.manager? || user.super_admin?
-        _enable_again_external_api!
-      else
-        raise Pundit::NotAuthorizedError, I18n.t("misc.user_not_authorized_error")
-      end
-    end
-
-    def reset_external_api!(user)
-      if user.super_admin?
-        _reset_external_api!
-      else
-        raise Pundit::NotAuthorizedError, I18n.t("misc.user_not_authorized_error")
-      end
+      self.aasm.fire!(desired_event)
     end
 
     def create_integration_mappings_async
@@ -87,7 +62,7 @@ module JurisdictionExternalApiState
     end
 
     def external_api_just_enabled?
-      saved_change_to_external_api_state? && external_api_state == "j_on"
+      saved_change_to_external_api_state? && j_on?
     end
   end
 end

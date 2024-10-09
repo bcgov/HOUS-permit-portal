@@ -54,30 +54,10 @@ class Api::JurisdictionsController < Api::ApplicationController
     desired_enabled = update_external_api_enabled_params
 
     begin
-      if desired_enabled
-        # Attempt to enable external API
-        if @jurisdiction.g_off?
-          @jurisdiction.enable_external_api!(current_user)
-        elsif @jurisdiction.j_off?
-          @jurisdiction.enable_again_external_api!(current_user)
-        elsif @jurisdiction.j_on?
-          # Already enabled; no action needed
-        end
-      else
-        # Attempt to disable external API
-        if @jurisdiction.j_on?
-          if current_user.super_admin?
-            @jurisdiction.reset_external_api!(current_user)
-          else
-            @jurisdiction.disable_external_api!(current_user)
-          end
-        elsif @jurisdiction.j_off?
-          @jurisdiction.reset_external_api!(current_user)
-        elsif @jurisdiction.g_off?
-          # Already disabled; no action needed
-          # Optionally, you can choose to return a specific message
-        end
-      end
+      @jurisdiction.update_external_api_state!(
+        enable_external_api: desired_enabled,
+        allow_reset: current_user.super_admin?,
+      )
 
       # Determine the appropriate success message based on the new state
       message =

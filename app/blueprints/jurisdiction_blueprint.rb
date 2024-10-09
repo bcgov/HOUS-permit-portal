@@ -20,7 +20,8 @@ class JurisdictionBlueprint < Blueprinter::Base
            :regional_district_name,
            :created_at,
            :submission_inbox_set_up,
-           :updated_at
+           :updated_at,
+           :external_api_state
 
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?
@@ -35,7 +36,8 @@ class JurisdictionBlueprint < Blueprinter::Base
   end
 
   view :minimal do
-    fields :qualified_name, :submission_inbox_set_up
+    fields :qualified_name, :submission_inbox_set_up, :external_api_state
+
     field :external_api_enabled do |jurisdiction, options|
       jurisdiction.external_api_enabled?
     end

@@ -7,6 +7,7 @@ import { Outlet } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionExternalApiState } from "../../../types/enums"
 import { CalloutBanner } from "../../shared/base/callout-banner"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
@@ -77,7 +78,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
             </RouterLinkButton>
           </ButtonGroup>
         </Flex>
-        {!externalApiEnabled && (currentUser.isReviewManager || currentUser.isRegionalReviewManager) && (
+        {currentJurisdiction?.externalApiState === EJurisdictionExternalApiState.gOff && currentUser.isManager && (
           <CalloutBanner
             type={"warning"}
             title={

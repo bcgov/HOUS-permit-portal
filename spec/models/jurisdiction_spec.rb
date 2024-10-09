@@ -53,7 +53,7 @@ RSpec.describe Jurisdiction, type: :model do
       it "creates mappings for published template versions" do
         expect(jurisdiction.integration_mappings.count).to eq(0)
 
-        jurisdiction.enable_external_api!(user)
+        jurisdiction.update_external_api_state!(enable_external_api: true, allow_reset: user.super_admin?)
 
         expect(jurisdiction.integration_mappings.count).to eq(2)
         expect(jurisdiction.integration_mappings.pluck(:template_version_id)).to match_array(
@@ -77,7 +77,7 @@ RSpec.describe Jurisdiction, type: :model do
             jurisdiction.id,
             "create_integration_mappings",
           )
-          jurisdiction.enable_external_api!(super_admin)
+          jurisdiction.update_external_api_state!(enable_external_api: true, allow_reset: super_admin.super_admin?)
         end
 
         it "performs the job immediately in test environment" do
@@ -85,7 +85,8 @@ RSpec.describe Jurisdiction, type: :model do
           job_instance = double("ModelCallbackJob")
           expect(ModelCallbackJob).to receive(:new).and_return(job_instance)
           expect(job_instance).to receive(:perform).with("SubDistrict", jurisdiction.id, "create_integration_mappings")
-          jurisdiction.enable_external_api!(super_admin)
+
+          jurisdiction.update_external_api_state!(enable_external_api: true, allow_reset: super_admin.super_admin?)
         end
       end
 
@@ -93,7 +94,8 @@ RSpec.describe Jurisdiction, type: :model do
         it "does not enqueue the job" do
           allow(Rails.env).to receive(:test?).and_return(false)
           expect(ModelCallbackJob).to receive(:new).at_most(:once)
-          enabled_jurisdiction.disable_external_api!(manager)
+
+          jurisdiction.update_external_api_state!(enable_external_api: false, allow_reset: manager.super_admin?)
         end
       end
     end
