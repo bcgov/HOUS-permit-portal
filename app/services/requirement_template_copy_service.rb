@@ -9,7 +9,7 @@ class RequirementTemplateCopyService
     ActiveRecord::Base.transaction do
       # Clone the basic attributes of the original template
       new_template =
-        @requirement_template.class.new(
+        (field_overrides[:type]&.constantize || requirement_template.class).new(
           activity_id: requirement_template.activity_id,
           permit_type_id: requirement_template.permit_type_id,
           description: field_overrides[:description] || "Copy of #{requirement_template.description}",

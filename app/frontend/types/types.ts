@@ -18,6 +18,7 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  ERequirementTemplateType,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -530,4 +531,10 @@ export interface IPermitTypeRequiredStep {
   permitTypeLabel?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+}
+
+export type TCopyFromLivePayloadData = {
+  id?: string
+  type?: ERequirementTemplateType
+  copyExistingById: boolean
 }

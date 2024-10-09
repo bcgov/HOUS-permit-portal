@@ -1409,6 +1409,15 @@ const options = {
             createButton: "Create new early access template",
             seeArchivedButton: "See archived",
           },
+          new: {
+            title: "Create new preview",
+            modalTitle: "Create new preview",
+            startingFresh: "Starting fresh?",
+            addFromExisitng: "Add requirements from an exisitng permit?",
+            startWithBlank: "Start with blank permit",
+            copyFromLive: "Copy from live permit",
+            copyFromThis: "Copy from this",
+          },
           fields: {
             nickname: "Nickname",
             permitType: "Permit type",
@@ -1519,7 +1528,7 @@ const options = {
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
             firstNationsLand: "This permit is intended <1>only for First Nations land</1>",
-            copyExisting: "Copy from existing template of this permit and work type if available",
+            copyExistingByClassifications: "Copy from existing template of this permit and work type if available",
           },
           versionSidebar: {
             triggerButton: "Versions",

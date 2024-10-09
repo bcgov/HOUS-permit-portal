@@ -27,7 +27,7 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
           title: t("site.breadcrumb.requirementTemplates"),
         },
         {
-          href: `/requirements-template${requirementTemplate.id}/edit`,
+          href: `/requirement-templates/${requirementTemplate.id}/edit`,
           title: t("site.breadcrumb.editTemplate"),
         },
       ]}
