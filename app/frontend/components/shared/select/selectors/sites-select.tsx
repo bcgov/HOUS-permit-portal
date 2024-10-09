@@ -3,13 +3,14 @@ import { MapPin } from "@phosphor-icons/react"
 import debounce from "lodash/debounce"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useCallback, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import CreatableSelect from "react-select/creatable"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
+import { formatPidValue } from "../../../../utils/utility-functions"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
@@ -29,13 +30,16 @@ export const SitesSelect = observer(function ({
   siteName = "site",
   ...rest
 }: TSitesSelectProps) {
+  const { t } = useTranslation()
   const { geocoderStore } = useMst()
   const [pidOptions, setPidOptions] = useState<IOption<string>[]>([])
-  const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids } = geocoderStore
+  const { fetchSiteOptions: fetchOptions, fetchPids, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
   const pidSelectRef = useRef(null)
 
-  const { setValue, control, reset } = useFormContext()
-  const { t } = useTranslation()
+  const { setValue, control, reset, watch } = useFormContext()
+
+  const pidWatch = watch(pidName)
+  const siteWatch = watch(siteName)
 
   const fetchSiteOptions = (address: string, callback: (options) => void) => {
     if (address.length > 3) {
@@ -64,6 +68,18 @@ export const SitesSelect = observer(function ({
     }
   }
 
+  useEffect(() => {
+    ;(async () => {
+      if (R.isNil(siteWatch?.value) && pidWatch) {
+        //the pid is valid, lets try to fill in the address based on the PID
+        const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
+        if (siteDetails) {
+          setValue(siteName, siteDetails)
+        }
+      }
+    })()
+  }, [siteWatch?.value, pidWatch])
+
   const debouncedFetchOptions = useCallback(debounce(fetchSiteOptions, 1000), [])
 
   return (
@@ -76,7 +92,6 @@ export const SitesSelect = observer(function ({
             onChange={handleChange}
             placeholder="Search Addresses"
             value={selectedOption}
-            defaultValue={selectedOption}
             components={{
               Control,
               Option,
@@ -122,13 +137,16 @@ export const SitesSelect = observer(function ({
                     ref={pidSelectRef}
                     value={{
                       label: value,
-                      value: value,
+                      value: formatPidValue(value),
                     }}
                     onChange={(option) => {
-                      onChange(option?.value)
+                      if (!option) {
+                        setValue(siteName, null)
+                      }
+                      onChange(formatPidValue(option?.value))
                     }}
                     onCreateOption={(inputValue: string) => {
-                      const newValue = { label: inputValue, value: inputValue }
+                      const newValue = { label: inputValue, value: formatPidValue(inputValue) }
                       onChange(newValue.value)
                     }}
                     formatCreateLabel={(inputValue: string) => t("permitApplication.usePid", { inputValue })}
