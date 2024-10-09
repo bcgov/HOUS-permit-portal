@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe AutomatedCompliance::ParcelInfoExtractor do
-  let!(:requirement_template) { create(:requirement_template_with_compliance) }
+  let!(:requirement_template) { create(:live_requirement_template_with_compliance) }
 
   context "a PID not on ALR land" do
     let!(:permit_application) do

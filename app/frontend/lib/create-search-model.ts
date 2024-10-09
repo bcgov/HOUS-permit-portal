@@ -21,6 +21,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
       showArchived: types.optional(types.boolean, false),
+      earlyAccess: types.optional(types.boolean, false),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
@@ -48,6 +49,10 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       setShowArchived(bool) {
         !skipQueryParam && setQueryParam("showArchived", bool.toString())
         self.showArchived = bool
+      },
+      setEarlyAccess(bool) {
+        !skipQueryParam && setQueryParam("earlyAccess", bool.toString())
+        self.earlyAccess = bool
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
         if (fetchDataActionName in self) {

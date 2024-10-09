@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe AutomatedCompliance::HistoricSite do
-  let!(:requirement_template) { create(:requirement_template_with_heritage) }
+  let!(:requirement_template) { create(:live_requirement_template_with_heritage) }
 
   context "a PID that is a historic site and parcel description matches" do
     let!(:permit_application) do

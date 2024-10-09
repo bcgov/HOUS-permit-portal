@@ -154,11 +154,20 @@ if PermitApplication.first.blank?
     end
   Contact.reindex
   puts "Seeding requirement templates..."
-  # Create RequirementTemplate records
-  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
-  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
-  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
-  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+  # Create LiveRequirementTemplate records
+  LiveRequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
+  LiveRequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
+  LiveRequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
+  LiveRequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+
+  puts "Seeding early access requirement templates..."
+
+  3.times do |n|
+    EarlyAccessRequirementTemplate.find_or_create_by!(nickname: "Early access #{n}") do |record|
+      record.activity = activity1
+      record.permit_type = permit_type1
+    end
+  end
 
   RequirementTemplate.reindex
 

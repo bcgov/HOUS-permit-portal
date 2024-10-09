@@ -92,6 +92,16 @@ export enum ERequirementTemplateSortFields {
   jurisdictionsSize = "jurisdictions_size",
 }
 
+export enum EEarlyAccessRequirementTemplateSortFields {
+  nickname = "nickname",
+  permitType = "permit_type",
+  activity = "activity",
+  firstNations = "first_nations",
+  sharedWith = "shared_with",
+  updatedAt = "updated_at",
+  assignee = "assignee",
+}
+
 export enum EContactSortFields {
   title = "role/position",
   name = "name",

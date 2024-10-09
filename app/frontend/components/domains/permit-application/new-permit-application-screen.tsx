@@ -31,8 +31,6 @@ import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
-import { Can } from "../../shared/user/can"
-import { NewPermitApplicationSandboxSelect } from "./new-permit-application-sandbox-select"
 
 export type TSearchAddressFormData = {
   addressString: string
@@ -163,7 +161,8 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {jurisdictionIdWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={8}>
-                  {jurisdiction?.sandboxOptions && (
+                  {/* TODO: Enable sandboxes */}
+                  {/* {jurisdiction?.sandboxOptions &&  (
                     <Can action="jurisdiction:create">
                       <Flex as="section" direction="column" gap={4}>
                         <Heading as="h2" variant="yellowline">
@@ -173,9 +172,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                         <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
                       </Flex>
                     </Can>
-                  )}
+                  )} */}
                   <Heading as="h2" variant="yellowline">
-                    {t("permitApplication.new.locationHeading")}
+                    {t("permitApplication.new.forFirstNations")}
                   </Heading>
                   <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
                   <Controller

@@ -9,6 +9,7 @@ class RequirementTemplate < ApplicationRecord
   has_many :requirement_template_sections, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirement_blocks, through: :requirement_template_sections
   has_many :requirements, through: :requirement_blocks
+  has_many :permit_type_required_steps, dependent: :destroy
   has_many :template_versions, -> { order(version_date: :desc) }, dependent: :destroy
   has_many :scheduled_template_versions,
            -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
@@ -17,7 +18,6 @@ class RequirementTemplate < ApplicationRecord
            -> { where(template_versions: { status: "deprecated" }).order(version_date: :desc).limit(3) },
            class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
-  has_many :permit_type_required_steps, dependent: :destroy
 
   has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
 
@@ -40,9 +40,12 @@ class RequirementTemplate < ApplicationRecord
   # This is a workaround needed to validate step code related errors
   attr_accessor :requirement_template_sections_attributes_copy
 
-  validate :unique_classification_for_undiscarded, on: :create
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
+
+  def early_access?
+    type == "EarlyAccessRequirementTemplate"
+  end
 
   def sections
     requirement_template_sections
@@ -139,12 +142,14 @@ class RequirementTemplate < ApplicationRecord
 
   def search_data
     {
+      nickname: nickname,
       description: description,
       first_nations: first_nations,
       current_version: published_template_version&.version_date,
       permit_type: permit_type.name,
       activity: activity.name,
       discarded: discarded_at.present?,
+      early_access: early_access?,
     }
   end
 
@@ -233,19 +238,6 @@ class RequirementTemplate < ApplicationRecord
     errors.add(:base, :step_code_package_required) if !has_any_step_code_package_file_requirements
     errors.add(:base, :duplicate_energy_step_code) if has_duplicate_step_code_requirements
     errors.add(:base, :duplicate_step_code_package) if has_duplicate_step_code_package_file_requirements
-  end
-
-  def unique_classification_for_undiscarded
-    existing_record =
-      RequirementTemplate.find_by(
-        permit_type_id: permit_type_id,
-        activity_id: activity_id,
-        first_nations: first_nations,
-        discarded_at: nil,
-      )
-    if existing_record.present?
-      errors.add(:base, I18n.t("activerecord.errors.models.requirement_template.nonunique_classification"))
-    end
   end
 
   def refresh_search_index

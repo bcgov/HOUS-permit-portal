@@ -104,6 +104,7 @@ RSpec.configure do |config|
     PermitApplication.reindex
     RequirementBlock.reindex
     RequirementTemplate.reindex
+    EarlyAccessRequirementTemplate.reindex
     User.reindex
     Contact.reindex
 

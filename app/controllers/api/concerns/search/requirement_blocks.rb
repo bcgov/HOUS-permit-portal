@@ -9,6 +9,7 @@ module Api::Concerns::Search::RequirementBlocks
         match: :word_start,
         where: {
           discarded: discarded,
+          early_access: early_access,
         },
         page: search_params[:page],
         per_page:
@@ -35,6 +36,10 @@ module Api::Concerns::Search::RequirementBlocks
 
   def discarded
     search_params[:show_archived].present?
+  end
+
+  def early_access
+    search_params[:early_access].present?
   end
 
   def order
