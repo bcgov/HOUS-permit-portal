@@ -406,3 +406,9 @@ export enum ECollaboratorType {
   delegatee = "delegatee",
   assignee = "assignee",
 }
+
+export enum EJurisdictionExternalApiState {
+  jOn = "j_on",
+  jOff = "j_off",
+  gOff = "g_off",
+}
