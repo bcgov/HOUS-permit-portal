@@ -245,7 +245,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.jsonb "compliance_data", default: {}, null: false
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
-    t.uuid "sandbox_id"
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
@@ -254,7 +253,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
             unique: true
     t.index ["permit_type_id"],
             name: "index_permit_applications_on_permit_type_id"
-    t.index ["sandbox_id"], name: "index_permit_applications_on_sandbox_id"
     t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
     t.index ["template_version_id"],
             name: "index_permit_applications_on_template_version_id"
@@ -891,7 +889,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "jurisdiction_memberships", "users"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "jurisdictions"
-  add_foreign_key "jurisdiction_template_version_customizations", "sandboxes"
   add_foreign_key "jurisdiction_template_version_customizations",
                   "template_versions"
   add_foreign_key "jurisdictions",
@@ -904,7 +901,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "permit_applications",
                   "permit_classifications",
                   column: "permit_type_id"
-  add_foreign_key "permit_applications", "sandboxes"
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
@@ -930,7 +926,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
-  add_foreign_key "sandboxes", "jurisdictions"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",

@@ -1,4 +1,4 @@
-class ChangeExternalApiEnabledToExternalApiStateInJurisdictions < ActiveRecord::Migration[6.1]
+class ChangeExternalApiEnabledToExternalApiStateInJurisdictions < ActiveRecord::Migration[7.1]
   def up
     # Add the new column with a default value
     add_column :jurisdictions, :external_api_state, :string, default: "g_off", null: false
