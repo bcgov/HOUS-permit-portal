@@ -1666,6 +1666,7 @@ const options = {
             createExternalApiKey: "Create new API key",
             enabled: "Enabled",
             disabled: "Disabled",
+            accessDocs: "Access the API Documentation",
             table: {
               heading: "API keys",
             },
