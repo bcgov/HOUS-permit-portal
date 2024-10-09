@@ -124,8 +124,8 @@ const options = {
           andMore: "...and more",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
-            mid: "Preview the New construction checklist for 1 - 4 Dwelling Units",
-            midSub: "(Including secondary suites)",
+            mid: "Preview the Small-scale/Multi-unit housing checklist",
+            midSub: "(Part 9 BC Building Code)",
             midDownload: "Download checklist",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",

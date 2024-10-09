@@ -109,18 +109,20 @@ export const NavBar = observer(function NavBar() {
         borderColor="border.light"
         shadow="elevations.elevation01"
       >
-        <Container maxW="container.lg" p={2} px={{ base: 2, md: 4 }}>
+        <Container maxW="container.lg" p={2} px={{ base: 4, md: 8 }}>
           <Flex align="center" gap={2} w="full">
-            <Show above="md">
-              <RouterLink to="/welcome">
+            <RouterLink to="/welcome">
+              <Box w={120} mr={2}>
                 <Image
-                  fit="cover"
+                  fit="contain"
                   htmlHeight="64px"
                   htmlWidth="166px"
                   alt={t("site.linkHome")}
                   src={currentUser?.isSubmitter || !loggedIn ? "/images/logo.svg" : "/images/logo-light.svg"}
                 />
-              </RouterLink>
+              </Box>
+            </RouterLink>
+            <Show above="md">
               <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
                 {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
               </Text>
@@ -161,9 +163,11 @@ export const NavBar = observer(function NavBar() {
                 </Text>
               )}
               {(!loggedIn || currentUser?.isSubmitter) && (
-                <RouterLinkButton variant="tertiary" to="/jurisdictions">
-                  {t("home.jurisdictionsTitle")}
-                </RouterLinkButton>
+                <Show above="md">
+                  <RouterLinkButton variant="tertiary" to="/jurisdictions">
+                    {t("home.jurisdictionsTitle")}
+                  </RouterLinkButton>
+                </Show>
               )}
               {loggedIn && (
                 <NotificationsPopover
@@ -326,6 +330,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                   {t("site.loggedInWelcome")}
                 </Text>
                 <MenuGroup title={currentUser.name} noOfLines={1}>
+                  <MenuDivider my={0} borderColor="border.light" />
                   <MenuDivider my={0} borderColor="border.light" />
                   {!currentUser.isReviewStaff && (
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
