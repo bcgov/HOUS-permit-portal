@@ -335,10 +335,6 @@ class PermitApplication < ApplicationRecord
     latest_submission_version&.viewed_at
   end
 
-  def time_in_new_draft
-    (submitted_at || Time.now) - created_at
-  end
-
   def submitted_at
     return nil if submission_versions.length < 1
     return earliest_submission_version.created_at
@@ -417,71 +413,64 @@ class PermitApplication < ApplicationRecord
   end
 
   def self.stats_by_template_jurisdiction_and_status
-    # Step 1: Aggregate counts grouped by jurisdiction_id, requirement_template_id, and status
-    counts =
+    # Subquery to get the earliest submission_version.created_at per permit_application
+    sv_min =
+      SubmissionVersion.select("permit_application_id, MIN(created_at) AS min_submission_created_at").group(
+        :permit_application_id,
+      )
+
+    sv_max =
+      SubmissionVersion.select("permit_application_id, MAX(created_at) AS max_submission_created_at").group(
+        :permit_application_id,
+      )
+
+    # Main aggregation query
+    aggregates =
       PermitApplication
-        .joins(:submitter)
         .joins(template_version: :requirement_template)
-        .where(users: { role: "submitter" })
-        .group(:jurisdiction_id, "requirement_templates.id", :status)
-        .count
-
-    # Organize counts by jurisdiction_id
-    jurisdiction_template_counts =
-      counts.each_with_object(
-        Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = {} } },
-      ) do |((jurisdiction_id, requirement_template_id, status), count), acc|
-        acc[jurisdiction_id][requirement_template_id][status] = count
-      end
-
-    # Step 2: Fetch all relevant permit applications to compute sum of time_in_new_draft
-    # Note: This can be memory-intensive for large datasets
-    permit_applications =
-      PermitApplication
-        .includes(template_version: :requirement_template)
         .joins(:submitter)
+        .joins(:jurisdiction)
+        .joins("LEFT JOIN (#{sv_min.to_sql}) sv_min ON sv_min.permit_application_id = permit_applications.id")
+        .joins("LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id")
         .where(users: { role: "submitter" })
-        .select(:id, :jurisdiction_id, :template_version_id, :created_at)
+        .group("jurisdictions.id", "requirement_templates.id", "jurisdictions.name", "requirement_templates.id")
+        .select(
+          "jurisdictions.id AS jurisdiction_id",
+          "requirement_templates.id AS requirement_template_id",
+          "jurisdictions.name AS jurisdiction_name",
+          "requirement_templates.id AS requirement_template_id",
+          "COUNT(CASE WHEN permit_applications.status IN (0, 3) THEN 1 END) AS draft_count",
+          "COUNT(CASE WHEN permit_applications.status IN (1, 4) THEN 1 END) AS submitted_count",
+          "AVG(
+                CASE
+                  WHEN sv_min.min_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_min.min_submission_created_at - permit_applications.created_at))
+                  ELSE EXTRACT(EPOCH FROM (NOW() - permit_applications.created_at))
+                END
+              ) AS average_time_spent_before_first_submit",
+          "AVG(
+                CASE
+                  WHEN sv_max.max_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_max.max_submission_created_at - permit_applications.created_at))
+                  ELSE EXTRACT(EPOCH FROM (NOW() - permit_applications.created_at))
+                END
+              ) AS average_time_spent_before_latest_submit",
+        )
 
-    # Group permit applications by jurisdiction and requirement template
-    grouped_apps =
-      permit_applications.group_by { |app| [app.jurisdiction_id, app.template_version.requirement_template_id] }
-
-    # Step 3: Compute sum of time_in_new_draft and count per group
-    time_sum_per_group = {}
-    count_per_group = {}
-
-    grouped_apps.each do |(jurisdiction_id, requirement_template_id), apps|
-      sum_time = apps.sum { |app| app.time_in_new_draft.to_i }
-      count = apps.size
-      time_sum_per_group[[jurisdiction_id, requirement_template_id]] = sum_time
-      count_per_group[[jurisdiction_id, requirement_template_id]] = count
-    end
-
-    # Step 4: Preload all jurisdictions and requirement templates
-    jurisdictions = Jurisdiction.select(:id, :name, :locality_type).index_by(&:id)
+    # Preload requirement templates with associated permit_type and activity
     requirement_templates = RequirementTemplate.includes(:permit_type, :activity).index_by(&:id)
 
-    # Step 5: Transform the organized counts and averages into the desired format
-    jurisdictions.values.flat_map do |jurisdiction|
-      requirement_templates.values.map do |requirement_template|
-        counts_for_jurisdiction_template = jurisdiction_template_counts[jurisdiction.id][requirement_template.id] || {}
-        total_time = time_sum_per_group[[jurisdiction.id, requirement_template.id]] || 0
-        total_count = count_per_group[[jurisdiction.id, requirement_template.id]] || 0
-        average_time = total_count > 0 ? (total_time.to_f / total_count).seconds : 0
-
-        {
-          jurisdiction_name: jurisdiction.qualified_name,
-          requirement_template: requirement_template.label,
-          draft_applications:
-            (counts_for_jurisdiction_template["new_draft"] || 0) +
-              (counts_for_jurisdiction_template["revisions_requested"] || 0),
-          submitted_applications:
-            (counts_for_jurisdiction_template["newly_submitted"] || 0) +
-              (counts_for_jurisdiction_template["resubmitted"] || 0),
-          average_time_in_new_draft: average_time,
-        }
-      end
+    # Transform the aggregated data into the desired format
+    aggregates.map do |aggregate|
+      requirement_template = requirement_templates[aggregate.requirement_template_id]
+      {
+        jurisdiction_name: aggregate.jurisdiction_name || "Unknown Jurisdiction",
+        permit_type: requirement_template.permit_type.name,
+        activity: requirement_template.activity.name,
+        first_nations: requirement_template.first_nations,
+        draft_applications: aggregate.draft_count.to_i,
+        submitted_applications: aggregate.submitted_count.to_i,
+        average_time_spent_before_first_submit: (aggregate.average_time_spent_before_first_submit || 0).to_i,
+        average_time_spent_before_latest_submit: (aggregate.average_time_spent_before_latest_submit || 0).to_i,
+      }
     end
   end
 
