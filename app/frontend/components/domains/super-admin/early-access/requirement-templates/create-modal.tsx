@@ -21,8 +21,8 @@ export const CreateModal: React.FC = () => {
 
   return (
     <>
-      <Button variant="primary" onClick={onOpen}>
-        {t("earlyAccessRequirementTemplate.new.modalTitle")}
+      <Button variant="primary" onClick={onOpen} w={220}>
+        {t("earlyAccessRequirementTemplate.new.title")}
       </Button>
 
       <Modal isOpen={isOpen} onClose={onClose} size="xl">

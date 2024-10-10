@@ -1,22 +1,15 @@
 import { Button, Checkbox, Flex, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../models/requirement-template"
 import { useMst } from "../../../setup/root"
 import { ERequirementTemplateType } from "../../../types/enums"
+import { TCreateRequirementTemplateFormData } from "../../../types/types"
 import { AsyncRadioGroup } from "../base/inputs/async-radio-group"
 import { TextFormControl } from "../form/input-form-control"
-
-export type TCreateRequirementTemplateFormData = {
-  description: string
-  firstNations?: boolean
-  copyExistingByClassifications?: boolean
-  permitTypeId: string
-  activityId: string
-}
 
 interface IRequirementTemplateFormProps {
   type: ERequirementTemplateType
@@ -26,16 +19,17 @@ interface IRequirementTemplateFormProps {
 export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequirementTemplateFormProps) => {
   const { t } = useTranslation()
   const {
-    requirementTemplateStore: { createRequirementTemplate },
+    requirementTemplateStore: { createRequirementTemplate, copyRequirementTemplate },
     permitClassificationStore: { fetchPermitTypeOptions, fetchActivityOptions },
   } = useMst()
+
+  const [copyExisting, setCopyExisting] = useState(false)
 
   const formMethods = useForm<TCreateRequirementTemplateFormData>({
     mode: "onChange",
     defaultValues: {
       description: "",
       firstNations: false,
-      copyExistingByClassifications: false,
       permitTypeId: null,
       activityId: null,
     },
@@ -54,7 +48,11 @@ export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequireme
 
   const onSubmit = async (formData) => {
     formData.type = type
-    const createdRequirementTemplate = (await createRequirementTemplate(formData)) as IRequirementTemplate
+
+    const createdRequirementTemplate = copyExisting
+      ? await copyRequirementTemplate(formData)
+      : await createRequirementTemplate(formData)
+
     if (createdRequirementTemplate) {
       onSuccess(createdRequirementTemplate)
     }
@@ -96,16 +94,9 @@ export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequireme
             )}
           />
           {firstNationsChecked && (
-            <Controller
-              name="copyExistingByClassifications"
-              control={control}
-              defaultValue={false}
-              render={({ field: { onChange, value } }) => (
-                <Checkbox isChecked={value} onChange={onChange}>
-                  {t("requirementTemplate.new.copyExistingByClassifications")}
-                </Checkbox>
-              )}
-            />
+            <Checkbox isChecked={copyExisting} onChange={(e) => setCopyExisting(e.target.checked)}>
+              {t("requirementTemplate.new.copyExistingByClassifications")}
+            </Checkbox>
           )}
 
           <Flex direction="column" as="section" w="full">

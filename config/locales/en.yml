@@ -347,6 +347,12 @@ en:
       create_error:
         title: Error
         message: "%{error_message}"
+      copy_success:
+        title: ""
+        message: "New template copied successfully!"
+      copy_error:
+        title: Error
+        message: "%{error_message}"
       destroy_success:
         title: ""
         message: "New template archived successfully"

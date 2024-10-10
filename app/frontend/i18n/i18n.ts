@@ -1405,7 +1405,8 @@ const options = {
           index: {
             tableHeading: "Previews",
             title: "Early access templates catalogue",
-            invitationInfo: "TODO: Invitation info. Ensure that you invite specific users to your previews.",
+            invitationInfo:
+              "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
             createButton: "Create new early access template",
             seeArchivedButton: "See archived",
           },

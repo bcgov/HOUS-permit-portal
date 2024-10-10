@@ -14,6 +14,7 @@ class RequirementTemplateCopyService
           permit_type_id: requirement_template.permit_type_id,
           description: field_overrides[:description] || "Copy of #{requirement_template.description}",
           first_nations: field_overrides[:first_nations] || requirement_template.first_nations,
+          copied_from: requirement_template,
         )
 
       # Save the new template first to get its ID
@@ -23,7 +24,12 @@ class RequirementTemplateCopyService
 
       # Clone the sections and associate them with the new template
       requirement_template.requirement_template_sections.each do |section|
-        new_section = new_template.requirement_template_sections.build(name: section.name, position: section.position)
+        new_section =
+          new_template.requirement_template_sections.build(
+            name: section.name,
+            position: section.position,
+            copied_from: section,
+          )
 
         # Associate existing requirement blocks with the new section
         section.requirement_blocks.each { |block| new_section.requirement_blocks << block }

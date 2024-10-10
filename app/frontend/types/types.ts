@@ -18,7 +18,6 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
-  ERequirementTemplateType,
   ERequirementType,
   ESocketDomainTypes,
   ESocketEventTypes,
@@ -533,8 +532,14 @@ export interface IPermitTypeRequiredStep {
   zeroCarbonStepRequired: EZeroCarbonStep
 }
 
-export type TCopyFromLivePayloadData = {
+export type TCreateRequirementTemplateFormData = {
+  description: string
+  firstNations?: boolean
+  permitTypeId: string
+  activityId: string
+  type: string
+}
+
+export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
-  type?: ERequirementTemplateType
-  copyExistingById: boolean
 }

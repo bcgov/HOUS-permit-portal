@@ -1,7 +1,6 @@
 import { format } from "date-fns"
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import { TCreateRequirementTemplateFormData } from "../components/shared/requirement-template/requirement-template-form"
 import { datefnsAppDateFormat } from "../constants"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -9,8 +8,8 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
-import { ERequirementTemplateSortFields, ERequirementTemplateType } from "../types/enums"
-import { TCopyFromLivePayloadData } from "../types/types"
+import { ERequirementTemplateSortFields } from "../types/enums"
+import { ICopyRequirementTemplateFormData, TCreateRequirementTemplateFormData } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 
 export const RequirementTemplateStoreModel = types
@@ -114,9 +113,7 @@ export const RequirementTemplateStoreModel = types
       return response.ok
     }),
 
-    createRequirementTemplate: flow(function* (
-      formData: TCreateRequirementTemplateFormData | TCopyFromLivePayloadData
-    ) {
+    createRequirementTemplate: flow(function* (formData: TCreateRequirementTemplateFormData) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.createRequirementTemplate(formData))
 
       if (ok) {
@@ -180,17 +177,15 @@ export const RequirementTemplateStoreModel = types
     }),
   }))
   .actions((self) => ({
-    copyRequirementTemplate: flow(function* (
-      requirementTemplate: IRequirementTemplate,
-      typeOverride?: ERequirementTemplateType
-    ) {
-      const formData: TCopyFromLivePayloadData = {
-        id: requirementTemplate.id,
-        copyExistingById: true,
-        type: typeOverride,
-      }
+    copyRequirementTemplate: flow(function* (requirementTemplateValues?: ICopyRequirementTemplateFormData) {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.copyRequirementTemplate(requirementTemplateValues)
+      )
 
-      return yield self.createRequirementTemplate(formData)
+      if (ok) {
+        self.requirementTemplateMap.put(response.data)
+        return response.data
+      }
     }),
   }))
 

@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../../setup/root"
 import { ERequirementTemplateType } from "../../../../../types/enums"
+import { ICopyRequirementTemplateFormData } from "../../../../../types/types"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { RequirementTemplateGrid } from "../../../../shared/requirement-template/requirement-template-grid"
 
@@ -27,7 +28,11 @@ export const CopyFromLiveModal: React.FC = () => {
 
   const handleCopyFrom = async (rt) => {
     setIsCopying(true)
-    const copiedTemplate = await copyRequirementTemplate(rt, ERequirementTemplateType.EarlyAccessRequirementTemplate)
+    const overrideData: ICopyRequirementTemplateFormData = {
+      id: rt.id,
+      type: ERequirementTemplateType.EarlyAccessRequirementTemplate,
+    }
+    const copiedTemplate = await copyRequirementTemplate(overrideData)
     setIsCopying(false)
     if (copiedTemplate) navigate(`/early-access/requirement-templates/${copiedTemplate.id}/edit`)
   }
