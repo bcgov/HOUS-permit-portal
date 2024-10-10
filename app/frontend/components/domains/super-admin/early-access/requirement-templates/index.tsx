@@ -13,6 +13,7 @@ import { ToggleArchivedButton } from "../../../../shared/buttons/show-archived-b
 import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
 import { YesNoTag } from "../../../../shared/yes-no-tag"
+import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
 
 export const EarlyAccessRequirementTemplatesScreen = observer(function RequirementTemplate() {
@@ -46,6 +47,7 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
               p={1}
             />
           </Box>
+          <CreateModal />
         </Flex>
         <SearchGrid templateColumns="repeat(8, 1fr)">
           <GridHeaders />
@@ -66,7 +68,7 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
                   </SearchGridItem>
                   <SearchGridItem>SHARED WITH</SearchGridItem>
                   <SearchGridItem>{format(rt.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
-                  <SearchGridItem>ASIGNEE</SearchGridItem>
+                  <SearchGridItem>ASSIGNEE</SearchGridItem>
                   <SearchGridItem>BUTTONS</SearchGridItem>
                 </Box>
               )

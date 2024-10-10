@@ -28,13 +28,20 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def create
-    copy_existing = requirement_template_params[:copy_existing]
+    copy_existing_by_classifications = params[:copy_existing_by_classifications]
+    copy_existing_by_id = params[:copy_existing_by_id]
 
-    if copy_existing
+    if copy_existing_by_classifications || copy_existing_by_id
       found_template =
-        RequirementTemplate.find_by(
-          permit_type_id: requirement_template_params[:permit_type_id],
-          activity_id: requirement_template_params[:activity_id],
+        (
+          if copy_existing_by_id
+            RequirementTemplate.find(requirement_template_params[:id])
+          elsif copy_existing_by_classifications
+            LiveRequirementTemplate.find_by(
+              permit_type_id: requirement_template_params[:permit_type_id],
+              activity_id: requirement_template_params[:activity_id],
+            )
+          end
         )
       if found_template.nil?
         authorize :requirement_template, :create?
@@ -45,7 +52,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
           requirement_template_params,
         )
     else
-      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
+      @requirement_template = RequirementTemplate.new(requirement_template_params)
     end
 
     authorize @requirement_template
@@ -203,7 +210,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       params.require(:requirement_template).permit(
         :description,
         :first_nations,
-        :copy_existing,
         :activity_id,
         :permit_type_id,
         :type,

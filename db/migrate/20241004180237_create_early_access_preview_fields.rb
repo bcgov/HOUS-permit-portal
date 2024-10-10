@@ -13,7 +13,7 @@ class CreateEarlyAccessPreviewFields < ActiveRecord::Migration[7.1]
                   },
                   type: :uuid
 
-    add_reference :requirement_templates, :asignee, null: true, foreign_key: { to_table: :users }, type: :uuid
+    add_reference :requirement_templates, :assignee, null: true, foreign_key: { to_table: :users }, type: :uuid
 
     add_reference :requirement_template_sections,
                   :copied_from,

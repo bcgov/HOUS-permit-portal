@@ -75,7 +75,7 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
         expect(json_response["data"]["description"]).to eq("a new template with first nations")
       end
 
-      it "copies sections from an existing non-first-nation requirement template when copy_existing is true" do
+      it "copies sections from an existing non-first-nation requirement template when copy_existing_by_classifications is true" do
         create(
           :live_requirement_template,
           activity: activity,
@@ -95,7 +95,7 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
                    first_nations: true,
                    activity_id: activity.id,
                    permit_type_id: permit_type.id,
-                   copy_existing: true,
+                   copy_existing_by_classifications: true,
                  },
                }
         }.to change(RequirementTemplate, :count).by(1)
