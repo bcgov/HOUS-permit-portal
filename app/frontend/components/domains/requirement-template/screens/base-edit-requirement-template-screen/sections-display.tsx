@@ -118,6 +118,9 @@ const SectionDisplay = observer(
                 borderTop: isInEditMode ? "none" : undefined,
               },
             }}
+            editablePreviewProps={{
+              marginTop: 6,
+            }}
             initialHint={t("ui.clickToEdit")}
             value={editableSectionName}
             onChange={setEditableSectionName}

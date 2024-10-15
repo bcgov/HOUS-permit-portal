@@ -36,7 +36,8 @@ export const ControlsHeader = observer(function ControlsHeader({
     formState: { isSubmitting, isValid },
   } = useFormContext<IRequirementTemplateForm>()
   const onClose = () => {
-    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
+    const parentPath = location.pathname.split("/").slice(0, -2).join("/") || "/"
+    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(parentPath)
   }
   const isSubmitDisabled = hasStepCodeDependencyError || !!requirementTemplate.discardedAt || isSubmitting || !isValid
 
@@ -75,7 +76,7 @@ export const ControlsHeader = observer(function ControlsHeader({
               isDisabled: isSubmitDisabled,
             },
           })}
-        <Button variant={"primary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
+        <Button variant={"secondary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
           {t("requirementTemplate.edit.saveDraft")}
         </Button>
 

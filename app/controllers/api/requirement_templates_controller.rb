@@ -218,6 +218,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       params.require(:requirement_template).permit(
         :id,
         :description,
+        :nickname,
         :first_nations,
         :activity_id,
         :permit_type_id,

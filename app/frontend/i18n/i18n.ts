@@ -694,6 +694,8 @@ const options = {
               },
             },
             clickToWriteDisplayName: "Click to write display name",
+            clickToWriteDescription: "Click to write description",
+            clickToWriteNickname: "Click to write nickname",
             blockSetupTitle: "Block setup",
             internalUse: "For internal use only",
             configureFields: "Configure the form fields below that submitters will see:",

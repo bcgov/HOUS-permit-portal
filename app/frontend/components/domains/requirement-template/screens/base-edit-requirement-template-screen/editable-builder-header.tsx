@@ -20,6 +20,10 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
     field: { value: description, onChange: onDescriptionChange },
   } = useController({ control, name: "description" })
 
+  const {
+    field: { value: nickname, onChange: onNicknameChange },
+  } = useController({ control, name: "nickname" })
+
   const breadCrumbs = {
     [ERequirementTemplateType.EarlyAccessRequirementTemplate]: [
       {
@@ -52,9 +56,44 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
       breadCrumbs={breadCrumbs[requirementTemplate.type]}
       requirementTemplate={requirementTemplate}
       status={ETemplateVersionStatus.draft}
+      renderHeading={
+        requirementTemplate.type !== ERequirementTemplateType.LiveRequirementTemplate &&
+        (() => (
+          <EditableInputWithControls
+            w="full"
+            initialHint={t("permitApplication.edit.clickToWriteNickname")}
+            value={nickname || ""}
+            controlsProps={{
+              iconButtonProps: {
+                color: "greys.white",
+              },
+            }}
+            editableInputProps={{
+              fontWeight: 700,
+              fontSize: "3xl",
+              width: "100%",
+              ...register("nickname", {
+                maxLength: {
+                  value: 256,
+                  message: t("ui.invalidInput"),
+                },
+              }),
+              "aria-label": "Edit Nickname",
+            }}
+            editablePreviewProps={{
+              fontWeight: 700,
+              fontSize: "3xl",
+            }}
+            aria-label={"Edit Nickname"}
+            onChange={onNicknameChange}
+            onSubmit={onNicknameChange}
+            onCancel={onNicknameChange}
+          />
+        ))
+      }
       renderDescription={() => (
         <EditableInputWithControls
-          initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
+          initialHint={t("requirementsLibrary.modals.clickToWriteDescription")}
           value={description || ""}
           editableInputProps={{
             "aria-label": "Edit Template Description",

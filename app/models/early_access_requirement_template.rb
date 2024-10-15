@@ -5,10 +5,6 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
 
   validate :has_one_published_template_version
 
-  def label
-    nickname || "asdf"
-  end
-
   private
 
   def ensure_one_published_template_version

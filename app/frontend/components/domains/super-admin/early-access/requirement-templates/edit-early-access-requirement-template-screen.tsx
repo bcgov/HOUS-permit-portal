@@ -63,12 +63,6 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
           </HStack>
         </MenuItem>
         <MenuDivider my={0} borderColor="border.light" />
-        {/* <MenuItem isDisabled={true} onClick={() => navigate("/early-access/requirement-templates/help")}>
-          {t("ui.help")}
-        </MenuItem>
-        <MenuItem isDisabled={true} onClick={() => navigate("/early-access/requirement-templates/help")}>
-          {t("earlyAccessRequirementTemplate.edit.auditLog")}
-        </MenuItem> */}
         <MenuDivider my={0} borderColor="border.light" />
         <MenuItem color="semantic.error" onClick={handleRemove} icon={<Archive />}>
           {t("ui.archive")}
