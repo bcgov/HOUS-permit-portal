@@ -43,6 +43,10 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
 
+  def assignee
+    raise NotImplementedError, "The assignee method is not implemented"
+  end
+
   def early_access?
     type == "EarlyAccessRequirementTemplate"
   end
@@ -149,6 +153,7 @@ class RequirementTemplate < ApplicationRecord
       permit_type: permit_type.name,
       activity: activity.name,
       discarded: discarded_at.present?,
+      assignee: assignee&.name,
       early_access: early_access?,
     }
   end

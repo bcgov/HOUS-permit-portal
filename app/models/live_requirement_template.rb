@@ -1,5 +1,10 @@
 class LiveRequirementTemplate < RequirementTemplate
   validate :unique_classification_for_undiscarded, on: :create
+
+  def assignee
+    nil
+  end
+
   def unique_classification_for_undiscarded
     existing_record =
       LiveRequirementTemplate.find_by(

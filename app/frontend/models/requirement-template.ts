@@ -9,6 +9,7 @@ import { ERequirementTemplateType } from "../types/enums"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
+import { UserModel } from "./user"
 
 function preProcessor(snapshot) {
   const processedSnapShot = {
@@ -60,6 +61,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
+      assignee: types.maybeNull(types.safeReference(UserModel)),
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),

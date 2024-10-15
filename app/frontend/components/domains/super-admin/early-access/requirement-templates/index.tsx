@@ -13,12 +13,13 @@ import { ToggleArchivedButton } from "../../../../shared/buttons/show-archived-b
 import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
+import { AssigneeSelect } from "../../../../shared/select/selectors/assignee-select"
 import { YesNoTag } from "../../../../shared/yes-no-tag"
 import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
 
 export const EarlyAccessRequirementTemplatesScreen = observer(function RequirementTemplate() {
-  const { earlyAccessRequirementTemplateStore } = useMst()
+  const { requirementTemplateStore, earlyAccessRequirementTemplateStore } = useMst()
   const {
     tableEarlyAccessRequirementTemplates,
     currentPage,
@@ -29,9 +30,14 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
     handlePageChange,
     isSearching,
   } = earlyAccessRequirementTemplateStore
+  const { updateRequirementTemplate } = requirementTemplateStore
   const { t } = useTranslation()
 
   useSearch(earlyAccessRequirementTemplateStore, [])
+
+  const handleChangeAssignee = (requirementTemplate, assigneeId: string) => {
+    updateRequirementTemplate(requirementTemplate.id, { assigneeId })
+  }
 
   return (
     <Container maxW="container.lg" p={8} as="main">
@@ -69,7 +75,13 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
                   </SearchGridItem>
                   <SearchGridItem>SHARED WITH</SearchGridItem>
                   <SearchGridItem>{format(rt.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
-                  <SearchGridItem>ASSIGNEE</SearchGridItem>
+                  <SearchGridItem>
+                    <AssigneeSelect
+                      onChange={(userId) => handleChangeAssignee(rt, userId)}
+                      defaultValue={rt.assignee && { value: rt.assignee.id, label: rt.assignee.name }}
+                      compact
+                    />
+                  </SearchGridItem>
                   <SearchGridItem>
                     <RouterLinkButton to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLinkButton>
                   </SearchGridItem>

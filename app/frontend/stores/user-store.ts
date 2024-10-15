@@ -8,7 +8,7 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IUser, UserModel } from "../models/user"
 import { IInvitationResponse } from "../types/api-responses"
-import { EUserSortFields } from "../types/enums"
+import { EUserRoles, EUserSortFields } from "../types/enums"
 import { IEULA } from "../types/types"
 import { convertToDate, toCamelCase } from "../utils/utility-functions"
 
@@ -21,6 +21,7 @@ export const UserStoreModel = types
       invitationResponse: types.maybeNull(types.frozen<IInvitationResponse>()),
       eula: types.maybeNull(types.frozen<IEULA>()),
       tableUsers: types.array(types.reference(UserModel)),
+      isSuperAdminsLoaded: types.optional(types.boolean, false),
     }),
     createSearchModel<EUserSortFields>("searchUsers")
   )
@@ -44,6 +45,14 @@ export const UserStoreModel = types
     getSortColumnHeader(field: EUserSortFields) {
       //@ts-ignore
       return t(`user.fields.${toCamelCase(field)}`)
+    },
+    getUser(id) {
+      return self.usersMap.get(id)
+    },
+  }))
+  .views((self) => ({
+    get adminUsers(): IUser[] {
+      return self.users.filter((u) => u.role === EUserRoles.superAdmin)
     },
   }))
   .actions((self) => ({
@@ -110,6 +119,17 @@ export const UserStoreModel = types
     getUserById(id: string) {
       return self.usersMap.get(id)
     },
+    fetchSuperAdmins: flow(function* () {
+      if (self.isSuperAdminsLoaded) return
+
+      const response = yield self.environment.api.fetchSuperAdmins()
+
+      if (response.ok) {
+        self.mergeUpdateAll(response.data.data, "usersMap")
+      }
+      self.isSuperAdminsLoaded = true
+      return response.ok
+    }),
   }))
   .actions((self) => ({
     searchUsers: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -142,6 +162,11 @@ export const UserStoreModel = types
         self.countPerPage = opts?.countPerPage ?? self.countPerPage
       }
       return response.ok
+    }),
+    getSuperAdminOptions: flow(function* () {
+      if (!self.isSuperAdminsLoaded) yield self.fetchSuperAdmins()
+
+      return self.adminUsers.map((u) => ({ label: u.name, value: u.id }))
     }),
   }))
 
