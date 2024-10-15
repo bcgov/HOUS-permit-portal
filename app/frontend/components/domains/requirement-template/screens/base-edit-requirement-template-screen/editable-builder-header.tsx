@@ -4,7 +4,7 @@ import React from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
-import { ETemplateVersionStatus } from "../../../../../types/enums"
+import { ERequirementTemplateType, ETemplateVersionStatus } from "../../../../../types/enums"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { BuilderHeader } from "./builder-header"
 import { IRequirementTemplateForm } from "./index"
@@ -19,18 +19,37 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
   const {
     field: { value: description, onChange: onDescriptionChange },
   } = useController({ control, name: "description" })
+
+  const breadCrumbs = {
+    [ERequirementTemplateType.EarlyAccessRequirementTemplate]: [
+      {
+        href: "/early-access",
+        title: t("site.breadcrumb.earlyAccess"),
+      },
+      {
+        href: "/early-access/requirement-templates",
+        title: t("site.breadcrumb.requirementTemplates"),
+      },
+      {
+        href: `/requirement-templates/${requirementTemplate.id}/edit`,
+        title: t("site.breadcrumb.editTemplate"),
+      },
+    ],
+    [ERequirementTemplateType.LiveRequirementTemplate]: [
+      {
+        href: "/requirement-templates",
+        title: t("site.breadcrumb.requirementTemplates"),
+      },
+      {
+        href: `/requirement-templates/${requirementTemplate.id}/edit`,
+        title: t("site.breadcrumb.editTemplate"),
+      },
+    ],
+  }
+
   return (
     <BuilderHeader
-      breadCrumbs={[
-        {
-          href: "/requirement-templates",
-          title: t("site.breadcrumb.requirementTemplates"),
-        },
-        {
-          href: `/requirement-templates/${requirementTemplate.id}/edit`,
-          title: t("site.breadcrumb.editTemplate"),
-        },
-      ]}
+      breadCrumbs={breadCrumbs[requirementTemplate.type]}
       requirementTemplate={requirementTemplate}
       status={ETemplateVersionStatus.draft}
       renderDescription={() => (

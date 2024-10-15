@@ -2,6 +2,7 @@ class CreateEarlyAccessPreviewFields < ActiveRecord::Migration[7.1]
   def change
     add_column :requirement_templates, :type, :string
     add_column :requirement_templates, :nickname, :string
+    add_column :requirement_templates, :fetched_at, :datetime
 
     add_column :requirement_blocks, :visibility, :integer, null: false, default: 0
 

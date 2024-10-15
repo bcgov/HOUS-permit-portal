@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { IDenormalizedRequirementTemplateSection } from "../../../types/types"
-import { IRequirementTemplateForm } from "./screens/edit-requirement-template-screen"
+import { IRequirementTemplateForm } from "./screens/base-edit-requirement-template-screen"
 
 export interface IUseSectionHighlightOptions {
   sections:

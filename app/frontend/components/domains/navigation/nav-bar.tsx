@@ -39,7 +39,7 @@ import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
-  const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
+  const regex = /^(\/early-access)?\/requirement-templates\/([a-f\d-]+)\/edit$/
 
   return regex.test(path)
 }
