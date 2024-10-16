@@ -248,3 +248,12 @@ export function formatPidValue(pid?: string) {
 
   return pid.replace(/[^a-zA-Z0-9]/g, "")
 }
+
+export function formatPidLabel(pid?: string) {
+  if (!pid) return null
+  // Remove all non-numeric characters
+  const numericString = pid.replace(/\D/g, "")
+
+  // Add a dash after every third character
+  return numericString.replace(/(\d{3})(?=\d)/g, "$1-")
+}
