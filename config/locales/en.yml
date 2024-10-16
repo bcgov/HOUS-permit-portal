@@ -170,6 +170,9 @@ en:
       jurisdiction_error:
         title: Error
         message: Jurisdiction could not be determined. Please manually enter your jurisdiction.
+      ltsa_retrieval_error:
+        title: Error
+        message: The land title could not be found
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable

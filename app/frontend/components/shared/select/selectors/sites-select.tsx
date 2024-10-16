@@ -10,7 +10,7 @@ import { ControlProps, InputProps, OptionProps, components } from "react-select"
 import CreatableSelect from "react-select/creatable"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
-import { formatPidValue } from "../../../../utils/utility-functions"
+import { formatPidLabel, formatPidValue } from "../../../../utils/utility-functions"
 import { AsyncSelect, TAsyncSelectProps } from "../async-select"
 
 type TSitesSelectProps = {
@@ -58,7 +58,7 @@ export const SitesSelect = observer(function ({
       //set the label for the address?
       fetchPids(option.value).then((pids: string[]) => {
         if (pids) {
-          setPidOptions(pids.map((pid) => ({ value: pid, label: pid })))
+          setPidOptions(pids.map((pid) => ({ value: pid, label: formatPidLabel(pid) })))
           const selectControl = pidSelectRef?.current?.controlRef
           if (selectControl && !R.isEmpty(pids)) {
             selectControl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
@@ -136,7 +136,7 @@ export const SitesSelect = observer(function ({
                     options={pidOptions}
                     ref={pidSelectRef}
                     value={{
-                      label: value,
+                      label: formatPidLabel(value),
                       value: formatPidValue(value),
                     }}
                     onChange={(option) => {
@@ -146,10 +146,12 @@ export const SitesSelect = observer(function ({
                       onChange(formatPidValue(option?.value))
                     }}
                     onCreateOption={(inputValue: string) => {
-                      const newValue = { label: inputValue, value: formatPidValue(inputValue) }
+                      const newValue = { label: formatPidLabel(inputValue), value: formatPidValue(inputValue) }
                       onChange(newValue.value)
                     }}
-                    formatCreateLabel={(inputValue: string) => t("permitApplication.usePid", { inputValue })}
+                    formatCreateLabel={(inputValue: string) =>
+                      t("permitApplication.usePid", { inputValue: formatPidLabel(inputValue) })
+                    }
                     isClearable
                     isSearchable
                   />

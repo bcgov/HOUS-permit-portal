@@ -570,7 +570,7 @@ const options = {
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found. Please select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
           },
