@@ -13,6 +13,7 @@ class PermitApplicationExportService
         first_nations = jc[:first_nations]
         draft_applications = jc[:draft_applications]
         submitted_applications = jc[:submitted_applications]
+        # 86400 seconds in a day
         average_days_spent_before_first_submit = (jc[:average_time_spent_before_first_submit] / 86400.0).round(2)
         average_days_spent_before_latest_submit = (jc[:average_time_spent_before_latest_submit] / 86400.0).round(2)
 
