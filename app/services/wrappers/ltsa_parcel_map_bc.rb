@@ -91,7 +91,7 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
       raise Errors::FeatureAttributesRetrievalError unless attributes.present?
       return attributes
     else
-      raise Errors::FeatureAttributesRetrievalError
+      raise Errors::LtsaUnavailableError
     end
   end
 

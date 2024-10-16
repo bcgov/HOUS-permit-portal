@@ -70,6 +70,8 @@ class Api::GeocoderController < Api::ApplicationController
       raise StandardError unless jurisdiction.present?
       render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
     rescue Errors::FeatureAttributesRetrievalError => e
+      render_error "geocoder.ltsa_retrieval_error", {}, e and return
+    rescue Errors::LtsaUnavailableError => e
       render_error "geocoder.ltsa_unavailable_error", {}, e and return
     rescue StandardError => e
       render_error "geocoder.jurisdiction_error", {}, e and return
