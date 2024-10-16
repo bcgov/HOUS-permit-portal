@@ -10,6 +10,11 @@ export enum EPermitClassificationType {
   Activity = "Activity",
 }
 
+export enum ERequirementTemplateType {
+  EarlyAccessRequirementTemplate = "EarlyAccessRequirementTemplate",
+  LiveRequirementTemplate = "LiveRequirementTemplate",
+}
+
 export enum EPermitClassificationCode {
   lowResidential = "low_residential",
   mediumResidential = "medium_residential",

@@ -80,12 +80,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
             name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
-  end
-
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -441,9 +435,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
     t.string "type"
     t.string "nickname"
     t.uuid "copied_from_id"
-    t.uuid "asignee_id"
+    t.uuid "assignee_id"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
-    t.index ["asignee_id"], name: "index_requirement_templates_on_asignee_id"
+    t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"],
             name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"],
@@ -961,7 +955,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
   add_foreign_key "requirement_templates",
                   "requirement_templates",
                   column: "copied_from_id"
-  add_foreign_key "requirement_templates", "users", column: "asignee_id"
+  add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"

@@ -1,5 +1,6 @@
 class RequirementTemplateSection < ApplicationRecord
   belongs_to :requirement_template
+  belongs_to :copied_from, class_name: "RequirementTemplateSection", optional: true
 
   has_many :template_section_blocks, -> { order(position: :asc) }, dependent: :destroy
   has_many :requirement_blocks, through: :template_section_blocks

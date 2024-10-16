@@ -64,7 +64,7 @@ en:
           nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
           attributes:
             template_versions:
-              published_required_for_early_access: "Early access template requires published template version"
+              published_required_for_early_access: "requires one published template version"
         requirement_block:
           attributes:
             visibility:
@@ -345,6 +345,12 @@ en:
         title: ""
         message: "Permit has been published."
       create_error:
+        title: Error
+        message: "%{error_message}"
+      copy_success:
+        title: ""
+        message: "New template copied successfully!"
+      copy_error:
         title: Error
         message: "%{error_message}"
       destroy_success:
