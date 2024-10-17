@@ -30,7 +30,7 @@
     "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "vite": "^5.1.7",
+    "vite": "^5.4.9",
     "vite-plugin-ruby": "^5.0.0"
   },
   "dependencies": {
