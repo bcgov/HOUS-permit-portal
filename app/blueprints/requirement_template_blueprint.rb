@@ -12,6 +12,11 @@ class RequirementTemplateBlueprint < Blueprinter::Base
     options[:published_template_version].present? ? options[:published_template_version] : rt.published_template_version
   end
 
+  association :assignee,
+              blueprint: UserBlueprint,
+              view: :minimal,
+              if: ->(_field_name, rt, options) { options[:current_user]&.super_admin? }
+
   view :extended do
     association :requirement_template_sections, blueprint: RequirementTemplateSectionBlueprint
   end

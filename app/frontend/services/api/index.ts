@@ -595,6 +595,10 @@ export class Api {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
   }
 
+  async fetchSuperAdmins() {
+    return this.client.get<IOptionResponse>(`/users/super_admins`, {})
+  }
+
   async createContact(params: TContactFormData) {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }

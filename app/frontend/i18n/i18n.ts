@@ -237,6 +237,8 @@ const options = {
           options: "Options",
           na: "N/A",
           share: "Share",
+          unassigned: "Unassigned",
+          unassign: "Unassign",
         },
         notification: {
           title: "Notifications",
@@ -1405,6 +1407,7 @@ const options = {
             super_admin:
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
+          assignTo: "Assign to...",
         },
         earlyAccessRequirementTemplate: {
           index: {
@@ -1428,6 +1431,8 @@ const options = {
             lastFetched: "Last fetched",
             fetchLatest: "Fetch latest",
             auditLog: "Audit log",
+            confirmRemoveModalTitle: "Archive preview?",
+            confirmRemoveModalBody: "This preview will no longer be accessible by invitees",
           },
           fields: {
             nickname: "Nickname",

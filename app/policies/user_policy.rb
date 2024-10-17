@@ -23,6 +23,10 @@ class UserPolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def super_admins?
+    user.super_admin?
+  end
+
   def search_jurisdiction_users?
     return true if user.super_admin? && (record.manager? || record.super_admin?)
     user.manager? && record_in_users_jurisdictions?

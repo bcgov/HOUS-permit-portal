@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import {
   BaseEditRequirementTemplateScreen,
   IEditRequirementActionsProps,
@@ -64,9 +65,24 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
         </MenuItem>
         <MenuDivider my={0} borderColor="border.light" />
         <MenuDivider my={0} borderColor="border.light" />
-        <MenuItem color="semantic.error" onClick={handleRemove} icon={<Archive />}>
-          {t("ui.archive")}
-        </MenuItem>
+        <ConfirmationModal
+          title={t("earlyAccessRequirementTemplate.edit.confirmRemoveModalTitle")}
+          body={t("earlyAccessRequirementTemplate.edit.confirmRemoveModalBody")}
+          onConfirm={(closeModal) => {
+            handleRemove()
+            closeModal()
+          }}
+          renderTriggerButton={(props) => (
+            <MenuItem color="semantic.error" icon={<Archive />} {...props}>
+              {t("ui.archive")}
+            </MenuItem>
+          )}
+          renderConfirmationButton={(props) => (
+            <Button variant="secondary" color="semantic.error" leftIcon={<Archive />} {...props}>
+              {t("ui.archive")}
+            </Button>
+          )}
+        />
       </MenuList>
     </Menu>
   )

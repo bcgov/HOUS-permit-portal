@@ -1,6 +1,7 @@
 import { format } from "date-fns"
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { datefnsAppDateFormat } from "../constants"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -60,8 +61,11 @@ export const RequirementTemplateStoreModel = types
       }
 
       self.rootStore.templateVersionStore.mergeUpdateAll(templateVersions, "templateVersionMap")
+      if (requirementTemplate.assignee) self.rootStore.userStore.mergeUpdate(requirementTemplate.assignee, "usersMap")
 
-      return requirementTemplate
+      return R.mergeRight(requirementTemplate, {
+        assignee: requirementTemplate.assignee?.id,
+      })
     },
   }))
   .actions((self) => ({

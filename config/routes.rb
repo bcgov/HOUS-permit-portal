@@ -150,6 +150,7 @@ Rails.application.routes.draw do
 
     resources :users, only: %i[] do
       get "current_user/license_agreements", on: :collection, to: "users#license_agreements"
+      get "super_admins", on: :collection, to: "users#super_admins"
     end
     resources :users, only: %i[destroy update] do
       patch "restore", on: :member

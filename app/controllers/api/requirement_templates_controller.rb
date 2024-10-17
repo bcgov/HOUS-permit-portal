@@ -16,6 +16,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        current_page: @search.current_page,
                      },
                      blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       current_user: current_user,
+                     },
                    }
   end
 
@@ -24,7 +27,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     render_success @requirement_template,
                    nil,
-                   { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended,
+                       current_user: current_user,
+                     },
+                   }
   end
 
   def create
@@ -82,7 +91,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.update(requirement_template_params)
       render_success @requirement_template,
                      "requirement_template.update_success",
-                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user,
+                       },
+                     }
     else
       render_error "requirement_template.update_error",
                    message_opts: {
@@ -219,6 +234,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :id,
         :description,
         :nickname,
+        :assignee_id,
         :first_nations,
         :activity_id,
         :permit_type_id,

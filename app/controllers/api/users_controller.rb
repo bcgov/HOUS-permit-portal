@@ -26,6 +26,16 @@ class Api::UsersController < Api::ApplicationController
                    }
   end
 
+  def super_admins
+    authorize :user, :super_admins?
+    begin
+      super_admins = User.super_admin
+      render_success super_admins, nil, { blueprint: UserBlueprint, blueprint_opts: { view: :minimal } }
+    rescue StandardError => e
+      render_error "user.get_super_admins_error", {}, e and return
+    end
+  end
+
   def update
     authorize @user
     return render_error "misc.user_not_authorized_error" unless %w[reviewer review_manager].include?(user_params[:role])
