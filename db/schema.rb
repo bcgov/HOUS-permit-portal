@@ -434,6 +434,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
     t.boolean "first_nations", default: false
     t.string "type"
     t.string "nickname"
+    t.datetime "fetched_at"
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"

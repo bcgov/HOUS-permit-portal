@@ -11,7 +11,7 @@ import { BuilderBottomFloatingButtons } from "../builder-bottom-floating-buttons
 import { SectionsDisplay } from "../sections-display"
 import { SectionsSidebar } from "../sections-sidebar"
 import { useSectionHighlight } from "../use-section-highlight"
-import { BuilderHeader } from "./edit-requirement-template-screen/builder-header"
+import { BuilderHeader } from "./base-edit-requirement-template-screen/builder-header"
 
 const scrollToIdPrefix = "template-version-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`

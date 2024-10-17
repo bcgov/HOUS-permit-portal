@@ -1,4 +1,4 @@
-import { Container, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Container, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -13,6 +13,7 @@ import { SubNavBar } from "../../../navigation/sub-nav-bar"
 interface IProps {
   requirementTemplate: Pick<IDenormalizedTemplate, "id" | "description" | "activity" | "permitType" | "label">
   renderDescription?: () => JSX.Element
+  renderHeading?: () => JSX.Element
   status?: ETemplateVersionStatus
   versionDate?: Date
   breadCrumbs?: { href: string; title: string }[]
@@ -24,6 +25,7 @@ export const BuilderHeader = observer(function BuilderHeader({
   status,
   versionDate,
   renderDescription,
+  renderHeading,
   breadCrumbs = [],
   latestVersionId,
 }: IProps) {
@@ -44,7 +46,7 @@ export const BuilderHeader = observer(function BuilderHeader({
         </Text>
       </HStack>
       <VStack spacing={2} w={"full"} alignItems={"flex-start"} py={5}>
-        <Heading as="h1">{requirementTemplate.label}</Heading>
+        {renderHeading ? renderHeading() : <Heading as="h1">{requirementTemplate.label}</Heading>}
         <HStack>
           <Text fontWeight={700}>{t("requirementTemplate.fields.description")}:</Text>
           {renderDescription ? renderDescription() : <Text as="span">{requirementTemplate.description}</Text>}

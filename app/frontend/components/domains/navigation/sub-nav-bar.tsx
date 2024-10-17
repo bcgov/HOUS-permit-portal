@@ -7,7 +7,7 @@ import { useMst } from "../../../setup/root"
 import { isUUID, toCamelCase } from "../../../utils/utility-functions"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
-type TBreadcrumbSegment = { href: string; title: string }
+export type TBreadcrumbSegment = { href: string; title: string }
 
 interface ISubNavBar extends FlexProps {
   breadCrumbContainerProps?: FlexProps

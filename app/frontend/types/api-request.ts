@@ -73,6 +73,7 @@ export interface IRevisionReasonsAttributes {
 
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
+  nickname?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 

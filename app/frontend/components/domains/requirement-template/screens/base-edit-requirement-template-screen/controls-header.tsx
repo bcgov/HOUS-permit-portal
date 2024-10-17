@@ -7,8 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IRequirementTemplate } from "../../../../../models/requirement-template"
 import { BrowserSearchPrompt } from "../../../../shared/permit-applications/browser-search-prompt"
-import { IRequirementTemplateForm } from "./index"
-import { PublishScheduleModal } from "./publish-schedule-modal"
+import { IEditRequirementActionsProps, IEditRequirementOptionsProps, IRequirementTemplateForm } from "./index"
 
 interface IProps {
   onScheduleDate?: (date: Date) => void
@@ -17,6 +16,8 @@ interface IProps {
   onAddSection: () => void
   requirementTemplate: IRequirementTemplate
   hasStepCodeDependencyError?: boolean
+  renderOptionsMenu?: React.FC<IEditRequirementOptionsProps>
+  renderActions?: React.FC<IEditRequirementActionsProps>
 }
 
 export const ControlsHeader = observer(function ControlsHeader({
@@ -26,6 +27,8 @@ export const ControlsHeader = observer(function ControlsHeader({
   onAddSection,
   onForcePublishNow,
   hasStepCodeDependencyError,
+  renderOptionsMenu,
+  renderActions,
 }: IProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -33,7 +36,8 @@ export const ControlsHeader = observer(function ControlsHeader({
     formState: { isSubmitting, isValid },
   } = useFormContext<IRequirementTemplateForm>()
   const onClose = () => {
-    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/requirement-templates`)
+    const parentPath = location.pathname.split("/").slice(0, -2).join("/") || "/"
+    window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(parentPath)
   }
   const isSubmitDisabled = hasStepCodeDependencyError || !!requirementTemplate.discardedAt || isSubmitting || !isValid
 
@@ -52,22 +56,29 @@ export const ControlsHeader = observer(function ControlsHeader({
       justifyContent="space-between"
       boxShadow="elevations.elevation02"
     >
-      <Button variant={"secondary"} isDisabled={isSubmitting} leftIcon={<Plus />} onClick={onAddSection}>
-        {t("requirementTemplate.edit.addSectionButton")}
-      </Button>
+      <HStack spacing={4}>
+        <Button variant={"secondary"} isDisabled={isSubmitting} leftIcon={<Plus />} onClick={onAddSection}>
+          {t("requirementTemplate.edit.addSectionButton")}
+        </Button>
+        {renderOptionsMenu && renderOptionsMenu({ requirementTemplate })}
+      </HStack>
+
       <HStack spacing={4}>
         <BrowserSearchPrompt color="text.primary" />
-        <Button variant={"primary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
+
+        {renderActions &&
+          renderActions({
+            requirementTemplate,
+            minDate: requirementTemplate.nextAvailableScheduleDate,
+            onScheduleConfirm: onScheduleDate,
+            onForcePublishNow: onForcePublishNow,
+            triggerButtonProps: {
+              isDisabled: isSubmitDisabled,
+            },
+          })}
+        <Button variant={"secondary"} isDisabled={isSubmitDisabled} isLoading={isSubmitting} onClick={onSaveDraft}>
           {t("requirementTemplate.edit.saveDraft")}
         </Button>
-        <PublishScheduleModal
-          minDate={requirementTemplate.nextAvailableScheduleDate}
-          onScheduleConfirm={onScheduleDate}
-          onForcePublishNow={onForcePublishNow}
-          triggerButtonProps={{
-            isDisabled: isSubmitDisabled,
-          }}
-        />
 
         <Button variant={"secondary"} isDisabled={isSubmitting} onClick={onClose}>
           {t("requirementTemplate.edit.closeEditor")}

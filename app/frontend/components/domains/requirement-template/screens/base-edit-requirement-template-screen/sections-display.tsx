@@ -6,13 +6,13 @@ import React, { useEffect } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
+import { IRequirementTemplateForm, formScrollToId } from "."
 import { useMst } from "../../../../../setup/root"
 import { IRequirementTemplateSectionAttributes } from "../../../../../types/api-request"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { RemoveConfirmationModal } from "../../../../shared/modals/remove-confirmation-modal"
 import { RequirementBlockAccordion } from "../../../requirements-library/requirement-block-accordion"
 import { RequirementsLibraryDrawer } from "../../../requirements-library/requirements-library-drawer"
-import { IRequirementTemplateForm, formScrollToId } from "./index"
 
 interface IProps {
   isCollapsedAll?: boolean
@@ -117,6 +117,9 @@ const SectionDisplay = observer(
               "&::before": {
                 borderTop: isInEditMode ? "none" : undefined,
               },
+            }}
+            editablePreviewProps={{
+              marginTop: 6,
             }}
             initialHint={t("ui.clickToEdit")}
             value={editableSectionName}

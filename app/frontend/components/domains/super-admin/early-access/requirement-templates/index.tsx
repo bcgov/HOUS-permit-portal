@@ -12,6 +12,7 @@ import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { ToggleArchivedButton } from "../../../../shared/buttons/show-archived-button"
 import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
+import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import { YesNoTag } from "../../../../shared/yes-no-tag"
 import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
@@ -69,7 +70,9 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
                   <SearchGridItem>SHARED WITH</SearchGridItem>
                   <SearchGridItem>{format(rt.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
                   <SearchGridItem>ASSIGNEE</SearchGridItem>
-                  <SearchGridItem>BUTTONS</SearchGridItem>
+                  <SearchGridItem>
+                    <RouterLinkButton to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLinkButton>
+                  </SearchGridItem>
                 </Box>
               )
             })

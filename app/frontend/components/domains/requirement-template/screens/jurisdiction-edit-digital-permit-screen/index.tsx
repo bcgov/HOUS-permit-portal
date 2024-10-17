@@ -29,7 +29,7 @@ import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-butt
 import { SectionsDisplay } from "../../sections-display"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
-import { BuilderHeader } from "../edit-requirement-template-screen/builder-header"
+import { BuilderHeader } from "../base-edit-requirement-template-screen/builder-header"
 import { JurisdictionRequirementBlockEditSidebar } from "./jurisdiction-requirement-block-edit-sidebar"
 
 const scrollToIdPrefix = "jurisdiction-edit-template-version-scroll-to-id-"
