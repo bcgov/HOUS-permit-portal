@@ -1,4 +1,5 @@
-import { Box, Container, Flex, Heading, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Heading, VStack } from "@chakra-ui/react"
+import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -19,7 +20,7 @@ import { YesNoTag } from "../../../../shared/yes-no-tag"
 import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
 
-export const EarlyAccessRequirementTemplatesScreen = observer(function RequirementTemplate() {
+export const EarlyAccessRequirementTemplatesIndexScreen = observer(function RequirementTemplate() {
   const { requirementTemplateStore, earlyAccessRequirementTemplateStore, userStore } = useMst()
   const {
     tableEarlyAccessRequirementTemplates,
@@ -94,7 +95,12 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
                     />
                   </SearchGridItem>
                   <SearchGridItem>
-                    <RouterLinkButton to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLinkButton>
+                    <HStack gap={2}>
+                      <RouterLinkButton to={`${rt.id}/edit`}>{t("ui.edit")}</RouterLinkButton>
+                      <RouterLinkButton rightIcon={<ArrowSquareOut />} variant="secondary" to={`${rt.id}`}>
+                        {t("ui.view")}
+                      </RouterLinkButton>
+                    </HStack>
                   </SearchGridItem>
                 </Box>
               )

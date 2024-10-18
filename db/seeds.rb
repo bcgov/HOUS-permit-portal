@@ -160,15 +160,6 @@ if PermitApplication.first.blank?
   LiveRequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
   LiveRequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
 
-  puts "Seeding early access requirement templates..."
-
-  3.times do |n|
-    EarlyAccessRequirementTemplate.find_or_create_by!(nickname: "Early access #{n}") do |record|
-      record.activity = activity1
-      record.permit_type = permit_type1
-    end
-  end
-
   RequirementTemplate.reindex
 
   PermitTypeRequiredStepSeeder.seed
@@ -252,3 +243,10 @@ EulaUpdater.run
 
 puts "Seeding default revision reasons..."
 RevisionReasonSeeder.seed
+
+puts "Seeding early access requirement templates..."
+
+LiveRequirementTemplate.find_each do |lrt|
+  overrides = { type: EarlyAccessRequirementTemplate.name, nickname: "Early access #{lrt.label}" }
+  RequirementTemplateCopyService.new(lrt).build_requirement_template_from_existing(overrides)
+end

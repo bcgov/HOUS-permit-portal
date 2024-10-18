@@ -39,7 +39,19 @@ import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
-  const regex = /^(\/early-access)?\/requirement-templates\/([a-f\d-]+)\/edit$/
+  const regex = /^\/requirement-templates\/([a-f\d-]+)\/edit$/
+
+  return regex.test(path)
+}
+
+function isEarlyAccessTemplateEditPath(path: string): boolean {
+  const regex = /^\/early-access?\/requirement-templates\/([a-f\d-]+)\/edit$/
+
+  return regex.test(path)
+}
+
+function isEarlyAccessTemplateViewPath(path: string): boolean {
+  const regex = /^\/early-access\/requirement-templates\/([a-f\d-]+)$/
 
   return regex.test(path)
 }
@@ -74,6 +86,8 @@ function shouldHideSubNavbarForPath(path: string): boolean {
   const matchers: Array<(path: string) => boolean> = [
     (path) => path === "/",
     isTemplateEditPath,
+    isEarlyAccessTemplateEditPath,
+    isEarlyAccessTemplateViewPath,
     isTemplateVersionPath,
     isPermitApplicationEditPath,
     isPermitApplicationPath,

@@ -29,6 +29,7 @@ import {
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
+  processFieldsForEphemeral,
 } from "../utils/formio-component-traversal"
 
 import { format } from "date-fns"
@@ -57,7 +58,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       activity: types.frozen<IActivity>(),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
       submitter: types.maybe(types.reference(types.late(() => UserModel))),
-      jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+      jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       publishedTemplateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       formJson: types.maybeNull(types.frozen<IFormJson>()),
@@ -111,6 +112,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get isResubmitted() {
         return self.status === EPermitApplicationStatus.resubmitted
+      },
+      get isEphemeral() {
+        return self.status === EPermitApplicationStatus.ephemeral
       },
       get sortedSubmissionVersions() {
         return self.submissionVersions.slice().sort((a, b) => b.createdAt - a.createdAt)
@@ -198,7 +202,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get formattedFormJson() {
         const clonedFormJson = R.clone(self.formJson)
-        const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.latestRevisionRequests)
+
+        // Disable certain fields if this is an ephemeral preview
+        const ephemeralProcessedFormJson = self.isEphemeral ? processFieldsForEphemeral(clonedFormJson) : clonedFormJson
+        const revisionAnnotatedFormJson = combineRevisionAnnotations(
+          ephemeralProcessedFormJson,
+          self.latestRevisionRequests
+        )
         //merge the formattedComliance data.  This should trigger a form redraw when it is updated
         const complianceHintedFormJson = combineComplianceHints(
           revisionAnnotatedFormJson,
@@ -206,11 +216,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.formattedComplianceData
         )
         const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
-
         const revisionRequestsToUse = self.isViewingPastRequests
           ? self.selectedPastSubmissionVersion?.revisionRequests
           : self.latestRevisionRequests
-
         let changedKeys = []
         if (self.isViewingPastRequests && self.selectedPastSubmissionVersion) {
           changedKeys = compareSubmissionData(
@@ -224,12 +232,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, self.isSubmitted, changedKeys)
-
         const revisionModeFormJson =
           self.revisionMode || self.isRevisionsRequested
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
             : diffColoredFormJson
-
         return revisionModeFormJson
       },
       sectionKey(sectionId) {
