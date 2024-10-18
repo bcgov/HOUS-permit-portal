@@ -68,8 +68,8 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.force_publish_now!(requirement_template)
-    unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
+  def self.force_publish_now!(requirement_template, for_early_access = false)
+    unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true" || for_early_access
       raise TemplateVersionForcePublishNowError.new("Force publish is not enabled")
     end
 
@@ -93,6 +93,16 @@ class TemplateVersioningService
     ModelCallbackJob.perform_async(template_version.class.name, template_version.id, "force_publish_now!")
 
     template_version
+  end
+
+  def self.publish_early_access_version!(requirement_template)
+    unless requirement_template.type == EarlyAccessRequirementTemplate.name
+      raise TemplateVersionPublishError.new(
+              "Cannot create early access version for a non-early access requirement template",
+            )
+    end
+
+    self.force_publish_now!(requirement_template, true)
   end
 
   def self.publish_version!(template_version, skip_date_check = false)
@@ -326,13 +336,22 @@ class TemplateVersioningService
   end
 
   def self.deprecate_versions_before_template(template_version)
-    template_version
-      .requirement_template
-      .template_versions
-      .where(status: %w[published scheduled])
-      .where("version_date <=?", template_version.version_date)
-      .where.not(id: template_version.id)
-      .update_all(status: "deprecated", deprecation_reason: TemplateVersion.deprecation_reasons[:new_publish])
+    template_versions =
+      template_version
+        .requirement_template
+        .template_versions
+        .where(status: %w[published scheduled])
+        .where("version_date <=?", template_version.version_date)
+        .where.not(id: template_version.id)
+
+    if (template_version.early_access?)
+      template_versions.destroy_all
+    else
+      template_versions.update_all(
+        status: "deprecated",
+        deprecation_reason: TemplateVersion.deprecation_reasons[:new_publish],
+      )
+    end
   end
 
   def self.form_requirement_blocks_hash(requirement_template)

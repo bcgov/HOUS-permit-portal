@@ -3,17 +3,16 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
 
   belongs_to :assignee, class_name: "User", optional: true
 
-  before_validation :ensure_one_published_template_version
+  after_save :publish_early_access_version
 
-  validate :has_one_published_template_version
+  def publish_early_access_version
+    TemplateVersioningService.publish_early_access_version!(self)
+  rescue TemplateVersionPublishError => e
+    errors.add(:base, e.message)
+    raise ActiveRecord::Rollback
+  end
 
   private
-
-  def ensure_one_published_template_version
-    return if published_template_version.present?
-
-    template_versions.build(status: :published, version_date: Date.today) if new_record?
-  end
 
   def has_one_published_template_version
     unless template_versions.length == 1 && template_versions.first.published?

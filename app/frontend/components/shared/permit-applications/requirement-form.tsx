@@ -369,7 +369,10 @@ export const RequirementForm = observer(
             />
           ) : (
             <CustomMessageBox
-              title={t("permitApplication.show.submittingTo.title", { jurisdictionName: jurisdiction.qualifiedName })}
+              title={
+                jurisdiction &&
+                t("permitApplication.show.submittingTo.title", { jurisdictionName: jurisdiction?.qualifiedName })
+              }
               description={
                 <Trans
                   t={t}

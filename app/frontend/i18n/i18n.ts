@@ -502,6 +502,7 @@ const options = {
             newly_submitted: "Submitted",
             resubmitted: "Resubmitted",
             revisions_requested: "Revisions Requested",
+            ephemeral: "Preview",
           },
           statusGroup: {
             draft: "Draft permits",
@@ -1410,6 +1411,7 @@ const options = {
           assignTo: "Assign to...",
         },
         earlyAccessRequirementTemplate: {
+          show: {},
           index: {
             tableHeading: "Previews",
             title: "Early access templates catalogue",

@@ -5,7 +5,7 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../components/dom
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
-import { IDenormalizedRequirementBlock, IDenormalizedTemplate, ITemplateVersionUpdate } from "../types/types"
+import { IDenormalizedRequirementBlock, IDenormalizedTemplate, IFormJson, ITemplateVersionUpdate } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
 import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
@@ -25,6 +25,7 @@ export const TemplateVersionModel = types
     templateVersionCustomizationsByJurisdiction: types.map(JurisdictionTemplateVersionCustomizationModel),
     integrationMappingByJurisdiction: types.map(IntegrationMappingModel),
     latestVersionId: types.maybeNull(types.string),
+    formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())

@@ -90,6 +90,7 @@ const EditPermitApplicationScreen = lazy(() =>
     default: module.EditPermitApplicationScreen,
   }))
 )
+
 const NewPermitApplicationScreen = lazy(() =>
   import("../permit-application/new-permit-application-screen").then((module) => ({
     default: module.NewPermitApplicationScreen,
@@ -205,10 +206,18 @@ const EarlyAccessScreen = lazy(() =>
   }))
 )
 
-const EarlyAccessRequirementTemplatesScreen = lazy(() =>
+const EarlyAccessRequirementTemplatesIndexScreen = lazy(() =>
   import("../super-admin/early-access/requirement-templates").then((module) => ({
-    default: module.EarlyAccessRequirementTemplatesScreen,
+    default: module.EarlyAccessRequirementTemplatesIndexScreen,
   }))
+)
+
+const EarlyAccessRequirementTemplateScreen = lazy(() =>
+  import("../super-admin/early-access/requirement-templates/early-access-requirement-template-screen").then(
+    (module) => ({
+      default: module.EarlyAccessRequirementTemplateScreen,
+    })
+  )
 )
 
 const NewEarlyAccessRequirementTemplateScreen = lazy(() =>
@@ -322,7 +331,11 @@ const AppRoutes = observer(() => {
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
       <Route path="/early-access/requirements-library" element={<EarlyAccessRequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
-      <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesScreen />} />
+      <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesIndexScreen />} />
+      <Route
+        path="/early-access/requirement-templates/:requirementTemplateId"
+        element={<EarlyAccessRequirementTemplateScreen />}
+      />
       <Route path="/early-access/requirement-templates/new" element={<NewEarlyAccessRequirementTemplateScreen />} />
       <Route
         path="/early-access/requirement-templates/:requirementTemplateId/edit"
