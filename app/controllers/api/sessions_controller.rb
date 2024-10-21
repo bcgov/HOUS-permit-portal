@@ -5,7 +5,8 @@ class Api::SessionsController < Devise::SessionsController
   skip_before_action :verify_signed_out_user
 
   def destroy
-    signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
+    signed_out =
+      (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
     render_success nil, "user.logout_success"
   end
 

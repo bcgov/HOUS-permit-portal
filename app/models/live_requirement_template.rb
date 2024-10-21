@@ -11,10 +11,15 @@ class LiveRequirementTemplate < RequirementTemplate
         permit_type_id: permit_type_id,
         activity_id: activity_id,
         first_nations: first_nations,
-        discarded_at: nil,
+        discarded_at: nil
       )
     if existing_record.present?
-      errors.add(:base, I18n.t("activerecord.errors.models.requirement_template.nonunique_classification"))
+      errors.add(
+        :base,
+        I18n.t(
+          "activerecord.errors.models.requirement_template.nonunique_classification"
+        )
+      )
     end
   end
 end

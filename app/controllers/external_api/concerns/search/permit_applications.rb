@@ -5,7 +5,8 @@ module ExternalApi::Concerns::Search::PermitApplications
     # This search should always be scoped to a jurisdiction via the api key.
     # The following condition should never be true, but is an added reduncy
     # for security purposes.
-    if current_external_api_key.blank? || current_external_api_key.jurisdiction_id.blank?
+    if current_external_api_key.blank? ||
+         current_external_api_key.jurisdiction_id.blank?
       raise Pundit::NotAuthorizedError
     end
 
@@ -17,15 +18,19 @@ module ExternalApi::Concerns::Search::PermitApplications
       per_page:
         (
           if permit_application_search_params[:page]
-            (permit_application_search_params[:per_page] || Kaminari.config.default_per_page)
+            (
+              permit_application_search_params[:per_page] ||
+                Kaminari.config.default_per_page
+            )
           else
             nil
           end
         ),
-      includes: PermitApplication::SEARCH_INCLUDES,
+      includes: PermitApplication::SEARCH_INCLUDES
     }
 
-    @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
+    @permit_application_search =
+      PermitApplication.search(permit_application_query, **search_conditions)
   end
 
   private
@@ -38,9 +43,9 @@ module ExternalApi::Concerns::Search::PermitApplications
         :permit_classifications,
         :status,
         submitted_at: %i[gt lt gte lte],
-        resubmitted_at: %i[gt lt gte lte],
+        resubmitted_at: %i[gt lt gte lte]
       ],
-      sort: %i[field direction],
+      sort: %i[field direction]
     )
   end
 
@@ -63,10 +68,11 @@ module ExternalApi::Concerns::Search::PermitApplications
     where = {
       jurisdiction_id: current_external_api_key.jurisdiction_id,
       # TODO: Support sandboxes in external API
-      sandbox_id: nil,
+      sandbox_id: nil
     }
 
-    where[:status] = %i[newly_submitted resubmitted] if constraints.blank? || constraints[:status].blank?
+    where[:status] = %i[newly_submitted resubmitted] if constraints.blank? ||
+      constraints[:status].blank?
 
     where.merge!(constraints.to_h.deep_symbolize_keys) if constraints.present?
 

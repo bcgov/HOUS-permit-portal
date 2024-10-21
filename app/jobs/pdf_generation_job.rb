@@ -8,7 +8,7 @@ class PdfGenerationJob
                   queue: :file_processing,
                   on_conflict: {
                     client: :log,
-                    server: :reject,
+                    server: :reject
                   }
 
   def self.lock_args(args)
@@ -30,16 +30,21 @@ class PdfGenerationJob
       puts "Directory created: #{generation_directory_path}"
     end
 
-    submission_version_with_missing_pdfs = permit_application.submission_versions.select(&:missing_pdfs?)
+    submission_version_with_missing_pdfs =
+      permit_application.submission_versions.select(&:missing_pdfs?)
 
     submission_versions_data =
       submission_version_with_missing_pdfs.map do |submission_version|
         # Convert data to JSON string
-        application_filename = "permit_application_#{permit_application.id}_v#{submission_version.version_number}.pdf"
-        step_code_filename = "step_code_checklist_#{permit_application.id}_v#{submission_version.version_number}.pdf"
+        application_filename =
+          "permit_application_#{permit_application.id}_v#{submission_version.version_number}.pdf"
+        step_code_filename =
+          "step_code_checklist_#{permit_application.id}_v#{submission_version.version_number}.pdf"
 
-        should_permit_application_pdf_be_generated = submission_version.missing_permit_application_pdf?
-        should_checklist_pdf_be_generated = submission_version.missing_step_code_checklist_pdf?
+        should_permit_application_pdf_be_generated =
+          submission_version.missing_permit_application_pdf?
+        should_checklist_pdf_be_generated =
+          submission_version.missing_step_code_checklist_pdf?
 
         pdf_json_data = {
           permitApplication:
@@ -49,8 +54,8 @@ class PdfGenerationJob
                 view: :pdf_generation,
                 form_json: submission_version.form_json,
                 submission_data: submission_version.formatted_submission_data,
-                submitted_at: submission_version.created_at,
-              ),
+                submitted_at: submission_version.created_at
+              )
             ),
           checklist:
             submission_version.has_step_code_checklist? &&
@@ -58,12 +63,14 @@ class PdfGenerationJob
           meta: {
             generationPaths: {
               permitApplication:
-                should_permit_application_pdf_be_generated && generation_directory_path.join(application_filename).to_s,
+                should_permit_application_pdf_be_generated &&
+                  generation_directory_path.join(application_filename).to_s,
               stepCodeChecklist:
-                should_checklist_pdf_be_generated && generation_directory_path.join(step_code_filename).to_s,
+                should_checklist_pdf_be_generated &&
+                  generation_directory_path.join(step_code_filename).to_s
             },
-            assetDirectoryPath: asset_directory_path.to_s,
-          },
+            assetDirectoryPath: asset_directory_path.to_s
+          }
         }.to_json
 
         {
@@ -71,8 +78,9 @@ class PdfGenerationJob
           pdf_json_data: pdf_json_data,
           application_filename: application_filename,
           step_code_filename: step_code_filename,
-          should_permit_application_pdf_be_generated: should_permit_application_pdf_be_generated,
-          should_checklist_pdf_be_generated: should_checklist_pdf_be_generated,
+          should_permit_application_pdf_be_generated:
+            should_permit_application_pdf_be_generated,
+          should_checklist_pdf_be_generated: should_checklist_pdf_be_generated
         }
       end
 
@@ -86,10 +94,13 @@ class PdfGenerationJob
     pdf_json_data = submission_version_data[:pdf_json_data]
     application_filename = submission_version_data[:application_filename]
     step_code_filename = submission_version_data[:step_code_filename]
-    should_permit_application_pdf_be_generated = submission_version_data[:should_permit_application_pdf_be_generated]
-    should_checklist_pdf_be_generated = submission_version_data[:should_checklist_pdf_be_generated]
+    should_permit_application_pdf_be_generated =
+      submission_version_data[:should_permit_application_pdf_be_generated]
+    should_checklist_pdf_be_generated =
+      submission_version_data[:should_checklist_pdf_be_generated]
 
-    json_filename = "#{generation_directory_path}/pdf_json_data_#{submission_version.id}.json"
+    json_filename =
+      "#{generation_directory_path}/pdf_json_data_#{submission_version.id}.json"
 
     File.open(json_filename, "w") { |file| file.write(pdf_json_data) }
 
@@ -100,7 +111,7 @@ class PdfGenerationJob
         "run",
         NodeScripts::GENERATE_PDF_SCRIPT_NAME,
         json_filename,
-        chdir: Rails.root.to_s,
+        chdir: Rails.root.to_s
       ) do |stdin, stdout, stderr, wait_thr|
         # Read and print the standard output continuously until the process exits
         stdout.each_line { |line| puts line }
@@ -116,10 +127,16 @@ class PdfGenerationJob
         if exit_status.success?
           pdfs = []
           if should_permit_application_pdf_be_generated
-            pdfs << { fname: application_filename, key: PermitApplication::PERMIT_APP_PDF_DATA_KEY }
+            pdfs << {
+              fname: application_filename,
+              key: PermitApplication::PERMIT_APP_PDF_DATA_KEY
+            }
           end
           if should_checklist_pdf_be_generated
-            pdfs << { fname: step_code_filename, key: PermitApplication::CHECKLIST_PDF_DATA_KEY }
+            pdfs << {
+              fname: step_code_filename,
+              key: PermitApplication::CHECKLIST_PDF_DATA_KEY
+            }
           end
 
           pdfs.each do |pdf|
@@ -128,7 +145,11 @@ class PdfGenerationJob
             doc =
               submission_version
                 .supporting_documents
-                .where(permit_application_id: submission_version.permit_application_id, data_key: pdf[:key])
+                .where(
+                  permit_application_id:
+                    submission_version.permit_application_id,
+                  data_key: pdf[:key]
+                )
                 .first_or_initialize
 
             doc.update(file:) if doc.file.blank?
@@ -146,7 +167,8 @@ class PdfGenerationJob
   end
 
   SUBMISSION_DATA_PREFIX = "formSubmissionData"
-  FORMIO_SECTION_REGEX = /^section[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  FORMIO_SECTION_REGEX =
+    /^section[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   SECTION_COMPLETION = "section-completion-key"
 
   def camelize_response(data)
@@ -168,10 +190,16 @@ class PdfGenerationJob
   end
 
   def camelize_key(key)
-    return key if key == SECTION_COMPLETION || key.start_with?(SUBMISSION_DATA_PREFIX)
+    if key == SECTION_COMPLETION || key.start_with?(SUBMISSION_DATA_PREFIX)
+      return key
+    end
 
     return key if key.match?(FORMIO_SECTION_REGEX)
 
-    key.split("_").map.with_index { |word, index| index.zero? ? word : word.capitalize }.join
+    key
+      .split("_")
+      .map
+      .with_index { |word, index| index.zero? ? word : word.capitalize }
+      .join
   end
 end

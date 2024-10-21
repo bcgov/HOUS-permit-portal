@@ -29,11 +29,16 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS = %w[bylaw policy zoning].freeze
 
   def elective_enabled?(requirement_block_id, requirement_id)
-    return false if customizations.blank? || customizations["requirement_block_changes"].blank?
+    if customizations.blank? ||
+         customizations["requirement_block_changes"].blank?
+      return false
+    end
 
-    !!customizations.dig("requirement_block_changes", requirement_block_id, "enabled_elective_field_ids")&.include?(
-      requirement_id,
-    )
+    !!customizations.dig(
+      "requirement_block_changes",
+      requirement_block_id,
+      "enabled_elective_field_ids"
+    )&.include?(requirement_id)
   end
 
   def update_event_notification_data
@@ -44,8 +49,8 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
         "#{I18n.t("notification.template_version.new_customization_notification", jurisdiction_name: jurisdiction.qualified_name, template_label: template_version.label)}",
       "object_data" => {
         "template_version_id" => template_version.id,
-        "customizations" => customizations,
-      },
+        "customizations" => customizations
+      }
     }
   end
 
@@ -53,7 +58,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
     "#{jurisdiction.name} #{template_version.label}"
   end
 
-  def self.requirement_count_by_reason(requirement_block_id, requirement_id, reason)
+  def self.requirement_count_by_reason(
+    requirement_block_id,
+    requirement_id,
+    reason
+  )
     return 0 unless ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.include?(reason)
 
     JurisdictionTemplateVersionCustomization
@@ -62,26 +71,33 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
       .where(
         "customizations -> 'requirement_block_changes' -> :requirement_block_id -> 'enabled_elective_field_ids' @> :id",
         requirement_block_id: requirement_block_id,
-        id: "[\"#{requirement_id}\"]",
+        id: "[\"#{requirement_id}\"]"
       )
       .select do |jtvc|
         jtvc
           .customizations
-          .dig("requirement_block_changes", requirement_block_id, "enabled_elective_field_reasons")
+          .dig(
+            "requirement_block_changes",
+            requirement_block_id,
+            "enabled_elective_field_reasons"
+          )
           &.values
           &.include?(reason)
       end
       .count
   end
 
-  def self.count_of_jurisdictions_using_requirement(requirement_block_id, requirement_id)
+  def self.count_of_jurisdictions_using_requirement(
+    requirement_block_id,
+    requirement_id
+  )
     JurisdictionTemplateVersionCustomization
       .joins(:template_version)
       .where(template_versions: { status: "published" })
       .where(
         "customizations -> 'requirement_block_changes' -> :requirement_block_id -> 'enabled_elective_field_ids' @> :id",
         requirement_block_id: requirement_block_id,
-        id: "[\"#{requirement_id}\"]",
+        id: "[\"#{requirement_id}\"]"
       )
       .count
   end
@@ -92,7 +108,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
       JurisdictionTemplateVersionCustomization.find_or_create_by(
         jurisdiction_id: self.jurisdiction_id,
         template_version_id: self.template_version_id,
-        sandbox_id: nil,
+        sandbox_id: nil
       )
     target_record.customizations = self.customizations
     target_record.save!
@@ -108,16 +124,24 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   end
 
   def sanitize_tip
-    return if customizations.blank? || customizations["requirement_block_changes"].blank?
+    if customizations.blank? ||
+         customizations["requirement_block_changes"].blank?
+      return
+    end
 
     customizations["requirement_block_changes"].each do |key, value|
       next if value["tip"].blank?
-      customizations["requirement_block_changes"][key]["tip"] = ActionController::Base.helpers.sanitize(value["tip"])
+      customizations["requirement_block_changes"][key][
+        "tip"
+      ] = ActionController::Base.helpers.sanitize(value["tip"])
     end
   end
 
   def ensure_reason_set_for_enabled_elective_fields
-    return if customizations.blank? || customizations["requirement_block_changes"].blank?
+    if customizations.blank? ||
+         customizations["requirement_block_changes"].blank?
+      return
+    end
 
     customizations["requirement_block_changes"].each do |_key, value|
       next if value["enabled_elective_field_ids"].blank?
@@ -137,8 +161,8 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
           :customizations,
           I18n.t(
             "model_validation.jurisdiction_template_version_customization.enabled_elective_field_reason_incorrect",
-            accepted_reasons: ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.join(", "),
-          ),
+            accepted_reasons: ACCEPTED_ENABLED_ELECTIVE_FIELD_REASONS.join(", ")
+          )
         )
       end
     end
@@ -154,7 +178,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
       JurisdictionTemplateVersionCustomization.where(
         jurisdiction_id: jurisdiction_id,
         template_version_id: template_version_id,
-        sandbox_id: sandbox_id,
+        sandbox_id: sandbox_id
       )
 
     # Allow updates on the same record (ignore self)
@@ -162,7 +186,12 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
 
     # If such a record exists, add an error
     if existing_record.exists?
-      errors.add(:base, I18n.t("activerecord.errors.models.jurisdiction_template_version_customizations.uniqueness"))
+      errors.add(
+        :base,
+        I18n.t(
+          "activerecord.errors.models.jurisdiction_template_version_customizations.uniqueness"
+        )
+      )
     end
   end
 end

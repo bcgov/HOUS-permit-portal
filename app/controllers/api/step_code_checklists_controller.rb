@@ -2,14 +2,20 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
   before_action :set_and_authorize_checklist, only: %i[show update]
 
   def index
-    @step_code_checklists = policy_scope(StepCodeChecklist).where(step_code_id: params[:step_code_id])
+    @step_code_checklists =
+      policy_scope(StepCodeChecklist).where(step_code_id: params[:step_code_id])
     render_success @step_code_checklists
   end
 
   def show
     render_success @step_code_checklist,
                    nil,
-                   { blueprint: StepCodeChecklistBlueprint, blueprint_opts: { view: :extended } }
+                   {
+                     blueprint: StepCodeChecklistBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
   end
 
   # PATCH /api/step_code_checklists
@@ -17,11 +23,17 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
     if @step_code_checklist.update(step_code_checklist_params)
       render_success @step_code_checklist,
                      "step_code_checklist.update_success",
-                     { blueprint: StepCodeChecklistBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: StepCodeChecklistBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
     else
       render_error "step_code_checklist.update_error",
                    message_opts: {
-                     error_message: @step_code_checklist.errors.full_messages.join(", "),
+                     error_message:
+                       @step_code_checklist.errors.full_messages.join(", ")
                    }
     end
   end
@@ -61,15 +73,23 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
         unheated_floors_lines: %i[details rsi],
         below_grade_walls_lines: %i[details rsi],
         slabs_lines: %i[details rsi],
-        windows_glazed_doors: [:performance_type, lines: %i[details performance_value shgc]],
+        windows_glazed_doors: [
+          :performance_type,
+          lines: %i[details performance_value shgc]
+        ],
         doors_lines: %i[details performance_type performance_value],
         airtightness: [:details],
-        space_heating_cooling_lines: %i[details variant performance_value performance_type],
+        space_heating_cooling_lines: %i[
+          details
+          variant
+          performance_value
+          performance_type
+        ],
         hot_water_lines: %i[details performance_type performance_value],
         ventilation_lines: %i[details percent_eff liters_per_sec],
         other_lines: [:details],
-        fossil_fuels: %i[details presence],
-      ],
+        fossil_fuels: %i[details presence]
+      ]
     )
   end
 

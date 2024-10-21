@@ -15,7 +15,7 @@ module Api::Concerns::Search::RequirementTemplates
         order: order,
         where: {
           discarded: discarded,
-          early_access: early_access,
+          early_access: early_access
         },
         match: :word_start,
         page: search_params[:page],
@@ -27,14 +27,21 @@ module Api::Concerns::Search::RequirementTemplates
               nil
             end
           ),
-        includes: RequirementTemplate::SEARCH_INCLUDES,
+        includes: RequirementTemplate::SEARCH_INCLUDES
       )
   end
 
   private
 
   def search_params
-    params.permit(:query, :show_archived, :early_access, :page, :per_page, sort: %i[field direction])
+    params.permit(
+      :query,
+      :show_archived,
+      :early_access,
+      :page,
+      :per_page,
+      sort: %i[field direction]
+    )
   end
 
   def query

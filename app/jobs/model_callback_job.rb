@@ -4,7 +4,7 @@ class ModelCallbackJob
                   queue: :model_callbacks,
                   on_conflict: {
                     client: :log,
-                    server: :reject,
+                    server: :reject
                   }
 
   def perform(model_name, model_id, callback_name)

@@ -3,39 +3,39 @@ class RequirementFormJsonService
 
   DEFAULT_FORMIO_TYPE_TO_OPTIONS = {
     text: {
-      type: "simpletextfield",
+      type: "simpletextfield"
     },
     phone: {
-      type: "simplephonenumber",
+      type: "simplephonenumber"
     },
     email: {
-      type: "simpleemail",
+      type: "simpleemail"
     },
     # TODO: figure out why these address fields don't work
     # address: {
     #   type: "simpleaddressadvanced",
     # },
     address: {
-      type: "simpletextfield",
+      type: "simpletextfield"
     },
     bcaddress: {
-      type: "bcaddress",
+      type: "bcaddress"
     },
     signature: {
-      type: "simplesignatureadvanced",
+      type: "simplesignatureadvanced"
     },
     number: {
       delimiter: true,
       applyMaskOn: "change",
       mask: false,
-      inputFormat: "plain",
+      inputFormat: "plain"
     },
     date: {
       tableView: false,
       enableTime: false,
       datePicker: {
         disableWeekends: false,
-        disableWeekdays: false,
+        disableWeekdays: false
       },
       enableMinDateInput: false,
       enableMaxDateInput: false,
@@ -57,19 +57,19 @@ class RequirementFormJsonService
         minDate: nil,
         disableWeekends: false,
         disableWeekdays: false,
-        maxDate: nil,
-      },
+        maxDate: nil
+      }
     },
     select: {
       widget: {
-        type: "choicesjs",
-      },
+        type: "choicesjs"
+      }
     },
     multi_option_select: {
       type: "selectboxes",
       inputType: "checkbox",
       optionsLabelPosition: "right",
-      tableView: false,
+      tableView: false
       # type: "select",
       # multiple: true,
       # widget: {
@@ -81,8 +81,8 @@ class RequirementFormJsonService
       action: "custom",
       title: I18n.t("formio.requirement_template.energy_step_code"),
       label: I18n.t("formio.requirement_template.energy_step_code"),
-      custom: "document.dispatchEvent(new Event('openStepCode'));",
-    },
+      custom: "document.dispatchEvent(new Event('openStepCode'));"
+    }
   }
 
   def initialize(requirement)
@@ -91,7 +91,8 @@ class RequirementFormJsonService
 
   def to_form_json(requirement_block_key = requirement&.requirement_block&.key)
     json =
-      if requirement.input_type_general_contact? || requirement.input_type_professional_contact?
+      if requirement.input_type_general_contact? ||
+           requirement.input_type_professional_contact?
         get_contact_form_json(requirement_block_key)
       elsif requirement.input_type_pid_info?
         get_pid_info_components(requirement_block_key, requirement.required)
@@ -104,8 +105,8 @@ class RequirementFormJsonService
           input: true,
           label: requirement.label,
           widget: {
-            type: "input",
-          },
+            type: "input"
+          }
         }.merge!(formio_type_options)
       end
 
@@ -116,18 +117,27 @@ class RequirementFormJsonService
     # assume all electives use a customConditional that defaults to false.  The customConditional works in tandem with the conditionals
     json.merge!({ elective: requirement.elective }) if requirement.elective
 
-    json.merge!({ data: { values: requirement.input_options["value_options"] } }) if requirement.input_type_select?
+    if requirement.input_type_select?
+      json.merge!(
+        { data: { values: requirement.input_options["value_options"] } }
+      )
+    end
 
-    if requirement.input_type_multi_option_select? || requirement.input_type_radio?
+    if requirement.input_type_multi_option_select? ||
+         requirement.input_type_radio?
       json.merge!({ values: requirement.input_options["value_options"] })
     end
 
     if requirement.computed_compliance?
-      json.merge!({ computedCompliance: requirement.input_options["computed_compliance"] })
+      json.merge!(
+        { computedCompliance: requirement.input_options["computed_compliance"] }
+      )
     end
 
     if requirement.input_type.to_sym == :energy_step_code
-      json.merge!({ energyStepCode: requirement.input_options["energy_step_code"] })
+      json.merge!(
+        { energyStepCode: requirement.input_options["energy_step_code"] }
+      )
     end
 
     if requirement.input_options["conditional"].present?
@@ -135,28 +145,44 @@ class RequirementFormJsonService
       conditional = requirement.input_options["conditional"].clone
       section = PermitApplication.section_from_key(requirement_block_key)
       if conditional["when"].present?
-        conditional.merge!("when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}")
+        conditional.merge!(
+          "when" => "#{section}.#{requirement_block_key}|#{conditional["when"]}"
+        )
       end
       json.merge!({ conditional: conditional })
     end
 
     # indicates code-based conditionals.  Always merge elective show = false to end.
     if requirement.input_options["customConditional"].present?
-      json.merge!({ customConditional: requirement.input_options["customConditional"] })
+      json.merge!(
+        { customConditional: requirement.input_options["customConditional"] }
+      )
     end
-    json.merge!({ customConditional: "#{json[:customConditional]};show = false" }) if requirement.elective
+    if requirement.elective
+      json.merge!(
+        { customConditional: "#{json[:customConditional]};show = false" }
+      )
+    end
 
     json
   end
 
   private
 
-  def get_contact_form_json(requirement_block_key = requirement&.requirement_block&.key)
-    return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
+  def get_contact_form_json(
+    requirement_block_key = requirement&.requirement_block&.key
+  )
+    unless requirement.input_type_general_contact? ||
+             requirement.input_type_professional_contact?
+      return {}
+    end
 
     if requirement.input_options["can_add_multiple_contacts"].blank?
       return(
-        get_contact_field_set_form_json("#{requirement.key(requirement_block_key)}|#{requirement.input_type}", false)
+        get_contact_field_set_form_json(
+          "#{requirement.key(requirement_block_key)}|#{requirement.input_type}",
+          false
+        )
       )
     end
 
@@ -176,19 +202,19 @@ class RequirementFormJsonService
       label: I18n.t("formio.requirement.contact.#{field_type.to_s}"),
       type: "textfield",
       validate: {
-        required: required,
+        required: required
       },
-      **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text],
+      **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
     }
 
     # TODO: address is a text now, replace with address type when implemented
     field_to_form_json = {
       email: {
-        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:email],
+        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:email]
       },
       phone: {
-        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:phone],
-      },
+        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:phone]
+      }
     }
 
     form_json =
@@ -210,12 +236,15 @@ class RequirementFormJsonService
       key: key,
       type: "columns",
       input: false,
-      tableView: false,
+      tableView: false
     }
   end
 
   def get_contact_field_set_form_json(key, is_multi)
-    return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
+    unless requirement.input_type_general_contact? ||
+             requirement.input_type_professional_contact?
+      return {}
+    end
 
     contact_components =
       (
@@ -235,10 +264,15 @@ class RequirementFormJsonService
       hideLabel: true,
       input: false,
       tableView: false,
-      components: contact_components.unshift(get_autofill_contact_button_form_json(key, is_multi)),
+      components:
+        contact_components.unshift(
+          get_autofill_contact_button_form_json(key, is_multi)
+        )
     }
 
-    form_json[:id] = requirement.id if requirement.input_options["can_add_multiple_contacts"].blank?
+    form_json[:id] = requirement.id if requirement.input_options[
+      "can_add_multiple_contacts"
+    ].blank?
 
     form_json
   end
@@ -250,24 +284,24 @@ class RequirementFormJsonService
         "name_columns",
         [
           get_contact_field_form_json(:first_name, parent_key, required),
-          get_contact_field_form_json(:last_name, parent_key, required),
-        ],
+          get_contact_field_form_json(:last_name, parent_key, required)
+        ]
       ),
       get_columns_form_json(
         "reach_columns",
         [
           get_contact_field_form_json(:email, parent_key, required),
-          get_contact_field_form_json(:phone, parent_key, required),
-        ],
+          get_contact_field_form_json(:phone, parent_key, required)
+        ]
       ),
       get_contact_field_form_json(:address, parent_key, required),
       get_columns_form_json(
         "organization_columns",
         [
           get_contact_field_form_json(:organization, parent_key, false),
-          get_contact_field_form_json(:title, parent_key, required),
-        ],
-      ),
+          get_contact_field_form_json(:title, parent_key, required)
+        ]
+      )
     ]
   end
 
@@ -278,15 +312,15 @@ class RequirementFormJsonService
         "name_columns",
         [
           get_contact_field_form_json(:first_name, parent_key, required),
-          get_contact_field_form_json(:last_name, parent_key, required),
-        ],
+          get_contact_field_form_json(:last_name, parent_key, required)
+        ]
       ),
       get_columns_form_json(
         "reach_columns",
         [
           get_contact_field_form_json(:email, parent_key, required),
-          get_contact_field_form_json(:phone, parent_key, required),
-        ],
+          get_contact_field_form_json(:phone, parent_key, required)
+        ]
       ),
       get_contact_field_form_json(:address, parent_key, required),
       get_contact_field_form_json(:title, parent_key, required),
@@ -294,16 +328,20 @@ class RequirementFormJsonService
         "business_columns",
         [
           get_contact_field_form_json(:business_name, parent_key, false),
-          get_contact_field_form_json(:business_license, parent_key, false),
-        ],
+          get_contact_field_form_json(:business_license, parent_key, false)
+        ]
       ),
       get_columns_form_json(
         "professional_columns",
         [
-          get_contact_field_form_json(:professional_association, parent_key, false),
-          get_contact_field_form_json(:professional_number, parent_key, false),
-        ],
-      ),
+          get_contact_field_form_json(
+            :professional_association,
+            parent_key,
+            false
+          ),
+          get_contact_field_form_json(:professional_number, parent_key, false)
+        ]
+      )
     ]
   end
 
@@ -315,12 +353,17 @@ class RequirementFormJsonService
       title: I18n.t("formio.requirement_template.autofill_contact"),
       label: I18n.t("formio.requirement_template.autofill_contact"),
       custom:
-        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{parent_key}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));",
+        "document.dispatchEvent(new CustomEvent('openAutofillContact', { detail: { key: `#{parent_key}|#{is_multi ? "${rowIndex}" : "in_section"}` } } ));"
     }
   end
 
-  def get_multi_contact_datagrid_form_json(requirement_block_key = requirement&.requirement_block&.key)
-    return {} unless requirement.input_type_general_contact? || requirement.input_type_professional_contact?
+  def get_multi_contact_datagrid_form_json(
+    requirement_block_key = requirement&.requirement_block&.key
+  )
+    unless requirement.input_type_general_contact? ||
+             requirement.input_type_professional_contact?
+      return {}
+    end
 
     key = "#{requirement.key(requirement_block_key)}|multi_contact"
     {
@@ -338,11 +381,22 @@ class RequirementFormJsonService
       key: key,
       type: "datagrid",
       input: false,
-      components: [get_contact_field_set_form_json("#{key}|#{requirement.input_type}", true)],
+      components: [
+        get_contact_field_set_form_json(
+          "#{key}|#{requirement.input_type}",
+          true
+        )
+      ]
     }
   end
 
-  def get_nested_info_component(field_key, parent_key, label, required, field_type = nil)
+  def get_nested_info_component(
+    field_key,
+    parent_key,
+    label,
+    required,
+    field_type = nil
+  )
     key = snake_to_camel(field_key.to_s)
     key = "#{parent_key}|#{key}" if parent_key.present?
 
@@ -356,11 +410,11 @@ class RequirementFormJsonService
         input: true,
         label: label,
         widget: {
-          type: "input",
+          type: "input"
         },
         validate: {
-          required: required,
-        },
+          required: required
+        }
       }.merge!(DEFAULT_FORMIO_TYPE_TO_OPTIONS[field_type.to_sym])
     else
       {
@@ -371,14 +425,17 @@ class RequirementFormJsonService
         label: label,
         type: "textfield",
         validate: {
-          required: required,
+          required: required
         },
-        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text],
+        **DEFAULT_FORMIO_TYPE_TO_OPTIONS[:text]
       }
     end
   end
 
-  def get_pid_info_components(requirement_block_key = requirement&.requirement_block&.key, required = false)
+  def get_pid_info_components(
+    requirement_block_key = requirement&.requirement_block&.key,
+    required = false
+  )
     return {} unless requirement.input_type_pid_info?
     key = "#{requirement.key(requirement_block_key)}|additional_pid_info"
     component = {
@@ -394,12 +451,28 @@ class RequirementFormJsonService
         get_columns_form_json(
           "pid_entry_columns",
           [
-            get_nested_info_component(:pid, requirement_block_key, "PID", required),
-            get_nested_info_component(:folio_number, requirement_block_key, "Folio Number", false),
-          ],
+            get_nested_info_component(
+              :pid,
+              requirement_block_key,
+              "PID",
+              required
+            ),
+            get_nested_info_component(
+              :folio_number,
+              requirement_block_key,
+              "Folio Number",
+              false
+            )
+          ]
         ),
-        get_nested_info_component(:address, requirement_block_key, "Address", false, :address),
-      ],
+        get_nested_info_component(
+          :address,
+          requirement_block_key,
+          "Address",
+          false,
+          :address
+        )
+      ]
     }
     multi_data_grid_form_json(key, component, true, "Add #{requirement.label}")
   end
@@ -426,7 +499,7 @@ class RequirementFormJsonService
       key: override_key,
       type: "datagrid",
       input: false,
-      components: [component],
+      components: [component]
     }
   end
 
@@ -440,14 +513,16 @@ class RequirementFormJsonService
       return(
         {
           type: "simplefile",
-          storage: "s3custom",
+          storage: "s3custom"
           # fileMaxSize driven by front end defaults, do not set in requirements as it fixes it
         }.tap do |file_hash|
-          file_hash[:computedCompliance] = input_options["computed_compliance"] if input_options[
+          file_hash[:computedCompliance] = input_options[
             "computed_compliance"
-          ].present?
+          ] if input_options["computed_compliance"].present?
           file_hash[:multiple] = true if input_options["multiple"].present?
-          file_hash[:custom_class] = "formio-component-file" if file_hash[:type] != "file"
+          file_hash[:custom_class] = "formio-component-file" if file_hash[
+            :type
+          ] != "file"
         end
       )
     end

@@ -5,7 +5,8 @@ class ExternalApiKeyPolicy < ApplicationPolicy
 
   def show?
     return true if user.super_admin?
-    (user.review_manager? || user.regional_review_manager?) && record.jurisdiction.external_api_enabled? &&
+    (user.review_manager? || user.regional_review_manager?) &&
+      record.jurisdiction.external_api_enabled? &&
       user.jurisdictions.find(record.jurisdiction_id).present?
   end
 
@@ -27,9 +28,16 @@ class ExternalApiKeyPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      raise Pundit::NotAuthorizedError unless user.super_admin? || user.review_manager? || user.regional_review_manager?
+      unless user.super_admin? || user.review_manager? ||
+               user.regional_review_manager?
+        raise Pundit::NotAuthorizedError
+      end
 
-      user.super_admin? ? ExternalApiKey.all : ExternalApiKey.where(jurisdiction_id: user.jurisdictions.pluck(:id))
+      if user.super_admin?
+        ExternalApiKey.all
+      else
+        ExternalApiKey.where(jurisdiction_id: user.jurisdictions.pluck(:id))
+      end
     end
   end
 end

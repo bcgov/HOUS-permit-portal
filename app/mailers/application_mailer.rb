@@ -12,7 +12,7 @@ class ApplicationMailer < ActionMailer::Base
       to: email,
       subject:
         "#{I18n.t("application_mailer.subject_start")} - #{I18n.t("application_mailer.subjects.#{template_key}", **subject_i18n_params)}",
-      template_name: template_key, # this isn't fully necessary since rails introspects it anyway, but here for clarity (template_path is also auto introspected by rails)
+      template_name: template_key # this isn't fully necessary since rails introspects it anyway, but here for clarity (template_path is also auto introspected by rails)
     )
   end
 end

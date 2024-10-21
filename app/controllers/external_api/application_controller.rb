@@ -20,7 +20,9 @@ class ExternalApi::ApplicationController < ActionController::API
   protected
 
   def apply_search_authorization(results, policy_action = action_name)
-    results.select { |result| policy([:external_api, result]).send("#{policy_action}?".to_sym) }
+    results.select do |result|
+      policy([:external_api, result]).send("#{policy_action}?".to_sym)
+    end
   end
 
   def store_currents
@@ -31,7 +33,7 @@ class ExternalApi::ApplicationController < ActionController::API
     render_error(
       "misc.external_api_key_unauthorized_error",
       { message_opts: { error_message: exception.message }, status: 403 },
-      exception,
+      exception
     ) and return
   end
 
@@ -49,7 +51,12 @@ class ExternalApi::ApplicationController < ActionController::API
 
     render_error(
       "misc.external_api_key_forbidden_error",
-      { message_opts: { error_message: message || "Access denied" }, status: 401 },
+      {
+        message_opts: {
+          error_message: message || "Access denied"
+        },
+        status: 401
+      }
     ) and return
   end
 end

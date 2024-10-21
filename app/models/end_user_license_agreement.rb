@@ -18,6 +18,9 @@ class EndUserLicenseAgreement < ApplicationRecord
   private
 
   def replace_active_agreement
-    EndUserLicenseAgreement.where(active: true, variant: variant).where.not(id: id).update_all(active: false)
+    EndUserLicenseAgreement
+      .where(active: true, variant: variant)
+      .where.not(id: id)
+      .update_all(active: false)
   end
 end

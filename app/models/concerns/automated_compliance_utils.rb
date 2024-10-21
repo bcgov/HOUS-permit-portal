@@ -13,11 +13,15 @@ module AutomatedComplianceUtils
 
   def automated_compliance_requirements
     #check which fields in requirement have custom compliance components
-    requirements_lookups.select { |field_id, req| req["computedCompliance"].present? }
+    requirements_lookups.select do |field_id, req|
+      req["computedCompliance"].present?
+    end
   end
 
   def automated_compliance_unfilled_requirements
-    automated_compliance_requirements.select { |field_id, req| submission_field_is_empty?(field_id, req) }
+    automated_compliance_requirements.select do |field_id, req|
+      submission_field_is_empty?(field_id, req)
+    end
   end
 
   def submission_field_is_empty?(field_id, requirement)
@@ -38,7 +42,10 @@ module AutomatedComplianceUtils
   end
 
   def automated_compliance_unique_unfilled_modules
-    automated_compliance_unfilled_requirements.values.map { |req| req.dig("computedCompliance", "module") }.uniq
+    automated_compliance_unfilled_requirements
+      .values
+      .map { |req| req.dig("computedCompliance", "module") }
+      .uniq
   end
 
   def automated_compliance_requirements_for_module(compliance_module_name)

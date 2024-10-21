@@ -13,7 +13,11 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
   end
 
   view :project_info do
-    fields :building_permit_number, :jurisdiction_name, :pid, :building_type, :builder
+    fields :building_permit_number,
+           :jurisdiction_name,
+           :pid,
+           :building_type,
+           :builder
     field :full_address, name: :address
 
     field :dwelling_units_count do |checklist, _options|
@@ -44,7 +48,8 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
   end
 
   view :building_characteristics_summary do
-    association :building_characteristics_summary, blueprint: StepCodeBuildingCharacteristicsSummaryBlueprint
+    association :building_characteristics_summary,
+                blueprint: StepCodeBuildingCharacteristicsSummaryBlueprint
   end
 
   view :mid_construction_testing_results do
@@ -75,7 +80,9 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
            :epc_calculation_compliance
 
     field :selected_report do |checklist, _options|
-      report = checklist.selected_report || checklist.passing_compliance_reports[0] || checklist.compliance_reports[0]
+      report =
+        checklist.selected_report || checklist.passing_compliance_reports[0] ||
+          checklist.compliance_reports[0]
       StepCode::ComplianceReportBlueprint.render_as_hash(report)
     end
   end

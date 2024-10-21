@@ -14,7 +14,9 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
   end
 
   def total_ghg
-    @total_ghg ||= other_ghg + district_energy_ghg + propane_ghg + natural_gas_ghg + electricity_ghg
+    @total_ghg ||=
+      other_ghg + district_energy_ghg + propane_ghg + natural_gas_ghg +
+        electricity_ghg
   end
 
   private
@@ -32,7 +34,9 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
   end
 
   def total_heated_floor_area
-    @total_heated_floor_area ||= total(:above_grade_heated_floor_area) + total(:below_grade_heated_floor_area)
+    @total_heated_floor_area ||=
+      total(:above_grade_heated_floor_area) +
+        total(:below_grade_heated_floor_area)
   end
 
   def electricity_ghg

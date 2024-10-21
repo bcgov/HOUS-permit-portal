@@ -4,9 +4,17 @@ class Api::JurisdictionsController < Api::ApplicationController
   include Api::Concerns::Search::PermitApplications
 
   before_action :set_jurisdiction,
-                only: %i[show update search_users search_permit_applications update_external_api_enabled]
-  skip_after_action :verify_policy_scoped, only: %i[index search_users search_permit_applications]
-  skip_before_action :authenticate_user!, only: %i[show index jurisdiction_options]
+                only: %i[
+                  show
+                  update
+                  search_users
+                  search_permit_applications
+                  update_external_api_enabled
+                ]
+  skip_after_action :verify_policy_scoped,
+                    only: %i[index search_users search_permit_applications]
+  skip_before_action :authenticate_user!,
+                     only: %i[show index jurisdiction_options]
 
   def index
     perform_search
@@ -17,12 +25,12 @@ class Api::JurisdictionsController < Api::ApplicationController
                      meta: {
                        total_pages: @search.total_pages,
                        total_count: @search.total_count,
-                       current_page: @search.current_page,
+                       current_page: @search.current_page
                      },
                      blueprint: JurisdictionBlueprint,
                      blueprint_opts: {
-                       view: :base,
-                     },
+                       view: :base
+                     }
                    }
   end
 
@@ -30,20 +38,29 @@ class Api::JurisdictionsController < Api::ApplicationController
     authorize @jurisdiction
     if jurisdiction_params[:contacts_attributes]
       # Get current contact ids from the params
-      payload_record_ids = jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
+      payload_record_ids =
+        jurisdiction_params[:contacts_attributes].map { |c| c[:id] }
       # Mark contacts not included in the current payload for destruction
       @jurisdiction.contacts.each do |contact|
-        contact.mark_for_destruction unless payload_record_ids.include?(contact.id.to_s)
+        unless payload_record_ids.include?(contact.id.to_s)
+          contact.mark_for_destruction
+        end
       end
     end
     if @jurisdiction.update(jurisdiction_params)
       render_success @jurisdiction,
                      "jurisdiction.update_success",
-                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
+                     {
+                       blueprint: JurisdictionBlueprint,
+                       blueprint_opts: {
+                         view: :base
+                       }
+                     }
     else
       render_error "jurisdiction.update_error",
                    message_opts: {
-                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                     error_message:
+                       @jurisdiction.errors.full_messages.join(", ")
                    }
     end
   end
@@ -51,7 +68,9 @@ class Api::JurisdictionsController < Api::ApplicationController
   def update_external_api_enabled
     authorize @jurisdiction, :update_external_api_enabled?
 
-    if @jurisdiction.update(external_api_enabled: update_external_api_enabled_params)
+    if @jurisdiction.update(
+         external_api_enabled: update_external_api_enabled_params
+       )
       render_success @jurisdiction,
                      (
                        if @jurisdiction.external_api_enabled?
@@ -60,11 +79,17 @@ class Api::JurisdictionsController < Api::ApplicationController
                          "jurisdiction.external_api_disabled_success"
                        end
                      ),
-                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :minimal } }
+                     {
+                       blueprint: JurisdictionBlueprint,
+                       blueprint_opts: {
+                         view: :minimal
+                       }
+                     }
     else
       render_error "jurisdiction.update_external_api_enabled_error",
                    message_opts: {
-                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                     error_message:
+                       @jurisdiction.errors.full_messages.join(", ")
                    }
     end
   end
@@ -77,7 +102,8 @@ class Api::JurisdictionsController < Api::ApplicationController
 
   # POST /api/jurisdiction
   def create
-    class_to_use = Jurisdiction.class_for_locality_type(jurisdiction_params[:locality_type])
+    class_to_use =
+      Jurisdiction.class_for_locality_type(jurisdiction_params[:locality_type])
 
     @jurisdiction = class_to_use.build(jurisdiction_params)
 
@@ -86,11 +112,17 @@ class Api::JurisdictionsController < Api::ApplicationController
     if @jurisdiction.save
       render_success @jurisdiction,
                      "jurisdiction.create_success",
-                     { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
+                     {
+                       blueprint: JurisdictionBlueprint,
+                       blueprint_opts: {
+                         view: :base
+                       }
+                     }
     else
       render_error "jurisdiction.create_error",
                    message_opts: {
-                     error_message: @jurisdiction.errors.full_messages.join(", "),
+                     error_message:
+                       @jurisdiction.errors.full_messages.join(", ")
                    }
     end
   end
@@ -98,7 +130,9 @@ class Api::JurisdictionsController < Api::ApplicationController
   def locality_type_options
     authorize :jurisdiction, :locality_type_options?
     options =
-      Jurisdiction.locality_types.sort.map { |lt| { label: Jurisdiction.custom_titleize_locality_type(lt), value: lt } }
+      Jurisdiction.locality_types.sort.map do |lt|
+        { label: Jurisdiction.custom_titleize_locality_type(lt), value: lt }
+      end
     render_success options, nil, { blueprint: OptionBlueprint }
   end
 
@@ -106,19 +140,23 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_users
     authorize @jurisdiction
     perform_user_search
-    authorized_results = apply_search_authorization(@user_search.results, "search_jurisdiction_users")
+    authorized_results =
+      apply_search_authorization(
+        @user_search.results,
+        "search_jurisdiction_users"
+      )
     render_success authorized_results,
                    nil,
                    {
                      meta: {
                        total_pages: @user_search.total_pages,
                        total_count: @user_search.total_count,
-                       current_page: @user_search.current_page,
+                       current_page: @user_search.current_page
                      },
                      blueprint: UserBlueprint,
                      blueprint_opts: {
-                       view: :base,
-                     },
+                       view: :base
+                     }
                    }
   end
 
@@ -126,19 +164,20 @@ class Api::JurisdictionsController < Api::ApplicationController
   def search_permit_applications
     authorize @jurisdiction
     perform_permit_application_search
-    authorized_results = apply_search_authorization(@permit_application_search.results, "index")
+    authorized_results =
+      apply_search_authorization(@permit_application_search.results, "index")
     render_success authorized_results,
                    nil,
                    {
                      meta: {
                        total_pages: @permit_application_search.total_pages,
                        total_count: @permit_application_search.total_count,
-                       current_page: @permit_application_search.current_page,
+                       current_page: @permit_application_search.current_page
                      },
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :jurisdiction_review_inbox,
-                     },
+                       view: :jurisdiction_review_inbox
+                     }
                    }
   end
 
@@ -178,8 +217,22 @@ class Api::JurisdictionsController < Api::ApplicationController
       :map_zoom,
       map_position: [],
       users_attributes: %i[first_name last_name role email],
-      contacts_attributes: %i[id first_name last_name department title phone cell email],
-      permit_type_submission_contacts_attributes: %i[id email permit_type_id _destroy],
+      contacts_attributes: %i[
+        id
+        first_name
+        last_name
+        department
+        title
+        phone
+        cell
+        email
+      ],
+      permit_type_submission_contacts_attributes: %i[
+        id
+        email
+        permit_type_id
+        _destroy
+      ],
       permit_type_required_steps_attributes: %i[
         id
         permit_type_id
@@ -187,7 +240,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         energy_step_required
         zero_carbon_step_required
         _destroy
-      ],
+      ]
     )
   end
 
@@ -196,7 +249,11 @@ class Api::JurisdictionsController < Api::ApplicationController
   end
 
   def set_jurisdiction
-    @jurisdiction = Jurisdiction.includes(Jurisdiction::BASE_INCLUDES).friendly.find(params[:id])
+    @jurisdiction =
+      Jurisdiction
+        .includes(Jurisdiction::BASE_INCLUDES)
+        .friendly
+        .find(params[:id])
   rescue ActiveRecord::RecordNotFound => e
     render_error("misc.not_found_error", { status: :not_found }, e)
   end

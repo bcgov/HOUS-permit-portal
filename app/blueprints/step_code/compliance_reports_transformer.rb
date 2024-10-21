@@ -3,8 +3,10 @@ class StepCode::ComplianceReportsTransformer < Blueprinter::Transformer
     hash.merge!(
       {
         compliance_reports:
-          object.compliance_reports.map { |report| StepCode::ComplianceReportBlueprint.render_as_hash(report) },
-      },
+          object.compliance_reports.map do |report|
+            StepCode::ComplianceReportBlueprint.render_as_hash(report)
+          end
+      }
     )
   end
 end

@@ -28,7 +28,8 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def create_or_update_jurisdiction_template_version_customization?
-    (user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record&.jurisdiction_id)
+    (user.review_manager? || user.regional_review_manager?) &&
+      user.jurisdictions.find(record&.jurisdiction_id)
   end
 
   def show_integration_mapping?
@@ -56,7 +57,8 @@ class TemplateVersionPolicy < ApplicationPolicy
           .where.not(status: "deprecated")
       if sandbox.present?
         template_versions.for_sandbox(sandbox)
-      elsif user.super_admin? || user.review_manager? || user.regional_review_manager?
+      elsif user.super_admin? || user.review_manager? ||
+            user.regional_review_manager?
         template_versions
       else
         template_versions.where(status: "published")
