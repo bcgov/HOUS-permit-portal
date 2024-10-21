@@ -1,4 +1,13 @@
 class RequirementTemplate < ApplicationRecord
+  SEARCH_INCLUDES = %i[
+    assignee
+    published_template_version
+    permit_type
+    last_three_deprecated_template_versions
+    activity
+    scheduled_template_versions
+  ]
+
   searchkick searchable: %i[description current_version permit_type activity],
              word_start: %i[description current_version permit_type activity],
              text_middle: %i[current_version description]

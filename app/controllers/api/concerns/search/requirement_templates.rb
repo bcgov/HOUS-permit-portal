@@ -27,6 +27,7 @@ module Api::Concerns::Search::RequirementTemplates
               nil
             end
           ),
+        includes: RequirementTemplate::SEARCH_INCLUDES,
       )
   end
 
