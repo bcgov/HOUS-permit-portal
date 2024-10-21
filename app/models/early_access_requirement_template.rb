@@ -1,4 +1,6 @@
 class EarlyAccessRequirementTemplate < RequirementTemplate
+  SEARCH_INCLUDES = RequirementTemplate::SEARCH_INCLUDES + [:assignee]
+
   has_one :template_version, dependent: :destroy, foreign_key: :requirement_template_id
 
   belongs_to :assignee, class_name: "User", optional: true

@@ -1,6 +1,5 @@
 class RequirementTemplate < ApplicationRecord
   SEARCH_INCLUDES = %i[
-    assignee
     published_template_version
     permit_type
     last_three_deprecated_template_versions
