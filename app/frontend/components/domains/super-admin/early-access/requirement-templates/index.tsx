@@ -1,10 +1,11 @@
 import { Box, Container, Flex, Heading, VStack } from "@chakra-ui/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../../../hooks/use-search"
 import { useMst } from "../../../../../setup/root"
+import { IOption } from "../../../../../types/types"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Paginator } from "../../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../../shared/base/inputs/per-page-select"
@@ -19,7 +20,7 @@ import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
 
 export const EarlyAccessRequirementTemplatesScreen = observer(function RequirementTemplate() {
-  const { requirementTemplateStore, earlyAccessRequirementTemplateStore } = useMst()
+  const { requirementTemplateStore, earlyAccessRequirementTemplateStore, userStore } = useMst()
   const {
     tableEarlyAccessRequirementTemplates,
     currentPage,
@@ -30,6 +31,7 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
     handlePageChange,
     isSearching,
   } = earlyAccessRequirementTemplateStore
+  const [superAdminOptions, setSuperAdminOptions] = useState<IOption[]>([])
   const { updateRequirementTemplate } = requirementTemplateStore
   const { t } = useTranslation()
 
@@ -38,6 +40,14 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
   const handleChangeAssignee = (requirementTemplate, assigneeId: string) => {
     updateRequirementTemplate(requirementTemplate.id, { assigneeId })
   }
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      const options = await userStore.getSuperAdminOptions()
+      setSuperAdminOptions(options)
+    }
+    fetchOptions()
+  }, [userStore])
 
   return (
     <Container maxW="container.lg" p={8} as="main">
@@ -79,6 +89,7 @@ export const EarlyAccessRequirementTemplatesScreen = observer(function Requireme
                     <AssigneeSelect
                       onChange={(userId) => handleChangeAssignee(rt, userId)}
                       defaultValue={rt.assignee && { value: rt.assignee.id, label: rt.assignee.name }}
+                      options={superAdminOptions}
                       compact
                     />
                   </SearchGridItem>

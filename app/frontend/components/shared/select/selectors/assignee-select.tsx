@@ -16,10 +16,11 @@ import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import Select, { components } from "react-select"
 import { useMst } from "../../../../setup/root"
 import { IOption } from "../../../../types/types"
+import { SharedSpinner } from "../../base/shared-spinner"
 import { ConditionalWrapper } from "../../conditional-wrapper"
 import { UserCard } from "../../user/user-card"
 
@@ -31,6 +32,7 @@ interface IAssigneeSelectProps {
   compact?: boolean
   placeholder?: JSX.Element
   avatarProps?: { [key: string]: any }
+  options: IOption[]
   [x: string]: any // allow ReactSelect props
 }
 
@@ -38,30 +40,17 @@ export const AssigneeSelect = observer(
   (props: IAssigneeSelectProps) => {
     const { userStore } = useMst()
     const [selectedOption, setSelectedOption] = useState(props.defaultValue)
-    const [options, setOptions] = useState<IOption[]>([])
-    const { dropdownTargetProps, components, onChange, compact, placeholder, avatarProps, ...rest } = props
+
+    const { dropdownTargetProps, components, onChange, compact, placeholder, avatarProps, options, ...rest } = props
     const selectRef = useRef()
     const selectedUser = selectedOption && userStore.getUser(selectedOption.value)
-
-    useEffect(() => {
-      setSelectedOption(props.defaultValue)
-      props.defaultValue?.value && setOptions((prevOpts) => R.move(prevOpts.indexOf(props.defaultValue), 1, prevOpts))
-    }, [props.defaultValue])
 
     const handleChange = (option: IOption) => {
       setSelectedOption(option)
       props.onChange(option.value)
     }
 
-    useEffect(() => {
-      const fetchOptions = async () => {
-        const options = await userStore.getSuperAdminOptions()
-        const prependedOptions = R.prepend({ value: null, label: t("ui.unassigned") }, options)
-        setOptions(prependedOptions)
-      }
-
-      fetchOptions()
-    }, [])
+    if (!options) return <SharedSpinner />
 
     return (
       <Popover
