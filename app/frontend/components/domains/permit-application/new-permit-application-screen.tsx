@@ -207,7 +207,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                             <PermitTypeRadioSelect
                               w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
-                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdiction)
+                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionIdWatch)
                               }}
                               dependencyArray={[firstNationsWatch, pidWatch, jurisdictionIdWatch, currentSandboxId]}
                               onChange={onChange}

@@ -92,7 +92,6 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
                params: {
                  requirement_template: {
                    description: "a copied template with first nations",
-                   first_nations: true,
                    activity_id: activity.id,
                    permit_type_id: permit_type.id,
                  },

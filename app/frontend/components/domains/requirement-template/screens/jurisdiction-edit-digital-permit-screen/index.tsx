@@ -38,7 +38,6 @@ export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`
 export interface IJurisdictionTemplateVersionCustomizationForm {
   jurisdictionId?: string
   customizations: ITemplateCustomization
-  sandboxId?: string
 }
 
 function formFormDefaults(

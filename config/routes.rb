@@ -106,7 +106,6 @@ Rails.application.routes.draw do
       patch "update_external_api_enabled", on: :member, to: "jurisdictions#update_external_api_enabled"
       get "locality_type_options", on: :collection
       get "jurisdiction_options", on: :collection
-      get "sandboxes", on: :member, to: "jurisdictions#sandboxes"
     end
 
     resources :contacts, only: %i[create update destroy] do
