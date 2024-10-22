@@ -1,0 +1,112 @@
+# NOTE: this is a minimal setup to get going in LOCAL development only, this is not intended for production use (the project is hoste on Openshift, see devops folder for helm charts)
+
+#  Dummy shared ENV vars
+x-env-vars: &default-env-vars
+  BROWSER: true # so that launchy does not error out - @TODO: figure out local emails in docker compose environment
+  RAILS_ENV: development
+  REDIS_URL: redis://redis:6379/0
+  ANYCABLE_DEV_REDIS_URL: redis://localhost:6379/1
+  ANYCABLE_URL: ws://localhost:8080/cable
+  RATE_LIMIT_DEV_REDIS_URL: redis://redis:6379/2
+  SIMPLE_FEED_DEV_REDIS_URL: redis://redis:6379/3
+  CACHE_DEV_REDIS_URL: redis://redis:6379/4
+  DEVISE_JWT_SECRET_KEY: supersecret
+  DATABASE_URL: postgres://postgres:password@postgres:5432/app_development
+  ELASTICSEARCH_URL: http://elasticsearch:9200
+
+services:
+  app:
+    image: hous-permit-portal-dev:latest
+    pull_policy: "never"
+    build:
+      context: .
+      dockerfile: ./devops/docker/app/Dockerfile.dev
+    env_file: .env.docker_compose
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+      - "3036:3036"
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    environment:
+      <<: *default-env-vars
+      VITE_RUBY_HOST: "0.0.0.0" # run vite in the same service for easy access, and HMR
+    command: bash -c "rm -f tmp/pids/server.pid && ./bin/rails server -b '0.0.0.0' & ./bin/vite dev"
+
+  sidekiq:
+    image: hous-permit-portal-dev:latest
+    pull_policy: "never"
+    working_dir: /app
+    env_file: .env.docker_compose
+    volumes:
+      - .:/app
+    environment:
+      <<: *default-env-vars
+    command: "bundle exec sidekiq"
+    depends_on:
+      - app
+
+  anycable-rpc:
+    image: hous-permit-portal-dev:latest
+    pull_policy: "never"
+    command: bundle exec anycable
+    volumes:
+      - .:/app
+    environment:
+      <<: *default-env-vars # need to inject DEVISE_JWT_SECRET_KEY and DATABASE_URL here might as well just reference the block
+      ANYCABLE_REDIS_URL: redis://redis:6379/1
+      ANYCABLE_RPC_HOST: "0.0.0.0:50051"
+      ANYCABLE_LOG_LEVEL: debug
+    ports:
+      - "50051:50051"
+    depends_on:
+      - redis
+      - app
+
+  anycable-go:
+    image: anycable/anycable-go:1.4.8
+    environment:
+      ANYCABLE_HOST: "0.0.0.0"
+      ANYCABLE_PORT: "8080"
+      ANYCABLE_RPC_HOST: anycable-rpc:50051
+      ANYCABLE_REDIS_URL: redis://redis:6379/1
+      ANYCABLE_LOG_LEVEL: debug
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - app
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  elasticsearch_data:
