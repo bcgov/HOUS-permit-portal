@@ -287,6 +287,9 @@ en:
       eula_accepted:
         title: ""
         message: "End-User License Agreement accepted"
+      get_super_admins_error:
+        title: "Error"
+        message: "Could not fetch super users"
     requirement_block:
       create_error:
         title: Error
@@ -337,7 +340,7 @@ en:
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This version has been saved as a draft."
+        message: "This draft has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."

@@ -5,13 +5,6 @@ module Api::Concerns::Search::RequirementTemplates
     @search =
       RequirementTemplate.search(
         query,
-        includes: %i[
-          activity
-          permit_type
-          last_three_deprecated_template_versions
-          scheduled_template_versions
-          published_template_version
-        ],
         order: order,
         where: {
           discarded: discarded,
@@ -27,10 +20,15 @@ module Api::Concerns::Search::RequirementTemplates
               nil
             end
           ),
+        includes: model_klass::SEARCH_INCLUDES,
       )
   end
 
   private
+
+  def model_klass
+    search_params[:early_access] ? EarlyAccessRequirementTemplate : LiveRequirementTemplate
+  end
 
   def search_params
     params.permit(:query, :show_archived, :early_access, :page, :per_page, sort: %i[field direction])
