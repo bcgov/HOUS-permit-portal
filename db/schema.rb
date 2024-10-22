@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -78,12 +78,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "end_user_license_agreements",
@@ -402,6 +396,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
     t.string "display_description"
     t.boolean "first_nations", default: false
     t.datetime "discarded_at"
+    t.integer "visibility", default: 0, null: false
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
     t.index %w[name first_nations],
             name: "index_requirement_blocks_on_name_and_first_nations",
@@ -418,6 +413,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "copied_from_id"
+    t.index ["copied_from_id"],
+            name: "index_requirement_template_sections_on_copied_from_id"
     t.index ["requirement_template_id"],
             name:
               "index_requirement_template_sections_on_requirement_template_id"
@@ -434,11 +432,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
     t.string "description"
     t.datetime "discarded_at"
     t.boolean "first_nations", default: false
+    t.string "type"
+    t.string "nickname"
+    t.datetime "fetched_at"
+    t.uuid "copied_from_id"
+    t.uuid "assignee_id"
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
+    t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
+    t.index ["copied_from_id"],
+            name: "index_requirement_templates_on_copied_from_id"
     t.index ["discarded_at"],
             name: "index_requirement_templates_on_discarded_at"
     t.index ["permit_type_id"],
             name: "index_requirement_templates_on_permit_type_id"
+    t.index ["type"], name: "index_requirement_templates_on_type"
   end
 
   create_table "requirements",
@@ -936,6 +943,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
                   "permit_classifications",
                   column: "permit_type_id"
   add_foreign_key "preferences", "users"
+  add_foreign_key "requirement_template_sections",
+                  "requirement_template_sections",
+                  column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
   add_foreign_key "requirement_templates",
                   "permit_classifications",
@@ -943,6 +953,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
   add_foreign_key "requirement_templates",
                   "permit_classifications",
                   column: "permit_type_id"
+  add_foreign_key "requirement_templates",
+                  "requirement_templates",
+                  column: "copied_from_id"
+  add_foreign_key "requirement_templates", "users", column: "assignee_id"
   add_foreign_key "requirements", "requirement_blocks"
   add_foreign_key "revision_reasons", "site_configurations"
   add_foreign_key "revision_requests", "submission_versions"

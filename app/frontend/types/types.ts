@@ -80,6 +80,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  earlyAccess?: boolean
   filters?: IModelFilterFields
 }
 
@@ -529,4 +530,16 @@ export interface IPermitTypeRequiredStep {
   permitTypeLabel?: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+}
+
+export type TCreateRequirementTemplateFormData = {
+  description: string
+  firstNations?: boolean
+  permitTypeId: string
+  activityId: string
+  type: string
+}
+
+export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
+  id?: string
 }

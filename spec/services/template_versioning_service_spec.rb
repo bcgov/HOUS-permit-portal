@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe TemplateVersioningService, type: :service do
-  let!(:requirement_template) { create(:full_requirement_template, sections_count: 3) }
+  let!(:requirement_template) { create(:live_full_requirement_template, sections_count: 3) }
 
   describe "schedule!" do
     context "when the version date is valid" do
@@ -161,7 +161,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         TemplateVersioningService.schedule!(requirement_template, Date.current + 15)
 
         permit_type = create(:permit_type, code: :medium_residential)
-        requirement_template_2 = create(:full_requirement_template, permit_type: permit_type, sections_count: 1)
+        requirement_template_2 = create(:live_full_requirement_template, permit_type: permit_type, sections_count: 1)
 
         TemplateVersioningService.schedule!(requirement_template_2, Date.current + 3)
         TemplateVersioningService.schedule!(requirement_template_2, Date.current + 5)
@@ -190,7 +190,7 @@ RSpec.describe TemplateVersioningService, type: :service do
         expected_scheduled_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 15)
 
         permit_type = create(:permit_type, code: :medium_residential)
-        requirement_template_2 = create(:full_requirement_template, permit_type: permit_type, sections_count: 1)
+        requirement_template_2 = create(:live_full_requirement_template, permit_type: permit_type, sections_count: 1)
 
         expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 3)
         expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 5)

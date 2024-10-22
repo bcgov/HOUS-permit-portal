@@ -28,6 +28,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     const currentPage = queryParams.get("currentPage")
     const countPerPage = queryParams.get("countPerPage")
     const showArchived = queryParams.get("showArchived")
+    const earlyAccess = queryParams.get("earlyAccess")
     const sortDirection = queryParams.get("sortDirection") as ESortDirection
     const sortField = queryParams.get("sortField")
 
@@ -39,6 +40,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     }
     if (countPerPage) searchModel.setCountPerPage(parseInt(decodeURIComponent(countPerPage)))
     if (showArchived) searchModel.setShowArchived(parseBoolean(showArchived))
+    if (earlyAccess) searchModel.setEarlyAccess(parseBoolean(earlyAccess))
     if (sortDirection && sortField) {
       searchModel.applySort({ direction: sortDirection, field: sortField })
     } else {

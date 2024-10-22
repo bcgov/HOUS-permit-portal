@@ -73,6 +73,7 @@ Rails.application.routes.draw do
       post "force_publish_now", to: "requirement_templates#force_publish_now", on: :member
       patch "restore", on: :member
       post "template_versions/:id/unschedule", on: :collection, to: "requirement_templates#unschedule_template_version"
+      post "copy", on: :collection
     end
 
     resources :template_versions, only: %i[index show] do
@@ -148,6 +149,7 @@ Rails.application.routes.draw do
 
     resources :users, only: %i[] do
       get "current_user/license_agreements", on: :collection, to: "users#license_agreements"
+      get "super_admins", on: :collection, to: "users#super_admins"
     end
     resources :users, only: %i[destroy update] do
       patch "restore", on: :member

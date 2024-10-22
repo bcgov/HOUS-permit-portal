@@ -10,6 +10,11 @@ export enum EPermitClassificationType {
   Activity = "Activity",
 }
 
+export enum ERequirementTemplateType {
+  EarlyAccessRequirementTemplate = "EarlyAccessRequirementTemplate",
+  LiveRequirementTemplate = "LiveRequirementTemplate",
+}
+
 export enum EPermitClassificationCode {
   lowResidential = "low_residential",
   mediumResidential = "medium_residential",
@@ -90,6 +95,16 @@ export enum ERequirementTemplateSortFields {
   description = "description",
   currentVersion = "current_version",
   jurisdictionsSize = "jurisdictions_size",
+}
+
+export enum EEarlyAccessRequirementTemplateSortFields {
+  nickname = "nickname",
+  permitType = "permit_type",
+  activity = "activity",
+  firstNations = "first_nations",
+  sharedWith = "shared_with",
+  updatedAt = "updated_at",
+  assignee = "assignee",
 }
 
 export enum EContactSortFields {

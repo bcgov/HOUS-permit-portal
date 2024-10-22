@@ -1,0 +1,2 @@
+class PreviewRequirementTemplate < RequirementTemplate
+end

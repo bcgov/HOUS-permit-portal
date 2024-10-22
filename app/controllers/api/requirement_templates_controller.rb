@@ -1,6 +1,5 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
-
   before_action :set_requirement_template, only: %i[show destroy restore update schedule force_publish_now]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
@@ -17,6 +16,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        current_page: @search.current_page,
                      },
                      blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       current_user: current_user,
+                     },
                    }
   end
 
@@ -25,30 +27,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     render_success @requirement_template,
                    nil,
-                   { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended,
+                       current_user: current_user,
+                     },
+                   }
   end
 
   def create
-    copy_existing = requirement_template_params[:copy_existing]
-
-    if copy_existing
-      found_template =
-        RequirementTemplate.find_by(
-          permit_type_id: requirement_template_params[:permit_type_id],
-          activity_id: requirement_template_params[:activity_id],
-        )
-      if found_template.nil?
-        authorize :requirement_template, :create?
-        render_error("misc.not_found_error", status: :not_found) and return
-      end
-      @requirement_template =
-        RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
-          requirement_template_params,
-        )
-    else
-      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
-    end
-
+    @requirement_template = RequirementTemplate.new(requirement_template_params)
     authorize @requirement_template
     if @requirement_template.save
       render_success @requirement_template,
@@ -62,13 +51,53 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  def copy
+    found_template =
+      if requirement_template_params[:id].present?
+        RequirementTemplate.find_by(id: requirement_template_params[:id])
+      elsif requirement_template_params[:permit_type_id].present? && requirement_template_params[:activity_id].present?
+        LiveRequirementTemplate.find_by(
+          permit_type_id: requirement_template_params[:permit_type_id],
+          activity_id: requirement_template_params[:activity_id],
+        )
+      end
+
+    if found_template.nil?
+      authorize :requirement_template, :create?
+      render_error("misc.not_found_error", status: :not_found) and return
+    end
+
+    @requirement_template =
+      RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
+        requirement_template_params,
+      )
+    authorize @requirement_template
+
+    if @requirement_template.save
+      render_success @requirement_template,
+                     "requirement_template.copy_success",
+                     { blueprint: RequirementTemplateBlueprint }
+    else
+      render_error "requirement_template.copy_error",
+                   message_opts: {
+                     error_message: @requirement_template.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
   def update
     authorize @requirement_template
 
     if @requirement_template.update(requirement_template_params)
       render_success @requirement_template,
                      "requirement_template.update_success",
-                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user,
+                       },
+                     }
     else
       render_error "requirement_template.update_error",
                    message_opts: {
@@ -202,11 +231,14 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def requirement_template_params
     permitted_params =
       params.require(:requirement_template).permit(
+        :id,
         :description,
+        :nickname,
+        :assignee_id,
         :first_nations,
-        :copy_existing,
         :activity_id,
         :permit_type_id,
+        :type,
         requirement_template_sections_attributes: [
           :id,
           :name,

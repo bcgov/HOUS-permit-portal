@@ -1,6 +1,6 @@
 class RequirementTemplateBlueprint < Blueprinter::Base
   identifier :id
-  fields :description, :first_nations, :label, :discarded_at, :created_at, :updated_at
+  fields :nickname, :type, :description, :first_nations, :label, :discarded_at, :fetched_at, :created_at, :updated_at
 
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint
@@ -11,6 +11,11 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   association :published_template_version, blueprint: TemplateVersionBlueprint do |rt, options|
     options[:published_template_version].present? ? options[:published_template_version] : rt.published_template_version
   end
+
+  association :assignee,
+              blueprint: UserBlueprint,
+              view: :minimal,
+              if: ->(_field_name, rt, options) { options[:current_user]&.super_admin? }
 
   view :extended do
     association :requirement_template_sections, blueprint: RequirementTemplateSectionBlueprint

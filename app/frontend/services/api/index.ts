@@ -1,7 +1,6 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
-import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
 import { IExternalApiKey } from "../../models/external-api-key"
@@ -38,6 +37,7 @@ import {
 import {
   ECollaborationType,
   ECollaboratorType,
+  EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
@@ -48,12 +48,14 @@ import {
 } from "../../types/enums"
 import {
   IContact,
+  ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPermitApplicationSearchFilters,
   ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
+  TCreateRequirementTemplateFormData,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
@@ -396,7 +398,9 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
-  async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
+  async fetchRequirementTemplates(
+    params?: TSearchParams<ERequirementTemplateSortFields | EEarlyAccessRequirementTemplateSortFields>
+  ) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
@@ -406,6 +410,12 @@ export class Api {
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates`, {
+      requirementTemplate: params,
+    })
+  }
+
+  async copyRequirementTemplate(params?: ICopyRequirementTemplateFormData) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/copy`, {
       requirementTemplate: params,
     })
   }
@@ -583,6 +593,10 @@ export class Api {
 
   async updateUser(id: string, user: IUser) {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
+  }
+
+  async fetchSuperAdmins() {
+    return this.client.get<IOptionResponse>(`/users/super_admins`, {})
   }
 
   async createContact(params: TContactFormData) {
