@@ -13,6 +13,8 @@ Ensure you have the following:
 - Redis
 - Node 20.10+
 
+**Please enable git LFS in order to properly clone the repo.**
+
 ### Local Running Steps
 
 - Install Dependencies: `bundle install` and `npm install`
