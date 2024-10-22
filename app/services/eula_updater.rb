@@ -19,7 +19,10 @@ class EulaUpdater
         eula =
           (
             if should_override_existing
-              EndUserLicenseAgreement.find_or_initialize_by(active: true, variant: variant)
+              EndUserLicenseAgreement.find_or_initialize_by(
+                active: true,
+                variant: variant
+              )
             else
               EndUserLicenseAgreement.build(active: true, variant: variant)
             end

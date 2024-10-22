@@ -10,10 +10,18 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 < StepCode::Compl
   end
 
   def co2_requirement
-    @co2_requirement ||= StepCode::References::ZERO_CARBON_REFERENCES.dig(step, :carbon_per_floor_area)
+    @co2_requirement ||=
+      StepCode::References::ZERO_CARBON_REFERENCES.dig(
+        step,
+        :carbon_per_floor_area
+      )
   end
 
   def co2_max_requirement
-    @co2_max_requirement ||= StepCode::References::ZERO_CARBON_REFERENCES.dig(step, :carbon_per_floor_area_max)
+    @co2_max_requirement ||=
+      StepCode::References::ZERO_CARBON_REFERENCES.dig(
+        step,
+        :carbon_per_floor_area_max
+      )
   end
 end

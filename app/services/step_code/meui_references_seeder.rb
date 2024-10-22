@@ -6,7 +6,10 @@ class StepCode::MEUIReferencesSeeder
 
       MechanicalEnergyUseIntensityReference.transaction do
         header_row = xlsx.row(1)
-        data_rows = (2..xlsx.last_row).map { |i| xlsx.row(i).map { |cell| MAPPINGS[cell] || cell } }
+        data_rows =
+          (2..xlsx.last_row).map do |i|
+            xlsx.row(i).map { |cell| MAPPINGS[cell] || cell }
+          end
 
         data_rows.each do |row|
           data_hash = Hash[header_row.zip(row)]
@@ -30,6 +33,6 @@ class StepCode::MEUIReferencesSeeder
     "76 to 120" => 76..120,
     "121 to 165" => 121..165,
     "166 to 210" => 166..210,
-    "> 210" => 210..,
+    "> 210" => 210..
   }
 end

@@ -9,7 +9,12 @@ class SiteConfiguration < ApplicationRecord
   validate :max_undiscarded_revision_reasons
   validate :max_revision_reasons
 
-  HELP_LINK_KEYS = %w[get_started_link_item best_practices_link_item dictionary_link_item user_guide_link_item]
+  HELP_LINK_KEYS = %w[
+    get_started_link_item
+    best_practices_link_item
+    dictionary_link_item
+    user_guide_link_item
+  ]
 
   def self.instance
     first_or_create
@@ -21,7 +26,10 @@ class SiteConfiguration < ApplicationRecord
     attributes.each do |attribute, _|
       next unless attribute["id"].blank? && attribute["reason_code"].present?
 
-      existing_reason = self.revision_reasons.with_discarded.find_by(reason_code: attribute["reason_code"])
+      existing_reason =
+        self.revision_reasons.with_discarded.find_by(
+          reason_code: attribute["reason_code"]
+        )
 
       next unless existing_reason.present?
 
@@ -39,7 +47,9 @@ class SiteConfiguration < ApplicationRecord
     if revision_reasons.count > 200
       errors.add(
         :revision_reasons,
-        I18n.t("activerecord.errors.models.site_configuration.attributes.revision_reasons.max_records"),
+        I18n.t(
+          "activerecord.errors.models.site_configuration.attributes.revision_reasons.max_records"
+        )
       )
     end
   end
@@ -48,7 +58,9 @@ class SiteConfiguration < ApplicationRecord
     if revision_reasons.kept.count > 20
       errors.add(
         :revision_reasons,
-        I18n.t("activerecord.errors.models.site_configuration.attributes.revision_reasons.max_undiscarded_records"),
+        I18n.t(
+          "activerecord.errors.models.site_configuration.attributes.revision_reasons.max_undiscarded_records"
+        )
       )
     end
   end
@@ -56,7 +68,10 @@ class SiteConfiguration < ApplicationRecord
   # A private method to ensure only one record exists
   def ensure_single_record
     if SiteConfiguration.count > 0
-      errors.add(:base, I18n.t("activerecord.errors.models.site_configuration.single_record"))
+      errors.add(
+        :base,
+        I18n.t("activerecord.errors.models.site_configuration.single_record")
+      )
     end
   end
 
@@ -66,10 +81,14 @@ class SiteConfiguration < ApplicationRecord
     help_link_items.each do |key, item|
       # Check if item should show
       if item["show"]
-        unless item["href"].present? && item["title"].present? && item["description"].present?
+        unless item["href"].present? && item["title"].present? &&
+                 item["description"].present?
           errors.add(
             :base,
-            I18n.t("activerecord.errors.models.site_configuration.attributes.help_link_items.incomplete", link: key),
+            I18n.t(
+              "activerecord.errors.models.site_configuration.attributes.help_link_items.incomplete",
+              link: key
+            )
           )
         end
       end
@@ -81,13 +100,19 @@ class SiteConfiguration < ApplicationRecord
           unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
             errors.add(
               :base,
-              I18n.t("activerecord.errors.models.site_configuration.attributes.help_link_items.invalid_url", link: key),
+              I18n.t(
+                "activerecord.errors.models.site_configuration.attributes.help_link_items.invalid_url",
+                link: key
+              )
             )
           end
         rescue URI::InvalidURIError
           errors.add(
             :base,
-            I18n.t("activerecord.errors.models.site_configuration.attributes.help_link_items.invalid_url", link: key),
+            I18n.t(
+              "activerecord.errors.models.site_configuration.attributes.help_link_items.invalid_url",
+              link: key
+            )
           )
         end
       end

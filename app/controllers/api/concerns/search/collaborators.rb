@@ -10,14 +10,18 @@ module Api::Concerns::Search::Collaborators
       per_page:
         (
           if collaborator_search_params[:page]
-            (collaborator_search_params[:per_page] || Kaminari.config.default_per_page)
+            (
+              collaborator_search_params[:per_page] ||
+                Kaminari.config.default_per_page
+            )
           else
             nil
           end
-        ),
+        )
     }
 
-    @collaborator_search = Collaborator.search(collaborator_query, **search_conditions)
+    @collaborator_search =
+      Collaborator.search(collaborator_query, **search_conditions)
   end
 
   private
@@ -27,7 +31,11 @@ module Api::Concerns::Search::Collaborators
   end
 
   def collaborator_query
-    collaborator_search_params[:query].present? ? collaborator_search_params[:query] : "*"
+    if collaborator_search_params[:query].present?
+      collaborator_search_params[:query]
+    else
+      "*"
+    end
   end
 
   def collaborator_order
@@ -39,7 +47,9 @@ module Api::Concerns::Search::Collaborators
   end
 
   def collaborator_where_clause
-    raise ArgumentError, "Missing collaboratorable" unless @collaboratorable.present?
+    unless @collaboratorable.present?
+      raise ArgumentError, "Missing collaboratorable"
+    end
 
     { collaboratorable_id: @collaboratorable.id }
   end

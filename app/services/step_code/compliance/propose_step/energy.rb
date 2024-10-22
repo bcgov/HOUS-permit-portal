@@ -12,14 +12,23 @@ class StepCode::Compliance::ProposeStep::Energy < StepCode::Compliance::ProposeS
   end
 
   def meui_checker
-    StepCode::Compliance::CheckRequirements::Energy::MEUI.new(step: step || min_required_step, checklist:)
+    StepCode::Compliance::CheckRequirements::Energy::MEUI.new(
+      step: step || min_required_step,
+      checklist:
+    )
   end
 
   def tedi_checker
-    StepCode::Compliance::CheckRequirements::Energy::TEDI.new(step: step || min_required_step, checklist:)
+    StepCode::Compliance::CheckRequirements::Energy::TEDI.new(
+      step: step || min_required_step,
+      checklist:
+    )
   end
 
   def airtightness_checker
-    StepCode::Compliance::CheckRequirements::Energy::Airtightness.new(step: step || min_required_step, checklist:)
+    StepCode::Compliance::CheckRequirements::Energy::Airtightness.new(
+      step: step || min_required_step,
+      checklist:
+    )
   end
 end

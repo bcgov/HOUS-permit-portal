@@ -6,19 +6,20 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
 
   def index
     perform_permit_application_search
-    authorized_results = apply_search_authorization(@permit_application_search.results)
+    authorized_results =
+      apply_search_authorization(@permit_application_search.results)
     render_success authorized_results,
                    nil,
                    {
                      meta: {
                        total_pages: @permit_application_search.total_pages,
                        total_count: @permit_application_search.total_count,
-                       current_page: @permit_application_search.current_page,
+                       current_page: @permit_application_search.current_page
                      },
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :external_api,
-                     },
+                       view: :external_api
+                     }
                    }
   end
 
@@ -27,19 +28,32 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
 
     render_success @permit_application,
                    nil,
-                   { blueprint: PermitApplicationBlueprint, blueprint_opts: { view: :external_api } }
+                   {
+                     blueprint: PermitApplicationBlueprint,
+                     blueprint_opts: {
+                       view: :external_api
+                     }
+                   }
   end
 
   def show_integration_mapping
     @integration_mapping =
-      @template_version.integration_mappings.find_by(jurisdiction: current_external_api_key.jurisdiction)
+      @template_version.integration_mappings.find_by(
+        jurisdiction: current_external_api_key.jurisdiction
+      )
 
-    authorize @integration_mapping, policy_class: ExternalApi::PermitApplicationPolicy
+    authorize @integration_mapping,
+              policy_class: ExternalApi::PermitApplicationPolicy
 
     if @integration_mapping.present?
       render_success @integration_mapping,
                      nil,
-                     { blueprint: IntegrationMappingBlueprint, blueprint_opts: { view: :external_api } }
+                     {
+                       blueprint: IntegrationMappingBlueprint,
+                       blueprint_opts: {
+                         view: :external_api
+                       }
+                     }
     else
       render_error "integration_mapping.not_found_error", status: 404
     end

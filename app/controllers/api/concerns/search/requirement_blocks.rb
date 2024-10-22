@@ -8,7 +8,7 @@ module Api::Concerns::Search::RequirementBlocks
         order: order,
         match: :word_start,
         where: {
-          discarded: discarded,
+          discarded: discarded
         },
         page: search_params[:page],
         per_page:
@@ -19,14 +19,20 @@ module Api::Concerns::Search::RequirementBlocks
               nil
             end
           ),
-        includes: %i[taggings requirements],
+        includes: %i[taggings requirements]
       )
   end
 
   private
 
   def search_params
-    params.permit(:query, :page, :show_archived, :per_page, sort: %i[field direction])
+    params.permit(
+      :query,
+      :page,
+      :show_archived,
+      :per_page,
+      sort: %i[field direction]
+    )
   end
 
   def query

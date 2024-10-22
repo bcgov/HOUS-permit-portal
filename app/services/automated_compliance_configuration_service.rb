@@ -4,87 +4,121 @@ class AutomatedComplianceConfigurationService
   AVAILABLE_MODULE_CONFIGURATIONS = {
     DigitalSealValidator: {
       module: "DigitalSealValidator",
-      label: I18n.t("services.auto_compliance_configuration.digital_seal_validator.label"),
+      label:
+        I18n.t(
+          "services.auto_compliance_configuration.digital_seal_validator.label"
+        ),
       default_settings: {
         "trigger" => "on_save",
-        "value_on" => "compliance_data",
+        "value_on" => "compliance_data"
       },
       available_on_input_types: ["file"],
-      type: :file_validator,
+      type: :file_validator
     },
     ParcelInfoExtractor: {
       module: "ParcelInfoExtractor",
-      label: I18n.t("services.auto_compliance_configuration.parcel_info_extractor.label"),
+      label:
+        I18n.t(
+          "services.auto_compliance_configuration.parcel_info_extractor.label"
+        ),
       type: :external_value_extractor,
       available_fields: [
         {
           value: "FEATURE_AREA_SQM",
           label:
-            I18n.t("services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.feature_area"),
-          available_on_input_types: %w[text number],
+            I18n.t(
+              "services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.feature_area"
+            ),
+          available_on_input_types: %w[text number]
         },
         {
           value: "PID",
-          label: I18n.t("services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pid"),
-          available_on_input_types: %w[text],
+          label:
+            I18n.t(
+              "services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pid"
+            ),
+          available_on_input_types: %w[text]
         },
         {
           value: "PIN",
-          label: I18n.t("services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pin"),
-          available_on_input_types: %w[text],
+          label:
+            I18n.t(
+              "services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.pin"
+            ),
+          available_on_input_types: %w[text]
         },
         {
           value: "PLAN_NUMBER",
           label:
-            I18n.t("services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.plan_number"),
-          available_on_input_types: %w[text],
-        },
+            I18n.t(
+              "services.auto_compliance_configuration.parcel_info_extractor.available_field_labels.plan_number"
+            ),
+          available_on_input_types: %w[text]
+        }
       ],
-      available_on_input_types: %w[text number],
+      available_on_input_types: %w[text number]
     },
     PermitApplication: {
       module: "PermitApplication",
-      label: I18n.t("services.auto_compliance_configuration.permit_application.label"),
+      label:
+        I18n.t(
+          "services.auto_compliance_configuration.permit_application.label"
+        ),
       type: :internal_value_extractor,
       available_fields: [
         {
           value: "full_address",
           label:
-            I18n.t("services.auto_compliance_configuration.permit_application.available_field_labels.full_address"),
-          available_on_input_types: %w[text],
+            I18n.t(
+              "services.auto_compliance_configuration.permit_application.available_field_labels.full_address"
+            ),
+          available_on_input_types: %w[text]
         },
         {
           value: "pid",
-          label: I18n.t("services.auto_compliance_configuration.permit_application.available_field_labels.pid"),
-          available_on_input_types: %w[text],
+          label:
+            I18n.t(
+              "services.auto_compliance_configuration.permit_application.available_field_labels.pid"
+            ),
+          available_on_input_types: %w[text]
         },
         {
           value: "pin",
-          label: I18n.t("services.auto_compliance_configuration.permit_application.available_field_labels.pin"),
-          available_on_input_types: %w[text],
-        },
+          label:
+            I18n.t(
+              "services.auto_compliance_configuration.permit_application.available_field_labels.pin"
+            ),
+          available_on_input_types: %w[text]
+        }
       ],
-      available_on_input_types: %w[text],
+      available_on_input_types: %w[text]
     },
     HistoricSite: {
       module: "HistoricSite",
-      label: I18n.t("services.auto_compliance_configuration.historic_site.label"),
+      label:
+        I18n.t("services.auto_compliance_configuration.historic_site.label"),
       type: :external_options_mapper,
       default_settings: {
-        "value" => "HISTORIC_SITE_IND",
+        "value" => "HISTORIC_SITE_IND"
       },
       mappable_external_options: [
         {
           value: "Y",
-          label: I18n.t("services.auto_compliance_configuration.historic_site.mappable_external_option_labels.y"),
+          label:
+            I18n.t(
+              "services.auto_compliance_configuration.historic_site.mappable_external_option_labels.y"
+            )
         },
         {
           value: "N",
-          label: I18n.t("services.auto_compliance_configuration.historic_site.mappable_external_option_labels.n"),
-        },
+          label:
+            I18n.t(
+              "services.auto_compliance_configuration.historic_site.mappable_external_option_labels.n"
+            )
+        }
       ],
-      available_on_input_types: %w[select],
-    },
+      available_on_input_types: %w[select]
+    }
   }
   VALUE_EXTRACTION_TYPES = %i[external_value_extractor internal_value_extractor]
   OPTIONS_MAPPER_TYPES = %i[external_options_mapper]
@@ -102,7 +136,8 @@ class AutomatedComplianceConfigurationService
 
     return unless module_name.present?
 
-    available_module_configuration = available_module_configurations[module_name.to_sym]
+    available_module_configuration =
+      available_module_configurations[module_name.to_sym]
 
     return unless available_module_configuration.present?
 
@@ -121,10 +156,11 @@ class AutomatedComplianceConfigurationService
 
     module_name = computed_compliance["module"]
 
-    unless module_name.present? && available_module_configurations[module_name.to_sym].present?
+    unless module_name.present? &&
+             available_module_configurations[module_name.to_sym].present?
       validation_result[:error] = I18n.t(
         "services.auto_compliance_configuration.validation_errors.incorrect_computed_compliance_module",
-        accepted_values: self.class.available_module_names.join(", "),
+        accepted_values: self.class.available_module_names.join(", ")
       )
       return validation_result
     end
@@ -135,7 +171,7 @@ class AutomatedComplianceConfigurationService
       validation_result[:error] = I18n.t(
         "services.auto_compliance_configuration.validation_errors.incompatible_input_type_for_module",
         module_name: module_name,
-        input_type: requirement.input_type,
+        input_type: requirement.input_type
       )
       return validation_result
     end
@@ -144,15 +180,16 @@ class AutomatedComplianceConfigurationService
          !valid_extraction_field_value?(module_config, computed_compliance)
       validation_result[:error] = I18n.t(
         "services.auto_compliance_configuration.validation_errors.incorrect_value_extraction_field",
-        module_name: module_name,
+        module_name: module_name
       )
       return validation_result
     end
 
-    if is_options_mapper_module_config?(module_config) && !valid_options_map?(module_config, computed_compliance)
+    if is_options_mapper_module_config?(module_config) &&
+         !valid_options_map?(module_config, computed_compliance)
       validation_result[:error] = I18n.t(
         "services.auto_compliance_configuration.validation_errors.incorrect_options_map",
-        module_name: module_name,
+        module_name: module_name
       )
       return validation_result
     end
@@ -162,7 +199,7 @@ class AutomatedComplianceConfigurationService
     unless valid_default_settings?(module_config, computed_compliance)
       validation_result[:error] = I18n.t(
         "services.auto_compliance_configuration.validation_errors.default_settings_not_valid",
-        module_name: module_name,
+        module_name: module_name
       )
     end
 
@@ -215,14 +252,26 @@ class AutomatedComplianceConfigurationService
     options_map = computed_compliance["options_map"]
     value_options = requirement.value_options
 
-    return false unless value_options.present? && value_options.is_a?(Array) && !value_options.empty?
+    unless value_options.present? && value_options.is_a?(Array) &&
+             !value_options.empty?
+      return false
+    end
 
-    return false unless options_map.present? && options_map.is_a?(Hash) && !options_map.empty?
+    unless options_map.present? && options_map.is_a?(Hash) &&
+             !options_map.empty?
+      return false
+    end
 
     is_valid_options_map =
       options_map.all? do |external_option_value, requirement_option_value|
-        external_option_valid = mappable_external_options.any? { |option| option[:value] == external_option_value }
-        requirement_option_valid = value_options.any? { |option| option["value"] == requirement_option_value }
+        external_option_valid =
+          mappable_external_options.any? do |option|
+            option[:value] == external_option_value
+          end
+        requirement_option_valid =
+          value_options.any? do |option|
+            option["value"] == requirement_option_value
+          end
 
         external_option_valid && requirement_option_valid
       end

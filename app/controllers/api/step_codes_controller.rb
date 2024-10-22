@@ -3,7 +3,12 @@ class Api::StepCodesController < Api::ApplicationController
     @step_codes = policy_scope(StepCode)
     render_success @step_codes,
                    nil,
-                   { blueprint: StepCodeBlueprint, meta: { select_options: StepCodeChecklist.select_options } }
+                   {
+                     blueprint: StepCodeBlueprint,
+                     meta: {
+                       select_options: StepCodeChecklist.select_options
+                     }
+                   }
   end
 
   # POST /api/step_codes
@@ -14,12 +19,22 @@ class Api::StepCodesController < Api::ApplicationController
       @step_code = StepCode.create(step_code_params)
       if @step_code.valid?
         @step_code.data_entries.each do |de|
-          StepCode::DataEntryFromHot2000.new(xml: Nokogiri.XML(de.h2k_file.read), data_entry: de).call if de.h2k_file
+          if de.h2k_file
+            StepCode::DataEntryFromHot2000.new(
+              xml: Nokogiri.XML(de.h2k_file.read),
+              data_entry: de
+            ).call
+          end
         end
-        render_success @step_code, "step_code.h2k_imported", { blueprint: StepCodeBlueprint } and return
+        render_success @step_code,
+                       "step_code.h2k_imported",
+                       { blueprint: StepCodeBlueprint } and return
       end
     end
-    render_error "step_code.create_error", message_opts: { error_message: @step_code.errors.full_messages.join(", ") }
+    render_error "step_code.create_error",
+                 message_opts: {
+                   error_message: @step_code.errors.full_messages.join(", ")
+                 }
   end
 
   # DELETE /api/step_codes/:id
@@ -50,8 +65,8 @@ class Api::StepCodesController < Api::ApplicationController
         :other_ghg_ef,
         :other_ghg_consumption,
         h2k_file: {
-        },
-      ],
+        }
+      ]
     )
   end
 end

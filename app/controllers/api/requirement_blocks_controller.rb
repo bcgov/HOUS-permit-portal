@@ -15,16 +15,18 @@ class Api::RequirementBlocksController < Api::ApplicationController
                      meta: {
                        total_pages: @search.total_pages,
                        total_count: @search.total_count,
-                       current_page: @search.current_page,
+                       current_page: @search.current_page
                      },
-                     blueprint: RequirementBlockBlueprint,
+                     blueprint: RequirementBlockBlueprint
                    }
   end
 
   def show
     authorize @requirement_block
 
-    render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
+    render_success @requirement_block,
+                   nil,
+                   { blueprint: RequirementBlockBlueprint }
   end
 
   def create
@@ -33,11 +35,14 @@ class Api::RequirementBlocksController < Api::ApplicationController
 
     if @requirement_block.save
       RequirementBlock.search_index.refresh
-      render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
+      render_success @requirement_block,
+                     nil,
+                     { blueprint: RequirementBlockBlueprint }
     else
       render_error "requirement_block.create_error",
                    message_opts: {
-                     error_message: @requirement_block.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_block.errors.full_messages.join(", ")
                    }
     end
   end
@@ -46,11 +51,14 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.update(requirement_block_params)
-      render_success @requirement_block, nil, { blueprint: RequirementBlockBlueprint }
+      render_success @requirement_block,
+                     nil,
+                     { blueprint: RequirementBlockBlueprint }
     else
       render_error "requirement_block.update_error",
                    message_opts: {
-                     error_message: @requirement_block.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_block.errors.full_messages.join(", ")
                    }
     end
   end
@@ -59,11 +67,14 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.discard
-      render_success @requirement_block, "requirement_block.destroy_success", { blueprint: RequirementBlockBlueprint }
+      render_success @requirement_block,
+                     "requirement_block.destroy_success",
+                     { blueprint: RequirementBlockBlueprint }
     else
       render_error "requirement_block.destroy_error",
                    message_opts: {
-                     error_message: @requirement_block.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_block.errors.full_messages.join(", ")
                    }
     end
   end
@@ -72,18 +83,23 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.undiscard
-      render_success @requirement_block, "requirement_block.restore_success", { blueprint: RequirementBlockBlueprint }
+      render_success @requirement_block,
+                     "requirement_block.restore_success",
+                     { blueprint: RequirementBlockBlueprint }
     else
       render_error "requirement_block.restore_error",
                    message_opts: {
-                     error_message: @requirement_block.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_block.errors.full_messages.join(", ")
                    }
     end
   end
 
   def auto_compliance_module_configurations
-    available_module_configurations = AutomatedComplianceConfigurationService.available_module_configurations
-    authorize available_module_configurations, policy_class: RequirementBlockPolicy
+    available_module_configurations =
+      AutomatedComplianceConfigurationService.available_module_configurations
+    authorize available_module_configurations,
+              policy_class: RequirementBlockPolicy
     render json: { data: available_module_configurations }
   end
 
@@ -119,9 +135,9 @@ class Api::RequirementBlocksController < Api::ApplicationController
           value_options: [%i[value label]],
           conditional: {
           },
-          computed_compliance: [:value, :module, options_map: {}],
-        ],
-      ],
+          computed_compliance: [:value, :module, options_map: {}]
+        ]
+      ]
     )
   end
 

@@ -13,14 +13,17 @@ module StepCode::BuildingCharacteristics::WithPerformanceType
     validate :valid_performance_type
 
     def valid_performance_type
-      return if self.performance_type.blank? || self.class::PERFORMANCE_TYPES.keys.include?(self.performance_type)
+      if self.performance_type.blank? ||
+           self.class::PERFORMANCE_TYPES.keys.include?(self.performance_type)
+        return
+      end
       self.errors.add(
         :base,
         I18n.t(
           "step_code_building_characteristics_summary.performance_type.error",
           field_name: self.class.name.demodulize.underscore.humanize,
-          accepted_values: self.class::PERFORMANCE_TYPES.keys.join(", "),
-        ),
+          accepted_values: self.class::PERFORMANCE_TYPES.keys.join(", ")
+        )
       )
     end
   end

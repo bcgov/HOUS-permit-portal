@@ -2,11 +2,19 @@ require "mini_magick"
 class AssetUploader < Shrine
   # callback that runs after a file has been promoted (aka saved)
   Attacher.promote_block do
-    DerivativesJob.perform_async(self.class.name, record.class.name, record.id, name, file_data)
+    DerivativesJob.perform_async(
+      self.class.name,
+      record.class.name,
+      record.id,
+      name,
+      file_data
+    )
   end
 
   # callback runs after file is destroyed
-  Attacher.destroy_block { DestroyAssetJob.perform_async(self.class.name, data) }
+  Attacher.destroy_block do
+    DestroyAssetJob.perform_async(self.class.name, data)
+  end
 
   Attacher.derivatives do |original|
     magick = ImageProcessing::MiniMagick.source(original)

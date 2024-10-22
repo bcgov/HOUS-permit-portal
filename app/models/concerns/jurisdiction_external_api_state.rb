@@ -4,7 +4,8 @@ module JurisdictionExternalApiState
     enum external_api_state: { g_off: "g_off", j_on: "j_on", j_off: "j_off" }
 
     # Update the after_save callback
-    after_save :create_integration_mappings_async, if: :external_api_just_enabled?
+    after_save :create_integration_mappings_async,
+               if: :external_api_just_enabled?
 
     # AASM configuration
     include AASM
@@ -51,9 +52,17 @@ module JurisdictionExternalApiState
       return unless external_api_enabled?
 
       if Rails.env.test?
-        ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
+        ModelCallbackJob.new.perform(
+          self.class.name,
+          id,
+          "create_integration_mappings"
+        )
       else
-        ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
+        ModelCallbackJob.perform_async(
+          self.class.name,
+          id,
+          "create_integration_mappings"
+        )
       end
     end
 

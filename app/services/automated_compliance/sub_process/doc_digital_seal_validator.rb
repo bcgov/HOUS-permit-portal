@@ -5,16 +5,28 @@ class AutomatedCompliance::SubProcess::DocDigitalSealValidator < AutomatedCompli
     #stream down the supporting document
     uploaded_file = supporting_document.file
     uploaded_file.open do
-      response = Wrappers::DigitalSealValidator.new.call(uploaded_file.download, uploaded_file.mime_type)
+      response =
+        Wrappers::DigitalSealValidator.new.call(
+          uploaded_file.download,
+          uploaded_file.mime_type
+        )
       if response.success
-        return(supporting_document.update(compliance_data: { status: "success", result: response.signatures }))
+        return(
+          supporting_document.update(
+            compliance_data: {
+              status: "success",
+              result: response.signatures
+            }
+          )
+        )
       else
         return(
           supporting_document.update(
             compliance_data: {
               status: "failed",
-              error: "Unable to run digital seal validator integration - #{response.error}",
-            },
+              error:
+                "Unable to run digital seal validator integration - #{response.error}"
+            }
           )
         )
       end
@@ -22,8 +34,8 @@ class AutomatedCompliance::SubProcess::DocDigitalSealValidator < AutomatedCompli
     supporting_document.update(
       compliance_data: {
         status: "failed",
-        error: "Unable to run digital seal validator integration",
-      },
+        error: "Unable to run digital seal validator integration"
+      }
     )
     #special case
   end

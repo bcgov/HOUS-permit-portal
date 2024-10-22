@@ -8,21 +8,21 @@ class PermitClassificationSeeder
         description:
           "Single detached, duplex, triplex / fourplex / townhouse, secondary suite, accessory dwelling unit (ADU) e.g. garden suite",
         enabled: true,
-        type: "PermitType",
+        type: "PermitType"
       },
       {
         name: "4+ Unit housing",
         code: "medium_residential",
         description: "Part 9 townhouses, small apartment buildings",
         enabled: false,
-        type: "PermitType",
+        type: "PermitType"
       },
       {
         name: "High density apartment buildings",
         code: "high_residential",
         description: "Highest density residential structures",
         enabled: true,
-        type: "PermitType",
+        type: "PermitType"
       },
       {
         name: "New Construction",
@@ -30,7 +30,7 @@ class PermitClassificationSeeder
         description:
           "Includes the addition to an existing building (infill development) but not the renovation of an existing home to include a secondary suite.",
         enabled: true,
-        type: "Activity",
+        type: "Activity"
       },
       {
         name: "Addition, Alteration, or Renovation",
@@ -38,7 +38,7 @@ class PermitClassificationSeeder
         description:
           "Modification of an existing residential dwelling to include a (secondary) suite (within the existing building footprint).",
         enabled: true,
-        type: "Activity",
+        type: "Activity"
       },
       {
         name: "Site Alteration",
@@ -46,7 +46,7 @@ class PermitClassificationSeeder
         description:
           "Modifies land contours through grading, excavation, or preparation for construction projects. This process involves adjusting the earth to support new structures or landscaping.",
         enabled: true,
-        type: "Activity",
+        type: "Activity"
       },
       {
         name: "Demolition",
@@ -54,14 +54,15 @@ class PermitClassificationSeeder
         description:
           "Involves the systematic tearing down of buildings and other structures, including clearing debris and preparing the site for future construction or restoration activities.",
         enabled: true,
-        type: "Activity",
-      },
+        type: "Activity"
+      }
     ]
 
     # Create Classifications
     classifications.each do |classification_attrs|
       # Attempt to find the Activity by code
-      classification = PermitClassification.find_by(code: classification_attrs[:code])
+      classification =
+        PermitClassification.find_by(code: classification_attrs[:code])
       if classification
         # If found, update the attributes
         classification.update(classification_attrs)

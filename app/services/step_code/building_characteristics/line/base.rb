@@ -13,7 +13,11 @@ class StepCode::BuildingCharacteristics::Line::Base
   end
 
   def self.dump(arr)
-    (arr || []).all? { |item| item.is_a?(self.class) } ? (arr || []).map(&:attributes) : arr || []
+    if (arr || []).all? { |item| item.is_a?(self.class) }
+      (arr || []).map(&:attributes)
+    else
+      arr || []
+    end
   end
 
   def attributes

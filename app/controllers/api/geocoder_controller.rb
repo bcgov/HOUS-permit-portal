@@ -21,7 +21,10 @@ class Api::GeocoderController < Api::ApplicationController
   def pid_details #get site details if a pid is supplied instead
     authorize :geocoder, :pid_details?
     begin
-      coordinates = Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(geocoder_params[:pid])
+      coordinates =
+        Wrappers::LtsaParcelMapBc.new.get_coordinates_by_pid(
+          geocoder_params[:pid]
+        )
       if coordinates
         wrapper = Wrappers::Geocoder.new
 
@@ -64,11 +67,20 @@ class Api::GeocoderController < Api::ApplicationController
         pid = geocoder_params[:pid]
       end
       raise StandardError unless pid.present?
-      attributes = Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
+      attributes =
+        Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
 
-      jurisdiction = Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
+      jurisdiction =
+        Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?
-      render_success jurisdiction, nil, { blueprint: JurisdictionBlueprint, blueprint_opts: { view: :base } }
+      render_success jurisdiction,
+                     nil,
+                     {
+                       blueprint: JurisdictionBlueprint,
+                       blueprint_opts: {
+                         view: :base
+                       }
+                     }
     rescue Errors::FeatureAttributesRetrievalError => e
       render_error "geocoder.ltsa_retrieval_error", {}, e and return
     rescue Errors::LtsaUnavailableError => e
@@ -81,7 +93,11 @@ class Api::GeocoderController < Api::ApplicationController
   def pin
     authorize :geocoder, :pin?
     begin
-      attributes = Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(pin: pin_params[:pin], pid: nil)
+      attributes =
+        Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(
+          pin: pin_params[:pin],
+          pid: nil
+        )
       render json: { pin: attributes }, status: :ok
     rescue Errors::FeatureAttributesRetrievalError => e
       render_error "geocoder.ltsa_unavailable_error", {}, e and return

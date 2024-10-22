@@ -118,6 +118,8 @@ group :development do
   gem "syntax_tree-rbs", "~> 1.0"
   gem "letter_opener", "~> 1.8"
   gem "rails-erd", "~> 1.5"
+  gem "rubocop", "~> 1.67", require: false
+  gem "rubocop-rails", "~> 2.26", require: false
 end
 
 gem "faraday-multipart", "~> 1.0"

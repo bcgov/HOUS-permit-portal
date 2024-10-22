@@ -27,10 +27,14 @@ class JurisdictionBlueprint < Blueprinter::Base
       jurisdiction.external_api_enabled?
     end
     association :contacts, blueprint: ContactBlueprint
-    association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
-    association :permit_type_required_steps, blueprint: PermitTypeRequiredStepBlueprint
+    association :permit_type_submission_contacts,
+                blueprint: PermitTypeSubmissionContactBlueprint
+    association :permit_type_required_steps,
+                blueprint: PermitTypeRequiredStepBlueprint
 
-    association :permit_type_required_steps, blueprint: PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
+    association :permit_type_required_steps,
+                blueprint:
+                  PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
       jurisdiction.enabled_permit_type_required_steps
     end
   end
