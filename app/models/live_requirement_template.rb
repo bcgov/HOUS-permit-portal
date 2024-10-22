@@ -1,9 +1,8 @@
 class LiveRequirementTemplate < RequirementTemplate
   validate :unique_classification_for_undiscarded, on: :create
-
   def unique_classification_for_undiscarded
     existing_record =
-      RequirementTemplate.find_by(
+      LiveRequirementTemplate.find_by(
         permit_type_id: permit_type_id,
         activity_id: activity_id,
         first_nations: first_nations,

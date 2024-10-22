@@ -28,26 +28,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def create
-    copy_existing = requirement_template_params[:copy_existing]
-
-    if copy_existing
-      found_template =
-        RequirementTemplate.find_by(
-          permit_type_id: requirement_template_params[:permit_type_id],
-          activity_id: requirement_template_params[:activity_id],
-        )
-      if found_template.nil?
-        authorize :requirement_template, :create?
-        render_error("misc.not_found_error", status: :not_found) and return
-      end
-      @requirement_template =
-        RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
-          requirement_template_params,
-        )
-    else
-      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
-    end
-
+    @requirement_template = RequirementTemplate.new(requirement_template_params)
     authorize @requirement_template
     if @requirement_template.save
       render_success @requirement_template,
@@ -55,6 +36,40 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      { blueprint: RequirementTemplateBlueprint }
     else
       render_error "requirement_template.create_error",
+                   message_opts: {
+                     error_message: @requirement_template.errors.full_messages.join(", "),
+                   }
+    end
+  end
+
+  def copy
+    found_template =
+      if requirement_template_params[:id].present?
+        RequirementTemplate.find_by(id: requirement_template_params[:id])
+      elsif requirement_template_params[:permit_type_id].present? && requirement_template_params[:activity_id].present?
+        LiveRequirementTemplate.find_by(
+          permit_type_id: requirement_template_params[:permit_type_id],
+          activity_id: requirement_template_params[:activity_id],
+        )
+      end
+
+    if found_template.nil?
+      authorize :requirement_template, :create?
+      render_error("misc.not_found_error", status: :not_found) and return
+    end
+
+    @requirement_template =
+      RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
+        requirement_template_params,
+      )
+    authorize @requirement_template
+
+    if @requirement_template.save
+      render_success @requirement_template,
+                     "requirement_template.copy_success",
+                     { blueprint: RequirementTemplateBlueprint }
+    else
+      render_error "requirement_template.copy_error",
                    message_opts: {
                      error_message: @requirement_template.errors.full_messages.join(", "),
                    }
@@ -201,9 +216,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def requirement_template_params
     permitted_params =
       params.require(:requirement_template).permit(
+        :id,
         :description,
         :first_nations,
-        :copy_existing,
         :activity_id,
         :permit_type_id,
         :type,

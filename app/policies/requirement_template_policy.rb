@@ -31,6 +31,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create?
   end
 
+  def copy?
+    create?
+  end
+
   def unschedule_template_version?
     create? && record.scheduled?
   end
