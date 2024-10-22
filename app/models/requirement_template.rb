@@ -37,6 +37,15 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
 
+  def sections
+    requirement_template_sections
+  end
+
+  def customizations
+    # Convenience method to prevent carpal tunnel syndrome
+    jurisdiction_template_version_customizations
+  end
+
   def label
     "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
   end

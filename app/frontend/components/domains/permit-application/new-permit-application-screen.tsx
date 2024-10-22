@@ -19,11 +19,10 @@ import { ArrowSquareOut } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
@@ -31,7 +30,9 @@ import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
+import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
+import { Can } from "../../shared/user/can"
 
 export type TSearchAddressFormData = {
   addressString: string
@@ -44,9 +45,10 @@ export type TCreatePermitApplicationFormData = {
   pin?: string
   permitTypeId: string
   activityId: string
-  jurisdiction: IJurisdiction
+  jurisdictionId: string
   site?: IOption
   firstNations: boolean
+  sandboxId: string
 }
 
 export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScreenProps) => {
@@ -59,15 +61,17 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       permitTypeId: "",
       activityId: "",
       site: null as IOption,
-      jurisdiction: null as IJurisdiction,
+      jurisdictionId: "",
       firstNations: null,
+      sandboxId: null,
     },
   })
   const { handleSubmit, formState, control, watch, register, setValue } = formMethods
   const { isSubmitting } = formState
-  const { permitClassificationStore, permitApplicationStore, geocoderStore } = useMst()
+  const { permitClassificationStore, permitApplicationStore, geocoderStore, jurisdictionStore } = useMst()
   const { fetchGeocodedJurisdiction, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions } = permitClassificationStore
+  const { getJurisdictionById } = jurisdictionStore
   const navigate = useNavigate()
 
   const [pinMode, setPinMode] = useState(false)
@@ -76,7 +80,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
     const params = {
       ...formValues,
       fullAddress: formValues.site.label,
-      jurisdictionId: formValues.jurisdiction.id,
     }
     const permitApplication = await permitApplicationStore.createPermitApplication(params)
     if (permitApplication) {
@@ -88,15 +91,17 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const pidWatch = watch("pid")
   const pinWatch = watch("pin")
   const siteWatch = watch("site")
-  const jurisdictionWatch = watch("jurisdiction")
+  const jurisdictionIdWatch = watch("jurisdictionId")
   const firstNationsWatch = watch("firstNations")
+
+  const jurisdiction = useMemo(() => getJurisdictionById(jurisdictionIdWatch), [jurisdictionIdWatch])
 
   useEffect(() => {
     if (R.isNil(siteWatch?.value) && !pidWatch) return
 
     if (siteWatch?.value == "") {
       setPinMode(true)
-      setValue("jurisdiction", null)
+      setValue("jurisdictionId", null)
       return
     }
 
@@ -104,7 +109,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value, pidWatch)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
-        setValue("jurisdiction", jurisdiction)
+        setValue("jurisdictionId", jurisdiction.id)
 
         if (R.isNil(siteWatch?.value) && pidWatch) {
           //the pid is valid, lets try to fill in the address based on the PID
@@ -115,7 +120,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
         }
       } else {
         setPinMode(true)
-        setValue("jurisdiction", null)
+        setValue("jurisdictionId", null)
       }
     })()
   }, [siteWatch?.value, pidWatch])
@@ -127,7 +132,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
         <DisclaimerInfo />
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
-            <Flex direction="column" gap={12} w="full" bg="greys.white">
+            <Flex direction="column" gap={8} w="full" bg="greys.white">
               <Flex as="section" direction="column" gap={4}>
                 <Heading as="h2" variant="yellowline">
                   {t("permitApplication.new.locationHeading")}
@@ -155,8 +160,35 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                 />
                 {pinMode && <PinModeInputs disabled={fetchingPids} />}
               </Flex>
-              {jurisdictionWatch && (pidWatch || pinWatch) && (
-                <Flex as="section" direction="column" gap={2}>
+              {jurisdictionIdWatch && (pidWatch || pinWatch) && (
+                <Flex as="section" direction="column" gap={8}>
+                  {jurisdiction?.sandboxOptions && (
+                    <Can action="jurisdiction:create">
+                      <Flex as="section" direction="column" gap={4}>
+                        <Heading as="h2" variant="yellowline">
+                          {t("permitApplication.new.sandboxIdHeading")}
+                        </Heading>
+
+                        <Controller
+                          name="sandboxId"
+                          control={control}
+                          defaultValue={null} // Set a default value if necessary
+                          render={({ field: { onChange, value } }) => (
+                            <FormControl display="flex" alignItems="center">
+                              <FormLabel htmlFor="intoSandbox" mb="0">
+                                {t("permitApplication.new.selectSandboxLabel")}
+                              </FormLabel>
+
+                              <SandboxSelect value={value} onChange={onChange} options={jurisdiction?.sandboxOptions} />
+                            </FormControl>
+                          )}
+                        />
+                      </Flex>
+                    </Can>
+                  )}
+                  <Heading as="h2" variant="yellowline">
+                    {t("permitApplication.new.locationHeading")}
+                  </Heading>
                   <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
                   <Controller
                     name="firstNations"
@@ -188,9 +220,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                             <PermitTypeRadioSelect
                               w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
-                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch)
+                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionIdWatch)
                               }}
-                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionWatch]}
+                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionIdWatch]}
                               onChange={onChange}
                               value={value}
                             />

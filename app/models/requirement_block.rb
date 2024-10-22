@@ -17,7 +17,7 @@ class RequirementBlock < ApplicationRecord
   enum reviewer_role: { any: 0 }, _prefix: true
 
   validates :sku, uniqueness: true, presence: true
-  validates :name, uniqueness: true, presence: true
+  validates :name, presence: true, uniqueness: { scope: :first_nations }
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
@@ -29,6 +29,10 @@ class RequirementBlock < ApplicationRecord
   acts_as_taggable_on :associations
 
   after_discard { template_section_blocks.destroy_all }
+
+  def sections
+    requirement_template_sections
+  end
 
   def search_data
     {

@@ -54,6 +54,8 @@ class PermitApplication < ApplicationRecord
   after_commit :send_submitted_webhook, if: :saved_change_to_status?
   after_commit :notify_user_reference_number_updated, if: :saved_change_to_reference_number?
 
+  scope :with_submitter_role, -> { joins(:submitter).where(users: { role: "submitter" }) }
+
   scope :unviewed, -> { where(status: :submitted, viewed_at: nil).order(submitted_at: :asc) }
 
   COMPLETION_SECTION_KEY = "section-completion-key"

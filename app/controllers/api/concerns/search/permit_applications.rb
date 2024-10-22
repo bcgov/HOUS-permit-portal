@@ -64,7 +64,7 @@ module Api::Concerns::Search::PermitApplications
     if @jurisdiction
       where = {
         jurisdiction_id: @jurisdiction.id,
-        sandbox_id: current_sandbox_id,
+        sandbox_id: current_sandbox&.id,
         # Overrides status filter, reorder the code if necessary
         status: %i[newly_submitted resubmitted],
       }

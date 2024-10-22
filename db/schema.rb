@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_09_18_215642) do
+ActiveRecord::Schema[7.1].define(version: 2024_09_20_173324) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -403,7 +403,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_215642) do
     t.boolean "first_nations", default: false
     t.datetime "discarded_at"
     t.index ["discarded_at"], name: "index_requirement_blocks_on_discarded_at"
-    t.index ["name"], name: "index_requirement_blocks_on_name", unique: true
+    t.index %w[name first_nations],
+            name: "index_requirement_blocks_on_name_and_first_nations",
+            unique: true
     t.index ["sku"], name: "index_requirement_blocks_on_sku", unique: true
   end
 
@@ -502,6 +504,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_09_18_215642) do
                force: :cascade do |t|
     t.uuid "jurisdiction_id", null: false
     t.string "name", null: false
+    t.integer "template_version_status_scope", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jurisdiction_id"], name: "index_sandboxes_on_jurisdiction_id"
