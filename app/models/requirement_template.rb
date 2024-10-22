@@ -52,15 +52,19 @@ class RequirementTemplate < ApplicationRecord
   validate :validate_step_code_related_dependencies
 
   def assignee
-    raise NotImplementedError, "The assignee method is not implemented"
-  end
-
-  def visibility
-    raise NotImplementedError, "The assignee method is not implemented"
+    nil
   end
 
   def early_access?
     type == "EarlyAccessRequirementTemplate"
+  end
+
+  def visibility
+    if early_access?
+      return "early_access"
+    else
+      return "live"
+    end
   end
 
   def sections

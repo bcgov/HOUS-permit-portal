@@ -1,10 +1,6 @@
 class LiveRequirementTemplate < RequirementTemplate
   validate :unique_classification_for_undiscarded, on: :create
 
-  def assignee
-    nil
-  end
-
   def visibility
     "live"
   end
