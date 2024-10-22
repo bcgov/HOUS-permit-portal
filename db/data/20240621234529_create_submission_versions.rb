@@ -8,7 +8,7 @@ class CreateSubmissionVersions < ActiveRecord::Migration[7.1]
         pa.submission_versions.create(
           form_json: pa.form_json,
           submission_data: pa.submission_data,
-          created_at: pa.submitted_at,
+          created_at: pa.submitted_at
         )
       end
     PermitApplication.reindex

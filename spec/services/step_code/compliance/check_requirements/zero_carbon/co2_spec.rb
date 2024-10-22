@@ -4,7 +4,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2.new(
       checklist: step_code.pre_construction_checklist,
-      step: step,
+      step: step
     )
   end
 
@@ -18,7 +18,14 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
 
   context "when total GHG is zero" do
     let(:data_entries_attributes) do
-      [{ stage: :proposed, electrical_consumption: 0, natural_gas_consumption: 0, propane_consumption: 0 }]
+      [
+        {
+          stage: :proposed,
+          electrical_consumption: 0,
+          natural_gas_consumption: 0,
+          propane_consumption: 0
+        }
+      ]
     end
     it_behaves_like FAILED_STEP_CODE
   end
@@ -32,7 +39,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           natural_gas_consumption: 0.02,
           propane_consumption: 0,
           above_grade_heated_floor_area: 117.9,
-          below_grade_heated_floor_area: 109.90,
+          below_grade_heated_floor_area: 109.90
         },
         {
           stage: :proposed,
@@ -40,8 +47,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           natural_gas_consumption: 0.02,
           propane_consumption: 0,
           above_grade_heated_floor_area: 117.9,
-          below_grade_heated_floor_area: 109.90,
-        },
+          below_grade_heated_floor_area: 109.90
+        }
       ]
     end
 
@@ -57,7 +64,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           natural_gas_consumption: 20.02,
           propane_consumption: 23.02,
           above_grade_heated_floor_area: 2.9,
-          below_grade_heated_floor_area: 1.8,
+          below_grade_heated_floor_area: 1.8
         },
         {
           stage: :proposed,
@@ -65,8 +72,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           natural_gas_consumption: 20.02,
           propane_consumption: 23.02,
           above_grade_heated_floor_area: 1.2,
-          below_grade_heated_floor_area: 1.4,
-        },
+          below_grade_heated_floor_area: 1.4
+        }
       ]
     end
 
@@ -84,7 +91,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           district_energy_consumption: 223.23,
           district_energy_ef: 32.3,
           above_grade_heated_floor_area: 911.2,
-          below_grade_heated_floor_area: 2221.4,
+          below_grade_heated_floor_area: 2221.4
         },
         {
           stage: :proposed,
@@ -94,8 +101,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           district_energy_consumption: 223.23,
           district_energy_ef: 32.3,
           above_grade_heated_floor_area: 911.2,
-          below_grade_heated_floor_area: 2221.4,
-        },
+          below_grade_heated_floor_area: 2221.4
+        }
       ]
     end
 
@@ -113,7 +120,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           district_energy_consumption: 23.23,
           district_energy_ef: 32.3,
           above_grade_heated_floor_area: 111.2,
-          below_grade_heated_floor_area: 21.4,
+          below_grade_heated_floor_area: 21.4
         },
         {
           stage: :proposed,
@@ -123,8 +130,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2 do
           district_energy_consumption: 23.23,
           district_energy_ef: 32.3,
           above_grade_heated_floor_area: 111.2,
-          below_grade_heated_floor_area: 21.4,
-        },
+          below_grade_heated_floor_area: 21.4
+        }
       ]
     end
 

@@ -25,7 +25,7 @@ class ChesEmailDelivery
       subject: mail.subject,
       attachments: [],
       body: mail.body.to_s,
-      bodyType: body_type(mail),
+      bodyType: body_type(mail)
     }
 
     response = client.post("email", params.to_json)
@@ -72,14 +72,17 @@ class ChesEmailDelivery
     auth_client =
       Faraday.new(url: ENV["CHES_AUTH_HOST"]) do |conn|
         conn.request :url_encoded
-        conn.request :authorization, :basic, ENV["CHES_CLIENT_ID"], ENV["CHES_CLIENT_SECRET"]
+        conn.request :authorization,
+                     :basic,
+                     ENV["CHES_CLIENT_ID"],
+                     ENV["CHES_CLIENT_SECRET"]
         conn.adapter Faraday.default_adapter
       end
 
     response =
-      auth_client.post("auth/realms/comsvcauth/protocol/openid-connect/token") do |req|
-        req.body = { grant_type: "client_credentials" }
-      end
+      auth_client.post(
+        "auth/realms/comsvcauth/protocol/openid-connect/token"
+      ) { |req| req.body = { grant_type: "client_credentials" } }
 
     if response.success?
       body = JSON.parse(response.body)

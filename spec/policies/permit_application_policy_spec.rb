@@ -3,13 +3,19 @@ require "rails_helper"
 RSpec.describe PermitApplicationPolicy do
   subject { described_class.new(user, draft_permit_application) }
 
-  let(:resolved_scope) { described_class::Scope.new(user, PermitApplication.all).resolve }
+  let(:resolved_scope) do
+    described_class::Scope.new(user, PermitApplication.all).resolve
+  end
 
   let(:user) { FactoryBot.create(:user) }
   let(:submitter) { FactoryBot.create(:user, :submitter) }
   let(:jurisdiction) { FactoryBot.create(:sub_district) }
   let(:draft_permit_application) do
-    FactoryBot.create(:permit_application, submitter: submitter, jurisdiction: jurisdiction)
+    FactoryBot.create(
+      :permit_application,
+      submitter: submitter,
+      jurisdiction: jurisdiction
+    )
   end
 
   context "for a submitter" do
@@ -62,7 +68,11 @@ RSpec.describe PermitApplicationPolicy do
     let(:user) { submitter }
 
     let(:submitted_permit_application) do
-      FactoryBot.create(:permit_application, :newly_submitted, submitter: submitter)
+      FactoryBot.create(
+        :permit_application,
+        :newly_submitted,
+        submitter: submitter
+      )
     end
 
     subject { described_class.new(submitter, submitted_permit_application) }

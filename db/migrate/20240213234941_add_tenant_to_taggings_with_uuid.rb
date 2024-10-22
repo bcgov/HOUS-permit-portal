@@ -3,7 +3,9 @@
 class AddTenantToTaggingsWithUuid < ActiveRecord::Migration[6.0]
   def self.up
     add_column ActsAsTaggableOn.taggings_table, :tenant, :string, limit: 128
-    add_index ActsAsTaggableOn.taggings_table, :tenant unless index_exists? ActsAsTaggableOn.taggings_table, :tenant
+    unless index_exists? ActsAsTaggableOn.taggings_table, :tenant
+      add_index ActsAsTaggableOn.taggings_table, :tenant
+    end
   end
 
   def self.down

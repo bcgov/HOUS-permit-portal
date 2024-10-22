@@ -7,9 +7,19 @@ RSpec.describe Jurisdiction::UserInviter, type: :service do
   let(:existing_user_role) { :review_manager }
   let(:invited_role) { :review_manager }
   let(:users_params) do
-    [{ email:, role: invited_role.to_s, first_name: "Some", last_name: "User", jurisdiction_id: jurisdiction.id }]
+    [
+      {
+        email:,
+        role: invited_role.to_s,
+        first_name: "Some",
+        last_name: "User",
+        jurisdiction_id: jurisdiction.id
+      }
+    ]
   end
-  subject(:user_inviter) { Jurisdiction::UserInviter.new(inviter:, users_params:) }
+  subject(:user_inviter) do
+    Jurisdiction::UserInviter.new(inviter:, users_params:)
+  end
 
   context "when a reviewer is invited with an email that does not belong to an existing user" do
     it_behaves_like AN_INVITED_USER
@@ -20,14 +30,18 @@ RSpec.describe Jurisdiction::UserInviter, type: :service do
   end
 
   context "when an unconfirmed reviewer is re-invited" do
-    let!(:existing_reviewer) { create(:user, existing_user_role, confirmed: false) }
+    let!(:existing_reviewer) do
+      create(:user, existing_user_role, confirmed: false)
+    end
     let(:email) { existing_reviewer.email }
 
     it_behaves_like A_REINVITED_USER
   end
 
   context "when a discarded reviewer is re-invited" do
-    let!(:existing_reviewer) { create(:user, existing_user_role, discarded_at: Time.current - 1.week) }
+    let!(:existing_reviewer) do
+      create(:user, existing_user_role, discarded_at: Time.current - 1.week)
+    end
     let(:email) { existing_reviewer.email }
 
     it_behaves_like A_REINVITED_USER
@@ -66,7 +80,9 @@ RSpec.describe Jurisdiction::UserInviter, type: :service do
 
   context "when a user is re-invited after creating a submitter account" do
     let!(:submitter) { create(:user, :submitter, email:) }
-    let!(:existing_reviewer) { create(:user, existing_user_role, confirmed: false) }
+    let!(:existing_reviewer) do
+      create(:user, existing_user_role, confirmed: false)
+    end
     let(:email) { existing_reviewer.email }
 
     it_behaves_like A_REINVITED_USER

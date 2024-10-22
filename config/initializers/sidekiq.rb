@@ -9,19 +9,31 @@ if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during pre
     sentinels:
       Resolv
         .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-        .map { |address| { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) } },
+        .map do |address|
+          { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) }
+        end,
     db: ENV["SIDEKIQ_REDIS_DB"]&.to_i || 0,
-    role: :master,
+    role: :master
   }
 
   Sidekiq.configure_server do |config|
     config.redis = redis_cfg
-    config.queues = %w[file_processing webhooks websocket model_callbacks default]
+    config.queues = %w[
+      file_processing
+      webhooks
+      websocket
+      model_callbacks
+      default
+    ]
     config.concurrency = ENV["SIDEKIQ_CONCURRENCY"].to_i
 
-    config.client_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Client }
+    config.client_middleware do |chain|
+      chain.add SidekiqUniqueJobs::Middleware::Client
+    end
 
-    config.server_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Server }
+    config.server_middleware do |chain|
+      chain.add SidekiqUniqueJobs::Middleware::Server
+    end
 
     SidekiqUniqueJobs::Server.configure(config)
   end
@@ -29,10 +41,14 @@ if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during pre
   Sidekiq.configure_client do |config|
     config.redis = redis_cfg
 
-    config.client_middleware { |chain| chain.add SidekiqUniqueJobs::Middleware::Client }
+    config.client_middleware do |chain|
+      chain.add SidekiqUniqueJobs::Middleware::Client
+    end
   end
 
   # # Don't load crons in test and dev mode
   schedule_file = "config/sidekiq_cron_schedule.yml"
-  Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file) if File.exist?(schedule_file)
+  if File.exist?(schedule_file)
+    Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file)
+  end
 end

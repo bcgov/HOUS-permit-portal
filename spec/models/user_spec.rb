@@ -4,7 +4,11 @@ RSpec.describe User, type: :model do
   describe "associations" do
     # Testing associations
     it { should have_many(:permit_applications) }
-    it { should have_many(:applied_jurisdictions).through(:permit_applications).source(:jurisdiction) }
+    it do
+      should have_many(:applied_jurisdictions).through(
+               :permit_applications
+             ).source(:jurisdiction)
+    end
 
     it { should have_many(:jurisdictions).through(:jurisdiction_memberships) }
   end
@@ -17,7 +21,7 @@ RSpec.describe User, type: :model do
                review_manager: 1,
                reviewer: 2,
                super_admin: 3,
-               regional_review_manager: 4,
+               regional_review_manager: 4
              )
     end
 
@@ -42,11 +46,15 @@ RSpec.describe User, type: :model do
   describe "invitable roles" do
     it "a super admin can invite reviewers, review managers, super admins" do
       inviter = build(:user, :super_admin)
-      expect(inviter.invitable_roles).to match_array(%w[reviewer review_manager regional_review_manager super_admin])
+      expect(inviter.invitable_roles).to match_array(
+        %w[reviewer review_manager regional_review_manager super_admin]
+      )
     end
     it "a review manager can invite reviewers and review managers" do
       inviter = build(:user, :review_manager)
-      expect(inviter.invitable_roles).to match_array(%w[reviewer review_manager])
+      expect(inviter.invitable_roles).to match_array(
+        %w[reviewer review_manager]
+      )
     end
     it "a reviewer cannot invite anyone" do
       inviter = build(:user, :reviewer)

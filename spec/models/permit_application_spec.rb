@@ -16,7 +16,7 @@ RSpec.describe PermitApplication, type: :model do
                new_draft: 0,
                newly_submitted: 1,
                revisions_requested: 3,
-               resubmitted: 4,
+               resubmitted: 4
              )
     end
   end
