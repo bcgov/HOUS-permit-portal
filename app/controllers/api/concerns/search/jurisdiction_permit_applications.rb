@@ -6,7 +6,7 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       PermitApplication.search(
         query,
         where: {
-          jurisdiction_id: @jurisdiction&.id,
+          jurisdiction_id: @jurisdiction&.id
         },
         order: order,
         match: :word_start,
@@ -14,12 +14,15 @@ module Api::Concerns::Search::JurisdictionPermitApplications
         per_page:
           (
             if permit_application_search_params[:page]
-              (permit_application_search_params[:per_page] || Kaminari.config.default_per_page)
+              (
+                permit_application_search_params[:per_page] ||
+                  Kaminari.config.default_per_page
+              )
             else
               nil
             end
           ),
-        includes: PermitApplication::SEARCH_INCLUDES,
+        includes: PermitApplication::SEARCH_INCLUDES
       )
   end
 
@@ -30,7 +33,11 @@ module Api::Concerns::Search::JurisdictionPermitApplications
   end
 
   def query
-    permit_application_search_params[:query].present? ? permit_application_search_params[:query] : "*"
+    if permit_application_search_params[:query].present?
+      permit_application_search_params[:query]
+    else
+      "*"
+    end
   end
 
   def order

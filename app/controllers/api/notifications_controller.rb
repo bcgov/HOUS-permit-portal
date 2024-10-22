@@ -4,7 +4,8 @@ class Api::NotificationsController < Api::ApplicationController
   def index
     authorize :notification, :index?
 
-    @notification_feed = NotificationService.user_feed_for(current_user.id, params[:page])
+    @notification_feed =
+      NotificationService.user_feed_for(current_user.id, params[:page])
     nf = @notification_feed[:feed_object]
     render_success @notification_feed[:feed_items],
                    nil,
@@ -13,8 +14,8 @@ class Api::NotificationsController < Api::ApplicationController
                      meta: {
                        total_pages: @notification_feed[:total_pages],
                        unread_count: nf.unread_count,
-                       last_read_at: nf.last_read,
-                     },
+                       last_read_at: nf.last_read
+                     }
                    }
   end
 

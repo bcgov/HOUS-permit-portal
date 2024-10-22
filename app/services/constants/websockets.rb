@@ -10,7 +10,7 @@ module Constants
         TYPES = {
           update_compliance: :update_compliance,
           update_supporting_documents: :update_supporting_documents,
-          update_permit_block_status: :update_permit_block_status,
+          update_permit_block_status: :update_permit_block_status
         }.freeze
       end
 

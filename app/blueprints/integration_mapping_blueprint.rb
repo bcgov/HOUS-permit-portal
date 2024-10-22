@@ -14,6 +14,9 @@ class IntegrationMappingBlueprint < Blueprinter::Base
   view :external_api do
     field :elective_filtered_requirements_mapping, name: :requirements_mapping
 
-    association :template_version, blueprint: TemplateVersionBlueprint, view: :external_api, name: :permit_version
+    association :template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api,
+                name: :permit_version
   end
 end

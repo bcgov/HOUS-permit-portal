@@ -7,7 +7,9 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
   end
 
   def total_heated_floor_area
-    @total_heated_floor_area ||= total(:above_grade_heated_floor_area) + total(:below_grade_heated_floor_area)
+    @total_heated_floor_area ||=
+      total(:above_grade_heated_floor_area) +
+        total(:below_grade_heated_floor_area)
   end
 
   private
@@ -24,6 +26,10 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
 
   def tedi_reference
     @tedi_reference ||=
-      ThermalEnergyDemandIntensityReference.find_by("hdd @> :hdd AND step = :step", hdd: total(:hdd), step: step)
+      ThermalEnergyDemandIntensityReference.find_by(
+        "hdd @> :hdd AND step = :step",
+        hdd: total(:hdd),
+        step: step
+      )
   end
 end

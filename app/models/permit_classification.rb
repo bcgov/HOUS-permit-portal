@@ -17,6 +17,8 @@ class PermitClassification < ApplicationRecord
        ]
 
   def image_url
-    ActionController::Base.helpers.asset_path("images/permit_classifications/#{self.code}.png")
+    ActionController::Base.helpers.asset_path(
+      "images/permit_classifications/#{self.code}.png"
+    )
   end
 end

@@ -13,15 +13,19 @@ class StepCode::Compliance::GenerateReports
       energy_result =
         StepCode::Compliance::ProposeStep::Energy.new(
           checklist:,
-          min_required_step: requirement.energy_step_required,
+          min_required_step: requirement.energy_step_required
         ).call
       zero_carbon_result =
         StepCode::Compliance::ProposeStep::ZeroCarbon.new(
           checklist:,
-          min_required_step: requirement.zero_carbon_step_required,
+          min_required_step: requirement.zero_carbon_step_required
         ).call
 
-      @reports << { zero_carbon: zero_carbon_result, energy: energy_result, requirement_id: requirement.id }
+      @reports << {
+        zero_carbon: zero_carbon_result,
+        energy: energy_result,
+        requirement_id: requirement.id
+      }
     end
 
     return self

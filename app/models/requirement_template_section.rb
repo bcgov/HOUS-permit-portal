@@ -1,7 +1,9 @@
 class RequirementTemplateSection < ApplicationRecord
   belongs_to :requirement_template
 
-  has_many :template_section_blocks, -> { order(position: :asc) }, dependent: :destroy
+  has_many :template_section_blocks,
+           -> { order(position: :asc) },
+           dependent: :destroy
   has_many :requirement_blocks, through: :template_section_blocks
 
   accepts_nested_attributes_for :template_section_blocks, allow_destroy: true
@@ -21,7 +23,7 @@ class RequirementTemplateSection < ApplicationRecord
       hide_label: false,
       collapsible: false,
       initially_collapsed: false,
-      components: requirement_blocks.map { |rb| rb.to_form_json(key) },
+      components: requirement_blocks.map { |rb| rb.to_form_json(key) }
     }
   end
 end

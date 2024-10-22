@@ -20,7 +20,8 @@ module HtmlSanitizeAttributes
     ActionController::Base.helpers.sanitize(
       html,
       tags: Rails::Html::WhiteListSanitizer.allowed_tags,
-      attributes: Rails::Html::WhiteListSanitizer.allowed_attributes + %w[target rel],
+      attributes:
+        Rails::Html::WhiteListSanitizer.allowed_attributes + %w[target rel]
     )
   end
 

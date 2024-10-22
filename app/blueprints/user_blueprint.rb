@@ -2,7 +2,14 @@ class UserBlueprint < Blueprinter::Base
   identifier :id
 
   view :minimal do
-    fields :email, :role, :first_name, :last_name, :organization, :certified, :confirmed_at, :discarded_at
+    fields :email,
+           :role,
+           :first_name,
+           :last_name,
+           :organization,
+           :certified,
+           :confirmed_at,
+           :discarded_at
   end
 
   view :accepted_license_agreements do
@@ -29,7 +36,8 @@ class UserBlueprint < Blueprinter::Base
   view :current_user do
     include_view :base
     field :eula_accepted do |user, _options|
-      user.eula_variant.present? && user.license_agreements.active_agreement(user.eula_variant).present?
+      user.eula_variant.present? &&
+        user.license_agreements.active_agreement(user.eula_variant).present?
     end
   end
 
@@ -48,8 +56,14 @@ class UserBlueprint < Blueprinter::Base
       user.invited_by&.email
     end
 
-    association :invited_to_jurisdiction, blueprint: JurisdictionBlueprint, view: :minimal do |user, _options|
-      user.jurisdiction_memberships&.order(updated_at: :desc)&.first&.jurisdiction
+    association :invited_to_jurisdiction,
+                blueprint: JurisdictionBlueprint,
+                view: :minimal do |user, _options|
+      user
+        .jurisdiction_memberships
+        &.order(updated_at: :desc)
+        &.first
+        &.jurisdiction
     end
   end
 end

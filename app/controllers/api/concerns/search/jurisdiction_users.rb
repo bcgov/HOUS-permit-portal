@@ -13,12 +13,13 @@ module Api::Concerns::Search::JurisdictionUsers
             (
               if current_user.super_admin?
                 %w[review_manager regional_review_manager]
-              elsif current_user.review_manager? || current_user.regional_review_manager?
+              elsif current_user.review_manager? ||
+                    current_user.regional_review_manager?
                 %w[regional_review_manager review_manager reviewer]
               else
                 nil
               end
-            ),
+            )
         },
         order: user_order,
         match: :word_start,
@@ -26,18 +27,27 @@ module Api::Concerns::Search::JurisdictionUsers
         per_page:
           (
             if user_search_params[:page]
-              (user_search_params[:per_page] || Kaminari.config.default_per_page)
+              (
+                user_search_params[:per_page] ||
+                  Kaminari.config.default_per_page
+              )
             else
               nil
             end
-          ),
+          )
       )
   end
 
   private
 
   def user_search_params
-    params.permit(:query, :show_archived, :page, :per_page, sort: %i[field direction])
+    params.permit(
+      :query,
+      :show_archived,
+      :page,
+      :per_page,
+      sort: %i[field direction]
+    )
   end
 
   def user_query

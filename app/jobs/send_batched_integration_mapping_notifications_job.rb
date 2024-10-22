@@ -18,13 +18,17 @@ class SendBatchedIntegrationMappingNotificationsJob
       .distinct
       .find_each do |notifiable|
         # Get all unprocessed notifications for the notifiable (either User or ExternalApiKey)
-        notifications = notifiable.integration_mapping_notifications.where(processed_at: nil)
+        notifications =
+          notifiable.integration_mapping_notifications.where(processed_at: nil)
 
         notification_ids = notifications.pluck(:id)
 
         # Bundle notifications into an email
         if notifications.any?
-          PermitHubMailer.send_batched_integration_mapping_notifications(notifiable, notification_ids)&.deliver_later
+          PermitHubMailer.send_batched_integration_mapping_notifications(
+            notifiable,
+            notification_ids
+          )&.deliver_later
 
           # Mark notifications as processed
           notifications.update_all(processed_at: Time.current)

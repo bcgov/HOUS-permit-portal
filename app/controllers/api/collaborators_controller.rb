@@ -6,22 +6,29 @@ class Api::CollaboratorsController < Api::ApplicationController
 
   def collaborator_search
     perform_collaborator_search
-    authorized_results = apply_search_authorization(@collaborator_search.results, "collaborator_search")
+    authorized_results =
+      apply_search_authorization(
+        @collaborator_search.results,
+        "collaborator_search"
+      )
     render_success authorized_results,
                    nil,
                    {
                      meta: {
                        total_pages: @collaborator_search.total_pages,
                        total_count: @collaborator_search.total_count,
-                       current_page: @collaborator_search.current_page,
+                       current_page: @collaborator_search.current_page
                      },
-                     blueprint: CollaboratorBlueprint,
+                     blueprint: CollaboratorBlueprint
                    }
   end
 
   private
 
   def set_collaboratorable
-    @collaboratorable = Collaborator.find_by!(collaboratorable_id: params[:collaboratorable_id]).collaboratorable
+    @collaboratorable =
+      Collaborator.find_by!(
+        collaboratorable_id: params[:collaboratorable_id]
+      ).collaboratorable
   end
 end

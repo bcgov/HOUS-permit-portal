@@ -10,15 +10,22 @@ class SubmissionVersion < ApplicationRecord
   def missing_pdfs
     missing_data_keys = []
 
-    existing_application_pdf = supporting_documents.find_by(data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY)
+    existing_application_pdf =
+      supporting_documents.find_by(
+        data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY
+      )
 
     if existing_application_pdf.blank? || existing_application_pdf.file.blank?
       missing_data_keys << "#{SupportingDocument::APPLICATION_PDF_DATA_KEY}_#{id}"
     end
 
-    existing_checklist_pdf = supporting_documents.find_by(data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY)
+    existing_checklist_pdf =
+      supporting_documents.find_by(
+        data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY
+      )
 
-    if has_step_code_checklist? && (existing_checklist_pdf.blank? || existing_checklist_pdf.file.blank?)
+    if has_step_code_checklist? &&
+         (existing_checklist_pdf.blank? || existing_checklist_pdf.file.blank?)
       missing_data_keys << "#{SupportingDocument::CHECKLIST_PDF_DATA_KEY}_#{id}"
     end
 
@@ -26,7 +33,10 @@ class SubmissionVersion < ApplicationRecord
   end
 
   def missing_permit_application_pdf?
-    existing_document = supporting_documents.find_by(data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY)
+    existing_document =
+      supporting_documents.find_by(
+        data_key: SupportingDocument::APPLICATION_PDF_DATA_KEY
+      )
 
     existing_document.blank? || existing_document.file.blank?
   end
@@ -34,7 +44,10 @@ class SubmissionVersion < ApplicationRecord
   def missing_step_code_checklist_pdf?
     return false unless has_step_code_checklist?
 
-    existing_document = supporting_documents.find_by(data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY).present?
+    existing_document =
+      supporting_documents.find_by(
+        data_key: SupportingDocument::CHECKLIST_PDF_DATA_KEY
+      ).present?
 
     existing_document.blank? || existing_document.file.blank?
   end
@@ -48,20 +61,29 @@ class SubmissionVersion < ApplicationRecord
   end
 
   def formatted_submission_data(current_user: nil)
-    PermitApplication::SubmissionDataService.new(permit_application).formatted_submission_data(
+    PermitApplication::SubmissionDataService.new(
+      permit_application
+    ).formatted_submission_data(
       current_user: current_user,
-      submission_data: submission_data,
+      submission_data: submission_data
     )
   end
 
   def version_number
-    permit_application.submission_versions.order(:created_at).pluck(:id).index(id) + 1
+    permit_application
+      .submission_versions
+      .order(:created_at)
+      .pluck(:id)
+      .index(id) + 1
   end
 
   def revision_requests_for_submitter_based_on_user_permissions(user: nil)
     return revision_requests if user.blank?
 
-    permissions = permit_application.submission_requirement_block_edit_permissions(user_id: user.id)
+    permissions =
+      permit_application.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      )
 
     return revision_requests if permissions == :all
 

@@ -5,6 +5,8 @@ class StepCode::ComplianceReportBlueprint < Blueprinter::Base
   end
 
   field :zero_carbon do |report, _options|
-    StepCode::ZeroCarbon::ComplianceBlueprint.render_as_hash(report[:zero_carbon])
+    StepCode::ZeroCarbon::ComplianceBlueprint.render_as_hash(
+      report[:zero_carbon]
+    )
   end
 end

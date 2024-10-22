@@ -1,13 +1,15 @@
 class AutomatedCompliance::ParcelInfoExtractor < AutomatedCompliance::Base
   def call(permit_application)
     begin
-      raise Errors::ParcelError if permit_application.pid.blank? && permit_application.pin.blank?
+      if permit_application.pid.blank? && permit_application.pin.blank?
+        raise Errors::ParcelError
+      end
 
       # extraction of parcel data can be done via LTSA base
       attributes =
         Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid_or_pin(
           pid: permit_application.pid,
-          pin: permit_application.pin,
+          pin: permit_application.pin
         )
 
       raise Errors::ParcelError if attributes.nil?
