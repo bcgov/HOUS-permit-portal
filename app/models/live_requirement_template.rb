@@ -5,6 +5,10 @@ class LiveRequirementTemplate < RequirementTemplate
     nil
   end
 
+  def visibility
+    "live"
+  end
+
   def unique_classification_for_undiscarded
     existing_record =
       LiveRequirementTemplate.find_by(

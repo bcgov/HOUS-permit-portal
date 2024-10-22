@@ -9,7 +9,7 @@ module Api::Concerns::Search::RequirementBlocks
         match: :word_start,
         where: {
           discarded: discarded,
-          early_access: early_access,
+          visibility: visibility,
         },
         page: search_params[:page],
         per_page:
@@ -27,7 +27,7 @@ module Api::Concerns::Search::RequirementBlocks
   private
 
   def search_params
-    params.permit(:query, :page, :show_archived, :per_page, sort: %i[field direction])
+    params.permit(:query, :page, :show_archived, :visibility, :per_page, sort: %i[field direction])
   end
 
   def query
@@ -38,8 +38,8 @@ module Api::Concerns::Search::RequirementBlocks
     search_params[:show_archived].present?
   end
 
-  def early_access
-    search_params[:early_access].present?
+  def visibility
+    search_params[:visibility].split(",")
   end
 
   def order

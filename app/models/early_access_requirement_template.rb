@@ -1,4 +1,6 @@
 class EarlyAccessRequirementTemplate < RequirementTemplate
+  SEARCH_INCLUDES = RequirementTemplate::SEARCH_INCLUDES + [:assignee]
+
   has_one :template_version, dependent: :destroy, foreign_key: :requirement_template_id
 
   belongs_to :assignee, class_name: "User", optional: true
@@ -10,6 +12,10 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   rescue TemplateVersionPublishError => e
     errors.add(:base, e.message)
     raise ActiveRecord::Rollback
+  end
+
+  def visibility
+    "early_access"
   end
 
   private

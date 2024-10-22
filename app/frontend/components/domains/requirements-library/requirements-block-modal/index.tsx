@@ -39,6 +39,7 @@ interface IRequirementsBlockProps {
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
   withOptionsMenu?: boolean
+  forEarlyAccess?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
@@ -46,6 +47,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   showEditWarning,
   triggerButtonProps,
   withOptionsMenu,
+  forEarlyAccess,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()

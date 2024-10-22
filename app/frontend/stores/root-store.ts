@@ -5,6 +5,10 @@ import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import {
+  EarlyAccessRequirementBlockStoreModel,
+  IEarlyAccessRequirementBlockStoreModel,
+} from "./early-access-requirement-block-store"
+import {
   EarlyAccessRequirementTemplateStoreModel,
   IEarlyAccessRequirementTemplateStoreModel,
 } from "./early-access-requirement-template-store"
@@ -33,6 +37,7 @@ export const RootStoreModel = types
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
+    earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     earlyAccessRequirementTemplateStore: types.optional(EarlyAccessRequirementTemplateStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
@@ -94,6 +99,7 @@ export interface IRootStore extends IStateTreeNode {
   permitClassificationStore: IPermitClassificationStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
+  earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
   earlyAccessRequirementTemplateStore: IEarlyAccessRequirementTemplateStoreModel
