@@ -47,7 +47,7 @@ class Api::ApplicationController < ActionController::API
   # Method to retrieve the current sandbox ID from request headers
 
   def current_sandbox
-    if current_user.review_staff?
+    if !current_user.submitter?
       @current_sandbox ||= Sandbox.find_by_id(request.headers["X-Sandbox-ID"])
     else
       @current_sandbox = nil

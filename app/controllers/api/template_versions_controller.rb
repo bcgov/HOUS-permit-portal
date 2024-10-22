@@ -5,6 +5,7 @@ class Api::TemplateVersionsController < Api::ApplicationController
                 only: %i[
                   show_jurisdiction_template_version_customization
                   create_or_update_jurisdiction_template_version_customization
+                  promote_jurisdiction_template_version_customization
                   show_integration_mapping
                   download_customization_csv
                   download_customization_json
@@ -54,6 +55,26 @@ class Api::TemplateVersionsController < Api::ApplicationController
                        { blueprint: JurisdictionTemplateVersionCustomizationBlueprint }
       else
         render_error "jurisdiction_template_version_customization.update_error",
+                     message_opts: {
+                       error_message: @jurisdiction_template_version_customization.errors.full_messages.join(", "),
+                     }
+      end
+    end
+  end
+
+  def promote_jurisdiction_template_version_customization
+    authorize @template_version, :show?
+
+    authorize @jurisdiction_template_version_customization, policy_class: TemplateVersionPolicy
+
+    # add a db lock in case multiple reviewers are updating this db row
+    @jurisdiction_template_version_customization.with_lock do
+      if @jurisdiction_template_version_customization.promote
+        render_success @jurisdiction_template_version_customization,
+                       "jurisdiction_template_version_customization.promote_success",
+                       { blueprint: JurisdictionTemplateVersionCustomizationBlueprint }
+      else
+        render_error "jurisdiction_template_version_customization.promote_error",
                      message_opts: {
                        error_message: @jurisdiction_template_version_customization.errors.full_messages.join(", "),
                      }

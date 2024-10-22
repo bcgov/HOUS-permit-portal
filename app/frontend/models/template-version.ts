@@ -172,6 +172,22 @@ export const TemplateVersionModel = types
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
     }),
+    promoteJurisdictionTemplateVersionCustomization: flow(function* (jurisdictionId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.promoteJurisdictionTemplateVersionCustomization(self.id, jurisdictionId)
+      )
+      if (!response.ok) {
+        return response.ok
+      }
+
+      const customization = response.data.data
+
+      if (customization) {
+        self.setJurisdictionTemplateVersionCustomization(jurisdictionId, customization)
+      }
+
+      return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
+    }),
     downloadExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
       const jurisdiction = self.rootStore.jurisdictionStore.getJurisdictionById(jurisdictionId)
       const mimeTypes = {

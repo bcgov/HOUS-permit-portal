@@ -30,9 +30,9 @@ import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
-import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
 import { Can } from "../../shared/user/can"
+import { NewPermitApplicationSandboxSelect } from "./new-permit-application-sandbox-select"
 
 export type TSearchAddressFormData = {
   addressString: string
@@ -66,12 +66,13 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       sandboxId: null,
     },
   })
-  const { handleSubmit, formState, control, watch, register, setValue } = formMethods
+  const { handleSubmit, formState, control, watch, setValue } = formMethods
   const { isSubmitting } = formState
-  const { permitClassificationStore, permitApplicationStore, geocoderStore, jurisdictionStore } = useMst()
+  const { permitClassificationStore, permitApplicationStore, geocoderStore, jurisdictionStore, sandboxStore } = useMst()
   const { fetchGeocodedJurisdiction, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions } = permitClassificationStore
   const { getJurisdictionById } = jurisdictionStore
+  const { currentSandboxId } = sandboxStore
   const navigate = useNavigate()
 
   const [pinMode, setPinMode] = useState(false)
@@ -169,20 +170,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                           {t("permitApplication.new.sandboxIdHeading")}
                         </Heading>
 
-                        <Controller
-                          name="sandboxId"
-                          control={control}
-                          defaultValue={null} // Set a default value if necessary
-                          render={({ field: { onChange, value } }) => (
-                            <FormControl display="flex" alignItems="center">
-                              <FormLabel htmlFor="intoSandbox" mb="0">
-                                {t("permitApplication.new.selectSandboxLabel")}
-                              </FormLabel>
-
-                              <SandboxSelect value={value} onChange={onChange} options={jurisdiction?.sandboxOptions} />
-                            </FormControl>
-                          )}
-                        />
+                        <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
                       </Flex>
                     </Can>
                   )}
@@ -222,7 +210,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                               fetchOptions={() => {
                                 return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionIdWatch)
                               }}
-                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionIdWatch]}
+                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionIdWatch, currentSandboxId]}
                               onChange={onChange}
                               value={value}
                             />

@@ -14,7 +14,13 @@ export const SandboxSelect = observer(function SandboxSelect({ onChange, value, 
   const { t } = useTranslation()
 
   return (
-    <Select aria-label="Select a sandbox" w={56} onChange={(e) => onChange(e.target.value)} value={value || ""}>
+    <Select
+      id="sandbox-select"
+      aria-label="Select a sandbox"
+      w={56}
+      onChange={(e) => onChange(e.target.value)}
+      value={value || ""}
+    >
       <option value={""}>{t("sandbox.live")}</option>
       {options.map((s) => (
         <option key={s.value} value={s.value}>
