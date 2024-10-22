@@ -1,5 +1,5 @@
 class EarlyAccessRequirementTemplate < RequirementTemplate
-  # has_one :template_version, dependent: :destroy, foreign_key: :requirement_template_id
+  has_one :template_version, dependent: :destroy, foreign_key: :requirement_template_id
 
   before_validation :ensure_one_published_template_version
 

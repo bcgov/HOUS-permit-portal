@@ -234,6 +234,9 @@ const options = {
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
           copyNoun: "Copy",
+          options: "Options",
+          na: "N/A",
+          share: "Share",
         },
         notification: {
           title: "Notifications",
@@ -691,6 +694,8 @@ const options = {
               },
             },
             clickToWriteDisplayName: "Click to write display name",
+            clickToWriteDescription: "Click to write description",
+            clickToWriteNickname: "Click to write nickname",
             blockSetupTitle: "Block setup",
             internalUse: "For internal use only",
             configureFields: "Configure the form fields below that submitters will see:",
@@ -1418,6 +1423,11 @@ const options = {
             startWithBlank: "Start with blank permit",
             copyFromLive: "Copy from live permit",
             copyFromThis: "Copy from this",
+          },
+          edit: {
+            lastFetched: "Last fetched",
+            fetchLatest: "Fetch latest",
+            auditLog: "Audit log",
           },
           fields: {
             nickname: "Nickname",

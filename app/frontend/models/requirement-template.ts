@@ -5,6 +5,7 @@ import pluck from "ramda/src/pluck"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { ERequirementTemplateType } from "../types/enums"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
@@ -53,6 +54,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       id: types.identifier,
       label: types.string,
       nickname: types.maybeNull(types.string),
+      type: types.enumeration(Object.values(ERequirementTemplateType)),
       description: types.maybeNull(types.string),
       jurisdictionsSize: types.optional(types.number, 0),
       publishedTemplateVersion: types.maybeNull(types.safeReference(TemplateVersionModel)),
@@ -67,6 +69,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       sortedRequirementTemplateSections: types.array(types.safeReference(RequirementTemplateSectionModel)),
       createdAt: types.Date,
       updatedAt: types.Date,
+      fetchedAt: types.maybeNull(types.Date),
       isFullyLoaded: types.optional(types.boolean, false),
     })
     .extend(withRootStore())
@@ -111,6 +114,10 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       },
       get lastThreeDeprecatedTemplateVersions() {
         return self.deprecatedTemplateVersions.slice(0, 3)
+      },
+      get numberSharedWith() {
+        // TODO
+        return 0
       },
     }))
     .actions((self) => ({
