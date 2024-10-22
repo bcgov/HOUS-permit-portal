@@ -1,6 +1,6 @@
 import { flow, Instance, types } from "mobx-state-tree"
 import { ESortDirection } from "../types/enums"
-import { ISort } from "../types/types"
+import { ISort, TVisibility } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
 interface IFetchOptions {
@@ -21,7 +21,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       sort: types.maybeNull(types.frozen<ISort<TSortField>>()),
       currentPage: types.optional(types.number, 1),
       showArchived: types.optional(types.boolean, false),
-      earlyAccess: types.optional(types.boolean, false),
+      visibility: types.maybeNull(types.frozen<TVisibility>()),
       totalPages: types.maybeNull(types.number),
       totalCount: types.maybeNull(types.number),
       countPerPage: types.optional(types.number, 10),
@@ -50,9 +50,9 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
         !skipQueryParam && setQueryParam("showArchived", bool.toString())
         self.showArchived = bool
       },
-      setEarlyAccess(bool) {
-        !skipQueryParam && setQueryParam("earlyAccess", bool.toString())
-        self.earlyAccess = bool
+      setVisibility(value: TVisibility) {
+        !skipQueryParam && setQueryParam("visibility", value)
+        self.visibility = value
       },
       fetchData: flow(function* (opts?: TFetchOptions) {
         if (fetchDataActionName in self) {

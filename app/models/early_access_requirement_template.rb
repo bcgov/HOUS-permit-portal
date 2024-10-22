@@ -14,6 +14,10 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
     raise ActiveRecord::Rollback
   end
 
+  def visibility
+    "early_access"
+  end
+
   private
 
   def has_one_published_template_version

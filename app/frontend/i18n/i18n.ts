@@ -239,6 +239,8 @@ const options = {
           share: "Share",
           unassigned: "Unassigned",
           unassign: "Unassign",
+          seeEarlyAccessButton: "See Early Access",
+          seeLiveButton: "See Live",
         },
         notification: {
           title: "Notifications",
@@ -650,8 +652,8 @@ const options = {
         earlyAccessRequirementsLibrary: {
           index: {
             title: "Early access requirements library",
-            description: "List of all Early Access Requirement Blocks in the system that can be used inside Templates.",
-            tableHeading: "previews",
+            description: "TODO description",
+            tableHeading: "Early access requirement blocks",
           },
         },
         requirementsLibrary: {

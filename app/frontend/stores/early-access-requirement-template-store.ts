@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { RequirementTemplateModel } from "../models/requirement-template"
-import { EEarlyAccessRequirementTemplateSortFields } from "../types/enums"
+import { EEarlyAccessRequirementTemplateSortFields, EVisibility } from "../types/enums"
 import { toCamelCase } from "../utils/utility-functions"
 
 export const EarlyAccessRequirementTemplateStoreModel = types
@@ -41,7 +41,7 @@ export const EarlyAccessRequirementTemplateStoreModel = types
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
           showArchived: self.showArchived,
-          earlyAccess: true,
+          visibility: EVisibility.earlyAccess,
         })
       )
 

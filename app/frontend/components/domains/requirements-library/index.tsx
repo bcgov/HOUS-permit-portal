@@ -25,9 +25,7 @@ export const RequirementsLibraryScreen = observer(function RequirementsLibrary()
           </Box>
           <RequirementsBlockModal />
         </Flex>
-
         <RequirementBlocksTable alignItems={"flex-start"} w={"full"} />
-
         <ToggleArchivedButton searchModel={requirementBlockStore} mt={3} />
       </VStack>
     </Container>

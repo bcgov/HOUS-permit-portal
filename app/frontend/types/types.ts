@@ -29,6 +29,7 @@ import {
   EStepCodeEPCTestingTargetType,
   ETemplateVersionStatus,
   EUserRoles,
+  EVisibility,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
@@ -80,7 +81,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
-  earlyAccess?: boolean
+  visibility?: TVisibility
   filters?: IModelFilterFields
 }
 
@@ -543,3 +544,10 @@ export type TCreateRequirementTemplateFormData = {
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
 }
+
+type EVisibilityValues = EVisibility.live | EVisibility.earlyAccess | EVisibility.any
+
+export type TVisibility =
+  | EVisibilityValues
+  | `${EVisibilityValues},${EVisibilityValues}`
+  | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`

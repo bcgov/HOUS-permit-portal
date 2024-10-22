@@ -3,6 +3,9 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../../setup/root"
+import { ToggleArchivedButton } from "../../../../shared/buttons/show-archived-button"
+import { RequirementBlocksTable } from "../../../requirements-library/requirement-blocks-table"
+import { RequirementsBlockModal } from "../../../requirements-library/requirements-block-modal"
 
 export const EarlyAccessRequirementsLibraryScreen = observer(function RequirementsLibrary() {
   const { t } = useTranslation()
@@ -20,12 +23,11 @@ export const EarlyAccessRequirementsLibraryScreen = observer(function Requiremen
               {t("earlyAccessRequirementsLibrary.index.description")}
             </Text>
           </Box>
-          {/* <RequirementsBlockModal /> */}
+          <RequirementsBlockModal forEarlyAccess />
         </Flex>
 
-        {/* <RequirementBlocksTable alignItems={"flex-start"} w={"full"} /> */}
-
-        {/* <ToggleArchivedButton searchModel={requirementBlockStore} mt={3} /> */}
+        <RequirementBlocksTable alignItems={"flex-start"} w={"full"} forEarlyAccess />
+        <ToggleArchivedButton searchModel={requirementBlockStore} mt={3} />
       </VStack>
     </Container>
   )

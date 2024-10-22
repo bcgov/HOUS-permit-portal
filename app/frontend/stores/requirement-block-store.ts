@@ -12,6 +12,7 @@ import {
   ERequirementLibrarySortFields,
   ERequirementType,
   ETagType,
+  EVisibility,
 } from "../types/enums"
 import {
   TAutoComplianceModuleConfiguration,
@@ -112,6 +113,7 @@ export const RequirementBlockStoreModel = types
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           showArchived: self.showArchived,
+          visibility: `${EVisibility.live},${EVisibility.any}`,
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )
