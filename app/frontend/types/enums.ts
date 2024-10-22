@@ -30,6 +30,7 @@ export enum EPermitApplicationStatus {
   newlySubmitted = "newly_submitted",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
+  ephemeral = "ephemeral",
 }
 
 export enum EPermitApplicationStatusGroup {

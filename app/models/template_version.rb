@@ -13,6 +13,7 @@ class TemplateVersion < ApplicationRecord
   delegate :label, to: :requirement_template
   delegate :published_template_version, to: :requirement_template
   delegate :first_nations, to: :requirement_template
+  delegate :early_access?, to: :requirement_template
 
   enum status: { scheduled: 0, published: 1, deprecated: 2 }, _default: 0
   enum deprecation_reason: { new_publish: 0, unscheduled: 1 }, _prefix: true

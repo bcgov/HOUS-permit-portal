@@ -13,12 +13,10 @@ class RequirementTemplateCopyService
           activity_id: requirement_template.activity_id,
           permit_type_id: requirement_template.permit_type_id,
           description: field_overrides[:description] || "Copy of #{requirement_template.description}",
+          nickname: field_overrides[:nickname],
           first_nations: field_overrides[:first_nations] || requirement_template.first_nations,
           copied_from: requirement_template,
         )
-
-      # Save the new template first to get its ID
-      new_template.save
 
       return new_template unless new_template.valid?
 
@@ -34,6 +32,10 @@ class RequirementTemplateCopyService
         # Associate existing requirement blocks with the new section
         section.requirement_blocks.each { |block| new_section.requirement_blocks << block }
       end
+
+      # Save the new template first to get its ID
+      new_template.save
+
       new_template
     end
   end

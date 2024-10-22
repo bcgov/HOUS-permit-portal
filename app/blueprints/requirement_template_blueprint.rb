@@ -9,7 +9,7 @@ class RequirementTemplateBlueprint < Blueprinter::Base
               name: :deprecated_template_versions
   association :scheduled_template_versions, blueprint: TemplateVersionBlueprint
   association :published_template_version, blueprint: TemplateVersionBlueprint do |rt, options|
-    options[:published_template_version].present? ? options[:published_template_version] : rt.published_template_version
+    defaulted_template_version(rt, options)
   end
 
   association :assignee,
@@ -19,9 +19,17 @@ class RequirementTemplateBlueprint < Blueprinter::Base
 
   view :extended do
     association :requirement_template_sections, blueprint: RequirementTemplateSectionBlueprint
+
+    association :published_template_version, blueprint: TemplateVersionBlueprint, view: :extended do |rt, options|
+      defaulted_template_version(rt, options)
+    end
   end
 
   view :template_snapshot do
     association :requirement_template_sections, blueprint: RequirementTemplateSectionBlueprint
   end
+end
+
+def defaulted_template_version(rt, options)
+  options[:published_template_version].present? ? options[:published_template_version] : rt.published_template_version
 end
