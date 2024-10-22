@@ -13,7 +13,7 @@ FactoryBot.define do
         requirement_block.requirements << create_list(
           :requirement,
           evaluator.requirements_count,
-          requirement_block: requirement_block,
+          requirement_block: requirement_block
         )
 
         # You may need to reload the record here, depending on your application
@@ -26,16 +26,21 @@ FactoryBot.define do
         requirement_block.requirements_attributes = [
           {
             "requirement_code" => "energy_step_code_method",
-            "label" => "Which method do you want to do use for the energy step code:",
+            "label" =>
+              "Which method do you want to do use for the energy step code:",
             "input_type" => "select",
             "input_options" => {
               "value_options" => [
-                { "label" => "Utilizing the digital step code tool", "value" => "tool" },
-                { "label" => "By file upload", "value" => "file" },
-              ],
+                {
+                  "label" => "Utilizing the digital step code tool",
+                  "value" => "tool"
+                },
+                { "label" => "By file upload", "value" => "file" }
+              ]
             },
-            "hint" => "(if not using the tool, we will allow you to upload by file)",
-            "required" => true,
+            "hint" =>
+              "(if not using the tool, we will allow you to upload by file)",
+            "required" => true
           },
           {
             "requirement_code" => "energy_step_code_tool_part_9",
@@ -46,11 +51,11 @@ FactoryBot.define do
               "conditional" => {
                 "eq" => "tool",
                 "show" => true,
-                "when" => "energy_step_code_method",
+                "when" => "energy_step_code_method"
               },
-              "energy_step_code" => "part_9",
+              "energy_step_code" => "part_9"
             },
-            "required" => true,
+            "required" => true
           },
           {
             "requirement_code" => "energy_step_code_report_file",
@@ -60,10 +65,10 @@ FactoryBot.define do
               "conditional" => {
                 "eq" => "file",
                 "show" => true,
-                "when" => "energy_step_code_method",
-              },
+                "when" => "energy_step_code_method"
+              }
             },
-            "required" => true,
+            "required" => true
           },
           {
             "requirement_code" => "energy_step_code_h2000_file",
@@ -73,11 +78,11 @@ FactoryBot.define do
               "conditional" => {
                 "eq" => "file",
                 "show" => true,
-                "when" => "energy_step_code_method",
-              },
+                "when" => "energy_step_code_method"
+              }
             },
-            "required" => true,
-          },
+            "required" => true
+          }
         ]
 
         requirement_block.save

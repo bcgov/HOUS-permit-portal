@@ -25,7 +25,8 @@ RSpec.describe Jurisdiction, type: :model do
 
   describe "#qualified_name" do
     it "returns the qualified name of the jurisdiction" do
-      jurisdiction = build(:sub_district, name: "Example", locality_type: "city")
+      jurisdiction =
+        build(:sub_district, name: "Example", locality_type: "city")
       expect(jurisdiction.qualified_name).to eq("City of Example")
     end
   end

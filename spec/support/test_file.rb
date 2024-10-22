@@ -13,7 +13,11 @@ module TestData
 
     # for performance we skip metadata extraction and assign test metadata
     uf = Shrine.upload(file, :store, metadata: false)
-    uf.metadata.merge!("size" => File.size(file.path), "mime_type" => "application/pdf", "filename" => "test.jpg")
+    uf.metadata.merge!(
+      "size" => File.size(file.path),
+      "mime_type" => "application/pdf",
+      "filename" => "test.jpg"
+    )
 
     uf
   end

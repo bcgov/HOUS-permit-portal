@@ -16,7 +16,7 @@ Devise.setup do |config|
       ["POST", %r{^/api/login$}],
       ["PUT", %r{^/api/invitation$}],
       ["PUT", %r{^/api/password$}],
-      ["GET", %r{^/api/auth/keycloak/callback$}],
+      ["GET", %r{^/api/auth/keycloak/callback$}]
     ]
   end
 
@@ -33,7 +33,7 @@ Devise.setup do |config|
                   ENV["KEYCLOAK_SECRET"],
                   client_options: {
                     site: ENV["KEYCLOAK_AUTH_URL"],
-                    realm: "standard",
+                    realm: "standard"
                   },
                   authorize_options: [:kc_idp_hint],
                   scope: "openid",

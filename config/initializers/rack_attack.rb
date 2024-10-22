@@ -4,11 +4,17 @@ class Rack::Attack
   redis_options =
     if Rails.env.production? && ENV["IS_DOCKER_BUILD"].blank? # skip this during precompilation in the docker build stage
       {
-        url: "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["RATE_LIMIT_REDIS_DB"]&.to_i || 2}",
+        url:
+          "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["RATE_LIMIT_REDIS_DB"]&.to_i || 2}",
         sentinels:
           Resolv
             .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-            .map { |address| { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) } },
+            .map do |address|
+              {
+                host: address,
+                port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379)
+              }
+            end
       }
     else
       { url: ENV["RATE_LIMIT_DEV_REDIS_URL"] }
@@ -44,10 +50,10 @@ class Rack::Attack
             meta: {
               message: "Rate limit exceeded. Try again later.",
               title: "Rate limit exceeded",
-              type: "error",
-            },
-          }.to_json,
-        ],
+              type: "error"
+            }
+          }.to_json
+        ]
       ]
     end
 end

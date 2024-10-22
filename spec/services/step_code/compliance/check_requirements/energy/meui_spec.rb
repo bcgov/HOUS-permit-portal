@@ -4,7 +4,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::Energy::MEUI.new(
       checklist: step_code.pre_construction_checklist,
-      step: step,
+      step: step
     )
   end
 
@@ -24,8 +24,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
           below_grade_heated_floor_area: 109.9,
           hdd: 2851,
           design_cooling_load: 2189.98,
-          air_heat_pump_cooling_capacity: 9,
-        },
+          air_heat_pump_cooling_capacity: 9
+        }
       ]
     end
 
@@ -45,8 +45,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
           design_cooling_load: 2189.98,
           air_heat_pump_cooling_capacity: 9,
           building_volume: 624.9,
-          ref_aec: 72.92,
-        },
+          ref_aec: 72.92
+        }
       ]
     end
 
@@ -66,8 +66,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
           design_cooling_load: 2189.98,
           air_heat_pump_cooling_capacity: 9,
           building_volume: 624.9,
-          ref_aec: 72.92,
-        },
+          ref_aec: 72.92
+        }
       ]
     end
 

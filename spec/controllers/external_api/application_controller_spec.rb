@@ -9,12 +9,18 @@ class MockExternalApiController < ExternalApi::ApplicationController
 
   def protected_action_with_authorization_pass
     authorize :mock_external_api_key
-    render json: { message: "mock protected action with authorisation" }, status: 200
+    render json: {
+             message: "mock protected action with authorisation"
+           },
+           status: 200
   end
 
   def protected_action_with_authorization_fail
     authorize :mock_external_api_key
-    render json: { message: "mock protected action with authorisation" }, status: 200
+    render json: {
+             message: "mock protected action with authorisation"
+           },
+           status: 200
   end
 end
 
@@ -58,7 +64,9 @@ RSpec.describe MockExternalApiController, type: :controller do
     it "returns 401 unauthorized with revoked token" do
       revoked_external_api_key = create(:external_api_key, revoked_at: Time.now)
 
-      request.headers["Authorization"] = "Bearer #{revoked_external_api_key.token}"
+      request.headers[
+        "Authorization"
+      ] = "Bearer #{revoked_external_api_key.token}"
       get :protected_action
       expect(response).to have_http_status(401)
     end
@@ -66,16 +74,23 @@ RSpec.describe MockExternalApiController, type: :controller do
     it "returns 401 unauthorized with expired token" do
       expired_external_api_key = create(:external_api_key, revoked_at: Time.now)
 
-      request.headers["Authorization"] = "Bearer #{expired_external_api_key.token}"
+      request.headers[
+        "Authorization"
+      ] = "Bearer #{expired_external_api_key.token}"
       get :protected_action
       expect(response).to have_http_status(401)
     end
 
     it "returns 401 unauthorized with existing token, if corresponding jurisdiction did not enable api" do
       expired_external_api_key =
-        create(:external_api_key, jurisdiction: create(:sub_district, external_api_state: "g_off"))
+        create(
+          :external_api_key,
+          jurisdiction: create(:sub_district, external_api_state: "g_off")
+        )
 
-      request.headers["Authorization"] = "Bearer #{expired_external_api_key.token}"
+      request.headers[
+        "Authorization"
+      ] = "Bearer #{expired_external_api_key.token}"
 
       get :protected_action
       expect(response).to have_http_status(401)
@@ -99,7 +114,9 @@ RSpec.describe MockExternalApiController, type: :controller do
 
     it "returns 200 OK for authorized action" do
       authorized_external_api_key = create(:external_api_key)
-      request.headers["Authorization"] = "Bearer #{authorized_external_api_key.token}"
+      request.headers[
+        "Authorization"
+      ] = "Bearer #{authorized_external_api_key.token}"
       get :protected_action_with_authorization_pass
       expect(response).to have_http_status(200)
     end

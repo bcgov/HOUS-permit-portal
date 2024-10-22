@@ -6,6 +6,8 @@ FactoryBot.define do
     version_diff { {} }
     version_date { "2024-02-15" }
     status { 1 }
-    requirement_template { RequirementTemplate.first || association(:requirement_template) }
+    requirement_template do
+      RequirementTemplate.first || association(:requirement_template)
+    end
   end
 end

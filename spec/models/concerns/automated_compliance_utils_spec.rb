@@ -4,7 +4,10 @@ RSpec.describe AutomatedComplianceUtils do
   #permit_application uses this
   let!(:requirement_template) { create(:requirement_template_with_compliance) }
   let!(:permit_application) do
-    create(:permit_application, template_version: requirement_template.published_template_version)
+    create(
+      :permit_application,
+      template_version: requirement_template.published_template_version
+    )
   end
 
   describe "requirement lookups" do
@@ -21,12 +24,14 @@ RSpec.describe AutomatedComplianceUtils do
         permit_application
           .automated_compliance_requirements
           .select { |key, req| req&.dig("computedCompliance").present? }
-          .map { |key, req| req["id"] },
+          .map { |key, req| req["id"] }
       ).to eq(
         requirement_template
           .requirements
-          .select { |req| req&.input_options&.dig("computed_compliance").present? }
-          .map(&:id),
+          .select do |req|
+            req&.input_options&.dig("computed_compliance").present?
+          end
+          .map(&:id)
       )
     end
   end
@@ -39,7 +44,9 @@ RSpec.describe AutomatedComplianceUtils do
 
   describe "automated_compliance_unique_unfilled_modules" do
     it "returns a list of unique compliance modules to run if data is missing" do
-      expect(permit_application.automated_compliance_unique_unfilled_modules.count).to eq 1
+      expect(
+        permit_application.automated_compliance_unique_unfilled_modules.count
+      ).to eq 1
     end
 
     #in the case of files, if there is a supporting document with the right data key it will count
@@ -47,7 +54,11 @@ RSpec.describe AutomatedComplianceUtils do
 
   describe "automated_compliance_requirements_for_module" do
     it "returns all requirements for a particular compliance module" do
-      expect(permit_application.automated_compliance_requirements_for_module("ParcelInfoExtractor").count).to eq 2
+      expect(
+        permit_application.automated_compliance_requirements_for_module(
+          "ParcelInfoExtractor"
+        ).count
+      ).to eq 2
     end
   end
 end

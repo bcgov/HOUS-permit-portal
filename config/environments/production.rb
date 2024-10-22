@@ -5,7 +5,8 @@ Rails.application.configure do
   # Specify AnyCable WebSocket server URL to use by JS client
   config.after_initialize do
     config.action_cable.url =
-      ActionCable.server.config.url = ENV.fetch("ANYCABLE_URL", "/cable") if AnyCable::Rails.enabled?
+      ActionCable.server.config.url =
+        ENV.fetch("ANYCABLE_URL", "/cable") if AnyCable::Rails.enabled?
   end
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -39,7 +40,8 @@ Rails.application.configure do
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "wss://example.com/cable"
-  config.action_cable.allowed_request_origins = ENV["ANYCABLE_ALLOWED_REQUEST_ORIGINS"]
+  config.action_cable.allowed_request_origins =
+    ENV["ANYCABLE_ALLOWED_REQUEST_ORIGINS"]
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   # Can be used together with config.force_ssl for Strict-Transport-Security and secure cookies.
@@ -63,13 +65,19 @@ Rails.application.configure do
     config.cache_store =
       :redis_cache_store,
       {
-        url: "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["CACHE_REDIS_DB"]&.to_i || 4}",
+        url:
+          "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["CACHE_REDIS_DB"]&.to_i || 4}",
         sentinels:
           Resolv
             .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-            .map { |address| { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) } },
+            .map do |address|
+              {
+                host: address,
+                port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379)
+              }
+            end,
         role: :master,
-        namespace: "cache",
+        namespace: "cache"
       }
   end
 
@@ -92,15 +100,26 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
-  config.action_mailer.default_url_options = { host: ENV["APP_DOMAIN"], protocol: "https" }
+  config.action_mailer.default_url_options = {
+    host: ENV["APP_DOMAIN"],
+    protocol: "https"
+  }
 
   config.after_initialize do
-    Rails.application.routes.default_url_options = Rails.application.config.action_mailer.default_url_options
+    Rails.application.routes.default_url_options =
+      Rails.application.config.action_mailer.default_url_options
   end
 
   # Change the logger to Multilogger in production so we can write both to a file (compliance) and to STDOUT for openshift
   # Rotate the logs daily
-  file_logger = Logger.new(Rails.root.join("log", "#{ENV["HOSTNAME"]}-#{Time.now.strftime("%m-%d-%y")}.log"), "daily")
+  file_logger =
+    Logger.new(
+      Rails.root.join(
+        "log",
+        "#{ENV["HOSTNAME"]}-#{Time.now.strftime("%m-%d-%y")}.log"
+      ),
+      "daily"
+    )
   stdout_logger = Logger.new(STDOUT)
 
   config.logger = MultiLogger.new(stdout_logger, file_logger)

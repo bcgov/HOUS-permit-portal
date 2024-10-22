@@ -10,14 +10,18 @@ RSpec.describe TemplatePublishJob, type: :job do
   describe "#perform" do
     it "calls the TemplateVersioningService methods during execution" do
       # Mock the TemplateVersioningService methods to control behavior during testing
-      allow(TemplateVersioningService).to receive(:publish_versions_publishable_now!)
+      allow(TemplateVersioningService).to receive(
+        :publish_versions_publishable_now!
+      )
 
       # Perform the job
       described_class.perform_async
       described_class.perform_one
 
       # Expect the TemplateVersioningService methods to be called
-      expect(TemplateVersioningService).to have_received(:publish_versions_publishable_now!).once
+      expect(TemplateVersioningService).to have_received(
+        :publish_versions_publishable_now!
+      ).once
     end
   end
 end

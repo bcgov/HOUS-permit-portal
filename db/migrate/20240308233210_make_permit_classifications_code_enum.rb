@@ -5,7 +5,9 @@ class MakePermitClassificationsCodeEnum < ActiveRecord::Migration[7.1]
 
     PermitClassification.reset_column_information
 
-    PermitClassification.find_each { |pc| pc.update(code: PermitClassification.codes[pc.code_string]) }
+    PermitClassification.find_each do |pc|
+      pc.update(code: PermitClassification.codes[pc.code_string])
+    end
 
     remove_column :permit_classifications, :code_string
   end

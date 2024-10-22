@@ -27,15 +27,15 @@ RSpec.describe StepCode, type: :model do
           compliance_data: {
             status: "failed",
             error:
-              "Unable to run digital seal validator integration - Failed to open TCP connection to consigno-verifio-notarius-server:80 (No route to host - connect(2) for \"consigno-verifio-notarius-server\" port 80)",
-          },
+              "Unable to run digital seal validator integration - Failed to open TCP connection to consigno-verifio-notarius-server:80 (No route to host - connect(2) for \"consigno-verifio-notarius-server\" port 80)"
+          }
         )
       end
 
       before :each do
-        expect_any_instance_of(PermitApplication).to receive(:active_supporting_documents).and_return(
-          SupportingDocument.all,
-        )
+        expect_any_instance_of(PermitApplication).to receive(
+          :active_supporting_documents
+        ).and_return(SupportingDocument.all)
       end
 
       #this is true for part 9, but may need to chagne for part 3
@@ -61,15 +61,15 @@ RSpec.describe StepCode, type: :model do
           permit_application: permit_application,
           compliance_data: {
             status: "success",
-            result: SIGNATURE_RESPONSE_STUB,
-          },
+            result: SIGNATURE_RESPONSE_STUB
+          }
         )
       end
 
       before :each do
-        expect_any_instance_of(PermitApplication).to receive(:active_supporting_documents).and_return(
-          SupportingDocument.all,
-        )
+        expect_any_instance_of(PermitApplication).to receive(
+          :active_supporting_documents
+        ).and_return(SupportingDocument.all)
       end
 
       it "sets the step code plan values if there is a supporting doc with compliance" do

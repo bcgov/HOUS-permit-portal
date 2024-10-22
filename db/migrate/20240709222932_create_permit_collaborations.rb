@@ -2,7 +2,10 @@ class CreatePermitCollaborations < ActiveRecord::Migration[7.1]
   def change
     create_table :permit_collaborations, id: :uuid do |t|
       t.references :collaborator, null: false, foreign_key: true, type: :uuid
-      t.references :permit_application, null: false, foreign_key: true, type: :uuid
+      t.references :permit_application,
+                   null: false,
+                   foreign_key: true,
+                   type: :uuid
       t.integer :collaboration_type, default: 0
       t.integer :collaborator_type, default: 0
       t.string :assigned_requirement_block_id, null: true

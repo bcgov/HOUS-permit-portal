@@ -7,7 +7,10 @@ class AddFieldsAndJoinToRequirementTemplate < ActiveRecord::Migration[7.1]
 
     create_table :jurisdiction_requirement_templates do |t|
       t.references :jurisdiction, null: false, foreign_key: true, type: :uuid
-      t.references :requirement_template, null: false, foreign_key: true, type: :uuid
+      t.references :requirement_template,
+                   null: false,
+                   foreign_key: true,
+                   type: :uuid
 
       t.timestamps
     end

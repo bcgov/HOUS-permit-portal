@@ -4,7 +4,7 @@ class AddPermitTypeRequirementToStepCodeChecklist < ActiveRecord::Migration[7.1]
                   :step_requirement,
                   null: true,
                   foreign_key: {
-                    to_table: :permit_type_required_steps,
+                    to_table: :permit_type_required_steps
                   },
                   type: :uuid
   end
