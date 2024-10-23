@@ -39,6 +39,10 @@ export const JurisdictionModel = types
     mapPosition: types.frozen<TLatLngTuple>(),
     mapZoom: types.maybeNull(types.number),
     externalApiEnabled: types.optional(types.boolean, false),
+    externalApiState: types.optional(
+      types.enumeration(Object.values(EJurisdictionExternalApiState)),
+      EJurisdictionExternalApiState.gOff
+    ),
     submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
     sandboxes: types.array(types.reference(SandboxModel)),
@@ -177,6 +181,7 @@ export const JurisdictionModel = types
 
       if (response.ok) {
         self.externalApiEnabled = !!response.data?.data?.externalApiEnabled
+        self.externalApiState = response.data?.data?.externalApiState
       }
       return response.ok
     }),

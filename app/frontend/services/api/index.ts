@@ -555,6 +555,10 @@ export class Api {
     return this.client.get<BlobPart>(`/step_codes/download_step_code_summary_csv`)
   }
 
+  async downloadApplicationMetricsCsv() {
+    return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
+  }
+
   async fetchStepCodeChecklist(id: string) {
     return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
   }

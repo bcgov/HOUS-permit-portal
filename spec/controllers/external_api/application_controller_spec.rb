@@ -85,7 +85,7 @@ RSpec.describe MockExternalApiController, type: :controller do
       expired_external_api_key =
         create(
           :external_api_key,
-          jurisdiction: create(:sub_district, external_api_enabled: false)
+          jurisdiction: create(:sub_district, external_api_state: "g_off")
         )
 
       request.headers[

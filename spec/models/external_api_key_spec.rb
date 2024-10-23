@@ -53,24 +53,18 @@ RSpec.describe ExternalApiKey, type: :model do
         create(:external_api_key, revoked_at: Time.now)
       ]
       jurisdiction_disabled_external_api_keys = [
+        create(:external_api_key, jurisdiction: create(:sub_district)),
         create(
           :external_api_key,
-          jurisdiction: create(:sub_district, external_api_enabled: false)
-        ),
-        create(
-          :external_api_key,
-          jurisdiction: create(:sub_district, external_api_enabled: false),
+          jurisdiction: create(:sub_district),
           revoked_at: Time.now - 1.day
         ),
         create(
           :external_api_key,
-          jurisdiction: create(:sub_district, external_api_enabled: false),
+          jurisdiction: create(:sub_district),
           expired_at: Time.now - 1.day
         ),
-        create(
-          :external_api_key,
-          jurisdiction: create(:sub_district, external_api_enabled: false)
-        )
+        create(:external_api_key, jurisdiction: create(:sub_district))
       ]
 
       expect(ExternalApiKey.active).to match_array(active_external_api_keys)

@@ -14,4 +14,4 @@ send_batched_integration_mapping_notifications:
   cron: "0 * * * * America/Vancouver" # Runs every hour
   class: "SendBatchedIntegrationMappingNotificationsJob"
   queue: default
-  active_job: true
+  active_job: false

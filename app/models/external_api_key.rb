@@ -10,9 +10,9 @@ class ExternalApiKey < ApplicationRecord
   scope :active,
         -> do
           joins(:jurisdiction).where(
-            "jurisdictions.external_api_enabled = TRUE AND (expired_at IS NULL OR expired_at > ?) AND revoked_at IS
-NULL",
-            Time.now
+            "jurisdictions.external_api_state = ? AND (expired_at IS NULL OR expired_at > ?) AND revoked_at IS NULL",
+            "j_on",
+            Time.current
           )
         end
   # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning

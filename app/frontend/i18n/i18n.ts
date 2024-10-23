@@ -124,8 +124,8 @@ const options = {
           andMore: "...and more",
           additionalContent: {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
-            mid: "Preview the New construction checklist for 1 - 4 Dwelling Units",
-            midSub: "(Including secondary suites)",
+            mid: "Preview the Small-scale/Multi-unit housing checklist",
+            midSub: "(Part 9 BC Building Code)",
             midDownload: "Download checklist",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
@@ -576,12 +576,12 @@ const options = {
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailable:
-              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
+              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found. Please select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
           },
@@ -1719,6 +1719,13 @@ const options = {
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
           },
+          applicationMetrics: {
+            name: "Permit application metrics",
+            description:
+              "Submitted and draft applications by jurisdiction, excluding submissions created by employee accounts",
+            title: "Submitted and draft applications by jurisdiction",
+            filename: "Submitted and draft applications by jurisdiction",
+          },
           columnHeaders: {
             name: "Name",
             description: "Description",
@@ -1729,6 +1736,7 @@ const options = {
             createExternalApiKey: "Create new API key",
             enabled: "Enabled",
             disabled: "Disabled",
+            accessDocs: "Access the API Documentation",
             table: {
               heading: "API keys",
             },

@@ -52,6 +52,12 @@ module HousPermitPortal
     end
     # This sets up keys needed for active record attribute encryption
 
+    # Add request-id to the logging tags
+    config.middleware.insert_before 0,
+                                    ActionDispatch::RequestId,
+                                    header: "X-Request-Id"
+    config.log_tags = [:request_id]
+
     # the minimum lengths for the keys should be 12 bytes for the
     # primary key (this will be used to derive the AES 32
     # bytes key) and 20 bytes for the salt.

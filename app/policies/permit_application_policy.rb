@@ -133,6 +133,10 @@ class PermitApplicationPolicy < ApplicationPolicy
     end
   end
 
+  def download_application_metrics_csv?
+    user.super_admin?
+  end
+
   # we may want to separate an admin update to a secondary policy
 
   class Scope < Scope

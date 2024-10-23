@@ -122,7 +122,6 @@ RSpec.describe Api::Concerns::Search::PermitApplications, type: :controller do
 
       it "returns only own permit applications" do
         controller.perform_permit_application_search
-
         expect(
           controller.instance_variable_get(:@permit_application_search).results
         ).to match_array(

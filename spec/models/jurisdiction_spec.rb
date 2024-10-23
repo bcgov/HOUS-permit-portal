@@ -34,8 +34,8 @@ RSpec.describe Jurisdiction, type: :model do
       )
     end
 
-    context "when external_api_enabled is true" do
-      let(:jurisdiction) { create(:sub_district, external_api_enabled: true) }
+    context "when external_api_state is j_on" do
+      let(:jurisdiction) { create(:sub_district, external_api_state: "j_on") }
       it "creates mappings for published template versions" do
         expect(jurisdiction.integration_mappings.count).to eq(2)
         expect(
@@ -76,11 +76,15 @@ RSpec.describe Jurisdiction, type: :model do
           deprecated_by: create(:user)
         )
       end
+      let!(:user) { create(:user, :super_admin) }
 
       it "creates mappings for published template versions" do
         expect(jurisdiction.integration_mappings.count).to eq(0)
 
-        jurisdiction.update(external_api_enabled: true)
+        jurisdiction.update_external_api_state!(
+          enable_external_api: true,
+          allow_reset: user.super_admin?
+        )
 
         expect(jurisdiction.integration_mappings.count).to eq(2)
         expect(
@@ -114,9 +118,16 @@ RSpec.describe Jurisdiction, type: :model do
   end
 
   describe "callbacks" do
-    context "before validation" do
-      let!(:published_sandbox) { create(:sandbox, :published) }
-      let!(:scheduled_sandbox) { create(:sandbox, :scheduled) }
+    let(:super_admin) { create(:user, :super_admin) }
+    let(:manager) { create(:user, :review_manager) }
+    let(:jurisdiction) { create(:sub_district) }
+    let(:enabled_jurisdiction) do
+      create(:sub_district, external_api_state: "j_on")
+    end
+    let!(:published_sandbox) { create(:sandbox, :published) }
+    let!(:scheduled_sandbox) { create(:sandbox, :scheduled) }
+
+    describe "before validation" do
       it "builds two sandboxes if none exist" do
         jurisdiction =
           Jurisdiction.new(name: "Townsville", locality_type: "city")
@@ -125,6 +136,51 @@ RSpec.describe Jurisdiction, type: :model do
         }.from(0).to(2)
         expect(jurisdiction.sandboxes.first).to be_a_new(Sandbox)
         expect(jurisdiction.sandboxes.second).to be_a_new(Sandbox)
+      end
+    end
+
+    describe "#create_integration_mappings_async" do
+      context "when transitioning to j_on" do
+        it "enqueues the job" do
+          allow(Rails.env).to receive(:test?).and_return(false)
+          expect(ModelCallbackJob).to receive(:perform_async).with(
+            "SubDistrict",
+            jurisdiction.id,
+            "create_integration_mappings"
+          )
+          jurisdiction.update_external_api_state!(
+            enable_external_api: true,
+            allow_reset: super_admin.super_admin?
+          )
+        end
+
+        it "performs the job immediately in test environment" do
+          allow(Rails.env).to receive(:test?).and_return(true)
+          job_instance = double("ModelCallbackJob")
+          expect(ModelCallbackJob).to receive(:new).and_return(job_instance)
+          expect(job_instance).to receive(:perform).with(
+            "SubDistrict",
+            jurisdiction.id,
+            "create_integration_mappings"
+          )
+
+          jurisdiction.update_external_api_state!(
+            enable_external_api: true,
+            allow_reset: super_admin.super_admin?
+          )
+        end
+      end
+
+      context "when not transitioning to j_on" do
+        it "does not enqueue the job" do
+          allow(Rails.env).to receive(:test?).and_return(false)
+          expect(ModelCallbackJob).to receive(:new).at_most(:once)
+
+          jurisdiction.update_external_api_state!(
+            enable_external_api: false,
+            allow_reset: manager.super_admin?
+          )
+        end
       end
     end
   end

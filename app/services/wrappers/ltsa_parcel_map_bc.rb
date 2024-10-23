@@ -90,9 +90,11 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
   def get_feature_attributes_by_pid(pid:, fields: "*")
     response = get_details_by_pid(pid: pid, fields: fields)
     if response.success?
-      return parse_attributes_from_response(response)
+      attributes = parse_attributes_from_response(response)
+      raise Errors::FeatureAttributesRetrievalError unless attributes.present?
+      return attributes
     else
-      raise Errors::FeatureAttributesRetrievalError
+      raise Errors::LtsaUnavailableError
     end
   end
 
@@ -106,7 +108,9 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
         get_details_by_pin(pin: pin, fields: fields)
       end
     if response.success?
-      return parse_attributes_from_response(response)
+      attributes = parse_attributes_from_response(response)
+      raise Errors::FeatureAttributesRetrievalError unless attributes.present?
+      return attributes
     else
       raise Errors::FeatureAttributesRetrievalError
     end

@@ -18,6 +18,5 @@
       "lint": true,
       "rails": true
     }
-  },
-  "ruby.rubocop.suppressRubocopWarnings": false
+  }
 }

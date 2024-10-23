@@ -428,3 +428,9 @@ export enum EVisibility {
   earlyAccess = "early_access",
   any = "any",
 }
+
+export enum EJurisdictionExternalApiState {
+  jOn = "j_on",
+  jOff = "j_off",
+  gOff = "g_off",
+}

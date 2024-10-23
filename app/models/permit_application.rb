@@ -506,6 +506,82 @@ class PermitApplication < ApplicationRecord
       end
   end
 
+  def self.stats_by_template_jurisdiction_and_status
+    # Subquery to get the earliest submission_version.created_at per permit_application
+    sv_min =
+      SubmissionVersion.select(
+        "permit_application_id, MIN(created_at) AS min_submission_created_at"
+      ).group(:permit_application_id)
+
+    sv_max =
+      SubmissionVersion.select(
+        "permit_application_id, MAX(created_at) AS max_submission_created_at"
+      ).group(:permit_application_id)
+
+    # Main aggregation query
+    aggregates =
+      PermitApplication
+        .joins(template_version: :requirement_template)
+        .joins(:submitter)
+        .joins(:jurisdiction)
+        .joins(
+          "LEFT JOIN (#{sv_min.to_sql}) sv_min ON sv_min.permit_application_id = permit_applications.id"
+        )
+        .joins(
+          "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
+        )
+        .where(users: { role: "submitter" })
+        .group(
+          "jurisdictions.id",
+          "requirement_templates.id",
+          "jurisdictions.name",
+          "requirement_templates.id"
+        )
+        .select(
+          "jurisdictions.id AS jurisdiction_id",
+          "requirement_templates.id AS requirement_template_id",
+          "jurisdictions.name AS jurisdiction_name",
+          "requirement_templates.id AS requirement_template_id",
+          "COUNT(CASE WHEN permit_applications.status IN (0, 3) THEN 1 END) AS draft_count",
+          "COUNT(CASE WHEN permit_applications.status IN (1, 4) THEN 1 END) AS submitted_count",
+          "AVG(
+                CASE
+                  WHEN sv_min.min_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_min.min_submission_created_at - permit_applications.created_at))
+                  ELSE EXTRACT(EPOCH FROM (NOW() - permit_applications.created_at))
+                END
+              ) AS average_time_spent_before_first_submit",
+          "AVG(
+                CASE
+                  WHEN sv_max.max_submission_created_at IS NOT NULL THEN EXTRACT(EPOCH FROM (sv_max.max_submission_created_at - permit_applications.created_at))
+                  ELSE EXTRACT(EPOCH FROM (NOW() - permit_applications.created_at))
+                END
+              ) AS average_time_spent_before_latest_submit"
+        )
+
+    # Preload requirement templates with associated permit_type and activity
+    requirement_templates =
+      RequirementTemplate.includes(:permit_type, :activity).index_by(&:id)
+
+    # Transform the aggregated data into the desired format
+    aggregates.map do |aggregate|
+      requirement_template =
+        requirement_templates[aggregate.requirement_template_id]
+      {
+        jurisdiction_name:
+          aggregate.jurisdiction_name || "Unknown Jurisdiction",
+        permit_type: requirement_template.permit_type.name,
+        activity: requirement_template.activity.name,
+        first_nations: requirement_template.first_nations,
+        draft_applications: aggregate.draft_count.to_i,
+        submitted_applications: aggregate.submitted_count.to_i,
+        average_time_spent_before_first_submit:
+          (aggregate.average_time_spent_before_first_submit || 0).to_i,
+        average_time_spent_before_latest_submit:
+          (aggregate.average_time_spent_before_latest_submit || 0).to_i
+      }
+    end
+  end
+
   private
 
   def update_collaboration_assignments

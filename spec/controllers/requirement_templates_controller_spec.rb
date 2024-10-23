@@ -112,7 +112,8 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
                  requirement_template: {
                    description: "a copied template with first nations",
                    activity_id: activity.id,
-                   permit_type_id: permit_type.id
+                   permit_type_id: permit_type.id,
+                   first_nations: true
                  }
                }
         }.to change(RequirementTemplate, :count).by(1)

@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
+import { EJurisdictionExternalApiState } from "../../../types/enums"
 import { FormSwitch } from "../../shared/form-switch"
 import { GridHeader } from "../../shared/grid/grid-header"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
@@ -34,7 +35,7 @@ export const GridHeaders = observer(function GridHeaders() {
         >
           <Text role={"heading"}>{t("externalApiKey.index.table.heading")}</Text>
 
-          {currentUser.isReviewManager ? (
+          {currentUser.isManager && currentUser.jurisdiction.externalApiState === EJurisdictionExternalApiState.gOff ? (
             <Tooltip label={t("externalApiKey.index.disabledTooltipLabel")}>
               <Box>
                 <ExternalApiEnabledSwitchWithConfirmation />
@@ -75,7 +76,8 @@ const ExternalApiEnabledSwitchWithConfirmation = observer(() => {
   const { t } = useTranslation()
 
   const isDisabled =
-    (currentUser.isReviewManager || currentUser.isRegionalReviewManager) && !currentJurisdiction.externalApiEnabled
+    currentUser.isManager && currentJurisdiction.externalApiState === EJurisdictionExternalApiState.gOff
+
   const shouldUseDisableConfirmationModal =
     !isDisabled && currentJurisdiction.externalApiEnabled && currentJurisdiction.externalApiKeysMap.size > 0
 
