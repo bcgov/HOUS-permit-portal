@@ -1650,11 +1650,11 @@ const options = {
             filename: "Energy step code configuration by jurisdiction",
           },
           applicationMetrics: {
-            name: "Permit application metrics",
+            name: "Basic Application metrics for all jurisdictions",
             description:
-              "Submitted and draft applications by jurisdiction, excluding submissions created by employee accounts",
-            title: "Submitted and draft applications by jurisdiction",
-            filename: "Submitted and draft applications by jurisdiction",
+              "Submitted and draft application metrics by jurisdiction and type, excluding submissions created by employee accounts",
+            title: "Basic Application metrics for all jurisdictions",
+            filename: "Basic Application metrics for all jurisdictions",
           },
           columnHeaders: {
             name: "Name",
