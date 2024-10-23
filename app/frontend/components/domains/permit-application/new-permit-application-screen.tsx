@@ -19,7 +19,7 @@ import { ArrowSquareOut } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -93,8 +93,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const jurisdictionIdWatch = watch("jurisdictionId")
   const firstNationsWatch = watch("firstNations")
 
-  const jurisdiction = useMemo(() => getJurisdictionById(jurisdictionIdWatch), [jurisdictionIdWatch])
-
   useEffect(() => {
     if (R.isNil(siteWatch?.value) && !pidWatch) return
 
@@ -108,7 +106,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value, pidWatch)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
-        setValue("jurisdiction", jurisdiction)
+        setValue("jurisdictionId", jurisdiction.id)
       } else {
         setPinMode(true)
         setValue("jurisdictionId", null)
@@ -165,9 +163,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                       </Flex>
                     </Can>
                   )} */}
-                  <Heading as="h2" variant="yellowline">
-                    {t("permitApplication.new.forFirstNations")}
-                  </Heading>
                   <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
                   <Controller
                     name="firstNations"
@@ -199,6 +194,8 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                             <PermitTypeRadioSelect
                               w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
+                                setValue("permitTypeId", null)
+                                setValue("activityId", null)
                                 return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionIdWatch)
                               }}
                               dependencyArray={[firstNationsWatch, pidWatch, jurisdictionIdWatch, currentSandboxId]}
@@ -218,7 +215,10 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                     {t("permitApplication.new.workTypeHeading")}
                   </Heading>
                   <ActivityList
-                    fetchOptions={() => fetchActivityOptions(true, firstNationsWatch, permitTypeIdWatch)}
+                    fetchOptions={() => {
+                      setValue("activityId", null)
+                      return fetchActivityOptions(true, firstNationsWatch, permitTypeIdWatch)
+                    }}
                     permitTypeId={permitTypeIdWatch}
                   />
                 </Flex>
