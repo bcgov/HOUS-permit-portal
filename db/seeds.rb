@@ -272,3 +272,16 @@ EulaUpdater.run
 
 puts "Seeding default revision reasons..."
 RevisionReasonSeeder.seed
+
+# invite a usable super admin
+# safeguard for development only
+if Rails.env.development?
+  email = "usable+super_admin@example.com"
+  User.invite!(email: email) do |u|
+    u.skip_confirmation_notification!
+    u.role = :super_admin
+    u.first_name = "Super"
+    u.last_name = "Admin"
+    u.save
+  end
+end
