@@ -13,7 +13,12 @@ class PermitCollaboration < ApplicationRecord
 
   validates :permit_application_id,
             uniqueness: {
-              scope: %i[collaborator_id collaboration_type collaborator_type assigned_requirement_block_id],
+              scope: %i[
+                collaborator_id
+                collaboration_type
+                collaborator_type
+                assigned_requirement_block_id
+              ]
             }
   validates :collaboration_type, presence: true
   validates :collaborator_type, presence: true
@@ -34,7 +39,10 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def assigned_requirement_block_name
-    permit_application.template_version.requirement_blocks_json.dig(assigned_requirement_block_id, "name") || ""
+    permit_application.template_version.requirement_blocks_json.dig(
+      assigned_requirement_block_id,
+      "name"
+    ) || ""
   end
 
   def collaboration_assignment_notification_data
@@ -55,12 +63,12 @@ class PermitCollaboration < ApplicationRecord
               I18n.t(
                 "notification.permit_collaboration.submission_delegatee_collaboration_notification",
                 number: permit_application.number,
-                author_name: permit_application.submitter.name,
+                author_name: permit_application.submitter.name
               )
             else
               I18n.t(
                 "notification.permit_collaboration.review_delegatee_collaboration_notification",
-                number: permit_application.number,
+                number: permit_application.number
               )
             end
           else
@@ -69,13 +77,13 @@ class PermitCollaboration < ApplicationRecord
                 "notification.permit_collaboration.submission_assignee_collaboration_notification",
                 number: permit_application.number,
                 requirement_block_name: assigned_requirement_block_name,
-                author_name: permit_application.submitter.name,
+                author_name: permit_application.submitter.name
               )
             else
               I18n.t(
                 "notification.permit_collaboration.review_assignee_collaboration_notification",
                 number: permit_application.number,
-                requirement_block_name: assigned_requirement_block_name,
+                requirement_block_name: assigned_requirement_block_name
               )
             end
           end
@@ -83,8 +91,8 @@ class PermitCollaboration < ApplicationRecord
       "object_data" => {
         "permit_application_id" => permit_application.id,
         "collaborator_type" => collaborator_type,
-        "assigned_requirement_block_name" => assigned_requirement_block_name,
-      },
+        "assigned_requirement_block_name" => assigned_requirement_block_name
+      }
     }
   end
 
@@ -104,27 +112,29 @@ class PermitCollaboration < ApplicationRecord
           if delegatee?
             I18n.t(
               "notification.permit_collaboration.#{collaboration_type.to_s}_delegatee_collaboration_unassignment_notification",
-              number: permit_application.number,
+              number: permit_application.number
             )
           else
             I18n.t(
               "notification.permit_collaboration.#{collaboration_type.to_s}_assignee_collaboration_unassignment_notification",
               number: permit_application.number,
-              requirement_block_name: assigned_requirement_block_name,
+              requirement_block_name: assigned_requirement_block_name
             )
           end
         ),
       "object_data" => {
         "permit_application_id" => permit_application.id,
         "collaborator_type" => collaborator_type,
-        "assigned_requirement_block_name" => assigned_requirement_block_name,
-      },
+        "assigned_requirement_block_name" => assigned_requirement_block_name
+      }
     }
   end
 
   def assigned_block_exists?
     # This can be nil if a new template version was published and the requirement block was deleted
-    permit_application.template_version.requirement_blocks_json&.key?(assigned_requirement_block_id)
+    permit_application.template_version.requirement_blocks_json&.key?(
+      assigned_requirement_block_id
+    )
   end
 
   private
@@ -136,21 +146,31 @@ class PermitCollaboration < ApplicationRecord
   def validate_author_not_collaborator
     return unless submission?
 
-    errors.add(:collaborator, :cannot_be_author) if collaborator.user == permit_application.submitter
+    if collaborator.user == permit_application.submitter
+      errors.add(:collaborator, :cannot_be_author)
+    end
   end
 
   def validate_collaboration_type
     if submission?
-      errors.add(:base, :must_be_draft_for_submission) unless permit_application.draft?
+      unless permit_application.draft?
+        errors.add(:base, :must_be_draft_for_submission)
+      end
     elsif review?
-      errors.add(:base, :must_be_submitted_for_review) unless permit_application.submitted?
+      unless permit_application.submitted?
+        errors.add(:base, :must_be_submitted_for_review)
+      end
     end
   end
 
   def validate_review_collaborator
     return unless review?
 
-    unless collaborator.user.jurisdictions.find_by(id: permit_application.jurisdiction_id).present?
+    unless collaborator
+             .user
+             .jurisdictions
+             .find_by(id: permit_application.jurisdiction_id)
+             .present?
       errors.add(:collaborator, :must_be_same_jurisdiction)
     end
   end
@@ -158,7 +178,8 @@ class PermitCollaboration < ApplicationRecord
   def validate_requirement_block_id
     return unless assignee?
 
-    requirement_blocks_json = permit_application.template_version.requirement_blocks_json || {}
+    requirement_blocks_json =
+      permit_application.template_version.requirement_blocks_json || {}
 
     return if requirement_blocks_json.key?(assigned_requirement_block_id)
 
@@ -170,7 +191,7 @@ class PermitCollaboration < ApplicationRecord
     existing_delegatee =
       permit_application.permit_collaborations.find_by(
         collaborator_id: collaborator_id,
-        collaborator_type: collaborator_type,
+        collaborator_type: collaborator_type
       )
 
     return unless existing_delegatee.present?
@@ -187,7 +208,12 @@ class PermitCollaboration < ApplicationRecord
   end
 
   def send_unassignment_notification
-    return unless collaborator&.user&.preference&.enable_in_app_collaboration_notification
+    unless collaborator
+             &.user
+             &.preference
+             &.enable_in_app_collaboration_notification
+      return
+    end
 
     NotificationService.publish_permit_collaboration_unassignment_event(self)
   end

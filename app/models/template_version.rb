@@ -27,7 +27,8 @@ class TemplateVersion < ApplicationRecord
   after_save :create_integration_mappings
   after_save :notify_users_of_missing_requirements_mappings
 
-  scope :for_sandbox, ->(sandbox) { where(status: sandbox.template_version_status_scope) }
+  scope :for_sandbox,
+        ->(sandbox) { where(status: sandbox.template_version_status_scope) }
 
   def customizations
     # Convenience method to prevent carpal tunnel syndrome
@@ -65,14 +66,16 @@ class TemplateVersion < ApplicationRecord
   def publish_event_notification_data(recent_permit_application = nil)
     {
       "id" => SecureRandom.uuid,
-      "action_type" => Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
-      "action_text" => "#{I18n.t("notification.template_version.new_version_notification", template_label: label)}",
+      "action_type" =>
+        Constants::NotificationActionTypes::NEW_TEMPLATE_VERSION_PUBLISH,
+      "action_text" =>
+        "#{I18n.t("notification.template_version.new_version_notification", template_label: label)}",
       "object_data" => {
         "template_version_id" => id,
         "previous_template_version_id" => previous_version.id,
         "requirement_template_id" => requirement_template_id,
-        "permit_application_id" => recent_permit_application&.id,
-      },
+        "permit_application_id" => recent_permit_application&.id
+      }
     }
   end
 
@@ -89,7 +92,9 @@ class TemplateVersion < ApplicationRecord
   end
 
   def get_requirement_json(requirement_block_id, requirement_id)
-    requirement_blocks_json.dig(requirement_block_id, "requirements")&.find { |req| req["id"] == requirement_id }
+    requirement_blocks_json
+      .dig(requirement_block_id, "requirements")
+      &.find { |req| req["id"] == requirement_id }
   end
 
   def create_integration_mappings
@@ -97,23 +102,28 @@ class TemplateVersion < ApplicationRecord
 
     api_enabled_jurisdictions = Jurisdiction.where(external_api_enabled: true)
 
-    existing_mapping_jurisdiction_ids = integration_mappings.pluck(:jurisdiction_id)
+    existing_mapping_jurisdiction_ids =
+      integration_mappings.pluck(:jurisdiction_id)
 
-    jurisdictions_without_mappings = api_enabled_jurisdictions.where.not(id: existing_mapping_jurisdiction_ids)
+    jurisdictions_without_mappings =
+      api_enabled_jurisdictions.where.not(id: existing_mapping_jurisdiction_ids)
 
-    jurisdictions_without_mappings.each { |jurisdiction| integration_mappings.create(jurisdiction: jurisdiction) }
+    jurisdictions_without_mappings.each do |jurisdiction|
+      integration_mappings.create(jurisdiction: jurisdiction)
+    end
   end
 
   def force_publish_now!
     return unless scheduled?
 
-    updated_template_version = TemplateVersioningService.publish_version!(self, true)
+    updated_template_version =
+      TemplateVersioningService.publish_version!(self, true)
 
     WebsocketBroadcaster.push_update_to_relevant_users(
       User.super_admin.kept.all.pluck(:id), # only super admins can force publish
       Constants::Websockets::Events::TemplateVersion::DOMAIN,
       Constants::Websockets::Events::TemplateVersion::TYPES[:update],
-      TemplateVersionBlueprint.render_as_hash(updated_template_version),
+      TemplateVersionBlueprint.render_as_hash(updated_template_version)
     )
   end
 
@@ -123,18 +133,30 @@ class TemplateVersion < ApplicationRecord
     return unless !deprecation_reason_unscheduled? && saved_change_to_status?
 
     if Rails.env.test?
-      ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
+      ModelCallbackJob.new.perform(
+        self.class.name,
+        id,
+        "create_integration_mappings"
+      )
     else
-      ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
+      ModelCallbackJob.perform_async(
+        self.class.name,
+        id,
+        "create_integration_mappings"
+      )
     end
   end
 
   def notify_users_of_missing_requirements_mappings
     return unless saved_change_to_status? && (published? || scheduled?)
     relevant_integration_mappings =
-      integration_mappings.joins(:jurisdiction).where({ jurisdictions: { external_api_enabled: true } })
+      integration_mappings.joins(:jurisdiction).where(
+        { jurisdictions: { external_api_enabled: true } }
+      )
 
-    relevant_integration_mappings.each { |im| im.send_missing_requirements_mapping_communication }
+    relevant_integration_mappings.each do |im|
+      im.send_missing_requirements_mapping_communication
+    end
   end
 
   def set_default_deprecation_reason

@@ -12,21 +12,25 @@ module Api::Concerns::Search::PermitApplications
         { permit_classifications: :word_middle },
         { submitter: :word_middle },
         { status: :word_middle },
-        { review_delegatee_name: :word_middle },
+        { review_delegatee_name: :word_middle }
       ],
       where: permit_application_where_clause,
       page: permit_application_search_params[:page],
       per_page:
         (
           if permit_application_search_params[:page]
-            (permit_application_search_params[:per_page] || Kaminari.config.default_per_page)
+            (
+              permit_application_search_params[:per_page] ||
+                Kaminari.config.default_per_page
+            )
           else
             nil
           end
         ),
-      includes: PermitApplication::SEARCH_INCLUDES,
+      includes: PermitApplication::SEARCH_INCLUDES
     }
-    @permit_application_search = PermitApplication.search(permit_application_query, **search_conditions)
+    @permit_application_search =
+      PermitApplication.search(permit_application_query, **search_conditions)
   end
 
   private
@@ -37,12 +41,16 @@ module Api::Concerns::Search::PermitApplications
       :page,
       :per_page,
       filters: [:requirement_template_id, :template_version_id, { status: [] }],
-      sort: %i[field direction],
+      sort: %i[field direction]
     )
   end
 
   def permit_application_query
-    permit_application_search_params[:query].present? ? permit_application_search_params[:query] : "*"
+    if permit_application_search_params[:query].present?
+      permit_application_search_params[:query]
+    else
+      "*"
+    end
   end
 
   def permit_application_order
@@ -66,10 +74,13 @@ module Api::Concerns::Search::PermitApplications
         jurisdiction_id: @jurisdiction.id,
         sandbox_id: current_sandbox&.id,
         # Overrides status filter, reorder the code if necessary
-        status: %i[newly_submitted resubmitted],
+        status: %i[newly_submitted resubmitted]
       }
     else
-      where = { user_ids_with_submission_edit_permissions: current_user.id, sandbox_id: nil }
+      where = {
+        user_ids_with_submission_edit_permissions: current_user.id,
+        sandbox_id: nil
+      }
     end
     ret = (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
 

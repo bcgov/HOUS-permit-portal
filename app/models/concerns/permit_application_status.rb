@@ -2,7 +2,13 @@ module PermitApplicationStatus
   extend ActiveSupport::Concern
   included do
     include AASM
-    enum status: { new_draft: 0, newly_submitted: 1, revisions_requested: 3, resubmitted: 4 }, _default: 0
+    enum status: {
+           new_draft: 0,
+           newly_submitted: 1,
+           revisions_requested: 3,
+           resubmitted: 4
+         },
+         _default: 0
 
     def self.draft_statuses
       %w[new_draft revisions_requested]
@@ -19,8 +25,14 @@ module PermitApplicationStatus
       state :resubmitted
 
       event :submit do
-        transitions from: :new_draft, to: :newly_submitted, guard: :can_submit?, after: :handle_submission
-        transitions from: :revisions_requested, to: :resubmitted, guard: :can_submit?, after: :handle_submission
+        transitions from: :new_draft,
+                    to: :newly_submitted,
+                    guard: :can_submit?,
+                    after: :handle_submission
+        transitions from: :revisions_requested,
+                    to: :resubmitted,
+                    guard: :can_submit?,
+                    after: :handle_submission
       end
 
       event :finalize_revision_requests do
@@ -40,7 +52,8 @@ module PermitApplicationStatus
     end
 
     def can_submit?
-      signed = submission_data.dig("data", "section-completion-key", "signed").present?
+      signed =
+        submission_data.dig("data", "section-completion-key", "signed").present?
       signed && using_current_template_version
     end
 
@@ -64,11 +77,14 @@ module PermitApplicationStatus
         step_code_checklist_json:
           (
             if checklist.present?
-              StepCodeChecklistBlueprint.render_as_hash(checklist, view: :extended)
+              StepCodeChecklistBlueprint.render_as_hash(
+                checklist,
+                view: :extended
+              )
             else
               nil
             end
-          ),
+          )
       )
 
       zip_and_upload_supporting_documents

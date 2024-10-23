@@ -1,13 +1,19 @@
 require "rails_helper"
 
 RSpec.describe TemplateVersioningService, type: :service do
-  let!(:requirement_template) { create(:live_full_requirement_template, sections_count: 3) }
+  let!(:requirement_template) do
+    create(:live_full_requirement_template, sections_count: 3)
+  end
 
   describe "schedule!" do
     context "when the version date is valid" do
       it "schedules a new template version for the future and there is no other scheduled versions before the new template version date" do
         version_date = Date.tomorrow
-        template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            version_date
+          )
 
         expect(template_version.version_date).to eq(version_date)
         expect(template_version.status).to eq("scheduled")
@@ -15,10 +21,18 @@ RSpec.describe TemplateVersioningService, type: :service do
 
       it "schedules a new template version for the future and and after last version" do
         version_date = Date.tomorrow
-        template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            version_date
+          )
 
         new_version_date = Date.tomorrow.tomorrow
-        new_template_version = TemplateVersioningService.schedule!(requirement_template, new_version_date)
+        new_template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            new_version_date
+          )
 
         expect(template_version.version_date).to eq(version_date)
         expect(template_version.status).to eq("scheduled")
@@ -32,29 +46,52 @@ RSpec.describe TemplateVersioningService, type: :service do
       it "raises an error when the template version is scheduled for in the past" do
         version_date = Date.yesterday
 
-        expect { TemplateVersioningService.schedule!(requirement_template, version_date) }.to raise_error(
+        expect {
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            version_date
+          )
+        }.to raise_error(
           TemplateVersionScheduleError,
-          "Version date must be in the future and after latest scheduled version date",
+          "Version date must be in the future and after latest scheduled version date"
         )
       end
 
       it "raises an error when a new template version is scheduled to be before an existing template version" do
         version_date = Date.tomorrow.tomorrow
-        template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            version_date
+          )
 
-        expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
+        expect {
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+        }.to raise_error(
           TemplateVersionScheduleError,
-          "Version date must be in the future and after latest scheduled version date",
+          "Version date must be in the future and after latest scheduled version date"
         )
       end
 
       it "raises an error when a new template version is scheduled for the same day as an existing template version" do
         version_date = Date.tomorrow
-        template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            version_date
+          )
 
-        expect { TemplateVersioningService.schedule!(requirement_template, Date.tomorrow) }.to raise_error(
+        expect {
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+        }.to raise_error(
           TemplateVersionScheduleError,
-          "Version date must be in the future and after latest scheduled version date",
+          "Version date must be in the future and after latest scheduled version date"
         )
       end
     end
@@ -67,9 +104,14 @@ RSpec.describe TemplateVersioningService, type: :service do
 
       it "saves the current requirement template state to denormalized_template_json" do
         expected_denormalized_template_json =
-          RequirementTemplateBlueprint.render_as_json(requirement_template, view: :template_snapshot)
+          RequirementTemplateBlueprint.render_as_json(
+            requirement_template,
+            view: :template_snapshot
+          )
 
-        template_version.denormalized_template_json.should eq(expected_denormalized_template_json)
+        template_version.denormalized_template_json.should eq(
+          expected_denormalized_template_json
+        )
       end
 
       it "saves the current requirement template form_json to denormalized_template_json" do
@@ -83,11 +125,13 @@ RSpec.describe TemplateVersioningService, type: :service do
 
         requirement_template.requirement_template_sections.each do |section|
           section.template_section_blocks.each do |section_block|
-            requirement_blocks_json[section_block.requirement_block.id].should eq(
+            requirement_blocks_json[
+              section_block.requirement_block.id
+            ].should eq(
                        RequirementBlockBlueprint.render_as_json(
                          section_block.requirement_block,
-                         parent_key: section.key,
-                       ),
+                         parent_key: section.key
+                       )
                      )
           end
         end
@@ -98,11 +142,17 @@ RSpec.describe TemplateVersioningService, type: :service do
   describe "publish_version!" do
     context "when publish is invalid" do
       it "raises an error when trying to publish a version scheduled for the future" do
-        template_version = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
 
-        expect { TemplateVersioningService.publish_version!(template_version) }.to raise_error(
+        expect {
+          TemplateVersioningService.publish_version!(template_version)
+        }.to raise_error(
           TemplateVersionPublishError,
-          "Version cannot be published before it's scheduled date",
+          "Version cannot be published before it's scheduled date"
         )
       end
     end
@@ -110,10 +160,15 @@ RSpec.describe TemplateVersioningService, type: :service do
     context "when publish is valid" do
       it "sets the status to published" do
         version_date = Date.tomorrow
-        template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+        template_version =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            version_date
+          )
 
         Timecop.freeze(version_date) do
-          template_version = TemplateVersioningService.publish_version!(template_version)
+          template_version =
+            TemplateVersioningService.publish_version!(template_version)
 
           expect(template_version.status).to eq("published")
         end
@@ -123,17 +178,37 @@ RSpec.describe TemplateVersioningService, type: :service do
         template_version_1 = nil
         template_version_2 = nil
         Timecop.freeze(Date.current - 3) do
-          template_version_1 = TemplateVersioningService.schedule!(requirement_template, Date.current + 1)
-          template_version_2 = TemplateVersioningService.schedule!(requirement_template, Date.current + 2)
+          template_version_1 =
+            TemplateVersioningService.schedule!(
+              requirement_template,
+              Date.current + 1
+            )
+          template_version_2 =
+            TemplateVersioningService.schedule!(
+              requirement_template,
+              Date.current + 2
+            )
         end
 
-        template_version_3 = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow)
-        template_version_4 = TemplateVersioningService.schedule!(requirement_template, Date.tomorrow + 1)
+        template_version_3 =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow
+          )
+        template_version_4 =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.tomorrow + 1
+          )
 
-        template_versions_to_be_deprecated = [template_version_1, template_version_2]
+        template_versions_to_be_deprecated = [
+          template_version_1,
+          template_version_2
+        ]
 
         Timecop.freeze(Date.tomorrow) do
-          published_template_version_3 = TemplateVersioningService.publish_version!(template_version_3)
+          published_template_version_3 =
+            TemplateVersioningService.publish_version!(template_version_3)
 
           expect(published_template_version_3.status).to eq("published")
 
@@ -155,25 +230,60 @@ RSpec.describe TemplateVersioningService, type: :service do
       expected_publishable_version_2 = nil
 
       Timecop.freeze(Date.current - 10) do
-        TemplateVersioningService.schedule!(requirement_template, Date.current + 1)
-        TemplateVersioningService.schedule!(requirement_template, Date.current + 2)
-        expected_publishable_version_1 = TemplateVersioningService.schedule!(requirement_template, Date.current + 5)
-        TemplateVersioningService.schedule!(requirement_template, Date.current + 15)
+        TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 1
+        )
+        TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 2
+        )
+        expected_publishable_version_1 =
+          TemplateVersioningService.schedule!(
+            requirement_template,
+            Date.current + 5
+          )
+        TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 15
+        )
 
         permit_type = create(:permit_type, code: :medium_residential)
-        requirement_template_2 = create(:live_full_requirement_template, permit_type: permit_type, sections_count: 1)
+        requirement_template_2 =
+          create(
+            :live_full_requirement_template,
+            permit_type: permit_type,
+            sections_count: 1
+          )
 
-        TemplateVersioningService.schedule!(requirement_template_2, Date.current + 3)
-        TemplateVersioningService.schedule!(requirement_template_2, Date.current + 5)
-        expected_publishable_version_2 = TemplateVersioningService.schedule!(requirement_template_2, Date.current + 7)
+        TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 3
+        )
+        TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 5
+        )
+        expected_publishable_version_2 =
+          TemplateVersioningService.schedule!(
+            requirement_template_2,
+            Date.current + 7
+          )
 
-        TemplateVersioningService.schedule!(requirement_template_2, Date.current + 30)
+        TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 30
+        )
       end
 
-      publishable_versions = TemplateVersioningService.get_versions_publishable_now
+      publishable_versions =
+        TemplateVersioningService.get_versions_publishable_now
 
       expect(publishable_versions.length).to eq(2)
-      expect(publishable_versions).to include(expected_publishable_version_1, expected_publishable_version_2)
+      expect(publishable_versions).to include(
+        expected_publishable_version_1,
+        expected_publishable_version_2
+      )
     end
   end
 
@@ -184,18 +294,47 @@ RSpec.describe TemplateVersioningService, type: :service do
       expected_scheduled_versions = []
 
       Timecop.freeze(Date.current - 10) do
-        expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 1)
-        expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 2)
-        expected_published_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 5)
-        expected_scheduled_versions << TemplateVersioningService.schedule!(requirement_template, Date.current + 15)
+        expected_deprecated_versions << TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 1
+        )
+        expected_deprecated_versions << TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 2
+        )
+        expected_published_versions << TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 5
+        )
+        expected_scheduled_versions << TemplateVersioningService.schedule!(
+          requirement_template,
+          Date.current + 15
+        )
 
         permit_type = create(:permit_type, code: :medium_residential)
-        requirement_template_2 = create(:live_full_requirement_template, permit_type: permit_type, sections_count: 1)
+        requirement_template_2 =
+          create(
+            :live_full_requirement_template,
+            permit_type: permit_type,
+            sections_count: 1
+          )
 
-        expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 3)
-        expected_deprecated_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 5)
-        expected_published_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 7)
-        expected_scheduled_versions << TemplateVersioningService.schedule!(requirement_template_2, Date.current + 30)
+        expected_deprecated_versions << TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 3
+        )
+        expected_deprecated_versions << TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 5
+        )
+        expected_published_versions << TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 7
+        )
+        expected_scheduled_versions << TemplateVersioningService.schedule!(
+          requirement_template_2,
+          Date.current + 30
+        )
       end
 
       TemplateVersioningService.publish_versions_publishable_now!
@@ -210,7 +349,9 @@ RSpec.describe TemplateVersioningService, type: :service do
         expected_deprecated_version.reload
 
         expect(expected_deprecated_version.status).to eq("deprecated")
-        expect(expected_deprecated_version.deprecation_reason).to eq("new_publish")
+        expect(expected_deprecated_version.deprecation_reason).to eq(
+          "new_publish"
+        )
       end
 
       expected_scheduled_versions.each do |expected_scheduled_version|

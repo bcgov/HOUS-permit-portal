@@ -8,7 +8,7 @@ module Api::Concerns::Search::RequirementTemplates
         order: order,
         where: {
           discarded: discarded,
-          visibility: visibility,
+          visibility: visibility
         },
         match: :word_start,
         page: search_params[:page],
@@ -20,7 +20,7 @@ module Api::Concerns::Search::RequirementTemplates
               nil
             end
           ),
-        includes: model_klass::SEARCH_INCLUDES,
+        includes: model_klass::SEARCH_INCLUDES
       )
   end
 
@@ -35,7 +35,14 @@ module Api::Concerns::Search::RequirementTemplates
   end
 
   def search_params
-    params.permit(:query, :show_archived, :visibility, :page, :per_page, sort: %i[field direction])
+    params.permit(
+      :query,
+      :show_archived,
+      :visibility,
+      :page,
+      :per_page,
+      sort: %i[field direction]
+    )
   end
 
   def visibility

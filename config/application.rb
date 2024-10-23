@@ -47,7 +47,9 @@ module HousPermitPortal
     # This will force all new tables to use UUIDs for id field
     config.generators { |g| g.orm :active_record, primary_key_type: :uuid }
 
-    config.hosts.concat(ENV["AUTHORIZED_HOSTS"].split(",")) if ENV["AUTHORIZED_HOSTS"]
+    if ENV["AUTHORIZED_HOSTS"]
+      config.hosts.concat(ENV["AUTHORIZED_HOSTS"].split(","))
+    end
     # This sets up keys needed for active record attribute encryption
 
     # the minimum lengths for the keys should be 12 bytes for the
@@ -56,9 +58,12 @@ module HousPermitPortal
 
     # You can auto generate this in the console with: bin/rails db:encryption:init
 
-    config.active_record.encryption.primary_key = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
-    config.active_record.encryption.deterministic_key = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
-    config.active_record.encryption.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
+    config.active_record.encryption.primary_key =
+      ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
+    config.active_record.encryption.deterministic_key =
+      ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]
+    config.active_record.encryption.key_derivation_salt =
+      ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
     # This will enable unique validations on encrypted fields
     config.active_record.encryption.extend_queries = true
   end

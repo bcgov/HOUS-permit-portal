@@ -1,7 +1,9 @@
 class ExternalApiKey < ApplicationRecord
   include ValidateUrlAttributes
 
-  has_many :integration_mapping_notifications, as: :notifiable, dependent: :destroy
+  has_many :integration_mapping_notifications,
+           as: :notifiable,
+           dependent: :destroy
 
   url_validatable :webhook_url
 
@@ -10,7 +12,7 @@ class ExternalApiKey < ApplicationRecord
           joins(:jurisdiction).where(
             "jurisdictions.external_api_enabled = TRUE AND (expired_at IS NULL OR expired_at > ?) AND revoked_at IS
 NULL",
-            Time.now,
+            Time.now
           )
         end
   # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning
@@ -23,7 +25,11 @@ NULL",
   validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
   validates :connecting_application, presence: true
   validates :expired_at, presence: true
-  validates :notification_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :notification_email,
+            format: {
+              with: URI::MailTo::EMAIL_REGEXP
+            },
+            allow_blank: true
 
   before_create :generate_token
 
@@ -54,7 +60,10 @@ NULL",
   private
 
   def valid_url_format
-    return if url.blank? || URI.parse(url).is_a?(URI::HTTP) || URI.parse(url).is_a?(URI::HTTPS)
+    if url.blank? || URI.parse(url).is_a?(URI::HTTP) ||
+         URI.parse(url).is_a?(URI::HTTPS)
+      return
+    end
     errors.add(:url, "must be a valid URL")
   rescue URI::InvalidURIError
     errors.add(:url, "must be a valid URL")

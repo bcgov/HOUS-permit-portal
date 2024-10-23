@@ -33,7 +33,9 @@ module StepCodeFieldExtraction
 
   def step_code_plan_field
     # can be overridden by config settings requirement_energy_step_code["plan_file_field"]
-    requirements_lookups.keys.find { |k| k.ends_with?("|#{Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE}") }
+    requirements_lookups.keys.find do |k|
+      k.ends_with?("|#{Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE}")
+    end
   end
 
   def step_code_plan_document # looks for the first instance that matches the plan field
@@ -42,6 +44,8 @@ module StepCodeFieldExtraction
 
   def requirement_energy_step_code_key_value
     # energy stepcode is a unique field, look at the published form_json to find item with lookup_type: "energy_step_code"
-    requirements_lookups.find { |k, v| v["requirementInputType"] == "energy_step_code" }
+    requirements_lookups.find do |k, v|
+      v["requirementInputType"] == "energy_step_code"
+    end
   end
 end

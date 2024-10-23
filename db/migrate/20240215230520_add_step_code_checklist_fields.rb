@@ -32,7 +32,9 @@ class AddStepCodeChecklistFields < ActiveRecord::Migration[7.1]
     add_column :step_code_checklists, :ref_hvac_consumption, :decimal
     add_column :step_code_checklists, :ref_dwh_heating_consumption, :decimal
     add_column :step_code_checklists, :epc_calculation_airtightness, :integer
-    add_column :step_code_checklists, :epc_calculation_testing_target_type, :integer
+    add_column :step_code_checklists,
+               :epc_calculation_testing_target_type,
+               :integer
     add_column :step_code_checklists, :epc_calculation_compliance, :boolean
   end
 end

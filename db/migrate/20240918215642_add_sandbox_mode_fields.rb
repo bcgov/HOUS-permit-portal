@@ -9,10 +9,18 @@ class AddSandboxModeFields < ActiveRecord::Migration[7.1]
     end
 
     # Add a nullable foreign key reference to sandboxes in jurisdiction_template_version_customizations
-    add_reference :jurisdiction_template_version_customizations, :sandbox, null: true, foreign_key: true, type: :uuid
+    add_reference :jurisdiction_template_version_customizations,
+                  :sandbox,
+                  null: true,
+                  foreign_key: true,
+                  type: :uuid
 
     # Add a nullable foreign key reference to sandboxes in permit_applications
-    add_reference :permit_applications, :sandbox, null: true, foreign_key: true, type: :uuid
+    add_reference :permit_applications,
+                  :sandbox,
+                  null: true,
+                  foreign_key: true,
+                  type: :uuid
 
     # Create a unique index considering null sandbox_id values
     execute <<-SQL
@@ -35,7 +43,9 @@ class AddSandboxModeFields < ActiveRecord::Migration[7.1]
     remove_reference :permit_applications, :sandbox, foreign_key: true
 
     # Remove the sandbox reference from jurisdiction_template_version_customizations
-    remove_reference :jurisdiction_template_version_customizations, :sandbox, foreign_key: true
+    remove_reference :jurisdiction_template_version_customizations,
+                     :sandbox,
+                     foreign_key: true
 
     # Drop the sandboxes table
     drop_table :sandboxes

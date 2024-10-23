@@ -21,7 +21,9 @@ class Api::ApplicationController < ActionController::API
   protected
 
   def check_for_archived_user
-    render_error("misc.user_not_authorized_error", {}, nil) and return if current_user&.discarded?
+    if current_user&.discarded?
+      render_error("misc.user_not_authorized_error", {}, nil) and return
+    end
   end
 
   def apply_search_authorization(results, policy_action = action_name)
@@ -36,7 +38,7 @@ class Api::ApplicationController < ActionController::API
     render_error(
       "misc.user_not_authorized_error",
       { message_opts: { error_message: exception.message }, status: 403 },
-      exception,
+      exception
     ) and return
   end
 

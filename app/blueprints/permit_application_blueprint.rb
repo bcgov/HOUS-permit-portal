@@ -20,7 +20,9 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :missing_pdfs
     association :permit_type, blueprint: PermitClassificationBlueprint
     association :activity, blueprint: PermitClassificationBlueprint
-    association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :base
+    association :submission_versions,
+                blueprint: SubmissionVersionBlueprint,
+                view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
     field :indexed_using_current_template_version do |pa, options|
@@ -34,15 +36,22 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     association :supporting_documents, blueprint: SupportingDocumentBlueprint
     # only the delegatee is needed for the inbox screen
-    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base do |pa, _options|
-      pa.permit_collaborations.where(collaboration_type: :review, collaborator_type: :delegatee)
+    association :permit_collaborations,
+                blueprint: PermitCollaborationBlueprint,
+                view: :base do |pa, _options|
+      pa.permit_collaborations.where(
+        collaboration_type: :review,
+        collaborator_type: :delegatee
+      )
     end
     association :submitter, blueprint: UserBlueprint, view: :minimal
   end
 
   view :extended do
     include_view :base
-    fields :formatted_compliance_data, :front_end_form_update, :form_customizations
+    fields :formatted_compliance_data,
+           :front_end_form_update,
+           :form_customizations
 
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
@@ -61,24 +70,29 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :template_version, blueprint: TemplateVersionBlueprint
     association :published_template_version, blueprint: TemplateVersionBlueprint
 
-    association :supporting_documents, blueprint: SupportingDocumentBlueprint do |pa, options|
+    association :supporting_documents,
+                blueprint: SupportingDocumentBlueprint do |pa, options|
       pa.supporting_documents_for_submitter_based_on_user_permissions(
         pa.supporting_documents,
-        user: options[:current_user],
+        user: options[:current_user]
       )
     end
     association :all_submission_version_completed_supporting_documents,
                 blueprint: SupportingDocumentBlueprint do |pa, options|
       pa.supporting_documents_for_submitter_based_on_user_permissions(
         pa.all_submission_version_completed_supporting_documents,
-        user: options[:current_user],
+        user: options[:current_user]
       )
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :step_code, blueprint: StepCodeBlueprint
-    association :permit_collaborations, blueprint: PermitCollaborationBlueprint, view: :base
+    association :permit_collaborations,
+                blueprint: PermitCollaborationBlueprint,
+                view: :base
     association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
-    association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :extended
+    association :submission_versions,
+                blueprint: SubmissionVersionBlueprint,
+                view: :extended
   end
 
   view :pdf_generation do
@@ -93,7 +107,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
 
     field :submission_data do |pa, options|
-      options[:submission_data].present? ? options[:submission_data] : pa.formatted_submission_data
+      if options[:submission_data].present?
+        options[:submission_data]
+      else
+        pa.formatted_submission_data
+      end
     end
   end
 
@@ -104,8 +122,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :submission_data do |pa, options|
       pa.formatted_submission_data
     end
-    association :all_submission_version_completed_supporting_documents, blueprint: SupportingDocumentBlueprint
-    association :submission_versions, blueprint: SubmissionVersionBlueprint, view: :review_extended
+    association :all_submission_version_completed_supporting_documents,
+                blueprint: SupportingDocumentBlueprint
+    association :submission_versions,
+                blueprint: SubmissionVersionBlueprint,
+                view: :review_extended
   end
 
   view :compliance_update do
@@ -115,7 +136,14 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
   view :external_api do
     identifier :id
-    fields :status, :number, :full_address, :pid, :pin, :reference_number, :submitted_at, :resubmitted_at
+    fields :status,
+           :number,
+           :full_address,
+           :pid,
+           :pin,
+           :reference_number,
+           :submitted_at,
+           :resubmitted_at
 
     field :submission_data do |pa, _options|
       pa.formatted_submission_data_for_external_use
@@ -129,10 +157,18 @@ class PermitApplicationBlueprint < Blueprinter::Base
       pa.formatted_raw_h2k_files_for_external_use
     end
 
-    association :template_version, blueprint: TemplateVersionBlueprint, view: :external_api, name: :permit_version
-    association :submitter, blueprint: UserBlueprint, view: :external_api, name: :account_holder
+    association :template_version,
+                blueprint: TemplateVersionBlueprint,
+                view: :external_api,
+                name: :permit_version
+    association :submitter,
+                blueprint: UserBlueprint,
+                view: :external_api,
+                name: :account_holder
     association :permit_type, blueprint: PermitClassificationBlueprint
-    association :activity, blueprint: PermitClassificationBlueprint, name: :activity_type
+    association :activity,
+                blueprint: PermitClassificationBlueprint,
+                name: :activity_type
   end
 
   view :supporting_docs_update do

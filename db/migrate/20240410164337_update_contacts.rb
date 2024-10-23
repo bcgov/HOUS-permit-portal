@@ -26,14 +26,14 @@ class UpdateContacts < ActiveRecord::Migration[7.1]
               first_name: names[0] || "",
               last_name: names[1..].join(" ") || "",
               contactable_id: contact.jurisdiction_id,
-              contactable_type: "Jurisdiction",
+              contactable_type: "Jurisdiction"
             )
           else
             contact.update(
               first_name: names[0] || "",
               last_name: "",
               contactable_id: contact.jurisdiction_id,
-              contactable_type: "Jurisdiction",
+              contactable_type: "Jurisdiction"
             )
           end
         end

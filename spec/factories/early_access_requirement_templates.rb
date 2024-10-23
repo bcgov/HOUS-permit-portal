@@ -1,7 +1,11 @@
 FactoryBot.define do
   factory :early_access_requirement_template do
-    permit_type { PermitType.first || association(:permit_type, code: :low_residential) }
-    activity { Activity.first || association(:activity, code: :new_construction) }
+    permit_type do
+      PermitType.first || association(:permit_type, code: :low_residential)
+    end
+    activity do
+      Activity.first || association(:activity, code: :new_construction)
+    end
 
     factory :early_access_requirement_template_with_sections do
       transient { sections_count { 5 } }
@@ -10,7 +14,7 @@ FactoryBot.define do
         template.requirement_template_sections << create_list(
           :requirement_template_section,
           evaluator.sections_count,
-          requirement_template: template,
+          requirement_template: template
         )
       end
     end
@@ -22,7 +26,7 @@ FactoryBot.define do
         template.requirement_template_sections << create_list(
           :requirement_template_section_with_template_section_blocks,
           evaluator.sections_count,
-          requirement_template: template,
+          requirement_template: template
         )
       end
     end

@@ -17,18 +17,18 @@ RSpec.describe ExternalApiKey, type: :model do
         create(:external_api_key),
         create(:external_api_key),
         create(:external_api_key, expired_at: Time.now + 1.day),
-        create(:external_api_key, expired_at: Time.now + 10.minute),
+        create(:external_api_key, expired_at: Time.now + 10.minute)
       ]
       revoked_external_api_keys = [
         create(:external_api_key, revoked_at: Time.now + 1.day),
         create(:external_api_key, revoked_at: Time.now - 1.day),
-        create(:external_api_key, revoked_at: Time.now),
+        create(:external_api_key, revoked_at: Time.now)
       ] # any non nil revoked_at value should be considered as immediately revoked
 
       expired_external_api_keys = [
         create(:external_api_key, revoked_at: Time.now - 1.day),
         create(:external_api_key, revoked_at: Time.now - 10.minute),
-        create(:external_api_key, revoked_at: Time.now),
+        create(:external_api_key, revoked_at: Time.now)
       ]
 
       expect(ExternalApiKey.active).to match_array(active_external_api_keys)
@@ -39,32 +39,38 @@ RSpec.describe ExternalApiKey, type: :model do
         create(:external_api_key),
         create(:external_api_key),
         create(:external_api_key, expired_at: Time.now + 1.day),
-        create(:external_api_key, expired_at: Time.now + 10.minute),
+        create(:external_api_key, expired_at: Time.now + 10.minute)
       ]
       revoked_external_api_keys = [
         create(:external_api_key, revoked_at: Time.now + 1.day),
         create(:external_api_key, revoked_at: Time.now - 1.day),
-        create(:external_api_key, revoked_at: Time.now),
+        create(:external_api_key, revoked_at: Time.now)
       ] # any non nil revoked_at value should be considered as immediately revoked
 
       expired_external_api_keys = [
         create(:external_api_key, revoked_at: Time.now - 1.day),
         create(:external_api_key, revoked_at: Time.now - 10.minute),
-        create(:external_api_key, revoked_at: Time.now),
+        create(:external_api_key, revoked_at: Time.now)
       ]
       jurisdiction_disabled_external_api_keys = [
-        create(:external_api_key, jurisdiction: create(:sub_district, external_api_enabled: false)),
         create(
           :external_api_key,
-          jurisdiction: create(:sub_district, external_api_enabled: false),
-          revoked_at: Time.now - 1.day,
+          jurisdiction: create(:sub_district, external_api_enabled: false)
         ),
         create(
           :external_api_key,
           jurisdiction: create(:sub_district, external_api_enabled: false),
-          expired_at: Time.now - 1.day,
+          revoked_at: Time.now - 1.day
         ),
-        create(:external_api_key, jurisdiction: create(:sub_district, external_api_enabled: false)),
+        create(
+          :external_api_key,
+          jurisdiction: create(:sub_district, external_api_enabled: false),
+          expired_at: Time.now - 1.day
+        ),
+        create(
+          :external_api_key,
+          jurisdiction: create(:sub_district, external_api_enabled: false)
+        )
       ]
 
       expect(ExternalApiKey.active).to match_array(active_external_api_keys)
@@ -78,21 +84,27 @@ RSpec.describe ExternalApiKey, type: :model do
         invalid_external_api_key = build(:external_api_key, name: nil)
 
         expect(invalid_external_api_key.valid?).to eq(false)
-        expect(invalid_external_api_key.errors[:name]).to include("can't be blank")
+        expect(invalid_external_api_key.errors[:name]).to include(
+          "can't be blank"
+        )
         expect(valid_external_api_key.valid?).to eq(true)
       end
 
       it "enforces name is unique per jurisdiction" do
         name = "test_name"
         jurisdiction = create(:sub_district)
-        valid_external_api_key = create(:external_api_key, name: name, jurisdiction: jurisdiction)
-        invalid_external_api_key = build(:external_api_key, name: name, jurisdiction: jurisdiction)
+        valid_external_api_key =
+          create(:external_api_key, name: name, jurisdiction: jurisdiction)
+        invalid_external_api_key =
+          build(:external_api_key, name: name, jurisdiction: jurisdiction)
         valid_external_api_key_2 = build(:external_api_key, name: name)
 
         expect(valid_external_api_key.valid?).to eq(true)
         expect(valid_external_api_key_2.valid?).to eq(true)
         expect(invalid_external_api_key.valid?).to eq(false)
-        expect(invalid_external_api_key.errors[:name]).to include("has already been taken")
+        expect(invalid_external_api_key.errors[:name]).to include(
+          "has already been taken"
+        )
       end
     end
 
@@ -102,7 +114,9 @@ RSpec.describe ExternalApiKey, type: :model do
         invalid_external_api_key = build(:external_api_key, expired_at: nil)
 
         expect(invalid_external_api_key.valid?).to eq(false)
-        expect(invalid_external_api_key.errors[:expired_at]).to include("can't be blank")
+        expect(invalid_external_api_key.errors[:expired_at]).to include(
+          "can't be blank"
+        )
         expect(valid_external_api_key.valid?).to eq(true)
       end
     end
@@ -110,23 +124,30 @@ RSpec.describe ExternalApiKey, type: :model do
     context "connecting_application" do
       it "enforces connecting_application is required" do
         valid_external_api_key = build(:external_api_key) # factory defaults connecting_application using Faker
-        invalid_external_api_key = build(:external_api_key, connecting_application: nil)
+        invalid_external_api_key =
+          build(:external_api_key, connecting_application: nil)
 
         expect(invalid_external_api_key.valid?).to eq(false)
-        expect(invalid_external_api_key.errors[:connecting_application]).to include("can't be blank")
+        expect(
+          invalid_external_api_key.errors[:connecting_application]
+        ).to include("can't be blank")
         expect(valid_external_api_key.valid?).to eq(true)
       end
     end
 
     context "webhook_url" do
       it "enforces webhook_url is a valid url when set to a non blank value" do
-        valid_external_api_key = build(:external_api_key, webhook_url: "https://www.example.com") # with valid url
+        valid_external_api_key =
+          build(:external_api_key, webhook_url: "https://www.example.com") # with valid url
         valid_external_api_key_2 = build(:external_api_key, webhook_url: "") # with blank url
         valid_external_api_key_3 = build(:external_api_key, webhook_url: nil) # with nil url
-        invalid_external_api_key = build(:external_api_key, webhook_url: "invalid") # with invalid url
+        invalid_external_api_key =
+          build(:external_api_key, webhook_url: "invalid") # with invalid url
 
         expect(invalid_external_api_key.valid?).to eq(false)
-        expect(invalid_external_api_key.errors[:webhook_url]).to include("must be a valid URL")
+        expect(invalid_external_api_key.errors[:webhook_url]).to include(
+          "must be a valid URL"
+        )
         expect(valid_external_api_key.valid?).to eq(true)
         expect(valid_external_api_key_2.valid?).to eq(true)
         expect(valid_external_api_key_3.valid?).to eq(true)
@@ -145,7 +166,9 @@ RSpec.describe ExternalApiKey, type: :model do
         external_api_key = create(:external_api_key, token: token)
 
         expect(external_api_key.valid?).to eq(true)
-        expect(external_api_key.token).to start_with(ExternalApiKey::TOKEN_NAMESPACE)
+        expect(external_api_key.token).to start_with(
+          ExternalApiKey::TOKEN_NAMESPACE
+        )
       end
     end
   end
@@ -153,7 +176,8 @@ RSpec.describe ExternalApiKey, type: :model do
   describe "methods" do
     context "expired?" do
       it "returns true if expired_at is in the past" do
-        external_api_key = create(:external_api_key, expired_at: Time.now - 1.day)
+        external_api_key =
+          create(:external_api_key, expired_at: Time.now - 1.day)
 
         expect(external_api_key.expired?).to eq(true)
       end
@@ -165,7 +189,8 @@ RSpec.describe ExternalApiKey, type: :model do
       end
 
       it "returns false if expired_at is in the future" do
-        external_api_key = create(:external_api_key, expired_at: Time.now + 1.day)
+        external_api_key =
+          create(:external_api_key, expired_at: Time.now + 1.day)
 
         expect(external_api_key.expired?).to eq(false)
       end
@@ -173,8 +198,10 @@ RSpec.describe ExternalApiKey, type: :model do
 
     context "revoked?" do
       it "returns true if revoked_at is any non nil value" do
-        external_api_key_1 = create(:external_api_key, revoked_at: Time.now - 1.day)
-        external_api_key_2 = create(:external_api_key, revoked_at: Time.now + 1.day) # should still be considered
+        external_api_key_1 =
+          create(:external_api_key, revoked_at: Time.now - 1.day)
+        external_api_key_2 =
+          create(:external_api_key, revoked_at: Time.now + 1.day) # should still be considered
         # revoked is timestamp is in the future. The timestamp is just for logging purposes
 
         expect(external_api_key_1.revoked?).to eq(true)

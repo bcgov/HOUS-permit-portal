@@ -6,7 +6,10 @@ class Wrappers::Geocoder < Wrappers::Base
   end
 
   def default_headers
-    { "Content-Type" => "application/json", "apiKey" => "#{ENV["BCGOV_ADDRESS_GEOCODER_API_KEY"]}" }
+    {
+      "Content-Type" => "application/json",
+      "apiKey" => "#{ENV["BCGOV_ADDRESS_GEOCODER_API_KEY"]}"
+    }
   end
 
   def site_options(address_string = nil, coordinates = nil)
@@ -15,7 +18,7 @@ class Wrappers::Geocoder < Wrappers::Base
       autoComplete: true,
       brief: true,
       maxResults: 10,
-      outputSRS: 4326,
+      outputSRS: 4326
       # A few more params available for experimentation:
       #   locationDescriptor: "any",
       #   interpolation: "adaptive",
@@ -25,13 +28,22 @@ class Wrappers::Geocoder < Wrappers::Base
     }
 
     site_params[:addressString] = address_string if address_string.present?
-    return nearest_options(coordinates.join(",")) if coordinates.present? && address_string.blank?
+    if coordinates.present? && address_string.blank?
+      return nearest_options(coordinates.join(","))
+    end
 
     r = get("/addresses.json", site_params)
     return(
       r["features"]
-        .filter { |f| %w[CIVIC_NUMBER BLOCK].include?(f["properties"]["matchPrecision"]) }
-        .map { |site| { label: site["properties"]["fullAddress"], value: site["properties"]["siteID"] } }
+        .filter do |f|
+          %w[CIVIC_NUMBER BLOCK].include?(f["properties"]["matchPrecision"])
+        end
+        .map do |site|
+          {
+            label: site["properties"]["fullAddress"],
+            value: site["properties"]["siteID"]
+          }
+        end
     )
   end
 
@@ -42,12 +54,17 @@ class Wrappers::Geocoder < Wrappers::Base
       locationDescriptor: "parcelPoint",
       maxDistance: 50,
       maxResults: 5,
-      excludeUnits: exclude_units,
+      excludeUnits: exclude_units
     }
     r = get("/sites/near.json", site_params)
     #matchPrecision does not exist on near
     return(
-      r["features"].map { |site| { label: site["properties"]["fullAddress"], value: site["properties"]["siteID"] } }
+      r["features"].map do |site|
+        {
+          label: site["properties"]["fullAddress"],
+          value: site["properties"]["siteID"]
+        }
+      end
     )
   end
 

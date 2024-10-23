@@ -3,7 +3,9 @@ require "spec_helper"
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 # Prevent database truncation if the environment is production
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+if Rails.env.production?
+  abort("The Rails environment is running in production mode!")
+end
 require "rspec/rails"
 require "pundit/rspec"
 
@@ -63,8 +65,16 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
   #
-  config.before { allow_any_instance_of(Api::ApplicationController).to receive(:verify_authenticity_token) }
-  config.before { allow_any_instance_of(ExternalApi::ApplicationController).to receive(:verify_authenticity_token) }
+  config.before do
+    allow_any_instance_of(Api::ApplicationController).to receive(
+      :verify_authenticity_token
+    )
+  end
+  config.before do
+    allow_any_instance_of(ExternalApi::ApplicationController).to receive(
+      :verify_authenticity_token
+    )
+  end
 
   Devise::Mailer.delivery_method = :test
   Devise::Mailer.perform_deliveries = false

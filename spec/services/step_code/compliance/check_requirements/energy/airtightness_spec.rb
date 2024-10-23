@@ -4,7 +4,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::Airtightness do
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::Energy::Airtightness.new(
       checklist: step_code.pre_construction_checklist,
-      step: step,
+      step: step
     )
   end
 
@@ -19,13 +19,20 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::Airtightness do
   end
 
   context "when total ACH meets the energy step requirement" do
-    let(:data_entries_attributes) { [{ stage: :proposed, ach: 22 }, { stage: :proposed, ach: 22 }] }
+    let(:data_entries_attributes) do
+      [{ stage: :proposed, ach: 22 }, { stage: :proposed, ach: 22 }]
+    end
 
     it_behaves_like PASSING_STEP_CODE
   end
 
   context "when total NLA meets the energy step requirement" do
-    let(:data_entries_attributes) { [{ stage: :proposed, ach: 32, nla: 18 }, { stage: :proposed, ach: 32, nla: 18 }] }
+    let(:data_entries_attributes) do
+      [
+        { stage: :proposed, ach: 32, nla: 18 },
+        { stage: :proposed, ach: 32, nla: 18 }
+      ]
+    end
 
     it_behaves_like PASSING_STEP_CODE
   end
@@ -40,8 +47,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::Airtightness do
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 109.9,
           building_volume: 624.9,
-          building_envelope_surface_area: 517.40,
-        },
+          building_envelope_surface_area: 517.40
+        }
       ]
     end
 
@@ -58,8 +65,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::Airtightness do
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 109.9,
           building_volume: 1624.9,
-          building_envelope_surface_area: 517.40,
-        },
+          building_envelope_surface_area: 517.40
+        }
       ]
     end
 

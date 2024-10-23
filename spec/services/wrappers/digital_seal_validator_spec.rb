@@ -8,7 +8,10 @@ RSpec.describe Wrappers::DigitalSealValidator do
   it "should detect there is no seal" do
     VCR.use_cassette("wrappers/digital_seal_validator/unsigned") do
       result =
-        Wrappers::DigitalSealValidator.new.call("spec/support/Test\ Document\ Seal\ -\ unsigned.pdf", "application/pdf")
+        Wrappers::DigitalSealValidator.new.call(
+          "spec/support/Test\ Document\ Seal\ -\ unsigned.pdf",
+          "application/pdf"
+        )
       expect(result.success).to eq false
       expect(result.signatures).to eq []
     end
@@ -16,11 +19,13 @@ RSpec.describe Wrappers::DigitalSealValidator do
 
   context "detects a seal" do
     it "validates a Engineering seal" do
-      VCR.use_cassette("wrappers/digital_seal_validator/signed_approved_orgs") do
+      VCR.use_cassette(
+        "wrappers/digital_seal_validator/signed_approved_orgs"
+      ) do
         result =
           Wrappers::DigitalSealValidator.new.call(
             "spec/support/TEST OF ENGINEERING DIGITAL SEAL RECOGNITION - Sealed.pdf",
-            "application/pdf",
+            "application/pdf"
           )
         expect(result.success).to eq true
         expect(result.signatures.length).to be > 0
@@ -34,7 +39,8 @@ RSpec.describe Wrappers::DigitalSealValidator do
           spec/support/Signed_invisible.pdf
           spec/support/signed_two_people.pdf
         ].each do |file|
-          result = Wrappers::DigitalSealValidator.new.call(file, "application/pdf")
+          result =
+            Wrappers::DigitalSealValidator.new.call(file, "application/pdf")
           expect(result.success).to eq true
           expect(result.signatures.length).to be > 0
         end

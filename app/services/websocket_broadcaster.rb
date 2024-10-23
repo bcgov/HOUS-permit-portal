@@ -14,14 +14,21 @@ class WebsocketBroadcaster
   end
 
   def self.push_user_payloads(payloads_hash)
-    return unless Current.skip_websocket_broadcasts.blank? || payloads_hash.blank?
+    unless Current.skip_websocket_broadcasts.blank? || payloads_hash.blank?
+      return
+    end
 
-    payloads_hash.each { |user_id, payload| ActionCable.server.broadcast(user_channel(user_id), payload) }
+    payloads_hash.each do |user_id, payload|
+      ActionCable.server.broadcast(user_channel(user_id), payload)
+    end
   end
 
   def self.push_update_to_relevant_users(user_ids, domain, eventType, data)
     user_ids.each do |id|
-      ActionCable.server.broadcast(user_channel(id), { domain: domain, eventType: eventType, data: data })
+      ActionCable.server.broadcast(
+        user_channel(id),
+        { domain: domain, eventType: eventType, data: data }
+      )
     end
   end
 end

@@ -7,24 +7,41 @@ RSpec.describe Jurisdiction, type: :model do
     it { should have_many(:users).class_name("User") }
 
     # Testing has_many :through association
-    it { should have_many(:submitters).through(:permit_applications).source(:submitter) }
+    it do
+      should have_many(:submitters).through(:permit_applications).source(
+               :submitter
+             )
+    end
   end
 
   describe "#create_integration_mappings after_save callback on new jurisdiction" do
-    let!(:template_version_published) { create(:template_version, status: "published") }
+    let!(:template_version_published) do
+      create(:template_version, status: "published")
+    end
     let!(:template_version_deprecated) do
-      create(:template_version, status: "deprecated", deprecation_reason: "new_publish")
+      create(
+        :template_version,
+        status: "deprecated",
+        deprecation_reason: "new_publish"
+      )
     end
     let!(:template_version_deprecated_other) do
-      create(:template_version, status: "deprecated", deprecation_reason: "unscheduled", deprecated_by: create(:user))
+      create(
+        :template_version,
+        status: "deprecated",
+        deprecation_reason: "unscheduled",
+        deprecated_by: create(:user)
+      )
     end
 
     context "when external_api_enabled is true" do
       let(:jurisdiction) { create(:sub_district, external_api_enabled: true) }
       it "creates mappings for published template versions" do
         expect(jurisdiction.integration_mappings.count).to eq(2)
-        expect(jurisdiction.integration_mappings.pluck(:template_version_id)).to match_array(
-          [template_version_published.id, template_version_deprecated.id],
+        expect(
+          jurisdiction.integration_mappings.pluck(:template_version_id)
+        ).to match_array(
+          [template_version_published.id, template_version_deprecated.id]
         )
       end
     end
@@ -41,12 +58,23 @@ RSpec.describe Jurisdiction, type: :model do
   describe "#create_integration_mappings after_save callback on existing jurisdiction" do
     context "when external_api_enabled is changed to true" do
       let!(:jurisdiction) { create(:sub_district) }
-      let!(:template_version_published) { create(:template_version, status: "published") }
+      let!(:template_version_published) do
+        create(:template_version, status: "published")
+      end
       let!(:template_version_deprecated) do
-        create(:template_version, status: "deprecated", deprecation_reason: "new_publish")
+        create(
+          :template_version,
+          status: "deprecated",
+          deprecation_reason: "new_publish"
+        )
       end
       let!(:template_version_deprecated_other) do
-        create(:template_version, status: "deprecated", deprecation_reason: "unscheduled", deprecated_by: create(:user))
+        create(
+          :template_version,
+          status: "deprecated",
+          deprecation_reason: "unscheduled",
+          deprecated_by: create(:user)
+        )
       end
 
       it "creates mappings for published template versions" do
@@ -55,8 +83,10 @@ RSpec.describe Jurisdiction, type: :model do
         jurisdiction.update(external_api_enabled: true)
 
         expect(jurisdiction.integration_mappings.count).to eq(2)
-        expect(jurisdiction.integration_mappings.pluck(:template_version_id)).to match_array(
-          [template_version_published.id, template_version_deprecated.id],
+        expect(
+          jurisdiction.integration_mappings.pluck(:template_version_id)
+        ).to match_array(
+          [template_version_published.id, template_version_deprecated.id]
         )
       end
     end
@@ -64,13 +94,15 @@ RSpec.describe Jurisdiction, type: :model do
   describe "validations" do
     context "when there is at least one sandbox" do
       it "is valid" do
-        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
+        jurisdiction =
+          Jurisdiction.new(name: "Townsville", locality_type: "city")
         expect(jurisdiction).to be_valid
         expect(jurisdiction.sandboxes.size).to eq(2)
       end
 
       it "allows multiple sandboxes with unique names" do
-        jurisdiction = create(:sub_district, name: "Townsville", locality_type: "city")
+        jurisdiction =
+          create(:sub_district, name: "Townsville", locality_type: "city")
 
         # Build 3 sandboxes with unique names for this jurisdiction
         3.times { jurisdiction.sandboxes.build(attributes_for(:sandbox)) }
@@ -86,8 +118,11 @@ RSpec.describe Jurisdiction, type: :model do
       let!(:published_sandbox) { create(:sandbox, :published) }
       let!(:scheduled_sandbox) { create(:sandbox, :scheduled) }
       it "builds two sandboxes if none exist" do
-        jurisdiction = Jurisdiction.new(name: "Townsville", locality_type: "city")
-        expect { jurisdiction.valid? }.to change { jurisdiction.sandboxes.size }.from(0).to(2)
+        jurisdiction =
+          Jurisdiction.new(name: "Townsville", locality_type: "city")
+        expect { jurisdiction.valid? }.to change {
+          jurisdiction.sandboxes.size
+        }.from(0).to(2)
         expect(jurisdiction.sandboxes.first).to be_a_new(Sandbox)
         expect(jurisdiction.sandboxes.second).to be_a_new(Sandbox)
       end

@@ -22,8 +22,8 @@ class Api::SiteConfigurationController < Api::ApplicationController
         render_error(
           "site_configuration.update_error",
           message_opts: {
-            error_message: @site_configuration.errors.full_messages.join(", "),
-          },
+            error_message: @site_configuration.errors.full_messages.join(", ")
+          }
         )
       )
     end
@@ -43,9 +43,9 @@ class Api::SiteConfigurationController < Api::ApplicationController
         get_started_link_item: %i[href title description show],
         best_practices_link_item: %i[href title description show],
         dictionary_link_item: %i[href title description show],
-        user_guide_link_item: %i[href title description show],
+        user_guide_link_item: %i[href title description show]
       ],
-      revision_reasons_attributes: %i[id description reason_code _discard],
+      revision_reasons_attributes: %i[id description reason_code _discard]
     )
   end
 end

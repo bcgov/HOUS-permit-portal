@@ -1,4 +1,6 @@
-class CreateThermalEnergyDemandIntensityReferences < ActiveRecord::Migration[7.1]
+class CreateThermalEnergyDemandIntensityReferences < ActiveRecord::Migration[
+  7.1
+]
   def change
     create_table :thermal_energy_demand_intensity_references, id: :uuid do |t|
       t.int4range :hdd
@@ -15,6 +17,9 @@ class CreateThermalEnergyDemandIntensityReferences < ActiveRecord::Migration[7.1
       t.timestamps
     end
 
-    add_index :thermal_energy_demand_intensity_references, %i[hdd step], unique: true, name: "tedi_composite_index"
+    add_index :thermal_energy_demand_intensity_references,
+              %i[hdd step],
+              unique: true,
+              name: "tedi_composite_index"
   end
 end

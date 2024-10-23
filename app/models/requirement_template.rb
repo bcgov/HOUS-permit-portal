@@ -15,27 +15,41 @@ class RequirementTemplate < ApplicationRecord
   belongs_to :permit_type
   belongs_to :copied_from, class_name: "RequirementTemplate", optional: true
 
-  has_many :requirement_template_sections, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_template_sections,
+           -> { order(position: :asc) },
+           dependent: :destroy
   has_many :requirement_blocks, through: :requirement_template_sections
   has_many :requirements, through: :requirement_blocks
-  has_many :template_versions, -> { order(version_date: :desc) }, dependent: :destroy
+  has_many :template_versions,
+           -> { order(version_date: :desc) },
+           dependent: :destroy
   has_many :scheduled_template_versions,
-           -> { where(template_versions: { status: "scheduled" }).order(version_date: :desc) },
+           -> do
+             where(template_versions: { status: "scheduled" }).order(
+               version_date: :desc
+             )
+           end,
            class_name: "TemplateVersion"
   has_many :last_three_deprecated_template_versions,
-           -> { where(template_versions: { status: "deprecated" }).order(version_date: :desc).limit(3) },
+           -> do
+             where(template_versions: { status: "deprecated" }).order(
+               version_date: :desc
+             ).limit(3)
+           end,
            class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
 
-  has_one :published_template_version, -> { where(status: "published") }, class_name: "TemplateVersion"
+  has_one :published_template_version,
+          -> { where(status: "published") },
+          class_name: "TemplateVersion"
 
   # Scope to get RequirementTemplates with a published template version
   scope :for_sandbox,
         ->(sandbox) do
           joins(:template_versions).where(
             template_versions: {
-              status: sandbox&.template_version_status_scope || :published,
-            },
+              status: sandbox&.template_version_status_scope || :published
+            }
           )
         end
 
@@ -43,7 +57,8 @@ class RequirementTemplate < ApplicationRecord
 
   include Discard::Model
 
-  accepts_nested_attributes_for :requirement_template_sections, allow_destroy: true
+  accepts_nested_attributes_for :requirement_template_sections,
+                                allow_destroy: true
 
   # This is a workaround needed to validate step code related errors
   attr_accessor :requirement_template_sections_attributes_copy
@@ -108,21 +123,28 @@ class RequirementTemplate < ApplicationRecord
                   id: "section-signoff-id",
                   key: "section-signoff-key",
                   type: "panel",
-                  title: I18n.t("formio.requirement_template.signoff_panel_title"),
+                  title:
+                    I18n.t("formio.requirement_template.signoff_panel_title"),
                   collapsible: true,
                   collapsed: false,
                   components: [
                     {
                       type: "checkbox",
                       key: "signed",
-                      title: I18n.t("formio.requirement_template.signoff_checkbox_title"),
-                      label: I18n.t("formio.requirement_template.signoff_checkbox_label"),
+                      title:
+                        I18n.t(
+                          "formio.requirement_template.signoff_checkbox_title"
+                        ),
+                      label:
+                        I18n.t(
+                          "formio.requirement_template.signoff_checkbox_label"
+                        ),
                       inputType: "checkbox",
                       validate: {
-                        required: true,
+                        required: true
                       },
                       input: true,
-                      defaultValue: false,
+                      defaultValue: false
                     },
                     {
                       key: "submit",
@@ -130,32 +152,46 @@ class RequirementTemplate < ApplicationRecord
                       type: "button",
                       block: false,
                       input: true,
-                      title: I18n.t("formio.requirement_template.signoff_submit_title"),
-                      label: I18n.t("formio.requirement_template.signoff_submit_title"),
+                      title:
+                        I18n.t(
+                          "formio.requirement_template.signoff_submit_title"
+                        ),
+                      label:
+                        I18n.t(
+                          "formio.requirement_template.signoff_submit_title"
+                        ),
                       theme: "primary",
                       action: "submit",
                       widget: {
-                        type: "input",
+                        type: "input"
                       },
                       disabled: false,
                       show: false,
                       conditional: {
                         show: true,
                         when: "signed",
-                        eq: "true",
-                      },
-                    },
-                  ],
-                ],
-              },
-            ],
-          ),
-      }.to_json,
+                        eq: "true"
+                      }
+                    }
+                  ]
+                ]
+              }
+            ]
+          )
+      }.to_json
     )
   end
 
-  def self.published_requirement_template_version(activity, permit_type, first_nations)
-    find_by(activity: activity, permit_type: permit_type, first_nations: first_nations).published_template_version
+  def self.published_requirement_template_version(
+    activity,
+    permit_type,
+    first_nations
+  )
+    find_by(
+      activity: activity,
+      permit_type: permit_type,
+      first_nations: first_nations
+    ).published_template_version
   rescue NoMethodError => e
     rails.logger.error e.message
   end
@@ -170,7 +206,7 @@ class RequirementTemplate < ApplicationRecord
       activity: activity.name,
       discarded: discarded_at.present?,
       assignee: assignee&.name,
-      visibility: visibility,
+      visibility: visibility
     }
   end
 
@@ -178,7 +214,12 @@ class RequirementTemplate < ApplicationRecord
 
   def validate_uniqueness_of_blocks
     # Track duplicates across all sections within the same template
-    duplicates = requirement_blocks.unscope(:order).group(:id).having("COUNT(*) > 1").pluck(:name)
+    duplicates =
+      requirement_blocks
+        .unscope(:order)
+        .group(:id)
+        .having("COUNT(*) > 1")
+        .pluck(:name)
   end
 
   def requirement_block_ids_from_nested_attributes_copy
@@ -213,7 +254,7 @@ class RequirementTemplate < ApplicationRecord
 
     Requirement.where(
       requirement_block_id: requirement_block_ids,
-      input_type: Requirement.input_types[:energy_step_code],
+      input_type: Requirement.input_types[:energy_step_code]
     )
   end
 
@@ -224,7 +265,7 @@ class RequirementTemplate < ApplicationRecord
 
     Requirement.where(
       requirement_block_id: requirement_block_ids,
-      requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
+      requirement_code: Requirement::STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE
     )
   end
 
@@ -239,26 +280,37 @@ class RequirementTemplate < ApplicationRecord
         :base,
         I18n.t(
           "model_validation.requirement_template.duplicate_block_in_template",
-          requirement_block_name: duplicate_block_name,
-        ),
+          requirement_block_name: duplicate_block_name
+        )
       )
     end
   end
 
   def validate_step_code_related_dependencies
-    energy_step_code_requirements_count = energy_step_code_requirements_from_nest_attributes_copy.count
-    step_code_package_file_requirements_count = step_code_package_file_requirements_from_nest_attributes_copy.count
+    energy_step_code_requirements_count =
+      energy_step_code_requirements_from_nest_attributes_copy.count
+    step_code_package_file_requirements_count =
+      step_code_package_file_requirements_from_nest_attributes_copy.count
 
     has_any_step_code_requirements = energy_step_code_requirements_count > 0
-    has_any_step_code_package_file_requirements = step_code_package_file_requirements_count > 0
-    has_duplicate_step_code_requirements = energy_step_code_requirements_count > 1
-    has_duplicate_step_code_package_file_requirements = step_code_package_file_requirements_count > 1
+    has_any_step_code_package_file_requirements =
+      step_code_package_file_requirements_count > 0
+    has_duplicate_step_code_requirements =
+      energy_step_code_requirements_count > 1
+    has_duplicate_step_code_package_file_requirements =
+      step_code_package_file_requirements_count > 1
 
     return unless has_any_step_code_requirements
 
-    errors.add(:base, :step_code_package_required) if !has_any_step_code_package_file_requirements
-    errors.add(:base, :duplicate_energy_step_code) if has_duplicate_step_code_requirements
-    errors.add(:base, :duplicate_step_code_package) if has_duplicate_step_code_package_file_requirements
+    if !has_any_step_code_package_file_requirements
+      errors.add(:base, :step_code_package_required)
+    end
+    if has_duplicate_step_code_requirements
+      errors.add(:base, :duplicate_energy_step_code)
+    end
+    if has_duplicate_step_code_package_file_requirements
+      errors.add(:base, :duplicate_step_code_package)
+    end
   end
 
   def refresh_search_index

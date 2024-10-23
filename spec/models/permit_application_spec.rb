@@ -16,7 +16,7 @@ RSpec.describe PermitApplication, type: :model do
                new_draft: 0,
                newly_submitted: 1,
                revisions_requested: 3,
-               resubmitted: 4,
+               resubmitted: 4
              )
     end
   end
@@ -25,7 +25,9 @@ RSpec.describe PermitApplication, type: :model do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }
     let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
-    let!(:sandboxed_application) { create(:permit_application, sandbox: sandbox) }
+    let!(:sandboxed_application) do
+      create(:permit_application, sandbox: sandbox)
+    end
     let!(:live_application) { create(:permit_application) }
 
     describe ".all" do

@@ -7,7 +7,10 @@ class RequirementsFromXlsxSeeder
       req_sheet = xlsx.sheet("Dev-Requirements")
       parsed_req_sheet = req_sheet.parse(headers: true)
       valid_rows =
-        parsed_req_sheet.select { |row| row["requirement_code"] && row["requirement_code"] != "requirement_code" }
+        parsed_req_sheet.select do |row|
+          row["requirement_code"] &&
+            row["requirement_code"] != "requirement_code"
+        end
       errors = ["Requirements Loading"]
 
       setup_requirement_template(
@@ -15,7 +18,7 @@ class RequirementsFromXlsxSeeder
         "low_residential",
         xlsx.sheet("Dev-RequirementBlocks-House"),
         valid_rows,
-        errors,
+        errors
       )
 
       puts errors
@@ -31,7 +34,10 @@ class RequirementsFromXlsxSeeder
       req_sheet = xlsx.sheet("Dev-Requirements")
       parsed_req_sheet = req_sheet.parse(headers: true)
       valid_rows =
-        parsed_req_sheet.select { |row| row["requirement_code"] && row["requirement_code"] != "requirement_code" }
+        parsed_req_sheet.select do |row|
+          row["requirement_code"] &&
+            row["requirement_code"] != "requirement_code"
+        end
       errors = ["Requirements Loading"]
 
       setup_requirement_template(
@@ -39,7 +45,7 @@ class RequirementsFromXlsxSeeder
         "medium_residential",
         xlsx.sheet("TEST-ReqBlocks-Mid.densityHouse"),
         valid_rows,
-        errors,
+        errors
       )
 
       puts errors
@@ -55,18 +61,31 @@ class RequirementsFromXlsxSeeder
 
   private
 
-  def self.setup_requirement_template(activity, permit_type, sheet, valid_rows, errors)
+  def self.setup_requirement_template(
+    activity,
+    permit_type,
+    sheet,
+    valid_rows,
+    errors
+  )
     errors << "#{activity} #{permit_type} loading"
 
     # create requirements blocks
     activity = Activity.find_by_code!(activity)
     permit_type = PermitType.find_by_code!(permit_type)
     requirement_template =
-      LiveRequirementTemplate.where(activity: activity, permit_type: permit_type).first_or_create(
+      LiveRequirementTemplate.where(
         activity: activity,
-        permit_type: permit_type,
-      )
-    setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
+        permit_type: permit_type
+      ).first_or_create(activity: activity, permit_type: permit_type)
+    setup_sheet(
+      activity,
+      permit_type,
+      sheet,
+      requirement_template,
+      valid_rows,
+      errors
+    )
 
     requirement_template.reload
 
@@ -80,15 +99,26 @@ class RequirementsFromXlsxSeeder
     template_version = nil
 
     Timecop.freeze(version_date - 1) do
-      template_version = TemplateVersioningService.schedule!(requirement_template, version_date)
+      template_version =
+        TemplateVersioningService.schedule!(requirement_template, version_date)
     end
 
     return if template_version.blank?
 
-    Timecop.freeze(version_date) { template_version = TemplateVersioningService.publish_version!(template_version) }
+    Timecop.freeze(version_date) do
+      template_version =
+        TemplateVersioningService.publish_version!(template_version)
+    end
   end
 
-  def self.setup_sheet(activity, permit_type, sheet, requirement_template, valid_rows, errors)
+  def self.setup_sheet(
+    activity,
+    permit_type,
+    sheet,
+    requirement_template,
+    valid_rows,
+    errors
+  )
     rs_position_incrementer = 0
     # create sections first and order them
     sheet
@@ -115,9 +145,14 @@ class RequirementsFromXlsxSeeder
 
         # go through each requirement block and add them to each section
         if sheet.row(row_index)[0].present? && sheet.row(row_index)[2] &&
-             (sheet.row(row_index)[3].present? || sheet.row(row_index)[11].present?)
+             (
+               sheet.row(row_index)[3].present? ||
+                 sheet.row(row_index)[11].present?
+             )
           req_template_section =
-            requirement_template.requirement_template_sections.find { |rs| rs.name == sheet.row(row_index)[0].strip }
+            requirement_template.requirement_template_sections.find do |rs|
+              rs.name == sheet.row(row_index)[0].strip
+            end
           internal_name = sheet.row(row_index)[1]&.strip
           display_name = sheet.row(row_index)[2]&.strip
           internal_name = display_name if internal_name.blank?
@@ -133,11 +168,14 @@ class RequirementsFromXlsxSeeder
                   else
                     (sheet.row(row_index)[3])&.strip
                   end
-                ),
+                )
             ) #unicode has blank (nbsp) from excel
 
           if sheet.row(row_index)[11].present?
-            req_vals = (11..29).map { |req_col| sheet.row(row_index)[req_col] }.reject(&:blank?)
+            req_vals =
+              (11..29)
+                .map { |req_col| sheet.row(row_index)[req_col] }
+                .reject(&:blank?)
             self.setup_requirements(rb, valid_rows, req_vals, errors)
 
             rsrb =
@@ -145,7 +183,10 @@ class RequirementsFromXlsxSeeder
                 .template_section_blocks
                 .where(requirement_block: rb)
                 .first_or_initialize(requirement_block: rb)
-            rsrb.update!(position: rstrb_position_incrementer[req_template_section.name] || 0)
+            rsrb.update!(
+              position:
+                rstrb_position_incrementer[req_template_section.name] || 0
+            )
             rstrb_position_incrementer[req_template_section.name].present? ?
               rstrb_position_incrementer[req_template_section.name] += 1 :
               rstrb_position_incrementer[req_template_section.name] = 1
@@ -157,7 +198,12 @@ class RequirementsFromXlsxSeeder
     end
   end
 
-  def self.setup_requirements(requirement_block, valid_rows, requirement_block_requirement_codes, errors)
+  def self.setup_requirements(
+    requirement_block,
+    valid_rows,
+    requirement_block_requirement_codes,
+    errors
+  )
     req_position_incrementer =
       (
         if requirement_block.requirements.present?
@@ -174,7 +220,9 @@ class RequirementsFromXlsxSeeder
             requirement_block
               .requirements
               .where(requirement_code: "#{row["requirement_code"]}")
-              .find_or_initialize_by(requirement_code: "#{row["requirement_code"]}")
+              .find_or_initialize_by(
+                requirement_code: "#{row["requirement_code"]}"
+              )
           requirement.update!(
             label: row["display_label"],
             input_type: row["input_type"],
@@ -192,7 +240,7 @@ class RequirementsFromXlsxSeeder
             # required_for_in_person_hint - text
             # reusable - boolean
             elective: row["elective"].present?,
-            position: req_position_incrementer,
+            position: req_position_incrementer
           )
           req_position_incrementer += 1
         rescue StandardError => e # ArgumentError, ActiveRecord::ActiveRecordError => e

@@ -16,12 +16,21 @@ class IntegrationMappingService
     updated_mapping = @mapping.requirements_mapping.deep_dup
 
     simplified_map.each do |requirement_block_sku, requirements|
-      next unless requirements.is_a?(Hash) && updated_mapping[requirement_block_sku].present?
+      unless requirements.is_a?(Hash) &&
+               updated_mapping[requirement_block_sku].present?
+        next
+      end
 
       requirements.each do |requirement_code, local_system_mapping|
-        next unless updated_mapping[requirement_block_sku]["requirements"][requirement_code].present?
+        unless updated_mapping[requirement_block_sku]["requirements"][
+                 requirement_code
+               ].present?
+          next
+        end
 
-        updated_mapping[requirement_block_sku]["requirements"][requirement_code][
+        updated_mapping[requirement_block_sku]["requirements"][
+          requirement_code
+        ][
           "local_system_mapping"
         ] = local_system_mapping
       end
@@ -45,31 +54,39 @@ class IntegrationMappingService
 
     new_mappings = {}
     # Fetches a consolidated requirements mapping from past 25 records
-    copyable_requirements_mapping_from_past_records = get_consolidated_requirements_mapping_from_past_records || {}
+    copyable_requirements_mapping_from_past_records =
+      get_consolidated_requirements_mapping_from_past_records || {}
 
-    @mapping.template_version.requirement_blocks_json.each do |requirement_block_id, requirement_block_blueprint|
+    @mapping
+      .template_version
+      .requirement_blocks_json
+      .each do |requirement_block_id, requirement_block_blueprint|
       requirements = requirement_block_blueprint["requirements"]
       next if requirements.blank?
 
       requirement_block_sku = requirement_block_blueprint["sku"]
 
-      new_mappings[requirement_block_sku] = { "id" => requirement_block_id, "requirements" => {} } unless new_mappings[
-        requirement_block_sku
-      ].present?
+      new_mappings[requirement_block_sku] = {
+        "id" => requirement_block_id,
+        "requirements" => {
+        }
+      } unless new_mappings[requirement_block_sku].present?
 
       requirements.each do |requirement_blueprint|
         requirement_id = requirement_blueprint["id"]
         requirement_code = requirement_blueprint["requirement_code"]
 
-        new_mappings[requirement_block_sku]["requirements"][requirement_code] = {
+        new_mappings[requirement_block_sku]["requirements"][
+          requirement_code
+        ] = {
           "id" => requirement_id,
           "local_system_mapping" =>
             copyable_requirements_mapping_from_past_records.dig(
               requirement_block_sku,
               "requirements",
               requirement_code,
-              "local_system_mapping",
-            ) || "",
+              "local_system_mapping"
+            ) || ""
         }
       end
     end
@@ -87,8 +104,15 @@ class IntegrationMappingService
   #
   # @return [IntegrationMapping] the copyable record with existing mapping
 
-  def copyable_record_with_existing_mapping(requirement_block_sku, requirement_code)
-    records_with_existing_mapping = fetch_records_with_existing_mapping(requirement_block_sku, requirement_code)
+  def copyable_record_with_existing_mapping(
+    requirement_block_sku,
+    requirement_code
+  )
+    records_with_existing_mapping =
+      fetch_records_with_existing_mapping(
+        requirement_block_sku,
+        requirement_code
+      )
     return nil if records_with_existing_mapping.empty?
 
     fetch_preferred_mapping_record_for_copy(records_with_existing_mapping)
@@ -104,30 +128,45 @@ class IntegrationMappingService
   #
   # @param max_past_records [Integer] The maximum number of past records to fetch (default: 25)
   # @return [Hash] The consolidated requirements mapping
-  def get_consolidated_requirements_mapping_from_past_records(max_past_records: 25)
-    past_records = fetch_ordered_integration_mappings_for_jurisdiction(limit: max_past_records)
+  def get_consolidated_requirements_mapping_from_past_records(
+    max_past_records: 25
+  )
+    past_records =
+      fetch_ordered_integration_mappings_for_jurisdiction(
+        limit: max_past_records
+      )
     return {} if past_records.empty?
 
     consolidated_requirements_mapping = {}
 
     past_records.each do |past_record|
-      past_record.requirements_mapping.each do |requirement_block_sku, requirement_block_mapping|
+      past_record
+        .requirements_mapping
+        .each do |requirement_block_sku, requirement_block_mapping|
         consolidated_requirements_mapping[requirement_block_sku] ||= {
           "id" => requirement_block_mapping.dig("id"),
           "requirements" => {
-          },
+          }
         }
 
         requirement_block_mapping
           .dig("requirements")
           &.each do |requirement_code, requirement|
-            if consolidated_requirements_mapping.dig(requirement_block_sku, "requirements", requirement_code).present?
+            if consolidated_requirements_mapping.dig(
+                 requirement_block_sku,
+                 "requirements",
+                 requirement_code
+               ).present?
               next
             end
 
-            consolidated_requirements_mapping[requirement_block_sku]["requirements"][requirement_code] = {
+            consolidated_requirements_mapping[requirement_block_sku][
+              "requirements"
+            ][
+              requirement_code
+            ] = {
               "id" => requirement["id"],
-              "local_system_mapping" => requirement["local_system_mapping"],
+              "local_system_mapping" => requirement["local_system_mapping"]
             }
           end
       end
@@ -146,7 +185,10 @@ class IntegrationMappingService
   # @param limit [Integer] the maximum number of records to return (optional)
   # @param offset [Integer] the number of records to skip before starting to return the records (optional)
   # @return [ActiveRecord::Relation, nil] an ordered list of IntegrationMapping records, or nil if the jurisdiction is not present
-  def fetch_ordered_integration_mappings_for_jurisdiction(limit: nil, offset: nil)
+  def fetch_ordered_integration_mappings_for_jurisdiction(
+    limit: nil,
+    offset: nil
+  )
     return unless @mapping.jurisdiction.present?
 
     case_statement = <<-SQL.squish
@@ -165,8 +207,8 @@ class IntegrationMappingService
           TemplateVersion.statuses[:published],
           TemplateVersion.statuses[:scheduled],
           TemplateVersion.statuses[:deprecated],
-          @mapping.template_version.requirement_template_id,
-        ],
+          @mapping.template_version.requirement_template_id
+        ]
       )
     query =
       IntegrationMapping
@@ -181,7 +223,10 @@ class IntegrationMappingService
     query
   end
 
-  def fetch_records_with_existing_mapping(requirement_block_sku, requirement_code)
+  def fetch_records_with_existing_mapping(
+    requirement_block_sku,
+    requirement_code
+  )
     IntegrationMapping
       .joins(:template_version)
       .where(jurisdiction: @mapping.jurisdiction)
@@ -190,28 +235,42 @@ class IntegrationMappingService
         "requirements_mapping -> :requirement_block_sku -> 'requirements' -> :requirement_code ->> 'local_system_mapping' IS NOT NULL AND " \
           "requirements_mapping -> :requirement_block_sku -> 'requirements' -> :requirement_code ->> 'local_system_mapping' <> ''",
         requirement_block_sku: requirement_block_sku,
-        requirement_code: requirement_code,
+        requirement_code: requirement_code
       )
       .order("template_versions.version_date DESC")
   end
 
   def fetch_preferred_mapping_record_for_copy(records_with_existing_mapping)
     records_with_published_template_version =
-      records_with_existing_mapping.joins(:template_version).where(template_versions: { status: "published" })
+      records_with_existing_mapping.joins(:template_version).where(
+        template_versions: {
+          status: "published"
+        }
+      )
 
     # prefer the record with a published template version with the same requirement template
     # if it exists, otherwise return the first record with any published template version
     record_with_preferred_published_template_version =
       records_with_published_template_version
         .joins(:template_version)
-        .where(template_versions: { requirement_template_id: @mapping.template_version.requirement_template_id })
+        .where(
+          template_versions: {
+            requirement_template_id:
+              @mapping.template_version.requirement_template_id
+          }
+        )
         .first || records_with_published_template_version.first
 
     # return the first record with a preferred published template version if it exists, otherwise return the first record
     record_with_preferred_published_template_version ||
       records_with_existing_mapping
         .joins(:template_version)
-        .where(template_versions: { requirement_template_id: @mapping.template_version.requirement_template_id })
+        .where(
+          template_versions: {
+            requirement_template_id:
+              @mapping.template_version.requirement_template_id
+          }
+        )
         .first || records_with_existing_mapping.first
   end
 end

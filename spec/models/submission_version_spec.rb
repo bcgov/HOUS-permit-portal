@@ -6,12 +6,18 @@ RSpec.describe SubmissionVersion, type: :model do
     # Create sandboxed and non-sandboxed permit applications
     let!(:jurisdiction) { create(:sub_district) }
     let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
-    let!(:sandboxed_application) { create(:permit_application, sandbox: sandbox) }
+    let!(:sandboxed_application) do
+      create(:permit_application, sandbox: sandbox)
+    end
     let!(:live_application) { create(:permit_application) }
 
     # Create submission versions associated with the permit applications
-    let!(:sandboxed_submission) { create(:submission_version, permit_application: sandboxed_application) }
-    let!(:live_submission) { create(:submission_version, permit_application: live_application) }
+    let!(:sandboxed_submission) do
+      create(:submission_version, permit_application: sandboxed_application)
+    end
+    let!(:live_submission) do
+      create(:submission_version, permit_application: live_application)
+    end
 
     describe ".all" do
       it "returns only submission versions associated with non-sandboxed permit applications due to live scope" do

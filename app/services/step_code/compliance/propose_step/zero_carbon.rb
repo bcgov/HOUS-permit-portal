@@ -12,14 +12,23 @@ class StepCode::Compliance::ProposeStep::ZeroCarbon < StepCode::Compliance::Prop
   end
 
   def ghg_checker
-    StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG.new(step: step || min_required_step, checklist:)
+    StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG.new(
+      step: step || min_required_step,
+      checklist:
+    )
   end
 
   def co2_checker
-    StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2.new(step: step || min_required_step, checklist:)
+    StepCode::Compliance::CheckRequirements::ZeroCarbon::CO2.new(
+      step: step || min_required_step,
+      checklist:
+    )
   end
 
   def prescriptive_checker
-    StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive.new(step: step || min_required_step, checklist:)
+    StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive.new(
+      step: step || min_required_step,
+      checklist:
+    )
   end
 end

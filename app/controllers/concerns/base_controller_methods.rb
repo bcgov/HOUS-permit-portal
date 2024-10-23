@@ -10,12 +10,19 @@ module BaseControllerMethods
   end
 
   def frontend_flash_message(message_key, message_type, opts = {})
-    msg = ArbitraryMessageConstruct.message(key: message_key, type: message_type, options: opts[:message_opts]).to_json
+    msg =
+      ArbitraryMessageConstruct.message(
+        key: message_key,
+        type: message_type,
+        options: opts[:message_opts]
+      ).to_json
     { flash: msg }
   end
 
   def render_success(resource, message_key = nil, opts = {})
-    opts.reverse_merge!({ blueprint: nil, blueprint_opts: {}, status: 200, meta: {} })
+    opts.reverse_merge!(
+      { blueprint: nil, blueprint_opts: {}, status: 200, meta: {} }
+    )
     message =
       (
         if message_key
@@ -32,7 +39,8 @@ module BaseControllerMethods
     else
       if opts[:blueprint].blank?
         begin
-          single_resource = resource.respond_to?(:first) ? resource.first : resource
+          single_resource =
+            resource.respond_to?(:first) ? resource.first : resource
           model_instance =
             (
               if single_resource.respond_to?(:__getobj__)
@@ -47,13 +55,16 @@ module BaseControllerMethods
         end
       end
       blueprint_opts = opts[:blueprint_opts].merge({ root: "data", meta: meta })
-      render json: opts[:blueprint].render(resource, blueprint_opts), status: opts[:status]
+      render json: opts[:blueprint].render(resource, blueprint_opts),
+             status: opts[:status]
     end
   end
 
   # error_key maps to a translation key in en.yml
   def render_error(error_key = nil, opts = {}, exception = nil)
-    Rails.logger.error "#{exception.message}\n#{exception.backtrace}" if exception.present?
+    if exception.present?
+      Rails.logger.error "#{exception.message}\n#{exception.backtrace}"
+    end
     opts.reverse_merge!({ status: 400, meta: {} })
     message =
       (
@@ -68,7 +79,12 @@ module BaseControllerMethods
   end
 
   def render_flash_message(message_key, message_type, opts = {})
-    msg = ArbitraryMessageConstruct.message(key: message_key, type: message_type, options: opts[:message_opts]).to_json
+    msg =
+      ArbitraryMessageConstruct.message(
+        key: message_key,
+        type: message_type,
+        options: opts[:message_opts]
+      ).to_json
     { flash: msg }
   end
 
@@ -83,7 +99,7 @@ module BaseControllerMethods
       value: form_authenticity_token,
       secure: Rails.env.production?,
       httponly: false, # Allow frontend to read the cookie
-      same_site: :lax,
+      same_site: :lax
     }
   end
 

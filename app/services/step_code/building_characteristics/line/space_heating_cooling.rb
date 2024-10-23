@@ -11,7 +11,13 @@ class StepCode::BuildingCharacteristics::Line::SpaceHeatingCooling < StepCode::B
     VARIANTS.key(@variant)
   end
 
-  PERFORMANCE_TYPES = { afue: 0, hspf: 1, sse: 2, cop: 3, seer: 4 }.with_indifferent_access
+  PERFORMANCE_TYPES = {
+    afue: 0,
+    hspf: 1,
+    sse: 2,
+    cop: 3,
+    seer: 4
+  }.with_indifferent_access
   include StepCode::BuildingCharacteristics::WithPerformanceType
 
   def fields
