@@ -170,3 +170,15 @@ for formatting and Rubocop for linting. The only recommended setup required for 
 to install the RubyLSP plugin for VSCode, and select syntax_tree as the formatter in the exension settings.
 Binaries for these should be installed as shims automatically upon running bundle install.
 All other configuration should be handled by the included workspace settings and .rubocop.yml file.
+
+# Intellisense
+
+At the moment getting intellisense to work out of the box on Mac is difficult but
+can be accomplished with some configuration. Install the Solargraph extension and
+then in your User VSCode settings add:
+
+"solargraph.commandPath": "/Users/YOUR-USERNAME/.rbenv/shims/solargraph",
+"solargraph.bundlerPath": "/Users/YOUR-USERNAME/.rbenv/shims/bundler",
+"solargraph.useBundler": true
+
+ensure that you are using rbenv and it is set up correctly.
