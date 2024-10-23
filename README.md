@@ -160,3 +160,11 @@ Some other notes
 ```
 bundle exec erd
 ```
+
+## Formatting & Linting
+
+Frontend linting is performed by Prettier. The backend files are set up to use syntax_tree
+for formatting and Rubocop for linting. The only recommended setup required for this is
+to install the RubyLSP plugin for VSCode, and select syntax_tree as the formatter in the exension settings.
+Binaries for these should be installed as shims automatically upon running bundle install.
+All other configuration should be handled by the included workspace settings and .rubocop.yml file.
