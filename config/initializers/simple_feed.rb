@@ -3,13 +3,16 @@ require "simplefeed"
 # Define a method to build Redis configuration for Sentinel
 def redis_sentinel_config
   {
-    url: "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["SIMPLE_FEED_REDIS_DB"]&.to_i || 3}",
+    url:
+      "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["SIMPLE_FEED_REDIS_DB"]&.to_i || 3}",
     driver: :ruby,
     sentinels:
       Resolv
         .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-        .map { |address| { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) } },
-    role: :master,
+        .map do |address|
+          { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) }
+        end,
+    role: :master
   }
 end
 
@@ -20,15 +23,24 @@ SimpleFeed.define(:user_feed) do |f|
       SimpleFeed.provider(
         :redis,
         redis: -> { Redis.new(redis_sentinel_config) },
-        pool_size: ENV["SIMPLE_FEED_POOL_SIZE"]&.to_i || 20,
+        pool_size: ENV["SIMPLE_FEED_POOL_SIZE"]&.to_i || 20
       )
   else
     # Fallback to default Redis configuration for non-production environments
     f.provider =
       SimpleFeed.provider(
         :redis,
-        redis: -> { Redis.new(url: ENV.fetch("SIMPLE_FEED_DEV_REDIS_URL", "redis://localhost:6379/3"), driver: :ruby) },
-        pool_size: 10,
+        redis: -> do
+          Redis.new(
+            url:
+              ENV.fetch(
+                "SIMPLE_FEED_DEV_REDIS_URL",
+                "redis://localhost:6379/3"
+              ),
+            driver: :ruby
+          )
+        end,
+        pool_size: 10
       )
   end
 

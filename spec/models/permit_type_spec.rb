@@ -27,7 +27,10 @@ RSpec.describe PermitType, type: :model do
   describe "#image_url" do
     it "returns the correct image URL" do
       permit_type = create(:permit_type)
-      expected_url = ActionController::Base.helpers.asset_path("images/permit_classifications/#{permit_type.code}.png")
+      expected_url =
+        ActionController::Base.helpers.asset_path(
+          "images/permit_classifications/#{permit_type.code}.png"
+        )
       expect(permit_type.image_url).to eq(expected_url)
     end
   end

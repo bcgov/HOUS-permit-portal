@@ -17,7 +17,13 @@ RSpec.describe Requirement, type: :model do
       it "enforces number inputs with valid unit defined to be valid" do
         Requirement::NUMBER_UNITS.each do |unit|
           number_requirement_with_valid_unit =
-            build(:requirement, input_type: "number", input_options: { "number_unit" => unit })
+            build(
+              :requirement,
+              input_type: "number",
+              input_options: {
+                "number_unit" => unit
+              }
+            )
 
           expect(number_requirement_with_valid_unit.valid?).to eq(true)
         end
@@ -25,7 +31,13 @@ RSpec.describe Requirement, type: :model do
 
       it "enforces number inputs with invalid unit defined to be invalid" do
         number_requirement_with_invalid_unit =
-          build(:requirement, input_type: "number", input_options: { "number_unit" => "cmmm" })
+          build(
+            :requirement,
+            input_type: "number",
+            input_options: {
+              "number_unit" => "cmmm"
+            }
+          )
 
         expect(number_requirement_with_invalid_unit.valid?).to eq(false)
       end
@@ -56,20 +68,25 @@ RSpec.describe Requirement, type: :model do
               :requirement,
               input_type: type,
               input_options: {
-                "value_options" => [1, "test", { "label" => "2", "value" => 2 }],
-              },
+                "value_options" => [1, "test", { "label" => "2", "value" => 2 }]
+              }
             )
           valid_requirement =
             build(
               :requirement,
               input_type: type,
               input_options: {
-                "value_options" => [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }],
-              },
+                "value_options" => [
+                  { "label" => "1", "value" => "1" },
+                  { "label" => "test", "value" => "test" }
+                ]
+              }
             )
 
           expect(invalid_requirement).not_to be_valid
-          expect(invalid_requirement.errors[:input_options]).to include(error_message)
+          expect(invalid_requirement.errors[:input_options]).to include(
+            error_message
+          )
 
           expect(valid_requirement).to be_valid
         end
@@ -79,35 +96,31 @@ RSpec.describe Requirement, type: :model do
         it "ensures the requirement_code for an energy_step_code input_type is 'energy_step_code_tool_part_9'" do
           valid_requirement = build(:energy_step_code_tool_part_9_requirement)
           invalid_requirement =
-            build(:requirement, input_type: "energy_step_code", requirement_code: "energy_step_code_tool_part_8")
+            build(
+              :requirement,
+              input_type: "energy_step_code",
+              requirement_code: "energy_step_code_tool_part_8"
+            )
 
           expect(valid_requirement).to be_valid
           expect(invalid_requirement).to_not be_valid
           expect(invalid_requirement.errors[:requirement_code]).to include(
             I18n.t(
               "activerecord.errors.models.requirement.attributes.requirement_code.incorrect_energy_requirement_code",
-              correct_requirement_code: Requirement::ENERGY_STEP_CODE_REQUIREMENT_CODE,
-              incorrect_requirement_code: "energy_step_code_tool_part_8",
-            ),
+              correct_requirement_code:
+                Requirement::ENERGY_STEP_CODE_REQUIREMENT_CODE,
+              incorrect_requirement_code: "energy_step_code_tool_part_8"
+            )
           )
         end
 
         it "ensures energy_step_code_tool_part_9 has correct required schema" do
           valid_requirement = build(:energy_step_code_tool_part_9_requirement)
           invalid_requirements = [
-            build(:requirement, input_type: "energy_step_code", requirement_code: "energy_step_code_tool_part_9"),
             build(
               :requirement,
               input_type: "energy_step_code",
-              requirement_code: "energy_step_code_tool_part_9",
-              input_options: {
-                "conditional" => {
-                  "eq" => "tool",
-                  "show" => true,
-                  "when" => "energy_step_code_method_wrong",
-                },
-                "energy_step_code" => "part_9",
-              },
+              requirement_code: "energy_step_code_tool_part_9"
             ),
             build(
               :requirement,
@@ -117,10 +130,23 @@ RSpec.describe Requirement, type: :model do
                 "conditional" => {
                   "eq" => "tool",
                   "show" => true,
-                  "when" => "energy_step_code_method",
+                  "when" => "energy_step_code_method_wrong"
                 },
-              },
+                "energy_step_code" => "part_9"
+              }
             ),
+            build(
+              :requirement,
+              input_type: "energy_step_code",
+              requirement_code: "energy_step_code_tool_part_9",
+              input_options: {
+                "conditional" => {
+                  "eq" => "tool",
+                  "show" => true,
+                  "when" => "energy_step_code_method"
+                }
+              }
+            )
           ]
 
           expect(valid_requirement).to be_valid
@@ -129,8 +155,8 @@ RSpec.describe Requirement, type: :model do
             expect(requirement.errors[:base]).to include(
               I18n.t(
                 "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
-                requirement_code: requirement.requirement_code,
-              ),
+                requirement_code: requirement.requirement_code
+              )
             )
           end
         end
@@ -140,15 +166,24 @@ RSpec.describe Requirement, type: :model do
         valid_requirement = build(:energy_step_code_method_requirement)
         invalid_requirements = [
           build(:requirement, requirement_code: "energy_step_code_tool_part_9"),
-          build(:requirement, input_type: "select", requirement_code: "energy_step_code_tool_part_9"),
+          build(
+            :requirement,
+            input_type: "select",
+            requirement_code: "energy_step_code_tool_part_9"
+          ),
           build(
             :requirement,
             input_type: "select",
             requirement_code: "energy_step_code_tool_part_9",
             input_options: {
-              "value_options" => [{ "label" => "Utilizing the digital step code tool", "value" => "tool" }],
-            },
-          ),
+              "value_options" => [
+                {
+                  "label" => "Utilizing the digital step code tool",
+                  "value" => "tool"
+                }
+              ]
+            }
+          )
         ]
 
         expect(valid_requirement).to be_valid
@@ -157,8 +192,8 @@ RSpec.describe Requirement, type: :model do
           expect(requirement.errors[:base]).to include(
             I18n.t(
               "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
-              requirement_code: requirement.requirement_code,
-            ),
+              requirement_code: requirement.requirement_code
+            )
           )
         end
       end
@@ -167,15 +202,24 @@ RSpec.describe Requirement, type: :model do
         valid_requirement = build(:energy_step_code_report_file_requirement)
         invalid_requirements = [
           build(:requirement, requirement_code: "energy_step_code_report_file"),
-          build(:requirement, input_type: "file", requirement_code: "energy_step_code_report_file"),
+          build(
+            :requirement,
+            input_type: "file",
+            requirement_code: "energy_step_code_report_file"
+          ),
           build(
             :requirement,
             input_type: "file",
             requirement_code: "energy_step_code_report_file",
             input_options: {
-              "value_options" => [{ "label" => "Utilizing the digital step code tool", "value" => "tool" }],
-            },
-          ),
+              "value_options" => [
+                {
+                  "label" => "Utilizing the digital step code tool",
+                  "value" => "tool"
+                }
+              ]
+            }
+          )
         ]
 
         expect(valid_requirement).to be_valid
@@ -184,8 +228,8 @@ RSpec.describe Requirement, type: :model do
           expect(requirement.errors[:base]).to include(
             I18n.t(
               "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
-              requirement_code: requirement.requirement_code,
-            ),
+              requirement_code: requirement.requirement_code
+            )
           )
         end
       end
@@ -194,7 +238,11 @@ RSpec.describe Requirement, type: :model do
         valid_requirement = build(:energy_step_code_h2000_file_requirement)
         invalid_requirements = [
           build(:requirement, requirement_code: "energy_step_code_h2000_file"),
-          build(:requirement, input_type: "file", requirement_code: "energy_step_code_h2000_file"),
+          build(
+            :requirement,
+            input_type: "file",
+            requirement_code: "energy_step_code_h2000_file"
+          ),
           build(
             :requirement,
             input_type: "file",
@@ -202,10 +250,10 @@ RSpec.describe Requirement, type: :model do
             input_options: {
               "conditional" => {
                 "eq" => "file",
-                "show" => true,
-              },
-            },
-          ),
+                "show" => true
+              }
+            }
+          )
         ]
 
         expect(valid_requirement).to be_valid
@@ -214,8 +262,8 @@ RSpec.describe Requirement, type: :model do
           expect(requirement.errors[:base]).to include(
             I18n.t(
               "activerecord.errors.models.requirement.incorrect_energy_requirement_schema",
-              requirement_code: requirement.requirement_code,
-            ),
+              requirement_code: requirement.requirement_code
+            )
           )
         end
       end
@@ -223,13 +271,25 @@ RSpec.describe Requirement, type: :model do
 
     context "positions of requirements" do
       it "starts position at 0" do
-        requirement = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 1)
+        requirement =
+          FactoryBot.create(
+            :requirement_block_with_requirements,
+            requirements_count: 1
+          )
         expect(requirement.requirements.first.position).to eq(0)
       end
 
       it "can have duplicate positions when requirements are added to different requirement blocks" do
-        requirement_1 = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 1)
-        requirement_2 = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 1)
+        requirement_1 =
+          FactoryBot.create(
+            :requirement_block_with_requirements,
+            requirements_count: 1
+          )
+        requirement_2 =
+          FactoryBot.create(
+            :requirement_block_with_requirements,
+            requirements_count: 1
+          )
 
         expect(requirement_1.requirements.first.position).to eq(0)
         expect(requirement_2.requirements.first.position).to eq(0)
@@ -237,8 +297,10 @@ RSpec.describe Requirement, type: :model do
 
       it "does not have duplicate positions when multiple requirements are added to the same requirement block" do
         requirement_block = create(:requirement_block)
-        requirement_1 = create(:requirement, requirement_block: requirement_block)
-        requirement_2 = create(:requirement, requirement_block: requirement_block)
+        requirement_1 =
+          create(:requirement, requirement_block: requirement_block)
+        requirement_2 =
+          create(:requirement, requirement_block: requirement_block)
 
         expect(requirement_1.position).to eq(0)
         expect(requirement_2.position).to eq(1)
@@ -249,7 +311,8 @@ RSpec.describe Requirement, type: :model do
       it "enforces file valid and no additional _file is added to requirement_code if it's already ending in _file for
  file types" do
         code = "test_file"
-        file_requirement = build(:requirement, requirement_code: code, input_type: "file")
+        file_requirement =
+          build(:requirement, requirement_code: code, input_type: "file")
         expect(file_requirement.valid?).to eq(true)
         expect(file_requirement.requirement_code).to eq(code)
       end
@@ -258,7 +321,8 @@ RSpec.describe Requirement, type: :model do
 types" do
         code = "test_incorrect_format"
 
-        file_requirement = build(:requirement, requirement_code: code, input_type: "file")
+        file_requirement =
+          build(:requirement, requirement_code: code, input_type: "file")
 
         expect(file_requirement.valid?).to eq(true)
         expect(file_requirement.requirement_code).to eq("#{code}_file")
@@ -269,7 +333,8 @@ with it for file
 types" do
         code = "test_file_incorrect_format"
 
-        file_requirement = build(:requirement, requirement_code: code, input_type: "file")
+        file_requirement =
+          build(:requirement, requirement_code: code, input_type: "file")
 
         expect(file_requirement.valid?).to eq(true)
         expect(file_requirement.requirement_code).to eq("#{code}_file")
@@ -286,16 +351,25 @@ types" do
                checkbox: 2,
                select: 3,
                multi_option_select: 4,
-               date: 5,
+               date: 5
              )
     end
   end
 
   describe "methods" do
     it "returns the options for a select input" do
-      select_options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
+      select_options = [
+        { "label" => "1", "value" => "1" },
+        { "label" => "test", "value" => "test" }
+      ]
       select_requirement =
-        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+        create(
+          :requirement,
+          input_type: "select",
+          input_options: {
+            "value_options" => select_options
+          }
+        )
 
       expect(select_requirement.value_options).to eq(select_options)
     end
@@ -303,7 +377,13 @@ types" do
     it "camelizes values on input types" do
       select_options = [{ "label" => "test", "value" => "needs_camel" }]
       select_requirement =
-        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+        create(
+          :requirement,
+          input_type: "select",
+          input_options: {
+            "value_options" => select_options
+          }
+        )
       camel_select_options = [{ "label" => "test", "value" => "needsCamel" }]
       expect(select_requirement.value_options).to eq(camel_select_options)
     end
@@ -311,7 +391,13 @@ types" do
     it "removes spaces from values on input types" do
       select_options = [{ "label" => "test", "value" => "needs trim" }]
       select_requirement =
-        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
+        create(
+          :requirement,
+          input_type: "select",
+          input_options: {
+            "value_options" => select_options
+          }
+        )
       formatted_select_options = [{ "label" => "test", "value" => "needsTrim" }]
       expect(select_requirement.value_options).to eq(formatted_select_options)
     end
@@ -319,16 +405,31 @@ types" do
     it "removes spaces and camelizes values on input types" do
       select_options = [{ "label" => "test", "value" => "new option_2" }]
       select_requirement =
-        create(:requirement, input_type: "select", input_options: { "value_options" => select_options })
-      formatted_select_options = [{ "label" => "test", "value" => "newOption2" }]
+        create(
+          :requirement,
+          input_type: "select",
+          input_options: {
+            "value_options" => select_options
+          }
+        )
+      formatted_select_options = [
+        { "label" => "test", "value" => "newOption2" }
+      ]
       expect(select_requirement.value_options).to eq(formatted_select_options)
     end
 
     it "returns the number unit for number input with a unit" do
       number_unit = "m"
       number_requirement_with_unit =
-        create(:requirement, input_type: "number", input_options: { "number_unit" => number_unit })
-      number_requirement_without_unit = create(:requirement, input_type: "number")
+        create(
+          :requirement,
+          input_type: "number",
+          input_options: {
+            "number_unit" => number_unit
+          }
+        )
+      number_requirement_without_unit =
+        create(:requirement, input_type: "number")
 
       expect(number_requirement_with_unit.number_unit).to eq(number_unit)
       expect(number_requirement_without_unit.number_unit).to eq(nil)
@@ -337,24 +438,35 @@ types" do
     context "form json" do
       it "returns correct form json for text requirement" do
         requirement =
-          create(:requirement, requirement_code: "text_requirement", label: "Text Requirement", input_type: "text")
+          create(
+            :requirement,
+            requirement_code: "text_requirement",
+            label: "Text Requirement",
+            input_type: "text"
+          )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
-          key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+          key:
+            "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
           requirementInputType: "text",
           type: "simpletextfield",
           input: true,
           label: "Text Requirement",
           widget: {
-            type: "input",
-          },
+            type: "input"
+          }
         }
 
         expect(form_json).to eq(expected_form_json)
       end
 
       it "returns correct form json for number requirement" do
-        requirement = create(:requirement, label: "Number Requirement", input_type: "number")
+        requirement =
+          create(
+            :requirement,
+            label: "Number Requirement",
+            input_type: "number"
+          )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|number_requirement",
@@ -363,19 +475,24 @@ types" do
           input: true,
           label: "Number Requirement",
           widget: {
-            type: "input",
+            type: "input"
           },
           applyMaskOn: "change",
           mask: false,
           requirementInputType: "number",
-          inputFormat: "plain",
+          inputFormat: "plain"
         }
 
         expect(form_json).to eq(expected_form_json)
       end
 
       it "returns correct form json for checkbox requirement" do
-        requirement = create(:requirement, label: "Checkbox Requirement", input_type: "checkbox")
+        requirement =
+          create(
+            :requirement,
+            label: "Checkbox Requirement",
+            input_type: "checkbox"
+          )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|checkbox_requirement",
@@ -384,15 +501,16 @@ types" do
           label: "Checkbox Requirement",
           requirementInputType: "checkbox",
           widget: {
-            type: "input",
-          },
+            type: "input"
+          }
         }
 
         expect(form_json).to eq(expected_form_json)
       end
 
       it "returns correct form json for date requirement" do
-        requirement = create(:requirement, label: "Date  Requirement", input_type: "date")
+        requirement =
+          create(:requirement, label: "Date  Requirement", input_type: "date")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|date_requirement",
@@ -404,7 +522,7 @@ types" do
           enableTime: false,
           datePicker: {
             disableWeekends: false,
-            disableWeekdays: false,
+            disableWeekdays: false
           },
           enableMinDateInput: false,
           enableMaxDateInput: false,
@@ -424,23 +542,26 @@ types" do
             minDate: nil,
             disableWeekends: false,
             disableWeekdays: false,
-            maxDate: nil,
-          },
+            maxDate: nil
+          }
         }
 
         expect(form_json).to eq(expected_form_json)
       end
 
       it "returns correct form json for select requirement" do
-        select_options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
+        select_options = [
+          { "label" => "1", "value" => "1" },
+          { "label" => "test", "value" => "test" }
+        ]
         requirement =
           create(
             :requirement,
             label: "select Requirement",
             input_type: "select",
             input_options: {
-              "value_options" => select_options,
-            },
+              "value_options" => select_options
+            }
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
@@ -450,49 +571,54 @@ types" do
           label: "select Requirement",
           requirementInputType: "select",
           widget: {
-            type: "choicesjs",
+            type: "choicesjs"
           },
           data: {
-            values: select_options,
-          },
+            values: select_options
+          }
         }
 
         expect(form_json).to eq(expected_form_json)
       end
 
       it "returns correct form json for multi option select requirement" do
-        select_options = [{ "label" => "1", "value" => "1" }, { "label" => "test", "value" => "test" }]
+        select_options = [
+          { "label" => "1", "value" => "1" },
+          { "label" => "test", "value" => "test" }
+        ]
         requirement =
           create(
             :requirement,
             label: "Multi option select Requirement",
             input_type: "multi_option_select",
             input_options: {
-              "value_options" => select_options,
-            },
+              "value_options" => select_options
+            }
           )
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           input: true,
           inputType: "checkbox",
-          key: "#{requirement.requirement_block.key}|multi_option_select_requirement",
+          key:
+            "#{requirement.requirement_block.key}|multi_option_select_requirement",
           label: "Multi option select Requirement",
           optionsLabelPosition: "right",
           requirementInputType: "multi_option_select",
           tableView: false,
           type: "selectboxes",
           widget: {
-            type: "input",
+            type: "input"
           },
           optionsLabelPosition: "right",
-          values: select_options,
+          values: select_options
         }
 
         expect(form_json).to eq(expected_form_json)
       end
 
       it "returns correct form json for file requirement" do
-        requirement = create(:requirement, label: "File Requirement", input_type: "file")
+        requirement =
+          create(:requirement, label: "File Requirement", input_type: "file")
         form_json = requirement.to_form_json.reject { |key| key == :id }
         expected_form_json = {
           key: "#{requirement.requirement_block.key}|file_requirement_file",
@@ -503,8 +629,8 @@ types" do
           label: "File Requirement",
           requirementInputType: "file",
           widget: {
-            type: "input",
-          },
+            type: "input"
+          }
         }
 
         expect(form_json).to eq(expected_form_json)
@@ -518,20 +644,21 @@ types" do
               requirement_code: "text_requirement",
               label: "Text Requirement",
               input_type: "text",
-              elective: true,
+              elective: true
             )
           form_json = requirement.to_form_json.reject { |key| key == :id }
           expected_form_json = {
-            key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            key:
+              "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
             requirementInputType: "text",
             type: "simpletextfield",
             elective: true,
             input: true,
             label: "Text Requirement",
             widget: {
-              type: "input",
+              type: "input"
             },
-            customConditional: ";show = false",
+            customConditional: ";show = false"
           }
           expect(form_json).to eq(expected_form_json)
         end
@@ -543,7 +670,7 @@ types" do
             requirement_block: requirement_block,
             requirement_code: "test",
             label: "Test",
-            input_type: "text",
+            input_type: "text"
           )
 
           requirement =
@@ -558,26 +685,27 @@ types" do
                 "conditional" => {
                   show: true,
                   when: "test",
-                  eq: "customValue",
-                },
-              },
+                  eq: "customValue"
+                }
+              }
             )
           form_json = requirement.to_form_json.reject { |key| key == :id }
           expected_form_json = {
-            key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            key:
+              "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
             type: "simpletextfield",
             elective: true,
             input: true,
             label: "Text Requirement",
             widget: {
-              type: "input",
+              type: "input"
             },
             conditional: {
               show: true,
               when: "test",
-              eq: "customValue",
+              eq: "customValue"
             },
-            customConditional: ";show = false",
+            customConditional: ";show = false"
           }
         end
 
@@ -590,20 +718,21 @@ types" do
               input_type: "text",
               elective: true,
               input_options: {
-                "customConditional" => "show = true",
-              },
+                "customConditional" => "show = true"
+              }
             )
           form_json = requirement.to_form_json.reject { |key| key == :id }
           expected_form_json = {
-            key: "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
+            key:
+              "#{requirement.requirement_block.key}|#{requirement.requirement_code}",
             type: "simpletextfield",
             elective: true,
             input: true,
             label: "Text Requirement",
             widget: {
-              type: "input",
+              type: "input"
             },
-            customConditional: "show = true;show = false",
+            customConditional: "show = true;show = false"
           }
         end
       end

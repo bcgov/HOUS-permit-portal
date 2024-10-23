@@ -9,6 +9,10 @@ class CreateJurisdictions < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    add_reference :users, :jurisdiction, null: true, foreign_key: true, type: :uuid
+    add_reference :users,
+                  :jurisdiction,
+                  null: true,
+                  foreign_key: true,
+                  type: :uuid
   end
 end

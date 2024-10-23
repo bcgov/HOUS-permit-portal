@@ -23,7 +23,9 @@ RSpec.describe HtmlSanitizeAttributes do
       content_invalid = "<span>missing</pan>"
       v = ValidatableModel.new(hint: content_invalid)
       expect(v.valid?).to eq false
-      expect(v.errors.full_messages).to include("Hint must be valid rich text html.")
+      expect(v.errors.full_messages).to include(
+        "Hint must be valid rich text html."
+      )
     end
   end
 
@@ -31,7 +33,9 @@ RSpec.describe HtmlSanitizeAttributes do
     it "validates bases on new methods" do
       v = ValidatableModel.new(label: "<span>missing</pan>")
       expect(v.valid?).to eq false
-      expect(v.errors.full_messages).to include("Label must be valid rich text html.")
+      expect(v.errors.full_messages).to include(
+        "Label must be valid rich text html."
+      )
     end
   end
 end

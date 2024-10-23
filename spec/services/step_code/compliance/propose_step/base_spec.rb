@@ -5,11 +5,15 @@ RSpec.describe StepCode::Compliance::ProposeStep::Base do
   let(:max_step) { 5 }
 
   subject(:compliance_checker) do
-    StepCode::Compliance::ProposeStep::Base.new(checklist: step_code.pre_construction_checklist, min_required_step:)
+    StepCode::Compliance::ProposeStep::Base.new(
+      checklist: step_code.pre_construction_checklist,
+      min_required_step:
+    )
   end
 
   before :each do
-    iterations = expected_step ? expected_step - (min_required_step || min_step) + 2 : 1
+    iterations =
+      expected_step ? expected_step - (min_required_step || min_step) + 2 : 1
     results =
       Array.new(iterations) do |n|
         step = (min_required_step || min_step) + n
