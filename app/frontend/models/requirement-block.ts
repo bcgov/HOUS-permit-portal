@@ -3,7 +3,12 @@ import { STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementAttributes, IRequirementBlockParams } from "../types/api-request"
-import { EAutoComplianceModule, EEnergyStepCodeDependencyRequirementCode, ERequirementType } from "../types/enums"
+import {
+  EAutoComplianceModule,
+  EEnergyStepCodeDependencyRequirementCode,
+  ERequirementType,
+  EVisibility,
+} from "../types/enums"
 import { RequirementModel } from "./requirement"
 
 export const RequirementBlockModel = types
@@ -15,6 +20,7 @@ export const RequirementBlockModel = types
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),
     description: types.maybeNull(types.string),
+    visibility: types.enumeration(Object.values(EVisibility)),
     displayDescription: types.maybeNull(types.string),
     sku: types.string,
     createdAt: types.Date,

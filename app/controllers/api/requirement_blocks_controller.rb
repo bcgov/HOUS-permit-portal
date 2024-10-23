@@ -110,6 +110,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       :name,
       :first_nations,
       :description,
+      :visibility,
       :display_name,
       :display_description,
       :sign_off_role,

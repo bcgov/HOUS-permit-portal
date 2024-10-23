@@ -74,11 +74,15 @@ class RequirementTemplate < ApplicationRecord
     type == "EarlyAccessRequirementTemplate"
   end
 
+  def live?
+    type == "LiveRequirementTemplate"
+  end
+
   def visibility
     if early_access?
-      return "early_access"
-    else
-      return "live"
+      "early_access"
+    elsif live?
+      "live"
     end
   end
 

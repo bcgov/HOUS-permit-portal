@@ -177,6 +177,7 @@ export interface IDenormalizedRequirementBlock {
   sku: string
   formJson?: IFormIOBlock
   description?: string
+  visibility: EVisibility
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]

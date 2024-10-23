@@ -22,7 +22,7 @@ import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resourc
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, EVisibility } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
@@ -49,8 +49,10 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   withOptionsMenu,
   forEarlyAccess,
 }: IRequirementsBlockProps) {
-  const { requirementBlockStore } = useMst()
+  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
   const { t } = useTranslation()
+  const { fetchData } = searchModel
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -63,12 +65,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           firstNations: requirementBlock.firstNations,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
+          visibility: requirementBlock.visibility || EVisibility.any,
           displayDescription: requirementBlock.displayDescription,
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
           requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
         }
       : {
+          visibility: forEarlyAccess ? EVisibility.earlyAccess : EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
         }
@@ -142,15 +146,16 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           ...removedRequirementAttributes,
         ] as IRequirementAttributes[],
       })
-      requirementBlockStore.fetchRequirementBlocks()
     } else {
       isSuccess = await createRequirementBlock({
         ...data,
         requirementsAttributes: [...mappedRequirementAttributes],
       })
     }
-
-    isSuccess && onClose()
+    if (isSuccess) {
+      fetchData()
+      onClose()
+    }
   }
 
   const handleClose = () => {

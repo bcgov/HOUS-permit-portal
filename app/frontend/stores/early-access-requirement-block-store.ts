@@ -41,7 +41,6 @@ export const EarlyAccessRequirementBlockStoreModel = types
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )
-
       if (response.ok) {
         self.rootStore.requirementBlockStore.mergeUpdateAll(response.data.data, "requirementBlockMap")
         self.tableEarlyAccessRequirementBlocks = cast(response.data.data.map((requirementBlock) => requirementBlock.id))
