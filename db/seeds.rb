@@ -284,3 +284,16 @@ LiveRequirementTemplate.find_each do |lrt|
     lrt
   ).build_requirement_template_from_existing(overrides)
 end
+
+# invite a usable super admin
+# safeguard for development only
+if Rails.env.development?
+  email = "usable+super_admin@example.com"
+  User.invite!(email: email) do |u|
+    u.skip_confirmation_notification!
+    u.role = :super_admin
+    u.first_name = "Super"
+    u.last_name = "Admin"
+    u.save
+  end
+end
