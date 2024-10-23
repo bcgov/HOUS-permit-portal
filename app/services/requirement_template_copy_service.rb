@@ -1,6 +1,12 @@
 class RequirementTemplateCopyService
   attr_accessor :requirement_template
 
+  # Define a whitelist of permitted classes
+  ALLOWED_CLASSES = {
+    LiveRequirementTemplate.name => LiveRequirementTemplate,
+    EarlyAccessRequirementTemplate.name => EarlyAccessRequirementTemplate
+  }.freeze
+
   def initialize(requirement_template)
     @requirement_template = requirement_template
   end
@@ -8,8 +14,12 @@ class RequirementTemplateCopyService
   def build_requirement_template_from_existing(field_overrides = {})
     ActiveRecord::Base.transaction do
       # Clone the basic attributes of the original template
+      # # Fetch the class from the whitelist or fallback to the existing class
+      template_class =
+        ALLOWED_CLASSES[field_overrides[:type]] || requirement_template.class
+
       new_template =
-        (field_overrides[:type]&.constantize || requirement_template.class).new(
+        template_class.new(
           activity_id: requirement_template.activity_id,
           permit_type_id: requirement_template.permit_type_id,
           description:
