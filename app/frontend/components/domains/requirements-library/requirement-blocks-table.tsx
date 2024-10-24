@@ -56,13 +56,13 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     showArchived,
   } = searchModel
 
-  useSearch(searchModel as ISearch, [showArchived])
-
   useEffect(() => {
     return () => {
       searchModel.setShowArchived(false)
     }
   }, [])
+
+  useSearch(searchModel as ISearch, [showArchived, requirementBlockStore.isEditingEarlyAccess])
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>

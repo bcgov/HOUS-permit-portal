@@ -67,6 +67,7 @@ const SectionDisplay = observer(
     disabledUseForBlockIds?: string[]
   }) => {
     const { requirementBlockStore } = useMst()
+    const { getIsRequirementBlockEditable } = requirementBlockStore
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
     const { t } = useTranslation()
 
@@ -156,19 +157,22 @@ const SectionDisplay = observer(
           )}
         </HStack>
         <Stack w={"full"}>
-          {watchedSectionBlocks.map((sectionBlock, index) => (
-            <RequirementBlockAccordion
-              mb="6"
-              as={"section"}
-              id={formScrollToId(sectionBlock.requirementBlockId)}
-              key={sectionBlock.id}
-              requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
-              onRemove={() => removeSectionBlock(index)}
-              isCollapsedAll={isCollapsedAll}
-              isEditable
-              showEditWarning
-            />
-          ))}
+          {watchedSectionBlocks.map((sectionBlock, index) => {
+            const requirementBlock = requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)
+            return (
+              <RequirementBlockAccordion
+                mb="6"
+                as={"section"}
+                id={formScrollToId(sectionBlock.requirementBlockId)}
+                key={sectionBlock.id}
+                requirementBlock={requirementBlock}
+                onRemove={() => removeSectionBlock(index)}
+                isCollapsedAll={isCollapsedAll}
+                isEditable={getIsRequirementBlockEditable(requirementBlock)}
+                showEditWarning
+              />
+            )
+          })}
           <RequirementsLibraryDrawer
             defaultButtonProps={{ alignSelf: "center" }}
             onUse={(requirementBlock, closeDrawer) => {

@@ -2,9 +2,10 @@ import { Button, Flex, HStack, Menu, MenuButton, MenuDivider, MenuItem, MenuList
 import { Archive, ArrowSquareOut, ArrowsClockwise, CaretDown } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { useMst } from "../../../../../setup/root"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
 import {
   BaseEditRequirementTemplateScreen,
@@ -13,6 +14,17 @@ import {
 } from "../../../requirement-template/screens/base-edit-requirement-template-screen"
 
 export const EditEarlyAccessRequirementTemplateScreen = observer(function EditEarlyAccessRequirementTemplateScreen() {
+  const { requirementBlockStore } = useMst()
+  const { setIsEditingEarlyAccess, resetIsEditingEarlyAccess } = requirementBlockStore
+
+  useEffect(() => {
+    setIsEditingEarlyAccess(true)
+
+    return () => {
+      resetIsEditingEarlyAccess()
+    }
+  }, [])
+
   return (
     <BaseEditRequirementTemplateScreen
       renderOptionsMenu={EditEarlyAccessRequirementOptions}
