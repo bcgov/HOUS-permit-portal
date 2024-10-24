@@ -24,17 +24,33 @@ services:
     env_file: .env.docker_compose
     volumes:
       - .:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
-      - "3036:3036"
     depends_on:
       - postgres
       - redis
       - elasticsearch
+      - vite
+    environment:
+      VITE_RUBY_HOST: vite
+      <<: *default-env-vars
+    command: bash -c "bundle exec rails s -b '0.0.0.0' -p 3000"
+
+  vite:
+    image: hous-permit-portal-dev:latest
+    pull_policy: "never"
+    working_dir: /app
+    env_file: .env.docker_compose
+    volumes:
+      - .:/app
+      - /app/node_modules
     environment:
       <<: *default-env-vars
-      VITE_RUBY_HOST: "0.0.0.0" # run vite in the same service for easy access, and HMR
-    command: bash -c "rm -f tmp/pids/server.pid && ./bin/rails server -b '0.0.0.0' & ./bin/vite dev"
+      VITE_RUBY_HOST: "0.0.0.0"
+    command: "./bin/vite dev"
+    ports:
+      - "3036:3036"
 
   sidekiq:
     image: hous-permit-portal-dev:latest

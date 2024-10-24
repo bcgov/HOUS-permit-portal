@@ -2,7 +2,6 @@
 ARG RUBY_VERSION=3.2.2-bullseye
 FROM ruby:$RUBY_VERSION
 
-# Rails app lives here
 WORKDIR /app
 
 # Set development environment
@@ -29,13 +28,11 @@ RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz
     /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
     rm -rf /tmp/node-build-master
 
+COPY . .
 
-# Install npm and node modules
+# in dev mode npm install AFTER copying so that we overwrite with the right architecture npm modules (and still allow users who want to run this locally to do so)
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps --maxsockets=50
 
-# Copy application code
-COPY . .
 
-# Precompile bootsnap code for faster boot times (optional)
 RUN bundle exec bootsnap precompile app/ lib/

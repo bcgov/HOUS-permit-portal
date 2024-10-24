@@ -13,9 +13,11 @@ Ensure you have the following:
 - Redis
 - Node 20.10+
 
+(Alternatively run this locally with `docker compose` see section further down)
+
 **Please enable git LFS in order to properly clone the repo.**
 
-### Local Running Steps
+### Running the application locally (non-dockerized)
 
 - Install Dependencies: `bundle install` and `npm install`
 - Ensure you have a `.env` file with required variables (reference `.env.example`)
@@ -25,6 +27,33 @@ Ensure you have the following:
 - (_Only first time or if there are changes_) Generate seed data: `rails db:seed`
 - Start the server: `rails s`
 - Start the front-end dev server for hot-reloading: `npm run dev`
+
+### Running the application locally with Docker Compose
+
+To make things easier to run on various platforms locally, there is a `docker compose` version of the app that can be run. This will help you run the app locally with most of the dependencies. There are a few caveats to this to note which will are mentioned at the end of this section
+
+**Prerequisites**
+
+- Download and install Docker Desktop for your system
+- Make sure that you can run both `docker` and `docker compose` in your terminal and this is working correctly
+- Since some prefer to run this locally without Docker (see above) this setup is aimed to preserving the ability to run this application both ways. As such, this uses a separate `Dockerfile.dev` and ENV file `.env.docker_compose` that we will use for the purposes of running locally only
+- Ensure that you have a local copy of `.env.docker_compose` - an example is provided in `.env.example` (see first point in Caveats section)
+
+**Instructions**
+
+1. Clone this repo with git to your local machine
+2. Run: `docker compose up` (this will start up all related services including Vite for HMR)
+3. (If this is the first run of the application or there are pending migrations) Run migrations: `docker compose exec app bundle exec rails db:migrate`
+4. (If this is the first run of the app or seeds have changed, you can rerun the seeder). Generate seed data: `docker compose exec app bundle exec rails db:seed`
+5. Things should now be running. You can isolate / look at logs for various containers using `docker compose logs -f app` for example for the app logs (or any other service)
+6. The app should reflect changes live if you edit the files in the folder (both Ruby and JS) since its mounted live
+
+**NOTES / Caveats**
+
+- A minimal set of ENV vars that reference various services (eg. Redis, Postgres, etc.) are defaulted in the `docker-compose.yml` for dev purposes, the app also loads other ENV vars from `.env.docker_compose` so ensure that you have those setup if you are trying to use functionality related to that (eg. CHES keys for email sending, BCEID / keycloak stuff, etc.)
+- Local development (see above) uses `letter_opener` / `launchy` to view emails locally. These do not work within the dockerized environment, and we haven't yet put in a workaround for this
+- This local dockerized version does not contain a service for `Consigno Verifio Notarius Server` which is proprietary licensed software that helps with validating PDFs. Therefore all functionality around this will not work. You can either run the service manually outside Docker and refer to it using the ENV vars, or find a private repository that has the image that you can then run in `docker-compose`
+- The local dockerized version does not setup Minio (which can be used to locally mocking Object Storage - see instructions for local setup below). You can set this up manually and hook it up via the ENV vars or simply switch the app to use actual `BCGOV_OBJECT_STORAGE` if you have a bucket allocation already.
 
 ### Workers (Sidekiq)
 
