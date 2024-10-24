@@ -53,7 +53,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
   const { t } = useTranslation()
   const { fetchData } = searchModel
-  const { createRequirementBlock } = requirementBlockStore
+  const { createRequirementBlock, isEditingEarlyAccess } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
@@ -244,7 +244,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
                 {showEditWarning && (
-                  <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.editWarning")} />
+                  <CalloutBanner
+                    type={"warning"}
+                    title={
+                      isEditingEarlyAccess
+                        ? t("requirementsLibrary.modals.previewEditWarning")
+                        : t("requirementsLibrary.modals.templateEditWarning")
+                    }
+                  />
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup

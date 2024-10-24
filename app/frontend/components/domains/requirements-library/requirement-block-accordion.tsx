@@ -26,6 +26,7 @@ import { Editor } from "../../shared/editor/editor"
 import { ElectiveTag } from "../../shared/elective-tag"
 import { FirstNationsTag } from "../../shared/first-nations-tag"
 import { RichTextTip } from "../../shared/rich-text-tip"
+import { VisibilityTag } from "../../shared/visibility-tag.tsx"
 import { RequirementFieldDisplay } from "./requirement-field-display"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 
@@ -38,8 +39,8 @@ type TProps = {
   hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
 } & Partial<AccordionProps> &
   (
-    | { isEditable?: never; showEditWarning?: never }
-    | { isEditable: true; showEditWarning?: boolean }
+    | { isEditable?: boolean; showEditWarning?: never }
+    | { isEditable: boolean; showEditWarning?: boolean }
     | {
         isEditable: false
         showEditWarning?: never
@@ -111,6 +112,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               )}
             </HStack>
             <HStack spacing={2}>
+              <VisibilityTag visibility={requirementBlock.visibility} />
               <Box mr={2}>{requirementBlock.firstNations && <FirstNationsTag />}</Box>
               {isOpen && isEditable && !renderEdit && (
                 <RequirementsBlockModal

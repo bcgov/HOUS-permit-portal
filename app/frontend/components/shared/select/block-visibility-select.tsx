@@ -22,7 +22,7 @@ export const BlockVisibilityOption = (props) => {
   return (
     <components.Option {...props}>
       <Box>
-        <Text color="text.link" fontWeight="bold">
+        <Text color="text.link" fontWeight="bold" mb={1}>
           {data.label}
         </Text>
         <Text fontSize="sm">{data.description}</Text>
@@ -36,9 +36,7 @@ const BlockVisibilitySingleValue = (props) => {
   const { data } = props
   return (
     <components.SingleValue {...props}>
-      <Text color="text.link" fontWeight="bold">
-        {data.label}
-      </Text>
+      <Text>{data.label}</Text>
     </components.SingleValue>
   )
 }
@@ -52,15 +50,15 @@ const chakraStyles = (theme) => ({
   }),
   control: (provided, state) => ({
     ...provided,
-    backgroundColor: "white",
+    backgroundColor: theme.colors.greys.white,
     boxShadow: state.isFocused ? `0 0 0 1px ${theme.colors.theme.blue}` : "none",
     minHeight: "40px",
     cursor: "pointer",
   }),
   menu: (provided) => ({
     ...provided,
-    backgroundColor: theme.colors.white,
-    zIndex: 10, // Ensure the menu appears above other elements
+    backgroundColor: theme.colors.greys.white,
+    width: "300px",
   }),
   option: (provided, state) => ({
     ...provided,

@@ -21,7 +21,7 @@ export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IPr
 
   console.log()
   return (
-    <Box display={"contents"} role={"rowgroup"}>
+    <Box display={"contents"} role={"rowgroup"} position="fixed">
       <Box display={"contents"} role={"row"}>
         <GridItem
           as={Flex}
