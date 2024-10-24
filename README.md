@@ -44,10 +44,11 @@ To make things easier to run on various platforms locally, there is a `docker co
 
 1. Clone this repo with git to your local machine
 2. Run: `docker compose up` (this will start up all related services including Vite for HMR)
-3. (If this is the first run of the application or there are pending migrations) Run migrations: `docker compose exec app bundle exec rails db:migrate`
+3. If this is the first run of the application, create the database and run migrations `docker compose exec app bundle exec rails db:migrate`
 4. (If this is the first run of the app or seeds have changed, you can rerun the seeder). Generate seed data: `docker compose exec app bundle exec rails db:seed`
-5. Things should now be running. You can isolate / look at logs for various containers using `docker compose logs -f app` for example for the app logs (or any other service)
-6. The app should reflect changes live if you edit the files in the folder (both Ruby and JS) since its mounted live
+5. If there are outstanding migrations after you pull code and done the initial runs. Run migrations: `docker compose exec app bundle exec rails db:migrate`
+6. Things should now be running. You can isolate / look at logs for various containers using `docker compose logs -f app` for example for the app logs (or any other service)
+7. The app should reflect changes live if you edit the files in the folder (both Ruby and JS) since its mounted live
 
 **NOTES / Caveats**
 

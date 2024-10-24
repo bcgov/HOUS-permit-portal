@@ -14,8 +14,6 @@ class CreatePermitTypeRequiredStep < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    PermitTypeRequiredStepSeeder.seed
-
     change_table :jurisdictions do |t|
       t.remove :energy_step_required, :zero_carbon_step_required
     end
@@ -28,5 +26,9 @@ class CreatePermitTypeRequiredStep < ActiveRecord::Migration[7.1]
     end
 
     drop_table :permit_type_required_steps
+  end
+
+  def data
+    PermitTypeRequiredStepSeeder.seed
   end
 end
