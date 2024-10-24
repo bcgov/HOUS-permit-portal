@@ -68,7 +68,8 @@ en:
         requirement_block:
           attributes:
             visibility:
-              wrong_requirement_template_type: "can only be 'early_access' if associated templates are also early access"
+              associated_requirement_templates_must_be_early_access: "can not be set to 'preview' if the block is present in any live drafts"
+              associated_requirement_templates_must_be_live: "can not be set to 'exclude preview' if the block is present in any early-access previews"
             requirements:
               incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
               duplicate_step_code_package_file: "must have only one design package file for energy step code per requirement block"

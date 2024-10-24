@@ -4,18 +4,22 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
+  HStack,
   Input,
   Text,
   Textarea,
   TextProps,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react"
+import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
+import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
@@ -41,10 +45,18 @@ export const BlockSetup = observer(function BlockSetup({
     return associations.map((association) => ({ value: association, label: association }))
   }
 
+  const visibilityWatch = watch("visibility")
+
+  const visibilityBgColor = {
+    any: "greys.grey10",
+    live: "semantic.infoLight",
+    early_access: "semantic.warningLight",
+  }
+
   return (
     <Box
       as={"section"}
-      w={"300px"}
+      w={"350px"}
       boxShadow={"md"}
       borderRadius={"xl"}
       bg={"greys.grey10"}
@@ -56,6 +68,32 @@ export const BlockSetup = observer(function BlockSetup({
           {t("requirementsLibrary.modals.blockSetupTitle")}
         </Text>
       </Box>
+      <FormControl
+        display="flex"
+        alignItems={{ sm: "center" }}
+        bg={visibilityBgColor[visibilityWatch]}
+        px={6}
+        py={2}
+        gap={2}
+        borderBottom="1px solid"
+        borderColor="border.light"
+        w="full"
+      >
+        <HStack gap={1}>
+          <FormLabel htmlFor="visibility-selector" fontWeight="bold" m={0} fontSize="sm">
+            {t("requirementsLibrary.modals.visibilityLabel")}
+          </FormLabel>
+          <Tooltip
+            label={t("requirementsLibrary.modals.edit.visibilityTooltip")}
+            aria-label="Visibility tooltip"
+            placement="right"
+            hasArrow
+          >
+            <Info size={15} />
+          </Tooltip>
+        </HStack>
+        <BlockVisibilitySelect name="visibility" />
+      </FormControl>
       <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
           {t("requirementsLibrary.modals.internalUse")}

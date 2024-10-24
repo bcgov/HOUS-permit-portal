@@ -37,6 +37,7 @@ export interface IRequirementBlockParams {
   name: string
   firstNations: boolean
   displayName: string
+  visibility: string
   displayDescription: string
   description?: string
   associationList?: string[]

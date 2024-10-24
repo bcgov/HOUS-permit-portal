@@ -652,7 +652,8 @@ const options = {
         earlyAccessRequirementsLibrary: {
           index: {
             title: "Early access requirements library",
-            description: "TODO description",
+            description:
+              "This displays all requirement blocks whose visibility has been set to 'preview only'. These blocks may not be used in any live drafts.",
             tableHeading: "Early access requirement blocks",
           },
         },
@@ -677,6 +678,17 @@ const options = {
             useButton: "Use",
             dummyOption: "Option",
           },
+          visibilityDescriptions: {
+            any: "No restrictions on visibility.",
+            live: "Can only be used in live templates only. Does not affect published templates.",
+            earlyAccess:
+              "Available to be used in early access preview templates only. Does not affect published templates",
+          },
+          visibility: {
+            any: "Any",
+            live: "Exclude preview",
+            earlyAccess: "Preview only",
+          },
           modals: {
             archived: "Archived",
             unlabeled: "Unlabeled",
@@ -685,6 +697,12 @@ const options = {
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
+            visibilityLabel: "Visibility",
+            changeVisibility: {
+              confirmChangeTitle: "Change visibility?",
+              confirmChangeBody:
+                "This is only possible if the block only currently exists in the correct corresponding in-progress template drafts and previews.",
+            },
             create: {
               triggerButton: "Create new requirement block",
               title: "New requirement block",
@@ -693,6 +711,8 @@ const options = {
               title: "Edit requirement block",
               options: "Options",
               copy: "Copy this block",
+              visibilityTooltip:
+                "Visibility determines if the block is restricted to live, early-access previews, or both",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",

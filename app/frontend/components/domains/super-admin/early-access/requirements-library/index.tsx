@@ -9,7 +9,7 @@ import { RequirementsBlockModal } from "../../../requirements-library/requiremen
 
 export const EarlyAccessRequirementsLibraryScreen = observer(function RequirementsLibrary() {
   const { t } = useTranslation()
-  const { requirementBlockStore } = useMst()
+  const { earlyAccessRequirementBlockStore } = useMst()
 
   return (
     <Container maxW="container.lg" p={8} as="main">
@@ -27,7 +27,7 @@ export const EarlyAccessRequirementsLibraryScreen = observer(function Requiremen
         </Flex>
 
         <RequirementBlocksTable alignItems={"flex-start"} w={"full"} forEarlyAccess />
-        <ToggleArchivedButton searchModel={requirementBlockStore} mt={3} />
+        <ToggleArchivedButton searchModel={earlyAccessRequirementBlockStore} mt={3} />
       </VStack>
     </Container>
   )
