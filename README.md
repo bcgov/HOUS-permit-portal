@@ -37,7 +37,8 @@ To make things easier to run on various platforms locally, there is a `docker co
 - Download and install Docker Desktop for your system
 - Make sure that you can run both `docker` and `docker compose` in your terminal and this is working correctly
 - Since some prefer to run this locally without Docker (see above) this setup is aimed to preserving the ability to run this application both ways. As such, this uses a separate `Dockerfile.dev` and ENV file `.env.docker_compose` that we will use for the purposes of running locally only
-- Ensure that you have a local copy of `.env.docker_compose` - an example is provided in `.env.example` (see first point in Caveats section)
+- Ensure that you have a local copy of `.env.docker_compose` - an example is provided in `.env_example.docker_compose` (see first point in Caveats section) which provides the minimal to start the app without some services
+- We currently ONLY allow keycloak login and we've removed e-mail login. To start the app make sure you must have a valid keycloak development realm set up so that you can properly log in. (See `.env_example.docker_compose` and [What is Keycloak at BC Government](https://developer.gov.bc.ca/docs/default/component/css-docs/What-is-Keycloak-at-BC-Government/))
 
 **Instructions**
 
@@ -183,6 +184,7 @@ bundle exec rspec
 Some other notes
 
 - For digital seal tests, the we have not uploaded documents with the real document to the repo, but captured the request responses
+- If you are running in the dockerized version, you may need to reset your database or you may want to create a second instance of the dockerized postgre service to run tests.
 
 ## ERD generation
 
