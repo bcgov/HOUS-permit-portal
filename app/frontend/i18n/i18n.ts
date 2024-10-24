@@ -686,7 +686,7 @@ const options = {
           },
           visibility: {
             any: "Any",
-            live: "Exclude preview",
+            live: "Preview omitted",
             earlyAccess: "Preview only",
           },
           modals: {
@@ -771,7 +771,12 @@ const options = {
               },
             },
             addOptionButton: "Add another option",
-            editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
+            templateEditWarning:
+              "Any changes made here will be reflected in all unsaved preview drafts that use this requirement block.",
+            previewEditWarning:
+              "Any changes made here will be reflected in all in-progress template drafts that use this requirement block.",
+            templates: "templates",
+            previews: "previews",
             stepCodeDependencies: {
               energyStepCodeMethod: {
                 tool: "Utilizing the digital step code tool",
@@ -1483,6 +1488,9 @@ const options = {
           added: "added",
           removed: "removed",
           edit: {
+            requirementsLibraryTab: "Requirements Library",
+            earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
+            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",

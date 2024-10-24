@@ -54,15 +54,7 @@ export const BlockSetup = observer(function BlockSetup({
   }
 
   return (
-    <Box
-      as={"section"}
-      w={"350px"}
-      boxShadow={"md"}
-      borderRadius={"xl"}
-      bg={"greys.grey10"}
-      overflow={"hidden"}
-      ref={containerRef}
-    >
+    <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>
       <Box as={"header"} w={"full"} px={6} py={3} bg={"theme.blueAlt"}>
         <Text as={"h3"} fontSize={"xl"} color={"greys.white"} fontWeight={700}>
           {t("requirementsLibrary.modals.blockSetupTitle")}
@@ -78,6 +70,7 @@ export const BlockSetup = observer(function BlockSetup({
         borderBottom="1px solid"
         borderColor="border.light"
         w="full"
+        position="relative"
       >
         <HStack gap={1}>
           <FormLabel htmlFor="visibility-selector" fontWeight="bold" m={0} fontSize="sm">
