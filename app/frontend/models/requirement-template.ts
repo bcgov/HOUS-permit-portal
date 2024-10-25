@@ -122,6 +122,9 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         // TODO
         return 0
       },
+      get isEarlyAccess() {
+        return self.type === ERequirementTemplateType.EarlyAccessRequirementTemplate
+      },
     }))
     .actions((self) => ({
       setIsFullyLoaded(val: boolean) {

@@ -79,8 +79,8 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.force_publish_now!(requirement_template, for_early_access = false)
-    unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true" || for_early_access
+  def self.force_publish_now!(requirement_template)
+    unless ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true"
       raise TemplateVersionForcePublishNowError.new(
               "Force publish is not enabled"
             )
@@ -120,14 +120,32 @@ class TemplateVersioningService
     template_version
   end
 
-  def self.publish_early_access_version!(requirement_template)
+  def self.create_or_update_published_version_for_early_access!(
+    requirement_template
+  )
     unless requirement_template.type == EarlyAccessRequirementTemplate.name
       raise TemplateVersionPublishError.new(
               "Cannot create early access version for a non-early access requirement template"
             )
     end
 
-    self.force_publish_now!(requirement_template, true)
+    attributes = {
+      denormalized_template_json:
+        RequirementTemplateBlueprint.render_as_hash(
+          requirement_template,
+          view: :template_snapshot
+        ),
+      form_json: requirement_template.to_form_json,
+      requirement_blocks_json:
+        form_requirement_blocks_hash(requirement_template),
+      version_date: Date.current,
+      status: "published"
+    }
+    version =
+      requirement_template.published_template_version ||
+        requirement_template.build_template_version
+    version.assign_attributes(attributes)
+    version.save!
   end
 
   def self.publish_version!(template_version, skip_date_check = false)
@@ -462,14 +480,10 @@ class TemplateVersioningService
         .where("version_date <=?", template_version.version_date)
         .where.not(id: template_version.id)
 
-    if (template_version.early_access?)
-      template_versions.destroy_all
-    else
-      template_versions.update_all(
-        status: "deprecated",
-        deprecation_reason: TemplateVersion.deprecation_reasons[:new_publish]
-      )
-    end
+    template_versions.update_all(
+      status: "deprecated",
+      deprecation_reason: TemplateVersion.deprecation_reasons[:new_publish]
+    )
   end
 
   def self.form_requirement_blocks_hash(requirement_template)

@@ -1,16 +1,16 @@
 class EarlyAccessRequirementTemplate < RequirementTemplate
   SEARCH_INCLUDES = RequirementTemplate::SEARCH_INCLUDES + [:assignee]
 
-  has_one :template_version,
-          dependent: :destroy,
-          foreign_key: :requirement_template_id
-
   belongs_to :assignee, class_name: "User", optional: true
 
-  after_save :publish_early_access_version
+  after_save :maintain_published_early_access_version
 
-  def publish_early_access_version
-    TemplateVersioningService.publish_early_access_version!(self)
+  validate :valid_template_version_status
+
+  def maintain_published_early_access_version
+    TemplateVersioningService.create_or_update_published_version_for_early_access!(
+      self
+    )
   rescue TemplateVersionPublishError => e
     errors.add(:base, e.message)
     raise ActiveRecord::Rollback
@@ -22,8 +22,11 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
 
   private
 
-  def has_one_published_template_version
-    unless template_versions.length == 1 && template_versions.first.published?
+  def valid_template_version_status
+    return if template_versions.empty?
+
+    if template_versions.size != 1 ||
+         template_versions.first.status != "published"
       errors.add(
         :template_versions,
         I18n.t(
