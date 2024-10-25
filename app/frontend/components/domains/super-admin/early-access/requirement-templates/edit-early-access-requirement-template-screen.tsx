@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../../setup/root"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
+import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import {
   BaseEditRequirementTemplateScreen,
   IEditRequirementActionsProps,
@@ -108,9 +109,13 @@ const EditEarlyAccessRequirementActions = ({ requirementTemplate }: IEditRequire
       <Button variant="primary">
         {t("ui.share")} ({requirementTemplate.numberSharedWith})
       </Button>
-      <Button variant="secondary" rightIcon={<ArrowSquareOut />}>
+      <RouterLinkButton
+        rightIcon={<ArrowSquareOut />}
+        variant="secondary"
+        to={`/early-access/requirement-templates/${requirementTemplate.id}`}
+      >
         {t("ui.view")}
-      </Button>
+      </RouterLinkButton>
     </>
   )
 }

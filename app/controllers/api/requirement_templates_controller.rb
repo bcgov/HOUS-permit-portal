@@ -43,7 +43,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.create_success",
-                     { blueprint: RequirementTemplateBlueprint }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
     else
       render_error "requirement_template.create_error",
                    message_opts: {
@@ -79,7 +85,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.copy_success",
-                     { blueprint: RequirementTemplateBlueprint }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
     else
       render_error "requirement_template.copy_error",
                    message_opts: {
@@ -91,7 +103,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def update
     authorize @requirement_template
-
     if @requirement_template.update(requirement_template_params)
       render_success @requirement_template,
                      "requirement_template.update_success",
