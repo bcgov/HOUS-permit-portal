@@ -143,7 +143,7 @@ class TemplateVersioningService
     }
     version =
       requirement_template.published_template_version ||
-        requirement_template.build_template_version
+        requirement_template.template_versions.build
     version.assign_attributes(attributes)
     version.save!
   end
