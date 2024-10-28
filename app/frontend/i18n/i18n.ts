@@ -1460,6 +1460,8 @@ const options = {
             sharePreviewLink: "{{ n }} people",
             sharePreviewTitle: "Share preview",
             inviteToPreviewTitle: "Invite to preview",
+            inviteToPreviewHint: "Separate each email with a comma ,",
+            inviteToPreviewButton: "Send invites",
           },
           new: {
             title: "Create new preview",

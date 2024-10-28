@@ -79,6 +79,10 @@ export interface IRequirementTemplateUpdateParams {
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 
+export interface IInvitePreviewersParams {
+  emails: string[]
+}
+
 export interface ISiteConfigurationUpdateParams extends Partial<ISiteConfiguration> {
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }

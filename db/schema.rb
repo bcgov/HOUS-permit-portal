@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_28_171846) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -78,6 +78,22 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "early_access_previews",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "early_access_requirement_template_id", null: false
+    t.uuid "previewer_id", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[early_access_requirement_template_id previewer_id],
+            name: "index_early_access_previews_on_template_id_and_previewer_id",
+            unique: true
+    t.index ["previewer_id"],
+            name: "index_early_access_previews_on_previewer_id"
   end
 
   create_table "end_user_license_agreements",
@@ -907,6 +923,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "collaborators", "users"
+  add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"

@@ -18,6 +18,7 @@ import { IUser } from "../../models/user"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
+  IInvitePreviewersParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -424,6 +425,13 @@ export class Api {
     return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
       requirementTemplate: params,
     })
+  }
+
+  async invitePreviewers(templateId: string, params: IInvitePreviewersParams) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/invite_previewers`,
+      params
+    )
   }
 
   // we send the versionDate as string instead of date as we want to strip off timezone info

@@ -1,7 +1,15 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
   before_action :set_requirement_template,
-                only: %i[show destroy restore update schedule force_publish_now]
+                only: %i[
+                  show
+                  destroy
+                  restore
+                  update
+                  schedule
+                  force_publish_now
+                  invite_previewers
+                ]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -251,6 +259,46 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  def invite_previewers
+    authorize @requirement_template
+    service = EarlyAccess::PreviewManagementService.new(@requirement_template)
+
+    result = service.invite_previewers!(previewer_invite_params[:emails])
+    if result[:failed_emails].empty?
+      render_success @requirement_template,
+                     "requirement_template.invite_previewers_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
+    elsif result[:previews].empty?
+      skip_authorization
+      render_error "requirement_template.invite_previewers_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
+    else
+      render_success @requirement_template,
+                     "requirement_template.invite_previewers_partial_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       },
+                       message_opts: {
+                         failed_emails:
+                           result[:failed_emails]
+                             .map { |obj| "#{obj[:email]} (#{obj[:error]})" }
+                             .join(", ")
+                       }
+                     }
+    end
+  end
+
   private
 
   def set_requirement_template
@@ -270,6 +318,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def set_template_version
     @template_version = TemplateVersion.find(params[:id])
+  end
+
+  def previewer_invite_params
+    params.permit(emails: [])
   end
 
   def requirement_template_params
