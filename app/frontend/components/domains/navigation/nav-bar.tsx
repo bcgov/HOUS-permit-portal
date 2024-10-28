@@ -433,7 +433,7 @@ const NavMenuItem = ({ label, to, onClick, ...rest }: INavMenuItemProps) => {
   }
 
   return (
-    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} {...rest}>
+    <MenuItem as={"a"} py={2} px={3} onClick={handleClick} _hover={{ cursor: "pointer", bg: "hover.blue" }} {...rest}>
       <Text textAlign="left" w="full">
         {label}
       </Text>
