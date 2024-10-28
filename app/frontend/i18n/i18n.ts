@@ -233,6 +233,7 @@ const options = {
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
+          copy: "Copy",
           copyNoun: "Copy",
           options: "Options",
           na: "N/A",
@@ -241,6 +242,7 @@ const options = {
           unassign: "Unassign",
           seeEarlyAccessButton: "See Early Access",
           seeLiveButton: "See Live",
+          invite: "Invite",
         },
         notification: {
           title: "Notifications",
@@ -1446,6 +1448,9 @@ const options = {
               "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
             createButton: "Create new early access template",
             seeArchivedButton: "See archived",
+            sharePreviewLink: "{{ n }} people",
+            sharePreviewTitle: "Share preview",
+            inviteToPreviewTitle: "Invite to preview",
           },
           new: {
             title: "Create new preview",

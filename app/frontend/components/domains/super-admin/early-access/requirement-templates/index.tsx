@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../../../hooks/use-search"
 import { useMst } from "../../../../../setup/root"
 import { IOption } from "../../../../../types/types"
+import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Paginator } from "../../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../../shared/base/inputs/per-page-select"
@@ -17,6 +18,7 @@ import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import { AssigneeSelect } from "../../../../shared/select/selectors/assignee-select"
 import { YesNoTag } from "../../../../shared/yes-no-tag"
+import { SharePreviewPopover } from "../../../requirement-template/share-preview-popover"
 import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
 
@@ -84,7 +86,12 @@ export const EarlyAccessRequirementTemplatesIndexScreen = observer(function Requ
                   <SearchGridItem>
                     <YesNoTag boolean={rt.firstNations} />
                   </SearchGridItem>
-                  <SearchGridItem>SHARED WITH</SearchGridItem>
+                  <SearchGridItem>
+                    <HStack>
+                      <SharePreviewPopover nInvitees={1} />
+                      <CopyLinkButton value={"TODO"} size="xs" />
+                    </HStack>
+                  </SearchGridItem>
                   <SearchGridItem>{format(rt.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
                   <SearchGridItem>
                     <AssigneeSelect
