@@ -136,6 +136,7 @@ en:
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
+      notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
   arbitrary_message_construct:
     devise:
       failure:
@@ -351,6 +352,15 @@ en:
       force_publish_now_success:
         title: ""
         message: "Permit has been published."
+      invite_previewers_success:
+        title: ""
+        message: "Successfully invited previewers"
+      invite_previewers_partial_success:
+        title: ""
+        message: "Successfully invited previewers, though there were problems with the following emails: %{failed_emails}"
+      invite_previewers_error:
+        title: Error
+        message: "%{error_message}"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -572,6 +582,10 @@ en:
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
         submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
+    preview:
+      preview_management:
+        create_user_error: "Failed to invite user to preview: %{error_message}"
+        assign_previewer_error: "Failed to assign previewer: %{error_message}"
   formio:
     requirement_template:
       completion_title: "Completion"

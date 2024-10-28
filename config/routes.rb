@@ -77,6 +77,9 @@ Rails.application.routes.draw do
       post "force_publish_now",
            to: "requirement_templates#force_publish_now",
            on: :member
+      post "invite_previewers",
+           to: "requirement_templates#invite_previewers",
+           on: :member
       patch "restore", on: :member
       post "template_versions/:id/unschedule",
            on: :collection,

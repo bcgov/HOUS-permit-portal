@@ -63,6 +63,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       assignee: types.maybeNull(types.safeReference(UserModel)),
+      previewers: types.maybeNull(types.array(types.safeReference(UserModel))),
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
@@ -126,6 +127,11 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         return self.type === ERequirementTemplateType.EarlyAccessRequirementTemplate
       },
     }))
+    .views((self) => ({
+      get numberOfPreviewers() {
+        return self.previewers?.length || 0
+      },
+    }))
     .actions((self) => ({
       setIsFullyLoaded(val: boolean) {
         self.isFullyLoaded = val
@@ -166,6 +172,10 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       }),
       restore: flow(function* () {
         const response = yield self.environment.api.restoreRequirementTemplate(self.id)
+        return response.ok
+      }),
+      invitePreviewersByEmail: flow(function* (emails: string[]) {
+        const response = yield self.environment.api.invitePreviewers(self.id, { emails })
         return response.ok
       }),
     })),

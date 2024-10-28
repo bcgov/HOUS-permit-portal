@@ -88,7 +88,7 @@ export const EarlyAccessRequirementTemplatesIndexScreen = observer(function Requ
                   </SearchGridItem>
                   <SearchGridItem>
                     <HStack>
-                      <SharePreviewPopover nInvitees={1} />
+                      <SharePreviewPopover earlyAccessRequirementTemplate={rt} />
                       <CopyLinkButton value={"TODO"} size="xs" />
                     </HStack>
                   </SearchGridItem>

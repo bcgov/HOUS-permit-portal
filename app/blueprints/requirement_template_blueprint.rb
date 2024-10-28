@@ -29,6 +29,12 @@ class RequirementTemplateBlueprint < Blueprinter::Base
                 options[:current_user]&.super_admin?
               end
 
+  association :early_access_previews,
+              blueprint: EarlyAccessPreviewBlueprint,
+              if: ->(_field_name, rt, options) do
+                options[:current_user]&.super_admin?
+              end
+
   view :extended do
     association :requirement_template_sections,
                 blueprint: RequirementTemplateSectionBlueprint

@@ -1,11 +1,19 @@
 class EarlyAccessRequirementTemplate < RequirementTemplate
-  SEARCH_INCLUDES = RequirementTemplate::SEARCH_INCLUDES + [:assignee]
+  SEARCH_INCLUDES =
+    RequirementTemplate::SEARCH_INCLUDES + %i[assignee previewers]
 
   belongs_to :assignee, class_name: "User", optional: true
+
+  has_many :early_access_previews, dependent: :destroy
+  has_many :previewers, through: :early_access_previews, source: :previewer
 
   after_save :maintain_published_early_access_version
 
   validate :valid_template_version_status
+
+  def frontend_url
+    FrontendUrlHelper.frontend_url("early-access/requirement-templates/#{id}")
+  end
 
   def maintain_published_early_access_version
     TemplateVersioningService.create_or_update_published_version_for_early_access!(

@@ -7,6 +7,23 @@ AllCops:
   Exclude:
     - "{.git,.github,.ruby-lsp,bin,coverage,doc,pkg,sorbet,spec,test/fixtures,vendor,tmp}/**/*"
     - test.rb
+    - 'db/schema.rb'
+    - "**/*.erb"
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Naming/RescuedExceptionsVariableName:
+  Enabled: false
+
+Style/RedundantBegin:
+  Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
 
 Style/FrozenStringLiteralComment:
   Enabled: false
@@ -15,7 +32,7 @@ Gemspec/DevelopmentDependencies:
   Enabled: false
 
 Layout/LineLength:
-  Max: 80
+  Enabled: false
 
 Lint/AmbiguousBlockAssociation:
   Enabled: false

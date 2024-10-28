@@ -39,6 +39,10 @@ class RequirementTemplatePolicy < ApplicationPolicy
     create? && record.scheduled?
   end
 
+  def invite_previewers?
+    create? && record.early_access?
+  end
+
   class Scope < Scope
     def resolve
       scope.all
