@@ -7,13 +7,13 @@ AllCops:
   Exclude:
     - "{.git,.github,.ruby-lsp,bin,coverage,doc,pkg,sorbet,spec,test/fixtures,vendor,tmp}/**/*"
     - test.rb
-    - 'db/schema.rb'
+    - "db/schema.rb"
     - "**/*.erb"
 
-Style/IfUnlessModifier:
+Style/Lambda:
   Enabled: false
 
-Naming/RescuedExceptionsVariableName:
+Style/IfUnlessModifier:
   Enabled: false
 
 Style/RedundantBegin:
@@ -89,7 +89,7 @@ Naming/MethodParameterName:
   Enabled: false
 
 Naming/RescuedExceptionsVariableName:
-  PreferredName: error
+  PreferredName: e
 
 Naming/VariableNumber:
   Enabled: false

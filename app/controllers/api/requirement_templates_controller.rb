@@ -264,7 +264,11 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     service = EarlyAccess::PreviewManagementService.new(@requirement_template)
 
     result = service.invite_previewers!(previewer_invite_params[:emails])
-    if result[:failed_emails].empty?
+
+    if result[:previews].empty?
+      render_error "requirement_template.invite_previewers_error",
+                   { meta: result }
+    else
       render_success @requirement_template,
                      "requirement_template.invite_previewers_success",
                      {
@@ -272,29 +276,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        blueprint_opts: {
                          view: :extended,
                          current_user: current_user
-                       }
-                     }
-    elsif result[:previews].empty?
-      skip_authorization
-      render_error "requirement_template.invite_previewers_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    else
-      render_success @requirement_template,
-                     "requirement_template.invite_previewers_partial_success",
-                     {
-                       blueprint: RequirementTemplateBlueprint,
-                       blueprint_opts: {
-                         view: :extended,
-                         current_user: current_user
                        },
-                       message_opts: {
-                         failed_emails:
-                           result[:failed_emails]
-                             .map { |obj| "#{obj[:email]} (#{obj[:error]})" }
-                             .join(", ")
-                       }
+                       meta: result
                      }
     end
   end

@@ -86,7 +86,6 @@ class PermitHubMailer < ApplicationMailer
   end
 
   def notify_new_or_unconfirmed_preview(early_access_preview:, user:)
-    # binding.pry
     @early_access_preview = early_access_preview
     @user = user
 

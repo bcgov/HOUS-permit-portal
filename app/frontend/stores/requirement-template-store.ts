@@ -63,6 +63,11 @@ export const RequirementTemplateStoreModel = types
       self.rootStore.templateVersionStore.mergeUpdateAll(templateVersions, "templateVersionMap")
       if (requirementTemplate.assignee) self.rootStore.userStore.mergeUpdate(requirementTemplate.assignee, "usersMap")
 
+      self.rootStore.earlyAccessPreviewStore.mergeUpdateAll(
+        requirementTemplate.earlyAccessPreviews,
+        "earlyAccessPreviewsMap"
+      )
+
       return R.mergeRight(requirementTemplate, {
         assignee: requirementTemplate.assignee?.id,
       })

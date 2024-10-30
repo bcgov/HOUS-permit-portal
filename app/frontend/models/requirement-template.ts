@@ -1,11 +1,13 @@
 import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
+import { t } from "i18next"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
 import pluck from "ramda/src/pluck"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { ERequirementTemplateType, EVisibility } from "../types/enums"
+import { EFlashMessageStatus, ERequirementTemplateType, EVisibility } from "../types/enums"
+import { EarlyAccessPreviewModel } from "./early-access-preview"
 import { IActivity, IPermitType } from "./permit-classification"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
@@ -15,6 +17,15 @@ function preProcessor(snapshot) {
   const processedSnapShot = {
     ...snapshot,
     publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
+  }
+
+  if (Array.isArray(snapshot.earlyAccessPreviews)) {
+    processedSnapShot.earlyAccessPreviews = pluck(
+      "id",
+      snapshot.earlyAccessPreviews as Array<{
+        id: "string"
+      }>
+    )
   }
 
   if (Array.isArray(snapshot.scheduledTemplateVersions)) {
@@ -63,7 +74,6 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       scheduledTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       deprecatedTemplateVersions: types.array(types.safeReference(TemplateVersionModel)),
       assignee: types.maybeNull(types.safeReference(UserModel)),
-      previewers: types.maybeNull(types.array(types.safeReference(UserModel))),
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       formJson: types.frozen<IRequirementTemplateFormJson>(),
@@ -71,6 +81,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       firstNations: types.boolean,
       requirementTemplateSectionMap: types.map(RequirementTemplateSectionModel),
       sortedRequirementTemplateSections: types.array(types.safeReference(RequirementTemplateSectionModel)),
+      earlyAccessPreviews: types.array(types.safeReference(EarlyAccessPreviewModel)),
       createdAt: types.Date,
       updatedAt: types.Date,
       fetchedAt: types.maybeNull(types.Date),
@@ -129,7 +140,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       get numberOfPreviewers() {
-        return self.previewers?.length || 0
+        return self.earlyAccessPreviews.length
       },
     }))
     .actions((self) => ({
@@ -175,8 +186,30 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         return response.ok
       }),
       invitePreviewersByEmail: flow(function* (emails: string[]) {
+        if (!self.isEarlyAccess) return
+
         const response = yield self.environment.api.invitePreviewers(self.id, { emails })
-        return response.ok
+
+        if (response.data.meta.failedEmails.length > 0) {
+          const failedEmails = response.data.meta.failedEmails // Assuming this is an array of strings
+          const markdownList = failedEmails.map((email) => `- ${email.email} **(${email.error})**`).join("\n")
+
+          self.rootStore.uiStore.flashMessage.show(
+            EFlashMessageStatus.warning,
+            t("earlyAccessRequirementTemplate.index.inviteToPreviewPartialSuccess"),
+            markdownList, // Pass the markdown-formatted list as description
+            30000,
+            true
+          )
+        }
+        if (response.ok) {
+          const templateData = response.data.data
+          templateData.isFullyLoaded = true
+
+          self.rootStore.requirementTemplateStore.mergeUpdate(templateData, "requirementTemplateMap")
+
+          return self
+        }
       }),
     })),
   {
