@@ -8,17 +8,17 @@ class StepCode < ApplicationRecord
            :pid,
            to: :permit_application
 
-  has_many :data_entries, class_name: "StepCodeDataEntry", dependent: :destroy
-  has_many :checklists, class_name: "StepCodeChecklist", dependent: :destroy
+  has_many :checklists,
+           class_name: "Part9StepCode::Checklist",
+           dependent: :destroy
   has_one :pre_construction_checklist,
           -> { where(stage: :pre_construction) },
-          class_name: "StepCodeChecklist"
+          class_name: "Part9StepCode::Checklist"
 
-  accepts_nested_attributes_for :data_entries
   accepts_nested_attributes_for :pre_construction_checklist
 
   before_create :set_plan_fields
-  validate :requires_plan_document
+  # validate :requires_plan_document
 
   def requires_plan_document
     return if permit_application.blank? #do not enforce if there is no permit application

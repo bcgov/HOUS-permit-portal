@@ -1,17 +1,23 @@
-class StepCodeChecklist < ApplicationRecord
+class Part9StepCode::Checklist < ApplicationRecord
+  self.table_name = "part_9_step_code_checklists"
+
   belongs_to :step_code, optional: Rails.env.test?
   belongs_to :step_requirement,
              class_name: "PermitTypeRequiredStep",
              optional: true
 
+  has_many :data_entries,
+           class_name: "Part9StepCode::DataEntry",
+           dependent: :destroy
+  accepts_nested_attributes_for :data_entries
   has_one :building_characteristics_summary,
-          class_name: "StepCodeBuildingCharacteristicsSummary",
+          class_name: "Part9StepCode::BuildingCharacteristicsSummary",
+          foreign_key: "checklist_id",
           dependent: :destroy
   accepts_nested_attributes_for :building_characteristics_summary
   after_create :create_building_characteristics_summary
 
-  delegate :data_entries,
-           :building_permit_number,
+  delegate :building_permit_number,
            :jurisdiction_name,
            :full_address,
            :pid,

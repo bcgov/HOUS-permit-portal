@@ -3,7 +3,9 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
 
   def index
     @step_code_checklists =
-      policy_scope(StepCodeChecklist).where(step_code_id: params[:step_code_id])
+      policy_scope(Part9StepCode::Checklist).where(
+        step_code_id: params[:step_code_id]
+      )
     render_success @step_code_checklists
   end
 
@@ -94,7 +96,7 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
   end
 
   def set_and_authorize_checklist
-    @step_code_checklist = StepCodeChecklist.find(params[:id])
+    @step_code_checklist = Part9StepCode::Checklist.find(params[:id])
     authorize @step_code_checklist
   end
 end

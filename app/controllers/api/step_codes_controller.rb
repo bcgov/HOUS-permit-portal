@@ -6,7 +6,7 @@ class Api::StepCodesController < Api::ApplicationController
                    {
                      blueprint: StepCodeBlueprint,
                      meta: {
-                       select_options: StepCodeChecklist.select_options
+                       select_options: Part9StepCode::Checklist.select_options
                      }
                    }
   end
@@ -18,7 +18,7 @@ class Api::StepCodesController < Api::ApplicationController
     StepCode.transaction do
       @step_code = StepCode.create(step_code_params)
       if @step_code.valid?
-        @step_code.data_entries.each do |de|
+        @step_code.pre_construction_checklist.data_entries.each do |de|
           if de.h2k_file
             StepCode::DataEntryFromHot2000.new(
               xml: Nokogiri.XML(de.h2k_file.read),
@@ -58,14 +58,16 @@ class Api::StepCodesController < Api::ApplicationController
     params.require(:step_code).permit(
       :name,
       :permit_application_id,
-      pre_construction_checklist_attributes: [:compliance_path],
-      data_entries_attributes: [
-        :district_energy_ef,
-        :district_energy_consumption,
-        :other_ghg_ef,
-        :other_ghg_consumption,
-        h2k_file: {
-        }
+      pre_construction_checklist_attributes: [
+        :compliance_path,
+        data_entries_attributes: [
+          :district_energy_ef,
+          :district_energy_consumption,
+          :other_ghg_ef,
+          :other_ghg_consumption,
+          h2k_file: {
+          }
+        ]
       ]
     )
   end

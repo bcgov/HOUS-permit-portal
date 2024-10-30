@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -211,6 +211,55 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.index %w[hdd conditioned_space_percent step conditioned_space_area],
             name: "meui_composite_index",
             unique: true
+  end
+
+  create_table "part_9_step_code_checklists",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_id"
+    t.integer "stage", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "site_visit_completed"
+    t.boolean "site_visit_date"
+    t.integer "testing_pressure"
+    t.integer "testing_pressure_direction"
+    t.integer "testing_result_type"
+    t.decimal "testing_result"
+    t.text "tester_name"
+    t.text "tester_company_name"
+    t.text "tester_email"
+    t.text "tester_phone"
+    t.text "home_state"
+    t.integer "compliance_status"
+    t.text "notes"
+    t.integer "status", default: 0, null: false
+    t.string "builder"
+    t.uuid "step_requirement_id"
+    t.integer "building_type"
+    t.integer "compliance_path"
+    t.string "completed_by"
+    t.datetime "completed_at"
+    t.string "completed_by_company"
+    t.string "completed_by_phone"
+    t.string "completed_by_address"
+    t.string "completed_by_email"
+    t.string "completed_by_service_organization"
+    t.text "energy_advisor_id"
+    t.decimal "hvac_consumption"
+    t.decimal "dwh_heating_consumption"
+    t.decimal "ref_hvac_consumption"
+    t.decimal "ref_dwh_heating_consumption"
+    t.integer "epc_calculation_airtightness"
+    t.integer "epc_calculation_testing_target_type"
+    t.boolean "epc_calculation_compliance"
+    t.boolean "codeco"
+    t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
+    t.index ["step_code_id"],
+            name: "index_part_9_step_code_checklists_on_step_code_id"
+    t.index ["step_requirement_id"],
+            name: "index_part_9_step_code_checklists_on_step_requirement_id"
   end
 
   create_table "permit_applications",
@@ -532,7 +581,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.uuid "step_code_checklist_id", null: false
+    t.uuid "checklist_id", null: false
     t.jsonb "roof_ceilings_lines", default: [{}]
     t.jsonb "above_grade_walls_lines", default: [{}]
     t.jsonb "framings_lines", default: [{}]
@@ -557,64 +606,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.jsonb "fossil_fuels", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["step_code_checklist_id"],
-            name: "idx_on_step_code_checklist_id_f0fc711627"
-  end
-
-  create_table "step_code_checklists",
-               id: :uuid,
-               default: -> { "gen_random_uuid()" },
-               force: :cascade do |t|
-    t.uuid "step_code_id"
-    t.integer "stage", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "building_type"
-    t.integer "compliance_path"
-    t.text "completed_by"
-    t.datetime "completed_at"
-    t.text "completed_by_company"
-    t.text "completed_by_phone"
-    t.text "completed_by_address"
-    t.text "completed_by_email"
-    t.text "completed_by_service_organization"
-    t.text "energy_advisor_id"
-    t.boolean "site_visit_completed"
-    t.boolean "site_visit_date"
-    t.integer "testing_pressure"
-    t.integer "testing_pressure_direction"
-    t.integer "testing_result_type"
-    t.decimal "testing_result"
-    t.text "tester_name"
-    t.text "tester_company_name"
-    t.text "tester_email"
-    t.text "tester_phone"
-    t.text "home_state"
-    t.integer "compliance_status"
-    t.text "notes"
-    t.decimal "hvac_consumption"
-    t.decimal "dwh_heating_consumption"
-    t.decimal "ref_hvac_consumption"
-    t.decimal "ref_dwh_heating_consumption"
-    t.integer "epc_calculation_airtightness"
-    t.integer "epc_calculation_testing_target_type"
-    t.boolean "epc_calculation_compliance"
-    t.boolean "codeco"
-    t.integer "status", default: 0, null: false
-    t.string "builder"
-    t.uuid "step_requirement_id"
-    t.index ["status"], name: "index_step_code_checklists_on_status"
-    t.index ["step_code_id"], name: "index_step_code_checklists_on_step_code_id"
-    t.index ["step_requirement_id"],
-            name: "index_step_code_checklists_on_step_requirement_id"
+    t.index ["checklist_id"], name: "idx_on_checklist_id_65832bada2"
   end
 
   create_table "step_code_data_entries",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
-    t.uuid "step_code_id"
-    t.integer "stage", null: false
     t.string "model"
     t.string "version"
     t.string "weather_location"
@@ -655,8 +653,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "h2k_file_data"
-    t.index ["step_code_id"],
-            name: "index_step_code_data_entries_on_step_code_id"
+    t.uuid "checklist_id"
+    t.index ["checklist_id"],
+            name: "index_step_code_data_entries_on_checklist_id"
   end
 
   create_table "step_codes",
@@ -888,6 +887,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "jurisdictions",
                   "jurisdictions",
                   column: "regional_district_id"
+  add_foreign_key "part_9_step_code_checklists",
+                  "permit_type_required_steps",
+                  column: "step_requirement_id"
+  add_foreign_key "part_9_step_code_checklists", "step_codes"
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications",
                   "permit_classifications",
@@ -921,12 +924,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "step_code_building_characteristics_summaries",
-                  "step_code_checklists"
-  add_foreign_key "step_code_checklists",
-                  "permit_type_required_steps",
-                  column: "step_requirement_id"
-  add_foreign_key "step_code_checklists", "step_codes"
-  add_foreign_key "step_code_data_entries", "step_codes"
+                  "part_9_step_code_checklists",
+                  column: "checklist_id"
+  add_foreign_key "step_code_data_entries",
+                  "part_9_step_code_checklists",
+                  column: "checklist_id"
   add_foreign_key "step_codes", "permit_applications"
   add_foreign_key "submission_versions", "permit_applications"
   add_foreign_key "supporting_documents", "permit_applications"
