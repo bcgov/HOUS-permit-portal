@@ -1453,6 +1453,7 @@ const options = {
             inviteToPreviewTitle: "Invite to preview",
             inviteToPreviewHint: "Separate each email with a comma ,",
             inviteToPreviewButton: "Send invites",
+            inviteToPreviewPartialSuccess: "Some invites failed to send",
           },
           new: {
             title: "Create new preview",

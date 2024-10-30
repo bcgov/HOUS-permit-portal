@@ -25,14 +25,14 @@ class RequirementTemplateBlueprint < Blueprinter::Base
   association :assignee,
               blueprint: UserBlueprint,
               view: :minimal,
-              if: ->(_field_name, rt, options) do
+              if: ->(_field_name, _rt, options) do
                 options[:current_user]&.super_admin?
               end
 
   association :early_access_previews,
               blueprint: EarlyAccessPreviewBlueprint,
               if: ->(_field_name, rt, options) do
-                options[:current_user]&.super_admin?
+                rt.early_access? && options[:current_user]&.super_admin?
               end
 
   view :extended do

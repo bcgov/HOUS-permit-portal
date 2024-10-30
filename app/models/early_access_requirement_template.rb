@@ -1,6 +1,6 @@
 class EarlyAccessRequirementTemplate < RequirementTemplate
   SEARCH_INCLUDES =
-    RequirementTemplate::SEARCH_INCLUDES + %i[assignee previewers]
+    RequirementTemplate::SEARCH_INCLUDES + %i[assignee early_access_previews]
 
   belongs_to :assignee, class_name: "User", optional: true
 

@@ -37,6 +37,9 @@ en:
         first_nations: "First Nations"
     errors:
       models:
+        early_access_preview:
+          already_invited: "User already invited to preview"
+          invalid_email: "Invalid email format"
         jurisdiction:
           no_sandboxes: "Jurisdiction must have at least one sandbox."
         jurisdiction_template_version_customizations:
@@ -355,12 +358,9 @@ en:
       invite_previewers_success:
         title: ""
         message: "Successfully invited previewers"
-      invite_previewers_partial_success:
-        title: ""
-        message: "Successfully invited previewers, though there were problems with the following emails: %{failed_emails}"
       invite_previewers_error:
         title: Error
-        message: "%{error_message}"
+        message: "Previewers could not be invited"
       create_error:
         title: Error
         message: "%{error_message}"

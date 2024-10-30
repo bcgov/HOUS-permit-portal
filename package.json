@@ -73,6 +73,7 @@
     "react-hook-form": "^7.50.1",
     "react-i18next": "^13.5.0",
     "react-leaflet": "^4.2.1",
+    "react-markdown": "^9.0.1",
     "react-password-strength-bar": "^0.4.1",
     "react-quill": "^2.0.0",
     "react-remove-scroll": "^2.5.7",

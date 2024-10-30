@@ -11,12 +11,17 @@ class EarlyAccess::PreviewManagementService
 
     emails.each do |email|
       begin
-        process_email!
+        process_email!(email)
       rescue StandardError => e
-        failed_emails << {
-          email: email,
-          error: e.instance_of?(PreviewError) ? e.message : e.class.name
-        }
+        message =
+          if e.instance_of?(ActiveRecord::RecordNotUnique)
+            I18n.t(
+              "activerecord.errors.models.early_access_preview.already_invited"
+            )
+          else
+            e.message.truncate(80)
+          end
+        failed_emails << { email: email, error: message }
       end
     end
 
@@ -28,7 +33,10 @@ class EarlyAccess::PreviewManagementService
   def process_email!(email)
     email = email.strip
     unless email =~ URI::MailTo::EMAIL_REGEXP
-      raise PreviewError, "Invalid email format"
+      raise PreviewError,
+            I18n.t(
+              "activerecord.errors.models.early_access_preview.invalid_email"
+            )
     end
 
     user = find_or_create_user(email)
