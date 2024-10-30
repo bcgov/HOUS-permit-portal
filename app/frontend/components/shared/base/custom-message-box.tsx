@@ -1,16 +1,15 @@
-import { Box, Flex, FlexProps, Heading, HeadingProps, ToastPosition, ToastProps } from "@chakra-ui/react"
+import { Box, Flex, FlexProps, Heading, HeadingProps, Text, ToastProps } from "@chakra-ui/react"
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 import ReactMarkdown from "react-markdown"
 
 interface ICustomMessageBoxProps
-  extends Omit<FlexProps, "id" | "title" | "position">,
+  extends Omit<FlexProps, "id" | "title">,
     Omit<ToastProps, "position" | "title" | "id"> {
   title?: React.ReactNode // Allow title to be any ReactNode
-  description?: string // Allow description to be any ReactNode
+  description?: string | React.ReactNode // Allow description to be any ReactNode
   children?: React.ReactNode
   headingProps?: Partial<HeadingProps>
-  position?: ToastPosition
 }
 
 const iconMap = {
@@ -29,7 +28,6 @@ export const CustomMessageBox = ({
   ...rest
 }: ICustomMessageBoxProps) => {
   return (
-    // @ts-ignore
     <Flex
       direction="column"
       gap={2}
@@ -48,7 +46,8 @@ export const CustomMessageBox = ({
               {title}
             </Heading>
           )}
-          {description && <ReactMarkdown>{description}</ReactMarkdown>}
+
+          {typeof description === "string" ? <ReactMarkdown>{description}</ReactMarkdown> : <Text>{description}</Text>}
           {children}
         </Flex>
       </Flex>

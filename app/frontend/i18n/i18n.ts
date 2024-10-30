@@ -133,6 +133,7 @@ const options = {
         },
         ui: {
           okay: "Okay",
+          until: "til",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
@@ -1452,7 +1453,11 @@ const options = {
             sharePreviewTitle: "Share preview",
             inviteToPreviewTitle: "Invite to preview",
             inviteToPreviewHint: "Separate each email with a comma ,",
+            revokeButton: "Revoke",
+            unrevokeButton: "Unevoke",
+            extendButton: "Extend",
             inviteToPreviewButton: "Send invites",
+            noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
             inviteToPreviewPartialSuccess: "Some invites failed to send",
           },
           new: {

@@ -10,6 +10,8 @@ class CreateEarlyAccessPreviews < ActiveRecord::Migration[7.1]
                    type: :uuid
       t.datetime :expires_at, null: false
 
+      t.datetime :discarded_at
+
       t.timestamps
     end
 

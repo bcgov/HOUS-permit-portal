@@ -5,6 +5,13 @@ export enum EFlashMessageStatus {
   info = "info",
 }
 
+export enum EPreviewStatus {
+  invited = "invited",
+  access = "access",
+  expired = "expired",
+  revoked = "revoked",
+}
+
 export enum EPermitClassificationType {
   PermitType = "PermitType",
   Activity = "Activity",

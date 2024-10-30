@@ -87,6 +87,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_28_171846) do
     t.uuid "early_access_requirement_template_id", null: false
     t.uuid "previewer_id", null: false
     t.datetime "expires_at", null: false
+    t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index %w[early_access_requirement_template_id previewer_id],

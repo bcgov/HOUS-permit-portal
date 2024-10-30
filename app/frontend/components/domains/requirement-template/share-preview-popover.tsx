@@ -13,20 +13,23 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
-  Tag,
   Text,
   Textarea,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
-import React, { useState } from "react"
+import { observer } from "mobx-react-lite"
+import * as R from "ramda"
+import React, { useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IEarlyAccessPreview } from "../../../models/early-access-preview"
 import { IRequirementTemplate } from "../../../models/requirement-template"
-import { IUser } from "../../../models/user"
-import { useMst } from "../../../setup/root"
+import { EPreviewStatus } from "../../../types/enums"
+import { urlForPath } from "../../../utils/utility-functions"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
+import PreviewStatusTag from "../../shared/early-access/preview-status-tag"
 import { RoleTag } from "../../shared/user/role-tag"
 
 interface ISharePreviewPopoverProps {
@@ -38,10 +41,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ early
   const { t } = useTranslation()
   const [isInviting, setIsInviting] = useState(false)
 
-  const { userStore } = useMst()
-
-  const { users } = userStore
-  const previewers = users
+  const earlyAccessPreviews = rt.earlyAccessPreviews
 
   const { handleSubmit, control, reset } = useForm({
     defaultValues: {
@@ -52,8 +52,8 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ early
   const onSubmit = (data: { emails: string }) => {
     const emailArray = data.emails.split(",").map((email) => email.trim())
     rt.invitePreviewersByEmail(emailArray)
-    // reset()
-    // setIsInviting(false)
+    reset()
+    setIsInviting(false)
   }
 
   return (
@@ -81,7 +81,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ early
                     {t("earlyAccessRequirementTemplate.index.sharePreviewTitle")}
                   </Heading>
                   <HStack>
-                    <CopyLinkButton value={"TODO"} />
+                    <CopyLinkButton value={urlForPath(`/early-access/requirement-templates/${rt.id}`)} />
                     <Button variant="primary" leftIcon={<Plus />} onClick={() => setIsInviting(true)}>
                       {t("ui.invite")}
                     </Button>
@@ -106,8 +106,10 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ early
                   {t("earlyAccessRequirementTemplate.index.inviteToPreviewButton")}
                 </Button>
               </Box>
+            ) : !R.isEmpty(earlyAccessPreviews) ? (
+              earlyAccessPreviews.map((eap) => <PreviewCard key={eap.id} earlyAccessPreview={eap} />)
             ) : (
-              [...previewers, ...previewers, ...previewers].map((user) => <InviteeCard key={user.id} user={user} />)
+              <Box color="greys.grey01">{t("earlyAccessRequirementTemplate.index.noPreviewersYet")}</Box>
             )}
           </PopoverBody>
         </PopoverContent>
@@ -116,31 +118,62 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ early
   )
 }
 
-interface InviteeCardProps {
-  user: IUser
+interface PreviewCardProps {
+  earlyAccessPreview: IEarlyAccessPreview
 }
 
-const InviteeCard: React.FC<InviteeCardProps> = ({ user }) => {
-  const { name, role, organization, confirmedAt } = user
+const PreviewCard: React.FC<PreviewCardProps> = observer(({ earlyAccessPreview }) => {
+  const { t } = useTranslation()
+  const previewer = earlyAccessPreview.previewer
+  const status = earlyAccessPreview.status
+  const { name, role, organization } = previewer
+
+  const cardRef = useRef()
+
+  const handleRevoke = (e) => {
+    earlyAccessPreview.revoke()
+  }
+  const handleUnrevoke = (e) => {
+    earlyAccessPreview.unrevoke()
+  }
+  const handleExtend = (e) => {
+    earlyAccessPreview.extend()
+  }
 
   return (
-    <Flex p={2} borderBottom="1px solid" borderColor="gray.200" align="center" justify="space-between" width="full">
-      <InvitationTag user={user} />
+    <Flex
+      p={2}
+      borderBottom="1px solid"
+      borderColor="gray.200"
+      align="center"
+      justify="space-between"
+      width="full"
+      ref={cardRef}
+    >
+      <PreviewStatusTag earlyAccessPreview={earlyAccessPreview} />
       <VStack spacing={0} align="flex-start" flex="1" ml={3}>
-        <Text size="lg" color="theme.blue" fontWeight="bold">
+        <Text size="lg" color="text.link" fontWeight="bold">
           {name}
         </Text>
         <Box fontSize="sm">
-          <RoleTag role={user.role} /> {user?.organization}
+          <RoleTag role={role} /> {organization}
         </Box>
       </VStack>
-      <Button variant="link" size="sm">
-        todo
-      </Button>
+      {(status === EPreviewStatus.invited || status === EPreviewStatus.access) && (
+        <Button variant="link" color="semantic.error" size="sm" onClick={handleRevoke}>
+          {t("earlyAccessRequirementTemplate.index.revokeButton")}
+        </Button>
+      )}
+      {status === EPreviewStatus.expired && (
+        <Button variant="link" size="sm" onClick={handleExtend}>
+          {t("earlyAccessRequirementTemplate.index.extendButton")}
+        </Button>
+      )}
+      {status === EPreviewStatus.revoked && (
+        <Button variant="link" size="sm" onClick={handleUnrevoke}>
+          {t("earlyAccessRequirementTemplate.index.unrevokeButton")}
+        </Button>
+      )}
     </Flex>
   )
-}
-
-const InvitationTag: React.FC<InviteeCardProps> = ({ user }) => {
-  return <Tag>TODO</Tag>
-}
+})
