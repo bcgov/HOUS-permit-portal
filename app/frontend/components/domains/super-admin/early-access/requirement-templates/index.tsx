@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../../../hooks/use-search"
 import { useMst } from "../../../../../setup/root"
 import { IOption } from "../../../../../types/types"
+import { urlForPath } from "../../../../../utils/utility-functions"
 import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Paginator } from "../../../../shared/base/inputs/paginator"
@@ -89,7 +90,7 @@ export const EarlyAccessRequirementTemplatesIndexScreen = observer(function Requ
                   <SearchGridItem>
                     <HStack>
                       <SharePreviewPopover earlyAccessRequirementTemplate={rt} />
-                      <CopyLinkButton value={"TODO"} size="xs" />
+                      <CopyLinkButton value={urlForPath(`/early-access/requirement-templates/${rt.id}`)} size="xs" />
                     </HStack>
                   </SearchGridItem>
                   <SearchGridItem>{format(rt.updatedAt, "yyyy-MM-dd")}</SearchGridItem>

@@ -87,6 +87,14 @@ Rails.application.routes.draw do
       post "copy", on: :collection
     end
 
+    resources :early_access_previews do
+      member do
+        post :revoke
+        post :unrevoke
+        post :extend
+      end
+    end
+
     resources :template_versions, only: %i[index show] do
       get "compare_requirements",
           to: "template_versions#compare_requirements",

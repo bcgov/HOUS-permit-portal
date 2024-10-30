@@ -257,3 +257,13 @@ export function formatPidLabel(pid?: string) {
   // Add a dash after every third character
   return numericString.replace(/(\d{3})(?=\d)/g, "$1-")
 }
+
+export function urlForPath(path: string): string {
+  // Ensure the path starts with a slash for consistent URLs
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+
+  // Construct the full URL using the base URL from window.location
+  const baseUrl = `${window.location.protocol}//${window.location.host}`
+
+  return `${baseUrl}${normalizedPath}`
+}

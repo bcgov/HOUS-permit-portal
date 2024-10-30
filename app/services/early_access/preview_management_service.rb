@@ -62,7 +62,7 @@ class EarlyAccess::PreviewManagementService
     username = email.split("@").first
     name_parts = username.split(".")
     first_name = name_parts[0].capitalize
-    last_name = (name_parts[1] || "Last").capitalize
+    last_name = (name_parts[1] || "<Last Name>").capitalize
 
     { email: email, first_name: first_name, last_name: last_name }
   end

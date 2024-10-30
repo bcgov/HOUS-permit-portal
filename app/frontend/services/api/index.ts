@@ -3,6 +3,7 @@ import { TCreatePermitApplicationFormData } from "../../components/domains/permi
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
@@ -432,6 +433,18 @@ export class Api {
       `/requirement_templates/${templateId}/invite_previewers`,
       params
     )
+  }
+
+  async revokeEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke`)
+  }
+
+  async unrevokeEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke`)
+  }
+
+  async extendEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend`)
   }
 
   // we send the versionDate as string instead of date as we want to strip off timezone info
