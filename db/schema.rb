@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -80,6 +80,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
             name: "index_contacts_on_contactable"
   end
 
+  create_table "document_references",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "checklist_id"
+    t.string "name"
+    t.string "document_name"
+    t.datetime "date_issued"
+    t.string "prepared_by"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checklist_id"], name: "index_document_references_on_checklist_id"
+  end
+
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -89,6 +103,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "variant"
+  end
+
+  create_table "energy_outputs",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "fuel_type_id"
+    t.uuid "checklist_id"
+    t.integer "source"
+    t.string "name"
+    t.decimal "annual_energy"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checklist_id"], name: "index_energy_outputs_on_checklist_id"
+    t.index ["fuel_type_id"], name: "index_energy_outputs_on_fuel_type_id"
   end
 
   create_table "external_api_keys",
@@ -108,6 +137,21 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
+  end
+
+  create_table "fuel_types",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "checklist_id"
+    t.string "name"
+    t.string "description"
+    t.decimal "emissions_factor"
+    t.string "source"
+    t.decimal "ref_annual_energy"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checklist_id"], name: "index_fuel_types_on_checklist_id"
   end
 
   create_table "integration_mapping_notifications",
@@ -197,6 +241,19 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
     t.index ["slug"], name: "index_jurisdictions_on_slug", unique: true
   end
 
+  create_table "make_up_air_fuels",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "fuel_type_id"
+    t.uuid "checklist_id"
+    t.decimal "percent_of_load"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checklist_id"], name: "index_make_up_air_fuels_on_checklist_id"
+    t.index ["fuel_type_id"], name: "index_make_up_air_fuels_on_fuel_type_id"
+  end
+
   create_table "mechanical_energy_use_intensity_references",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -211,6 +268,86 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
     t.index %w[hdd conditioned_space_percent step conditioned_space_area],
             name: "meui_composite_index",
             unique: true
+  end
+
+  create_table "occupancy_classifications",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "checklist_id"
+    t.decimal "modelled_floor_area"
+    t.integer "performance_requirement"
+    t.decimal "percent_better_requirement"
+    t.integer "energy_step_required"
+    t.integer "zero_carbon_step_required"
+    t.string "requirement_source"
+    t.integer "occupancy_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checklist_id"],
+            name: "index_occupancy_classifications_on_checklist_id"
+  end
+
+  create_table "part_3_step_code_checklists",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "step_code_id"
+    t.decimal "building_height"
+    t.integer "building_code_version"
+    t.integer "heating_degree_days"
+    t.integer "climate_zone"
+    t.decimal "ref_annual_thermal_energy_demand"
+    t.decimal "total_annual_thermal_energy_demand"
+    t.decimal "total_annual_cooling_energy_demand"
+    t.decimal "step_code_annual_thermal_energy_demand"
+    t.decimal "generated_electricity"
+    t.decimal "overheating_hours"
+    t.integer "pressurized_doors_count"
+    t.decimal "pressurization_airflow_per_door"
+    t.decimal "pressurized_cooridors_area"
+    t.decimal "suite_heating_energy"
+    t.integer "software"
+    t.string "software_name"
+    t.string "simulation_weather_file"
+    t.decimal "above_grade_wall_area"
+    t.decimal "window_to_wall_area_ratio"
+    t.decimal "vertical_facade_to_floor_area_ratio"
+    t.decimal "window_to_floor_area_ratio"
+    t.decimal "design_airtightness"
+    t.decimal "tested_airtightness"
+    t.decimal "modelled_infiltration_rate"
+    t.decimal "as_built_infiltration_rate"
+    t.decimal "average_wall_clear_field_r_value"
+    t.decimal "average_wall_effective_r_value"
+    t.decimal "average_roof_clear_field_r_value"
+    t.decimal "average_roof_effective_r_value"
+    t.decimal "average_window_effective_u_value"
+    t.decimal "average_window_solar_heat_gain_coefficient"
+    t.decimal "average_occupant_density"
+    t.decimal "average_lighting_power_density"
+    t.decimal "average_ventilation_rate"
+    t.decimal "dhw_low_flow_savings"
+    t.boolean "is_demand_control_ventilation_used"
+    t.decimal "sensible_recovery_efficient"
+    t.integer "heating_system_plant"
+    t.integer "heating_system_type"
+    t.string "heating_system_description"
+    t.integer "cooling_system_plant"
+    t.integer "cooling_system_type"
+    t.string "cooling_system_description"
+    t.integer "dhw_system_type"
+    t.string "dhw_system_description"
+    t.string "completed_by_name"
+    t.string "completed_by_title"
+    t.string "completed_by_phone_number"
+    t.string "completed_by_email"
+    t.string "completed_by_organization_name"
+    t.string "submitted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["step_code_id"],
+            name: "index_part_3_step_code_checklists_on_step_code_id"
   end
 
   create_table "part_9_step_code_checklists",
@@ -668,6 +805,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
     t.string "plan_author"
     t.string "plan_version"
     t.string "plan_date"
+    t.string "type"
     t.index ["permit_application_id"],
             name: "index_step_codes_on_permit_application_id"
   end
@@ -874,7 +1012,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "collaborators", "users"
+  add_foreign_key "document_references",
+                  "part_3_step_code_checklists",
+                  column: "checklist_id"
+  add_foreign_key "energy_outputs",
+                  "part_3_step_code_checklists",
+                  column: "checklist_id"
   add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "fuel_types",
+                  "part_3_step_code_checklists",
+                  column: "checklist_id"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"
@@ -887,6 +1034,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_29_223207) do
   add_foreign_key "jurisdictions",
                   "jurisdictions",
                   column: "regional_district_id"
+  add_foreign_key "make_up_air_fuels",
+                  "part_3_step_code_checklists",
+                  column: "checklist_id"
+  add_foreign_key "occupancy_classifications",
+                  "part_3_step_code_checklists",
+                  column: "checklist_id"
+  add_foreign_key "part_3_step_code_checklists", "step_codes"
   add_foreign_key "part_9_step_code_checklists",
                   "permit_type_required_steps",
                   column: "step_requirement_id"
