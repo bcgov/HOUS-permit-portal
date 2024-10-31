@@ -117,6 +117,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
         <DisclaimerInfo />
+        <TimelineInfo />
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={12} w="full" bg="greys.white">
@@ -281,44 +282,69 @@ const DisclaimerInfo = () => {
   }) as Array<{ text: string; href: string }>
 
   return (
+    <Flex align="center" my={3} flexDirection={{ base: "column", md: "row" }} width="full" mx="auto" p={6} gap={6}>
+      <Box w={{ base: "100%", md: "50%" }}>
+        <Heading as="h2" variant="yellowline">
+          {t("permitApplication.new.needToKnow")}
+        </Heading>
+
+        <Text>{t("permitApplication.new.disclaimer1")}</Text>
+        <br />
+        <Text>{t("permitApplication.new.disclaimer2")}</Text>
+      </Box>
+    </Flex>
+  )
+}
+
+const TimelineInfo = () => {
+  const { t } = useTranslation()
+
+  const applicationDisclaimers = i18next.t("permitApplication.new.applicationDisclaimers", {
+    returnObjects: true,
+  }) as Array<{ text: string; href: string }>
+
+  return (
     <Flex
-      direction="column"
+      align="center"
+      my={3}
+      flexDirection={{ base: "column", md: "row" }}
       width="full"
       mx="auto"
       border="1px solid"
       borderColor="border.light"
       borderRadius="md"
-      p="6"
+      p={6}
+      gap={6}
     >
-      <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
-      <Flex align="center" my={3} flexDirection={{ base: "column", md: "row" }}>
-        <Box w={{ base: "100%", md: "40%" }}>
-          <UnorderedList ml="0">
-            {applicationDisclaimers.map((disclaimer) => {
-              return (
-                <ListItem key={disclaimer.href}>
-                  <Link href={disclaimer.href} isExternal>
-                    {disclaimer.text}
-                    <ArrowSquareOut />
-                  </Link>
-                </ListItem>
-              )
-            })}
-          </UnorderedList>
-          <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
+      <Box w={{ base: "100%", md: "50%" }}>
+        <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
+        <UnorderedList ml="0" my={4}>
+          {applicationDisclaimers.map((disclaimer) => {
+            return (
+              <ListItem key={disclaimer.href}>
+                <Link href={disclaimer.href} isExternal>
+                  {disclaimer.text}
+                  <ArrowSquareOut />
+                </Link>
+              </ListItem>
+            )
+          })}
+        </UnorderedList>
+        <Text>
+          {t("permitApplication.new.applicationDisclaimerMoreInfo")}{" "}
           <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
             {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
             <ArrowSquareOut />
           </Link>
-        </Box>
-        <Image
-          src="/images/timeline/timeline-graphic-full.gif"
-          alt="thumbnail for timeline"
-          w={{ base: "100%", md: "60%" }}
-          bg="semantic.infoLight"
-          objectFit="contain"
-        />
-      </Flex>
+        </Text>
+      </Box>
+      <Image
+        src="/images/timeline/timeline-graphic-full.gif"
+        alt="thumbnail for timeline"
+        w={{ base: "100%", md: "50%" }}
+        bg="semantic.infoLight"
+        objectFit="contain"
+      />
     </Flex>
   )
 }
