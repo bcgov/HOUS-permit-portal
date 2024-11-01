@@ -30,6 +30,7 @@ class RequirementBlock < ApplicationRecord
   validate :early_access_on_appropriate_template
 
   before_validation :set_sku, on: :create
+  before_validation :ensure_unique_name, on: :create
 
   after_commit :refresh_search_index,
                if: -> do
@@ -220,5 +221,36 @@ class RequirementBlock < ApplicationRecord
 
       retry_count += 1
     end
+  end
+
+  def ensure_unique_name
+    return if name.blank?
+
+    base_name = name.strip
+    new_name = base_name
+
+    # Loop to find a unique name
+    while self.class.exists?(name: new_name)
+      new_name = increment_last_word(new_name)
+    end
+
+    self.name = new_name
+  end
+
+  # Method to increment the last word if it's a number, or append " 2"
+  def increment_last_word(input)
+    words = input.split(" ")
+    last_word = words.last
+
+    if last_word.match?(/\A\d+\z/)
+      # If the last word is a number, increment it
+      incremented_number = last_word.to_i + 1
+      words[-1] = incremented_number.to_s
+    else
+      # If the last word is not a number, append "2"
+      words << "2"
+    end
+
+    words.join(" ")
   end
 end

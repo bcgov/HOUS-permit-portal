@@ -32,9 +32,11 @@ const helperTextStyles: Partial<TextProps> = {
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
   withOptionsMenu,
+  forEarlyAccess,
 }: {
   requirementBlock?: IRequirementBlock
   withOptionsMenu?: boolean
+  forEarlyAccess?: boolean
 }) {
   const { requirementBlockStore } = useMst()
   const { isEditingEarlyAccess } = requirementBlockStore
@@ -91,7 +93,7 @@ export const BlockSetup = observer(function BlockSetup({
             <Info size={15} />
           </Tooltip>
         </HStack>
-        <BlockVisibilitySelect name="visibility" forEarlyAccess={isEditingEarlyAccess} />
+        <BlockVisibilitySelect name="visibility" forEarlyAccess={forEarlyAccess} />
       </FormControl>
       <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>

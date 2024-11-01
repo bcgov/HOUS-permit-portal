@@ -20,6 +20,9 @@ export const EarlyAccessRequirementBlockStoreModel = types
     get tableRequirementBlocks() {
       return self.tableEarlyAccessRequirementBlocks
     },
+    get getSortColumnHeader() {
+      return self.rootStore.requirementBlockStore.getSortColumnHeader
+    },
   }))
   .actions((self) => ({
     fetchEarlyAccessRequirementBlocks: flow(function* (opts?: {

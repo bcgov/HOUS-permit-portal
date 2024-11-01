@@ -39,8 +39,8 @@ interface IRequirementsBlockProps {
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
   withOptionsMenu?: boolean
-  forEarlyAccess?: boolean
   isEditable?: boolean
+  forEarlyAccess?: boolean
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
@@ -48,8 +48,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   showEditWarning,
   triggerButtonProps,
   withOptionsMenu,
-  forEarlyAccess,
   isEditable,
+  forEarlyAccess,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
   const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
@@ -257,6 +257,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup
+                    forEarlyAccess={forEarlyAccess}
                     requirementBlock={
                       (requirementBlock as IRequirementBlock)?.restore
                         ? (requirementBlock as IRequirementBlock)
@@ -264,6 +265,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                     }
                     withOptionsMenu={withOptionsMenu}
                   />
+
                   <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
                 </HStack>
               </ModalBody>
