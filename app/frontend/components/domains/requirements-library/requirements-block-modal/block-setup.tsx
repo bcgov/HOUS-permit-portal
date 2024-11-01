@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Checkbox,
   FormControl,
   FormHelperText,
@@ -36,9 +37,14 @@ export const BlockSetup = observer(function BlockSetup({
   withOptionsMenu?: boolean
 }) {
   const { requirementBlockStore } = useMst()
+  const { isEditingEarlyAccess } = requirementBlockStore
   const { t } = useTranslation()
   const { register, control, watch } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const handleCopyToEarlyAccess = async () => {
+    await requirementBlockStore.copyRequirementBlock(requirementBlock, true)
+  }
 
   const fetchAssociationOptions = async (query: string) => {
     const associations = await requirementBlockStore.searchAssociations(query)
@@ -85,7 +91,7 @@ export const BlockSetup = observer(function BlockSetup({
             <Info size={15} />
           </Tooltip>
         </HStack>
-        <BlockVisibilitySelect name="visibility" />
+        <BlockVisibilitySelect name="visibility" forEarlyAccess={isEditingEarlyAccess} />
       </FormControl>
       <VStack spacing={4} w={"full"} alignItems={"flex-start"} px={6} pb={6} pt={3}>
         <Text color={"text.secondary"} fontSize={"sm"} fontWeight={700}>
@@ -170,7 +176,14 @@ export const BlockSetup = observer(function BlockSetup({
             {t("requirementsLibrary.fieldDescriptions.requirementSku")}
           </FormHelperText>
         </FormControl>
-        {requirementBlock && withOptionsMenu && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />}
+        {withOptionsMenu
+          ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
+          : isEditingEarlyAccess && (
+              <Button variant="primary" onClick={handleCopyToEarlyAccess}>
+                {t("requirementsLibrary.copyToEarlyAccess")}
+              </Button>
+            )}
+        {}
       </VStack>
     </Box>
   )

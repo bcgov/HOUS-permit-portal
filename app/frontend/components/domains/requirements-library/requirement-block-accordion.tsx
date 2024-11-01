@@ -114,9 +114,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             <HStack spacing={2}>
               <VisibilityTag visibility={requirementBlock.visibility} />
               <Box mr={2}>{requirementBlock.firstNations && <FirstNationsTag />}</Box>
-              {isOpen && isEditable && !renderEdit && (
+              {isOpen && !renderEdit && (
                 <RequirementsBlockModal
                   showEditWarning={showEditWarning}
+                  isEditable={isEditable}
                   requirementBlock={requirementBlock}
                   triggerButtonProps={{
                     color: "text.primary",
@@ -127,7 +128,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   }}
                 />
               )}
-              {isEditable && renderEdit?.()}
+              {renderEdit?.()}
               <IconButton variant="unstyled" aria-label="Collapse or expand accordion">
                 <AccordionIcon color={"text.primary"} />
               </IconButton>

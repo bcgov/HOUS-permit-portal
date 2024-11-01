@@ -670,6 +670,7 @@ const options = {
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
+          copyToEarlyAccess: "Copy to early access",
           index: {
             title: "Requirements library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",

@@ -27,6 +27,7 @@ interface IProps {
   renderTriggerButton?: (props: ButtonProps & { ref: Ref<HTMLElement> }) => JSX.Element
   onUse?: (requirementBlock: IRequirementBlock, closeDrawer?: () => void) => void
   disabledUseForBlockIds?: Set<string>
+  forEarlyAccess?: boolean
   disabledReason?: string
 }
 
@@ -36,6 +37,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
   onUse,
   disabledUseForBlockIds,
   disabledReason,
+  forEarlyAccess,
 }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()

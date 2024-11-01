@@ -18,10 +18,10 @@ import Select, { components } from "react-select"
 
 // BlockVisibility Option component
 export const BlockVisibilityOption = (props) => {
-  const { data } = props
+  const { data, isDisabled } = props
   return (
-    <components.Option {...props}>
-      <Box>
+    <components.Option {...props} isDisabled={isDisabled}>
+      <Box opacity={isDisabled ? 0.5 : 1} cursor={isDisabled ? "not-allowed" : "pointer"}>
         <Text color="text.link" fontWeight="bold" mb={1}>
           {data.label}
         </Text>
@@ -30,7 +30,6 @@ export const BlockVisibilityOption = (props) => {
     </components.Option>
   )
 }
-
 // BlockVisibility SingleValue component
 const BlockVisibilitySingleValue = (props) => {
   const { data } = props
@@ -74,8 +73,13 @@ const chakraStyles = (theme) => ({
   }),
 })
 
-export const BlockVisibilitySelect = ({ name }) => {
-  const { control, setValue } = useFormContext() // Access form methods from context
+interface IBlockVisibilitySelectProps {
+  name: string
+  forEarlyAccess?: boolean
+}
+
+export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibilitySelectProps) => {
+  const { control, setValue, watch } = useFormContext() // Access form methods from context
   const theme = useTheme() // Access Chakra UI theme
   const { t } = useTranslation() // Access translation function
 
@@ -95,6 +99,7 @@ export const BlockVisibilitySelect = ({ name }) => {
       value: "early_access",
       label: t(`requirementsLibrary.visibility.earlyAccess`),
       description: t(`requirementsLibrary.visibilityDescriptions.earlyAccess`),
+      isDisabled: !forEarlyAccess,
     },
   ]
 
