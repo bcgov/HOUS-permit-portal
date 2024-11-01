@@ -1,5 +1,9 @@
 class RequirementTemplatePolicy < ApplicationPolicy
   def show?
+    return true if record.public?
+
+    return false unless user.present?
+
     user.super_admin? ||
       (
         record.early_access? &&
@@ -9,7 +13,7 @@ class RequirementTemplatePolicy < ApplicationPolicy
               early_access_requirement_template_id: record.id,
               discarded_at: nil
             )
-            .where("expired_at > ?", Time.current)
+            .where("expires_at > ?", Time.current)
             .exists?
       )
   end

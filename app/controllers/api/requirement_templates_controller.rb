@@ -12,6 +12,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
+  skip_before_action :authenticate_user!, only: [:show]
 
   def index
     perform_search
@@ -318,6 +319,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :activity_id,
         :permit_type_id,
         :type,
+        :public,
         requirement_template_sections_attributes: [
           :id,
           :name,

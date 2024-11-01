@@ -244,6 +244,7 @@ const options = {
           seeEarlyAccessButton: "See Early Access",
           seeLiveButton: "See Live",
           invite: "Invite",
+          public: "Public",
         },
         notification: {
           title: "Notifications",
@@ -1485,6 +1486,7 @@ const options = {
             auditLog: "Audit log",
             confirmRemoveModalTitle: "Archive preview?",
             confirmRemoveModalBody: "This preview will no longer be accessible by invitees",
+            public: "Grant public access?",
           },
           fields: {
             nickname: "Nickname",

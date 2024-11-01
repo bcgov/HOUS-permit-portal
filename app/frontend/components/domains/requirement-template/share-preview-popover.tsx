@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  ButtonProps,
   Flex,
   FormControl,
   FormHelperText,
@@ -32,11 +33,14 @@ import { CopyLinkButton } from "../../shared/base/copy-link-button"
 import PreviewStatusTag from "../../shared/early-access/preview-status-tag"
 import { RoleTag } from "../../shared/user/role-tag"
 
-interface ISharePreviewPopoverProps {
+interface ISharePreviewPopoverProps extends ButtonProps {
   earlyAccessRequirementTemplate: IRequirementTemplate
 }
 
-export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ earlyAccessRequirementTemplate: rt }) => {
+export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({
+  earlyAccessRequirementTemplate: rt,
+  ...rest
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { t } = useTranslation()
   const [isInviting, setIsInviting] = useState(false)
@@ -60,7 +64,7 @@ export const SharePreviewPopover: React.FC<ISharePreviewPopoverProps> = ({ early
     <Box>
       <Popover isOpen={isOpen} onClose={onClose}>
         <PopoverTrigger>
-          <Button variant="link" onClick={onOpen}>
+          <Button variant="link" onClick={onOpen} {...rest}>
             {t("earlyAccessRequirementTemplate.index.sharePreviewLink", { n: rt.numberOfPreviewers?.toString() })}
           </Button>
         </PopoverTrigger>

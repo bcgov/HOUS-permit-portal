@@ -467,6 +467,7 @@ function formFormDefaults(requirementTemplate?: IRequirementTemplate): IRequirem
   return {
     description: requirementTemplate.description,
     nickname: requirementTemplate.nickname,
+    public: requirementTemplate.public,
     requirementTemplateSectionsAttributes,
   }
 }

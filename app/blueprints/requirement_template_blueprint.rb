@@ -9,7 +9,8 @@ class RequirementTemplateBlueprint < Blueprinter::Base
          :fetched_at,
          :created_at,
          :updated_at,
-         :visibility
+         :visibility,
+         :public
 
   association :permit_type, blueprint: PermitClassificationBlueprint
   association :activity, blueprint: PermitClassificationBlueprint

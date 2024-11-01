@@ -332,10 +332,6 @@ const AppRoutes = observer(() => {
       <Route path="/early-access/requirements-library" element={<EarlyAccessRequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesIndexScreen />} />
-      <Route
-        path="/early-access/requirement-templates/:requirementTemplateId"
-        element={<EarlyAccessRequirementTemplateScreen />}
-      />
       <Route path="/early-access/requirement-templates/new" element={<NewEarlyAccessRequirementTemplateScreen />} />
       <Route
         path="/early-access/requirement-templates/:requirementTemplateId/edit"
@@ -519,6 +515,10 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
+        <Route
+          path="/early-access/requirement-templates/:requirementTemplateId"
+          element={<EarlyAccessRequirementTemplateScreen />}
+        />
         <Route
           path="/jurisdictions"
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}

@@ -1,4 +1,4 @@
-import { Box, Container, Flex, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Heading, Tag, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -89,7 +89,11 @@ export const EarlyAccessRequirementTemplatesIndexScreen = observer(function Requ
                   </SearchGridItem>
                   <SearchGridItem>
                     <HStack>
-                      <SharePreviewPopover earlyAccessRequirementTemplate={rt} />
+                      {rt.public ? (
+                        <Tag>{t("ui.public")}</Tag>
+                      ) : (
+                        <SharePreviewPopover earlyAccessRequirementTemplate={rt} />
+                      )}
                       <CopyLinkButton value={urlForPath(`/early-access/requirement-templates/${rt.id}`)} size="xs" />
                     </HStack>
                   </SearchGridItem>

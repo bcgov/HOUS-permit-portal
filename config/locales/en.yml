@@ -66,6 +66,8 @@ en:
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
           nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
           attributes:
+            public:
+              true_on_early_access_only: "can only be true for early access"
             template_versions:
               published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:

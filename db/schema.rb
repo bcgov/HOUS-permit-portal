@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_28_171846) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_01_205023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -454,6 +454,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_28_171846) do
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
+    t.boolean "public", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"],

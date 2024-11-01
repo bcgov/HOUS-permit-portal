@@ -86,6 +86,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       updatedAt: types.Date,
       fetchedAt: types.maybeNull(types.Date),
       isFullyLoaded: types.optional(types.boolean, false),
+      public: types.boolean,
     })
     .extend(withRootStore())
     .extend(withEnvironment())

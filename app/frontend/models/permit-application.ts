@@ -57,7 +57,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
-      submitter: types.maybe(types.reference(types.late(() => UserModel))),
+      submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       publishedTemplateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
