@@ -3,7 +3,6 @@ GEM
   specs:
     aasm (5.5.0)
       concurrent-ruby (~> 1.0)
-    abbrev (0.1.1)
     actioncable (7.1.4.1)
       actionpack (= 7.1.4.1)
       activesupport (= 7.1.4.1)
@@ -422,8 +421,7 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.1.0)
-    rbs (3.3.2)
-      abbrev
+    rbs (2.8.2)
     rbtree (0.4.6)
     rdoc (6.6.3.1)
       psych (>= 4.0.0)
@@ -541,18 +539,19 @@ GEM
     snaky_hash (2.0.1)
       hashie
       version_gem (~> 1.1, >= 1.1.1)
-    solargraph (0.48.0)
+    solargraph (0.50.0)
       backport (~> 1.2)
       benchmark
-      bundler (>= 1.17.2)
+      bundler (~> 2.0)
       diff-lcs (~> 1.4)
       e2mmap
       jaro_winkler (~> 1.5)
       kramdown (~> 2.3)
       kramdown-parser-gfm (~> 1.1)
       parser (~> 3.0)
-      reverse_markdown (>= 1.0.5, < 3)
-      rubocop (>= 0.52)
+      rbs (~> 2.0)
+      reverse_markdown (~> 2.0)
+      rubocop (~> 1.38)
       thor (~> 1.0)
       tilt (~> 2.0)
       yard (~> 0.9, >= 0.9.24)
@@ -698,7 +697,7 @@ DEPENDENCIES
   sidekiq-cron (~> 1.12)
   sidekiq-unique-jobs (~> 8.0)
   simple-feed (~> 3.2.0)
-  solargraph (~> 0.48.0)
+  solargraph (~> 0.50.0)
   syntax_tree (~> 6.2)
   syntax_tree-haml (~> 4.0)
   syntax_tree-rbs (~> 1.0)
@@ -710,7 +709,7 @@ DEPENDENCIES
   web-console
 
 RUBY VERSION
-   ruby 3.2.2p53
+   ruby 3.2.5p208
 
 BUNDLED WITH
    2.5.22

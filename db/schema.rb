@@ -80,12 +80,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_222326) do
             name: "index_contacts_on_contactable"
   end
 
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
-  end
-
   create_table "end_user_license_agreements",
                id: :uuid,
                default: -> { "gen_random_uuid()" },

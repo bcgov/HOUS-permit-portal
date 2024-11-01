@@ -13,9 +13,40 @@ Ensure you have the following:
 - Redis
 - Node 20.10+
 
+(Alternatively run this locally with `docker compose` see section further down)
+
 **Please enable git LFS in order to properly clone the repo.**
 
-### Local Running Steps
+## Running the application locally with Docker Compose
+
+To make things easier to develop on various platforms locally, there is a `docker compose` script for the app that can be run. This will setup all critical dependencies locally and bring the app up mounted to your filesystem for live development. There are a few caveats to this to note which will are mentioned at the end of this section
+
+**Prerequisites**
+
+- Download and install Docker Desktop for your system
+- Make sure that you can run both `docker` and `docker compose` in your terminal and this is working correctly
+- Since some prefer to run this locally without Docker (see section below) this setup is aimed to preserve the ability to run this application both ways. As such, this uses a separate `Dockerfile.dev` and ENV file `.env.docker_compose` that we will use for the purposes of running locally only
+- Ensure that you have a local copy of `.env.docker_compose` - an example is provided in `.env_example.docker_compose` which provides the minimal ENV configuration to start the app without some services (see first point in Caveats section for more info)
+- We currently ONLY allow keycloak login have removed the ability to login via e-mail. To ensure you can login to the app make sure you have a valid Keycloak development ENV secrets set up so that you can properly log in. (See `.env_example.docker_compose` and [What is Keycloak at BC Government](https://developer.gov.bc.ca/docs/default/component/css-docs/What-is-Keycloak-at-BC-Government/))
+
+**Instructions**
+
+1. Clone this repo with git to your local machine
+2. Run: `docker compose up` (this will start up all related services including Vite for HMR)
+3. (If this is the first run of the application, create the database) `docker compose exec app bundle exec rails db:create`
+4. (If this is the first run of the application OR if there are new migrations to run) Run migrations: `docker compose exec app bundle exec rails db:migrate`
+5. (If this is the first run of the app or seeds have changed, you can rerun the seeder). Generate seed data: `docker compose exec app bundle exec rails db:seed`
+6. Things should now be running. You can isolate / look at logs for various containers using `docker compose logs -f app` for example for the app logs (or any other service)
+7. The app should reflect changes live if you edit the files in the folder (both Ruby and JS) since its mounted live on the filesystem
+
+**NOTES / Caveats**
+
+- A minimal set of ENV vars that reference various services (eg. Redis, Postgres, etc.) are defaulted in the `docker-compose.yml` for dev purposes, the app also loads other ENV vars from `.env.docker_compose` so ensure that you have those setup if you are trying to use functionality related to that (eg. CHES keys for email sending, BCEID / keycloak stuff, etc.)
+- Local development (see above) uses `letter_opener` / `launchy` to view emails locally. These do not work within the dockerized environment, and we haven't yet put in a workaround for this
+- This local dockerized version does not contain a service for `Consigno Verifio Notarius Server` which is proprietary licensed software that helps with validating PDFs. Therefore all functionality around this will not work. You can either run the service manually outside Docker and refer to it using the ENV vars, or find a private repository that has the image that you can then run in `docker-compose`
+- The local dockerized version does not setup Minio (which can be used to locally to mock Object Storage as it is S3 compatible - see instructions for local setup below). You can set this up manually outside the docker setup or add your own docker compose service for it. Just hook it up via the ENV vars (see `.env.example`) or simply switch the app to use actual `BCGOV_OBJECT_STORAGE` if you have a bucket allocation already.
+
+## Running the application locally (non-dockerized)
 
 - Install Dependencies: `bundle install` and `npm install`
 - Ensure you have a `.env` file with required variables (reference `.env.example`)
@@ -154,6 +185,7 @@ bundle exec rspec
 Some other notes
 
 - For digital seal tests, the we have not uploaded documents with the real document to the repo, but captured the request responses
+- If you are running in the dockerized version, you may need to reset your database or you may want to create a second instance of the dockerized postgre service to run tests.
 
 ## ERD generation
 
@@ -171,7 +203,7 @@ to install the RubyLSP plugin for VSCode, and select syntax_tree as the formatte
 Binaries for these should be installed as shims automatically upon running bundle install.
 All other configuration should be handled by the included workspace settings and .rubocop.yml file.
 
-# Intellisense
+## Intellisense
 
 At the moment getting intellisense to work out of the box on Mac is difficult but
 can be accomplished with some configuration. Install the Solargraph extension and
