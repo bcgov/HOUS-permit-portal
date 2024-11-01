@@ -15,7 +15,7 @@ import { X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { ERequirementType } from "../../../types/enums"
+import { ERequirementType, EVisibility } from "../../../types/enums"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -116,6 +116,7 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
               <Box mr={2}>{requirementBlock.firstNations && <FirstNationsTag />}</Box>
               {isOpen && !renderEdit && (
                 <RequirementsBlockModal
+                  forEarlyAccess={requirementBlock.visibility === EVisibility.earlyAccess}
                   showEditWarning={showEditWarning}
                   isEditable={isEditable}
                   requirementBlock={requirementBlock}

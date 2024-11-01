@@ -125,7 +125,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     <RequirementsBlockModal
                       withOptionsMenu
                       requirementBlock={requirementBlock}
-                      forEarlyAccess={forEarlyAccess}
+                      forEarlyAccess={requirementBlock.isEarlyAccess}
                     />
                   )}
                 </SearchGridItem>

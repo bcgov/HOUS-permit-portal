@@ -15,11 +15,12 @@ interface IProps {
 }
 
 export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IProps) {
-  const { requirementBlockStore } = useMst()
-  const { sort, getSortColumnHeader, toggleSort } = requirementBlockStore
+  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+
+  const { sort, getSortColumnHeader, toggleSort } = searchModel
   const { t } = useTranslation()
 
-  console.log()
   return (
     <Box display={"contents"} role={"rowgroup"} position="fixed">
       <Box display={"contents"} role={"row"}>
@@ -39,7 +40,7 @@ export const GridHeaders = observer(function GridHeaders({ forEarlyAccess }: IPr
               position: "sticky",
               right: 6,
             }}
-            searchModel={requirementBlockStore as ISearch}
+            searchModel={searchModel as ISearch}
           />
         </GridItem>
       </Box>

@@ -20,7 +20,7 @@ import {
   TAutoComplianceModuleConfigurations,
   TValueExtractorAutoComplianceModuleConfiguration,
 } from "../types/types"
-import { incrementLastWord, isValueExtractorModuleConfiguration } from "../utils/utility-functions"
+import { isValueExtractorModuleConfiguration } from "../utils/utility-functions"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -187,7 +187,7 @@ export const RequirementBlockStoreModel = types
           const { id, ...rest } = attr
           return rest
         }),
-        name: incrementLastWord(requirementBlock.name),
+        name: requirementBlock.name,
         visibility: toEarlyAccess ? EVisibility.earlyAccess : requirementBlock.visibility,
       }
 
