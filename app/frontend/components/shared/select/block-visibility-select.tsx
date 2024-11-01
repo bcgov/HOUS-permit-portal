@@ -11,6 +11,7 @@ import {
   Text,
   UnorderedList,
   useDisclosure,
+  useTheme,
 } from "@chakra-ui/react"
 import React, { useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -20,10 +21,10 @@ import { EVisibility } from "../../../types/enums"
 
 // BlockVisibility Option component
 export const BlockVisibilityOption = (props) => {
-  const { data } = props
+  const { data, isDisabled } = props
   return (
-    <components.Option {...props}>
-      <Box>
+    <components.Option {...props} isDisabled={isDisabled}>
+      <Box opacity={isDisabled ? 0.5 : 1} cursor={isDisabled ? "not-allowed" : "pointer"}>
         <Text color="text.link" fontWeight="bold" mb={1}>
           {data.label}
         </Text>
@@ -32,7 +33,6 @@ export const BlockVisibilityOption = (props) => {
     </components.Option>
   )
 }
-
 // BlockVisibility SingleValue component
 const BlockVisibilitySingleValue = (props) => {
   const { data } = props
@@ -76,8 +76,14 @@ const chakraStyles = (theme) => ({
   }),
 })
 
-export const BlockVisibilitySelect = ({ name }) => {
+interface IBlockVisibilitySelectProps {
+  name: string
+  forEarlyAccess?: boolean
+}
+
+export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibilitySelectProps) => {
   const { control, setValue, watch } = useFormContext()
+  const theme = useTheme()
   const { t } = useTranslation()
   const visibilityWatch = watch(name)
 
@@ -97,6 +103,7 @@ export const BlockVisibilitySelect = ({ name }) => {
       value: EVisibility.earlyAccess,
       label: t("requirementsLibrary.visibility.earlyAccess"),
       description: t("requirementsLibrary.visibilityDescriptions.earlyAccess"),
+      isDisabled: !forEarlyAccess,
     },
   ]
 
@@ -144,6 +151,7 @@ export const BlockVisibilitySelect = ({ name }) => {
         render={({ field }) => (
           <Select
             {...field}
+            styles={chakraStyles(theme)}
             ref={selectRef}
             options={options}
             components={{

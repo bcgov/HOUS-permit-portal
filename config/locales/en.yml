@@ -299,6 +299,9 @@ en:
         title: "Error"
         message: "Could not fetch super users"
     requirement_block:
+      create_success:
+        title: ""
+        message: "Successfully created requirement block!"
       create_error:
         title: Error
         message: "%{error_message}"

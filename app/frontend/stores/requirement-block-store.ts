@@ -178,7 +178,7 @@ export const RequirementBlockStoreModel = types
     }),
   }))
   .actions((self) => ({
-    copyRequirementBlock: flow(function* (requirementBlock: IRequirementBlock) {
+    copyRequirementBlock: flow(function* (requirementBlock: IRequirementBlock, toEarlyAccess = false) {
       const { id, requirements, ...copyableRequirementsAttributes } = requirementBlock
 
       const clonedParams: IRequirementBlockParams = {
@@ -188,6 +188,7 @@ export const RequirementBlockStoreModel = types
           return rest
         }),
         name: incrementLastWord(requirementBlock.name),
+        visibility: toEarlyAccess ? EVisibility.earlyAccess : requirementBlock.visibility,
       }
 
       return yield self.createRequirementBlock(clonedParams)

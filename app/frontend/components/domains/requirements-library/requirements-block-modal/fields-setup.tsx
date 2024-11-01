@@ -10,7 +10,7 @@ import {
   STEP_CODE_PACKAGE_FILE_REQUIREMENT_CODE,
 } from "../../../../constants"
 import { IRequirementBlock } from "../../../../models/requirement-block"
-import { IRequirementAttributes } from "../../../../types/api-request"
+import { IFormConditional, IRequirementAttributes } from "../../../../types/api-request"
 import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import {
@@ -39,8 +39,10 @@ const fieldContainerSharedProps = {
 
 export const FieldsSetup = observer(function FieldsSetup({
   requirementBlock,
+  isEditable = true,
 }: {
   requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock
+  isEditable?: boolean
 }) {
   const { t } = useTranslation()
   const { setValue, control, watch } = useFormContext<IRequirementBlockForm>()
@@ -179,266 +181,282 @@ export const FieldsSetup = observer(function FieldsSetup({
   }
 
   return (
-    <Flex as={"section"} flexDir={"column"} flex={1} h={"full"} alignItems={"flex-start"}>
-      <Text color={"text.primary"} fontSize={"sm"}>
-        {t("requirementsLibrary.modals.configureFields")}
-      </Text>
+    <Box position="relative" w="full" h="full">
+      <Flex as={"section"} flexDir={"column"} flex={1} h={"full"} alignItems={"flex-start"}>
+        <Text color={"text.primary"} fontSize={"sm"}>
+          {t("requirementsLibrary.modals.configureFields")}
+        </Text>
 
-      <Box as={"section"} w={"full"} border={"1px solid"} borderColor={"border.light"} borderRadius={"lg"} mt={4}>
-        <Flex
-          py={2}
-          px={6}
-          w={"full"}
-          background={"greys.grey04"}
-          borderTopRadius="lg"
-          borderBottom="1px solid"
-          borderBottomColor="border.light"
-          alignItems={"center"}
-        >
-          <EditableInputWithControls
-            initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
-            fontWeight={700}
-            defaultValue={displayNameValue || ""}
-            onSubmit={onDisplayNameChange}
-            onCancel={onDisplayNameChange}
-            color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
-            aria-label={"Edit Display Name"}
-            flex={1}
-          />
-          <Button size={"xs"} variant={isInReorderMode ? "primary" : "secondary"} onClick={onToggle}>
-            {t(isInReorderMode ? "ui.done" : "ui.reorder")}
-          </Button>
-        </Flex>
-        <Box pb={8}>
-          <Box px={3} mt={4} mb={3}>
-            <Controller
-              render={({ field: { value, onChange } }) => (
-                <EditorWithPreview
-                  label={t("requirementsLibrary.modals.displayDescriptionLabel")}
-                  htmlValue={value}
-                  onChange={onChange}
-                  initialTriggerText={t("requirementsLibrary.modals.addDescriptionTrigger")}
-                  onRemove={(setEditMode) => {
-                    setEditMode(false)
-                    onChange("")
-                  }}
-                />
-              )}
-              name={"displayDescription"}
-              control={control}
+        <Box as={"section"} w={"full"} border={"1px solid"} borderColor={"border.light"} borderRadius={"lg"} mt={4}>
+          <Flex
+            py={2}
+            px={6}
+            w={"full"}
+            background={"greys.grey04"}
+            borderTopRadius="lg"
+            borderBottom="1px solid"
+            borderBottomColor="border.light"
+            alignItems={"center"}
+          >
+            <EditableInputWithControls
+              initialHint={t("requirementsLibrary.modals.clickToWriteDisplayName")}
+              fontWeight={700}
+              defaultValue={displayNameValue || ""}
+              onSubmit={onDisplayNameChange}
+              onCancel={onDisplayNameChange}
+              color={R.isEmpty(displayNameValue) ? "text.link" : undefined}
+              aria-label={"Edit Display Name"}
+              flex={1}
             />
-          </Box>
-          {!hasFields && (
-            <Flex w={"full"} justifyContent={"space-between"} px={6}>
-              <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-              <FieldsSetupDrawer
-                disabledRequirementTypeOptions={disabledRequirementTypeOptions}
-                onUse={onUseRequirement}
+            <Button size={"xs"} variant={isInReorderMode ? "primary" : "secondary"} onClick={onToggle}>
+              {t(isInReorderMode ? "ui.done" : "ui.reorder")}
+            </Button>
+          </Flex>
+          <Box pb={8}>
+            <Box px={3} mt={4} mb={3}>
+              <Controller
+                render={({ field: { value, onChange } }) => (
+                  <EditorWithPreview
+                    label={t("requirementsLibrary.modals.displayDescriptionLabel")}
+                    htmlValue={value}
+                    onChange={onChange}
+                    initialTriggerText={t("requirementsLibrary.modals.addDescriptionTrigger")}
+                    onRemove={(setEditMode) => {
+                      setEditMode(false)
+                      onChange("")
+                    }}
+                  />
+                )}
+                name={"displayDescription"}
+                control={control}
               />
-            </Flex>
-          )}
-          {isInReorderMode ? (
-            <ReorderList />
-          ) : (
-            <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
-              {fields.map((field, index) => {
-                const watchedHint = watch(`requirementsAttributes.${index}.hint`)
-                const watchedRequired = watch(`requirementsAttributes.${index}.required`)
-                const requirementType = (field as IRequirementAttributes).inputType
-                const watchedElective = watch(`requirementsAttributes.${index}.elective`)
-                const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
-                const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
-                const watchedComputedCompliance = watch(
-                  `requirementsAttributes.${index}.inputOptions.computedCompliance`
-                )
-                // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
-                const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
-                  watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
-                )
-                const disabledMenuOptions: ("remove" | "conditional")[] =
-                  isStepCodeDependency || isStepCodePackageFileRequirementCode(watchedRequirementCode)
-                    ? ["conditional"]
-                    : []
-
-                // for step code dependency only the step_code requirement is removable and the other
-                // dependencies rely on it for removal
-                if (
-                  isStepCodeDependency &&
-                  watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9
-                ) {
-                  disabledMenuOptions.push("remove")
-                }
-
-                return (
-                  <Box
-                    key={field.id}
-                    w={"full"}
-                    borderRadius={"sm"}
-                    _hover={{
-                      bg: "theme.blueLight",
-                      "& .requirement-edit-controls-container": {
-                        ".requirement-edit-controls": {
-                          display: "flex",
-                        },
-                      },
-                    }}
-                    _focus={{
-                      bg: "theme.blueLight",
-                      "& .requirement-edit-controls-container": {
-                        flexFlow: "row",
-                        ".requirement-edit-controls": {
-                          visibility: "visible",
-                        },
-                      },
-                    }}
-                    tabIndex={0}
-                    px={3}
-                    pt={index !== 0 ? 1 : 0}
-                    pb={5}
-                    pos={"relative"}
-                  >
-                    <Box {...fieldContainerSharedProps} display={isRequirementInEditMode(field.id) ? "block" : "none"}>
-                      <RequirementFieldEdit<IRequirementBlockForm>
-                        requirementType={requirementType}
-                        editableLabelProps={{
-                          controlProps: {
-                            control: control,
-                            name: `requirementsAttributes.${index}.label`,
-                            rules: { required: true },
-                          },
-                          color: "text.link",
-                          "aria-label": "Edit Label",
-                        }}
-                        editableHelperTextProps={{
-                          controlProps: {
-                            control: control,
-                            name: `requirementsAttributes.${index}.hint`,
-                          },
-                        }}
-                        isOptionalCheckboxProps={{
-                          controlProps: {
-                            control: control,
-                            name: `requirementsAttributes.${index}.required`,
-                            defaultValue: true,
-                          },
-                        }}
-                        isElectiveCheckboxProps={{
-                          controlProps: {
-                            control: control,
-                            name: `requirementsAttributes.${index}.elective`,
-                          },
-                        }}
-                        unitSelectProps={
-                          requirementType === ERequirementType.number
-                            ? {
-                                controlProps: {
-                                  control: control,
-
-                                  name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
-                                  // @ts-ignore
-                                  defaultValue: ENumberUnit.noUnit,
-                                },
-                              }
-                            : undefined
-                        }
-                        multiOptionProps={
-                          isMultiOptionRequirement(requirementType)
-                            ? {
-                                useFieldArrayProps: {
-                                  control,
-                                  name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
-                                },
-                                onOptionValueChange: (optionNIndex, optionValue) => {
-                                  setValue(
-                                    `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
-                                    optionValue
-                                  )
-                                  setValue(
-                                    `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
-                                    optionValue
-                                  )
-                                },
-                                getOptionValue: (idx) =>
-                                  watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
-                              }
-                            : undefined
-                        }
-                        canAddMultipleContactProps={
-                          isContactRequirement(requirementType)
-                            ? {
-                                controlProps: {
-                                  control: control,
-                                  name: `requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`,
-                                },
-                              }
-                            : undefined
-                        }
-                        requirementCode={watchedRequirementCode}
-                      />
-                    </Box>
-                    <Box
-                      className={"requirement-display"}
-                      display={!isRequirementInEditMode(field.id) ? "block" : "none"}
-                      {...fieldContainerSharedProps}
-                    >
-                      <RequirementFieldDisplay
-                        matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
-                          watchedRequirementCode
-                        )}
-                        requirementType={requirementType}
-                        label={watch(`requirementsAttributes.${index}.label`)}
-                        helperText={watchedHint}
-                        unit={
-                          requirementType === ERequirementType.number
-                            ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
-                            : undefined
-                        }
-                        options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(
-                          (option) => option.label
-                        )}
-                        selectProps={{
-                          maxW: "339px",
-                        }}
-                        addMultipleContactProps={{
-                          shouldRender: true,
-                          formControlProps: { isDisabled: true },
-                          switchProps: {
-                            isChecked: !!watch(`requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`),
-                          },
-                        }}
-                        required={watchedRequired}
-                        showAddLabelIndicator
-                      />
-                    </Box>
-                    <FieldControlsHeader
-                      requirementCode={watchedRequirementCode}
-                      isRequirementInEditMode={isRequirementInEditMode(field.id)}
-                      toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
-                      onRemove={() => onRemoveRequirement(index)}
-                      elective={watchedElective}
-                      conditional={watchedConditional}
-                      computedCompliance={watchedComputedCompliance}
-                      requirementType={requirementType}
-                      index={index}
-                      disabledMenuOptions={disabledMenuOptions}
-                    />
-                  </Box>
-                )
-              })}
-              {hasFields && (
+            </Box>
+            {!hasFields && (
+              <Flex w={"full"} justifyContent={"space-between"} px={6}>
+                <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
                 <FieldsSetupDrawer
                   disabledRequirementTypeOptions={disabledRequirementTypeOptions}
                   onUse={onUseRequirement}
-                  defaultButtonProps={{
-                    alignSelf: "flex-end",
-                    mr: 3,
-                  }}
                 />
-              )}
-            </VStack>
-          )}
+              </Flex>
+            )}
+            {isInReorderMode ? (
+              <ReorderList />
+            ) : (
+              <VStack w={"full"} alignItems={"flex-start"} spacing={2} px={3}>
+                {fields.map((field, index) => {
+                  const watchedHint = watch(`requirementsAttributes.${index}.hint`)
+                  const watchedRequired = watch(`requirementsAttributes.${index}.required`)
+                  const requirementType = (field as IRequirementAttributes).inputType
+                  const watchedElective = watch(`requirementsAttributes.${index}.elective`)
+                  const watchedConditional = watch(`requirementsAttributes.${index}.inputOptions.conditional`)
+                  const watchedRequirementCode = watch(`requirementsAttributes.${index}.requirementCode`)
+                  const watchedComputedCompliance = watch(
+                    `requirementsAttributes.${index}.inputOptions.computedCompliance`
+                  )
+                  // Disables remove and conditional options for all energy_step_code dependency requirements except for the Energy Step Code requirement itself
+                  const isStepCodeDependency = Object.values(EEnergyStepCodeDependencyRequirementCode).includes(
+                    watchedRequirementCode as EEnergyStepCodeDependencyRequirementCode
+                  )
+                  const disabledMenuOptions: ("remove" | "conditional")[] =
+                    isStepCodeDependency || isStepCodePackageFileRequirementCode(watchedRequirementCode)
+                      ? ["conditional"]
+                      : []
+
+                  // for step code dependency only the step_code requirement is removable and the other
+                  // dependencies rely on it for removal
+                  if (
+                    isStepCodeDependency &&
+                    watchedRequirementCode !== EEnergyStepCodeDependencyRequirementCode.energyStepCodeToolPart9
+                  ) {
+                    disabledMenuOptions.push("remove")
+                  }
+
+                  return (
+                    <Box
+                      key={field.id}
+                      w={"full"}
+                      borderRadius={"sm"}
+                      _hover={{
+                        bg: "theme.blueLight",
+                        "& .requirement-edit-controls-container": {
+                          ".requirement-edit-controls": {
+                            display: "flex",
+                          },
+                        },
+                      }}
+                      _focus={{
+                        bg: "theme.blueLight",
+                        "& .requirement-edit-controls-container": {
+                          flexFlow: "row",
+                          ".requirement-edit-controls": {
+                            visibility: "visible",
+                          },
+                        },
+                      }}
+                      tabIndex={0}
+                      px={3}
+                      pt={index !== 0 ? 1 : 0}
+                      pb={5}
+                      pos={"relative"}
+                    >
+                      <Box
+                        {...fieldContainerSharedProps}
+                        display={isRequirementInEditMode(field.id) ? "block" : "none"}
+                      >
+                        <RequirementFieldEdit<IRequirementBlockForm>
+                          requirementType={requirementType}
+                          editableLabelProps={{
+                            controlProps: {
+                              control: control,
+                              name: `requirementsAttributes.${index}.label`,
+                              rules: { required: true },
+                            },
+                            color: "text.link",
+                            "aria-label": "Edit Label",
+                          }}
+                          editableHelperTextProps={{
+                            controlProps: {
+                              control: control,
+                              name: `requirementsAttributes.${index}.hint`,
+                            },
+                          }}
+                          isOptionalCheckboxProps={{
+                            controlProps: {
+                              control: control,
+                              name: `requirementsAttributes.${index}.required`,
+                              defaultValue: true,
+                            },
+                          }}
+                          isElectiveCheckboxProps={{
+                            controlProps: {
+                              control: control,
+                              name: `requirementsAttributes.${index}.elective`,
+                            },
+                          }}
+                          unitSelectProps={
+                            requirementType === ERequirementType.number
+                              ? {
+                                  controlProps: {
+                                    control: control,
+
+                                    name: `requirementsAttributes.${index}.inputOptions.numberUnit`,
+                                    // @ts-ignore
+                                    defaultValue: ENumberUnit.noUnit,
+                                  },
+                                }
+                              : undefined
+                          }
+                          multiOptionProps={
+                            isMultiOptionRequirement(requirementType)
+                              ? {
+                                  useFieldArrayProps: {
+                                    control,
+                                    name: `requirementsAttributes.${index}.inputOptions.valueOptions`,
+                                  },
+                                  onOptionValueChange: (optionNIndex, optionValue) => {
+                                    setValue(
+                                      `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.value`,
+                                      optionValue
+                                    )
+                                    setValue(
+                                      `requirementsAttributes.${index}.inputOptions.valueOptions.${optionNIndex}.label`,
+                                      optionValue
+                                    )
+                                  },
+                                  getOptionValue: (idx) =>
+                                    watch(`requirementsAttributes.${index}.inputOptions.valueOptions.${idx}`),
+                                }
+                              : undefined
+                          }
+                          canAddMultipleContactProps={
+                            isContactRequirement(requirementType)
+                              ? {
+                                  controlProps: {
+                                    control: control,
+                                    name: `requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`,
+                                  },
+                                }
+                              : undefined
+                          }
+                          requirementCode={watchedRequirementCode}
+                        />
+                      </Box>
+                      <Box
+                        className={"requirement-display"}
+                        display={!isRequirementInEditMode(field.id) ? "block" : "none"}
+                        {...fieldContainerSharedProps}
+                      >
+                        <RequirementFieldDisplay
+                          matchesStepCodePackageRequirementCode={isStepCodePackageFileRequirementCode(
+                            watchedRequirementCode
+                          )}
+                          requirementType={requirementType}
+                          label={watch(`requirementsAttributes.${index}.label`)}
+                          helperText={watchedHint}
+                          unit={
+                            requirementType === ERequirementType.number
+                              ? watch(`requirementsAttributes.${index}.inputOptions.numberUnit`) ?? null
+                              : undefined
+                          }
+                          options={watch(`requirementsAttributes.${index}.inputOptions.valueOptions`)?.map(
+                            (option) => option.label
+                          )}
+                          selectProps={{
+                            maxW: "339px",
+                          }}
+                          addMultipleContactProps={{
+                            shouldRender: true,
+                            formControlProps: { isDisabled: true },
+                            switchProps: {
+                              isChecked: !!watch(`requirementsAttributes.${index}.inputOptions.canAddMultipleContacts`),
+                            },
+                          }}
+                          required={watchedRequired}
+                          showAddLabelIndicator
+                        />
+                      </Box>
+                      <FieldControlsHeader
+                        requirementCode={watchedRequirementCode}
+                        isRequirementInEditMode={isRequirementInEditMode(field.id)}
+                        toggleRequirementToEdit={() => toggleRequirementToEdit(field.id)}
+                        onRemove={() => onRemoveRequirement(index)}
+                        elective={watchedElective}
+                        conditional={watchedConditional as IFormConditional}
+                        computedCompliance={watchedComputedCompliance}
+                        requirementType={requirementType}
+                        index={index}
+                        disabledMenuOptions={disabledMenuOptions}
+                      />
+                    </Box>
+                  )
+                })}
+                {hasFields && (
+                  <FieldsSetupDrawer
+                    disabledRequirementTypeOptions={disabledRequirementTypeOptions}
+                    onUse={onUseRequirement}
+                    defaultButtonProps={{
+                      alignSelf: "flex-end",
+                      mr: 3,
+                    }}
+                  />
+                )}
+              </VStack>
+            )}
+          </Box>
         </Box>
-      </Box>
-    </Flex>
+      </Flex>
+      {!isEditable && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="rgba(255, 255, 255, 0.6)" // Semi-transparent white overlay
+          _hover={{ cursor: "not-allowed" }}
+        />
+      )}
+    </Box>
   )
 })
