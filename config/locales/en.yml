@@ -173,6 +173,9 @@ en:
       ltsa_retrieval_error:
         title: Error
         message: The land title could not be found
+      pin_retrieval_error:
+        title: Error
+        message: A parcel could not be found by the given PIN
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable

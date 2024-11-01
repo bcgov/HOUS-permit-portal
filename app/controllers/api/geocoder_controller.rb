@@ -100,7 +100,7 @@ class Api::GeocoderController < Api::ApplicationController
         )
       render json: { pin: attributes }, status: :ok
     rescue Errors::FeatureAttributesRetrievalError => e
-      render_error "geocoder.ltsa_unavailable_error", {}, e and return
+      render_error "geocoder.pin_retrieval_error", {}, e and return
     rescue StandardError => e
       render_error "geocoder.ltsa_unavailable_error", {}, e and return
     end
