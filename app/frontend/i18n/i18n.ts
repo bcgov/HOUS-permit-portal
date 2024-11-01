@@ -1711,6 +1711,14 @@ const options = {
             title: "Users",
             description: "View and manage administrative users",
           },
+          landingPageSetup: {
+            title: "Landing page setup",
+            description: "Configure content for the landing page",
+            enable: "Show",
+            label: "Site-wide message",
+            hint: "This message will appear at the top of each page for all users.",
+            settings: "Site-wide message settings",
+          },
           sitewideMessage: {
             title: "Site-wide message",
             description: "Enable and configure a site-wide message",
@@ -1755,6 +1763,7 @@ const options = {
             },
           },
         },
+
         reporting: {
           title: "Reporting",
           tableHeading: "Available reports",
@@ -1939,6 +1948,7 @@ const options = {
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
+            landingSetup: "Landing setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
             earlyAccess: "Early access",
