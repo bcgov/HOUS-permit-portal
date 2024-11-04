@@ -1,5 +1,3 @@
-module Part3StepCode
-  class FuelType < ApplicationRecord
-    belongs_to :checklist
-  end
+class Part3StepCode::FuelType < ApplicationRecord
+  belongs_to :checklist
 end

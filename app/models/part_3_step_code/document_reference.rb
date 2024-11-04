@@ -1,5 +1,3 @@
-module Part3StepCode
-  class DocumentReference < ApplicationRecord
-    belongs_to :checklist
-  end
+class Part3StepCode::DocumentReference < ApplicationRecord
+  belongs_to :checklist
 end
