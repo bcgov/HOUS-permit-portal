@@ -16,7 +16,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
   end
 
   before :each do
-    StepCode::TEDIReferencesSeeder.seed!
+    StepCode::Part9::TEDIReferencesSeeder.seed!
   end
 
   context "when tedi is present and does not exceed the energy step requirement" do

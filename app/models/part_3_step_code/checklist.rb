@@ -97,4 +97,6 @@ class Part3StepCode::Checklist < ApplicationRecord
          other
        ],
        _prefix: :dhw
+
+  enum climate_zone: %i[4 5 6 7a 7b 8]
 end

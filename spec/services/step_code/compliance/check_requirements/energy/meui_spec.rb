@@ -16,8 +16,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
   end
 
   before :each do
-    StepCode::MEUIReferencesSeeder.seed!
-    StepCode::TEDIReferencesSeeder.seed!
+    StepCode::Part9::MEUIReferencesSeeder.seed!
+    StepCode::Part9::TEDIReferencesSeeder.seed!
   end
 
   context "when meui is present and does not exceed the energy step requirement" do

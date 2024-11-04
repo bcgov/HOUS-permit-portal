@@ -63,6 +63,7 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
                      to_table: :part_3_step_code_checklists
                    },
                    type: :uuid
+      t.integer :key
       t.decimal :modelled_floor_area
       t.integer :performance_requirement
       t.decimal :percent_better_requirement

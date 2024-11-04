@@ -1,4 +1,4 @@
-class StepCode::DataEntryFromHot2000
+class StepCode::Part9::DataEntryFromHot2000
   attr_reader :xml, :data_entry
 
   def initialize(xml:, data_entry:)
@@ -7,7 +7,7 @@ class StepCode::DataEntryFromHot2000
   end
 
   def call
-    mapper = StepCode::DataEntryHot2000Mapper.new(xml:)
+    mapper = StepCode::Part9::DataEntryHot2000Mapper.new(xml:)
     data_entry.update!(mapper.mappings)
     return self
   end
