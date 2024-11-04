@@ -1,4 +1,4 @@
-class StepCode::DataEntryHot2000Mapper
+class StepCode::Part9::DataEntryHot2000Mapper
   attr_reader :xml
 
   def initialize(xml:)
