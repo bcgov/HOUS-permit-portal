@@ -1,6 +1,13 @@
 RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
   let(:step) { 3 }
-  let!(:step_code) { create(:step_code, data_entries_attributes:) }
+  let!(:step_code) do
+    create(
+      :part_9_step_code,
+      pre_construction_checklist_attributes: {
+        data_entries_attributes:
+      }
+    )
+  end
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::Energy::MEUI.new(
       checklist: step_code.pre_construction_checklist,
@@ -17,7 +24,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           aec: 45.56,
           baseloads: 25.62,
           above_grade_heated_floor_area: 117.9,
@@ -36,7 +42,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           aec: 45.56,
           baseloads: 25.62,
           above_grade_heated_floor_area: 7.9,
@@ -57,7 +62,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::MEUI do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           aec: 65.56,
           baseloads: 25.62,
           above_grade_heated_floor_area: 7.9,

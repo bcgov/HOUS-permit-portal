@@ -1,6 +1,13 @@
 RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
   let(:step) { 3 }
-  let!(:step_code) { create(:step_code, data_entries_attributes:) }
+  let!(:step_code) do
+    create(
+      :part_9_step_code,
+      pre_construction_checklist_attributes: {
+        data_entries_attributes:
+      }
+    )
+  end
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::Energy::TEDI.new(
       checklist: step_code.pre_construction_checklist,
@@ -16,7 +23,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           aux_energy_required: 15065.98,
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 109.9,
@@ -35,7 +41,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           aux_energy_required: 35065.98,
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 59.9,
@@ -55,7 +60,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           aux_energy_required: 35065.98,
           above_grade_heated_floor_area: 117.9,
           below_grade_heated_floor_area: 59.9,
