@@ -205,8 +205,8 @@ if PermitApplication.first.blank?
   RequirementBlock.find_each { |block| block.destroy unless block.valid? }
 
   # Energy Step Code Reference Tables
-  StepCode::MEUIReferencesSeeder.seed!
-  StepCode::TEDIReferencesSeeder.seed!
+  StepCode::Part9::MEUIReferencesSeeder.seed!
+  StepCode::Part9::TEDIReferencesSeeder.seed!
 
   # Creating Permit Applications
   puts "Seeding permit applications..."
