@@ -104,15 +104,15 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     # reindex models
-    Jurisdiction.reindex
-    PermitApplication.reindex
-    RequirementBlock.reindex
-    RequirementTemplate.reindex
-    User.reindex
-    Contact.reindex
+    # Jurisdiction.reindex
+    # PermitApplication.reindex
+    # RequirementBlock.reindex
+    # RequirementTemplate.reindex
+    # User.reindex
+    # Contact.reindex
 
-    # and disable callbacks
-    Searchkick.disable_callbacks
+    # # and disable callbacks
+    # Searchkick.disable_callbacks
   end
 
   config.around(:each, search: true) do |example|
