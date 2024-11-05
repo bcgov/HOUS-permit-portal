@@ -1,18 +1,15 @@
 RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
+  let(:checklist) do
+    build(:part_3_checklist, occupancy_classifications: occupancies)
+  end
+
   context "single use" do
+    let(:occupancies) do
+      [*build_list(:step_code_occupancy, 1, :other_residential)]
+    end
     it "passes on passing example" do
-      step_code = {
-        occupancies: [
-          {
-            occupancy: "Group C - Other Residential",
-            energy_requirement: "Step 3",
-            zero_carbon_requirement: "EL-4",
-            modelled_floor_area: 1000
-          }
-        ]
-      }
       step_code_report_generator =
-        StepCode::Part3::V1::Compliance::GenerateReports.new(step_code)
+        StepCode::Part3::V1::Compliance::GenerateReports.new(check_list)
       result = step_code_report_generator.call
 
       expect(result).to eq(
@@ -20,8 +17,9 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
           occupancies: [
             {
               occupancy: "Group C - Other Residential",
-              energy_requirement: "Step 3",
-              zero_carbon_requirement: "EL-4"
+              energy_requirement: :step_3,
+              zero_carbon_requirement: :el_4,
+              performance_requirement: nil
             }
           ],
           whole_building_performance: {
@@ -67,39 +65,34 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
   end
 
   context "mixed use" do
+    let(:occupancies) do
+      [
+        *build_list(:step_code_occupancy, 1, :other_residential),
+        *build_list(:step_code_occupancy, 1, :low_industrial)
+      ]
+    end
+
     it "fails in predefined failure case" do
     end
 
     it "passes on passing example" do
-      step_code = {
-        occupancies: [
-          {
-            occupancy: "Group F3 - Low-Hazard Industrial",
-            energy_requirement: "NECB",
-            modelled_floor_area: 1000
-          },
-          {
-            occupancy: "Group C - Other Residential",
-            energy_requirement: "Step 3",
-            zero_carbon_requirement: "EL-4",
-            modelled_floor_area: 1000
-          }
-        ]
-      }
       step_code_report_generator =
-        StepCode::Part3::V1::Compliance::GenerateReports.new(step_code)
+        StepCode::Part3::V1::Compliance::GenerateReports.new(checklist)
       result = step_code_report_generator.call
       expect(result).to eq(
         {
           occupancies: [
             {
-              occupancy: "Group F3 - Low-Hazard Industrial",
-              energy_requirement: "NECB"
-            },
-            {
               occupancy: "Group C - Other Residential",
               energy_requirement: "Step 3",
-              zero_carbon_requirement: "EL-4"
+              zero_carbon_requirement: "EL-4",
+              performance_requirement: nil
+            },
+            {
+              occupancy: "Group F3 - Low-Hazard Industrial",
+              energy_requirement: nil,
+              zero_carbon_requirement: nil,
+              performance_requirement: :necb
             }
           ],
           whole_building_performance: {

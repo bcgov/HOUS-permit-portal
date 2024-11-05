@@ -17,7 +17,8 @@ class StepCode::Part3::V0::Compliance::GenerateReports
           {
             occupancy: oc.name,
             energy_requirement: oc.energy_step_required,
-            zero_carbon_requirement: oc.zero_carbon_step_required
+            zero_carbon_requirement: oc.zero_carbon_step_required,
+            performance_requirement: oc.performance_requirement
           }
         end,
       whole_building_performance: {
