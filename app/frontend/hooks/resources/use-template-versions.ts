@@ -8,10 +8,14 @@ export const useTemplateVersions = ({
   activityId,
   customErrorMessage,
   status,
+  earlyAccess = false,
+  isPublic = false,
 }: {
   activityId?: string
   customErrorMessage?: string
   status?: ETemplateVersionStatus
+  earlyAccess?: boolean
+  isPublic?: boolean
 }) => {
   const [error, setError] = useState<Error | undefined>(undefined)
   const { templateVersionStore, sandboxStore } = useMst()
@@ -21,16 +25,17 @@ export const useTemplateVersions = ({
   status ??= currentSandbox?.templateVersionStatusScope || ETemplateVersionStatus.published
 
   const templateVersions = (
-    activityId ? getTemplateVersionsByActivityId(activityId, status) : getTemplateVersionsByStatus(status)
+    activityId
+      ? getTemplateVersionsByActivityId(activityId, status, earlyAccess, isPublic)
+      : getTemplateVersionsByStatus(status, earlyAccess, isPublic)
   ) as ITemplateVersion[]
   const { t } = useTranslation()
 
   useEffect(() => {
     ;(async () => {
       const errorMessage = customErrorMessage ?? t("errors.fetchTemplateVersions")
-
       try {
-        const isSuccess = await fetchTemplateVersions(activityId, status)
+        const isSuccess = await fetchTemplateVersions(activityId, status, earlyAccess, isPublic)
 
         !isSuccess && setError(new Error(errorMessage))
       } catch (e) {

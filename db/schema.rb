@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_04_223257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -78,6 +78,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
     t.uuid "contactable_id"
     t.index %w[contactable_type contactable_id],
             name: "index_contacts_on_contactable"
+  end
+
+  create_table "early_access_previews",
+               id: :uuid,
+               default: -> { "gen_random_uuid()" },
+               force: :cascade do |t|
+    t.uuid "early_access_requirement_template_id", null: false
+    t.uuid "previewer_id", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index %w[early_access_requirement_template_id previewer_id],
+            name: "index_early_access_previews_on_template_id_and_previewer_id",
+            unique: true
+    t.index ["previewer_id"],
+            name: "index_early_access_previews_on_previewer_id"
   end
 
   create_table "end_user_license_agreements",
@@ -437,6 +454,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
     t.datetime "fetched_at"
     t.uuid "copied_from_id"
     t.uuid "assignee_id"
+    t.boolean "public", default: false
     t.index ["activity_id"], name: "index_requirement_templates_on_activity_id"
     t.index ["assignee_id"], name: "index_requirement_templates_on_assignee_id"
     t.index ["copied_from_id"],
@@ -558,6 +576,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
             },
             null: false
     t.jsonb "revision_reason_options"
+    t.uuid "small_scale_requirement_template_id"
+    t.index ["small_scale_requirement_template_id"],
+            name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -907,6 +928,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "collaborators", "users"
+  add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "external_api_keys", "jurisdictions"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
@@ -962,6 +984,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_04_180237) do
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
+  add_foreign_key "site_configurations",
+                  "requirement_templates",
+                  column: "small_scale_requirement_template_id"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",

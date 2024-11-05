@@ -30,8 +30,12 @@ class RequirementBlock < ApplicationRecord
   validate :early_access_on_appropriate_template
 
   before_validation :set_sku, on: :create
+  before_validation :ensure_unique_name, on: :create
 
-  after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :refresh_search_index,
+               if: -> do
+                 saved_change_to_discarded_at? || saved_change_to_visibility?
+               end
 
   acts_as_taggable_on :associations
 
@@ -105,17 +109,28 @@ class RequirementBlock < ApplicationRecord
   private
 
   def early_access_on_appropriate_template
-    return unless early_access?
+    # Determine the required visibility based on the current object's state
+    if early_access?
+      required_visibility = :early_access
+      error_key = "associated_requirement_templates_must_be_early_access"
+    elsif live?
+      required_visibility = :live
+      error_key = "associated_requirement_templates_must_be_live"
+    elsif any?
+      # If any, no validation is needed
+      return
+    end
+
     # Fetch associated requirement templates through requirement_template_sections
     associated_templates =
       requirement_template_sections.map(&:requirement_template)
 
-    # Check if all associated templates satisfy early_access? check
-    unless associated_templates.all?(&:early_access?)
+    # Check if all associated templates satisfy the required visibility
+    unless associated_templates.all?(&required_visibility)
       errors.add(
         :visibility,
         I18n.t(
-          "activerecord.errors.models.requirement_block.attributes.visibility.wrong_requirement_template_type"
+          "activerecord.errors.models.requirement_block.attributes.visibility.#{error_key}"
         )
       )
     end
@@ -203,5 +218,36 @@ class RequirementBlock < ApplicationRecord
 
       retry_count += 1
     end
+  end
+
+  def ensure_unique_name
+    return if name.blank?
+
+    base_name = name.strip
+    new_name = base_name
+
+    # Loop to find a unique name
+    while self.class.exists?(name: new_name)
+      new_name = increment_last_word(new_name)
+    end
+
+    self.name = new_name
+  end
+
+  # Method to increment the last word if it's a number, or append " 2"
+  def increment_last_word(input)
+    words = input.split(" ")
+    last_word = words.last
+
+    if last_word.match?(/\A\d+\z/)
+      # If the last word is a number, increment it
+      incremented_number = last_word.to_i + 1
+      words[-1] = incremented_number.to_s
+    else
+      # If the last word is not a number, append "2"
+      words << "2"
+    end
+
+    words.join(" ")
   end
 end

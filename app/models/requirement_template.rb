@@ -65,6 +65,7 @@ class RequirementTemplate < ApplicationRecord
 
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
+  validate :public_only_for_early_access_preview
 
   def assignee
     nil
@@ -74,11 +75,15 @@ class RequirementTemplate < ApplicationRecord
     type == "EarlyAccessRequirementTemplate"
   end
 
+  def live?
+    type == "LiveRequirementTemplate"
+  end
+
   def visibility
     if early_access?
-      return "early_access"
-    else
-      return "live"
+      "early_access"
+    elsif live?
+      "live"
     end
   end
 
@@ -206,11 +211,23 @@ class RequirementTemplate < ApplicationRecord
       activity: activity.name,
       discarded: discarded_at.present?,
       assignee: assignee&.name,
-      visibility: visibility
+      visibility: visibility,
+      public: public?
     }
   end
 
   private
+
+  def public_only_for_early_access_preview
+    if public && !early_access?
+      errors.add(
+        :public,
+        I18n.t(
+          "activerecord.errors.models.requirement_template.attributes.public.true_on_early_access_only"
+        )
+      )
+    end
+  end
 
   def validate_uniqueness_of_blocks
     # Track duplicates across all sections within the same template

@@ -177,6 +177,7 @@ export interface IDenormalizedRequirementBlock {
   sku: string
   formJson?: IFormIOBlock
   description?: string
+  visibility: EVisibility
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
@@ -355,10 +356,6 @@ export interface IUserPushPayload {
 export type TSiteWideMessageConfiguration = {
   displaySitewideMessage: boolean
   sitewideMessage: string | null
-}
-
-export interface ISiteConfiguration extends TSiteWideMessageConfiguration {
-  helpLinkItems: IHelpLinkItems
 }
 
 export interface IContact {

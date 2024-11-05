@@ -3,6 +3,7 @@ import { TCreatePermitApplicationFormData } from "../../components/domains/permi
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
@@ -15,9 +16,11 @@ import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
+import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
+  IInvitePreviewersParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -52,7 +55,6 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPermitApplicationSearchFilters,
-  ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreateRequirementTemplateFormData,
@@ -426,6 +428,25 @@ export class Api {
     })
   }
 
+  async invitePreviewers(templateId: string, params: IInvitePreviewersParams) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/invite_previewers`,
+      params
+    )
+  }
+
+  async revokeEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke`)
+  }
+
+  async unrevokeEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke`)
+  }
+
+  async extendEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend`)
+  }
+
   // we send the versionDate as string instead of date as we want to strip off timezone info
   async scheduleRequirementTemplate(
     templateId: string,
@@ -481,8 +502,18 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(activityId?: string, status?: ETemplateVersionStatus) {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId, status })
+  async fetchTemplateVersions(
+    activityId?: string,
+    status?: ETemplateVersionStatus,
+    earlyAccess?: boolean,
+    isPublic?: boolean
+  ) {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
+      activityId,
+      status,
+      earlyAccess,
+      public: isPublic,
+    })
   }
 
   async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
@@ -568,7 +599,7 @@ export class Api {
   }
 
   async fetchSiteConfiguration() {
-    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+    return this.client.get<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, {})
   }
 
   async fetchExternalApiKeys(jurisdictionId: string) {
@@ -592,7 +623,7 @@ export class Api {
   }
 
   async updateSiteConfiguration(siteConfiguration) {
-    return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
+    return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
   }
 
   async updateUser(id: string, user: IUser) {

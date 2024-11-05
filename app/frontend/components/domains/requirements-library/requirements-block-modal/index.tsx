@@ -22,7 +22,7 @@ import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resourc
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { IFormConditional, IRequirementAttributes, IRequirementBlockParams } from "../../../../types/api-request"
-import { EEnergyStepCodeDependencyRequirementCode } from "../../../../types/enums"
+import { EEnergyStepCodeDependencyRequirementCode, EVisibility } from "../../../../types/enums"
 import { IDenormalizedRequirementBlock, TAutoComplianceModuleConfigurations } from "../../../../types/types"
 import { AUTO_COMPLIANCE_OPTIONS_MAP_KEY_PREFIX } from "../../../../utils"
 import { isOptionsMapperModuleConfiguration } from "../../../../utils/utility-functions"
@@ -39,6 +39,7 @@ interface IRequirementsBlockProps {
   showEditWarning?: boolean
   triggerButtonProps?: Partial<ButtonProps>
   withOptionsMenu?: boolean
+  isEditable?: boolean
   forEarlyAccess?: boolean
 }
 
@@ -47,11 +48,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   showEditWarning,
   triggerButtonProps,
   withOptionsMenu,
+  isEditable,
   forEarlyAccess,
 }: IRequirementsBlockProps) {
-  const { requirementBlockStore } = useMst()
+  const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
   const { t } = useTranslation()
-  const { createRequirementBlock } = requirementBlockStore
+  const { fetchData } = searchModel
+  const { createRequirementBlock, isEditingEarlyAccess } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
@@ -63,12 +67,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           firstNations: requirementBlock.firstNations,
           description: requirementBlock.description,
           displayName: requirementBlock.displayName,
+          visibility: requirementBlock.visibility || EVisibility.any,
           displayDescription: requirementBlock.displayDescription,
           sku: (requirementBlock as IRequirementBlock).sku,
           associationList: (requirementBlock as IRequirementBlock).associations,
           requirementsAttributes: (requirementBlock as IRequirementBlock).requirementFormDefaults,
         }
       : {
+          visibility: forEarlyAccess ? EVisibility.earlyAccess : EVisibility.any,
           associationList: [],
           requirementsAttributes: [],
         }
@@ -142,15 +148,16 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
           ...removedRequirementAttributes,
         ] as IRequirementAttributes[],
       })
-      requirementBlockStore.fetchRequirementBlocks()
     } else {
       isSuccess = await createRequirementBlock({
         ...data,
         requirementsAttributes: [...mappedRequirementAttributes],
       })
     }
-
-    isSuccess && onClose()
+    if (isSuccess) {
+      fetchData()
+      onClose()
+    }
   }
 
   const handleClose = () => {
@@ -239,10 +246,18 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
               </ModalHeader>
               <ModalBody px={"2.75rem"}>
                 {showEditWarning && (
-                  <CalloutBanner type={"warning"} title={t("requirementsLibrary.modals.editWarning")} />
+                  <CalloutBanner
+                    type={"warning"}
+                    title={
+                      isEditingEarlyAccess
+                        ? t("requirementsLibrary.modals.previewEditWarning")
+                        : t("requirementsLibrary.modals.templateEditWarning")
+                    }
+                  />
                 )}
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup
+                    forEarlyAccess={forEarlyAccess}
                     requirementBlock={
                       (requirementBlock as IRequirementBlock)?.restore
                         ? (requirementBlock as IRequirementBlock)
@@ -250,7 +265,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                     }
                     withOptionsMenu={withOptionsMenu}
                   />
-                  <FieldsSetup requirementBlock={requirementBlock} />
+
+                  <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
                 </HStack>
               </ModalBody>
             </ModalContent>

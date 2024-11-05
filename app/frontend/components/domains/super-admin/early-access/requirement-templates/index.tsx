@@ -1,4 +1,4 @@
-import { Box, Container, Flex, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Box, Container, Flex, HStack, Heading, Tag, VStack } from "@chakra-ui/react"
 import { ArrowSquareOut } from "@phosphor-icons/react"
 import { format } from "date-fns"
 import { observer } from "mobx-react-lite"
@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next"
 import { useSearch } from "../../../../../hooks/use-search"
 import { useMst } from "../../../../../setup/root"
 import { IOption } from "../../../../../types/types"
+import { urlForPath } from "../../../../../utils/utility-functions"
+import { CopyLinkButton } from "../../../../shared/base/copy-link-button"
 import { CustomMessageBox } from "../../../../shared/base/custom-message-box"
 import { Paginator } from "../../../../shared/base/inputs/paginator"
 import { PerPageSelect } from "../../../../shared/base/inputs/per-page-select"
@@ -17,6 +19,7 @@ import { SearchGridItem } from "../../../../shared/grid/search-grid-item"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import { AssigneeSelect } from "../../../../shared/select/selectors/assignee-select"
 import { YesNoTag } from "../../../../shared/yes-no-tag"
+import { SharePreviewPopover } from "../../../requirement-template/share-preview-popover"
 import { CreateModal } from "./create-modal"
 import { GridHeaders } from "./grid-headers"
 
@@ -84,7 +87,16 @@ export const EarlyAccessRequirementTemplatesIndexScreen = observer(function Requ
                   <SearchGridItem>
                     <YesNoTag boolean={rt.firstNations} />
                   </SearchGridItem>
-                  <SearchGridItem>SHARED WITH</SearchGridItem>
+                  <SearchGridItem>
+                    <HStack>
+                      {rt.public ? (
+                        <Tag>{t("ui.public")}</Tag>
+                      ) : (
+                        <SharePreviewPopover earlyAccessRequirementTemplate={rt} />
+                      )}
+                      <CopyLinkButton value={urlForPath(`/early-access/requirement-templates/${rt.id}`)} size="xs" />
+                    </HStack>
+                  </SearchGridItem>
                   <SearchGridItem>{format(rt.updatedAt, "yyyy-MM-dd")}</SearchGridItem>
                   <SearchGridItem>
                     <AssigneeSelect

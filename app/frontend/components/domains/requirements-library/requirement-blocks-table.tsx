@@ -43,7 +43,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
   ...containerProps
 }: IProps) {
   const { requirementBlockStore, earlyAccessRequirementBlockStore } = useMst()
-  const storeToUse = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
+  const searchModel = forEarlyAccess ? earlyAccessRequirementBlockStore : requirementBlockStore
   const {
     tableRequirementBlocks,
     currentPage,
@@ -54,15 +54,15 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
     handlePageChange,
     isSearching,
     showArchived,
-  } = storeToUse
-
-  useSearch(storeToUse as ISearch, [showArchived])
+  } = searchModel
 
   useEffect(() => {
     return () => {
-      storeToUse.setShowArchived(false)
+      searchModel.setShowArchived(false)
     }
   }, [])
+
+  useSearch(searchModel as ISearch, [showArchived, requirementBlockStore.isEditingEarlyAccess])
 
   return (
     <VStack as={"article"} spacing={5} {...containerProps}>
@@ -97,7 +97,7 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                     ))}
                   </HStack>
                 </SearchGridItem>
-                <SearchGridItem pr={0} minW="280px">
+                <SearchGridItem pr={0} minW="273px">
                   <UnorderedList ml={0} pl={0} w={"full"}>
                     {requirementBlock.requirements.map((requirement) => {
                       return (
@@ -122,7 +122,11 @@ export const RequirementBlocksTable = observer(function RequirementBlocksTable({
                   {renderActionButton ? (
                     renderActionButton({ requirementBlock })
                   ) : (
-                    <RequirementsBlockModal withOptionsMenu requirementBlock={requirementBlock} />
+                    <RequirementsBlockModal
+                      withOptionsMenu
+                      requirementBlock={requirementBlock}
+                      forEarlyAccess={requirementBlock.isEarlyAccess}
+                    />
                   )}
                 </SearchGridItem>
               </Box>

@@ -1,9 +1,10 @@
-import { ENumberUnit, ERequirementType, ETagType } from "./enums"
+import { IRevisionReason } from "../models/revision-reason"
+import { ELandingTemplateKeys, ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
+  IHelpLinkItems,
   IOption,
   IRevisionRequest,
   ISimplifiedRequirementsMap,
-  ISiteConfiguration,
   TComputedCompliance,
   TConditional,
 } from "./types"
@@ -37,6 +38,7 @@ export interface IRequirementBlockParams {
   name: string
   firstNations: boolean
   displayName: string
+  visibility: EVisibility
   displayDescription: string
   description?: string
   associationList?: string[]
@@ -74,11 +76,21 @@ export interface IRevisionReasonsAttributes {
 export interface IRequirementTemplateUpdateParams {
   description?: string | null
   nickname?: string | null
+  public?: boolean | null
   assigneeId?: string | null
   requirementTemplateSectionsAttributes?: IRequirementTemplateSectionAttributes[]
 }
 
-export interface ISiteConfigurationUpdateParams extends Partial<ISiteConfiguration> {
+export interface IInvitePreviewersParams {
+  emails: string[]
+}
+
+export interface ISiteConfigurationUpdateParams {
+  displaySitewideMessage?: boolean | null
+  sitewideMessage?: string | null
+  helpLinkItems?: IHelpLinkItems
+  revisionReasonsMap?: { [key: string]: IRevisionReason }
+  [ELandingTemplateKeys.SmallScale]?: string | null
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
 }
 

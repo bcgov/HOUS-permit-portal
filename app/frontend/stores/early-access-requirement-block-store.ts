@@ -20,6 +20,9 @@ export const EarlyAccessRequirementBlockStoreModel = types
     get tableRequirementBlocks() {
       return self.tableEarlyAccessRequirementBlocks
     },
+    get getSortColumnHeader() {
+      return self.rootStore.requirementBlockStore.getSortColumnHeader
+    },
   }))
   .actions((self) => ({
     fetchEarlyAccessRequirementBlocks: flow(function* (opts?: {
@@ -41,7 +44,6 @@ export const EarlyAccessRequirementBlockStoreModel = types
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )
-
       if (response.ok) {
         self.rootStore.requirementBlockStore.mergeUpdateAll(response.data.data, "requirementBlockMap")
         self.tableEarlyAccessRequirementBlocks = cast(response.data.data.map((requirementBlock) => requirementBlock.id))

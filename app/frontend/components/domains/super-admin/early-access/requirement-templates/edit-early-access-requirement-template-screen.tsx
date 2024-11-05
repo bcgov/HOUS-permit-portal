@@ -1,18 +1,32 @@
-import { Button, Flex, HStack, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text } from "@chakra-ui/react"
-import { Archive, ArrowSquareOut, ArrowsClockwise, CaretDown } from "@phosphor-icons/react"
-import { format } from "date-fns"
+import { Button, Checkbox, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+import { Archive, ArrowSquareOut, CaretDown } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useEffect } from "react"
+import { Controller, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { useMst } from "../../../../../setup/root"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
+import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import {
   BaseEditRequirementTemplateScreen,
   IEditRequirementActionsProps,
   IEditRequirementOptionsProps,
 } from "../../../requirement-template/screens/base-edit-requirement-template-screen"
+import { SharePreviewPopover } from "../../../requirement-template/share-preview-popover"
 
 export const EditEarlyAccessRequirementTemplateScreen = observer(function EditEarlyAccessRequirementTemplateScreen() {
+  const { requirementBlockStore } = useMst()
+  const { setIsEditingEarlyAccess, resetIsEditingEarlyAccess } = requirementBlockStore
+
+  useEffect(() => {
+    setIsEditingEarlyAccess(true)
+
+    return () => {
+      resetIsEditingEarlyAccess()
+    }
+  }, [])
+
   return (
     <BaseEditRequirementTemplateScreen
       renderOptionsMenu={EditEarlyAccessRequirementOptions}
@@ -24,10 +38,6 @@ export const EditEarlyAccessRequirementTemplateScreen = observer(function EditEa
 const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequirementOptionsProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-
-  const handleFetchLatest = () => {
-    // TODO: Fetch latest from non-preview template
-  }
 
   const handleRemove = async () => {
     if (await requirementTemplate.destroy()) navigate("/early-access/requirement-templates")
@@ -50,21 +60,6 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
       </MenuButton>
 
       <MenuList pt={0}>
-        <MenuItem bg="semantic.warningLight" onClick={null}>
-          <HStack gap={6}>
-            <Flex direction="column" gap={0}>
-              <Text>{t("earlyAccessRequirementTemplate.edit.lastFetched")}:</Text>
-              <Text>
-                {requirementTemplate?.fetchedAt ? format(requirementTemplate.fetchedAt, "yyyy-MM-dd") : t("ui.na")}
-              </Text>
-            </Flex>
-            <Button variant="primary" onClick={handleFetchLatest} leftIcon={<ArrowsClockwise />}>
-              {t("earlyAccessRequirementTemplate.edit.fetchLatest")}
-            </Button>
-          </HStack>
-        </MenuItem>
-        <MenuDivider my={0} borderColor="border.light" />
-        <MenuDivider my={0} borderColor="border.light" />
         <ConfirmationModal
           title={t("earlyAccessRequirementTemplate.edit.confirmRemoveModalTitle")}
           body={t("earlyAccessRequirementTemplate.edit.confirmRemoveModalBody")}
@@ -90,15 +85,29 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
 
 const EditEarlyAccessRequirementActions = ({ requirementTemplate }: IEditRequirementActionsProps) => {
   const { t } = useTranslation()
+  const { control, watch } = useFormContext()
+
+  const publicWatch = watch("public")
 
   return (
     <>
-      <Button variant="primary">
-        {t("ui.share")} ({requirementTemplate.numberSharedWith})
-      </Button>
-      <Button variant="secondary" rightIcon={<ArrowSquareOut />}>
+      <Controller
+        name="public"
+        control={control}
+        render={({ field }) => (
+          <Checkbox isChecked={field.value} onChange={field.onChange} borderColor={"border.input"}>
+            {t("earlyAccessRequirementTemplate.edit.public")}
+          </Checkbox>
+        )}
+      />
+      {!publicWatch && <SharePreviewPopover earlyAccessRequirementTemplate={requirementTemplate} variant="primary" />}
+      <RouterLinkButton
+        rightIcon={<ArrowSquareOut />}
+        variant="secondary"
+        to={`/early-access/requirement-templates/${requirementTemplate.id}`}
+      >
         {t("ui.view")}
-      </Button>
+      </RouterLinkButton>
     </>
   )
 }

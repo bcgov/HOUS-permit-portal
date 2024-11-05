@@ -184,6 +184,12 @@ const RevisionReasonSetupScreen = lazy(() =>
   }))
 )
 
+const LandingSetupScreen = lazy(() =>
+  import("../super-admin/site-configuration-management/landing-setup-screen").then((module) => ({
+    default: module.LandingSetupScreen,
+  }))
+)
+
 const AdminUserIndexScreen = lazy(() =>
   import("../super-admin/site-configuration-management/users-screen").then((module) => ({
     default: module.AdminUserIndexScreen,
@@ -332,10 +338,6 @@ const AppRoutes = observer(() => {
       <Route path="/early-access/requirements-library" element={<EarlyAccessRequirementsLibraryScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/early-access/requirement-templates" element={<EarlyAccessRequirementTemplatesIndexScreen />} />
-      <Route
-        path="/early-access/requirement-templates/:requirementTemplateId"
-        element={<EarlyAccessRequirementTemplateScreen />}
-      />
       <Route path="/early-access/requirement-templates/new" element={<NewEarlyAccessRequirementTemplateScreen />} />
       <Route
         path="/early-access/requirement-templates/:requirementTemplateId/edit"
@@ -348,6 +350,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
+      <Route path="/configuration-management/landing-setup" element={<LandingSetupScreen />} />
       <Route path="/configuration-management/users" element={<AdminUserIndexScreen />} />
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
@@ -519,6 +522,10 @@ const AppRoutes = observer(() => {
         <Route path="/contact" element={<ContactScreen />} />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
         <Route path="/welcome" element={<LandingScreen />} />
+        <Route
+          path="/early-access/requirement-templates/:requirementTemplateId"
+          element={<EarlyAccessRequirementTemplateScreen />}
+        />
         <Route
           path="/jurisdictions"
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}

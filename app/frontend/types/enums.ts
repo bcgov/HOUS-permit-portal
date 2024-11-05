@@ -5,6 +5,13 @@ export enum EFlashMessageStatus {
   info = "info",
 }
 
+export enum EPreviewStatus {
+  invited = "invited",
+  access = "access",
+  expired = "expired",
+  revoked = "revoked",
+}
+
 export enum EPermitClassificationType {
   PermitType = "PermitType",
   Activity = "Activity",
@@ -433,4 +440,9 @@ export enum EJurisdictionExternalApiState {
   jOn = "j_on",
   jOff = "j_off",
   gOff = "g_off",
+}
+
+export enum ELandingTemplateKeys {
+  SmallScale = "small_scale_requirement_template_id",
+  // FourPlus = "four_plus_template_version_id",
 }

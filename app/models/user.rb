@@ -52,6 +52,12 @@ class User < ApplicationRecord
            foreign_key: "user_id",
            class_name: "Collaborator",
            dependent: :destroy
+
+  has_many :early_access_previews,
+           dependent: :destroy,
+           foreign_key: :previewer_id
+  has_many :early_access_requirement_templates, through: :early_access_previews
+
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 

@@ -18,9 +18,8 @@ interface IEarlyAccessRequirementTemplateScreenProps {}
 export const EarlyAccessRequirementTemplateScreen = observer(({}: IEarlyAccessRequirementTemplateScreenProps) => {
   const { t } = useTranslation()
 
-  const { userStore, permitApplicationStore } = useMst()
+  const { permitApplicationStore } = useMst()
   const { getEphemeralPermitApplication } = permitApplicationStore
-  const currentUser = userStore.currentUser
 
   const { requirementTemplate, error } = useRequirementTemplate()
 
@@ -33,7 +32,7 @@ export const EarlyAccessRequirementTemplateScreen = observer(({}: IEarlyAccessRe
   const [completedBlocks, setCompletedBlocks] = useState({})
 
   if (error) return <ErrorScreen error={error} />
-  if (!currentUser || !requirementTemplate?.isFullyLoaded) return <LoadingScreen />
+  if (!requirementTemplate?.isFullyLoaded) return <LoadingScreen />
 
   const ephemeralPermitApplication = getEphemeralPermitApplication(requirementTemplate)
 
