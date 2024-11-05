@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_01_205023) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_04_223257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -576,6 +576,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_01_205023) do
             },
             null: false
     t.jsonb "revision_reason_options"
+    t.uuid "small_scale_requirement_template_id"
+    t.index ["small_scale_requirement_template_id"],
+            name: "idx_on_small_scale_requirement_template_id_235b636c86"
   end
 
   create_table "step_code_building_characteristics_summaries",
@@ -981,6 +984,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_01_205023) do
   add_foreign_key "revision_requests", "submission_versions"
   add_foreign_key "revision_requests", "users"
   add_foreign_key "sandboxes", "jurisdictions"
+  add_foreign_key "site_configurations",
+                  "requirement_templates",
+                  column: "small_scale_requirement_template_id"
   add_foreign_key "step_code_building_characteristics_summaries",
                   "step_code_checklists"
   add_foreign_key "step_code_checklists",

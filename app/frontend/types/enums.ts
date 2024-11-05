@@ -441,3 +441,8 @@ export enum EJurisdictionExternalApiState {
   jOff = "j_off",
   gOff = "g_off",
 }
+
+export enum ELandingTemplateKeys {
+  SmallScale = "small_scale_requirement_template_id",
+  // FourPlus = "four_plus_template_version_id",
+}

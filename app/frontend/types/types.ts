@@ -358,10 +358,6 @@ export type TSiteWideMessageConfiguration = {
   sitewideMessage: string | null
 }
 
-export interface ISiteConfiguration extends TSiteWideMessageConfiguration {
-  helpLinkItems: IHelpLinkItems
-}
-
 export interface IContact {
   firstName: string
   lastName: string

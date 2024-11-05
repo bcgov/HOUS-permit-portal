@@ -113,8 +113,6 @@ export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibility
   const cancelRef = useRef()
   const selectRef = useRef()
 
-  const visibilityWatch = watch(name)
-
   // Handle the option change
   const handleChange = (selectedOption) => {
     if (selectedOption.value === visibilityWatch) return

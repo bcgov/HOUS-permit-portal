@@ -16,6 +16,7 @@ import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
+import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
@@ -54,7 +55,6 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPermitApplicationSearchFilters,
-  ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
   TCreateRequirementTemplateFormData,
@@ -502,8 +502,18 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(activityId?: string, status?: ETemplateVersionStatus) {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId, status })
+  async fetchTemplateVersions(
+    activityId?: string,
+    status?: ETemplateVersionStatus,
+    earlyAccess?: boolean,
+    isPublic?: boolean
+  ) {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
+      activityId,
+      status,
+      earlyAccess,
+      public: isPublic,
+    })
   }
 
   async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
@@ -589,7 +599,7 @@ export class Api {
   }
 
   async fetchSiteConfiguration() {
-    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+    return this.client.get<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, {})
   }
 
   async fetchExternalApiKeys(jurisdictionId: string) {
@@ -613,7 +623,7 @@ export class Api {
   }
 
   async updateSiteConfiguration(siteConfiguration) {
-    return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
+    return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
   }
 
   async updateUser(id: string, user: IUser) {

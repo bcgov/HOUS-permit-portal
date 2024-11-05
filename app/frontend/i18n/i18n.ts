@@ -126,7 +126,7 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            midDownload: "Download checklist",
+            viewTemplate: "View requirements",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
@@ -1714,10 +1714,10 @@ const options = {
           landingPageSetup: {
             title: "Landing page setup",
             description: "Configure content for the landing page",
-            enable: "Show",
-            label: "Site-wide message",
-            hint: "This message will appear at the top of each page for all users.",
-            settings: "Site-wide message settings",
+            selectOpenAccessPreviews:
+              "Set open access previews to display on the front page. Select from the available public access previews below.",
+            smallScale: "Set as Small Scale New Contruction Preview",
+            fourPlus: "Set as Four Plus New Construction Preview",
           },
           sitewideMessage: {
             title: "Site-wide message",

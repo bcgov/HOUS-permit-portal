@@ -27,6 +27,9 @@ export const TemplateVersionModel = types
     latestVersionId: types.maybeNull(types.string),
     formJson: types.maybeNull(types.frozen<IFormJson>()),
     isFullyLoaded: types.optional(types.boolean, false),
+    public: types.boolean,
+    earlyAccess: types.boolean,
+    requirementTemplateId: types.string,
   })
   .extend(withEnvironment())
   .extend(withRootStore())
