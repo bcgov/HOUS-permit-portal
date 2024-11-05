@@ -43,6 +43,8 @@ export interface IRequirementBlockParams {
   description?: string
   associationList?: string[]
   requirementsAttributes: IRequirementAttributes[]
+  replaceBlockId?: string
+  replaceOnTemplateId?: string
 }
 
 export interface ITemplateSectionBlockAttributes {

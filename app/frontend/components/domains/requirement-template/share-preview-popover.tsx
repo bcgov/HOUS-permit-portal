@@ -30,6 +30,7 @@ import { IRequirementTemplate } from "../../../models/requirement-template"
 import { EPreviewStatus } from "../../../types/enums"
 import { urlForPath } from "../../../utils/utility-functions"
 import { CopyLinkButton } from "../../shared/base/copy-link-button"
+import { ConfirmationModal } from "../../shared/confirmation-modal"
 import PreviewStatusTag from "../../shared/early-access/preview-status-tag"
 import { RoleTag } from "../../shared/user/role-tag"
 
@@ -134,15 +135,39 @@ const PreviewCard: React.FC<PreviewCardProps> = observer(({ earlyAccessPreview }
 
   const cardRef = useRef()
 
-  const handleRevoke = (e) => {
-    earlyAccessPreview.revoke()
+  const getModalContent = (status: EPreviewStatus) => {
+    switch (status) {
+      case EPreviewStatus.invited:
+      case EPreviewStatus.access:
+        return {
+          buttonText: t("earlyAccessRequirementTemplate.index.revokeButton"),
+          buttonProps: { variant: "link", color: "semantic.error", size: "sm" },
+          title: (name: string) => t("earlyAccessRequirementTemplate.index.confirmation.revokeTitle", { name }),
+          body: t("earlyAccessRequirementTemplate.index.confirmation.revokeBody"),
+          handler: earlyAccessPreview.revoke,
+        }
+      case EPreviewStatus.expired:
+        return {
+          buttonText: t("earlyAccessRequirementTemplate.index.extendButton"),
+          buttonProps: { variant: "link", size: "sm" },
+          title: (name: string) => t("earlyAccessRequirementTemplate.index.confirmation.extendTitle", { name }),
+          body: t("earlyAccessRequirementTemplate.index.confirmation.extendBody"),
+          handler: earlyAccessPreview.extend,
+        }
+      case EPreviewStatus.revoked:
+        return {
+          buttonText: t("earlyAccessRequirementTemplate.index.unrevokeButton"),
+          buttonProps: { variant: "link", size: "sm" },
+          title: (name: string) => t("earlyAccessRequirementTemplate.index.confirmation.unrevokeTitle", { name }),
+          body: t("earlyAccessRequirementTemplate.index.confirmation.unrevokeBody"),
+          handler: earlyAccessPreview.unrevoke,
+        }
+      default:
+        return null
+    }
   }
-  const handleUnrevoke = (e) => {
-    earlyAccessPreview.unrevoke()
-  }
-  const handleExtend = (e) => {
-    earlyAccessPreview.extend()
-  }
+
+  const modalContent = getModalContent(status)
 
   return (
     <Flex
@@ -163,20 +188,24 @@ const PreviewCard: React.FC<PreviewCardProps> = observer(({ earlyAccessPreview }
           <RoleTag role={role} /> {organization}
         </Box>
       </VStack>
-      {(status === EPreviewStatus.invited || status === EPreviewStatus.access) && (
-        <Button variant="link" color="semantic.error" size="sm" onClick={handleRevoke}>
-          {t("earlyAccessRequirementTemplate.index.revokeButton")}
-        </Button>
-      )}
-      {status === EPreviewStatus.expired && (
-        <Button variant="link" size="sm" onClick={handleExtend}>
-          {t("earlyAccessRequirementTemplate.index.extendButton")}
-        </Button>
-      )}
-      {status === EPreviewStatus.revoked && (
-        <Button variant="link" size="sm" onClick={handleUnrevoke}>
-          {t("earlyAccessRequirementTemplate.index.unrevokeButton")}
-        </Button>
+      {modalContent && (
+        <ConfirmationModal
+          title={modalContent.title(name)}
+          body={modalContent.body}
+          triggerText={t("ui.proceed")}
+          renderTriggerButton={({ onClick, ...rest }) => (
+            <Button {...modalContent.buttonProps} onClick={onClick as (e: React.MouseEvent) => Promise<any>} {...rest}>
+              {modalContent.buttonText}
+            </Button>
+          )}
+          onConfirm={(_onClose) => {
+            modalContent.handler()
+            _onClose()
+          }}
+          modalContentProps={{
+            maxW: "700px",
+          }}
+        />
       )}
     </Flex>
   )

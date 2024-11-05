@@ -5,6 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementBlock, RequirementBlockModel } from "../models/requirement-block"
+import { IRequirementTemplate } from "../models/requirement-template"
 import { IRequirementBlockParams } from "../types/api-request"
 import {
   EAutoComplianceModule,
@@ -178,7 +179,11 @@ export const RequirementBlockStoreModel = types
     }),
   }))
   .actions((self) => ({
-    copyRequirementBlock: flow(function* (requirementBlock: IRequirementBlock, toEarlyAccess = false) {
+    copyRequirementBlock: flow(function* (
+      requirementBlock: IRequirementBlock,
+      toEarlyAccess = false,
+      replaceOn: IRequirementTemplate = null
+    ) {
       const { id, requirements, ...copyableRequirementsAttributes } = requirementBlock
 
       const clonedParams: IRequirementBlockParams = {
@@ -189,6 +194,8 @@ export const RequirementBlockStoreModel = types
         }),
         name: requirementBlock.name,
         visibility: toEarlyAccess ? EVisibility.earlyAccess : requirementBlock.visibility,
+        replaceBlockId: requirementBlock.id,
+        replaceOnTemplateId: replaceOn.id,
       }
 
       return yield self.createRequirementBlock(clonedParams)

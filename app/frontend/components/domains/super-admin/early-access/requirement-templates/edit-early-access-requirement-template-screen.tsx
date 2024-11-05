@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../../setup/root"
 import { ConfirmationModal } from "../../../../shared/confirmation-modal"
-import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
 import {
   BaseEditRequirementTemplateScreen,
   IEditRequirementActionsProps,
@@ -83,11 +82,17 @@ const EditEarlyAccessRequirementOptions = ({ requirementTemplate }: IEditRequire
   )
 }
 
-const EditEarlyAccessRequirementActions = ({ requirementTemplate }: IEditRequirementActionsProps) => {
+const EditEarlyAccessRequirementActions = ({ requirementTemplate, onSaveDraft }: IEditRequirementActionsProps) => {
   const { t } = useTranslation()
-  const { control, watch } = useFormContext()
+  const { control } = useFormContext()
+  const navigate = useNavigate()
 
-  const publicWatch = watch("public")
+  const handleClick = () => {
+    ;(async () => {
+      await onSaveDraft()
+      navigate(`/early-access/requirement-templates/${requirementTemplate.id}`)
+    })()
+  }
 
   return (
     <>
@@ -100,14 +105,10 @@ const EditEarlyAccessRequirementActions = ({ requirementTemplate }: IEditRequire
           </Checkbox>
         )}
       />
-      {!publicWatch && <SharePreviewPopover earlyAccessRequirementTemplate={requirementTemplate} variant="primary" />}
-      <RouterLinkButton
-        rightIcon={<ArrowSquareOut />}
-        variant="secondary"
-        to={`/early-access/requirement-templates/${requirementTemplate.id}`}
-      >
+      <SharePreviewPopover earlyAccessRequirementTemplate={requirementTemplate} variant="primary" />
+      <Button rightIcon={<ArrowSquareOut />} variant="secondary" onClick={handleClick}>
         {t("ui.view")}
-      </RouterLinkButton>
+      </Button>
     </>
   )
 }

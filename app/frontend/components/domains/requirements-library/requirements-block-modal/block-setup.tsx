@@ -17,9 +17,11 @@ import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useRef } from "react"
 import { Controller, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
+import { useParams } from "react-router-dom"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
+import { ConfirmationModal } from "../../../shared/confirmation-modal"
 import { BlockVisibilitySelect } from "../../../shared/select/block-visibility-select"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
@@ -44,8 +46,12 @@ export const BlockSetup = observer(function BlockSetup({
   const { register, control, watch } = useFormContext<IRequirementBlockForm>()
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const { requirementTemplateId } = useParams()
+  const { requirementTemplateStore } = useMst()
+  const requirementTemplate = requirementTemplateStore.getRequirementTemplateById(requirementTemplateId)
+
   const handleCopyToEarlyAccess = async () => {
-    await requirementBlockStore.copyRequirementBlock(requirementBlock, true)
+    await requirementBlockStore.copyRequirementBlock(requirementBlock, true, requirementTemplate)
   }
 
   const fetchAssociationOptions = async (query: string) => {
@@ -181,11 +187,25 @@ export const BlockSetup = observer(function BlockSetup({
         {withOptionsMenu
           ? requirementBlock && <BlockSetupOptionsMenu requirementBlock={requirementBlock} />
           : isEditingEarlyAccess && (
-              <Button variant="primary" onClick={handleCopyToEarlyAccess}>
-                {t("requirementsLibrary.copyToEarlyAccess")}
-              </Button>
+              <ConfirmationModal
+                title={t("requirementsLibrary.copyToEarlyAccess.title")}
+                body={(<Trans i18nKey={"requirementsLibrary.copyToEarlyAccess.body"} />) as unknown as string}
+                triggerText={t("ui.proceed")}
+                renderTriggerButton={({ onClick, ...rest }) => (
+                  <Button variant="primary" onClick={onClick as (e: React.MouseEvent) => Promise<any>} {...rest}>
+                    {t("requirementsLibrary.copyToEarlyAccess.title")}
+                  </Button>
+                )}
+                onConfirm={(_onClose) => {
+                  handleCopyToEarlyAccess()
+                  _onClose()
+                }}
+                // confirmButtonProps={{
+                //   isLoading: false, // Replace with your loading state if needed
+                //   isDisabled: false, // Replace with your validation logic if needed
+                // }}
+              />
             )}
-        {}
       </VStack>
     </Box>
   )
