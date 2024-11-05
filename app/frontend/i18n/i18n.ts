@@ -573,6 +573,11 @@ const options = {
             pinRequired: "PID not found. Please select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
+            needToKnow: "What you need to know",
+            disclaimer1:
+              "You can use this website to submit a permit application for your building project. This website checks if your application meets some codes, but approval isn’t automatic.",
+            disclaimer2:
+              "After you’ve submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -823,7 +828,8 @@ const options = {
         },
         stepCode: {
           title: "Step code auto-compliance tool",
-          subTitle: "Automatically generate your BC Energy Step Code compliance report",
+          subTitle:
+            "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           checklistGuide: "See checklist guide",
           helpLink:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065",
