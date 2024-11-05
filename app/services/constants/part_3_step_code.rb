@@ -23,19 +23,24 @@ module Constants
         type: :reference_building
       },
       hotel_motel: {
-        type: :step_code
+        type: :step_code,
+        major_occupancy_type: :hotel_motel
       },
       residential: {
-        type: :step_code
+        type: :step_code,
+        major_occupancy_type: :residential
       },
       office: {
-        type: :step_code
+        type: :step_code,
+        major_occupancy_type: :office
       },
       other: {
-        type: :step_code
+        type: :step_code,
+        major_occupancy_type: :office
       },
       mercantile: {
-        type: :step_code
+        type: :step_code,
+        major_occupancy_type: :retail
       },
       high_hazard_industrial: {
         type: :reference_building
