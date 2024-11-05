@@ -1,4 +1,6 @@
 class Part3StepCode::OccupancyClassification < ApplicationRecord
+  self.table_name = "occupancy_classifications"
+
   belongs_to :checklist
 
   enum performance_requirement: %i[

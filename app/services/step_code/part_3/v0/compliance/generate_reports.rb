@@ -2,19 +2,23 @@ class StepCode::Part3::V0::Compliance::GenerateReports
   attr_accessor :reports
   attr_reader :checklist, :requirements
 
-  def initialize(data)
-    @checklist = [] #checklist
+  def initialize(checklist)
+    @checklist = checklist
     @requirements = [] # requirements
     @reports = {}
-    @occupancies = data[:occupancies]
+    @occupancies = checklist.occupancy_classifications
     @whole_building_performance = {}
   end
 
   def call
     @reports = {
       occupancies:
-        @occupancies.map do |hash|
-          hash.slice(:occupancy, :energy_requirement, :zero_carbon_requirement)
+        @occupancies.map do |oc|
+          {
+            occupancy: oc.name,
+            energy_requirement: oc.energy_step_required,
+            zero_carbon_requirement: oc.zero_carbon_step_required
+          }
         end,
       whole_building_performance: {
         does_building_comply: {

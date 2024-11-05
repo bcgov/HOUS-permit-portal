@@ -80,6 +80,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
             name: "index_contacts_on_contactable"
   end
 
+  create_table "data_migrations",
+               primary_key: "version",
+               id: :string,
+               force: :cascade do |t|
+  end
+
   create_table "document_references",
                id: :uuid,
                default: -> { "gen_random_uuid()" },
@@ -92,12 +98,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["checklist_id"], name: "index_document_references_on_checklist_id"
-  end
-
-  create_table "data_migrations",
-               primary_key: "version",
-               id: :string,
-               force: :cascade do |t|
   end
 
   create_table "end_user_license_agreements",
@@ -281,6 +281,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "checklist_id"
+    t.string "name"
     t.decimal "modelled_floor_area"
     t.integer "performance_requirement"
     t.decimal "percent_better_requirement"
