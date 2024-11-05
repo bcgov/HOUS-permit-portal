@@ -281,7 +281,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "checklist_id"
-    t.string "name"
+    t.integer "key"
     t.decimal "modelled_floor_area"
     t.integer "performance_requirement"
     t.decimal "percent_better_requirement"

@@ -3,6 +3,9 @@ class Part3StepCode::OccupancyClassification < ApplicationRecord
 
   belongs_to :checklist
 
+  OCCUPANCIES_LOOKUP = Constants::Part3StepCode::OCCUPANCIES_LOOKUP
+
+  enum key: OCCUPANCIES_LOOKUP.keys, _prefix: :occupancy
   enum performance_requirement: %i[
          step_2_necb
          ashrae
