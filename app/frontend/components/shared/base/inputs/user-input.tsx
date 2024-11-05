@@ -118,10 +118,10 @@ const IInviteResultTag = ({ bg, icon, text, ...rest }: IInviteResultTagProps) =>
       noOfLines={1}
       bg={bg}
       color={color}
-      {...rest}
       display="flex"
       alignItems="center"
       gap={2}
+      {...rest}
     >
       {icon}
       <Text>{text}</Text>
