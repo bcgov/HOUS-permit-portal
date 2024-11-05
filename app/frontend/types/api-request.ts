@@ -1,4 +1,4 @@
-import { ENumberUnit, ERequirementType, ETagType } from "./enums"
+import { ENumberUnit, ERequirementType, ETagType, EVisibility } from "./enums"
 import {
   IOption,
   IRevisionRequest,
@@ -37,7 +37,7 @@ export interface IRequirementBlockParams {
   name: string
   firstNations: boolean
   displayName: string
-  visibility: string
+  visibility: EVisibility
   displayDescription: string
   description?: string
   associationList?: string[]

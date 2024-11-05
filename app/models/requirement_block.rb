@@ -124,11 +124,8 @@ class RequirementBlock < ApplicationRecord
     associated_templates =
       requirement_template_sections.map(&:requirement_template)
 
-    # Dynamically determine the method to check based on required_visibility
-    visibility_check_method = :"#{required_visibility}?"
-
     # Check if all associated templates satisfy the required visibility
-    unless associated_templates.all?(&visibility_check_method)
+    unless associated_templates.all?(&required_visibility)
       errors.add(
         :visibility,
         I18n.t(

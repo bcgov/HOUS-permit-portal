@@ -699,9 +699,18 @@ const options = {
             addDescriptionTrigger: "Add instructions/description for this block",
             visibilityLabel: "Visibility",
             changeVisibility: {
-              confirmChangeTitle: "Change visibility?",
-              confirmChangeBody:
-                "This is only possible if the block only currently exists in the correct corresponding in-progress template drafts and previews.",
+              fromEarlyAccessTitle: "Are you sure you want to promote this?",
+              fromLiveTitle: "Are you sure you want to promote this?",
+
+              confirmChangeBody1:
+                "This is only possible if the block only currently exists in the correct corresponding in-progress template drafts and previews. Once changed, it will be in the corresponding library only",
+              confirmChangeBody2:
+                "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
+              listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
+              listItem2:
+                "<strong>Exclude preview</strong>: The requirement block may not exist in previews, and only in templates",
+              listItem3:
+                "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
             },
             create: {
               triggerButton: "Create new requirement block",

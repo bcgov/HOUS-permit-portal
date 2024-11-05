@@ -7,14 +7,16 @@ import {
   AlertDialogOverlay,
   Box,
   Button,
+  ListItem,
   Text,
+  UnorderedList,
   useDisclosure,
-  useTheme,
 } from "@chakra-ui/react"
 import React, { useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import Select, { components } from "react-select"
+import { EVisibility } from "../../../types/enums"
 
 // BlockVisibility Option component
 export const BlockVisibilityOption = (props) => {
@@ -77,26 +79,26 @@ const chakraStyles = (theme) => ({
 })
 
 export const BlockVisibilitySelect = ({ name }) => {
-  const { control, setValue } = useFormContext() // Access form methods from context
-  const theme = useTheme() // Access Chakra UI theme
-  const { t } = useTranslation() // Access translation function
+  const { control, setValue, watch } = useFormContext()
+  const { t } = useTranslation()
+  const visibilityWatch = watch(name)
 
   // Define your options with title and description
   const options = [
     {
-      value: "any",
-      label: t(`requirementsLibrary.visibility.any`),
-      description: t(`requirementsLibrary.visibilityDescriptions.any`),
+      value: EVisibility.any,
+      label: t("requirementsLibrary.visibility.any"),
+      description: t("requirementsLibrary.visibilityDescriptions.any"),
     },
     {
-      value: "live",
-      label: t(`requirementsLibrary.visibility.live`),
-      description: t(`requirementsLibrary.visibilityDescriptions.live`),
+      value: EVisibility.live,
+      label: t("requirementsLibrary.visibility.live"),
+      description: t("requirementsLibrary.visibilityDescriptions.live"),
     },
     {
-      value: "early_access",
-      label: t(`requirementsLibrary.visibility.earlyAccess`),
-      description: t(`requirementsLibrary.visibilityDescriptions.earlyAccess`),
+      value: EVisibility.earlyAccess,
+      label: t("requirementsLibrary.visibility.earlyAccess"),
+      description: t("requirementsLibrary.visibilityDescriptions.earlyAccess"),
     },
   ]
 
@@ -129,6 +131,12 @@ export const BlockVisibilitySelect = ({ name }) => {
     onClose() // Close the modal
   }
 
+  const titleMap = {
+    [EVisibility.earlyAccess]: t("requirementsLibrary.modals.changeVisibility.fromEarlyAccessTitle"),
+    [EVisibility.live]: t("requirementsLibrary.modals.changeVisibility.fromLiveTitle"),
+    [EVisibility.any]: t("requirementsLibrary.modals.changeVisibility.fromLiveTitle"),
+  }
+
   return (
     <>
       <Controller
@@ -144,20 +152,33 @@ export const BlockVisibilitySelect = ({ name }) => {
               Option: BlockVisibilityOption,
               SingleValue: BlockVisibilitySingleValue,
             }}
-            styles={chakraStyles(theme)}
             value={options.find((option) => option.value === field.value) || null}
             onChange={(selectedOption) => handleChange(selectedOption)}
           />
         )}
       />
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={cancelChange}>
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={cancelChange} size="2xl">
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              {t("requirementsLibrary.modals.changeVisibility.confirmChangeTitle")}
+              {titleMap[visibilityWatch]}
             </AlertDialogHeader>
-
-            <AlertDialogBody>{t("requirementsLibrary.modals.changeVisibility.confirmChangeBody")}</AlertDialogBody>
+            <AlertDialogBody>
+              <Text>{t("requirementsLibrary.modals.changeVisibility.confirmChangeBody1")}</Text>
+              <Text>{t("requirementsLibrary.modals.changeVisibility.confirmChangeBody2")}</Text>
+              <br />
+              <UnorderedList>
+                <ListItem>
+                  <Trans i18nKey="requirementsLibrary.modals.changeVisibility.listItem1" />
+                </ListItem>
+                <ListItem>
+                  <Trans i18nKey="requirementsLibrary.modals.changeVisibility.listItem2" />
+                </ListItem>
+                <ListItem>
+                  <Trans i18nKey="requirementsLibrary.modals.changeVisibility.listItem3" />
+                </ListItem>
+              </UnorderedList>
+            </AlertDialogBody>
 
             <AlertDialogFooter>
               <Button variant="secondary" ref={cancelRef} onClick={cancelChange}>
