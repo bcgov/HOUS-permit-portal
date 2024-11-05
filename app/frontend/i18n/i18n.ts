@@ -1208,9 +1208,18 @@ const options = {
             "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
           earlyAccess: {
             title: "Early Access",
-            adminDescription: "{TODO early access description}",
-            previews: { title: "Early access previews", description: "{TODO preview description}" },
-            requirements: { title: "Early access requirements", description: "{TODO requiremet description}" },
+            adminDescription:
+              "Access and manage Early access previews and requirement sets before they become publicly available.",
+            previews: {
+              title: "Early access previews",
+              description:
+                "View and manage non-submittable permit templates in Early Access, shared with selected users for service design purposes.",
+            },
+            requirements: {
+              title: "Early access requirements",
+              description:
+                "Explore and manage pre-release requirement blocks sets designed for testing within Early Access projects.",
+            },
           },
           configurationManagement: {
             title: "Configuration management",
