@@ -111,11 +111,20 @@ const IInviteResultTag = ({ bg, icon, text, ...rest }: IInviteResultTagProps) =>
   const color = (bg as string).replace(/Light/g, "")
 
   return (
-    <Tag border="1px solid" borderColor={color} mb={2} noOfLines={1} bg={bg} {...rest}>
-      <HStack color={color}>
-        {icon}
-        <Text>{text}</Text>
-      </HStack>
+    <Tag
+      border="1px solid"
+      borderColor={color}
+      mb={2}
+      noOfLines={1}
+      bg={bg}
+      color={color}
+      display="flex"
+      alignItems="center"
+      gap={2}
+      {...rest}
+    >
+      {icon}
+      <Text>{text}</Text>
     </Tag>
   )
 }

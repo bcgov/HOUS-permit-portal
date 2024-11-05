@@ -51,11 +51,14 @@ class Jurisdiction::UserInviter
         self.results[:invited] << user
       else
         reinvited = user.present?
+        is_invitable_role =
+          inviter.invitable_roles.include?(user_params[:role].to_s)
         if reinvited
+          user.update(role: user_params[:role].to_sym) if is_invitable_role
           user.skip_confirmation_notification!
           user.invite!(inviter)
           self.results[:reinvited] << user
-        elsif inviter.invitable_roles.include?(user_params[:role].to_s)
+        elsif is_invitable_role
           jurisdiction_id =
             user_params.delete(:jurisdiction_id) ||
               inviter.jurisdictions.pluck(:id)
