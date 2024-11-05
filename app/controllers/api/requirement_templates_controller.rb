@@ -1,9 +1,18 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
   before_action :set_requirement_template,
-                only: %i[show destroy restore update schedule force_publish_now]
+                only: %i[
+                  show
+                  destroy
+                  restore
+                  update
+                  schedule
+                  force_publish_now
+                  invite_previewers
+                ]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
+  skip_before_action :authenticate_user!, only: [:show]
 
   def index
     perform_search
@@ -43,7 +52,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.create_success",
-                     { blueprint: RequirementTemplateBlueprint }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
     else
       render_error "requirement_template.create_error",
                    message_opts: {
@@ -79,7 +94,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.save
       render_success @requirement_template,
                      "requirement_template.copy_success",
-                     { blueprint: RequirementTemplateBlueprint }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       }
+                     }
     else
       render_error "requirement_template.copy_error",
                    message_opts: {
@@ -91,7 +112,6 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def update
     authorize @requirement_template
-
     if @requirement_template.update(requirement_template_params)
       render_success @requirement_template,
                      "requirement_template.update_success",
@@ -240,6 +260,29 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     end
   end
 
+  def invite_previewers
+    authorize @requirement_template
+    service = EarlyAccess::PreviewManagementService.new(@requirement_template)
+
+    result = service.invite_previewers!(previewer_invite_params[:emails])
+
+    if result[:previews].empty?
+      render_error "requirement_template.invite_previewers_error",
+                   { meta: result }
+    else
+      render_success @requirement_template,
+                     "requirement_template.invite_previewers_success",
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended,
+                         current_user: current_user
+                       },
+                       meta: result
+                     }
+    end
+  end
+
   private
 
   def set_requirement_template
@@ -261,6 +304,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     @template_version = TemplateVersion.find(params[:id])
   end
 
+  def previewer_invite_params
+    params.permit(emails: [])
+  end
+
   def requirement_template_params
     permitted_params =
       params.require(:requirement_template).permit(
@@ -272,6 +319,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :activity_id,
         :permit_type_id,
         :type,
+        :public,
         requirement_template_sections_attributes: [
           :id,
           :name,

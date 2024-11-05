@@ -15,11 +15,12 @@ import {
   EVisibility,
 } from "../types/enums"
 import {
+  IDenormalizedRequirementBlock,
   TAutoComplianceModuleConfiguration,
   TAutoComplianceModuleConfigurations,
   TValueExtractorAutoComplianceModuleConfiguration,
 } from "../types/types"
-import { incrementLastWord, isValueExtractorModuleConfiguration } from "../utils/utility-functions"
+import { isValueExtractorModuleConfiguration } from "../utils/utility-functions"
 
 export const RequirementBlockStoreModel = types
   .compose(
@@ -28,6 +29,7 @@ export const RequirementBlockStoreModel = types
       autoComplianceModuleConfigurations: types.maybeNull(types.frozen<TAutoComplianceModuleConfigurations>()),
       isAutoComplianceModuleOptionsLoading: types.optional(types.boolean, false),
       tableRequirementBlocks: types.array(types.safeReference(RequirementBlockModel)),
+      isEditingEarlyAccess: types.optional(types.boolean, false),
     }),
     createSearchModel<ERequirementLibrarySortFields>("fetchRequirementBlocks")
   )
@@ -100,6 +102,9 @@ export const RequirementBlockStoreModel = types
           return option
         })
     },
+    getIsRequirementBlockEditable(requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock) {
+      return !self.isEditingEarlyAccess || requirementBlock.visibility === EVisibility.earlyAccess
+    },
   }))
   .actions((self) => ({
     fetchRequirementBlocks: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
@@ -107,13 +112,15 @@ export const RequirementBlockStoreModel = types
         self.resetPages()
       }
 
+      const visibility = self.isEditingEarlyAccess ? EVisibility.any : `${EVisibility.live},${EVisibility.any}`
+
       const response = yield* toGenerator(
         self.environment.api.fetchRequirementBlocks({
           query: self.query,
           sort: self.sort,
           page: opts?.page ?? self.currentPage,
           showArchived: self.showArchived,
-          visibility: `${EVisibility.live},${EVisibility.any}`,
+          visibility,
           perPage: opts?.countPerPage ?? self.countPerPage,
         })
       )
@@ -171,7 +178,7 @@ export const RequirementBlockStoreModel = types
     }),
   }))
   .actions((self) => ({
-    copyRequirementBlock: flow(function* (requirementBlock: IRequirementBlock) {
+    copyRequirementBlock: flow(function* (requirementBlock: IRequirementBlock, toEarlyAccess = false) {
       const { id, requirements, ...copyableRequirementsAttributes } = requirementBlock
 
       const clonedParams: IRequirementBlockParams = {
@@ -180,11 +187,18 @@ export const RequirementBlockStoreModel = types
           const { id, ...rest } = attr
           return rest
         }),
-        name: incrementLastWord(requirementBlock.name),
+        name: requirementBlock.name,
+        visibility: toEarlyAccess ? EVisibility.earlyAccess : requirementBlock.visibility,
       }
 
       return yield self.createRequirementBlock(clonedParams)
     }),
+    setIsEditingEarlyAccess: (value: boolean) => {
+      self.isEditingEarlyAccess = value
+    },
+    resetIsEditingEarlyAccess: () => {
+      self.isEditingEarlyAccess = false
+    },
   }))
 
 export interface IRequirementBlockStoreModel extends Instance<typeof RequirementBlockStoreModel> {}

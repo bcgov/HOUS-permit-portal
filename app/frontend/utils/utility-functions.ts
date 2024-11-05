@@ -221,28 +221,6 @@ export function convertToDate(property: any) {
   return property
 }
 
-export function incrementLastWord(input: string): string {
-  // Split the string by spaces
-  const words = input.trim().split(" ")
-
-  // Get the last word in the array
-  const lastWord = words[words.length - 1]
-
-  // Check if the last word is a number
-  const lastNumber = parseInt(lastWord, 10)
-
-  if (!isNaN(lastNumber)) {
-    // If it's a number, increment it
-    words[words.length - 1] = (lastNumber + 1).toString()
-  } else {
-    // If it's not a number, append " 2" to the original string
-    return `${input.trim()} 2`
-  }
-
-  // Join the array back into a string and return
-  return words.join(" ")
-}
-
 export function formatPidValue(pid?: string) {
   if (!pid) return null
 
@@ -256,4 +234,14 @@ export function formatPidLabel(pid?: string) {
 
   // Add a dash after every third character
   return numericString.replace(/(\d{3})(?=\d)/g, "$1-")
+}
+
+export function urlForPath(path: string): string {
+  // Ensure the path starts with a slash for consistent URLs
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+
+  // Construct the full URL using the base URL from window.location
+  const baseUrl = `${window.location.protocol}//${window.location.host}`
+
+  return `${baseUrl}${normalizedPath}`
 }

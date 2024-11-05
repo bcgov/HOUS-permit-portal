@@ -26,20 +26,37 @@ export const TemplateVersionStoreModel = types
     getTemplateVersionById(id: string) {
       return self.templateVersionMap.get(id)
     },
-    getTemplateVersionsByStatus(status: ETemplateVersionStatus = ETemplateVersionStatus.published) {
-      return self.templateVersions.filter((t) => t.status === status)
+    getTemplateVersionsByStatus(
+      status: ETemplateVersionStatus = ETemplateVersionStatus.published,
+      earlyAccess: boolean = false,
+      isPublic: boolean = false
+    ) {
+      return self.templateVersions.filter(
+        (t) => t.status === status && t.public === isPublic && t.earlyAccess === earlyAccess
+      )
     },
     getTemplateVersionsByActivityId: (
       permitTypeId: string,
-      status: ETemplateVersionStatus = ETemplateVersionStatus.published
+      status: ETemplateVersionStatus = ETemplateVersionStatus.published,
+      earlyAccess: boolean = false,
+      isPublic: boolean = false
     ) => {
-      return (self.templateVersionsByActivityId.get(permitTypeId) ?? []).filter((t) => t.status === status)
+      return (self.templateVersionsByActivityId.get(permitTypeId) ?? []).filter(
+        (t) => t.status === status && t.public === isPublic && t.earlyAccess === earlyAccess
+      )
     },
   }))
   .actions((self) => ({
-    fetchTemplateVersions: flow(function* (activityId?: string, status?: ETemplateVersionStatus) {
+    fetchTemplateVersions: flow(function* (
+      activityId?: string,
+      status?: ETemplateVersionStatus,
+      earlyAccess?: boolean,
+      isPublic?: boolean
+    ) {
       self.isLoading = true
-      const response = yield* toGenerator(self.environment.api.fetchTemplateVersions(activityId, status))
+      const response = yield* toGenerator(
+        self.environment.api.fetchTemplateVersions(activityId, status, earlyAccess, isPublic)
+      )
 
       if (response.ok) {
         const templateVersions = response.data.data

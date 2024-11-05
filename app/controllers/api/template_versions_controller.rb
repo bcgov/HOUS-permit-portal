@@ -12,15 +12,37 @@ class Api::TemplateVersionsController < Api::ApplicationController
                 ]
 
   def index
-    status = params[:status] || "published"
+    status = template_version_params[:status] || "published"
+    early_access = template_version_params[:early_access] || false
+    type =
+      (
+        if early_access == "true"
+          "EarlyAccessRequirementTemplate"
+        else
+          "LiveRequirementTemplate"
+        end
+      )
+    public = template_version_params[:public] == "true" || false
     @template_versions =
       if params[:activity_id].present?
         policy_scope(TemplateVersion)
-          .where(activity: { id: params[:activity_id] })
+          .joins(:requirement_template)
+          .where(
+            activity: {
+              id: params[:activity_id]
+            },
+            requirement_templates: {
+              public: public,
+              type: type
+            }
+          )
           .order(updated_at: :desc)
           .where(status:)
       else
-        policy_scope(TemplateVersion).order(updated_at: :desc).where(status:)
+        policy_scope(TemplateVersion)
+          .order(updated_at: :desc)
+          .joins(:requirement_template)
+          .where(status:, requirement_templates: { public: public, type: type })
       end
 
     render_success @template_versions,
@@ -236,6 +258,10 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   private
+
+  def template_version_params
+    params.permit(:activity_id, :status, :early_access, :public)
+  end
 
   def template_version_sandbox_scope
     if user.super_admin?

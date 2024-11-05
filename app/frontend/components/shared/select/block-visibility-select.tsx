@@ -11,6 +11,7 @@ import {
   Text,
   UnorderedList,
   useDisclosure,
+  useTheme,
 } from "@chakra-ui/react"
 import React, { useRef, useState } from "react"
 import { Controller, useFormContext } from "react-hook-form"
@@ -20,11 +21,11 @@ import { EVisibility } from "../../../types/enums"
 
 // BlockVisibility Option component
 export const BlockVisibilityOption = (props) => {
-  const { data } = props
+  const { data, isDisabled } = props
   return (
-    <components.Option {...props}>
-      <Box>
-        <Text color="text.link" fontWeight="bold">
+    <components.Option {...props} isDisabled={isDisabled}>
+      <Box opacity={isDisabled ? 0.5 : 1} cursor={isDisabled ? "not-allowed" : "pointer"}>
+        <Text color="text.link" fontWeight="bold" mb={1}>
           {data.label}
         </Text>
         <Text fontSize="sm">{data.description}</Text>
@@ -32,15 +33,12 @@ export const BlockVisibilityOption = (props) => {
     </components.Option>
   )
 }
-
 // BlockVisibility SingleValue component
 const BlockVisibilitySingleValue = (props) => {
   const { data } = props
   return (
     <components.SingleValue {...props}>
-      <Text color="text.link" fontWeight="bold">
-        {data.label}
-      </Text>
+      <Text>{data.label}</Text>
     </components.SingleValue>
   )
 }
@@ -54,15 +52,15 @@ const chakraStyles = (theme) => ({
   }),
   control: (provided, state) => ({
     ...provided,
-    backgroundColor: "white",
+    backgroundColor: theme.colors.greys.white,
     boxShadow: state.isFocused ? `0 0 0 1px ${theme.colors.theme.blue}` : "none",
     minHeight: "40px",
     cursor: "pointer",
   }),
   menu: (provided) => ({
     ...provided,
-    backgroundColor: theme.colors.white,
-    zIndex: 10, // Ensure the menu appears above other elements
+    backgroundColor: theme.colors.greys.white,
+    width: "300px",
   }),
   option: (provided, state) => ({
     ...provided,
@@ -78,8 +76,14 @@ const chakraStyles = (theme) => ({
   }),
 })
 
-export const BlockVisibilitySelect = ({ name }) => {
+interface IBlockVisibilitySelectProps {
+  name: string
+  forEarlyAccess?: boolean
+}
+
+export const BlockVisibilitySelect = ({ name, forEarlyAccess }: IBlockVisibilitySelectProps) => {
   const { control, setValue, watch } = useFormContext()
+  const theme = useTheme()
   const { t } = useTranslation()
   const visibilityWatch = watch(name)
 
@@ -99,6 +103,7 @@ export const BlockVisibilitySelect = ({ name }) => {
       value: EVisibility.earlyAccess,
       label: t("requirementsLibrary.visibility.earlyAccess"),
       description: t("requirementsLibrary.visibilityDescriptions.earlyAccess"),
+      isDisabled: !forEarlyAccess,
     },
   ]
 
@@ -110,6 +115,8 @@ export const BlockVisibilitySelect = ({ name }) => {
 
   // Handle the option change
   const handleChange = (selectedOption) => {
+    if (selectedOption.value === visibilityWatch) return
+
     // Show confirmation modal
     setPendingOption(selectedOption)
     onOpen()
@@ -146,6 +153,7 @@ export const BlockVisibilitySelect = ({ name }) => {
         render={({ field }) => (
           <Select
             {...field}
+            styles={chakraStyles(theme)}
             ref={selectRef}
             options={options}
             components={{

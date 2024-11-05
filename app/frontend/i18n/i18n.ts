@@ -126,13 +126,14 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            midDownload: "Download checklist",
+            viewTemplate: "View requirements",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
         },
         ui: {
           okay: "Okay",
+          until: "til",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
@@ -233,6 +234,7 @@ const options = {
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
+          copy: "Copy",
           copyNoun: "Copy",
           options: "Options",
           na: "N/A",
@@ -241,6 +243,8 @@ const options = {
           unassign: "Unassign",
           seeEarlyAccessButton: "See Early Access",
           seeLiveButton: "See Live",
+          invite: "Invite",
+          public: "Public",
         },
         notification: {
           title: "Notifications",
@@ -667,6 +671,7 @@ const options = {
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
+          copyToEarlyAccess: "Copy to early access",
           index: {
             title: "Requirements library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
@@ -686,7 +691,7 @@ const options = {
           },
           visibility: {
             any: "Any",
-            live: "Exclude preview",
+            live: "Preview omitted",
             earlyAccess: "Preview only",
           },
           modals: {
@@ -771,7 +776,12 @@ const options = {
               },
             },
             addOptionButton: "Add another option",
-            editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
+            templateEditWarning:
+              "Any changes made here will be reflected in all unsaved preview drafts that use this requirement block.",
+            previewEditWarning:
+              "Any changes made here will be reflected in all in-progress template drafts that use this requirement block.",
+            templates: "templates",
+            previews: "previews",
             stepCodeDependencies: {
               energyStepCodeMethod: {
                 tool: "Utilizing the digital step code tool",
@@ -1450,6 +1460,16 @@ const options = {
               "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
             createButton: "Create new early access template",
             seeArchivedButton: "See archived",
+            sharePreviewLink: "{{ n }} people",
+            sharePreviewTitle: "Share preview",
+            inviteToPreviewTitle: "Invite to preview",
+            inviteToPreviewHint: "Separate each email with a comma ,",
+            revokeButton: "Revoke",
+            unrevokeButton: "Unevoke",
+            extendButton: "Extend",
+            inviteToPreviewButton: "Send invites",
+            noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
+            inviteToPreviewPartialSuccess: "Some invites failed to send",
           },
           new: {
             title: "Create new preview",
@@ -1466,6 +1486,7 @@ const options = {
             auditLog: "Audit log",
             confirmRemoveModalTitle: "Archive preview?",
             confirmRemoveModalBody: "This preview will no longer be accessible by invitees",
+            public: "Grant public access?",
           },
           fields: {
             nickname: "Nickname",
@@ -1483,6 +1504,9 @@ const options = {
           added: "added",
           removed: "removed",
           edit: {
+            requirementsLibraryTab: "Requirements Library",
+            earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
+            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
@@ -1687,6 +1711,14 @@ const options = {
             title: "Users",
             description: "View and manage administrative users",
           },
+          landingPageSetup: {
+            title: "Landing page setup",
+            description: "Configure content for the landing page",
+            selectOpenAccessPreviews:
+              "Set open access previews to display on the front page. Select from the available public access previews below.",
+            smallScale: "Set as Small Scale New Contruction Preview",
+            fourPlus: "Set as Four Plus New Construction Preview",
+          },
           sitewideMessage: {
             title: "Site-wide message",
             description: "Enable and configure a site-wide message",
@@ -1731,6 +1763,7 @@ const options = {
             },
           },
         },
+
         reporting: {
           title: "Reporting",
           tableHeading: "Available reports",
@@ -1915,6 +1948,7 @@ const options = {
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
+            landingSetup: "Landing setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
             earlyAccess: "Early access",

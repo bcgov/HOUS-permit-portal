@@ -285,6 +285,28 @@ LiveRequirementTemplate.find_each do |lrt|
   ).build_requirement_template_from_existing(overrides)
 end
 
+# Seed some previewers for EarlyAccessRequirementTemplate instances
+puts "Seeding Early Access Invitations..."
+
+# Fetching existing EarlyAccessRequirementTemplate instances
+early_access_requirement_templates = EarlyAccessRequirementTemplate.limit(3)
+
+# Fetching existing User instances
+users = User.limit(5)
+
+# Associate some users as previewers for each template
+early_access_requirement_templates.each do |eart|
+  # Select a random subset of users to invite (between 1 and 5 users)
+  previewers = users.sample(rand(1..5))
+
+  previewers.each do |user|
+    EarlyAccessPreview.create!(
+      early_access_requirement_template: eart,
+      previewer: user
+    )
+  end
+end
+
 # invite a usable super admin
 # safeguard for development only
 if Rails.env.development?

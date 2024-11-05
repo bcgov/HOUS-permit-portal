@@ -1,6 +1,7 @@
 import { Box, Heading, Stack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
+import { useMst } from "../../../setup/root"
 import {
   IDenormalizedRequirement,
   IDenormalizedRequirementBlock,
@@ -49,6 +50,9 @@ const SectionDisplay = observer(
     const sectionBlocks = section.templateSectionBlocks
     const sectionName = section.name
 
+    const { requirementBlockStore } = useMst()
+    const { getIsRequirementBlockEditable } = requirementBlockStore
+
     return (
       <Box
         ref={(el) => setSectionRef(el, section.id)}
@@ -79,7 +83,7 @@ const SectionDisplay = observer(
               key={sectionBlock.id}
               requirementBlock={sectionBlock.requirementBlock}
               isCollapsedAll={isCollapsedAll}
-              isEditable={!!renderEdit}
+              isEditable={!!renderEdit && getIsRequirementBlockEditable(sectionBlock.requirementBlock)}
               renderEdit={
                 renderEdit
                   ? () => renderEdit({ denormalizedRequirementBlock: sectionBlock.requirementBlock })
