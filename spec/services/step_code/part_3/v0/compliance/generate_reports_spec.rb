@@ -1,4 +1,4 @@
-RSpec.describe StepCode::Part3::V0::Compliance::GenerateReports do
+RSpec.describe StepCode::Part3::V0::GenerateReports do
   let(:checklist) do
     build(:part_3_checklist, occupancy_classifications: occupancies)
   end
@@ -10,13 +10,13 @@ RSpec.describe StepCode::Part3::V0::Compliance::GenerateReports do
 
     it "fails in predefined failure case" do
       step_code_report_generator =
-        StepCode::Part3::V0::Compliance::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReports.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
         occupancies.map do |occupancy|
           {
-            occupancy: occupancy.name,
+            occupancy: occupancy.key,
             energy_requirement: occupancy.energy_step_required,
             zero_carbon_requirement: occupancy.zero_carbon_step_required,
             performance_requirement: occupancy.performance_requirement
@@ -33,13 +33,13 @@ RSpec.describe StepCode::Part3::V0::Compliance::GenerateReports do
 
     it "fails on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V0::Compliance::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReports.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
         occupancies.map do |occupancy|
           {
-            occupancy: occupancy.name,
+            occupancy: occupancy.key,
             energy_requirement: occupancy.energy_step_required,
             zero_carbon_requirement: occupancy.zero_carbon_step_required,
             performance_requirement: occupancy.performance_requirement
@@ -65,13 +65,13 @@ RSpec.describe StepCode::Part3::V0::Compliance::GenerateReports do
 
     it "fails in predefined failure case" do
       step_code_report_generator =
-        StepCode::Part3::V0::Compliance::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReports.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
         occupancies.map do |occupancy|
           {
-            occupancy: occupancy.name,
+            occupancy: occupancy.key,
             energy_requirement: occupancy.energy_step_required,
             zero_carbon_requirement: occupancy.zero_carbon_step_required,
             performance_requirement: occupancy.performance_requirement
@@ -88,13 +88,13 @@ RSpec.describe StepCode::Part3::V0::Compliance::GenerateReports do
 
     it "fails on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V0::Compliance::GenerateReports.new(checklist)
+        StepCode::Part3::V0::GenerateReports.new(checklist)
       result = step_code_report_generator.call
 
       expect(result[:occupancies]).to eq(
         occupancies.map do |occupancy|
           {
-            occupancy: occupancy.name,
+            occupancy: occupancy.key,
             energy_requirement: occupancy.energy_step_required,
             zero_carbon_requirement: occupancy.zero_carbon_step_required,
             performance_requirement: occupancy.performance_requirement

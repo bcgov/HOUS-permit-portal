@@ -1,4 +1,4 @@
-class StepCode::Part3::V0::Lookups::OccupancyStepReferences
+class StepCode::Part3::V0::Requirements::References::Energy
   LOOKUP = [
     { type: :residential, zone: "4", step: :step_2, teui: 130, tedi: 45 },
     { type: :residential, zone: "4", step: :step_3, teui: 120, tedi: 30 },
@@ -59,20 +59,15 @@ class StepCode::Part3::V0::Lookups::OccupancyStepReferences
     { type: :hotel_motel, zone: "7B", step: :step_4, teui: 145, tedi: 20 },
     { type: :hotel_motel, zone: "8", step: :step_2, teui: 170, tedi: 32 },
     { type: :hotel_motel, zone: "8", step: :step_3, teui: 150, tedi: 28 },
-    { type: :hotel_motel, zone: "8", step: :step_4, "te ui": 145, tedi: 20 }
+    { type: :hotel_motel, zone: "8", step: :step_4, teui: 145, tedi: 20 }
   ]
 
   def self.value(major_occupancy_type, climate_zone, step_value)
-    binding.pry
     found_value =
       LOOKUP.find do |item|
         item[:type] == major_occupancy_type && item[:zone] == climate_zone &&
           item[:step] == step_value
-      end
-    if found_value
-      { teui: found_value["teui"], tedi: found_value["tedi"] }
-    else
-      { teui: nil, tedi: nil }
-    end
+      end || {}
+    { teui: found_value[:teui], tedi: found_value[:tedi] }
   end
 end

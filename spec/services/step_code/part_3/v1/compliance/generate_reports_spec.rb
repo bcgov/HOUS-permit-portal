@@ -16,7 +16,7 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
         {
           occupancies: [
             {
-              occupancy: "Group C - Other Residential",
+              occupancy: "residential",
               energy_requirement: :step_3,
               zero_carbon_requirement: :el_4,
               performance_requirement: nil
@@ -56,8 +56,8 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
           },
           adjusted_step_code_performance_for_compliance: 21.5,
           step_code_summary: {
-            step_achieved: "Step 4",
-            zero_carbon_achieved: "EL-4"
+            step_achieved: "step_4",
+            zero_carbon_achieved: "el_4"
           }
         }
       )
@@ -83,13 +83,13 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
         {
           occupancies: [
             {
-              occupancy: "Group C - Other Residential",
-              energy_requirement: "Step 3",
-              zero_carbon_requirement: "EL-4",
+              occupancy: "residential",
+              energy_requirement: "step_3",
+              zero_carbon_requirement: "el_4",
               performance_requirement: nil
             },
             {
-              occupancy: "Group F3 - Low-Hazard Industrial",
+              occupancy: "low_hazard_industrial",
               energy_requirement: nil,
               zero_carbon_requirement: nil,
               performance_requirement: :necb
@@ -129,8 +129,8 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
           },
           adjusted_step_code_performance_for_compliance: 21.5,
           step_code_summary: {
-            step_achieved: "Step 4",
-            zero_carbon_achieved: "EL-4"
+            step_achieved: "step_3",
+            zero_carbon_achieved: "el_4"
           }
         }
       )

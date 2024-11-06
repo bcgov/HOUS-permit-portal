@@ -1,10 +1,10 @@
-class StepCode::Part3::V0::Compliance::GenerateReports
+class StepCode::Part3::V0::GenerateReports
   attr_accessor :reports
   attr_reader :checklist, :requirements
 
   def initialize(checklist)
     @checklist = checklist
-    @requirements = [] # requirements
+    @requirements = StepCode::Part3::V0::LookupRequirements.new(checklist).call
     @reports = {}
     @occupancies = checklist.occupancy_classifications
     @whole_building_performance = {}
@@ -15,7 +15,7 @@ class StepCode::Part3::V0::Compliance::GenerateReports
       occupancies:
         @occupancies.map do |oc|
           {
-            occupancy: oc.name,
+            occupancy: oc.key,
             energy_requirement: oc.energy_step_required,
             zero_carbon_requirement: oc.zero_carbon_step_required,
             performance_requirement: oc.performance_requirement

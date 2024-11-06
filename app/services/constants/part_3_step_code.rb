@@ -2,25 +2,25 @@ module Constants
   module Part3StepCode
     OCCUPANCIES_LOOKUP = {
       performing_arts_assembly: {
-        type: :reference_building
+        type: :baseline
       },
       other_assembly: {
-        type: :reference_building
+        type: :baseline
       },
       arena_assembly: {
-        type: :reference_building
+        type: :baseline
       },
       open_air_assembly: {
-        type: :reference_building
+        type: :baseline
       },
       detention: {
-        type: :reference_building
+        type: :baseline
       },
       treatment: {
-        type: :reference_building
+        type: :baseline
       },
       care: {
-        type: :reference_building
+        type: :baseline
       },
       hotel_motel: {
         type: :step_code,
@@ -43,13 +43,13 @@ module Constants
         major_occupancy_type: :retail
       },
       high_hazard_industrial: {
-        type: :reference_building
+        type: :baseline
       },
       medium_hazard_industrial: {
-        type: :reference_building
+        type: :baseline
       },
       low_hazard_industrial: {
-        type: :reference_building
+        type: :baseline
       }
     }
   end

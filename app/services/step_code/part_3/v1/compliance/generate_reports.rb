@@ -1,4 +1,4 @@
-class StepCode::Part3::V1::Compliance::GenerateReports < StepCode::Part3::V0::Compliance::GenerateReports
+class StepCode::Part3::V1::Compliance::GenerateReports < StepCode::Part3::V0::GenerateReports
   #Before generate reports:
   #generate_requirements -> takes in initial inputs to populate form
 
