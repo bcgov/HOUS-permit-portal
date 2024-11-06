@@ -436,15 +436,15 @@ export class Api {
   }
 
   async revokeEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke`)
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke_access`)
   }
 
   async unrevokeEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke`)
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke_access`)
   }
 
   async extendEarlyAccess(previewId: string) {
-    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend`)
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend_access`)
   }
 
   // we send the versionDate as string instead of date as we want to strip off timezone info

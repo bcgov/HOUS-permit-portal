@@ -1,13 +1,13 @@
 class EarlyAccessPreviewPolicy < RequirementTemplatePolicy
-  def revoke?
+  def revoke_access?
     user.super_admin?
   end
 
-  def unrevoke?
-    revoke?
+  def unrevoke_access?
+    revoke_access?
   end
 
-  def extend?
-    revoke?
+  def extend_access?
+    revoke_access?
   end
 end

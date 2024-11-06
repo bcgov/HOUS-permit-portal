@@ -54,7 +54,8 @@ class RequirementBlock < ApplicationRecord
       associations: association_list,
       configurations: configurations_search_list,
       discarded: discarded_at.present?,
-      visibility: visibility
+      visibility: visibility,
+      created_at: created_at
     }
   end
 

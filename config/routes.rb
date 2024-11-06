@@ -89,9 +89,9 @@ Rails.application.routes.draw do
 
     resources :early_access_previews do
       member do
-        post :revoke
-        post :unrevoke
-        post :extend
+        post :revoke_access
+        post :unrevoke_access
+        post :extend_access
       end
     end
 

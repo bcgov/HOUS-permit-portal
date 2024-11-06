@@ -46,7 +46,7 @@ module Api::Concerns::Search::RequirementTemplates
   end
 
   def visibility
-    search_params[:visibility].split(",")
+    search_params[:visibility]&.split(",") || "live"
   end
 
   def query

@@ -1,10 +1,11 @@
 # app/controllers/api/early_access_previews_controller.rb
 
 class Api::EarlyAccessPreviewsController < Api::ApplicationController
-  before_action :set_early_access_preview, only: %i[revoke unrevoke extend]
+  before_action :set_early_access_preview,
+                only: %i[revoke_access unrevoke_access extend_access]
 
   # POST /api/early_access_previews/:id/revoke
-  def revoke
+  def revoke_access
     authorize @early_access_preview
 
     if @early_access_preview.discarded_at.present?
@@ -27,7 +28,7 @@ class Api::EarlyAccessPreviewsController < Api::ApplicationController
   end
 
   # POST /api/early_access_previews/:id/unrevoke
-  def unrevoke
+  def unrevoke_access
     authorize @early_access_preview
 
     if @early_access_preview.discarded_at.blank?
@@ -50,10 +51,10 @@ class Api::EarlyAccessPreviewsController < Api::ApplicationController
   end
 
   # POST /api/early_access_previews/:id/extend
-  def extend
+  def extend_access
     authorize @early_access_preview
 
-    if @early_access_preview.extend
+    if @early_access_preview.extend_access
       render_success @early_access_preview,
                      "early_access_preview.extend_success",
                      { blueprint: EarlyAccessPreviewBlueprint }

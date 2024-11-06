@@ -13,6 +13,12 @@ AllCops:
 Style/Lambda:
   Enabled: false
 
+Layout/MultilineOperationIndentation:
+  Enabled: false
+
+Style/MultilineMemoization:
+  Enabled: false
+
 Style/IfUnlessModifier:
   Enabled: false
 
