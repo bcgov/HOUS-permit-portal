@@ -9,7 +9,7 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
     end
     it "passes on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V1::Compliance::GenerateReports.new(check_list)
+        StepCode::Part3::V1::Compliance::GenerateReports.new(checklist)
       result = step_code_report_generator.call
 
       expect(result).to eq(

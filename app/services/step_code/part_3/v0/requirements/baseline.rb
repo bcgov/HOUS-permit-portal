@@ -22,6 +22,7 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def teui
+    return nil if total_mfa.blank? || total_mfa == 0
     adjustment_factor =
       occupancies.inject do |sum, oc|
         sum + oc.modelled_floor_area * oc.percent_better_requirement
@@ -30,10 +31,12 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def tedi
+    return nil if total_mfa.blank? || total_mfa == 0
     total_annual_energy / total_mfa
   end
 
   def ghgi
+    return nil if total_mfa.blank? || total_mfa == 0
     checklist.reference_energy_outputs.inject do |sum, output|
       sum + output.annual_energy * output.fuel_type.emissions_factor
     end / total_mfa

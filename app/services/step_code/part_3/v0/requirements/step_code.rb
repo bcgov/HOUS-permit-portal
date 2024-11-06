@@ -45,6 +45,7 @@ class StepCode::Part3::V0::Requirements::StepCode
 
   def area_weighted_total(metric)
     return if measure_only?(metric)
+    return nil if total_mfa.blank? || total_mfa == 0
 
     occupancies_requirements.inject do |sum, requirement|
       sum + requirement[:modelled_floor_area] * requirement[metric]
