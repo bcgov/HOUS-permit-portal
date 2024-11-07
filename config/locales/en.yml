@@ -126,6 +126,7 @@ en:
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
+      notify_batched_integration_mapping: "New API mappings"
   arbitrary_message_construct:
     devise:
       failure:
