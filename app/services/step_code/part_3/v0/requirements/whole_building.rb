@@ -42,9 +42,11 @@ class StepCode::Part3::V0::Requirements::WholeBuilding
 
   # buildings with NO step code occupancies report total energy
   # if there are ANY step code occupancies, teui/tedi/ghgi is reported
-  def applicable?(metric)
-    return step_code_requirement.blank? if metric == :total_energy
+  def applicable?(metric:)
+    compliance_metrics.include?(metric)
+  end
 
-    step_code_requirement.present?
+  def compliance_metrics
+    @compliance_metrics ||= checklist.compliance_metrics
   end
 end
