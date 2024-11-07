@@ -1,4 +1,4 @@
-RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
+RSpec.describe StepCode::Part3::V1::GenerateReports do
   let(:checklist) do
     build(:part_3_checklist, occupancy_classifications: occupancies)
   end
@@ -9,7 +9,7 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
     end
     it "passes on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V1::Compliance::GenerateReports.new(checklist)
+        StepCode::Part3::V1::GenerateReports.new(checklist)
       result = step_code_report_generator.call
 
       expect(result).to eq(
@@ -77,7 +77,7 @@ RSpec.describe StepCode::Part3::V1::Compliance::GenerateReports do
 
     it "passes on passing example" do
       step_code_report_generator =
-        StepCode::Part3::V1::Compliance::GenerateReports.new(checklist)
+        StepCode::Part3::V1::GenerateReports.new(checklist)
       result = step_code_report_generator.call
       expect(result).to eq(
         {
