@@ -7,10 +7,24 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def call
-    if checklist.occupancy_classifications.step_code_occupancy.empty?
-      { total_energy: total_annual_energy, modelled_floor_area: total_mfa }
+    if checklist.occupancy_classifications.baseline_occupancy.empty?
+      { teiu: 0, tedi: 0, ghgi: 0, modelled_floor_area: 0, total_energy: 0 }
+    elsif checklist.occupancy_classifications.step_code_occupancy.empty?
+      {
+        teiu: 0,
+        tedi: 0,
+        ghgi: 0,
+        total_energy: total_annual_energy,
+        modelled_floor_area: total_mfa
+      }
     else
-      { teui: teui, tedi: tedi, ghgi: ghgi, modelled_floor_area: total_mfa }
+      {
+        teui: teui,
+        tedi: tedi,
+        ghgi: ghgi,
+        total_energy: 0,
+        modelled_floor_area: total_mfa
+      }
     end
   end
 
@@ -22,7 +36,6 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def teui
-    return nil if total_mfa.blank? || total_mfa == 0
     adjustment_factor =
       occupancies.inject do |sum, oc|
         sum + oc.modelled_floor_area * oc.percent_better_requirement
@@ -31,12 +44,10 @@ class StepCode::Part3::V0::Requirements::Baseline
   end
 
   def tedi
-    return nil if total_mfa.blank? || total_mfa == 0
     total_annual_energy / total_mfa
   end
 
   def ghgi
-    return nil if total_mfa.blank? || total_mfa == 0
     checklist.reference_energy_outputs.inject do |sum, output|
       sum + output.annual_energy * output.fuel_type.emissions_factor
     end / total_mfa
@@ -46,6 +57,6 @@ class StepCode::Part3::V0::Requirements::Baseline
     @total_mfa ||=
       checklist.occupancy_classifications.baseline_occupancy.sum(
         :modelled_floor_area
-      )
+      ) || 0
   end
 end
