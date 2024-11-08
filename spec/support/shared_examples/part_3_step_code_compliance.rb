@@ -34,14 +34,14 @@ RSpec.shared_examples PART_3_PASSING_COMPLIANCE_RESULTS do
     ).to eq(expected_corridor_pressurization_adjustment_metrics)
   end
 
-  # it "returns the correct suite submetering adjustment" do
-  #   expect(
-  #     subject.results.dig(
-  #       :whole_building_performance,
-  #       :suite_sub_metering_adjustment
-  #     )
-  #   ).to eq(expected_suite_sub_metering_adjustment_metrics)
-  # end
+  it "returns the correct suite submetering adjustment" do
+    expect(
+      subject.results.dig(
+        :whole_building_performance,
+        :suite_sub_metering_adjustment
+      )
+    ).to eq(expected_suite_sub_metering_adjustment_metrics)
+  end
 
   # it "returns the correct adjusted performance compliance" do
   #   expect(

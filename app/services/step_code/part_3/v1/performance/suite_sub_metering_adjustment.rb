@@ -2,7 +2,11 @@ class StepCode::Part3::V1::Performance::SuiteSubMeteringAdjustment < StepCode::P
   private
 
   def teui
-    super {}
+    super do
+      return 0 if checklist.suite_heating_energy.blank?
+
+      checklist.suite_heating_energy * 0.15 / total_mfa
+    end
   end
 
   def tedi
@@ -15,5 +19,12 @@ class StepCode::Part3::V1::Performance::SuiteSubMeteringAdjustment < StepCode::P
 
   def total_energy
     super {}
+  end
+
+  def total_mfa
+    @total_mfa ||=
+      checklist.occupancy_classifications.baseline_occupancy.sum(
+        :modelled_floor_area
+      )
   end
 end
