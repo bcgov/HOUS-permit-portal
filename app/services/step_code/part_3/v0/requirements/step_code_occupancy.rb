@@ -1,11 +1,9 @@
 class StepCode::Part3::V0::Requirements::StepCodeOccupancy
-  attr_reader :occupancy, :climate_zone, :energy_step, :zero_carbon_step
+  attr_reader :occupancy, :climate_zone
 
-  def initialize(occupancy:, climate_zone:, energy_step:, zero_carbon_step:)
+  def initialize(occupancy:, climate_zone:)
     @occupancy = occupancy
     @climate_zone = climate_zone
-    @energy_step = energy_step
-    @zero_carbon_step = zero_carbon_step
   end
 
   def call
@@ -13,7 +11,7 @@ class StepCode::Part3::V0::Requirements::StepCodeOccupancy
       occupancy: occupancy.key,
       modelled_floor_area: occupancy.modelled_floor_area,
       **step_code_requirements,
-      **zero_carbon_requirements
+      **zero_carbon_requirement
     }
   end
 
@@ -31,14 +29,14 @@ class StepCode::Part3::V0::Requirements::StepCodeOccupancy
     StepCode::Part3::V0::Requirements::References::Energy.value(
       major_occupancy_type,
       climate_zone,
-      checklist.energy_step_required
+      occupancy.energy_step_required.to_sym
     )
   end
 
   def zero_carbon_requirement
     StepCode::Part3::V0::Requirements::References::ZeroCarbon.value(
       major_occupancy_type,
-      checklist.zero_carbon_step_required
+      occupancy.zero_carbon_step_required.to_sym
     )
   end
 end

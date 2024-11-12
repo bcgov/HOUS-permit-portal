@@ -14,10 +14,11 @@ FactoryBot.define do
     end
 
     trait :low_industrial do
+      occupancy_type { :baseline }
       key { :low_hazard_industrial }
       performance_requirement { :necb }
+      energy_step_required { nil }
       zero_carbon_step_required { nil }
-      occupancy_type { :baseline }
     end
   end
 end
