@@ -125,8 +125,10 @@ class RequirementBlock < ApplicationRecord
     associated_templates =
       requirement_template_sections.map(&:requirement_template)
 
+    method_to_use = :"#{required_visibility}?"
+
     # Check if all associated templates satisfy the required visibility
-    unless associated_templates.all?(&required_visibility)
+    unless associated_templates.all?(&method_to_use)
       errors.add(
         :visibility,
         I18n.t(

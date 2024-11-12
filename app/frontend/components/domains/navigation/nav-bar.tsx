@@ -269,6 +269,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     <MenuGroup>
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
+      <NavMenuItem label={t("home.earlyAccess.title")} to={"/early-access"} />
       <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
       <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>

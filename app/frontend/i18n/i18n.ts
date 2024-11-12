@@ -671,7 +671,12 @@ const options = {
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
-          copyToEarlyAccess: "Copy to early access",
+          copyToEarlyAccess: {
+            title: "Copy to early access",
+            body: "Do you want to deuplicate this into an early access requirement block? <br /> <br /> <strong>Replace and duplicate with early access:</strong>",
+            replaceButton: "Replace requirement block",
+          },
+
           index: {
             title: "Requirements library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
@@ -703,6 +708,7 @@ const options = {
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
             visibilityLabel: "Visibility",
+            cantEditHere: "Non preview-only blocks cannot be edited from here",
             changeVisibility: {
               fromEarlyAccessTitle: "Are you sure you want to promote this?",
               fromLiveTitle: "Are you sure you want to promote this?",
@@ -1479,6 +1485,18 @@ const options = {
             inviteToPreviewButton: "Send invites",
             noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
             inviteToPreviewPartialSuccess: "Some invites failed to send",
+
+            confirmation: {
+              revokeTitle: "Are you sure you want to revoke access for {{ name }}?",
+              revokeBody:
+                "Revoking access will immediately prevent this user from accessing the early access content. This may be undone.",
+              extendTitle: "Extend Access Duration for {{ name }}",
+              extendBody:
+                "Extending access will give the user 60 additional days to interact with the early access content. Do you want to proceed?",
+              unrevokeTitle: "Restore Access for {{ name }}",
+              unrevokeBody:
+                "Restoring access will allow the user to access the early access content again. Are you sure you want to proceed?",
+            },
           },
           new: {
             title: "Create new preview",

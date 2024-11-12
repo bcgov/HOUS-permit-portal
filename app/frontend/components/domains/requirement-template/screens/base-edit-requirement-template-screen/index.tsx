@@ -39,6 +39,7 @@ export interface IEditRequirementActionsProps {
   onForcePublishNow?: () => void
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
+  onSaveDraft?: () => void
 }
 const scrollToIdPrefix = "template-builder-scroll-to-id-"
 export const formScrollToId = (id: string) => `${scrollToIdPrefix}${id}`

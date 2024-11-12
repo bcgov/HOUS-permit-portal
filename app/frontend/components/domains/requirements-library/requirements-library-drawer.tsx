@@ -120,7 +120,7 @@ export const RequirementsLibraryDrawer = observer(function RequirementsLibraryDr
                     }}
                   />
                 </TabPanel>
-                <TabPanel p={0}>
+                <TabPanel h="full" p={0}>
                   {/* Early Access Requirements Library */}
                   <RequirementBlocksTable
                     h={"calc(100% - 120px)"}

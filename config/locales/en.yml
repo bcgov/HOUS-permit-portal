@@ -301,6 +301,12 @@ en:
         title: "Error"
         message: "Could not fetch super users"
     requirement_block:
+      create_and_replace_success:
+        title: ""
+        message: "Successfully created and replaced requirement block on template!"
+      create_and_replace_error:
+        title: ""
+        message: "%{error_message}"
       create_success:
         title: ""
         message: "Successfully created requirement block!"

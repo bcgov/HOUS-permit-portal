@@ -1,4 +1,5 @@
-import { Box, Button, Flex, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Info } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useState } from "react"
@@ -453,9 +454,18 @@ export const FieldsSetup = observer(function FieldsSetup({
           left={0}
           right={0}
           bottom={0}
-          bg="rgba(255, 255, 255, 0.6)" // Semi-transparent white overlay
+          bg="rgba(255, 255, 255, 0.6)"
           _hover={{ cursor: "not-allowed" }}
-        />
+        >
+          <Flex height="100%" justifyContent="center">
+            <Tag h="fit-content" mt={50} bg="semantic.infoLight" border="1px solid" borderColor="semantic.info">
+              <HStack spacing={2}>
+                <Info />
+                <Text>{t("requirementsLibrary.modals.cantEditHere")}</Text>
+              </HStack>
+            </Tag>
+          </Flex>
+        </Box>
       )}
     </Box>
   )

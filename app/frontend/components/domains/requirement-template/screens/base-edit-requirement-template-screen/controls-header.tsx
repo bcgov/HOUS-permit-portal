@@ -69,6 +69,7 @@ export const ControlsHeader = observer(function ControlsHeader({
         {renderActions &&
           renderActions({
             requirementTemplate,
+            onSaveDraft,
             minDate: requirementTemplate.nextAvailableScheduleDate,
             onScheduleConfirm: onScheduleDate,
             onForcePublishNow: onForcePublishNow,
