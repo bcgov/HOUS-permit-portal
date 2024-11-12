@@ -9,7 +9,7 @@ class Part3::V0::Requirements::BaselineOccupancy
     {
       occupancy: occupancy.key,
       **step_code_requirements,
-      **zero_carbon_requirements
+      **zero_carbon_requirement
     }
   end
 
