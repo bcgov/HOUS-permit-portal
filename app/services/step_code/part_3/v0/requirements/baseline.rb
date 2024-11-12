@@ -21,19 +21,22 @@ class StepCode::Part3::V0::Requirements::Baseline
   private
 
   def teui
+    return if total_energy == 0.0
+
     adjustment_factor =
-      occupancies.inject do |sum, oc|
-        sum + oc.modelled_floor_area * oc.percent_better_requirement
+      occupancies.inject(0) do |sum, oc|
+        sum + oc.modelled_floor_area * (oc.percent_better_requirement || 0)
       end
-    total_annual_energy / total_mfa * (1 - adjustment_factor / total_mfa)
+
+    total_energy / total_mfa * (1 - adjustment_factor / total_mfa)
   end
 
   def tedi
-    total_annual_energy / total_mfa
+    checklist.ref_annual_thermal_energy_demand / total_mfa
   end
 
   def ghgi
-    reference_energy_outputs.inject do |sum, output|
+    reference_energy_outputs.inject(0) do |sum, output|
       sum + output.annual_energy * output.fuel_type.emissions_factor
     end / total_mfa
   end

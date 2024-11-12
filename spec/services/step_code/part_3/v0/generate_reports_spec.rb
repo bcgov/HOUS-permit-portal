@@ -1,6 +1,13 @@
 RSpec.describe StepCode::Part3::V0::GenerateReports do
+  let(:reference_energy_outputs) { [] }
   let(:checklist) do
-    build(:part_3_checklist, occupancy_classifications: occupancies)
+    create(
+      :part_3_checklist,
+      occupancy_classifications: occupancies,
+      reference_energy_outputs: reference_energy_outputs,
+      climate_zone: :zone_6,
+      ref_annual_thermal_energy_demand: 50_000
+    )
   end
 
   context "single use not yet implemented" do
@@ -61,6 +68,30 @@ RSpec.describe StepCode::Part3::V0::GenerateReports do
         *build_list(:step_code_occupancy, 1, :other_residential),
         *build_list(:step_code_occupancy, 1, :low_industrial)
       ]
+    end
+    let(:electricity_reference) do
+      build(
+        :energy_output,
+        :reference,
+        fuel_type: build(:fuel_type, :electricity)
+      )
+    end
+    let(:natural_gas_reference) do
+      build(
+        :energy_output,
+        :reference,
+        fuel_type: build(:fuel_type, :natural_gas)
+      )
+    end
+    let(:district_energy_reference) do
+      build(
+        :energy_output,
+        :reference,
+        fuel_type: build(:fuel_type, :district_energy)
+      )
+    end
+    let(:reference_energy_outputs) do
+      [electricity_reference, natural_gas_reference, district_energy_reference]
     end
 
     it "fails in predefined failure case" do
