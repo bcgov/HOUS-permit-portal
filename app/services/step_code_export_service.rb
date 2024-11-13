@@ -15,8 +15,8 @@ class StepCodeExportService
             energy_step_required = jtsc.energy_step_required
             zero_carbon_step_required = jtsc.zero_carbon_step_required
             enabled =
-              energy_step_required.positive? ||
-                zero_carbon_step_required.positive?
+              energy_step_required&.positive? ||
+                zero_carbon_step_required&.positive?
             csv << [
               jurisdiction_name,
               permit_type,
