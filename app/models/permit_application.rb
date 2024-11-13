@@ -268,7 +268,7 @@ class PermitApplication < ApplicationRecord
     else
       jurisdiction
         .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version)
+        .find_by(template_version: template_version, sandbox_id: sandbox_id)
         &.customizations
     end
   end

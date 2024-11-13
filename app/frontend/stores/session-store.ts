@@ -32,7 +32,8 @@ export const SessionStoreModel = types
         const user = response.data.data
         self.loggedIn = true
         self.rootStore.userStore.setCurrentUser(user)
-
+        // activate persisted data
+        self.rootStore.loadLocalPersistedData()
         // connect websocket
         self.rootStore.subscribeToUserChannel()
 

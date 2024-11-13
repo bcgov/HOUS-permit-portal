@@ -69,11 +69,15 @@ export const RootStoreModel = types
         properties: ["currentlySelectedJurisdictionId"],
         storage: localStorage,
       })
-      yield makePersistable(self.sandboxStore, {
-        name: `SandboxStore`,
-        properties: ["currentSandboxId"],
-        storage: localStorage,
-      })
+      if (!self.userStore.currentUser.isSuperAdmin || self.sandboxStore.temporarilyPersistingSandboxId) {
+        yield makePersistable(self.sandboxStore, {
+          name: `SandboxStore`,
+          properties: ["currentSandboxId"],
+          storage: localStorage,
+        })
+      } else {
+        localStorage.removeItem("SandboxStore")
+      }
       protect(self)
     }),
     subscribeToUserChannel() {
@@ -86,11 +90,6 @@ export const RootStoreModel = types
     },
     disconnectUserChannel() {
       self.userChannelConsumer?.consumer?.disconnect()
-    },
-  }))
-  .actions((self) => ({
-    afterCreate() {
-      self.loadLocalPersistedData()
     },
   }))
 
