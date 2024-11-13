@@ -31,6 +31,7 @@ export const PermitTypeRadioSelect = observer(
   ({ onChange, value, fetchOptions, dependencyArray, ...rest }: IPermitTypeRadioSelect) => {
     const { getRadioProps } = useRadioGroup({
       name: "permitType",
+      value: value,
       defaultValue: null,
       onChange: onChange,
     })
@@ -43,6 +44,7 @@ export const PermitTypeRadioSelect = observer(
     useEffect(() => {
       ;(async () => {
         setPermitTypeOptions(await fetchOptions())
+        onChange(null)
       })()
     }, dependencyArray)
 

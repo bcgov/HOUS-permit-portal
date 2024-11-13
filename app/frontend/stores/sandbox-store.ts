@@ -10,6 +10,7 @@ export const SandboxStoreModel = types
   .props({
     sandboxMap: types.map(SandboxModel),
     currentSandboxId: types.maybeNull(types.string),
+    temporarilyPersistingSandboxId: types.optional(types.boolean, false),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -32,6 +33,15 @@ export const SandboxStoreModel = types
   }))
   .actions((self) => ({
     clearSandboxId: () => {
+      self.currentSandboxId = null
+    },
+    temporarilyPersistSandboxId: () => {
+      self.temporarilyPersistingSandboxId = true
+      self.rootStore.loadLocalPersistedData()
+    },
+    resetTemporarilyPersistSandboxId: () => {
+      self.temporarilyPersistingSandboxId = false
+      localStorage.removeItem("SandboxStore")
       self.currentSandboxId = null
     },
   }))

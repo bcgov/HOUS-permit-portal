@@ -124,7 +124,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value, pidWatch)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
-        console.log(JSON.stringify(jurisdiction))
         setValue("jurisdictionId", jurisdiction.id)
       } else {
         setPinMode(true)

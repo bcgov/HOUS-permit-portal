@@ -13,12 +13,15 @@ export const NewPermitApplicationSandboxSelect = observer(function NavSandboxSel
   options,
 }: INewPermitApplicationSandboxSelectProps) {
   const { sandboxStore } = useMst()
-  const { currentSandboxId, setCurrentSandboxId, clearSandboxId } = sandboxStore
+  const { currentSandboxId, setCurrentSandboxId, temporarilyPersistSandboxId, resetTemporarilyPersistSandboxId } =
+    sandboxStore
   const { t } = useTranslation()
 
   useEffect(() => {
-    //When the component unmounts, clear the currentSandboxId
-    return () => clearSandboxId()
+    temporarilyPersistSandboxId()
+    return () => {
+      resetTemporarilyPersistSandboxId()
+    }
   }, [])
 
   return (
