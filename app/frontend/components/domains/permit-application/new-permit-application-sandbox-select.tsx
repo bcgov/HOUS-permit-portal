@@ -21,5 +21,14 @@ export const NewPermitApplicationSandboxSelect = observer(function NavSandboxSel
     return () => clearSandboxId()
   }, [])
 
-  return <SandboxSelect onChange={setCurrentSandboxId} value={currentSandboxId} options={options} />
+  return (
+    <SandboxSelect
+      onChange={setCurrentSandboxId}
+      value={currentSandboxId}
+      options={options}
+      includeLive
+      bg="greys.white"
+      w="50%"
+    />
+  )
 })

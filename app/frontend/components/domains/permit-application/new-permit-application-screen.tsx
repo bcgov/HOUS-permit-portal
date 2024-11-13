@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Container,
   Flex,
   FormControl,
@@ -15,22 +16,26 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
-import { ArrowSquareOut } from "@phosphor-icons/react"
+import { ArrowSquareOut, Info } from "@phosphor-icons/react"
 import i18next from "i18next"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { BlueTitleBar } from "../../shared/base/blue-title-bar"
+import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { BackButton } from "../../shared/buttons/back-button"
 import { ActivityList } from "../../shared/permit-classification/activity-list"
 import { PermitTypeRadioSelect } from "../../shared/permit-classification/permit-type-radio-select"
 import { JurisdictionSelect } from "../../shared/select/selectors/jurisdiction-select"
 import { SitesSelect } from "../../shared/select/selectors/sites-select"
+import { Can } from "../../shared/user/can"
+import { NewPermitApplicationSandboxSelect } from "./new-permit-application-sandbox-select"
 
 export type TSearchAddressFormData = {
   addressString: string
@@ -66,14 +71,23 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   })
   const { handleSubmit, formState, control, watch, setValue } = formMethods
   const { isSubmitting } = formState
-  const { permitClassificationStore, permitApplicationStore, geocoderStore, jurisdictionStore, sandboxStore } = useMst()
-  const { fetchGeocodedJurisdiction, fetchingPids, fetchSiteDetailsFromPid } = geocoderStore
+  const {
+    permitClassificationStore,
+    permitApplicationStore,
+    geocoderStore,
+    sandboxStore,
+    userStore,
+    jurisdictionStore,
+  } = useMst()
+  const { fetchGeocodedJurisdiction, fetchingPids } = geocoderStore
   const { fetchPermitTypeOptions, fetchActivityOptions } = permitClassificationStore
-  const { getJurisdictionById } = jurisdictionStore
   const { currentSandboxId } = sandboxStore
+  const { getJurisdictionById } = jurisdictionStore
+  const { currentUser } = userStore
   const navigate = useNavigate()
 
   const [pinMode, setPinMode] = useState(false)
+  const [jurisdiction, setJurisdiction] = useState<IJurisdiction>(null)
 
   const onSubmit = async (formValues) => {
     const params = {
@@ -94,6 +108,10 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   const firstNationsWatch = watch("firstNations")
 
   useEffect(() => {
+    setJurisdiction(getJurisdictionById(jurisdictionIdWatch))
+  }, [jurisdictionIdWatch])
+
+  useEffect(() => {
     if (R.isNil(siteWatch?.value) && !pidWatch) return
 
     if (siteWatch?.value == "") {
@@ -106,6 +124,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       const jurisdiction = await fetchGeocodedJurisdiction(siteWatch?.value, pidWatch)
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
+        console.log(JSON.stringify(jurisdiction))
         setValue("jurisdictionId", jurisdiction.id)
       } else {
         setPinMode(true)
@@ -118,6 +137,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
+        {currentUser.isReviewStaff && (
+          <CustomMessageBox status="info" description={t("permitApplication.new.submitToOwn")} mb={8} />
+        )}
         <DisclaimerInfo />
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
@@ -148,21 +170,45 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                   }}
                 />
                 {pinMode && <PinModeInputs disabled={fetchingPids} />}
+                <Button variant="link" onClick={() => setPinMode((prev) => !prev)}>
+                  {pinMode ? t("permitApplication.new.dontHavePin") : t("permitApplication.new.onlyHavePin")}
+                </Button>
               </Flex>
               {jurisdictionIdWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={8}>
-                  {/* TODO: Enable sandboxes */}
-                  {/* {jurisdiction?.sandboxOptions &&  (
+                  {jurisdiction?.sandboxOptions && (
                     <Can action="jurisdiction:create">
-                      <Flex as="section" direction="column" gap={4}>
-                        <Heading as="h2" variant="yellowline">
-                          {t("permitApplication.new.sandboxIdHeading")}
-                        </Heading>
-
-                        <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
+                      <Flex
+                        gap={4}
+                        borderRadius="lg"
+                        border="1px solid"
+                        borderColor="semantic.special"
+                        background="semantic.specialLight"
+                        p={6}
+                      >
+                        <Info />
+                        <Flex direction="column">
+                          <Heading>{t("sandbox.switch.superAdminAvailable")}</Heading>
+                          <Text>{t("sandbox.switch.testingPurposes")}</Text>
+                          <UnorderedList my={2}>
+                            <ListItem>
+                              <Trans i18nKey="sandbox.switch.liveDescription" />
+                            </ListItem>
+                            <ListItem>
+                              <Trans i18nKey="sandbox.switch.publishedDescription" />
+                            </ListItem>
+                            <ListItem>
+                              <Trans i18nKey="sandbox.switch.scheduledDescription" />
+                            </ListItem>
+                          </UnorderedList>
+                          <NewPermitApplicationSandboxSelect options={jurisdiction.sandboxOptions} />
+                        </Flex>
                       </Flex>
                     </Can>
-                  )} */}
+                  )}
+                  <Heading as="h2" variant="yellowline">
+                    {t("permitApplication.new.firstNationsTitle")}
+                  </Heading>
                   <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
                   <Controller
                     name="firstNations"
@@ -219,7 +265,13 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                       setValue("activityId", null)
                       return fetchActivityOptions(true, firstNationsWatch, permitTypeIdWatch)
                     }}
-                    permitTypeId={permitTypeIdWatch}
+                    dependencyArray={[
+                      permitTypeIdWatch,
+                      firstNationsWatch,
+                      pidWatch,
+                      jurisdictionIdWatch,
+                      currentSandboxId,
+                    ]}
                   />
                 </Flex>
               )}
@@ -232,7 +284,11 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
   )
 })
 
-export const PinModeInputs = ({ disabled }) => {
+interface IPinModeInputsProps {
+  disabled?: boolean
+}
+
+export const PinModeInputs = ({ disabled }: IPinModeInputsProps) => {
   const { register, control, setValue } = useFormContext()
   const { jurisdictionStore, geocoderStore } = useMst()
   const { addJurisdiction } = jurisdictionStore

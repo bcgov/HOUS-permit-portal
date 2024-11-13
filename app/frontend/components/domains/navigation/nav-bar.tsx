@@ -34,8 +34,10 @@ import { INotification, IPermitNotificationObjectData } from "../../../types/typ
 import { HelpDrawer } from "../../shared/help-drawer"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import SandboxHeader from "../../shared/sandbox/sandbox-header"
 import { NotificationsPopover } from "../home/notifications/notifications-popover"
 import { RegionalRMJurisdictionSelect } from "./regional-rm-jurisdiction-select"
+import { SandboxMenuItem } from "./sandbox-menu-item"
 import { SubNavBar } from "./sub-nav-bar"
 
 function isTemplateEditPath(path: string): boolean {
@@ -137,13 +139,26 @@ export const NavBar = observer(function NavBar() {
               </Box>
             </RouterLink>
             <Show above="md">
-              <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
-                {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
-              </Text>
+              <Flex direction="column" w="full">
+                <HStack>
+                  <Text fontSize="2xl" fontWeight="normal" mb="0" whiteSpace="nowrap">
+                    {currentUser?.isSuperAdmin ? t("site.adminNavBarTitle") : t("site.title")}
+                  </Text>
 
-              <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
-                {t("site.beta")}
-              </Text>
+                  <Text fontSize="sm" textTransform="uppercase" color="theme.yellow" fontWeight="bold" mb={2} ml={1}>
+                    {t("site.beta")}
+                  </Text>
+                </HStack>
+                <SandboxHeader
+                  justify="center"
+                  align="center"
+                  position="static"
+                  borderTopRadius={0}
+                  mb={-2}
+                  color="text.primary"
+                  expanded
+                />
+              </Flex>
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
@@ -192,8 +207,6 @@ export const NavBar = observer(function NavBar() {
               )}
               <NavBarMenu />
             </HStack>
-            {/* TODO: Enable sandboxes */}
-            {/* {currentUser?.isReviewStaff && <NavSandboxSelect />} */}
           </Flex>
         </Container>
       </Box>
@@ -269,13 +282,17 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
     <MenuGroup>
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
-      <NavMenuItem label={t("home.earlyAccess.title")} to={"/early-access"} />
       <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
       <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
 
-  const reviewStaffOnlyItems = <></>
+  const reviewStaffOnlyItems = (
+    <MenuGroup>
+      <SandboxMenuItem />
+      <MenuDivider my={0} borderColor="border.light" />
+    </MenuGroup>
+  )
 
   const reviewManagerOnlyItems = (
     <MenuGroup>
@@ -351,12 +368,12 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                 </Text>
                 <MenuGroup title={currentUser.name} noOfLines={1}>
                   <MenuDivider my={0} borderColor="border.light" />
+                  <NavMenuItem label={t("site.home")} to={"/"} />
                   <MenuDivider my={0} borderColor="border.light" />
                   {!currentUser.isReviewStaff && (
                     <NavMenuItem label={t("home.jurisdictionsTitle")} to={"/jurisdictions"} />
                   )}
                   {currentUser?.isSuperAdmin && superAdminOnlyItems}
-                  {currentUser?.isReviewStaff && reviewStaffOnlyItems}
                   {(currentUser?.isReviewManager || currentUser?.isRegionalReviewManager) && reviewManagerOnlyItems}
                   {(currentUser?.isSuperAdmin ||
                     currentUser?.isReviewManager ||
@@ -364,6 +381,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
                     adminOrManagerItems}
                   {currentUser?.isReviewer && reviwerOnlyItems}
                   {currentUser?.isSubmitter && submitterOnlyItems}
+                  {currentUser?.isReviewStaff && reviewStaffOnlyItems}
                   {!currentUser?.isSubmitter && (
                     <>
                       <MenuItem bg="greys.grey03" onClick={(e) => navigate("/permit-applications/new")}>

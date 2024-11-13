@@ -52,6 +52,7 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
+  validate :sandbox_belongs_to_jurisdiction
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -702,6 +703,14 @@ class PermitApplication < ApplicationRecord
           "activerecord.errors.models.permit_application.attributes.pid_or_pin"
         )
       )
+    end
+  end
+
+  def sandbox_belongs_to_jurisdiction
+    return unless sandbox
+
+    unless jurisdiction.sandboxes.include?(sandbox)
+      errors.add(:sandbox, "must belong to the jurisdiction")
     end
   end
 end
