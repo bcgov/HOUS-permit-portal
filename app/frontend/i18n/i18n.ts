@@ -1743,7 +1743,7 @@ const options = {
             description: "Configure content for the landing page",
             selectOpenAccessPreviews:
               "Set open access previews to display on the front page. Select from the available public access previews below.",
-            smallScale: "Set as Small Scale New Contruction Preview",
+            smallScale: "Set as Small Scale New Contruction Preview on landing page",
             fourPlus: "Set as Four Plus New Construction Preview",
           },
           sitewideMessage: {
