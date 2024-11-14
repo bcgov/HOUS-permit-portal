@@ -20,7 +20,7 @@ class Api::StepCodesController < Api::ApplicationController
       if @step_code.valid?
         @step_code.pre_construction_checklist.data_entries.each do |de|
           if de.h2k_file
-            StepCode::DataEntryFromHot2000.new(
+            StepCode::Part9::DataEntryFromHot2000.new(
               xml: Nokogiri.XML(de.h2k_file.read),
               data_entry: de
             ).call

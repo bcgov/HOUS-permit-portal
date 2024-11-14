@@ -1,4 +1,4 @@
-class StepCode::MEUIReferencesSeeder
+class StepCode::Part9::MEUIReferencesSeeder
   def self.seed!
     file_name = "#{Rails.root}/db/templates/meui_references.xlsx"
     if File.exist?(file_name)

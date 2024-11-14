@@ -14,6 +14,7 @@
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym "MEUI" # Mechanical Energy Use Intensity
   inflect.acronym "TEDI" # Thermal Energy Demand Intensity
+  inflect.acronym "TEUI"
   inflect.acronym "GHG" # Greenhouse Gas
   inflect.acronym "CO2" # Carbon Dioxide
 end
