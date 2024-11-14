@@ -107,11 +107,11 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
     # Find or create a record with same jurisdiction_id and template_version_id but with sandbox_id == nil
     target_record =
       JurisdictionTemplateVersionCustomization.find_or_create_by(
-        jurisdiction_id: self.jurisdiction_id,
-        template_version_id: self.template_version_id,
+        jurisdiction_id: jurisdiction_id,
+        template_version_id: template_version_id,
         sandbox_id: nil
       )
-    target_record.customizations = self.customizations
+    target_record.customizations = customizations
     target_record.save!
   end
 

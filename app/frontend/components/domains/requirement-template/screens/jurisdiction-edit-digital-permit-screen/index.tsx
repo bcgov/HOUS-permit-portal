@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Flex, Menu, MenuButton, MenuItem, MenuList, Spacer } from "@chakra-ui/react"
-import { CaretDown, CaretRight } from "@phosphor-icons/react"
+import { ArrowUp, CaretDown, CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -241,8 +241,8 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
                   promptMessage={t("requirementTemplate.edit.promoteElectivesMessage")}
                   renderTrigger={(onOpen) => (
                     <Button
-                      variant={"secondary"}
-                      rightIcon={<CaretRight />}
+                      variant={"primary"}
+                      rightIcon={<ArrowUp />}
                       onClick={onOpen}
                       isDisabled={isSubmitting || !isValid}
                       isLoading={isSubmitting}

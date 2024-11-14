@@ -1571,7 +1571,7 @@ const options = {
               copyTips: "Import tips from ({{ templateLabel }})",
               copyElectives: "Import electives from ({{ templateLabel }})",
             },
-            promoteElectives: "Save and promote",
+            promoteElectives: "Export changes",
             promoteElectivesMessage:
               "This will publish your sandboxed customizations and overwrite your non-sandboxed live electives!",
             clickToWriteDescription: "Click to write description",
