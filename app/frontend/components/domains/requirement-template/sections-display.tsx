@@ -75,23 +75,26 @@ const SectionDisplay = observer(
             {sectionName}
           </Heading>
 
-          {sectionBlocks.map((sectionBlock) => (
-            <RequirementBlockAccordion
-              as={"section"}
-              hideElectiveField={hideElectiveField}
-              id={formScrollToId(sectionBlock.requirementBlock.id)}
-              key={sectionBlock.id}
-              requirementBlock={sectionBlock.requirementBlock}
-              isCollapsedAll={isCollapsedAll}
-              isEditable={!!renderEdit && getIsRequirementBlockEditable(sectionBlock.requirementBlock)}
-              renderEdit={
-                renderEdit
-                  ? () => renderEdit({ denormalizedRequirementBlock: sectionBlock.requirementBlock })
-                  : undefined
-              }
-              requirementBlockCustomization={requirementBlockCustomizations?.[sectionBlock.requirementBlock.id]}
-            />
-          ))}
+          {sectionBlocks.map(
+            (sectionBlock) =>
+              sectionBlock.requirementBlock && (
+                <RequirementBlockAccordion
+                  as={"section"}
+                  hideElectiveField={hideElectiveField}
+                  id={formScrollToId(sectionBlock.requirementBlock.id)}
+                  key={sectionBlock.id}
+                  requirementBlock={sectionBlock.requirementBlock}
+                  isCollapsedAll={isCollapsedAll}
+                  isEditable={!!renderEdit && getIsRequirementBlockEditable(sectionBlock.requirementBlock)}
+                  renderEdit={
+                    renderEdit
+                      ? () => renderEdit({ denormalizedRequirementBlock: sectionBlock.requirementBlock })
+                      : undefined
+                  }
+                  requirementBlockCustomization={requirementBlockCustomizations?.[sectionBlock.requirementBlock.id]}
+                />
+              )
+          )}
         </Stack>
       </Box>
     )

@@ -1,5 +1,4 @@
 import { observer } from "mobx-react-lite"
-import * as R from "ramda"
 import React from "react"
 import { useController, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -63,11 +62,6 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
             w="full"
             initialHint={t("permitApplication.edit.clickToWriteNickname")}
             value={nickname || ""}
-            controlsProps={{
-              iconButtonProps: {
-                color: "greys.white",
-              },
-            }}
             editableInputProps={{
               fontWeight: 700,
               fontSize: "3xl",
@@ -96,9 +90,14 @@ export const EditableBuilderHeader = observer(function EditableBuilderHeader({ r
           initialHint={t("requirementsLibrary.modals.clickToWriteDescription")}
           value={description || ""}
           editableInputProps={{
+            ...register("description", {
+              maxLength: {
+                value: 1024,
+                message: t("ui.invalidInput"),
+              },
+            }),
             "aria-label": "Edit Template Description",
           }}
-          color={R.isEmpty(description) ? "text.link" : undefined}
           aria-label={"Edit Template Description"}
           onChange={onDescriptionChange}
           onSubmit={onDescriptionChange}

@@ -160,17 +160,19 @@ const SectionDisplay = observer(
           {watchedSectionBlocks.map((sectionBlock, index) => {
             const requirementBlock = requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)
             return (
-              <RequirementBlockAccordion
-                mb="6"
-                as={"section"}
-                id={formScrollToId(sectionBlock.requirementBlockId)}
-                key={sectionBlock.id}
-                requirementBlock={requirementBlock}
-                onRemove={() => removeSectionBlock(index)}
-                isCollapsedAll={isCollapsedAll}
-                isEditable={getIsRequirementBlockEditable(requirementBlock)}
-                showEditWarning
-              />
+              requirementBlock && (
+                <RequirementBlockAccordion
+                  mb="6"
+                  as={"section"}
+                  id={formScrollToId(sectionBlock.requirementBlockId)}
+                  key={sectionBlock.id}
+                  requirementBlock={requirementBlock}
+                  onRemove={() => removeSectionBlock(index)}
+                  isCollapsedAll={isCollapsedAll}
+                  isEditable={getIsRequirementBlockEditable(requirementBlock)}
+                  showEditWarning
+                />
+              )
             )
           })}
           <RequirementsLibraryDrawer

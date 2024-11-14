@@ -38,7 +38,7 @@ export const EarlyAccessRequirementTemplateScreen = observer(({}: IEarlyAccessRe
 
   return (
     <Box as="main" id="submitter-view-permit">
-      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef}>
+      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef} h="66px">
         <Flex
           w="full"
           px={6}

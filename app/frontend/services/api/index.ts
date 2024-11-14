@@ -89,7 +89,7 @@ export class Api {
 
     this.client.addRequestTransform((request) => {
       const persistedSandboxValues = JSON.parse(localStorage.getItem("SandboxStore"))
-      request.headers["X-Sandbox-ID"] = persistedSandboxValues.currentSandboxId
+      request.headers["X-Sandbox-ID"] = persistedSandboxValues?.currentSandboxId
     })
   }
 

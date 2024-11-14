@@ -37,7 +37,7 @@ export const JurisdictionSubmissionInboxScreen = observer(function JurisdictionS
     permitApplicationStore
 
   const { currentSandboxId } = sandboxStore
-  useSearch(permitApplicationStore, [currentJurisdiction?.id, currentSandboxId])
+  useSearch(permitApplicationStore, [currentJurisdiction?.id, JSON.stringify(currentSandboxId)])
 
   if (error) return <ErrorScreen error={error} />
   if (!currentJurisdiction || !isPermitClassificationsLoaded) return <LoadingScreen />

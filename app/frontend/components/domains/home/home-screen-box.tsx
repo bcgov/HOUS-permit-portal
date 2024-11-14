@@ -3,6 +3,7 @@ import { CaretRight } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { useMst } from "../../../setup/root"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import SandboxHeader from "../../shared/sandbox/sandbox-header"
 
@@ -20,7 +21,10 @@ export const HomeScreenBox = observer(
   ({ icon, title, description, href, linkText, markForSandbox, disableForSandbox, ...rest }: IHomeScreenBoxProps) => {
     const { t } = useTranslation()
 
-    const isDisabled = disableForSandbox
+    const { sandboxStore } = useMst()
+    const { isSandboxActive } = sandboxStore
+
+    const isDisabled = disableForSandbox && isSandboxActive
     const isMarked = markForSandbox
 
     return (
