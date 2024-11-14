@@ -734,7 +734,7 @@ const options = {
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
             visibilityLabel: "Visibility",
-            cantEditHere: "Non preview-only blocks cannot be edited from here",
+            cantEditHere: "Not currently editable here",
             changeVisibility: {
               fromEarlyAccessTitle: "Are you sure you want to promote this?",
               fromLiveTitle: "Are you sure you want to promote this?",
@@ -1501,7 +1501,7 @@ const options = {
               "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
             createButton: "Create new early access template",
             seeArchivedButton: "See archived",
-            sharePreviewLink: "{{ n }} people",
+            sharePreviewLink: "Share ({{ n }})",
             sharePreviewTitle: "Share preview",
             inviteToPreviewTitle: "Invite to preview",
             inviteToPreviewHint: "Separate each email with a comma ,",
@@ -1565,7 +1565,7 @@ const options = {
               copyTips: "Import tips from ({{ templateLabel }})",
               copyElectives: "Import electives from ({{ templateLabel }})",
             },
-            promoteElectives: "Save and promote",
+            promoteElectives: "Export changes",
             promoteElectivesMessage:
               "This will publish your sandboxed customizations and overwrite your non-sandboxed live electives!",
             clickToWriteDescription: "Click to write description",

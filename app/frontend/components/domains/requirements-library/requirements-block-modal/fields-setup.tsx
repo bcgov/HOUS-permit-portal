@@ -125,10 +125,10 @@ export const FieldsSetup = observer(function FieldsSetup({
   const hasFields = fields.length > 0
 
   const disabledRequirementTypeOptions = (() => {
-    const hasEnergyStepCodeRequirement = watchedRequirements.some(
+    const hasEnergyStepCodeRequirement = watchedRequirements?.some(
       (r) => (r as IRequirementAttributes).inputType === ERequirementType.energyStepCode
     )
-    const hasStepCodePackageFileRequirement = watchedRequirements.some((r) =>
+    const hasStepCodePackageFileRequirement = watchedRequirements?.some((r) =>
       isStepCodePackageFileRequirementCode(r.requirementCode)
     )
 
@@ -458,7 +458,7 @@ export const FieldsSetup = observer(function FieldsSetup({
           _hover={{ cursor: "not-allowed" }}
         >
           <Flex height="100%" justifyContent="center">
-            <Tag h="fit-content" mt={50} bg="semantic.infoLight" border="1px solid" borderColor="semantic.info">
+            <Tag h="fit-content" mt={30} bg="semantic.infoLight" border="1px solid" borderColor="semantic.info">
               <HStack spacing={2}>
                 <Info />
                 <Text>{t("requirementsLibrary.modals.cantEditHere")}</Text>

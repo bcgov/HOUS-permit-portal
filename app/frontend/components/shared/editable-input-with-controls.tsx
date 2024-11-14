@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { Pencil } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { MouseEventHandler, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -129,6 +130,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
       as={Flex}
       alignItems={"center"}
       placeholder={isInEditMode ? placeholder : initialHint ?? placeholder}
+      color={R.isEmpty(editableProps.value) ? "text.link" : undefined}
       onEdit={() => {
         setIsInEditMode(true)
         onEdit?.()
