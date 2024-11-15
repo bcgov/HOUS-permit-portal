@@ -1,6 +1,6 @@
 import { isFuture } from "date-fns"
 import { getParent, Instance, types } from "mobx-state-tree"
-import { ExternalApiKeyStatus } from "../types/enums"
+import { ETemplateVersionStatus, ExternalApiKeyStatus } from "../types/enums"
 
 export const ExternalApiKeyModel = types
   .model("ExternalApiKeyModel")
@@ -11,6 +11,7 @@ export const ExternalApiKeyModel = types
     webhookUrl: types.maybeNull(types.string),
     notificationEmail: types.maybeNull(types.string),
     sandboxId: types.maybeNull(types.string),
+    statusScope: types.maybeNull(types.enumeration(Object.values(ETemplateVersionStatus))),
     expiredAt: types.Date,
     revokedAt: types.maybeNull(types.Date),
     createdAt: types.Date,

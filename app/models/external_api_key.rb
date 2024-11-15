@@ -33,6 +33,10 @@ class ExternalApiKey < ApplicationRecord
 
   encrypts :token, deterministic: true
 
+  def status_scope
+    sandbox&.template_version_status_scope
+  end
+
   def email
     notification_email
   end
