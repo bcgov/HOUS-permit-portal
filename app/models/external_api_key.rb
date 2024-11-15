@@ -15,11 +15,9 @@ class ExternalApiKey < ApplicationRecord
             Time.current
           )
         end
-  # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning
-  # https://docs.github.com/en/code-security/secret-scanning/secret-scanning-partner-program
-  TOKEN_NAMESPACE = "bphh"
 
   belongs_to :jurisdiction
+  belongs_to :sandbox, optional: true
 
   validates :token, uniqueness: true
   validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
@@ -57,6 +55,14 @@ class ExternalApiKey < ApplicationRecord
     update(revoked_at: Time.now)
   end
 
+  def token_namespace
+    # Token namespace can be useful for secrets scanning tools, e.g. GitHub secret scanning
+    # https://docs.github.com/en/code-security/secret-scanning/secret-scanning-partner-program
+    return "live" unless sandbox.present?
+
+    "sb_#{sandbox.template_version_status_scope}"
+  end
+
   private
 
   def valid_url_format
@@ -70,6 +76,6 @@ class ExternalApiKey < ApplicationRecord
   end
 
   def generate_token
-    self.token = "#{TOKEN_NAMESPACE}_#{SecureRandom.urlsafe_base64(64)}"
+    self.token = "#{token_namespace}_#{SecureRandom.urlsafe_base64(64)}"
   end
 end

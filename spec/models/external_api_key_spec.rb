@@ -161,7 +161,7 @@ RSpec.describe ExternalApiKey, type: :model do
 
         expect(external_api_key.valid?).to eq(true)
         expect(external_api_key.token).to start_with(
-          ExternalApiKey::TOKEN_NAMESPACE
+          external_api_key.token_namespace
         )
       end
     end

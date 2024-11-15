@@ -295,15 +295,19 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def set_template_version
-    @template_version = TemplateVersion.find(params[:id])
+    @template_version =
+      TemplateVersion.for_sandbox(current_sandbox).find(params[:id])
   end
 
   def set_jurisdiction_template_version_customization
     @jurisdiction_template_version_customization =
-      @template_version.jurisdiction_template_version_customizations.find_or_create_by(
-        jurisdiction_id: params[:jurisdiction_id],
-        sandbox: current_sandbox
-      )
+      @template_version
+        .jurisdiction_template_version_customizations
+        .for_sandbox(current_sandbox)
+        .find_or_create_by(
+          jurisdiction_id: params[:jurisdiction_id],
+          sandbox: current_sandbox
+        )
   end
 
   def jurisdiction_template_version_customization_params

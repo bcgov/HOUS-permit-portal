@@ -10,6 +10,7 @@ export const ExternalApiKeyModel = types
     connectingApplication: types.string,
     webhookUrl: types.maybeNull(types.string),
     notificationEmail: types.maybeNull(types.string),
+    sandboxId: types.maybeNull(types.string),
     expiredAt: types.Date,
     revokedAt: types.maybeNull(types.Date),
     createdAt: types.Date,

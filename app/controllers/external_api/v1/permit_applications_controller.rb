@@ -62,10 +62,14 @@ class ExternalApi::V1::PermitApplicationsController < ExternalApi::ApplicationCo
   private
 
   def set_permit_application
-    @permit_application = PermitApplication.find(params[:id])
+    @permit_application =
+      PermitApplication.for_sandbox(current_sandbox).find(params[:id])
   end
 
   def set_template_version
-    @template_version = TemplateVersion.find(params[:template_version_id])
+    @template_version =
+      TemplateVersion.for_sandbox(current_sandbox).find(
+        params[:template_version_id]
+      )
   end
 end

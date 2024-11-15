@@ -27,6 +27,15 @@ class SubmissionVersion < ApplicationRecord
           )
         end
 
+  scope :for_sandbox,
+        ->(sandbox) do
+          joins(:permit_application).where(
+            permit_applications: {
+              sandbox_id: sandbox.id
+            }
+          )
+        end
+
   def missing_pdfs
     missing_data_keys = []
 

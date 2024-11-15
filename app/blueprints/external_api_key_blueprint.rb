@@ -4,6 +4,7 @@ class ExternalApiKeyBlueprint < Blueprinter::Base
   identifier :id
   fields :name,
          :notification_email,
+         :sandbox_id,
          :connecting_application,
          :expired_at,
          :webhook_url,
