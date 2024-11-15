@@ -43,11 +43,11 @@ RSpec.shared_examples PART_3_PASSING_COMPLIANCE_RESULTS do
     ).to eq(expected_suite_sub_metering_adjustment_metrics)
   end
 
-  # it "returns the correct adjusted performance compliance" do
-  #   expect(
-  #     subject.results.dig(:whole_building_performance, :adjusted_results)
-  #   ).to eq(expected_adjusted_performance_metrics)
-  # end
+  it "returns the correct adjusted performance compliance" do
+    expect(
+      subject.results.dig(:whole_building_performance, :adjusted_results)
+    ).to eq(expected_adjusted_performance_metrics)
+  end
 
   # it "returns the correct step code TEDI requirement" do
   #   expect(subject.results[:step_code_tedi_requirement]).to eq(
