@@ -525,9 +525,9 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
-            forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
+            forFirstNations: "Is this permit application on <1>First Nation Registered Land</1>?",
             applicationDisclaimerInstruction:
               "Before you submit a building permit application, please ensure your proposed building siting and design complies with:",
             applicationDisclaimers: [
@@ -1483,7 +1483,7 @@ const options = {
             descriptionHelpText:
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
-            firstNationsLand: "This permit is intended <1>only for First Nations land</1>",
+            firstNationsLand: "This permit is intended only for <1>First Nation Registered Land</1>",
             copyExisting: "Copy from existing template of this permit and work type if available",
           },
           versionSidebar: {
