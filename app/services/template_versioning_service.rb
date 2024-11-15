@@ -141,6 +141,7 @@ class TemplateVersioningService
       version_date: Date.current,
       status: "published"
     }
+    requirement_template.reload if requirement_template.id.present?
     version =
       requirement_template.published_template_version ||
         requirement_template.template_versions.build
