@@ -107,10 +107,12 @@ class RequirementBlock < ApplicationRecord
 
       next unless conditional.present?
 
-      if [conditional["when"], conditional["eq"], conditional["show"]].any?(
-           &:blank?
-         )
-        errors.add(:input_options, "conditional must have when, eq, and show")
+      if [conditional["when"], conditional["eq"]].any?(&:blank?) ||
+           [conditional["show"], conditional["hide"]].all?(&:blank?)
+        errors.add(
+          :input_options,
+          "conditional must have when and eq, and one of show or hide"
+        )
         break
       end
 

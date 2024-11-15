@@ -240,11 +240,33 @@ class Api::TemplateVersionsController < Api::ApplicationController
   end
 
   def jurisdiction_template_version_customization_params
-    params.require(:jurisdiction_template_version_customization).permit(
-      customizations: {
-        requirement_block_changes: {
+    # This requires a multi step permit structure in order for this to work correctly
+
+    # Step 1: Permit the outer structure without the dynamic keys
+    permitted_params =
+      params.require(:jurisdiction_template_version_customization).permit(
+        customizations: {
+          requirement_block_changes: {
+          }
         }
-      }
-    )
+      )
+
+    # Step 2: Iterate through each dynamic key and permit nested attributes
+    if permitted_params[:customizations][:requirement_block_changes].present?
+      permitted_params[:customizations][
+        :requirement_block_changes
+      ].each do |key, value|
+        permitted_params[:customizations][:requirement_block_changes][
+          key
+        ] = value.permit(
+          :tip,
+          enabled_elective_field_ids: [],
+          enabled_elective_field_reasons: {
+          }
+        )
+      end
+    end
+
+    permitted_params
   end
 end
