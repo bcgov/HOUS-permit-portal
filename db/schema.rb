@@ -154,7 +154,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
     t.string "description"
     t.decimal "emissions_factor"
     t.string "source"
-    t.decimal "ref_annual_energy"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["checklist_id"], name: "index_fuel_types_on_checklist_id"
@@ -312,7 +311,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_31_235633) do
     t.decimal "overheating_hours"
     t.integer "pressurized_doors_count"
     t.decimal "pressurization_airflow_per_door"
-    t.decimal "pressurized_cooridors_area"
+    t.decimal "pressurized_corridors_area"
     t.decimal "suite_heating_energy"
     t.integer "software"
     t.string "software_name"

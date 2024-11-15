@@ -14,7 +14,7 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
       t.decimal :overheating_hours
       t.integer :pressurized_doors_count
       t.decimal :pressurization_airflow_per_door
-      t.decimal :pressurized_cooridors_area
+      t.decimal :pressurized_corridors_area
       t.decimal :suite_heating_energy
       t.integer :software
       t.string :software_name
@@ -85,7 +85,6 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
       t.string :description
       t.decimal :emissions_factor
       t.string :source
-      t.decimal :ref_annual_energy
 
       t.timestamps
     end

@@ -1,23 +1,21 @@
-class StepCode::Part3::V1::Performance::CorridorPressurizationAdjustment
-  def initialize(checklist:, requirements:)
-  end
-
-  def call
-    { teui: teui, tedi: tedi, ghgi: ghgi }
-  end
-
+class StepCode::Part3::V1::Performance::CorridorPressurizationAdjustment < StepCode::Part3::V1::Performance::Base
   private
 
   def teui
-    tedi
+    super { tedi }
   end
 
   def tedi
-    whole_building_adjustment
+    super { whole_building_adjustment }
   end
 
   def ghgi
+    super {}
     # teui * make-up air emissions factor (calculate from checklist.make_up_air_fuels based on percent_of_load)
+  end
+
+  def total_energy
+    super {}
   end
 
   def whole_building_adjustment

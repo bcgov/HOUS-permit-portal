@@ -1,18 +1,19 @@
-class StepCode::Part3::V1::Performance::SuiteSubMeteringAdjustment
-  attr_reader :checklist
-
-  def initialize(checklist:)
-    @checklist = checklist
-  end
-
-  def call
-    { teui: teui, tedi: nil, ghgi: nil }
-  end
-
+class StepCode::Part3::V1::Performance::SuiteSubMeteringAdjustment < StepCode::Part3::V1::Performance::Base
   private
 
   def teui
-    # if checklist.suite_heating_energy.blank? (e.g. suite is submetered) return 0
-    # checklist.suite_heating_energy * 0.15 / total MFA
+    super {}
+  end
+
+  def tedi
+    super {}
+  end
+
+  def ghgi
+    super {}
+  end
+
+  def total_energy
+    super {}
   end
 end
