@@ -69,7 +69,7 @@ export const RootStoreModel = types
         properties: ["currentlySelectedJurisdictionId"],
         storage: localStorage,
       })
-      if (!self.userStore.currentUser.isSuperAdmin || self.sandboxStore.temporarilyPersistingSandboxId) {
+      if (!self.userStore.currentUser?.isSuperAdmin || self.sandboxStore.temporarilyPersistingSandboxId) {
         yield makePersistable(self.sandboxStore, {
           name: `SandboxStore`,
           properties: ["currentSandboxId"],
@@ -90,6 +90,11 @@ export const RootStoreModel = types
     },
     disconnectUserChannel() {
       self.userChannelConsumer?.consumer?.disconnect()
+    },
+  }))
+  .actions((self) => ({
+    afterCreate() {
+      self.loadLocalPersistedData()
     },
   }))
 

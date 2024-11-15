@@ -57,7 +57,6 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     <Flex as="main" direction="column" w="full" bg="greys.white" pb="24">
       <PermitApplicationStatusTabs />
       <BlueTitleBar title={t("permitApplication.indexTitle")} />
-      {currentSandboxId}
       <Container maxW="container.lg" pb={4}>
         <Flex as="section" direction="column" p={6} gap={6} flex={1}>
           <RouterLinkButton
