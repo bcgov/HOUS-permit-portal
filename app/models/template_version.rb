@@ -6,7 +6,7 @@ class TemplateVersion < ApplicationRecord
   has_many :jurisdiction_template_version_customizations, dependent: :destroy
   has_many :permit_applications
   has_many :submitters, through: :permit_applications
-  has_many :integration_mappings
+  has_many :integration_mappings, dependent: :destroy
 
   delegate :permit_type, to: :requirement_template
   delegate :activity, to: :requirement_template

@@ -95,6 +95,7 @@ export const PermitApplicationStoreModel = types
       const pad = permitApplicationData
 
       if (!pad.skipAssociationMerges) {
+        pad.sandbox && self.rootStore.sandboxStore.mergeUpdate(pad.sandbox, "sandboxMap")
         pad.stepCode && self.rootStore.stepCodeStore.mergeUpdate(pad.stepCode, "stepCodesMap")
         pad.jurisdiction && self.rootStore.jurisdictionStore.mergeUpdate(pad.jurisdiction, "jurisdictionMap")
         pad.submitter && self.rootStore.userStore.mergeUpdate(pad.submitter, "usersMap")
@@ -111,6 +112,7 @@ export const PermitApplicationStoreModel = types
       }
 
       return R.mergeRight(pad, {
+        sandbox: pad.sandbox?.id,
         jurisdiction: pad.jurisdiction?.id,
         submitter: pad.submitter?.id,
         templateVersion: pad.templateVersion?.id,

@@ -43,7 +43,8 @@ class Contact < ApplicationRecord
       organization: organization,
       department: department,
       professional_association: professional_association,
-      contactable_id: contactable_id
+      contactable_id: contactable_id,
+      created_at: created_at
     }
   end
 end

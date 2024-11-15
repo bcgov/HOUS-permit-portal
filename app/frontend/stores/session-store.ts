@@ -38,10 +38,12 @@ export const SessionStoreModel = types
 
         if (opts.redirectToRoot) window.location.replace("/")
 
-        // Clear any temporarily set sandbox IDs for super admins
-        if (!self.rootStore.sandboxStore.shouldPersistSandboxId) self.rootStore.sandboxStore.clearSandboxId()
         return true
       }
+      // if the response is not OK, reset the auth as if we logged out
+      // The sandbox ID should be cleared even if the user did not log
+      // out explicitly (ie their token expired)
+      self.resetAuth()
       return false
     },
   }))

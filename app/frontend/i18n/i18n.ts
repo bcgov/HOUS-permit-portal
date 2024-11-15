@@ -538,8 +538,13 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
+            submitToOwn:
+              "Make sure you are submitting to a jurisdiction that you have inbox access to so that you can see it.",
             sandboxIdHeading: "Submit into Sandbox",
+            onlyHavePin: "I only have a PIN",
+            dontHavePin: "I don't have a PIN",
             selectSandboxLabel: "Select a sandbox to submit into",
+            firstNationsTitle: "First Nations",
             forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
@@ -585,7 +590,7 @@ const options = {
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found or unavailable. Please select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
           },
@@ -652,6 +657,27 @@ const options = {
         sandbox: {
           formLabel: "Sandbox",
           live: "Live",
+          disabledFor: "Disabled for sandbox",
+          inMode: "You're in testing mode:",
+          switch: {
+            label: "Sandbox mode",
+            title: "Enter testing sandbox mode?",
+            description: "While in this mode, you will be able to:",
+            descriptionList: [
+              "make changes to a permit template without affecting what is published live.",
+              "publish permit templates for testing it out as how a submitter would see it",
+              "if you made any changes on a permit, you may choose to copy those over to publish live.",
+            ],
+            choicesAvailable: "Choices available",
+            liveDescription: "<strong>Live</strong>: No sandbox. Submit directly to the live inbox.",
+            publishedDescription:
+              "<strong>Published sandbox:</strong> Sandbox that emulates the live mode by letting you test edits on published permit templates.",
+            scheduledDescription:
+              "<strong>Scheduled sandbox:</strong> Sandbox that lets you interact with scheduled permit templates.",
+            continue: "Continue to sandbox",
+            superAdminAvailable: "Super Admin feature available!",
+            testingPurposes: "For testing purposes, you may choose which permit applications to test.",
+          },
         },
         earlyAccessRequirementsLibrary: {
           index: {

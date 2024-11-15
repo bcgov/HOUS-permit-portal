@@ -22,6 +22,7 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
   after_commit :publish_customization_event, on: %i[update]
 
   validate :ensure_reason_set_for_enabled_elective_fields
+  validate :sandbox_belongs_to_jurisdiction
 
   scope :sandboxed, -> { where.not(sandbox_id: nil) }
   scope :live, -> { where(sandbox_id: nil) }
@@ -192,6 +193,14 @@ class JurisdictionTemplateVersionCustomization < ApplicationRecord
           "activerecord.errors.models.jurisdiction_template_version_customizations.uniqueness"
         )
       )
+    end
+  end
+
+  def sandbox_belongs_to_jurisdiction
+    return unless sandbox
+
+    unless jurisdiction.sandboxes.include?(sandbox)
+      errors.add(:sandbox, "must belong to the jurisdiction")
     end
   end
 end

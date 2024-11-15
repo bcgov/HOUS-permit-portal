@@ -19,6 +19,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
+import SandboxHeader from "../sandbox/sandbox-header"
 
 interface IProps {
   permitApplication: IPermitApplication
@@ -36,12 +37,24 @@ export const PermitApplicationSubmitModal = observer(function PermitApplicationS
   const { userStore } = useMst()
   const currentUser = userStore.currentUser
   const { t } = useTranslation()
+
   return (
     <Modal onClose={onClose} isOpen={isOpen} size="2xl">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent border={permitApplication.sandbox ? "8px solid" : 0} borderColor="background.sandboxBase">
         <ModalHeader>
           <ModalCloseButton fontSize="11px" />
+          {permitApplication.sandbox && (
+            <SandboxHeader
+              borderTopRadius={0}
+              borderBottomRadius="lg"
+              top="100%"
+              bottom={0}
+              mx={-2}
+              override
+              sandbox={permitApplication.sandbox}
+            />
+          )}
         </ModalHeader>
         <ModalBody py={6}>
           {permitApplication.canUserSubmit(currentUser) ? (

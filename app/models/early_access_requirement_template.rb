@@ -7,7 +7,8 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   has_many :early_access_previews, dependent: :destroy
   has_many :previewers, through: :early_access_previews, source: :previewer
 
-  after_save :maintain_published_early_access_version
+  before_validation :maintain_published_early_access_version,
+                    unless: :maintaining_published_version?
 
   validate :valid_template_version_status
 
@@ -16,12 +17,17 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   end
 
   def maintain_published_early_access_version
+    return if @maintaining_published_version
+
+    @maintaining_published_version = true
     TemplateVersioningService.create_or_update_published_version_for_early_access!(
       self
     )
   rescue TemplateVersionPublishError => e
     errors.add(:base, e.message)
     raise ActiveRecord::Rollback
+  ensure
+    @maintaining_published_version = false
   end
 
   def visibility
@@ -30,9 +36,12 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
 
   private
 
-  def valid_template_version_status
-    return if template_versions.empty?
+  # Predicate method for callback condition
+  def maintaining_published_version?
+    @maintaining_published_version
+  end
 
+  def valid_template_version_status
     if template_versions.size != 1 ||
          template_versions.first.status != "published"
       errors.add(

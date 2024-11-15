@@ -17,6 +17,7 @@ const iconMap = {
   warning: <Warning size={24} aria-label={"warning icon"} />,
   error: <WarningCircle size={24} aria-label={"error icon"} />,
   info: <Info size={24} aria-label={"info icon"} />,
+  spacial: <Info size={24} aria-label={"info icon"} />,
 }
 
 export const CustomMessageBox = ({

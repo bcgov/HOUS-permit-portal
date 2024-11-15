@@ -129,7 +129,8 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
-      submission_inbox_set_up: submission_inbox_set_up
+      submission_inbox_set_up: submission_inbox_set_up,
+      created_at: created_at
     }
   end
 

@@ -41,6 +41,7 @@ import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-statu
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
+import { SandboxModel } from "./sandbox"
 import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { IUser, UserModel } from "./user"
@@ -60,6 +61,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
       jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
+      sandbox: types.maybeNull(types.reference(types.late(() => SandboxModel))),
       publishedTemplateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       formJson: types.maybeNull(types.frozen<IFormJson>()),
       submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
