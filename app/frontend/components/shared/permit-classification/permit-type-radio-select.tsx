@@ -24,7 +24,7 @@ interface IPermitTypeRadioSelect extends FlexProps {
   fetchOptions: () => Promise<IOption<IPermitType>[]>
   onChange: (value) => void
   value: string
-  dependencyArray: any[]
+  dependencyArray?: any[]
 }
 
 export const PermitTypeRadioSelect = observer(

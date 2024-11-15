@@ -8,20 +8,21 @@ import { IActivity } from "../../../models/permit-classification"
 import { useMst } from "../../../setup/root"
 import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../base/shared-spinner"
+import SandboxHeader from "../sandbox/sandbox-header"
 
 interface IPermitTypeRadioSelect extends FlexProps {
   fetchOptions: () => Promise<IOption<IActivity>[]>
-  permitTypeId?: string
+  dependencyArray?: any[]
 }
 
-export const ActivityList = observer(({ fetchOptions, permitTypeId, ...rest }: IPermitTypeRadioSelect) => {
+export const ActivityList = observer(({ fetchOptions, dependencyArray, ...rest }: IPermitTypeRadioSelect) => {
   const [activityOptions, setActivityOptions] = useState<IOption<IActivity>[]>([])
 
   useEffect(() => {
     ;(async () => {
       setActivityOptions(await fetchOptions())
     })()
-  }, [permitTypeId])
+  }, dependencyArray)
 
   const { permitClassificationStore } = useMst()
   const { isActivityLoading } = permitClassificationStore
@@ -41,7 +42,7 @@ interface IActivityBoxProps {
   activity: IActivity
 }
 
-const ActivityBox = ({ activity }: IActivityBoxProps) => {
+const ActivityBox = observer(({ activity }: IActivityBoxProps) => {
   const { t } = useTranslation()
 
   const { setValue, formState, watch } = useFormContext()
@@ -51,12 +52,14 @@ const ActivityBox = ({ activity }: IActivityBoxProps) => {
   return (
     <Box
       borderRadius="lg"
-      p={6}
+      p={8}
       border={activity.enabled ? "1px solid" : "none"}
       borderColor="border.light"
       maxW={{ base: "100%", sm: "473px" }}
       bg={activity.enabled ? "white" : "greys.grey03"}
+      position="relative"
     >
+      <SandboxHeader />
       <Flex gap={8}>
         <Flex direction="column" gap={3} flex={1}>
           <Heading as="h3" fontSize="lg" color={activity.enabled ? "text.link" : "greys.grey90"}>
@@ -92,4 +95,4 @@ const ActivityBox = ({ activity }: IActivityBoxProps) => {
       </Flex>
     </Box>
   )
-}
+})
