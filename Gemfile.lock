@@ -437,7 +437,7 @@ GEM
       railties (>= 5.2)
     reverse_markdown (2.1.1)
       nokogiri
-    rexml (3.3.8)
+    rexml (3.3.9)
     rgeo (3.0.1)
     rgeo-proj4 (4.0.0)
       rgeo (~> 3.0.0)
