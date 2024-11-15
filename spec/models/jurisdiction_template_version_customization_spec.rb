@@ -232,7 +232,10 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
         )
       end
       let!(:live_customization) do
-        create(:jurisdiction_template_version_customization)
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction
+        )
       end
 
       describe ".sandboxed" do

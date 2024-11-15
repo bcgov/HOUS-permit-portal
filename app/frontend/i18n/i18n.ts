@@ -661,7 +661,7 @@ const options = {
         },
         sandbox: {
           formLabel: "Sandbox",
-          live: "Live",
+          live: "Live (None)",
           disabledFor: "Disabled for sandbox",
           inMode: "You're in testing mode:",
           switch: {
@@ -1891,6 +1891,7 @@ const options = {
             token: "Token",
             status: "Status",
             notificationEmail: "Notification email",
+            sandbox: "Sandbox",
           },
           notificationEmailHint:
             "This email will be used to notify your local integration partner about upcoming changes to API mappings. Note: Jurisdiction review managers will be notified via their registered email irrespective of this field",

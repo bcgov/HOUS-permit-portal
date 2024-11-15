@@ -22,7 +22,7 @@ import { Info, Key, Prohibit } from "@phosphor-icons/react"
 import { addYears } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { IExternalApiKey } from "../../../models/external-api-key"
@@ -31,6 +31,7 @@ import { IExternalApiKeyParams } from "../../../types/api-request"
 import { CopyableValue } from "../../shared/base/copyable-value"
 import { DatePickerFormControl, TextFormControl, UrlFormControl } from "../../shared/form/input-form-control"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
+import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 
 interface IProps {}
 
@@ -46,6 +47,7 @@ const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKe
     webhookUrl: externalApiKey?.webhookUrl,
     revokedAt: externalApiKey?.revokedAt,
     notificationEmail: externalApiKey?.notificationEmail,
+    sandboxId: null,
   }
 }
 
@@ -59,7 +61,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
   const formMethods = useForm<IExternalApiKeyForm>({
     defaultValues: formFormDefaultValues(externalApiKey),
   })
-  const { handleSubmit, reset, formState } = formMethods
+  const { handleSubmit, reset, formState, control } = formMethods
   const { isSubmitting, isValid } = formState
   const [showToken, setShowToken] = useState(false)
   const [token, setToken] = useState("")
@@ -192,6 +194,24 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                 />
               </GridItem>
               <GridItem colSpan={2}>
+                <FormLabel>{t("externalApiKey.fieldLabels.sandbox")}</FormLabel>
+                <Controller
+                  control={control}
+                  name={"sandboxId"}
+                  render={({ field: { onChange, value } }) => {
+                    return (
+                      <SandboxSelect
+                        onChange={onChange}
+                        value={value}
+                        options={currentJurisdiction.sandboxOptions}
+                        includeLive
+                        isDisabled={!!externalApiKey}
+                      />
+                    )
+                  }}
+                />
+              </GridItem>
+              <GridItem colSpan={2}>
                 <FormControl isReadOnly>
                   <FormLabel>{t("externalApiKey.fieldLabels.token")}</FormLabel>
                   <CopyableValue
@@ -202,7 +222,7 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                             <Key />
                           </InputLeftElement>
                           <Input
-                            overflow={"auto "}
+                            overflow={"auto"}
                             type={showToken ? "text" : "password"}
                             bg={"greys.grey04"}
                             value={value}

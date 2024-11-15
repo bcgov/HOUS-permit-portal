@@ -108,6 +108,7 @@ export interface IExternalApiKeyParams {
   expiredAt?: Date
   jurisdictionId?: string
   notificationEmail?: string
+  sandboxId?: string
 }
 
 export interface IIntegrationMappingUpdateParams {

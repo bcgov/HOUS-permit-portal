@@ -428,7 +428,8 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def set_permit_application
-    @permit_application = PermitApplication.find(params[:id])
+    @permit_application =
+      PermitApplication.for_sandbox(current_sandbox).find(params[:id])
   end
 
   def permit_application_params # params for submitters
