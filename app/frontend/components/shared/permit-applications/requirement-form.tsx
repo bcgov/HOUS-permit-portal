@@ -20,7 +20,6 @@ import { SharedSpinner } from "../base/shared-spinner"
 import { Form, defaultOptions } from "../chefs"
 import { ContactModal } from "../contact/contact-modal"
 import { PreviousSubmissionModal } from "../revisions/previous-submission-modal"
-import SandboxHeader from "../sandbox/sandbox-header"
 import { PermitApplicationSubmitModal } from "./permit-application-submit-modal"
 
 interface IRequirementFormProps {
@@ -327,9 +326,6 @@ export const RequirementForm = observer(
             },
           }}
         >
-          {permitApplication.sandbox && (
-            <SandboxHeader borderTopRadius={0} override sandbox={permitApplication.sandbox} position="absolute" />
-          )}
           {renderTopButtons && renderTopButtons()}
           {permitApplication.isLoading && (
             <Center position="fixed" top={0} left={0} right={0} zIndex={12} h="100vh" w="full" bg="greys.overlay">

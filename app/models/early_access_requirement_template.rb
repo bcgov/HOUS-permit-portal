@@ -10,7 +10,27 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   before_validation :maintain_published_early_access_version,
                     unless: :maintaining_published_version?
 
+  has_one :small_scale_site_configuration,
+          class_name: "SiteConfiguration",
+          foreign_key: "small_scale_requirement_template_id",
+          dependent: :nullify
+
+  # In the future, add new landing page templates like so:
+  # has_one :medium_scale_site_configuration,
+  #         class_name: "SiteConfiguration",
+  #         foreign_key: "medium_scale_requirement_template_id",
+  #         dependent: :nullify
+
+  # has_one :large_scale_site_configuration,
+  #         class_name: "SiteConfiguration",
+  #         foreign_key: "large_scale_requirement_template_id",
+  #         dependent: :nullify
+
+  after_save :maintain_published_early_access_version
+
   validate :valid_template_version_status
+
+  validate :public_cannot_be_false_if_any_site_configuration_exists
 
   def frontend_url
     FrontendUrlHelper.frontend_url("early-access/requirement-templates/#{id}")
@@ -41,7 +61,25 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
     @maintaining_published_version
   end
 
+  def public_cannot_be_false_if_any_site_configuration_exists
+    if !public && site_configuration_present?
+      errors.add(
+        :public,
+        "cannot be set to false because a site configuration is set to use this template on the landing page."
+      )
+    end
+  end
+
+  def site_configuration_present?
+    small_scale_site_configuration.present?
+    # In the future, add new landing page templates like so:
+    # || medium_scale_site_configuration.present? ||
+    #   large_scale_site_configuration.present?
+  end
+
   def valid_template_version_status
+    return if template_versions.empty?
+
     if template_versions.size != 1 ||
          template_versions.first.status != "published"
       errors.add(

@@ -142,6 +142,7 @@ en:
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
+      notify_preview: "You’re Invited to Preview a Building Permit Template"
   arbitrary_message_construct:
     devise:
       failure:

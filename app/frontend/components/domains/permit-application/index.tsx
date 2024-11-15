@@ -24,7 +24,7 @@ interface IPermitApplicationIndexScreenProps {}
 export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationIndexScreenProps) => {
   const { t } = useTranslation()
 
-  const { permitApplicationStore } = useMst()
+  const { permitApplicationStore, sandboxStore } = useMst()
   const {
     tablePermitApplications,
     currentPage,
@@ -38,12 +38,18 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
     hasResetableFilters,
   } = permitApplicationStore
 
+  const { currentSandboxId } = sandboxStore
+
   const query = useQuery()
 
   const requirementTemplateId = query.get("requirementTemplateId")
   const templateVersionId = query.get("templateVersionId")
 
-  useSearch(permitApplicationStore, [requirementTemplateId || "", templateVersionId || ""])
+  useSearch(permitApplicationStore, [
+    requirementTemplateId || "",
+    templateVersionId || "",
+    JSON.stringify(currentSandboxId),
+  ])
   useFlashQueryParam()
   const resetQueryParams = useResetQueryParams()
 

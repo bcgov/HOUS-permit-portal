@@ -102,7 +102,7 @@ function shouldHideSubNavbarForPath(path: string): boolean {
 
 export const NavBar = observer(function NavBar() {
   const { t } = useTranslation()
-  const { sessionStore, userStore, notificationStore, uiStore } = useMst()
+  const { sessionStore, userStore, notificationStore, uiStore, sandboxStore } = useMst()
 
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
@@ -149,22 +149,22 @@ export const NavBar = observer(function NavBar() {
                     {t("site.beta")}
                   </Text>
                 </HStack>
-                <SandboxHeader
-                  justify="center"
-                  align="center"
-                  position="static"
-                  borderTopRadius={0}
-                  mb={-2}
-                  color="text.primary"
-                  expanded
-                />
+                {currentUser?.isReviewStaff && (
+                  <SandboxHeader
+                    justify="center"
+                    align="center"
+                    position="static"
+                    borderTopRadius={0}
+                    mb={-2}
+                    color="text.primary"
+                    expanded
+                  />
+                )}
               </Flex>
               <Spacer />
             </Show>
             <HStack gap={3} w="full" justify="flex-end">
               {!loggedIn && <HelpDrawer />}
-              {/* todo: navbar search? */}
-              {/* {currentUser?.isSubmitter && <NavBarSearch />} */}
               {currentUser?.isSubmitter && !currentUser.isUnconfirmed && (
                 <RouterLinkButton to="/" variant="tertiary" leftIcon={<Folders size={16} />}>
                   {t("site.myPermits")}
@@ -283,6 +283,7 @@ const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
       <NavMenuItem label={t("home.permitTemplateCatalogueTitle")} to={"/requirement-templates"} />
       <NavMenuItem label={t("home.requirementsLibraryTitle")} to={"/requirements-library"} />
       <NavMenuItem label={t("home.configurationManagement.title")} to={"/configuration-management"} />
+      <NavMenuItem label={t("home.earlyAccess.title")} to={"/early-access"} />
       <MenuDivider my={0} borderColor="border.light" />
     </MenuGroup>
   )
