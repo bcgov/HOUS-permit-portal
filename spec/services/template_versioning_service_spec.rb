@@ -361,4 +361,106 @@ RSpec.describe TemplateVersioningService, type: :service do
       end
     end
   end
+
+  describe ".create_or_update_published_version_for_early_access!" do
+    context "when the requirement_template is an EarlyAccessRequirementTemplate" do
+      let(:early_access_template) do
+        create(
+          :early_access_requirement_template_with_sections,
+          sections_count: 3
+        )
+      end
+
+      context "and no published version exists" do
+        it "creates a new published template version" do
+          # The calling of the service should not affect the count because it is already called in model creation
+          expect {
+            TemplateVersioningService.create_or_update_published_version_for_early_access!(
+              early_access_template
+            )
+          }.to change { early_access_template.template_versions.count }.by(0)
+
+          published_version = early_access_template.published_template_version
+          expect(published_version).not_to be_nil
+          expect(published_version.status).to eq("published")
+          expect(published_version.version_date).to eq(Date.current)
+          rendered_hash =
+            RequirementTemplateBlueprint.render_as_hash(
+              early_access_template,
+              view: :template_snapshot
+            )
+          expect(published_version.denormalized_template_json).to eq(
+            rendered_hash.deep_stringify_keys
+          )
+          expect(published_version.form_json).to eq(
+            early_access_template.to_form_json
+          )
+          expect(published_version.requirement_blocks_json).to eq(
+            TemplateVersioningService.send(
+              :form_requirement_blocks_hash,
+              early_access_template
+            )
+          )
+        end
+      end
+
+      context "and a published version already exists" do
+        let!(:existing_published_version) do
+          TemplateVersioningService.create_or_update_published_version_for_early_access!(
+            early_access_template
+          )
+        end
+
+        it "updates the existing published template version" do
+          # Modify the requirement_template to simulate changes
+          # For example, add a new section or modify existing ones
+          # Here, we'll assume adding a new section
+          new_section =
+            create(
+              :requirement_template_section,
+              requirement_template: early_access_template
+            )
+
+          expect {
+            TemplateVersioningService.create_or_update_published_version_for_early_access!(
+              early_access_template
+            )
+          }.not_to change { early_access_template.template_versions.count }
+
+          existing_published_version =
+            early_access_template.published_template_version
+          expect(existing_published_version.status).to eq("published")
+          expect(existing_published_version.version_date).to eq(Date.current)
+          expect(existing_published_version.denormalized_template_json).to eq(
+            RequirementTemplateBlueprint.render_as_hash(
+              early_access_template,
+              view: :template_snapshot
+            ).deep_stringify_keys
+          )
+          expect(existing_published_version.form_json).to eq(
+            early_access_template.to_form_json
+          )
+          expect(existing_published_version.requirement_blocks_json).to eq(
+            TemplateVersioningService.send(
+              :form_requirement_blocks_hash,
+              early_access_template
+            )
+          )
+        end
+      end
+    end
+
+    context "when the requirement_template is not an EarlyAccessRequirementTemplate" do
+      it "raises a TemplateVersionPublishError" do
+        expect {
+          TemplateVersioningService.create_or_update_published_version_for_early_access!(
+            requirement_template
+          )
+        }.to raise_error(
+          TemplateVersionPublishError,
+          "Cannot create early access version for a non-early access requirement template"
+        )
+      end
+    end
+  end
 end

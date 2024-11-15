@@ -11,8 +11,8 @@ class RequirementTemplate < ApplicationRecord
              word_start: %i[description current_version permit_type activity],
              text_middle: %i[current_version description]
 
-  belongs_to :activity
-  belongs_to :permit_type
+  belongs_to :activity, optional: false
+  belongs_to :permit_type, optional: false
   belongs_to :copied_from, class_name: "RequirementTemplate", optional: true
 
   has_many :requirement_template_sections,
@@ -212,7 +212,8 @@ class RequirementTemplate < ApplicationRecord
       discarded: discarded_at.present?,
       assignee: assignee&.name,
       visibility: visibility,
-      public: public?
+      public: public?,
+      created_at: created_at
     }
   end
 

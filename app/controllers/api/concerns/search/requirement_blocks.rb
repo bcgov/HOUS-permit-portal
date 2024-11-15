@@ -46,7 +46,7 @@ module Api::Concerns::Search::RequirementBlocks
   end
 
   def visibility
-    search_params[:visibility].split(",")
+    search_params[:visibility]&.split(",") || %w[live any]
   end
 
   def order

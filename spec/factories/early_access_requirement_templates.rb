@@ -1,5 +1,7 @@
 FactoryBot.define do
   factory :early_access_requirement_template do
+    public { false }
+
     permit_type do
       PermitType.first || association(:permit_type, code: :low_residential)
     end
