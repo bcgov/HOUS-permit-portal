@@ -21,7 +21,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -150,7 +150,20 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {jurisdictionWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={2}>
-                  <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
+                  <FormLabel htmlFor="firstNations">
+                    <Trans
+                      i18nKey="permitApplication.new.forFirstNations"
+                      components={{
+                        // The key '1' corresponds to <1></1> in your translation string
+                        1: (
+                          <Link
+                            isExternal
+                            href="https://services.aadnc-aandc.gc.ca/ILRS_Public/Home/Home.aspx?ReturnUrl=%2filrs_public%2f"
+                          ></Link>
+                        ),
+                      }}
+                    />
+                  </FormLabel>
                   <Controller
                     name="firstNations"
                     control={control}
