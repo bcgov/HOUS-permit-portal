@@ -149,9 +149,9 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
 
         let(:expected_adjusted_performance_metrics) do
           {
-            teui: BigDecimal("86"),
-            tedi: BigDecimal("36"),
-            ghgi: BigDecimal("3.0"),
+            teui: BigDecimal("93"),
+            tedi: BigDecimal("22"),
+            ghgi: BigDecimal("1.0"),
             total_energy: nil
           }
         end
