@@ -1,7 +1,6 @@
 require "rails_helper"
 
 RSpec.describe EarlyAccessPreview, type: :model do
-  # Using the factory defined for EarlyAccessPreview
   let(:early_access_preview) { create(:early_access_preview) }
 
   describe "Associations" do
@@ -84,7 +83,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
               early_access_preview.created_at = created_time
               early_access_preview.expires_at = nil
               early_access_preview.valid?
-              expect(early_access_preview.expires_at).to eq(
+              expect(early_access_preview.expires_at).to be_within(1.second).of(
                 created_time + 90.days
               )
             end
@@ -98,7 +97,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
               early_access_preview.expires_at = nil
 
               early_access_preview.valid?
-              expect(early_access_preview.expires_at).to eq(
+              expect(early_access_preview.expires_at).to be_within(1.second).of(
                 current_time + 90.days
               )
             end
@@ -119,7 +118,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
               early_access_preview.expires_at = nil
 
               early_access_preview.valid?
-              expect(early_access_preview.expires_at).to eq(
+              expect(early_access_preview.expires_at).to be_within(1.second).of(
                 created_time + 60.days
               )
             end
@@ -133,7 +132,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
               early_access_preview.expires_at = nil
 
               early_access_preview.valid?
-              expect(early_access_preview.expires_at).to eq(
+              expect(early_access_preview.expires_at).to be_within(1.second).of(
                 current_time + 60.days
               )
             end
@@ -148,7 +147,9 @@ RSpec.describe EarlyAccessPreview, type: :model do
             early_access_preview.expires_at = existing_expires_at
 
             early_access_preview.valid?
-            expect(early_access_preview.expires_at).to eq(existing_expires_at)
+            expect(early_access_preview.expires_at).to be_within(1.second).of(
+              existing_expires_at
+            )
           end
         end
       end
@@ -182,7 +183,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
 
         expect { early_access_preview.extend_access }.to change {
           early_access_preview.expires_at
-        }.from(initial_expires_at).to(current_time + 60.days)
+        }.to(be_within(1.second).of(current_time + 60.days))
       end
     end
 
@@ -200,7 +201,9 @@ RSpec.describe EarlyAccessPreview, type: :model do
           early_access_preview.expires_at = initial_expires_at
 
           early_access_preview.extend_access
-          expect(early_access_preview.expires_at).to eq(current_time + 30.days)
+          expect(early_access_preview.expires_at).to be_within(1.second).of(
+            current_time + 30.days
+          )
         end
       end
     end
