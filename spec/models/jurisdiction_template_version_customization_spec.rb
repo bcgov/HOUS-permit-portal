@@ -225,7 +225,11 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
     describe "Scopes" do
       let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
       let!(:sandboxed_customization) do
-        create(:jurisdiction_template_version_customization, sandbox: sandbox)
+        create(
+          :jurisdiction_template_version_customization,
+          sandbox: sandbox,
+          jurisdiction: jurisdiction
+        )
       end
       let!(:live_customization) do
         create(:jurisdiction_template_version_customization)

@@ -389,7 +389,7 @@ RSpec.describe TemplateVersioningService, type: :service do
               early_access_template,
               view: :template_snapshot
             )
-          rendered_hash[:published_template_version] = nil
+
           expect(published_version.denormalized_template_json).to eq(
             rendered_hash.deep_stringify_keys
           )
