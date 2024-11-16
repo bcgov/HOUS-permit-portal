@@ -1,4 +1,4 @@
-import { Button, Checkbox, Flex, Text, VStack } from "@chakra-ui/react"
+import { Button, Checkbox, Flex, Link, Text, VStack } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
@@ -87,7 +87,12 @@ export const RequirementTemplateForm = observer(({ type, onSuccess }: IRequireme
                 <Trans
                   i18nKey={"requirementTemplate.new.firstNationsLand"}
                   components={{
-                    1: <Text as="strong" />,
+                    1: (
+                      <Link
+                        isExternal
+                        href="https://services.aadnc-aandc.gc.ca/ILRS_Public/Home/Home.aspx?ReturnUrl=%2filrs_public%2f"
+                      ></Link>
+                    ),
                   }}
                 />
               </Checkbox>

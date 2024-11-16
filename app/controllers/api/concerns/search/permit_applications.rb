@@ -78,7 +78,7 @@ module Api::Concerns::Search::PermitApplications
       else
         { user_ids_with_submission_edit_permissions: current_user.id }
       end
-    where[:sandbox_id] = current_sandbox&.id
+    where[:sandbox_id] = current_sandbox&.id if !current_user.super_admin?
 
     (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
   end

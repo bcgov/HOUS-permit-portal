@@ -437,7 +437,7 @@ GEM
       railties (>= 5.2)
     reverse_markdown (2.1.1)
       nokogiri
-    rexml (3.3.8)
+    rexml (3.3.9)
     rgeo (3.0.1)
     rgeo-proj4 (4.0.0)
       rgeo (~> 3.0.0)
@@ -709,7 +709,7 @@ DEPENDENCIES
   web-console
 
 RUBY VERSION
-   ruby 3.2.2p53
+   ruby 3.2.5p208
 
 BUNDLED WITH
    2.5.22

@@ -3,6 +3,11 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
   HISTORIC_SERVICE = "whse/bcgw_pub_whse_human_cultural_economic/MapServer/1"
   IMAP_SERVICE = "mpcm/bcgw/MapServer/dynamicLayer"
 
+  # Define the acceptable WKID range based on EPSG registry
+  MIN_WKID = 1000.freeze
+  MAX_WKID = 999_999.freeze
+  KNOWN_WKIDS = [102_190, 3005, 4326].freeze
+
   def base_url
     ENV["GEO_LTSA_PARCELMAP_REST_URL"]
   end
@@ -145,7 +150,7 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
 
       wkid = parsed_response.dig("spatialReference", "wkid")
 
-      raise Errors::FeatureAttributesRetrievalError if !valid_wkid?(wkid)
+      raise Errors::FeatureAttributesRetrievalError if !known_wkid?(wkid)
 
       geometry_coords =
         parsed_response.dig("features", 0, "geometry", "rings", 0)
@@ -179,6 +184,15 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
   end
 
   def wkid_factory_lookup(wkid)
+    # Validate that wkid is an integer
+    raise ArgumentError, "WKID must be an integer" unless wkid.is_a?(Integer)
+
+    # Validate that wkid is within the acceptable range
+    unless wkid.between?(MIN_WKID, MAX_WKID)
+      raise ArgumentError,
+            "WKID #{wkid} is out of the valid range (#{MIN_WKID}-#{MAX_WKID})"
+    end
+
     case (wkid)
     when 102_190
       RGeo::Cartesian.factory(
@@ -204,7 +218,6 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
           'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]'
       )
     else
-      raise StandardError unless wkid.is_a?(Integer)
       #fetch the proj4 string from website
       espg = Faraday.new("https://epsg.io")
       response_proj4 = espg.get("#{wkid}.proj4")
@@ -243,9 +256,7 @@ class Wrappers::LtsaParcelMapBc < Wrappers::Base
     end
   end
 
-  ALLOWED_WKIDS = [102_190, 3005, 4326].freeze
-
-  def valid_wkid?(wkid)
-    ALLOWED_WKIDS.include?(wkid.to_i)
+  def known_wkid?(wkid)
+    KNOWN_WKIDS.include?(wkid.to_i)
   end
 end

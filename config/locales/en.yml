@@ -143,6 +143,7 @@ en:
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You’re Invited to Preview a Building Permit Template"
+      notify_batched_integration_mapping: "New API mappings"
   arbitrary_message_construct:
     devise:
       failure:
@@ -190,6 +191,9 @@ en:
       ltsa_retrieval_error:
         title: Error
         message: The land title could not be found
+      pin_retrieval_error:
+        title: Error
+        message: A parcel could not be found by the given PIN
       ltsa_unavailable_error:
         title: Error
         message: The land title service is currently unavailable
