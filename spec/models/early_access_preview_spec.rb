@@ -79,25 +79,29 @@ RSpec.describe EarlyAccessPreview, type: :model do
 
         context "and created_at is present" do
           it "sets expires_at to created_time + 90 days" do
-            created_time = current_time - 1.day
-            early_access_preview.created_at = created_time
-            early_access_preview.expires_at = nil
-            early_access_preview.valid?
-            expect(early_access_preview.expires_at).to eq(
-              created_time + 90.days
-            )
+            Timecop.freeze(current_time) do
+              created_time = current_time - 1.day
+              early_access_preview.created_at = created_time
+              early_access_preview.expires_at = nil
+              early_access_preview.valid?
+              expect(early_access_preview.expires_at).to eq(
+                created_time + 90.days
+              )
+            end
           end
         end
 
         context "and created_at is nil" do
           it "sets expires_at to current_time + 90 days" do
-            early_access_preview.created_at = nil
-            early_access_preview.expires_at = nil
+            Timecop.freeze(current_time) do
+              early_access_preview.created_at = nil
+              early_access_preview.expires_at = nil
 
-            early_access_preview.valid?
-            expect(early_access_preview.expires_at).to eq(
-              current_time + 90.days
-            )
+              early_access_preview.valid?
+              expect(early_access_preview.expires_at).to eq(
+                current_time + 90.days
+              )
+            end
           end
         end
       end
@@ -109,37 +113,43 @@ RSpec.describe EarlyAccessPreview, type: :model do
 
         context "and created_at is present" do
           it "defaults expires_at to created_at + 60 days" do
-            created_time = current_time - 2.days
-            early_access_preview.created_at = created_time
-            early_access_preview.expires_at = nil
+            Timecop.freeze(current_time) do
+              created_time = current_time - 2.days
+              early_access_preview.created_at = created_time
+              early_access_preview.expires_at = nil
 
-            early_access_preview.valid?
-            expect(early_access_preview.expires_at).to eq(
-              created_time + 60.days
-            )
+              early_access_preview.valid?
+              expect(early_access_preview.expires_at).to eq(
+                created_time + 60.days
+              )
+            end
           end
         end
 
         context "and created_at is nil" do
           it "defaults expires_at to current_time + 60 days" do
-            early_access_preview.created_at = nil
-            early_access_preview.expires_at = nil
+            Timecop.freeze(current_time) do
+              early_access_preview.created_at = nil
+              early_access_preview.expires_at = nil
 
-            early_access_preview.valid?
-            expect(early_access_preview.expires_at).to eq(
-              current_time + 60.days
-            )
+              early_access_preview.valid?
+              expect(early_access_preview.expires_at).to eq(
+                current_time + 60.days
+              )
+            end
           end
         end
       end
 
       context "when expires_at is already set" do
         it "does not override the existing expires_at" do
-          existing_expires_at = current_time + 10.days
-          early_access_preview.expires_at = existing_expires_at
+          Timecop.freeze(current_time) do
+            existing_expires_at = current_time + 10.days
+            early_access_preview.expires_at = existing_expires_at
 
-          early_access_preview.valid?
-          expect(early_access_preview.expires_at).to eq(existing_expires_at)
+            early_access_preview.valid?
+            expect(early_access_preview.expires_at).to eq(existing_expires_at)
+          end
         end
       end
     end
@@ -156,6 +166,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
   describe "#extend_access" do
     let(:initial_expires_at) { 1.week.from_now }
     let(:new_expires_at) { 60.days.from_now }
+    let(:current_time) { Time.current }
 
     before do
       early_access_preview.expires_at = initial_expires_at
@@ -164,9 +175,7 @@ RSpec.describe EarlyAccessPreview, type: :model do
     end
 
     it "sets expires_at to nil and then recalculates it based on the default duration" do
-      Timecop.freeze(Time.current) do
-        current_time = Time.current
-
+      Timecop.freeze(current_time) do
         allow(ENV).to receive(:[]).with(
           "EARLY_ACCESS_EXPIRATION_DAYS"
         ).and_return(nil)
@@ -186,10 +195,8 @@ RSpec.describe EarlyAccessPreview, type: :model do
       end
 
       it "updates expires_at based on the new expiration_days" do
-        Timecop.freeze(Time.current) do
-          current_time = Time.current
-
-          early_access_preview.created_at = Time.current - 1.day
+        Timecop.freeze(current_time) do
+          early_access_preview.created_at = current_time - 1.day
           early_access_preview.expires_at = initial_expires_at
 
           early_access_preview.extend_access
