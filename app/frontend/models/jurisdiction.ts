@@ -6,9 +6,10 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
 import { EEnergyStep, EJurisdictionExternalApiState, EZeroCarbonStep } from "../types/enums"
-import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
+import { IContact, IOption, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
+import { SandboxModel } from "./sandbox"
 
 export const JurisdictionModel = types
   .model("JurisdictionModel", {
@@ -44,6 +45,7 @@ export const JurisdictionModel = types
     ),
     submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
+    sandboxes: types.array(types.reference(SandboxModel)),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -84,6 +86,9 @@ export const JurisdictionModel = types
       return zeroCarbonStepRequired
         ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
         : t(`${i18nPrefix}.notRequired`)
+    },
+    get sandboxOptions(): IOption[] {
+      return self.sandboxes.map((s) => ({ label: s.name, value: s.id }))
     },
   }))
   .views((self) => ({

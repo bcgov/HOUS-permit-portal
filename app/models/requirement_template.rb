@@ -1,10 +1,19 @@
 class RequirementTemplate < ApplicationRecord
+  SEARCH_INCLUDES = %i[
+    published_template_version
+    permit_type
+    last_three_deprecated_template_versions
+    activity
+    scheduled_template_versions
+  ]
+
   searchkick searchable: %i[description current_version permit_type activity],
              word_start: %i[description current_version permit_type activity],
              text_middle: %i[current_version description]
 
-  belongs_to :activity
-  belongs_to :permit_type
+  belongs_to :activity, optional: false
+  belongs_to :permit_type, optional: false
+  belongs_to :copied_from, class_name: "RequirementTemplate", optional: true
 
   has_many :requirement_template_sections,
            -> { order(position: :asc) },
@@ -29,14 +38,20 @@ class RequirementTemplate < ApplicationRecord
            end,
            class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
-  has_many :permit_type_required_steps, dependent: :destroy
 
   has_one :published_template_version,
           -> { where(status: "published") },
           class_name: "TemplateVersion"
 
   # Scope to get RequirementTemplates with a published template version
-  scope :with_published_version, -> { joins(:published_template_version) }
+  scope :for_sandbox,
+        ->(sandbox) do
+          joins(:template_versions).where(
+            template_versions: {
+              status: sandbox&.template_version_status_scope || :published
+            }
+          )
+        end
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
 
@@ -48,9 +63,38 @@ class RequirementTemplate < ApplicationRecord
   # This is a workaround needed to validate step code related errors
   attr_accessor :requirement_template_sections_attributes_copy
 
-  validate :unique_classification_for_undiscarded, on: :create
   validate :validate_uniqueness_of_blocks
   validate :validate_step_code_related_dependencies
+  validate :public_only_for_early_access_preview
+
+  def assignee
+    nil
+  end
+
+  def early_access?
+    type == "EarlyAccessRequirementTemplate"
+  end
+
+  def live?
+    type == "LiveRequirementTemplate"
+  end
+
+  def visibility
+    if early_access?
+      "early_access"
+    elsif live?
+      "live"
+    end
+  end
+
+  def sections
+    requirement_template_sections
+  end
+
+  def customizations
+    # Convenience method to prevent carpal tunnel syndrome
+    jurisdiction_template_version_customizations
+  end
 
   def label
     "#{permit_type.name} | #{activity.name}#{first_nations ? " (" + I18n.t("activerecord.attributes.requirement_template.first_nations") + ")" : ""}"
@@ -159,16 +203,32 @@ class RequirementTemplate < ApplicationRecord
 
   def search_data
     {
+      nickname: nickname,
       description: description,
       first_nations: first_nations,
       current_version: published_template_version&.version_date,
       permit_type: permit_type.name,
       activity: activity.name,
-      discarded: discarded_at.present?
+      discarded: discarded_at.present?,
+      assignee: assignee&.name,
+      visibility: visibility,
+      public: public?,
+      created_at: created_at
     }
   end
 
   private
+
+  def public_only_for_early_access_preview
+    if public && !early_access?
+      errors.add(
+        :public,
+        I18n.t(
+          "activerecord.errors.models.requirement_template.attributes.public.true_on_early_access_only"
+        )
+      )
+    end
+  end
 
   def validate_uniqueness_of_blocks
     # Track duplicates across all sections within the same template
@@ -268,24 +328,6 @@ class RequirementTemplate < ApplicationRecord
     end
     if has_duplicate_step_code_package_file_requirements
       errors.add(:base, :duplicate_step_code_package)
-    end
-  end
-
-  def unique_classification_for_undiscarded
-    existing_record =
-      RequirementTemplate.find_by(
-        permit_type_id: permit_type_id,
-        activity_id: activity_id,
-        first_nations: first_nations,
-        discarded_at: nil
-      )
-    if existing_record.present?
-      errors.add(
-        :base,
-        I18n.t(
-          "activerecord.errors.models.requirement_template.nonunique_classification"
-        )
-      )
     end
   end
 

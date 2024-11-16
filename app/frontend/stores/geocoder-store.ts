@@ -38,7 +38,7 @@ export const GeocoderStoreModel = types
       let responseData = response?.data?.data
       self.fetchingJurisdiction = false
       if (response.ok) {
-        self.rootStore.jurisdictionStore.addJurisdiction(responseData)
+        self.rootStore.jurisdictionStore.mergeUpdate(responseData, "jurisdictionMap")
         return responseData
       }
     }),

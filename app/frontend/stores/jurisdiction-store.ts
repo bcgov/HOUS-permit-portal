@@ -1,5 +1,6 @@
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
+import * as R from "ramda"
 import { TCreateJurisdictionFormData } from "../components/domains/jurisdictions/new-jurisdiction-screen"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -45,9 +46,17 @@ export const JurisdictionStoreModel = types
     },
   }))
   .actions((self) => ({
+    __beforeMergeUpdate(jurisdiction) {
+      if (!R.isEmpty(jurisdiction.sandboxes)) {
+        self.rootStore.sandboxStore.mergeUpdateAll(jurisdiction.sandboxes, "sandboxMap")
+      }
+      return R.mergeRight(jurisdiction, {
+        sandboxes: jurisdiction.sandboxes?.map((sandbox) => sandbox.id),
+      })
+    },
     // Action to add a new Jurisdiction
     addJurisdiction(jurisdiction: IJurisdiction) {
-      self.jurisdictionMap.put(jurisdiction)
+      self.mergeUpdate(jurisdiction, "jurisdictionMap")
     },
     // Action to remove a Jurisdiction
     removeJurisdiction(id: string) {

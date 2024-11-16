@@ -22,13 +22,14 @@ import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../../shared/floating-help-drawer"
+import ConfirmationModal from "../../../../shared/modals/confirmation-modal"
 import { BrowserSearchPrompt } from "../../../../shared/permit-applications/browser-search-prompt"
 import { CompareRequirementsBox } from "../../../permit-application/compare-requirements-box"
 import { BuilderBottomFloatingButtons } from "../../builder-bottom-floating-buttons"
 import { SectionsDisplay } from "../../sections-display"
 import { SectionsSidebar } from "../../sections-sidebar"
 import { useSectionHighlight } from "../../use-section-highlight"
-import { BuilderHeader } from "../edit-requirement-template-screen/builder-header"
+import { BuilderHeader } from "../base-edit-requirement-template-screen/builder-header"
 import { JurisdictionRequirementBlockEditSidebar } from "./jurisdiction-requirement-block-edit-sidebar"
 
 const scrollToIdPrefix = "jurisdiction-edit-template-version-scroll-to-id-"
@@ -57,7 +58,8 @@ function formFormDefaults(
 
 export const JurisdictionEditDigitalPermitScreen = observer(function JurisdictionEditDigitalPermitScreen() {
   const { t } = useTranslation()
-  const { userStore } = useMst()
+  const { userStore, sandboxStore } = useMst()
+  const { currentSandbox } = sandboxStore
   const { currentUser } = userStore
   const { templateVersion, error: templateVersionError } = useTemplateVersion({
     customErrorMessage: t("errors.fetchBuildingPermit"),
@@ -153,6 +155,11 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
     return templateVersion.createOrUpdateJurisdictionTemplateVersionCustomization(currentUser.jurisdiction.id, data)
   })
 
+  const onPromote = async () => {
+    await onSubmit()
+    return templateVersion.promoteJurisdictionTemplateVersionCustomization(currentUser.jurisdiction.id)
+  }
+
   return (
     <Box as="main" id="jurisdiction-edit-permit-template">
       <BuilderHeader
@@ -228,15 +235,41 @@ export const JurisdictionEditDigitalPermitScreen = observer(function Jurisdictio
             )}
             <ButtonGroup>
               <BrowserSearchPrompt color="text.primary" />
-              <Button
-                variant={"primary"}
-                rightIcon={<CaretRight />}
-                onClick={onSubmit}
-                isDisabled={isSubmitting || !isValid}
-                isLoading={isSubmitting}
-              >
-                {t("ui.publish")}
-              </Button>
+              {currentSandbox && (
+                <ConfirmationModal
+                  promptHeader={t("requirementTemplate.edit.promoteElectives")}
+                  promptMessage={t("requirementTemplate.edit.promoteElectivesMessage")}
+                  renderTrigger={(onOpen) => (
+                    <Button
+                      variant={"secondary"}
+                      rightIcon={<CaretRight />}
+                      onClick={onOpen}
+                      isDisabled={isSubmitting || !isValid}
+                      isLoading={isSubmitting}
+                    >
+                      {t("requirementTemplate.edit.promoteElectives")}
+                    </Button>
+                  )}
+                  onConfirm={onPromote}
+                />
+              )}
+              <ConfirmationModal
+                promptHeader={t("ui.save")}
+                promptMessage={t("ui.confirmOverwrite")}
+                renderTrigger={(onOpen) => (
+                  <Button
+                    variant={"primary"}
+                    rightIcon={<CaretRight />}
+                    onClick={onOpen}
+                    isDisabled={isSubmitting || !isValid}
+                    isLoading={isSubmitting}
+                  >
+                    {t("ui.save")}
+                  </Button>
+                )}
+                onConfirm={onSubmit}
+              />
+
               <Button variant={"secondary"} onClick={onClose} isDisabled={isSubmitting}>
                 {t("ui.close")}
               </Button>

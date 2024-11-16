@@ -65,21 +65,21 @@ module Api::Concerns::Search::PermitApplications
 
   def permit_application_where_clause
     filters = permit_application_search_params[:filters]
-    where = {}
 
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
     # Only add the jurisdiction_id condition if @jurisdiction is present
-    if @jurisdiction
-      where = {
-        jurisdiction_id: @jurisdiction.id,
-        # Overrides status filter, reorder the code if necessary
-        status: %i[newly_submitted resubmitted]
-      }
-    else
-      where = { user_ids_with_submission_edit_permissions: current_user.id }
-    end
-    ret = (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
+    where =
+      if @jurisdiction
+        {
+          jurisdiction_id: @jurisdiction.id,
+          # Overrides status filter, reorder the code if necessary
+          status: %i[newly_submitted resubmitted]
+        }
+      else
+        { user_ids_with_submission_edit_permissions: current_user.id }
+      end
+    where[:sandbox_id] = current_sandbox&.id if !current_user.super_admin?
 
-    ret
+    (filters&.to_h || {}).deep_symbolize_keys.compact.merge!(where)
   end
 end

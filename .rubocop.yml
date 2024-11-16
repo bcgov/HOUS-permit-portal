@@ -3,16 +3,42 @@ AllCops:
   DisplayStyleGuide: true
   NewCops: enable
   SuggestExtensions: false
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.2
   Exclude:
     - "{.git,.github,.ruby-lsp,bin,coverage,doc,pkg,sorbet,spec,test/fixtures,vendor,tmp}/**/*"
     - test.rb
+    - "db/schema.rb"
+    - "**/*.erb"
+
+Style/Lambda:
+  Enabled: false
+
+Layout/MultilineOperationIndentation:
+  Enabled: false
+
+Style/MultilineMemoization:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/RedundantBegin:
+  Enabled: false
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
 
 Gemspec/DevelopmentDependencies:
   Enabled: false
 
 Layout/LineLength:
-  Max: 80
+  Enabled: false
 
 Lint/AmbiguousBlockAssociation:
   Enabled: false
@@ -69,7 +95,7 @@ Naming/MethodParameterName:
   Enabled: false
 
 Naming/RescuedExceptionsVariableName:
-  PreferredName: error
+  PreferredName: e
 
 Naming/VariableNumber:
   Enabled: false

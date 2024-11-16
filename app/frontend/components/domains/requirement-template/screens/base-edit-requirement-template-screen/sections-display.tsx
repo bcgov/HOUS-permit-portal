@@ -6,13 +6,13 @@ import React, { useEffect } from "react"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { v4 as uuidv4 } from "uuid"
+import { IRequirementTemplateForm, formScrollToId } from "."
 import { useMst } from "../../../../../setup/root"
 import { IRequirementTemplateSectionAttributes } from "../../../../../types/api-request"
 import { EditableInputWithControls } from "../../../../shared/editable-input-with-controls"
 import { RemoveConfirmationModal } from "../../../../shared/modals/remove-confirmation-modal"
 import { RequirementBlockAccordion } from "../../../requirements-library/requirement-block-accordion"
 import { RequirementsLibraryDrawer } from "../../../requirements-library/requirements-library-drawer"
-import { IRequirementTemplateForm, formScrollToId } from "./index"
 
 interface IProps {
   isCollapsedAll?: boolean
@@ -67,6 +67,7 @@ const SectionDisplay = observer(
     disabledUseForBlockIds?: string[]
   }) => {
     const { requirementBlockStore } = useMst()
+    const { getIsRequirementBlockEditable } = requirementBlockStore
     const { control, watch, register, setValue } = useFormContext<IRequirementTemplateForm>()
     const { t } = useTranslation()
 
@@ -118,6 +119,9 @@ const SectionDisplay = observer(
                 borderTop: isInEditMode ? "none" : undefined,
               },
             }}
+            editablePreviewProps={{
+              marginTop: 6,
+            }}
             initialHint={t("ui.clickToEdit")}
             value={editableSectionName}
             onChange={setEditableSectionName}
@@ -153,19 +157,24 @@ const SectionDisplay = observer(
           )}
         </HStack>
         <Stack w={"full"}>
-          {watchedSectionBlocks.map((sectionBlock, index) => (
-            <RequirementBlockAccordion
-              mb="6"
-              as={"section"}
-              id={formScrollToId(sectionBlock.requirementBlockId)}
-              key={sectionBlock.id}
-              requirementBlock={requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)}
-              onRemove={() => removeSectionBlock(index)}
-              isCollapsedAll={isCollapsedAll}
-              isEditable
-              showEditWarning
-            />
-          ))}
+          {watchedSectionBlocks.map((sectionBlock, index) => {
+            const requirementBlock = requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId)
+            return (
+              requirementBlock && (
+                <RequirementBlockAccordion
+                  mb="6"
+                  as={"section"}
+                  id={formScrollToId(sectionBlock.requirementBlockId)}
+                  key={sectionBlock.id}
+                  requirementBlock={requirementBlock}
+                  onRemove={() => removeSectionBlock(index)}
+                  isCollapsedAll={isCollapsedAll}
+                  isEditable={getIsRequirementBlockEditable(requirementBlock)}
+                  showEditWarning
+                />
+              )
+            )
+          })}
           <RequirementsLibraryDrawer
             defaultButtonProps={{ alignSelf: "center" }}
             onUse={(requirementBlock, closeDrawer) => {

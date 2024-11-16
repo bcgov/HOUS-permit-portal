@@ -126,17 +126,19 @@ const options = {
             left: "See helpful tips from your local jurisdictions to streamline your digital building permit applications",
             mid: "Preview the Small-scale/Multi-unit housing checklist",
             midSub: "(Part 9 BC Building Code)",
-            midDownload: "Download checklist",
+            viewTemplate: "View requirements",
             end: "Accurately fill out your permit application online with ease",
             endButton: "Get started now",
           },
         },
         ui: {
           okay: "Okay",
+          until: "til",
           reorder: "Reorder",
           delete: "Delete",
           confirmDelete: "Confirm delete",
           confirmation: "Are you sure you want to proceed?",
+          confirmOverwrite: "Are you sure you want to save and overwrite this item?",
           sureDelete: "Are you sure you want to delete this item?",
           disable: "Disable",
           ok: "OK",
@@ -232,7 +234,17 @@ const options = {
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
+          copy: "Copy",
           copyNoun: "Copy",
+          options: "Options",
+          na: "N/A",
+          share: "Share",
+          unassigned: "Unassigned",
+          unassign: "Unassign",
+          seeEarlyAccessButton: "See Early Access",
+          seeLiveButton: "See Live",
+          invite: "Invite",
+          public: "Public",
         },
         notification: {
           title: "Notifications",
@@ -496,6 +508,7 @@ const options = {
             newly_submitted: "Submitted",
             resubmitted: "Resubmitted",
             revisions_requested: "Revisions Requested",
+            ephemeral: "Preview",
           },
           statusGroup: {
             draft: "Draft permits",
@@ -525,6 +538,13 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
+            submitToOwn:
+              "Make sure you are submitting to a jurisdiction that you have inbox access to so that you can see it.",
+            sandboxIdHeading: "Submit into Sandbox",
+            onlyHavePin: "I only have a PIN",
+            dontHavePin: "I don't have a PIN",
+            selectSandboxLabel: "Select a sandbox to submit into",
+            firstNationsTitle: "First Nations",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
             forFirstNations: "Is this permit application on <1>First Nation Registered Land</1>?",
@@ -570,7 +590,7 @@ const options = {
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found or unavailable. Please select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
             needToKnow: "What you need to know",
@@ -639,6 +659,39 @@ const options = {
             },
           },
         },
+        sandbox: {
+          formLabel: "Sandbox",
+          live: "Live",
+          disabledFor: "Disabled for sandbox",
+          inMode: "You're in testing mode:",
+          switch: {
+            label: "Sandbox mode",
+            title: "Enter testing sandbox mode?",
+            description: "While in this mode, you will be able to:",
+            descriptionList: [
+              "make changes to a permit template without affecting what is published live.",
+              "publish permit templates for testing it out as how a submitter would see it",
+              "if you made any changes on a permit, you may choose to copy those over to publish live.",
+            ],
+            choicesAvailable: "Choices available",
+            liveDescription: "<strong>Live</strong>: No sandbox. Submit directly to the live inbox.",
+            publishedDescription:
+              "<strong>Published sandbox:</strong> Sandbox that emulates the live mode by letting you test edits on published permit templates.",
+            scheduledDescription:
+              "<strong>Scheduled sandbox:</strong> Sandbox that lets you interact with scheduled permit templates.",
+            continue: "Continue to sandbox",
+            superAdminAvailable: "Super Admin feature available!",
+            testingPurposes: "For testing purposes, you may choose which permit applications to test.",
+          },
+        },
+        earlyAccessRequirementsLibrary: {
+          index: {
+            title: "Early access requirements library",
+            description:
+              "This displays all requirement blocks whose visibility has been set to 'preview only'. These blocks may not be used in any live drafts.",
+            tableHeading: "Early access requirement blocks",
+          },
+        },
         requirementsLibrary: {
           addAnother: "Add",
           addAnotherPerson: "Add another person",
@@ -649,6 +702,12 @@ const options = {
           hasAutomatedCompliance: "Has automated compliance",
           inputNotSupported: "Input type not yet supported",
           associationsInfo: "Sections, tags, etc...",
+          copyToEarlyAccess: {
+            title: "Copy to early access",
+            body: "Do you want to deuplicate this into an early access requirement block? <br /> <br /> <strong>Replace and duplicate with early access:</strong>",
+            replaceButton: "Replace requirement block",
+          },
+
           index: {
             title: "Requirements library",
             description: "List of all Requirement Blocks in the system that can be used inside Templates.",
@@ -660,6 +719,17 @@ const options = {
             useButton: "Use",
             dummyOption: "Option",
           },
+          visibilityDescriptions: {
+            any: "No restrictions on visibility.",
+            live: "Can only be used in live templates only. Does not affect published templates.",
+            earlyAccess:
+              "Available to be used in early access preview templates only. Does not affect published templates",
+          },
+          visibility: {
+            any: "Any",
+            live: "Preview omitted",
+            earlyAccess: "Preview only",
+          },
           modals: {
             archived: "Archived",
             unlabeled: "Unlabeled",
@@ -668,6 +738,22 @@ const options = {
             addLabel: "Add label",
             displayDescriptionLabel: "Instruction/Description (public)",
             addDescriptionTrigger: "Add instructions/description for this block",
+            visibilityLabel: "Visibility",
+            cantEditHere: "Not currently editable here",
+            changeVisibility: {
+              fromEarlyAccessTitle: "Are you sure you want to promote this?",
+              fromLiveTitle: "Are you sure you want to promote this?",
+
+              confirmChangeBody1:
+                "This is only possible if the block only currently exists in the correct corresponding in-progress template drafts and previews. Once changed, it will be in the corresponding library only",
+              confirmChangeBody2:
+                "Make sure you are ready to promote/demote this, any other previews or templates using this specific block will also reflect this change.",
+              listItem1: "<strong>All</strong>: The requirement block may exist in any preview or template",
+              listItem2:
+                "<strong>Exclude preview</strong>: The requirement block may not exist in previews, and only in templates",
+              listItem3:
+                "<strong>Preview only</strong>: The requirement block may not exist in templates, and only in previews",
+            },
             create: {
               triggerButton: "Create new requirement block",
               title: "New requirement block",
@@ -676,12 +762,16 @@ const options = {
               title: "Edit requirement block",
               options: "Options",
               copy: "Copy this block",
+              visibilityTooltip:
+                "Visibility determines if the block is restricted to live, early-access previews, or both",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
               },
             },
             clickToWriteDisplayName: "Click to write display name",
+            clickToWriteDescription: "Click to write description",
+            clickToWriteNickname: "Click to write nickname",
             blockSetupTitle: "Block setup",
             internalUse: "For internal use only",
             configureFields: "Configure the form fields below that submitters will see:",
@@ -723,7 +813,12 @@ const options = {
               },
             },
             addOptionButton: "Add another option",
-            editWarning: "Any changes made here will be reflected in all templates that use this requirement block.",
+            templateEditWarning:
+              "Any changes made here will be reflected in all unsaved preview drafts that use this requirement block.",
+            previewEditWarning:
+              "Any changes made here will be reflected in all in-progress template drafts that use this requirement block.",
+            templates: "templates",
+            previews: "previews",
             stepCodeDependencies: {
               energyStepCodeMethod: {
                 tool: "Utilizing the digital step code tool",
@@ -1188,6 +1283,21 @@ const options = {
           requirementsLibraryTitle: "Requirements library",
           requirementsLibraryDescription:
             "Construct and maintain requirement blocks that form the core structure of permit templates. This library allows you to create, update, and manage the questions that define each requirement block.",
+          earlyAccess: {
+            title: "Early Access",
+            adminDescription:
+              "Access and manage Early access previews and requirement sets before they become publicly available.",
+            previews: {
+              title: "Early access previews",
+              description:
+                "View and manage non-submittable permit templates in Early Access, shared with selected users for service design purposes.",
+            },
+            requirements: {
+              title: "Early access requirements",
+              description:
+                "Explore and manage pre-release requirement blocks sets designed for testing within Early Access projects.",
+            },
+          },
           configurationManagement: {
             title: "Configuration management",
             reviewManagerDescription:
@@ -1386,6 +1496,66 @@ const options = {
             super_admin:
               "The Super Admin is the highest-level user within the system, with overarching control over the entire permit application platform. They have the authority to manage user roles, including creating and removing user accounts, and to modify the system configuration. This role is responsible for the maintenance of the system, including updates and enhancements, and ensuring that the system meets the operational and strategic objectives of the local government or the organization.",
           },
+          assignTo: "Assign to...",
+        },
+        earlyAccessRequirementTemplate: {
+          show: {},
+          index: {
+            tableHeading: "Previews",
+            title: "Early access templates catalogue",
+            invitationInfo:
+              "Early access previews are non-submittable and accessible only by registered users who are invited. Access is granted for 60 days and can be extended or revoked at any time.",
+            createButton: "Create new early access template",
+            seeArchivedButton: "See archived",
+            sharePreviewLink: "Share ({{ n }})",
+            sharePreviewTitle: "Share preview",
+            inviteToPreviewTitle: "Invite to preview",
+            inviteToPreviewHint: "Separate each email with a comma ,",
+            revokeButton: "Revoke",
+            unrevokeButton: "Unevoke",
+            extendButton: "Extend",
+            inviteToPreviewButton: "Send invites",
+            noPreviewersYet: "No previewers yet. Click invite to add previewers to this template",
+            inviteToPreviewPartialSuccess: "Some invites failed to send",
+
+            confirmation: {
+              revokeTitle: "Are you sure you want to revoke access for {{ name }}?",
+              revokeBody:
+                "Revoking access will immediately prevent this user from accessing the early access content. This may be undone.",
+              extendTitle: "Extend Access Duration for {{ name }}",
+              extendBody:
+                "Extending access will give the user 60 additional days to interact with the early access content. Do you want to proceed?",
+              unrevokeTitle: "Restore Access for {{ name }}",
+              unrevokeBody:
+                "Restoring access will allow the user to access the early access content again. Are you sure you want to proceed?",
+            },
+          },
+          new: {
+            title: "Create new preview",
+            modalTitle: "Create new preview",
+            startingFresh: "Starting fresh?",
+            addFromExisitng: "Add requirements from an exisitng permit?",
+            startWithBlank: "Start with blank permit",
+            copyFromLive: "Copy from live permit",
+            copyFromThis: "Copy from this",
+          },
+          edit: {
+            lastFetched: "Last fetched",
+            fetchLatest: "Fetch latest",
+            auditLog: "Audit log",
+            confirmRemoveModalTitle: "Archive preview?",
+            confirmRemoveModalBody: "This preview will no longer be accessible by invitees",
+            public: "Grant public access?",
+          },
+          fields: {
+            nickname: "Nickname",
+            permitType: "Permit type",
+            activity: "Work type",
+            firstNations: "First nations?",
+            sharedWith: "Shared with",
+            updatedAt: "Updated at",
+            assignee: "Assigned",
+          },
         },
         requirementTemplate: {
           compareAction: 'Requirement "{{ requirementName }}" has been {{ action }}',
@@ -1393,11 +1563,17 @@ const options = {
           added: "added",
           removed: "removed",
           edit: {
+            requirementsLibraryTab: "Requirements Library",
+            earlyAccessRequirementsLibraryTab: "Early Access Requirements Library",
+            earlyAccessTabDescription: "Early access previews cannot add 'Exclude preview' blocks ",
             options: {
               button: "Options",
               copyTips: "Import tips from ({{ templateLabel }})",
               copyElectives: "Import electives from ({{ templateLabel }})",
             },
+            promoteElectives: "Save and promote",
+            promoteElectivesMessage:
+              "This will publish your sandboxed customizations and overwrite your non-sandboxed live electives!",
             clickToWriteDescription: "Click to write description",
             title: "Permit Application Builder",
             dndTitle: "Drag to reorder",
@@ -1473,7 +1649,7 @@ const options = {
             tableHeading: "Templates",
             title: "Permit templates catalogue",
             description:
-              "List of all permit templates in the system that's been created by the Super Admin. Only Published templates will be visible to jurisdictions and submitters.",
+              "List of all permit templates in the system that's been created by the Super Admin. Only published templates will be visible to jurisdictions and submitters.",
             createButton: "Create new template",
             seeArchivedButton: "See archived",
           },
@@ -1484,7 +1660,7 @@ const options = {
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
             firstNationsLand: "This permit is intended only for <1>First Nation Registered Land</1>",
-            copyExisting: "Copy from existing template of this permit and work type if available",
+            copyExistingByClassifications: "Copy from existing template of this permit and work type if available",
           },
           versionSidebar: {
             triggerButton: "Versions",
@@ -1594,6 +1770,14 @@ const options = {
             title: "Users",
             description: "View and manage administrative users",
           },
+          landingPageSetup: {
+            title: "Landing page setup",
+            description: "Configure content for the landing page",
+            selectOpenAccessPreviews:
+              "Set open access previews to display on the front page. Select from the available public access previews below.",
+            smallScale: "Set as Small Scale New Contruction Preview on landing page",
+            fourPlus: "Set as Four Plus New Construction Preview",
+          },
           sitewideMessage: {
             title: "Site-wide message",
             description: "Enable and configure a site-wide message",
@@ -1638,6 +1822,7 @@ const options = {
             },
           },
         },
+
         reporting: {
           title: "Reporting",
           tableHeading: "Available reports",
@@ -1822,8 +2007,10 @@ const options = {
             apiMappings: "API mappings",
             manageMapping: "Manage mapping",
             revisionReasonSetup: "Revision reason setup",
+            landingSetup: "Landing setup",
             acceptInvitation: "Accept invitation",
             eula: "End user license agreement",
+            earlyAccess: "Early access",
           },
         },
         automatedCompliance: {

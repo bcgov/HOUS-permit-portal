@@ -29,6 +29,7 @@ import {
   combineDiff,
   combineRevisionAnnotations,
   combineRevisionButtons,
+  processFieldsForEphemeral,
 } from "../utils/formio-component-traversal"
 
 import { format } from "date-fns"
@@ -40,6 +41,7 @@ import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-statu
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
+import { SandboxModel } from "./sandbox"
 import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { IUser, UserModel } from "./user"
@@ -56,9 +58,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
       permitType: types.frozen<IPermitType>(),
       activity: types.frozen<IActivity>(),
       status: types.enumeration(Object.values(EPermitApplicationStatus)),
-      submitter: types.maybe(types.reference(types.late(() => UserModel))),
-      jurisdiction: types.maybe(types.reference(types.late(() => JurisdictionModel))),
+      submitter: types.maybeNull(types.maybe(types.reference(types.late(() => UserModel)))),
+      jurisdiction: types.maybeNull(types.maybe(types.reference(types.late(() => JurisdictionModel)))),
       templateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
+      sandbox: types.maybeNull(types.reference(types.late(() => SandboxModel))),
       publishedTemplateVersion: types.maybeNull(types.reference(types.late(() => TemplateVersionModel))),
       formJson: types.maybeNull(types.frozen<IFormJson>()),
       submissionData: types.maybeNull(types.frozen<ISubmissionData>()),
@@ -111,6 +114,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get isResubmitted() {
         return self.status === EPermitApplicationStatus.resubmitted
+      },
+      get isEphemeral() {
+        return self.status === EPermitApplicationStatus.ephemeral
       },
       get sortedSubmissionVersions() {
         return self.submissionVersions.slice().sort((a, b) => b.createdAt - a.createdAt)
@@ -198,7 +204,13 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
       get formattedFormJson() {
         const clonedFormJson = R.clone(self.formJson)
-        const revisionAnnotatedFormJson = combineRevisionAnnotations(clonedFormJson, self.latestRevisionRequests)
+
+        // Disable certain fields if this is an ephemeral preview
+        const ephemeralProcessedFormJson = self.isEphemeral ? processFieldsForEphemeral(clonedFormJson) : clonedFormJson
+        const revisionAnnotatedFormJson = combineRevisionAnnotations(
+          ephemeralProcessedFormJson,
+          self.latestRevisionRequests
+        )
         //merge the formattedComliance data.  This should trigger a form redraw when it is updated
         const complianceHintedFormJson = combineComplianceHints(
           revisionAnnotatedFormJson,
@@ -206,11 +218,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.formattedComplianceData
         )
         const diffColoredFormJson = combineDiff(complianceHintedFormJson, self.diff)
-
         const revisionRequestsToUse = self.isViewingPastRequests
           ? self.selectedPastSubmissionVersion?.revisionRequests
           : self.latestRevisionRequests
-
         let changedKeys = []
         if (self.isViewingPastRequests && self.selectedPastSubmissionVersion) {
           changedKeys = compareSubmissionData(
@@ -224,12 +234,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         const changedMarkedFormJson = combineChangeMarkers(diffColoredFormJson, self.isSubmitted, changedKeys)
-
         const revisionModeFormJson =
           self.revisionMode || self.isRevisionsRequested
             ? combineRevisionButtons(changedMarkedFormJson, self.isSubmitted, revisionRequestsToUse)
             : diffColoredFormJson
-
         return revisionModeFormJson
       },
       sectionKey(sectionId) {

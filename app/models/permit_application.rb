@@ -30,6 +30,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :permit_type
   belongs_to :activity
   belongs_to :template_version
+  belongs_to :sandbox, optional: true
 
   # The front end form update provides a json paylioad of items we want to force update on the front-end since form io maintains its own state and does not 'rerender' if we send the form data back
   attr_accessor :front_end_form_update
@@ -41,6 +42,9 @@ class PermitApplication < ApplicationRecord
 
   scope :submitted, -> { joins(:submission_versions).distinct }
 
+  scope :sandboxed, -> { where.not(sandbox_id: nil) }
+  scope :live, -> { where(sandbox_id: nil) }
+
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact
@@ -48,6 +52,7 @@ class PermitApplication < ApplicationRecord
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
+  validate :sandbox_belongs_to_jurisdiction
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -202,7 +207,8 @@ class PermitApplication < ApplicationRecord
         users_by_collaboration_options(
           collaboration_type: :review,
           collaborator_type: :delegatee
-        ).first&.name
+        ).first&.name,
+      sandbox_id: sandbox_id
     }
   end
 
@@ -262,7 +268,7 @@ class PermitApplication < ApplicationRecord
     else
       jurisdiction
         .jurisdiction_template_version_customizations
-        .find_by(template_version: template_version)
+        .find_by(template_version: template_version, sandbox_id: sandbox_id)
         &.customizations
     end
   end
@@ -697,6 +703,14 @@ class PermitApplication < ApplicationRecord
           "activerecord.errors.models.permit_application.attributes.pid_or_pin"
         )
       )
+    end
+  end
+
+  def sandbox_belongs_to_jurisdiction
+    return unless sandbox
+
+    unless jurisdiction.sandboxes.include?(sandbox)
+      errors.add(:sandbox, "must belong to the jurisdiction")
     end
   end
 end

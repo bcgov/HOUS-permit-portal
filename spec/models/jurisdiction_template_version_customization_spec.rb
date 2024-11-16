@@ -109,28 +109,152 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
   end
 
   describe "Validations" do
-    describe "uniqueness" do
-      subject do
-        create(
-          :jurisdiction_template_version_customization,
-          jurisdiction: jurisdiction,
-          template_version: published_template_version
-        )
-      end
-      let(:duplicate) do
-        build(
-          :jurisdiction_template_version_customization,
-          jurisdiction: subject.jurisdiction,
-          template_version: subject.template_version
-        )
+    describe "uniqueness and presence" do
+      let(:jurisdiction) { create(:sub_district) }
+      let(:template_version) { create(:template_version) }
+      let(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+      context "when sandboxed is true" do
+        it "allows one sandboxed customization per jurisdiction and template version" do
+          customization =
+            create(
+              :jurisdiction_template_version_customization,
+              jurisdiction: jurisdiction,
+              template_version: template_version,
+              sandbox: sandbox
+            )
+          expect(customization).to be_valid
+        end
+
+        it "does allow a second sandboxed customization for the same jurisdiction and template version" do
+          create(
+            :jurisdiction_template_version_customization,
+            jurisdiction: jurisdiction,
+            template_version: template_version,
+            sandbox: sandbox
+          )
+          duplicate_customization =
+            build(
+              :jurisdiction_template_version_customization,
+              jurisdiction: jurisdiction,
+              template_version: template_version,
+              sandbox: sandbox
+            )
+          expect(duplicate_customization).not_to be_valid
+          expect(duplicate_customization.errors.full_messages).to include(
+            "already exists for this jurisdiction and template version."
+          )
+        end
       end
 
-      it "does not allow duplicate jurisdiction and template_version combinations" do
-        expect(subject).to be_valid
-        expect(duplicate).not_to be_valid
-        expect(duplicate.errors[:template_version_id]).to include(
-          "has already been taken"
+      context "when sandbox is nil" do
+        it "allows a non-sandboxed customization per jurisdiction and template version" do
+          customization =
+            create(
+              :jurisdiction_template_version_customization,
+              jurisdiction: jurisdiction,
+              template_version: template_version
+            )
+          expect(customization).to be_valid
+        end
+
+        it "does not allow a second non-sandboxed customization for the same jurisdiction and template version" do
+          create(
+            :jurisdiction_template_version_customization,
+            jurisdiction: jurisdiction,
+            template_version: template_version
+          )
+          duplicate_customization =
+            build(
+              :jurisdiction_template_version_customization,
+              jurisdiction: jurisdiction,
+              template_version: template_version
+            )
+          expect(duplicate_customization).not_to be_valid
+          expect(duplicate_customization.errors.full_messages).to include(
+            "already exists for this jurisdiction and template version."
+          )
+        end
+      end
+
+      context "when sandboxed varies" do
+        it "allows sandboxed and non-sandboxed customization for the same jurisdiction and template version" do
+          sandboxed_customization =
+            create(
+              :jurisdiction_template_version_customization,
+              jurisdiction: jurisdiction,
+              template_version: template_version,
+              sandbox: sandbox
+            )
+          expect(sandboxed_customization).to be_valid
+
+          live_customization =
+            create(
+              :jurisdiction_template_version_customization,
+              jurisdiction: jurisdiction,
+              template_version: template_version
+            )
+          expect(live_customization).to be_valid
+        end
+      end
+
+      describe "presence" do
+        it "is invalid without a jurisdiction" do
+          customization =
+            build(
+              :jurisdiction_template_version_customization,
+              jurisdiction: nil
+            )
+          expect(customization).not_to be_valid
+          expect(customization.errors[:jurisdiction]).to include("must exist")
+        end
+
+        it "is invalid without a template_version" do
+          customization =
+            build(
+              :jurisdiction_template_version_customization,
+              template_version: nil
+            )
+          expect(customization).not_to be_valid
+          expect(customization.errors[:template_version]).to include(
+            "must exist"
+          )
+        end
+      end
+    end
+
+    describe "Scopes" do
+      let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+      let!(:sandboxed_customization) do
+        create(
+          :jurisdiction_template_version_customization,
+          sandbox: sandbox,
+          jurisdiction: jurisdiction
         )
+      end
+      let!(:live_customization) do
+        create(:jurisdiction_template_version_customization)
+      end
+
+      describe ".sandboxed" do
+        it "returns only sandboxed customizations" do
+          expect(JurisdictionTemplateVersionCustomization.sandboxed).to include(
+            sandboxed_customization
+          )
+          expect(
+            JurisdictionTemplateVersionCustomization.sandboxed
+          ).not_to include(live_customization)
+        end
+      end
+
+      describe ".live" do
+        it "returns only non-sandboxed customizations" do
+          expect(JurisdictionTemplateVersionCustomization.live).to include(
+            live_customization
+          )
+          expect(JurisdictionTemplateVersionCustomization.live).not_to include(
+            sandboxed_customization
+          )
+        end
       end
     end
   end

@@ -21,6 +21,44 @@ RSpec.describe PermitApplication, type: :model do
     end
   end
 
+  describe "Scopes" do
+    # Create sandboxed and non-sandboxed permit applications
+    let!(:jurisdiction) { create(:sub_district) }
+    let!(:sandbox) { create(:sandbox, jurisdiction: jurisdiction) }
+    let!(:sandboxed_application) do
+      create(:permit_application, sandbox: sandbox, jurisdiction: jurisdiction)
+    end
+    let!(:live_application) { create(:permit_application) }
+
+    describe ".all" do
+      it "returns only non-sandboxed permit applications due to live scope" do
+        expect(PermitApplication.live).to include(live_application)
+        expect(PermitApplication.live).not_to include(sandboxed_application)
+      end
+    end
+
+    describe ".sandboxed" do
+      it "returns only sandboxed permit applications" do
+        expect(PermitApplication.sandboxed).to include(sandboxed_application)
+        expect(PermitApplication.sandboxed).not_to include(live_application)
+      end
+    end
+
+    describe ".live" do
+      it "returns only non-sandboxed permit applications" do
+        expect(PermitApplication.live).to include(live_application)
+        expect(PermitApplication.live).not_to include(sandboxed_application)
+      end
+    end
+
+    describe "Default Scope" do
+      it "includes all permit applications" do
+        expect(PermitApplication.all).to include(sandboxed_application)
+        expect(PermitApplication.all).to include(live_application)
+      end
+    end
+  end
+
   # describe "validations" do
   #   context "with an invalid submitter" do
   #     let(:submitter) { create(:user, role: :reviewer) }

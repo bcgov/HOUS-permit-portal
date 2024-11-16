@@ -1,7 +1,7 @@
 import { format } from "date-fns"
 import { t } from "i18next"
 import { Instance, cast, flow, toGenerator, types } from "mobx-state-tree"
-import { TCreateRequirementTemplateFormData } from "../components/domains/requirement-template/new-requirement-template-screen"
+import * as R from "ramda"
 import { datefnsAppDateFormat } from "../constants"
 import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
@@ -9,7 +9,8 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
-import { ERequirementTemplateSortFields } from "../types/enums"
+import { ERequirementTemplateSortFields, EVisibility } from "../types/enums"
+import { ICopyRequirementTemplateFormData, TCreateRequirementTemplateFormData } from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
 
 export const RequirementTemplateStoreModel = types
@@ -60,11 +61,18 @@ export const RequirementTemplateStoreModel = types
       }
 
       self.rootStore.templateVersionStore.mergeUpdateAll(templateVersions, "templateVersionMap")
+      if (requirementTemplate.assignee) self.rootStore.userStore.mergeUpdate(requirementTemplate.assignee, "usersMap")
 
-      return requirementTemplate
+      self.rootStore.earlyAccessPreviewStore.mergeUpdateAll(
+        requirementTemplate.earlyAccessPreviews,
+        "earlyAccessPreviewsMap"
+      )
+
+      return R.mergeRight(requirementTemplate, {
+        assignee: requirementTemplate.assignee?.id,
+      })
     },
   }))
-
   .actions((self) => ({
     fetchRequirementTemplates: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
@@ -78,6 +86,7 @@ export const RequirementTemplateStoreModel = types
           page: opts?.page ?? self.currentPage,
           perPage: opts?.countPerPage ?? self.countPerPage,
           showArchived: self.showArchived,
+          visibility: `${EVisibility.live},${EVisibility.any}`,
         })
       )
 
@@ -174,6 +183,18 @@ export const RequirementTemplateStoreModel = types
       }
 
       return false
+    }),
+  }))
+  .actions((self) => ({
+    copyRequirementTemplate: flow(function* (requirementTemplateValues?: ICopyRequirementTemplateFormData) {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.copyRequirementTemplate(requirementTemplateValues)
+      )
+
+      if (ok) {
+        self.requirementTemplateMap.put(response.data)
+        return response.data
+      }
     }),
   }))
 

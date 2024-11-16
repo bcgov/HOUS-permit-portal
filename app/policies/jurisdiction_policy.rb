@@ -37,6 +37,10 @@ class JurisdictionPolicy < ApplicationPolicy
     update?
   end
 
+  def sandboxes?
+    update?
+  end
+
   class Scope < Scope
     def resolve
       scope.all

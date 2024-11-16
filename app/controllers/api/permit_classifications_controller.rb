@@ -13,7 +13,7 @@ class Api::PermitClassificationsController < Api::ApplicationController
         if classification_option_params[:published].present?
           query =
             RequirementTemplate
-              .with_published_version
+              .for_sandbox(current_sandbox)
               .joins(:permit_type)
               .joins(:activity)
               .where(permit_classifications: { enabled: true })

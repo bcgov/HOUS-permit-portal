@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :sub_district do
-    name { Faker::Address.city }
+    sequence(:name) { |n| "#{Faker::Address.city} #{n}" }
     type { "SubDistrict" }
     locality_type { "city" }
     description_html { "<p>Some description</p>" }

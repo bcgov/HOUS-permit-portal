@@ -5,9 +5,21 @@ export enum EFlashMessageStatus {
   info = "info",
 }
 
+export enum EPreviewStatus {
+  invited = "invited",
+  access = "access",
+  expired = "expired",
+  revoked = "revoked",
+}
+
 export enum EPermitClassificationType {
   PermitType = "PermitType",
   Activity = "Activity",
+}
+
+export enum ERequirementTemplateType {
+  EarlyAccessRequirementTemplate = "EarlyAccessRequirementTemplate",
+  LiveRequirementTemplate = "LiveRequirementTemplate",
 }
 
 export enum EPermitClassificationCode {
@@ -25,6 +37,7 @@ export enum EPermitApplicationStatus {
   newlySubmitted = "newly_submitted",
   revisionsRequested = "revisions_requested",
   resubmitted = "resubmitted",
+  ephemeral = "ephemeral",
 }
 
 export enum EPermitApplicationStatusGroup {
@@ -90,6 +103,16 @@ export enum ERequirementTemplateSortFields {
   description = "description",
   currentVersion = "current_version",
   jurisdictionsSize = "jurisdictions_size",
+}
+
+export enum EEarlyAccessRequirementTemplateSortFields {
+  nickname = "nickname",
+  permitType = "permit_type",
+  activity = "activity",
+  firstNations = "first_nations",
+  sharedWith = "shared_with",
+  updatedAt = "updated_at",
+  assignee = "assignee",
 }
 
 export enum EContactSortFields {
@@ -407,8 +430,19 @@ export enum ECollaboratorType {
   assignee = "assignee",
 }
 
+export enum EVisibility {
+  live = "live",
+  earlyAccess = "early_access",
+  any = "any",
+}
+
 export enum EJurisdictionExternalApiState {
   jOn = "j_on",
   jOff = "j_off",
   gOff = "g_off",
+}
+
+export enum ELandingTemplateKeys {
+  SmallScale = "small_scale_requirement_template_id",
+  // FourPlus = "four_plus_template_version_id",
 }

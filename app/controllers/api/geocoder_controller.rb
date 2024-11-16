@@ -69,7 +69,6 @@ class Api::GeocoderController < Api::ApplicationController
       raise StandardError unless pid.present?
       attributes =
         Wrappers::LtsaParcelMapBc.new.get_feature_attributes_by_pid(pid: pid)
-
       jurisdiction =
         Jurisdiction.fuzzy_find_by_ltsa_feature_attributes(attributes)
       raise StandardError unless jurisdiction.present?

@@ -236,7 +236,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def create
     @permit_application =
       PermitApplication.build(
-        permit_application_params.to_h.merge(submitter: current_user)
+        permit_application_params.to_h.merge(
+          submitter: current_user,
+          sandbox: current_sandbox
+        )
       )
     authorize @permit_application
     if @permit_application.save

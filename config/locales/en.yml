@@ -37,6 +37,13 @@ en:
         first_nations: "First Nations"
     errors:
       models:
+        early_access_preview:
+          already_invited: "User already invited to preview"
+          invalid_email: "Invalid email format"
+        jurisdiction:
+          no_sandboxes: "Jurisdiction must have at least one sandbox."
+        jurisdiction_template_version_customizations:
+          uniqueness: "already exists for this jurisdiction and template version."
         site_configuration:
           single_record: "There can only be one SiteConfiguration record."
           attributes:
@@ -58,8 +65,16 @@ en:
           duplicate_energy_step_code: 'Multiple "Energy step code" requirements found. Please ensure there is only one "Energy step code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package energy step code files" found. Please ensure there is only one "Design package energy step code file" when there is an "Energy step code" requirement'
           nonunique_classification: "There can only be one requirement template per permit type, activity, and First Nations combination"
+          attributes:
+            public:
+              true_on_early_access_only: "can only be true for early access"
+            template_versions:
+              published_required_for_early_access: "requires one or less published template version on early access"
         requirement_block:
           attributes:
+            visibility:
+              associated_requirement_templates_must_be_early_access: "can not be set to 'preview' if the block is present in any live drafts"
+              associated_requirement_templates_must_be_live: "can not be set to 'exclude preview' if the block is present in any early-access previews"
             requirements:
               incorrect_energy_step_code_dependencies: "missing or duplicate energy step code dependencies"
               duplicate_step_code_package_file: "must have only one design package file for energy step code per requirement block"
@@ -126,6 +141,8 @@ en:
       new_jurisdiction_membership: "New jurisdiction membership"
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
+      notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
+      notify_preview: "You’re Invited to Preview a Building Permit Template"
       notify_batched_integration_mapping: "New API mappings"
   arbitrary_message_construct:
     devise:
@@ -285,7 +302,19 @@ en:
       eula_accepted:
         title: ""
         message: "End-User License Agreement accepted"
+      get_super_admins_error:
+        title: "Error"
+        message: "Could not fetch super users"
     requirement_block:
+      create_and_replace_success:
+        title: ""
+        message: "Successfully created and replaced requirement block on template!"
+      create_and_replace_error:
+        title: ""
+        message: "%{error_message}"
+      create_success:
+        title: ""
+        message: "Successfully created requirement block!"
       create_error:
         title: Error
         message: "%{error_message}"
@@ -329,20 +358,57 @@ en:
       revoke_success:
         title: Success
         message: "External api key revoked successfully!"
+    early_access_preview:
+      revoke_success:
+        title: ""
+        message: "Preview revoked successfully!"
+      revoke_error:
+        title: "Error"
+        message: "%{error_message}"
+      unrevoke_success:
+        title: ""
+        message: "Preview unrevoked successfully!"
+      unrevoke_error:
+        title: "Error"
+        message: "%{error_message}"
+      already_revoked:
+        title: "Error"
+        message: "Preview already revoked"
+      not_revoked:
+        title: "Error"
+        message: "Preview not revoked"
+      extend_success:
+        title: ""
+        message: "Preview extended successfully!"
+      extend_error:
+        title: "Error"
+        message: "%{error_message}"
     requirement_template:
       create_success:
         title: ""
         message: "New template created successfully!"
       update_success:
         title: ""
-        message: "This version has been saved as a draft."
+        message: "This draft has been saved."
       schedule_success:
         title: ""
         message: "Permit has been scheduled to published."
       force_publish_now_success:
         title: ""
         message: "Permit has been published."
+      invite_previewers_success:
+        title: ""
+        message: "Successfully invited previewers"
+      invite_previewers_error:
+        title: Error
+        message: "Previewers could not be invited"
       create_error:
+        title: Error
+        message: "%{error_message}"
+      copy_success:
+        title: ""
+        message: "New template copied successfully!"
+      copy_error:
         title: Error
         message: "%{error_message}"
       destroy_success:
@@ -449,6 +515,7 @@ en:
       create_or_update_permit_block_status_error:
         title: Error
         message: "There was an error updating permit block status"
+
     permit_collaboration:
       destroy_success:
         title: ""
@@ -506,6 +573,12 @@ en:
       update_error:
         title: Error
         message: "Something went wrong updating Jurisdiction Customization"
+      promote_success:
+        title: ""
+        message: "Jurisdiction Template Customization promoted!"
+      promote_error:
+        title: Error
+        message: "Something went wrong promoting jurisdiction customization"
     integration_mapping:
       update_success:
         title: ""
@@ -550,6 +623,10 @@ en:
         assign_collaborator_error: "Failed to assign collaborator: %{error_message}"
         create_user_error: "Failed to invite user to collaborate: %{error_message}"
         submission_collaborator_must_be_submitter: "Ineligible user for submission collaboration"
+    preview:
+      preview_management:
+        create_user_error: "Failed to invite user to preview: %{error_message}"
+        assign_previewer_error: "Failed to assign previewer: %{error_message}"
   formio:
     requirement_template:
       completion_title: "Completion"

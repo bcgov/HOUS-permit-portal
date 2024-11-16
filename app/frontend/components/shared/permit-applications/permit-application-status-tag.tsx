@@ -16,6 +16,7 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
     [EPermitApplicationStatus.resubmitted]: "theme.yellow",
     [EPermitApplicationStatus.newDraft]: "theme.blueLight",
     [EPermitApplicationStatus.revisionsRequested]: "semantic.errorLight",
+    [EPermitApplicationStatus.ephemeral]: "theme.blueLight",
   }
 
   const colorMap = {
@@ -23,6 +24,7 @@ export const PermitApplicationStatusTag = ({ permitApplication, ...rest }: IPerm
     [EPermitApplicationStatus.resubmitted]: "text.primary",
     [EPermitApplicationStatus.newDraft]: "text.primary",
     [EPermitApplicationStatus.revisionsRequested]: "semantic.error",
+    [EPermitApplicationStatus.ephemeral]: "text.primary",
   }
 
   return (

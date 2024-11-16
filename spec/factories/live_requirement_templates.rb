@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :requirement_template do
+  factory :live_requirement_template do
     permit_type do
       PermitType.first || association(:permit_type, code: :low_residential)
     end
@@ -7,7 +7,7 @@ FactoryBot.define do
       Activity.first || association(:activity, code: :new_construction)
     end
 
-    factory :requirement_template_with_sections do
+    factory :live_requirement_template_with_sections do
       transient { sections_count { 5 } }
 
       after(:create) do |template, evaluator|
@@ -19,7 +19,7 @@ FactoryBot.define do
       end
     end
 
-    factory :full_requirement_template do
+    factory :live_full_requirement_template do
       transient { sections_count { 5 } }
 
       after(:create) do |template, evaluator|
@@ -32,7 +32,7 @@ FactoryBot.define do
     end
 
     # default a template with some municipality and regional district
-    factory :requirement_template_with_compliance do
+    factory :live_requirement_template_with_compliance do
       after(:create) do |template|
         create_list(
           :requirement_template_section,
@@ -101,7 +101,7 @@ FactoryBot.define do
       end
     end
 
-    factory :requirement_template_with_heritage do
+    factory :live_requirement_template_with_heritage do
       after(:create) do |template|
         create_list(
           :requirement_template_section,

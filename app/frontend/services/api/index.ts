@@ -1,9 +1,9 @@
 import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { TCreatePermitApplicationFormData } from "../../components/domains/permit-application/new-permit-application-screen"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
-import { TCreateRequirementTemplateFormData } from "../../components/domains/requirement-template/new-requirement-template-screen"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IEarlyAccessPreview } from "../../models/early-access-preview"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
@@ -16,9 +16,11 @@ import { IStepCode } from "../../models/step-code"
 import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
+import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import {
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
+  IInvitePreviewersParams,
   IRequirementBlockParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
@@ -38,6 +40,7 @@ import {
 import {
   ECollaborationType,
   ECollaboratorType,
+  EEarlyAccessRequirementTemplateSortFields,
   EJurisdictionSortFields,
   EPermitApplicationSortFields,
   EPermitBlockStatus,
@@ -48,12 +51,13 @@ import {
 } from "../../types/enums"
 import {
   IContact,
+  ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   IPermitApplicationSearchFilters,
-  ISiteConfiguration,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
+  TCreateRequirementTemplateFormData,
   TSearchParams,
 } from "../../types/types"
 import { camelizeResponse, decamelizeRequest } from "../../utils"
@@ -81,6 +85,11 @@ export class Api {
       request.headers["X-CSRF-Token"] = getCsrfToken()
       request.params = decamelizeRequest(request.params)
       request.data = decamelizeRequest(request.data)
+    })
+
+    this.client.addRequestTransform((request) => {
+      const persistedSandboxValues = JSON.parse(localStorage.getItem("SandboxStore"))
+      request.headers["X-Sandbox-ID"] = persistedSandboxValues?.currentSandboxId
     })
   }
 
@@ -391,7 +400,9 @@ export class Api {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests/finalize`)
   }
 
-  async fetchRequirementTemplates(params?: TSearchParams<ERequirementTemplateSortFields>) {
+  async fetchRequirementTemplates(
+    params?: TSearchParams<ERequirementTemplateSortFields | EEarlyAccessRequirementTemplateSortFields>
+  ) {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
@@ -405,10 +416,35 @@ export class Api {
     })
   }
 
+  async copyRequirementTemplate(params?: ICopyRequirementTemplateFormData) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/copy`, {
+      requirementTemplate: params,
+    })
+  }
+
   async updateRequirementTemplate(templateId: string, params: IRequirementTemplateUpdateParams) {
     return this.client.put<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}`, {
       requirementTemplate: params,
     })
+  }
+
+  async invitePreviewers(templateId: string, params: IInvitePreviewersParams) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(
+      `/requirement_templates/${templateId}/invite_previewers`,
+      params
+    )
+  }
+
+  async revokeEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/revoke_access`)
+  }
+
+  async unrevokeEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/unrevoke_access`)
+  }
+
+  async extendEarlyAccess(previewId: string) {
+    return this.client.post<ApiResponse<IEarlyAccessPreview>>(`/early_access_previews/${previewId}/extend_access`)
   }
 
   // we send the versionDate as string instead of date as we want to strip off timezone info
@@ -466,8 +502,18 @@ export class Api {
     return this.client.patch<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${id}/restore`)
   }
 
-  async fetchTemplateVersions(activityId?: string, status?: ETemplateVersionStatus) {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, { activityId, status })
+  async fetchTemplateVersions(
+    activityId?: string,
+    status?: ETemplateVersionStatus,
+    earlyAccess?: boolean,
+    isPublic?: boolean
+  ) {
+    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions`, {
+      activityId,
+      status,
+      earlyAccess,
+      public: isPublic,
+    })
   }
 
   async fetchTemplateVersionCompare(templateVersionId: string, previousVersionId?: string) {
@@ -512,6 +558,12 @@ export class Api {
     )
   }
 
+  async promoteJurisdictionTemplateVersionCustomization(templateId: string, jurisdictionId: string) {
+    return this.client.post<ApiResponse<IJurisdictionTemplateVersionCustomization>>(
+      `/template_versions/${templateId}/jurisdictions/${jurisdictionId}/jurisdiction_template_version_customization/promote`
+    )
+  }
+
   async unscheduleTemplateVersion(templateId: string) {
     return this.client.post<ApiResponse<ITemplateVersion>>(
       `requirement_templates/template_versions/${templateId}/unschedule`
@@ -547,7 +599,7 @@ export class Api {
   }
 
   async fetchSiteConfiguration() {
-    return this.client.get<ApiResponse<ISiteConfiguration>>(`/site_configuration`, {})
+    return this.client.get<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, {})
   }
 
   async fetchExternalApiKeys(jurisdictionId: string) {
@@ -571,11 +623,15 @@ export class Api {
   }
 
   async updateSiteConfiguration(siteConfiguration) {
-    return this.client.put<ApiResponse<ISiteConfiguration>>(`/site_configuration`, { siteConfiguration })
+    return this.client.put<ApiResponse<ISiteConfigurationStore>>(`/site_configuration`, { siteConfiguration })
   }
 
   async updateUser(id: string, user: IUser) {
     return this.client.patch<ApiResponse<IUser>>(`/users/${id}`, { user })
+  }
+
+  async fetchSuperAdmins() {
+    return this.client.get<IOptionResponse>(`/users/super_admins`, {})
   }
 
   async createContact(params: TContactFormData) {

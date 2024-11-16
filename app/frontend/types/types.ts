@@ -29,6 +29,7 @@ import {
   EStepCodeEPCTestingTargetType,
   ETemplateVersionStatus,
   EUserRoles,
+  EVisibility,
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
@@ -80,6 +81,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  visibility?: TVisibility
   filters?: IModelFilterFields
 }
 
@@ -175,6 +177,7 @@ export interface IDenormalizedRequirementBlock {
   sku: string
   formJson?: IFormIOBlock
   description?: string
+  visibility: EVisibility
   displayName: string
   displayDescription?: string
   requirements: IDenormalizedRequirement[]
@@ -355,10 +358,6 @@ export type TSiteWideMessageConfiguration = {
   sitewideMessage: string | null
 }
 
-export interface ISiteConfiguration extends TSiteWideMessageConfiguration {
-  helpLinkItems: IHelpLinkItems
-}
-
 export interface IContact {
   firstName: string
   lastName: string
@@ -530,3 +529,22 @@ export interface IPermitTypeRequiredStep {
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
 }
+
+export type TCreateRequirementTemplateFormData = {
+  description: string
+  firstNations?: boolean
+  permitTypeId: string
+  activityId: string
+  type: string
+}
+
+export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
+  id?: string
+}
+
+type EVisibilityValues = EVisibility.live | EVisibility.earlyAccess | EVisibility.any
+
+export type TVisibility =
+  | EVisibilityValues
+  | `${EVisibilityValues},${EVisibilityValues}`
+  | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`

@@ -4,6 +4,15 @@ import { createUserChannelConsumer } from "../channels/user_channel"
 import { withEnvironment } from "../lib/with-environment"
 import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store"
 import { ContactStoreModel, IContactStore } from "./contact-store"
+import { EarlyAccessPreviewStoreModel, IEarlyAccessPreviewStoreModel } from "./early-access-preview-store"
+import {
+  EarlyAccessRequirementBlockStoreModel,
+  IEarlyAccessRequirementBlockStoreModel,
+} from "./early-access-requirement-block-store"
+import {
+  EarlyAccessRequirementTemplateStoreModel,
+  IEarlyAccessRequirementTemplateStoreModel,
+} from "./early-access-requirement-template-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
@@ -11,6 +20,7 @@ import { IPermitApplicationStore, PermitApplicationStoreModel } from "./permit-a
 import { IPermitClassificationStore, PermitClassificationStoreModel } from "./permit-classification-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
+import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
 import { ISiteConfigurationStore, SiteConfigurationStoreModel } from "./site-configuration-store"
 import { IStepCodeStore, StepCodeStoreModel } from "./step-code-store"
@@ -28,7 +38,10 @@ export const RootStoreModel = types
     permitClassificationStore: types.optional(PermitClassificationStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
+    earlyAccessRequirementBlockStore: types.optional(EarlyAccessRequirementBlockStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
+    earlyAccessRequirementTemplateStore: types.optional(EarlyAccessRequirementTemplateStoreModel, {}),
+    earlyAccessPreviewStore: types.optional(EarlyAccessPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
@@ -36,6 +49,7 @@ export const RootStoreModel = types
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
     notificationStore: types.optional(NotificationStoreModel, {}),
+    sandboxStore: types.optional(SandboxStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -55,6 +69,15 @@ export const RootStoreModel = types
         properties: ["currentlySelectedJurisdictionId"],
         storage: localStorage,
       })
+      if (!self.userStore.currentUser?.isSuperAdmin || self.sandboxStore.temporarilyPersistingSandboxId) {
+        yield makePersistable(self.sandboxStore, {
+          name: `SandboxStore`,
+          properties: ["currentSandboxId"],
+          storage: localStorage,
+        })
+      } else {
+        localStorage.removeItem("SandboxStore")
+      }
       protect(self)
     }),
     subscribeToUserChannel() {
@@ -82,8 +105,11 @@ export interface IRootStore extends IStateTreeNode {
   permitClassificationStore: IPermitClassificationStore
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
+  earlyAccessRequirementBlockStore: IEarlyAccessRequirementBlockStoreModel
   requirementBlockStore: IRequirementBlockStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
+  earlyAccessRequirementTemplateStore: IEarlyAccessRequirementTemplateStoreModel
+  earlyAccessPreviewStore: IEarlyAccessPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   stepCodeStore: IStepCodeStore
@@ -91,6 +117,7 @@ export interface IRootStore extends IStateTreeNode {
   contactStore: IContactStore
   notificationStore: INotificationStore
   collaboratorStore: ICollaboratorStore
+  sandboxStore: ISandboxStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void
