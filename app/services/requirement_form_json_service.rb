@@ -11,16 +11,11 @@ class RequirementFormJsonService
     email: {
       type: "simpleemail"
     },
-    # TODO: figure out why these address fields don't work
-    # address: {
-    #   type: "simpleaddressadvanced",
-    # },
-    # TODO: figure out why these address fields don't work
     address: {
       type: "simpleaddressadvanced",
       provider: "nominatim",
       validate: {
-        isUseForCopy: false,
+        isUseForCopy: false
       },
       tableView: false,
       components: [
@@ -30,7 +25,8 @@ class RequirementFormJsonService
           input: true,
           label: "Address 1",
           tableView: false,
-          customConditional: "show = _.get(instance, 'parent.manualMode', false);",
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
         },
         {
           key: "address2",
@@ -38,7 +34,8 @@ class RequirementFormJsonService
           input: true,
           label: "Address 2",
           tableView: false,
-          customConditional: "show = _.get(instance, 'parent.manualMode', false);",
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
         },
         {
           key: "city",
@@ -46,7 +43,8 @@ class RequirementFormJsonService
           input: true,
           label: "City",
           tableView: false,
-          customConditional: "show = _.get(instance, 'parent.manualMode', false);",
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
         },
         {
           key: "state",
@@ -54,7 +52,8 @@ class RequirementFormJsonService
           input: true,
           label: "Province / State",
           tableView: false,
-          customConditional: "show = _.get(instance, 'parent.manualMode', false);",
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
         },
         {
           key: "country",
@@ -62,7 +61,8 @@ class RequirementFormJsonService
           input: true,
           label: "Country",
           tableView: false,
-          customConditional: "show = _.get(instance, 'parent.manualMode', false);",
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
         },
         {
           key: "zip",
@@ -70,9 +70,10 @@ class RequirementFormJsonService
           input: true,
           label: "Postal / Zip Code",
           tableView: false,
-          customConditional: "show = _.get(instance, 'parent.manualMode', false);",
-        },
-      ],
+          customConditional:
+            "show = _.get(instance, 'parent.manualMode', false);"
+        }
+      ]
     },
     bcaddress: {
       type: "simplebcaddress",
@@ -86,14 +87,14 @@ class RequirementFormJsonService
           # minScore: 55,
           # onlyCivic: true,
           maxResults: 10,
-          autoComplete: true,
+          autoComplete: true
           # matchAccuracy: 100,
           # matchPrecision: "unit, civic_number, intersection, block, street, locality, province"
           # precisionPoints: 100
         },
         queryProperty: "addressString",
         responseProperty: "features",
-        displayValueProperty: "properties.fullAddress",
+        displayValueProperty: "properties.fullAddress"
       },
       queryParameters: {
         # echo: true,
@@ -101,11 +102,11 @@ class RequirementFormJsonService
         # minScore: 55,
         # onlyCivic: true,
         maxResults: 10,
-        autoComplete: true,
+        autoComplete: true
         # matchAccuracy: 100,
         # matchPrecision:  "unit, civic_number, intersection, block, street, locality, province"
         # precisionPoints: 100
-      },
+      }
     },
     signature: {
       type: "simplesignatureadvanced"

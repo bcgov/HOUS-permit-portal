@@ -88,12 +88,14 @@ class Api::GeocoderController < Api::ApplicationController
       render_error "geocoder.jurisdiction_error", {}, e and return
     end
   end
-  
+
   def form_bc_addresses
-    authorize :geocoder, :formio?
+    binding.pry
+    authorize :geocoder, :form_bc_addresses?
     begin
       wrapper = Wrappers::Geocoder.new
-      addresses = wrapper.site_options_raw(form_bc_address_params[:addressString])
+      addresses =
+        wrapper.site_options_raw(form_bc_address_params[:addressString])
       render json: addresses, status: :ok
     rescue StandardError => e
       render_error "geocoder.general_error", {}, e and return
