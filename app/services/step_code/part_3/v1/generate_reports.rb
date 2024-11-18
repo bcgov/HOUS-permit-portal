@@ -1,9 +1,5 @@
 class StepCode::Part3::V1::GenerateReports < StepCode::Part3::V0::GenerateReports
-  attr_reader :checklist,
-              :requirements,
-              :whole_building_performance,
-              :reports,
-              :occupancies
+  attr_reader :checklist, :requirements, :performance, :reports, :occupancies
   attr_accessor :results
 
   def initialize(checklist:)
@@ -11,10 +7,10 @@ class StepCode::Part3::V1::GenerateReports < StepCode::Part3::V0::GenerateReport
     @requirements =
       StepCode::Part3::V0::LookupRequirements.new(checklist: checklist).call
     @occupancies = checklist.occupancy_classifications
-    @whole_building_performance =
+    @performance =
       StepCode::Part3::V1::EvaluatePerformance.new(
         checklist: checklist,
-        requirements: requirements[:whole_building_requirements]
+        requirements: requirements
       ).call
   end
 
@@ -29,7 +25,7 @@ class StepCode::Part3::V1::GenerateReports < StepCode::Part3::V0::GenerateReport
             performance_requirement: oc.performance_requirement
           }
         end,
-      whole_building_performance: whole_building_performance,
+      performance: performance,
       step_code_summary: {
         step_achieved: nil,
         zero_carbon_achieved: nil
