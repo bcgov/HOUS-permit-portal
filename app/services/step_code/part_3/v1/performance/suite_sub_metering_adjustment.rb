@@ -20,11 +20,4 @@ class StepCode::Part3::V1::Performance::SuiteSubMeteringAdjustment < StepCode::P
   def total_energy
     super {}
   end
-
-  def total_mfa
-    @total_mfa ||=
-      checklist.occupancy_classifications.baseline_occupancy.sum(
-        :modelled_floor_area
-      )
-  end
 end

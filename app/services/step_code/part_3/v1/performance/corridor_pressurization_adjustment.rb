@@ -1,23 +1,21 @@
 class StepCode::Part3::V1::Performance::CorridorPressurizationAdjustment < StepCode::Part3::V1::Performance::Base
-  attr_reader :occupancies
-
-  def initialize(checklist:)
-    super
-    @occupancies = checklist.occupancy_classifications
-  end
-
   private
 
   def teui
-    super { tedi }
+    super { tedi[:whole_building] }
   end
 
   def tedi
-    super { whole_building_adjustment }
+    super do
+      {
+        whole_building: whole_building_adjustment,
+        step_code_portion: step_code_portion_adjustment
+      }
+    end
   end
 
   def ghgi
-    super { (teui * make_up_air_emissions_factor).round(1) }
+    super { (teui * make_up_air_emissions_factor) }
   end
 
   def total_energy
@@ -33,14 +31,14 @@ class StepCode::Part3::V1::Performance::CorridorPressurizationAdjustment < StepC
 
   def whole_building_adjustment
     result = pressurization_energy / total_mfa
-    result >= 0 ? [result.round(1), 10.0].min : 0 # (kWh/m²/yr)
+    result >= 0 ? [result, 10.0].min : 0 # (kWh/m²/yr)
   end
 
   def step_code_portion_adjustment
     return 0 if step_code_mfa == 0
 
     result = pressurization_energy / step_code_mfa
-    result >= 0 ? [result.round(1), 10.0].min : 0 # (kWh/m²/yr)
+    result >= 0 ? [result, 10.0].min : 0 # (kWh/m²/yr)
   end
 
   def pressurization_energy
@@ -63,13 +61,5 @@ class StepCode::Part3::V1::Performance::CorridorPressurizationAdjustment < StepC
 
   def pressurized_corridors_area
     @pressurized_corridors_area ||= checklist.pressurized_corridors_area || 0
-  end
-
-  def total_mfa
-    @total_mfa ||= occupancies.sum(:modelled_floor_area)
-  end
-
-  def step_code_mfa
-    @step_code_mfa ||= occupancies.step_code_occupancy.sum(:modelled_floor_area)
   end
 end
