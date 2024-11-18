@@ -1,5 +1,6 @@
 class TemplateVersionPolicy < ApplicationPolicy
   def index?
+    # records are filtered by PolicyScope in this case
     true
   end
 
@@ -12,7 +13,7 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show_jurisdiction_template_version_customization?
-    true
+    record.sandbox == sandbox
   end
 
   def download_summary_csv?

@@ -9,7 +9,9 @@ RSpec.describe SubmissionVersion, type: :model do
     let!(:sandboxed_application) do
       create(:permit_application, sandbox: sandbox, jurisdiction: jurisdiction)
     end
-    let!(:live_application) { create(:permit_application) }
+    let!(:live_application) do
+      create(:permit_application, jurisdiction: jurisdiction)
+    end
 
     # Create submission versions associated with the permit applications
     let!(:sandboxed_submission) do

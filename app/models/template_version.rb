@@ -29,7 +29,13 @@ class TemplateVersion < ApplicationRecord
   after_save :notify_users_of_missing_requirements_mappings
 
   scope :for_sandbox,
-        ->(sandbox) { where(status: sandbox.template_version_status_scope) }
+        ->(sandbox) do
+          if sandbox.present?
+            where(status: sandbox.template_version_status_scope)
+          else
+            all
+          end
+        end
 
   def customizations
     # Convenience method to prevent carpal tunnel syndrome

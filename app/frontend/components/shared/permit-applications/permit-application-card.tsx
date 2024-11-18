@@ -7,6 +7,7 @@ import { IPermitApplication } from "../../../models/permit-application"
 import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import SandboxHeader from "../sandbox/sandbox-header"
 import { PermitApplicationStatusTag } from "./permit-application-status-tag"
 
 interface IPermitApplicationCardProps {
@@ -52,10 +53,12 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
       borderRadius="lg"
       border="1px solid"
       borderColor={showNewVersionWarning ? "semantic.warning" : "border.light"}
-      p={6}
+      p={8}
       align="center"
       gap={4}
+      position="relative"
     >
+      {permitApplication.sandbox && <SandboxHeader override sandbox={permitApplication.sandbox} />}
       <Flex flexDirection={{ base: "column", md: "row" }} gap={6} w="full">
         <Show above="md">
           <Flex direction="column" flex={{ base: 0, md: 1 }} maxW={{ base: "100%", md: "20%" }}>

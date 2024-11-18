@@ -44,6 +44,7 @@ class PermitApplication < ApplicationRecord
 
   scope :sandboxed, -> { where.not(sandbox_id: nil) }
   scope :live, -> { where(sandbox_id: nil) }
+  scope :for_sandbox, ->(sandbox) { where(sandbox_id: sandbox&.id) }
 
   # Custom validation
 

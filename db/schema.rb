@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_04_223257) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_14_212505) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -122,8 +122,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_04_223257) do
     t.datetime "updated_at", null: false
     t.string "connecting_application", null: false
     t.string "notification_email"
+    t.uuid "sandbox_id"
     t.index ["jurisdiction_id"],
             name: "index_external_api_keys_on_jurisdiction_id"
+    t.index ["sandbox_id"], name: "index_external_api_keys_on_sandbox_id"
     t.index ["token"], name: "index_external_api_keys_on_token", unique: true
   end
 
@@ -930,6 +932,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_04_223257) do
   add_foreign_key "collaborators", "users"
   add_foreign_key "early_access_previews", "users", column: "previewer_id"
   add_foreign_key "external_api_keys", "jurisdictions"
+  add_foreign_key "external_api_keys", "sandboxes"
   add_foreign_key "integration_mapping_notifications", "template_versions"
   add_foreign_key "integration_mappings", "jurisdictions"
   add_foreign_key "integration_mappings", "template_versions"

@@ -43,6 +43,10 @@ class ExternalApi::ApplicationController < ActionController::API
     end
   end
 
+  def current_sandbox
+    current_external_api_key.sandbox
+  end
+
   # Override rails default 401 response to return JSON content-type
   # with request for Bearer token
   # https://api.rubyonrails.org/classes/ActionController/HttpAuthentication/Token/ControllerMethods.html
