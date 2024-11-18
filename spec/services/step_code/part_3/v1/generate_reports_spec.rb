@@ -113,22 +113,53 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
         end
 
         let(:expected_compliance_results) do
-          { teui: true, tedi: true, ghgi: true }
+          {
+            teui: true,
+            tedi: {
+              whole_building: true,
+              step_code_portion: true
+            },
+            ghgi: true
+          }
         end
 
         let(:expected_requirements_metrics) do
           {
-            teui: BigDecimal("120.0"),
-            tedi: BigDecimal("35.0"),
-            ghgi: BigDecimal("1.8"),
-            total_energy: nil
+            baseline_portions: {
+            },
+            step_code_portions: {
+              occupancies_requirements: [
+                {
+                  occupancy: "residential",
+                  modelled_floor_area: 0.1e4,
+                  teui: BigDecimal("120.0"),
+                  tedi: BigDecimal("35.0"),
+                  ghgi: BigDecimal("1.8")
+                }
+              ],
+              area_weighted_totals: {
+                teui: BigDecimal("120.0"),
+                tedi: BigDecimal("35.0"),
+                ghgi: BigDecimal("1.8"),
+                modelled_floor_area: BigDecimal("1000")
+              }
+            },
+            whole_building: {
+              teui: BigDecimal("120.0"),
+              tedi: BigDecimal("35.0"),
+              ghgi: BigDecimal("1.8"),
+              total_energy: nil
+            }
           }
         end
 
         let(:expected_modelled_metrics) do
           {
             teui: BigDecimal("101.0"),
-            tedi: BigDecimal("30"),
+            tedi: {
+              whole_building: BigDecimal("30"),
+              step_code_portion: BigDecimal("30")
+            },
             ghgi: BigDecimal("1.111"),
             total_energy: nil
           }
@@ -136,9 +167,12 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
 
         let(:expected_corridor_pressurization_adjustment_metrics) do
           {
-            teui: BigDecimal("8.5"),
-            tedi: BigDecimal("8.5"),
-            ghgi: BigDecimal("0.1"),
+            teui: BigDecimal("8.46032000000000209"),
+            tedi: {
+              whole_building: BigDecimal("8.46032000000000209"),
+              step_code_portion: BigDecimal("8.46032000000000209")
+            },
+            ghgi: BigDecimal("0.09306352000000002299"),
             total_energy: nil
           }
         end
@@ -149,22 +183,15 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
 
         let(:expected_adjusted_performance_metrics) do
           {
-            teui: BigDecimal("93"),
-            tedi: BigDecimal("22"),
-            ghgi: BigDecimal("1.0"),
+            teui: BigDecimal("92.53967999999999791"),
+            tedi: {
+              whole_building: BigDecimal("21.53967999999999791"),
+              step_code_portion: BigDecimal("21.53967999999999791")
+            },
+            ghgi: BigDecimal("1.01793647999999997701"),
             total_energy: nil
           }
         end
-
-        let(:expected_step_code_tedi_requirement) { BigDecimal("35.0") }
-
-        let(:expected_tedi_modelled_result) { BigDecimal("30.0") }
-
-        let(:expected_step_code_corridor_adjustment) { BigDecimal("8.5") }
-
-        let(:expected_adjusted_step_code_performance) { BigDecimal("21.5") }
-
-        let(:expected_step_code_complies) { true }
 
         let(:expected_summary) {} # TODO: should
       end
@@ -294,22 +321,58 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
         end
 
         let(:expected_compliance_results) do
-          { teui: true, tedi: true, ghgi: true }
+          {
+            teui: true,
+            tedi: {
+              whole_building: true,
+              step_code_portion: true
+            },
+            ghgi: true
+          }
         end
 
         let(:expected_requirements_metrics) do
           {
-            teui: BigDecimal("100"),
-            tedi: BigDecimal("42.5"),
-            ghgi: BigDecimal("3.03"),
-            total_energy: nil
+            baseline_portions: {
+              teui: BigDecimal("80"),
+              tedi: BigDecimal("50"),
+              ghgi: BigDecimal("4.26"),
+              total_energy: BigDecimal("80000"),
+              modelled_floor_area: BigDecimal("1000")
+            },
+            step_code_portions: {
+              occupancies_requirements: [
+                {
+                  occupancy: "residential",
+                  modelled_floor_area: BigDecimal("1000"),
+                  teui: BigDecimal("120"),
+                  tedi: BigDecimal("35"),
+                  ghgi: BigDecimal("1.8")
+                }
+              ],
+              area_weighted_totals: {
+                teui: BigDecimal("120"),
+                tedi: BigDecimal("35"),
+                ghgi: BigDecimal("1.8"),
+                modelled_floor_area: BigDecimal("1000")
+              }
+            },
+            whole_building: {
+              teui: BigDecimal("100"),
+              tedi: BigDecimal("42.5"),
+              ghgi: BigDecimal("3.03"),
+              total_energy: nil
+            }
           }
         end
 
         let(:expected_modelled_metrics) do
           {
             teui: BigDecimal("90"),
-            tedi: BigDecimal("40"),
+            tedi: {
+              whole_building: BigDecimal("40"),
+              step_code_portion: BigDecimal("30")
+            },
             ghgi: BigDecimal("2.68"),
             total_energy: nil
           }
@@ -317,9 +380,12 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
 
         let(:expected_corridor_pressurization_adjustment_metrics) do
           {
-            teui: BigDecimal("4.2"),
-            tedi: BigDecimal("4.2"),
-            ghgi: 0,
+            teui: BigDecimal("4.230160000000001045"),
+            tedi: {
+              whole_building: BigDecimal("4.230160000000001045"),
+              step_code_portion: BigDecimal("8.46032000000000209")
+            },
+            ghgi: BigDecimal("0.046531760000000011495"),
             total_energy: nil
           }
         end
@@ -330,22 +396,15 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
 
         let(:expected_adjusted_performance_metrics) do
           {
-            teui: BigDecimal("86"),
-            tedi: BigDecimal("36"),
-            ghgi: BigDecimal("3.0"),
+            teui: BigDecimal("85.769839999999998955"),
+            tedi: {
+              whole_building: BigDecimal("35.769839999999998955"),
+              step_code_portion: BigDecimal("21.53967999999999791")
+            },
+            ghgi: BigDecimal("2.633468239999999988505"),
             total_energy: nil
           }
         end
-
-        let(:expected_step_code_tedi_requirement) { BigDecimal("35.0") }
-
-        let(:expected_tedi_modelled_result) { BigDecimal("30.0") }
-
-        let(:expected_step_code_corridor_adjustment) { BigDecimal("8.5") }
-
-        let(:expected_adjusted_step_code_performance) { BigDecimal("21.5") }
-
-        let(:expected_step_code_complies) { true }
 
         let(:expected_summary) {} # TODO: should
       end

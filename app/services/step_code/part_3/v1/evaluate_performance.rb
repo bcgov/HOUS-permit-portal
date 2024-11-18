@@ -13,7 +13,7 @@ class StepCode::Part3::V1::EvaluatePerformance
       corridor_pressurization_adjustment: corridor_pressurization_adjustment,
       suite_sub_metering_adjustment: suite_sub_metering_adjustment,
       adjusted_results: adjusted_results,
-      does_building_comply: does_building_comply
+      compliance_summary: compliance_summary
     }
   end
 
@@ -44,19 +44,27 @@ class StepCode::Part3::V1::EvaluatePerformance
   end
 
   def adjusted_results
-    StepCode::Part3::V1::Performance::AdjustedResults
+    @adjusted_results ||=
+      StepCode::Part3::V1::Performance::AdjustedResults
+        .new(
+          checklist: checklist,
+          results_as_modelled: results_as_modelled,
+          corridor_pressurization_adjustment:
+            corridor_pressurization_adjustment,
+          suite_sub_metering_adjustment: suite_sub_metering_adjustment
+        )
+        .call
+        .results
+  end
+
+  def compliance_summary
+    StepCode::Part3::V1::Performance::OverallCompliance
       .new(
         checklist: checklist,
-        results_as_modelled: results_as_modelled,
-        corridor_pressurization_adjustment: corridor_pressurization_adjustment,
-        suite_sub_metering_adjustment: suite_sub_metering_adjustment
+        requirements: requirements,
+        adjusted_results: adjusted_results
       )
       .call
       .results
-  end
-
-  def does_building_comply
-    #take in corridor etc.
-    { teiu: false, tedi: false, ghgi: false }
   end
 end

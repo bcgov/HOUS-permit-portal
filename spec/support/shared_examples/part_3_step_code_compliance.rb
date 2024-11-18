@@ -9,44 +9,38 @@ RSpec.shared_examples PART_3_PASSING_COMPLIANCE_RESULTS do
 
   # it "passes the compliance check" do
   #   expect(
-  #     subject.results.dig(:whole_building_performance, :does_building_comply)
+  #     subject.results.dig(:performance, :does_building_comply)
   #   ).to eq(expected_compliance_results)
   # end
 
   it "returns the correct requirements metrics" do
-    expect(
-      subject.results.dig(:whole_building_performance, :requirements)
-    ).to eq(expected_requirements_metrics)
+    expect(subject.results.dig(:performance, :requirements)).to eq(
+      expected_requirements_metrics
+    )
   end
 
   it "returns the correct modelled metrics" do
-    expect(
-      subject.results.dig(:whole_building_performance, :results_as_modelled)
-    ).to eq(expected_modelled_metrics)
+    expect(subject.results.dig(:performance, :results_as_modelled)).to eq(
+      expected_modelled_metrics
+    )
   end
 
   it "returns the correct corridor pressurization adjustment" do
     expect(
-      subject.results.dig(
-        :whole_building_performance,
-        :corridor_pressurization_adjustment
-      )
+      subject.results.dig(:performance, :corridor_pressurization_adjustment)
     ).to eq(expected_corridor_pressurization_adjustment_metrics)
   end
 
   it "returns the correct suite submetering adjustment" do
     expect(
-      subject.results.dig(
-        :whole_building_performance,
-        :suite_sub_metering_adjustment
-      )
+      subject.results.dig(:performance, :suite_sub_metering_adjustment)
     ).to eq(expected_suite_sub_metering_adjustment_metrics)
   end
 
   it "returns the correct adjusted performance compliance" do
-    expect(
-      subject.results.dig(:whole_building_performance, :adjusted_results)
-    ).to eq(expected_adjusted_performance_metrics)
+    expect(subject.results.dig(:performance, :adjusted_results)).to eq(
+      expected_adjusted_performance_metrics
+    )
   end
 
   # it "returns the correct step code TEDI requirement" do

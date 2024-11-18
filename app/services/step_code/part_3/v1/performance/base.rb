@@ -13,6 +13,7 @@ class StepCode::Part3::V1::Performance::Base
       ghgi: ghgi,
       total_energy: total_energy
     }
+    yield if block_given?
     self
   end
 
@@ -48,5 +49,16 @@ class StepCode::Part3::V1::Performance::Base
 
   def compliance_metrics
     @compliance_metrics ||= checklist.compliance_metrics
+  end
+
+  def total_mfa
+    @total_mfa ||= checklist.occupancy_classifications.sum(:modelled_floor_area)
+  end
+
+  def step_code_mfa
+    @step_code_mfa ||=
+      checklist.occupancy_classifications.step_code_occupancy.sum(
+        :modelled_floor_area
+      )
   end
 end
