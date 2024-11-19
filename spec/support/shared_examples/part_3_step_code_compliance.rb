@@ -42,9 +42,4 @@ RSpec.shared_examples PART_3_PASSING_COMPLIANCE_RESULTS do
       expected_adjusted_performance_metrics
     )
   end
-
-  # TODO: summary of step / zero carbon levels achieved
-  # it "returns the correct summary" do
-  #   expect(subject.results[:summary]).to eq(expected_summary)
-  # end
 end
