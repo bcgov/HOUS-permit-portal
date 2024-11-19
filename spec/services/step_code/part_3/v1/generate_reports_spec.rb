@@ -105,8 +105,8 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
           [
             {
               occupancy: "residential",
-              energy_requirement: "step_3",
-              zero_carbon_requirement: "el_4",
+              energy_requirement: 3,
+              zero_carbon_requirement: 4,
               performance_requirement: nil
             }
           ]
@@ -120,7 +120,9 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
               step_code_portion: true
             },
             ghgi: true,
-            total_energy: nil
+            total_energy: nil,
+            energy_step_achieved: 4,
+            zero_carbon_step_achieved: 4
           }
         end
 
@@ -193,8 +195,6 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
             total_energy: nil
           }
         end
-
-        let(:expected_summary) {} # TODO: should
       end
     end
   end
@@ -308,8 +308,8 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
           [
             {
               occupancy: "residential",
-              energy_requirement: "step_3",
-              zero_carbon_requirement: "el_4",
+              energy_requirement: 3,
+              zero_carbon_requirement: 4,
               performance_requirement: nil
             },
             {
@@ -329,7 +329,9 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
               step_code_portion: true
             },
             ghgi: true,
-            total_energy: nil
+            total_energy: nil,
+            energy_step_achieved: 4,
+            zero_carbon_step_achieved: 4
           }
         end
 
@@ -407,8 +409,6 @@ RSpec.describe StepCode::Part3::V1::GenerateReports do
             total_energy: nil
           }
         end
-
-        let(:expected_summary) {} # TODO: should
       end
     end
   end

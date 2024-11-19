@@ -13,8 +13,6 @@ class Part3StepCode::OccupancyClassification < ApplicationRecord
          necb
          %_better_necb
        ]
-  enum energy_step_required: %i[step_2 step_3 step_4]
-  enum zero_carbon_step_required: %i[n_a el_1 el_2 el_3 el_4]
   enum occupancy_type: %i[baseline step_code], _suffix: :occupancy
 
   validates :performance_requirement, presence: true, if: :baseline_occupancy?

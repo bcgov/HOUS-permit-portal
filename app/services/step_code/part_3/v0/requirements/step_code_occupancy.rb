@@ -29,14 +29,14 @@ class StepCode::Part3::V0::Requirements::StepCodeOccupancy
     StepCode::Part3::V0::Requirements::References::Energy.value(
       major_occupancy_type,
       climate_zone,
-      occupancy.energy_step_required.to_sym
+      occupancy.energy_step_required
     )
   end
 
   def zero_carbon_requirement
     StepCode::Part3::V0::Requirements::References::ZeroCarbon.value(
       major_occupancy_type,
-      occupancy.zero_carbon_step_required.to_sym
+      occupancy.zero_carbon_step_required
     )
   end
 end
