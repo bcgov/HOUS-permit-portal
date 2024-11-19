@@ -98,5 +98,13 @@ class Part3StepCode::Checklist < ApplicationRecord
        ],
        _prefix: :dhw
 
-  enum climate_zone: %i[4 5 6 7a 7b 8]
+  enum climate_zone: %i[zone_4 zone_5 zone_6 zone_7a zone_7b zone_8]
+
+  def compliance_metrics
+    if occupancy_classifications.step_code_occupancy.any?
+      %i[teui tedi ghgi]
+    else
+      [:total_energy]
+    end
+  end
 end

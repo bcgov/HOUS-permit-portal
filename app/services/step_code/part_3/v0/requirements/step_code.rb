@@ -22,18 +22,9 @@ class StepCode::Part3::V0::Requirements::StepCode
       occupancies.map do |oc|
         StepCode::Part3::V0::Requirements::StepCodeOccupancy.new(
           occupancy: oc,
-          climate_zone: climate_zone,
-          energy_step: checklist.energy_step_required,
-          zero_carbon_step: checklist.zero_carbon_step_required
+          climate_zone: checklist.climate_zone.to_sym
         ).call
       end
-  end
-
-  def climate_zone
-    @climate_zone ||=
-      StepCode::Part3::V0::Requirements::References::ClimateZone.value(
-        checklist.climate_zone
-      )
   end
 
   def area_weighted_totals
@@ -48,7 +39,7 @@ class StepCode::Part3::V0::Requirements::StepCode
   def area_weighted_total(metric)
     return if measure_only?(metric)
 
-    occupancies_requirements.inject do |sum, requirement|
+    occupancies_requirements.inject(0) do |sum, requirement|
       sum + requirement[:modelled_floor_area] * requirement[metric]
     end / total_mfa
   end
