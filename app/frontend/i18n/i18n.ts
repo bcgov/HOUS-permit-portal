@@ -927,6 +927,20 @@ const options = {
           },
         },
         stepCode: {
+          part3: {
+            title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
+            sidebar: {
+              overview: "Overview",
+              start: "Start page",
+              projectDetails: "Project details",
+              energySetup: "Energy setup",
+              districtEnergy: "District energy system",
+              compliance: "Compliance",
+              baselineOccupancies: "Occupancy classifications for buildings with a baseline",
+              baselineDetails: "Baseline comparison details",
+              fuelTypes: "Fuel types",
+            },
+          },
           title: "Step code auto-compliance tool",
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
