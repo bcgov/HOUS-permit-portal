@@ -1,4 +1,3 @@
-// SandboxMenuItem.tsx
 import {
   Button,
   Flex,
@@ -17,6 +16,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
+import * as R from "ramda"
 import React, { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
@@ -30,7 +30,7 @@ export const SandboxMenuItem: React.FC = observer(() => {
   const { currentSandboxId, setCurrentSandboxId, clearSandboxId, isSandboxActive } = sandboxStore
 
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [selectedOption, setSelectedOption] = useState(sandboxOptions[0].value)
+  const [selectedOption, setSelectedOption] = useState(sandboxOptions[0]?.value)
 
   // Handler for toggling the switch
   const handleToggle = () => {
@@ -46,6 +46,8 @@ export const SandboxMenuItem: React.FC = observer(() => {
     setCurrentSandboxId(selectedOption)
     onClose()
   }
+
+  if (!currentUser.jurisdiction || R.isEmpty(sandboxOptions)) return <></>
 
   return (
     <>
