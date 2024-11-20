@@ -8,6 +8,7 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
+import { Part3StepCodeForm } from "../step-code/part_3"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 
@@ -531,6 +532,9 @@ const AppRoutes = observer(() => {
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
         />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+        <Route path="/part-3-step-code" element={<RedirectScreen path="/part-3-step-code/start" />} />
+        <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
+        <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
       {enableStepCodeRoute && (
