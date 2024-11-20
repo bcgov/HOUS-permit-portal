@@ -173,7 +173,9 @@ export const RevisionModal: React.FC<IRevisionModalProps> = ({
 
             <Divider />
 
-            <SingleRequirementForm requirementJson={requirementForm} submissionJson={requirementSubmission} />
+            {requirementForm && (
+              <SingleRequirementForm requirementJson={requirementForm} submissionJson={requirementSubmission} />
+            )}
           </Flex>
           <ModalFooter>
             <Flex width="full" justify="center" gap={4}>

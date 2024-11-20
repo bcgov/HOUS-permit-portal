@@ -3,6 +3,8 @@ import { FORMIO_DATA_CLASS_PREFIX } from "../constants/formio-constants"
 import { IFormIORequirement, ISingleRequirementFormJson, ISubmissionData } from "../types/types"
 
 export const singleRequirementFormJson = (requirementJson: IFormIORequirement): ISingleRequirementFormJson => {
+  if (!requirementJson) return
+
   requirementJson.conditional = null
   requirementJson.customConditional = null
 
