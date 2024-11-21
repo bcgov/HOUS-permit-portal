@@ -603,7 +603,7 @@ export interface IPart3NavSection {
 export interface IPart3SectionCompletionStatus {
   start: boolean
   projectDetails: boolean
-  buildingDetails: boolean
+  locationDetails: boolean
   baselineOccupancies: boolean
   baselineDetails: boolean
   districtEnergy: boolean

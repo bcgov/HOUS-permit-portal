@@ -14,6 +14,15 @@ class Part3StepCode::Checklist < ApplicationRecord
            -> { where(source: :modelled) },
            class_name: "Part3StepCode::EnergyOutput"
 
+  delegate :building_permit_number,
+           :nickname,
+           :jurisdiction_name,
+           :full_address,
+           :pid,
+           :status,
+           :newly_submitted_at,
+           to: :step_code
+
   enum building_code_version: %i[
          revision_1
          revision_2
