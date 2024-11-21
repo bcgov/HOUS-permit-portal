@@ -47,6 +47,7 @@ class RequirementTemplateCopyService
         section.requirement_blocks.each do |block|
           new_section.requirement_blocks << block
         end
+        new_section.save
       end
 
       # Save the new template first to get its ID
