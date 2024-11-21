@@ -39,6 +39,17 @@ class RequirementTemplate < ApplicationRecord
            class_name: "TemplateVersion"
   has_many :jurisdiction_template_version_customizations
 
+  belongs_to :copied_from,
+             class_name: "RequirementTemplate",
+             foreign_key: "copied_from_id",
+             optional: true
+
+  # Self-referential association for sections copied from this section
+  has_many :copied_sections,
+           class_name: "RequirementTemplate",
+           foreign_key: "copied_from_id",
+           dependent: :nullify
+
   has_one :published_template_version,
           -> { where(status: "published") },
           class_name: "TemplateVersion"
