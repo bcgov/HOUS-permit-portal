@@ -3,9 +3,12 @@ class StepCode < ApplicationRecord
 
   delegate :number, to: :permit_application, prefix: :building_permit
   delegate :submitter,
+           :nickname,
            :jurisdiction_name,
            :full_address,
            :pid,
+           :newly_submitted_at,
+           :status,
            to: :permit_application,
            allow_nil: true
 

@@ -10,7 +10,7 @@ export const Part3StepCodeModel = types
   .model("Part3StepCodeModel", {
     id: types.identifier,
     type: types.literal(Part3StepCodeType),
-    checklist: types.maybeNull(Part3StepCodeChecklistModel),
+    checklist: types.maybeNull(types.late(() => Part3StepCodeChecklistModel)),
   })
   .extend(withEnvironment())
   .extend(withRootStore())

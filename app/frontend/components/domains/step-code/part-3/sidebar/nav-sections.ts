@@ -14,14 +14,8 @@ export const navLinks: IPart3NavLink[] = [
     section: "overview",
   },
   {
-    key: "buildingDetails",
-    location: "building-details",
-    subLinks: [],
-    section: "overview",
-  },
-  {
-    key: "districtEnergy",
-    location: "district-energy",
+    key: "locationDetails",
+    location: "location-details",
     subLinks: [],
     section: "overview",
   },
@@ -35,6 +29,12 @@ export const navLinks: IPart3NavLink[] = [
         subLinks: [],
       },
     ],
+    section: "compliance",
+  },
+  {
+    key: "districtEnergy",
+    location: "district-energy",
+    subLinks: [],
     section: "compliance",
   },
   {

@@ -33,7 +33,7 @@ export const StepCodeStoreModel = types
   .model("StepCodeStore", {
     stepCodesMap: types.map(StepCodeModel),
     isLoaded: types.maybeNull(types.boolean),
-    selectOptions: types.frozen<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>(),
+    selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
     currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
   })
   .extend(withEnvironment())
