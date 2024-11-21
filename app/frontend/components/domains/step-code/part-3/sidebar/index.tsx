@@ -9,7 +9,7 @@ import { SubLink } from "./sub-link"
 
 export const Sidebar = observer(function Part3StepCodeSidebar() {
   return (
-    <VStack w="full" align="stretch">
+    <VStack w="full" align="stretch" pt={4}>
       {navSections.map((section) => (
         <React.Fragment key={section.key}>
           <SectionHeader title={t(`stepCode.part3.sidebar.${section.key}`)} />

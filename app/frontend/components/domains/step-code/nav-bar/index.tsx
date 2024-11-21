@@ -28,7 +28,7 @@ export const StepCodeNavBar = observer(function StepCodeNavBar({ title, NavLinks
     >
       <Flex align="center" gap={2} px={8}>
         <Image fit="cover" htmlHeight="64px" htmlWidth="166px" alt={t("site.linkHome")} src="/images/logo.svg" />
-        <Show above="md">
+        <Show above="xl">
           <Text fontSize="md" color="text.primary" fontWeight="bold">
             {title}
           </Text>
