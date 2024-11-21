@@ -107,4 +107,9 @@ class Part3StepCode::Checklist < ApplicationRecord
       [:total_energy]
     end
   end
+
+  def select_options
+    #these are a the base dropdowns
+    #caluclated dropdowns will be elsewhere
+  end
 end

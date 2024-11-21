@@ -1,4 +1,4 @@
-class Api::StepCodeChecklistsController < Api::ApplicationController
+class Api::StepCode::Part9ChecklistsController < Api::ApplicationController
   before_action :set_and_authorize_checklist, only: %i[show update]
 
   def index
@@ -13,7 +13,7 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
     render_success @step_code_checklist,
                    nil,
                    {
-                     blueprint: StepCodeChecklistBlueprint,
+                     blueprint: StepCode::Part9::ChecklistBlueprint,
                      blueprint_opts: {
                        view: :extended
                      }
@@ -26,7 +26,7 @@ class Api::StepCodeChecklistsController < Api::ApplicationController
       render_success @step_code_checklist,
                      "step_code_checklist.update_success",
                      {
-                       blueprint: StepCodeChecklistBlueprint,
+                       blueprint: StepCode::Part9::ChecklistBlueprint,
                        blueprint_opts: {
                          view: :extended
                        }

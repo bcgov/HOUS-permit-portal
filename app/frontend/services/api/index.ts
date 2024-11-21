@@ -522,8 +522,12 @@ export class Api {
     return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
   }
 
-  async createStepCode(stepCode: IStepCode) {
-    return this.client.post<ApiResponse<IStepCode>>("/step_codes", { stepCode })
+  async createPart3StepCode(stepCode: IStepCode) {
+    return this.client.post<ApiResponse<IStepCode>>("/step_codes/part_3", { stepCode })
+  }
+
+  async createPart9StepCode(stepCode: IStepCode) {
+    return this.client.post<ApiResponse<IStepCode>>("/step_codes/part_9", { stepCode })
   }
 
   async deleteStepCode(id: string) {
@@ -538,11 +542,19 @@ export class Api {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }
 
-  async fetchStepCodeChecklist(id: string) {
+  async fetchPart3StepCodeChecklist(id: string) {
     return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
   }
 
-  async updateStepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
+  async updatePart3StepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
+    return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
+  }
+
+  async fetchPart9StepCodeChecklist(id: string) {
+    return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
+  }
+
+  async updatePart9StepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
     return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
   }
 

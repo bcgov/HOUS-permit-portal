@@ -85,7 +85,18 @@ class PermitApplicationBlueprint < Blueprinter::Base
       )
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
-    association :step_code, blueprint: StepCodeBlueprint
+
+    #TODO: REVIEW IF THIS STI TYPE IS WORKING
+    association :step_code,
+                blueprint: ->(sc) do
+                  if sc.type == "Part3"
+                    StepCode::Part3::StepCodeBlueprint
+                  else
+                    StepCode::Part9::StepCodeBlueprint
+                  end
+                end,
+                default: {
+                }
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base

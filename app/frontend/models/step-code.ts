@@ -28,7 +28,7 @@ export const StepCodeModel = types
   }))
   .actions((self) => ({
     updateStepCodeChecklist: flow(function* (id, values) {
-      const response = yield self.environment.api.updateStepCodeChecklist(id, values)
+      const response = yield self.environment.api.updatePart9StepCodeChecklist(id, values)
       if (response.ok) {
         self.mergeUpdate(response.data.data, "checklistsMap")
         return true

@@ -1,40 +1,19 @@
 class Api::StepCodesController < Api::ApplicationController
   def index
     @step_codes = policy_scope(StepCode)
+    #TODO: remove select_options from meta, reroute the front
     render_success @step_codes,
                    nil,
                    {
                      blueprint: StepCodeBlueprint,
                      meta: {
-                       select_options: Part9StepCode::Checklist.select_options
+                       select_options: Part9StepCode::Checklist.select_options,
+                       part_9_select_options:
+                         Part9StepCode::Checklist.select_options,
+                       part_3_select_options:
+                         Part3StepCode::Checklist.select_options
                      }
                    }
-  end
-
-  # POST /api/step_codes
-  def create
-    #save step code like normal
-    authorize StepCode.new
-    StepCode.transaction do
-      @step_code = StepCode.create(step_code_params)
-      if @step_code.valid?
-        @step_code.pre_construction_checklist.data_entries.each do |de|
-          if de.h2k_file
-            StepCode::Part9::DataEntryFromHot2000.new(
-              xml: Nokogiri.XML(de.h2k_file.read),
-              data_entry: de
-            ).call
-          end
-        end
-        render_success @step_code,
-                       "step_code.h2k_imported",
-                       { blueprint: StepCodeBlueprint } and return
-      end
-    end
-    render_error "step_code.create_error",
-                 message_opts: {
-                   error_message: @step_code.errors.full_messages.join(", ")
-                 }
   end
 
   # DELETE /api/step_codes/:id

@@ -1,4 +1,4 @@
-class StepCodeChecklistBlueprint < Blueprinter::Base
+class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   identifier :id
 
   fields :stage, :status
@@ -49,7 +49,7 @@ class StepCodeChecklistBlueprint < Blueprinter::Base
 
   view :building_characteristics_summary do
     association :building_characteristics_summary,
-                blueprint: StepCodeBuildingCharacteristicsSummaryBlueprint
+                blueprint: StepCode::BuildingCharacteristicsSummaryBlueprint
   end
 
   view :mid_construction_testing_results do

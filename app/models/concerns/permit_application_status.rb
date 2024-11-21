@@ -77,7 +77,7 @@ module PermitApplicationStatus
         step_code_checklist_json:
           (
             if checklist.present?
-              StepCodeChecklistBlueprint.render_as_hash(
+              StepCode::Part9::ChecklistBlueprint.render_as_hash(
                 checklist,
                 view: :extended
               )

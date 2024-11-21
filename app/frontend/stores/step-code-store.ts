@@ -57,7 +57,7 @@ export const StepCodeStoreModel = types
       self.isLoaded = true
     }),
     createStepCode: flow(function* (values) {
-      const response = yield self.environment.api.createStepCode(values)
+      const response = yield self.environment.api.createPart9StepCode(values)
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")
         self.currentStepCode = response.data.data.id

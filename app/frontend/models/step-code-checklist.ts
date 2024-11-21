@@ -109,7 +109,7 @@ export const StepCodeChecklistModel = types.snapshotProcessor(
     }))
     .actions((self) => ({
       load: flow(function* () {
-        const response = yield self.environment.api.fetchStepCodeChecklist(self.id)
+        const response = yield self.environment.api.fetchPart9StepCodeChecklist(self.id)
         if (response.ok) {
           applySnapshot(self, preProcessor(response.data.data))
           self.isLoaded = true

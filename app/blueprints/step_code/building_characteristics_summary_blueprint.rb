@@ -1,4 +1,4 @@
-class StepCodeBuildingCharacteristicsSummaryBlueprint < Blueprinter::Base
+class StepCode::BuildingCharacteristicsSummaryBlueprint < Blueprinter::Base
   identifier :id
 
   transform StepCode::BuildingCharacteristicsTransformer
