@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useMst } from "../../../../setup/root"
 import { EStepCodeChecklistStatus } from "../../../../types/enums"
-import { RestartConfirmationModal } from "../restart-confirmation-modal"
+import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
 
 export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
   const { stepCodeStore } = useMst()
