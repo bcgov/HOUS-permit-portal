@@ -97,6 +97,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
     .extend(withEnvironment())
     .extend(withRootStore())
     .views((self) => ({
+      get isPart3() {
+        // TODO
+        return false
+      },
       get isDraft() {
         return (
           self.status === EPermitApplicationStatus.newDraft ||

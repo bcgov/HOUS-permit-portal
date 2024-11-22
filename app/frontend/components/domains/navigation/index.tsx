@@ -8,7 +8,6 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { EULAScreen } from "../onboarding/eula"
-import { Part3StepCodeForm } from "../step-code/part_3"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 
@@ -159,9 +158,16 @@ const ExportTemplatesScreen = lazy(() =>
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
-const StepCodeForm = lazy(() => import("../step-code").then((module) => ({ default: module.StepCodeForm })))
+const Part9StepCodeForm = lazy(() =>
+  import("../step-code/part-9").then((module) => ({ default: module.Part9StepCodeForm }))
+)
+const Part3StepCodeForm = lazy(() =>
+  import("../step-code/part-3").then((module) => ({ default: module.Part3StepCodeForm }))
+)
 const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({ default: module.StepCodeChecklistPDFViewer }))
+  import("../step-code/part-9/checklist/pdf-content/viewer").then((module) => ({
+    default: module.StepCodeChecklistPDFViewer,
+  }))
 )
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
@@ -308,7 +314,6 @@ const AppRoutes = observer(() => {
   const { loggedIn, tokenExpired } = sessionStore
   const location = useLocation()
   const background = location.state && location.state.background
-  const enableStepCodeRoute = location.state?.enableStepCodeRoute
 
   const { currentUser } = userStore
   const { afterLoginPath, setAfterLoginPath, resetAuth } = sessionStore
@@ -452,9 +457,19 @@ const AppRoutes = observer(() => {
         >
           <Route path="/permit-applications" element={<PermitApplicationIndexScreen />} />
           <Route path="/permit-applications/new" element={<NewPermitApplicationScreen />} />
-          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />}>
-            <Route path="step-code" element={<StepCodeForm />} />
-          </Route>
+          <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
+          <Route
+            path="/permit-applications/:permitApplicationId/edit/part-9-step-code"
+            element={<Part9StepCodeForm />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
+            element={<RedirectScreen path="start" />}
+          />
+          <Route
+            path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"
+            element={<Part3StepCodeForm />}
+          />
           <Route
             path="/permit-applications/:permitApplicationId/sucessful-submission"
             element={<SuccessfulSubmissionScreen />}
@@ -532,16 +547,10 @@ const AppRoutes = observer(() => {
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
         />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
-        <Route path="/part-3-step-code" element={<RedirectScreen path="/part-3-step-code/start" />} />
-        <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
+        <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
       </Routes>
-      {enableStepCodeRoute && (
-        <Routes>
-          <Route path="/permit-applications/:permitApplicationId/edit/step-code" element={<StepCodeForm />} />
-        </Routes>
-      )}
     </>
   )
 })

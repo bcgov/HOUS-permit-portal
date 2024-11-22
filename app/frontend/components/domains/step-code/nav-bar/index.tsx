@@ -5,7 +5,7 @@ import React from "react"
 
 interface IProps {
   title: string
-  NavLinks: JSX.Element
+  NavLinks?: JSX.Element
 }
 
 export const StepCodeNavBar = observer(function StepCodeNavBar({ title, NavLinks }: IProps) {
@@ -37,7 +37,7 @@ export const StepCodeNavBar = observer(function StepCodeNavBar({ title, NavLinks
           </Text>
         </Show>
         <Spacer />
-        {NavLinks}
+        {NavLinks || null}
       </Flex>
     </Box>
   )
