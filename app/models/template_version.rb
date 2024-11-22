@@ -4,7 +4,7 @@ class TemplateVersion < ApplicationRecord
   belongs_to :deprecated_by, class_name: "User", optional: true
 
   has_many :jurisdiction_template_version_customizations, dependent: :destroy
-  has_many :permit_applications
+  has_many :permit_applications, dependent: :nullify
   has_many :submitters, through: :permit_applications
   has_many :integration_mappings, dependent: :destroy
 
