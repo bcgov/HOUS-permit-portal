@@ -20,7 +20,8 @@ class OmniauthUserResolver
     idir: "idir",
     bceid: "bceidboth",
     bceid_business: "bceidbusiness",
-    bceid_basic: "bceidbasic"
+    bceid_basic: "bceidbasic",
+    bcsc: ENV["VITE_BCSC_PROVIDER_KEY"]
   }
 
   def resolve_user
@@ -37,16 +38,19 @@ class OmniauthUserResolver
 
   def should_promote_user?
     return unless promotable_user?
+
     existing_user.id != invited_user.id
   end
 
   def promotable_user?
     return unless existing_user.present? && invited_user.present?
+
     existing_user.submitter? || invited_user.regional_review_manager?
   end
 
   def create_user
     return if omniauth_provider == OMNIAUTH_PROVIDERS[:idir]
+
     u =
       User.new(
         password: Devise.friendly_token[0, 20],

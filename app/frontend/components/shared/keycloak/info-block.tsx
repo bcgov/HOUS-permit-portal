@@ -2,7 +2,7 @@ import { Button, Flex, Heading, Link, ListItem, Text, UnorderedList } from "@cha
 import { ArrowSquareOut, CaretRight } from "@phosphor-icons/react"
 import React from "react"
 
-export function BCeIDInfoBlock({ title, description, bulletPoints, ctaText, ctaLink, infoLink = null }) {
+export function KeycloakInfoBlock({ title, description, bulletPoints, ctaText, ctaLink, infoLink = null }) {
   return (
     <Flex direction="column" gap={2} p={6} rounded="sm" borderWidth={1} borderColor="border.light">
       <Heading as="h3" m={0}>
