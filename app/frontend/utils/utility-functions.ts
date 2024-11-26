@@ -245,3 +245,8 @@ export function urlForPath(path: string): string {
 
   return `${baseUrl}${normalizedPath}`
 }
+
+export function isSafari() {
+  // Check if the browser is Safari
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+}
