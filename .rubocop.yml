@@ -13,6 +13,9 @@ AllCops:
 Style/Lambda:
   Enabled: false
 
+Style/FetchEnvVar:
+  Enabled: false
+
 Layout/MultilineOperationIndentation:
   Enabled: false
 
