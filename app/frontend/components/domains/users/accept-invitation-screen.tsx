@@ -5,13 +5,13 @@ import React, { Suspense, useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { IUser } from "../../../models/user"
+import { IUser, OMNIAUTH_PROVIDERS } from "../../../models/user"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { LoadingScreen } from "../../shared/base/loading-screen"
-import { BusinessBCeIDInfo } from "../../shared/bceid/business"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { HelpDrawer } from "../../shared/help-drawer"
+import { BusinessBCeIDInfo } from "../../shared/keycloak/businessbceid"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 
@@ -95,14 +95,18 @@ const Content = observer(function Content({ invitedUser }: Readonly<IProps>) {
               {t("user.createAccount")}
             </Heading>
             <form action={`/api/auth/keycloak`} method="post">
-              <input type="hidden" name="kc_idp_hint" value={isSuperAdmin ? "idir" : "bceidboth"} />
+              <input
+                type="hidden"
+                name="kc_idp_hint"
+                value={isSuperAdmin ? OMNIAUTH_PROVIDERS.idir : OMNIAUTH_PROVIDERS.bceid}
+              />
               <input
                 type="hidden"
                 name="authenticity_token"
                 value={(document.querySelector("[name=csrf-token]") as HTMLMetaElement).content}
               />
               <Button variant="primary" w="full" type="submit">
-                {isSuperAdmin ? t("auth.idir_login") : t("auth.bceid_login")}
+                {isSuperAdmin ? t("auth.idirLogin") : t("auth.bceidLogin")}
               </Button>
             </form>
           </>

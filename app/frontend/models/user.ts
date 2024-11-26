@@ -1,10 +1,18 @@
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EOmniauthProvider, EUserRoles } from "../types/enums"
+import { EUserRoles } from "../types/enums"
 import { ILicenseAgreement } from "../types/types"
 import { convertToDate } from "../utils/utility-functions"
 import { IJurisdiction, JurisdictionModel } from "./jurisdiction"
+
+export const OMNIAUTH_PROVIDERS = {
+  idir: "idir",
+  bceid: "bceidboth",
+  basicBceid: "bceidbasic",
+  businessBceid: "bceidbusiness",
+  bcsc: import.meta.env.VITE_BCSC_PROVIDER_KEY,
+} as const
 
 export const UserModel = types
   .model("UserModel")
@@ -15,7 +23,7 @@ export const UserModel = types
     role: types.enumeration(Object.values(EUserRoles)),
     omniauthEmail: types.maybeNull(types.string),
     omniauthUsername: types.maybeNull(types.string),
-    omniauthProvider: types.maybeNull(types.enumeration(Object.values(EOmniauthProvider))),
+    omniauthProvider: types.maybeNull(types.enumeration(Object.values(OMNIAUTH_PROVIDERS))),
     firstName: types.maybeNull(types.string),
     lastName: types.maybeNull(types.string),
     certified: types.maybeNull(types.boolean),
