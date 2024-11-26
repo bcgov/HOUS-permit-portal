@@ -16,7 +16,7 @@ class Api::StepCodesController < Api::ApplicationController
     #save step code like normal
     authorize StepCode.new
     StepCode.transaction do
-      @step_code = StepCode.create(step_code_params)
+      @step_code = Part9StepCode.create(step_code_params)
       if @step_code.valid?
         @step_code.pre_construction_checklist.data_entries.each do |de|
           if de.h2k_file
