@@ -257,3 +257,8 @@ export function formatPidLabel(pid?: string) {
   // Add a dash after every third character
   return numericString.replace(/(\d{3})(?=\d)/g, "$1-")
 }
+
+export function isSafari() {
+  // Check if the browser is Safari
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+}
