@@ -214,4 +214,4 @@ then in your User VSCode settings add:
 "solargraph.bundlerPath": "/Users/YOUR-USERNAME/.rbenv/shims/bundler",
 "solargraph.useBundler": true
 
-ensure that you are using rbenv and it is set up correctly.
+ensure that you are using rbenv and it is set up correctly. Test
