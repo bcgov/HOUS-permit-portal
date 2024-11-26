@@ -1,5 +1,6 @@
 class Collaborator < ApplicationRecord
-  searchkick searchable: %i[first_name last_name email], word_start: %i[first_name last_name email]
+  searchkick searchable: %i[first_name last_name email],
+             word_start: %i[first_name last_name email]
 
   belongs_to :user
   belongs_to :collaboratorable, polymorphic: true
@@ -7,7 +8,10 @@ class Collaborator < ApplicationRecord
   has_many :permit_collaborations, dependent: :destroy
 
   validates :collaboratorable_type, inclusion: { in: %w[User Jurisdiction] }
-  validates :user, uniqueness: { scope: %i[collaboratorable_id collaboratorable_type] }
+  validates :user,
+            uniqueness: {
+              scope: %i[collaboratorable_id collaboratorable_type]
+            }
 
   validate :validate_user, on: :create
 
@@ -23,7 +27,7 @@ class Collaborator < ApplicationRecord
       last_name: user.last_name,
       email: user.email,
       jurisdiction_ids: user.jurisdictions.pluck(:id),
-      discarded: user.discarded_at.present?,
+      discarded: user.discarded_at.present?
     }
   end
 
@@ -32,7 +36,11 @@ class Collaborator < ApplicationRecord
   def reindex_permit_applications
     return unless saved_change_to_user_id
 
-    permit_applications = permit_collaborations.includes(:permit_application).map(&:permit_application).uniq
+    permit_applications =
+      permit_collaborations
+        .includes(:permit_application)
+        .map(&:permit_application)
+        .uniq
 
     permit_applications.each(&:reindex)
   end

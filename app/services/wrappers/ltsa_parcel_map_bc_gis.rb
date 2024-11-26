@@ -9,7 +9,9 @@ class Wrappers::LtsaParcelMapBcGis < Wrappers::LtsaParcelMapBc
 
   def client
     @client ||=
-      Faraday.new(url: base_url, headers: default_headers) { |faraday| faraday.options.params_encoder = DoNotEncoder }
+      Faraday.new(url: base_url, headers: default_headers) do |faraday|
+        faraday.options.params_encoder = DoNotEncoder
+      end
   end
 
   def base_url
@@ -28,7 +30,7 @@ class Wrappers::LtsaParcelMapBcGis < Wrappers::LtsaParcelMapBc
       inSR: 4326,
       spatialRel: "esriSpatialRelIntersects",
       returnGeometry: true,
-      outFields: fields,
+      outFields: fields
     }
 
     get("#{PARCEL_SERVICE}/query", query_params, true)
@@ -46,7 +48,7 @@ class Wrappers::LtsaParcelMapBcGis < Wrappers::LtsaParcelMapBc
       inSR: 4326,
       spatialRel: "esriSpatialRelIntersects",
       returnGeometry: true,
-      outFields: fields,
+      outFields: fields
     }
 
     get("#{PARCEL_SERVICE}/query", query_params, true)

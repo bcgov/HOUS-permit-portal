@@ -51,7 +51,7 @@ export const Header = observer(function Header({ templateVersion }: IProps) {
           <Trans
             i18nKey={"apiMappingsSetup.edit.heading"}
             values={{
-              permitClassification: `${templateVersion?.denormalizedTemplateJson?.permitType.name} | ${templateVersion?.denormalizedTemplateJson?.activity.name}`,
+              permitClassification: `${templateVersion?.denormalizedTemplateJson?.label}`,
             }}
             components={{
               1: <Text fontSize={"md"} mb={2} />,

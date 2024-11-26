@@ -15,7 +15,9 @@ class Wrappers::Base
 
   def handle_response(response)
     if response.success?
-      return(response.body.is_a?(Hash) ? response.body : JSON.parse(response.body))
+      return(
+        response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
+      )
     else
       handle_error(response)
     end
@@ -54,12 +56,12 @@ class Wrappers::Base
     when 400..499
       raise Errors::WrapperClientError.new(
               "Wrapper client error: #{response.status}. Details: #{response.body}",
-              response.status,
+              response.status
             )
     when 500..599
       raise Errors::WrapperServerError.new(
               "Wrapper server error: #{response.status}. Details: #{response.body}",
-              response.status,
+              response.status
             )
     else
       raise "HTTP error: #{response.status}"

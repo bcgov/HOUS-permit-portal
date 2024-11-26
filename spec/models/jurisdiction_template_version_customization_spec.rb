@@ -3,21 +3,25 @@ require "rails_helper"
 RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
   let(:requirement) { create(:requirement, elective: true) }
   let(:jurisdiction) { create(:sub_district) }
-  let(:published_template_version) { create(:template_version, status: "published") }
-  let(:scheduled_template_version) { create(:template_version, status: "scheduled") }
+  let(:published_template_version) do
+    create(:template_version, status: "published")
+  end
+  let(:scheduled_template_version) do
+    create(:template_version, status: "scheduled")
+  end
   describe "#count_of_jurisdictions_using_requirement" do
     context "when no customizations reference the requirement" do
       it "returns 0 for published templates" do
         create(
           :jurisdiction_template_version_customization,
           jurisdiction: jurisdiction,
-          template_version: published_template_version,
+          template_version: published_template_version
         )
         expect(
           JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
             requirement.requirement_block_id,
-            requirement.id,
-          ),
+            requirement.id
+          )
         ).to eq(0)
       end
 
@@ -25,13 +29,13 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
         create(
           :jurisdiction_template_version_customization,
           jurisdiction: jurisdiction,
-          template_version: scheduled_template_version,
+          template_version: scheduled_template_version
         )
         expect(
           JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
             requirement.requirement_block_id,
-            requirement.id,
-          ),
+            requirement.id
+          )
         ).to eq(0)
       end
     end
@@ -43,12 +47,12 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           customizations: {
             "requirement_block_changes" => {
               requirement.requirement_block_id.to_s => {
-                "enabled_elective_field_ids" => [requirement.id.to_s],
-              },
-            },
+                "enabled_elective_field_ids" => [requirement.id.to_s]
+              }
+            }
           },
           jurisdiction: jurisdiction,
-          template_version: published_template_version,
+          template_version: published_template_version
         )
 
         create(
@@ -56,12 +60,12 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           customizations: {
             "requirement_block_changes" => {
               requirement.requirement_block_id.to_s => {
-                "enabled_elective_field_ids" => [requirement.id.to_s],
-              },
-            },
+                "enabled_elective_field_ids" => [requirement.id.to_s]
+              }
+            }
           },
           jurisdiction: jurisdiction,
-          template_version: scheduled_template_version,
+          template_version: scheduled_template_version
         )
       end
 
@@ -69,8 +73,8 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
         expect(
           JurisdictionTemplateVersionCustomization.count_of_jurisdictions_using_requirement(
             requirement.requirement_block_id,
-            requirement.id,
-          ),
+            requirement.id
+          )
         ).to eq(1)
       end
     end
@@ -84,20 +88,22 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           customizations: {
             "requirement_block_changes" => {
               "some_id" => {
-                "tip" => "<script>alert('xss');</script>Tip content",
-              },
-            },
+                "tip" => "<script>alert('xss');</script>Tip content"
+              }
+            }
           },
           jurisdiction: jurisdiction,
-          template_version: published_template_version,
+          template_version: published_template_version
         )
       end
 
       it "sanitizes tip fields within customizations" do
         customization.save
-        expect(customization.customizations["requirement_block_changes"]["some_id"]["tip"]).to eq(
-          "alert('xss');Tip content",
-        )
+        expect(
+          customization.customizations["requirement_block_changes"]["some_id"][
+            "tip"
+          ]
+        ).to eq("alert('xss');Tip content")
       end
     end
   end
@@ -108,21 +114,23 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
         create(
           :jurisdiction_template_version_customization,
           jurisdiction: jurisdiction,
-          template_version: published_template_version,
+          template_version: published_template_version
         )
       end
       let(:duplicate) do
         build(
           :jurisdiction_template_version_customization,
           jurisdiction: subject.jurisdiction,
-          template_version: subject.template_version,
+          template_version: subject.template_version
         )
       end
 
       it "does not allow duplicate jurisdiction and template_version combinations" do
         expect(subject).to be_valid
         expect(duplicate).not_to be_valid
-        expect(duplicate.errors[:template_version_id]).to include("has already been taken")
+        expect(duplicate.errors[:template_version_id]).to include(
+          "has already been taken"
+        )
       end
     end
   end
@@ -138,13 +146,13 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
                 "some_id" => {
                   "enabled_elective_field_ids" => ["field_id"],
                   "enabled_elective_field_reasons" => {
-                    "field_id" => "invalid_reason",
-                  },
-                },
-              },
+                    "field_id" => "invalid_reason"
+                  }
+                }
+              }
             },
             jurisdiction: jurisdiction,
-            template_version: published_template_version,
+            template_version: published_template_version
           )
         end
       end
@@ -158,13 +166,13 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
                 "some_id" => {
                   "enabled_elective_field_ids" => ["field_id"],
                   "enabled_elective_field_reasons" => {
-                    "field_id" => "bylaw",
-                  },
-                },
-              },
+                    "field_id" => "bylaw"
+                  }
+                }
+              }
             },
             jurisdiction: jurisdiction,
-            template_version: published_template_version,
+            template_version: published_template_version
           )
         end
 
@@ -185,13 +193,13 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
               requirement.requirement_block_id.to_s => {
                 "enabled_elective_field_ids" => [requirement.id.to_s],
                 "enabled_elective_field_reasons" => {
-                  requirement.id.to_s => "bylaw",
-                },
-              },
-            },
+                  requirement.id.to_s => "bylaw"
+                }
+              }
+            }
           },
           template_version: published_template_version,
-          jurisdiction: jurisdiction,
+          jurisdiction: jurisdiction
         )
       end
 
@@ -203,13 +211,13 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
               requirement.requirement_block_id.to_s => {
                 "enabled_elective_field_ids" => [requirement.id.to_s],
                 "enabled_elective_field_reasons" => {
-                  requirement.id.to_s => "policy",
-                },
-              },
-            },
+                  requirement.id.to_s => "policy"
+                }
+              }
+            }
           },
           template_version: scheduled_template_version,
-          jurisdiction: jurisdiction,
+          jurisdiction: jurisdiction
         )
       end
 
@@ -218,22 +226,22 @@ RSpec.describe JurisdictionTemplateVersionCustomization, type: :model do
           JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
             requirement.requirement_block_id,
             requirement.id,
-            "bylaw",
-          ),
+            "bylaw"
+          )
         ).to eq(1)
         expect(
           JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
             requirement.requirement_block_id,
             requirement.id,
-            "policy",
-          ),
+            "policy"
+          )
         ).to eq(0) # Because template version is unpublished
         expect(
           JurisdictionTemplateVersionCustomization.requirement_count_by_reason(
             requirement.requirement_block_id,
             requirement.id,
-            "zoning",
-          ),
+            "zoning"
+          )
         ).to eq(0)
       end
     end

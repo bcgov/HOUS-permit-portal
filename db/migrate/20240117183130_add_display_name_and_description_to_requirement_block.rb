@@ -1,4 +1,6 @@
-class AddDisplayNameAndDescriptionToRequirementBlock < ActiveRecord::Migration[7.1]
+class AddDisplayNameAndDescriptionToRequirementBlock < ActiveRecord::Migration[
+  7.1
+]
   def change
     add_column :requirement_blocks, :display_name, :string
     add_column :requirement_blocks, :display_description, :string, null: true

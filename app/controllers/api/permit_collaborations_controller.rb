@@ -11,7 +11,8 @@ class Api::PermitCollaborationsController < Api::ApplicationController
     else
       render_error "permit_collaboration.destroy_error",
                    message_opts: {
-                     error_message: @permit_collaboration.errors.full_messages.join(", "),
+                     error_message:
+                       @permit_collaboration.errors.full_messages.join(", ")
                    }
     end
   end
@@ -19,15 +20,23 @@ class Api::PermitCollaborationsController < Api::ApplicationController
   def reinvite
     authorize @permit_collaboration
     begin
-      PermitCollaboration::CollaborationManagementService.new(@permit_application).send_submission_collaboration_email!(
-        @permit_collaboration,
-      )
+      PermitCollaboration::CollaborationManagementService.new(
+        @permit_application
+      ).send_submission_collaboration_email!(@permit_collaboration)
 
       render_success @permit_collaboration,
                      "permit_collaboration.re_invite_success",
-                     { blueprint: PermitCollaborationBlueprint, blueprint_opts: { view: :base } }
+                     {
+                       blueprint: PermitCollaborationBlueprint,
+                       blueprint_opts: {
+                         view: :base
+                       }
+                     }
     rescue PermitCollaborationError => e
-      render_error "permit_collaboration.re_invite_error", message_opts: { error_message: e.message }
+      render_error "permit_collaboration.re_invite_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
     end
   end
 

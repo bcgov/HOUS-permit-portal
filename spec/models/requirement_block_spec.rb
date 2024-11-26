@@ -5,7 +5,11 @@ RSpec.describe RequirementBlock, type: :model do
     # Testing direct associations
     it { should have_many(:requirements) }
     it "should order requirements by position in ascending order" do
-      requirement_block = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 6)
+      requirement_block =
+        FactoryBot.create(
+          :requirement_block_with_requirements,
+          requirements_count: 6
+        )
 
       # This is so that the order is not tied to create order, because by default it returns associations
       # in update order we might get a false positive test, where the position seems correct
@@ -18,18 +22,32 @@ RSpec.describe RequirementBlock, type: :model do
 
       requirement_block.reload
 
-      requirement_block.requirements.each_with_index { |r, i| expect(r.position).to eq(i) }
+      requirement_block.requirements.each_with_index do |r, i|
+        expect(r.position).to eq(i)
+      end
     end
   end
 
   describe "enums" do
-    it { should define_enum_for(:sign_off_role).with_prefix(true).with_values(any: 0) }
-    it { should define_enum_for(:reviewer_role).with_prefix(true).with_values(any: 0) }
+    it do
+      should define_enum_for(:sign_off_role).with_prefix(true).with_values(
+               any: 0
+             )
+    end
+    it do
+      should define_enum_for(:reviewer_role).with_prefix(true).with_values(
+               any: 0
+             )
+    end
   end
 
   describe "methods" do
     it "returns the form json with with all requirements" do
-      requirement_block = FactoryBot.create(:requirement_block_with_requirements, requirements_count: 6)
+      requirement_block =
+        FactoryBot.create(
+          :requirement_block_with_requirements,
+          requirements_count: 6
+        )
       form_json = requirement_block.to_form_json
       expect(form_json.reject { |key| key === :components }).to eq (
            {
@@ -40,7 +58,7 @@ RSpec.describe RequirementBlock, type: :model do
              type: "panel",
              collapsible: true,
              collapsed: false,
-             description: nil,
+             description: nil
            }
          )
       # expect 7 because a block that is all optional requirements gets one extra required component
@@ -67,7 +85,8 @@ RSpec.describe RequirementBlock, type: :model do
 
       it "auto generates unique human readable sku when not supplied" do
         new_block = create(:requirement_block, name: "Test Name")
-        new_block_with_name_clash = build(:requirement_block, name: "Test Name ") # has an extra space
+        new_block_with_name_clash =
+          build(:requirement_block, name: "Test Name ") # has an extra space
 
         expect(new_block).to be_valid
         expect(new_block.sku).to eq("test_name")
@@ -98,13 +117,13 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
-              },
-            ],
+                "required" => true
+              }
+            ]
           ),
           build(
             :requirement_block,
@@ -118,11 +137,11 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_tool_part_9",
@@ -133,13 +152,13 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
-              },
-            ],
+                "required" => true
+              }
+            ]
           ),
           build(
             :requirement_block,
@@ -153,11 +172,11 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_tool_part_9",
@@ -168,11 +187,11 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_report_file",
@@ -182,12 +201,12 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "file",
                     "show" => true,
-                    "when" => "energy_step_code_method",
-                  },
+                    "when" => "energy_step_code_method"
+                  }
                 },
-                "required" => true,
-              },
-            ],
+                "required" => true
+              }
+            ]
           ),
           build(
             :requirement_block,
@@ -201,11 +220,11 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_tool_part_9",
@@ -216,26 +235,27 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_h2000_file",
-                "label" => "Pre construction Hot2000 model details, Hot2000 report",
+                "label" =>
+                  "Pre construction Hot2000 model details, Hot2000 report",
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
                     "eq" => "file",
                     "show" => true,
-                    "when" => "energy_step_code_method",
-                  },
+                    "when" => "energy_step_code_method"
+                  }
                 },
-                "required" => true,
-              },
-            ],
+                "required" => true
+              }
+            ]
           ),
           # has duplicate
           build(
@@ -243,16 +263,21 @@ RSpec.describe RequirementBlock, type: :model do
             requirements_attributes: [
               {
                 "requirement_code" => "energy_step_code_method",
-                "label" => "Which method do you want to do use for the energy step code:",
+                "label" =>
+                  "Which method do you want to do use for the energy step code:",
                 "input_type" => "select",
                 "input_options" => {
                   "value_options" => [
-                    { "label" => "Utilizing the digital step code tool", "value" => "tool" },
-                    { "label" => "By file upload", "value" => "file" },
-                  ],
+                    {
+                      "label" => "Utilizing the digital step code tool",
+                      "value" => "tool"
+                    },
+                    { "label" => "By file upload", "value" => "file" }
+                  ]
                 },
-                "hint" => "(if not using the tool, we will allow you to upload by file)",
-                "required" => true,
+                "hint" =>
+                  "(if not using the tool, we will allow you to upload by file)",
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_tool_part_9",
@@ -263,11 +288,11 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "tool",
                     "show" => true,
-                    "when" => "energy_step_code_method",
+                    "when" => "energy_step_code_method"
                   },
-                  "energy_step_code" => "part_9",
+                  "energy_step_code" => "part_9"
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_report_file",
@@ -277,39 +302,41 @@ RSpec.describe RequirementBlock, type: :model do
                   "conditional" => {
                     "eq" => "file",
                     "show" => true,
-                    "when" => "energy_step_code_method",
-                  },
+                    "when" => "energy_step_code_method"
+                  }
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_h2000_file",
-                "label" => "Pre construction Hot2000 model details, Hot2000 report",
+                "label" =>
+                  "Pre construction Hot2000 model details, Hot2000 report",
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
                     "eq" => "file",
                     "show" => true,
-                    "when" => "energy_step_code_method",
-                  },
+                    "when" => "energy_step_code_method"
+                  }
                 },
-                "required" => true,
+                "required" => true
               },
               {
                 "requirement_code" => "energy_step_code_h2000_file",
-                "label" => "Pre construction Hot2000 model details, Hot2000 report",
+                "label" =>
+                  "Pre construction Hot2000 model details, Hot2000 report",
                 "input_type" => "file",
                 "input_options" => {
                   "conditional" => {
                     "eq" => "file",
                     "show" => true,
-                    "when" => "energy_step_code_method",
-                  },
+                    "when" => "energy_step_code_method"
+                  }
                 },
-                "required" => true,
-              },
-            ],
-          ),
+                "required" => true
+              }
+            ]
+          )
         ]
 
         expect(valid_block).to be_valid
@@ -319,8 +346,8 @@ RSpec.describe RequirementBlock, type: :model do
 
           expect(invalid_block.errors[:requirements]).to include(
             I18n.t(
-              "activerecord.errors.models.requirement_block.attributes.requirements.incorrect_energy_step_code_dependencies",
-            ),
+              "activerecord.errors.models.requirement_block.attributes.requirements.incorrect_energy_step_code_dependencies"
+            )
           )
         end
       end

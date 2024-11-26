@@ -23,7 +23,9 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   def update?
     if record.draft?
-      record.submission_requirement_block_edit_permissions(user_id: user.id).present?
+      record.submission_requirement_block_edit_permissions(
+        user_id: user.id
+      ).present?
     else
       user.review_staff? && user.jurisdictions.find(record.jurisdiction_id)
     end
@@ -34,7 +36,7 @@ class PermitApplicationPolicy < ApplicationPolicy
     designated_submitter =
       permit_application.users_by_collaboration_options(
         collaboration_type: :submission,
-        collaborator_type: :delegatee,
+        collaborator_type: :delegatee
       ).first
 
     record.draft? && (record.submitter == user || designated_submitter == user)
@@ -51,7 +53,8 @@ class PermitApplicationPolicy < ApplicationPolicy
   def submit?
     record.draft? ? record.submitter == user : user.review_staff?
     if record.draft?
-      record.submission_requirement_block_edit_permissions(user_id: user.id) == :all
+      record.submission_requirement_block_edit_permissions(user_id: user.id) ==
+        :all
     else
       user.review_staff? && user.jurisdictions.find(record.jurisdiction_id)
     end
@@ -70,11 +73,14 @@ class PermitApplicationPolicy < ApplicationPolicy
     permit_collaboration = record
 
     if permit_collaboration.submission?
-      permit_collaboration.permit_application.submitter == user && permit_collaboration.permit_application.draft?
+      permit_collaboration.permit_application.submitter == user &&
+        permit_collaboration.permit_application.draft?
     elsif permit_collaboration.review?
       (user.review_staff?) &&
-        user.jurisdictions.find_by(id: permit_collaboration.permit_application.jurisdiction_id).present? &&
-        permit_collaboration.permit_application.submitted?
+        user
+          .jurisdictions
+          .find_by(id: permit_collaboration.permit_application.jurisdiction_id)
+          .present? && permit_collaboration.permit_application.submitted?
     else
       false
     end
@@ -86,7 +92,8 @@ class PermitApplicationPolicy < ApplicationPolicy
     if permit_application.draft?
       permit_application.submitter_id == user.id
     else
-      user.review_staff? && user.jurisdictions.find(permit_application.jurisdiction_id)
+      user.review_staff? &&
+        user.jurisdictions.find(permit_application.jurisdiction_id)
     end
   end
 
@@ -96,7 +103,8 @@ class PermitApplicationPolicy < ApplicationPolicy
     # New collaborators (i.e new user in the system) can only be invited for submission collaborations
     return false if permit_collaboration.review?
 
-    permit_collaboration.permit_application.submitter == user && permit_collaboration.permit_application.draft?
+    permit_collaboration.permit_application.submitter == user &&
+      permit_collaboration.permit_application.draft?
   end
 
   def create_or_update_permit_block_status?
@@ -104,17 +112,29 @@ class PermitApplicationPolicy < ApplicationPolicy
 
     if permit_block_status.submission?
       block_permissions =
-        permit_block_status.permit_application.submission_requirement_block_edit_permissions(user_id: user.id)
+        permit_block_status.permit_application.submission_requirement_block_edit_permissions(
+          user_id: user.id
+        )
 
-      permit_block_status.permit_application.draft? && block_permissions.present? &&
-        (block_permissions == :all || block_permissions.include?(permit_block_status.requirement_block_id))
+      permit_block_status.permit_application.draft? &&
+        block_permissions.present? &&
+        (
+          block_permissions == :all ||
+            block_permissions.include?(permit_block_status.requirement_block_id)
+        )
     elsif permit_block_status.review?
       (user.review_staff?) &&
-        user.jurisdictions.find_by(id: permit_block_status.permit_application.jurisdiction_id).present? &&
-        permit_block_status.permit_application.submitted?
+        user
+          .jurisdictions
+          .find_by(id: permit_block_status.permit_application.jurisdiction_id)
+          .present? && permit_block_status.permit_application.submitted?
     else
       false
     end
+  end
+
+  def download_application_metrics_csv?
+    user.super_admin?
   end
 
   # we may want to separate an admin update to a secondary policy

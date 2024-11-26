@@ -17,15 +17,15 @@ class StepCode::BuildingCharacteristicsTransformer < Blueprinter::Transformer
         ].inject({}) do |h, key|
           h[key] = lines_attrs(object.send(key))
           h
-        end,
+        end
       )
       .merge!(
         {
           windows_glazed_doors: {
             performance_type: object.windows_glazed_doors.performance_type,
-            lines: object.windows_glazed_doors.lines.map(&:attributes),
-          },
-        },
+            lines: object.windows_glazed_doors.lines.map(&:attributes)
+          }
+        }
       )
       .merge!({ fossil_fuels: object.fossil_fuels.attributes })
       .merge!({ airtightness: object.airtightness.attributes })

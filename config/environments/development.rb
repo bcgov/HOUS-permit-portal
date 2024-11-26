@@ -4,7 +4,11 @@ Rails.application.configure do
   # Specify AnyCable WebSocket server URL to use by JS client
   config.after_initialize do
     config.action_cable.url =
-      ActionCable.server.config.url = ENV.fetch("ANYCABLE_URL", "ws://localhost:8080/cable") if AnyCable::Rails.enabled?
+      ActionCable.server.config.url =
+        ENV.fetch(
+          "ANYCABLE_URL",
+          "ws://localhost:8080/cable"
+        ) if AnyCable::Rails.enabled?
 
     Bullet.enable = true
     Bullet.bullet_logger = true # Log to the Bullet log file (Rails.root/log/bullet.log)
@@ -38,8 +42,12 @@ Rails.application.configure do
     config.action_controller.perform_caching = true
     config.action_controller.enable_fragment_cache_logging = true
 
-    config.cache_store = :redis_cache_store, { url: "#{ENV["CACHE_DEV_REDIS_URL"]}", namespace: "cache" }
-    config.public_file_server.headers = { "Cache-Control" => "public, max-age=#{2.days.to_i}" }
+    config.cache_store =
+      :redis_cache_store,
+      { url: "#{ENV["CACHE_DEV_REDIS_URL"]}", namespace: "cache" }
+    config.public_file_server.headers = {
+      "Cache-Control" => "public, max-age=#{2.days.to_i}"
+    }
   else
     config.action_controller.perform_caching = false
 
@@ -75,9 +83,14 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :letter_opener
 
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000, protocol: "http" }
+  config.action_mailer.default_url_options = {
+    host: "localhost",
+    port: 3000,
+    protocol: "http"
+  }
 
   config.after_initialize do
-    Rails.application.routes.default_url_options = Rails.application.config.action_mailer.default_url_options
+    Rails.application.routes.default_url_options =
+      Rails.application.config.action_mailer.default_url_options
   end
 end

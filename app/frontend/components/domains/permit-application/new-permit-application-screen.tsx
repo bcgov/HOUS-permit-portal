@@ -21,7 +21,7 @@ import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { useEffect, useState } from "react"
 import { Controller, FormProvider, useForm, useFormContext } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IJurisdiction } from "../../../models/jurisdiction"
 import { useMst } from "../../../setup/root"
@@ -105,14 +105,6 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       if (jurisdiction && !R.isEmpty(jurisdiction)) {
         setPinMode(false)
         setValue("jurisdiction", jurisdiction)
-
-        if (R.isNil(siteWatch?.value) && pidWatch) {
-          //the pid is valid, lets try to fill in the address based on the PID
-          const siteDetails = await fetchSiteDetailsFromPid(pidWatch)
-          if (siteDetails) {
-            setValue("site", siteDetails)
-          }
-        }
       } else {
         setPinMode(true)
         setValue("jurisdiction", null)
@@ -125,6 +117,7 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
       <BlueTitleBar title={t("permitApplication.start")} />
       <Container maxW="container.lg" py={8}>
         <DisclaimerInfo />
+        <TimelineInfo />
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...formMethods}>
             <Flex direction="column" gap={12} w="full" bg="greys.white">
@@ -157,7 +150,20 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
               </Flex>
               {jurisdictionWatch && (pidWatch || pinWatch) && (
                 <Flex as="section" direction="column" gap={2}>
-                  <FormLabel htmlFor="firstNations">{t("permitApplication.new.forFirstNations")}</FormLabel>
+                  <FormLabel htmlFor="firstNations">
+                    <Trans
+                      i18nKey="permitApplication.new.forFirstNations"
+                      components={{
+                        // The key '1' corresponds to <1></1> in your translation string
+                        1: (
+                          <Link
+                            isExternal
+                            href="https://services.aadnc-aandc.gc.ca/ILRS_Public/Home/Home.aspx?ReturnUrl=%2filrs_public%2f"
+                          ></Link>
+                        ),
+                      }}
+                    />
+                  </FormLabel>
                   <Controller
                     name="firstNations"
                     control={control}
@@ -188,9 +194,9 @@ export const NewPermitApplicationScreen = observer(({}: INewPermitApplicationScr
                             <PermitTypeRadioSelect
                               w={{ base: "full", md: "50%" }}
                               fetchOptions={() => {
-                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch)
+                                return fetchPermitTypeOptions(true, firstNationsWatch, pidWatch, jurisdictionWatch.id)
                               }}
-                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionWatch]}
+                              dependencyArray={[firstNationsWatch, pidWatch, jurisdictionWatch.id]}
                               onChange={onChange}
                               value={value}
                             />
@@ -289,44 +295,69 @@ const DisclaimerInfo = () => {
   }) as Array<{ text: string; href: string }>
 
   return (
+    <Flex align="center" my={3} flexDirection={{ base: "column", md: "row" }} width="full" mx="auto" p={6} gap={6}>
+      <Box w={{ base: "100%", md: "50%" }}>
+        <Heading as="h2" variant="yellowline">
+          {t("permitApplication.new.needToKnow")}
+        </Heading>
+
+        <Text>{t("permitApplication.new.disclaimer1")}</Text>
+        <br />
+        <Text>{t("permitApplication.new.disclaimer2")}</Text>
+      </Box>
+    </Flex>
+  )
+}
+
+const TimelineInfo = () => {
+  const { t } = useTranslation()
+
+  const applicationDisclaimers = i18next.t("permitApplication.new.applicationDisclaimers", {
+    returnObjects: true,
+  }) as Array<{ text: string; href: string }>
+
+  return (
     <Flex
-      direction="column"
+      align="center"
+      my={3}
+      flexDirection={{ base: "column", md: "row" }}
       width="full"
       mx="auto"
       border="1px solid"
       borderColor="border.light"
       borderRadius="md"
-      p="6"
+      p={6}
+      gap={6}
     >
-      <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
-      <Flex align="center" mt={6} flexDirection={{ base: "column", md: "row" }}>
-        <Box w={{ base: "100%", md: "40%" }}>
-          <UnorderedList ml="0" mt="4">
-            {applicationDisclaimers.map((disclaimer) => {
-              return (
-                <ListItem key={disclaimer.href}>
-                  <Link href={disclaimer.href} isExternal>
-                    {disclaimer.text}
-                    <ArrowSquareOut />
-                  </Link>
-                </ListItem>
-              )
-            })}
-          </UnorderedList>
-          <Text>{t("permitApplication.new.applicationDisclaimerMoreInfo")}</Text>
+      <Box w={{ base: "100%", md: "50%" }}>
+        <Text fontWeight="bold">{t("permitApplication.new.applicationDisclaimerInstruction")}</Text>
+        <UnorderedList ml="0" my={4}>
+          {applicationDisclaimers.map((disclaimer) => {
+            return (
+              <ListItem key={disclaimer.href}>
+                <Link href={disclaimer.href} isExternal>
+                  {disclaimer.text}
+                  <ArrowSquareOut />
+                </Link>
+              </ListItem>
+            )
+          })}
+        </UnorderedList>
+        <Text>
+          {t("permitApplication.new.applicationDisclaimerMoreInfo")}{" "}
           <Link href={t("permitApplication.new.applicationDisclaimerMoreInfo_Link")} isExternal>
             {t("permitApplication.new.applicationDisclaimerMoreInfo_CTA")}
             <ArrowSquareOut />
           </Link>
-        </Box>
-        <Image
-          src="/images/timeline/timeline-graphic-full.gif"
-          alt="thumbnail for timeline"
-          w={{ base: "100%", md: "60%" }}
-          bg="semantic.infoLight"
-          objectFit="contain"
-        />
-      </Flex>
+        </Text>
+      </Box>
+      <Image
+        src="/images/timeline/timeline-graphic-full.gif"
+        alt="thumbnail for timeline"
+        w={{ base: "100%", md: "50%" }}
+        bg="semantic.infoLight"
+        objectFit="contain"
+      />
     </Flex>
   )
 }

@@ -4,7 +4,11 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def show?
-    !record.scheduled? || (user.super_admin? || user.review_manager? || user.regional_review_manager?)
+    !record.scheduled? ||
+      (
+        user.super_admin? || user.review_manager? ||
+          user.regional_review_manager?
+      )
   end
 
   def show_jurisdiction_template_version_customization?
@@ -24,11 +28,15 @@ class TemplateVersionPolicy < ApplicationPolicy
   end
 
   def create_or_update_jurisdiction_template_version_customization?
-    (user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id)
+    (user.review_manager? || user.regional_review_manager?) &&
+      user.jurisdictions.find(record&.jurisdiction_id)
   end
 
   def show_integration_mapping?
-    ((user.review_manager? || user.regional_review_manager?) && user.jurisdictions.find(record.jurisdiction_id))
+    (
+      (user.review_manager? || user.regional_review_manager?) &&
+        user.jurisdictions.find(record&.jurisdiction_id)
+    )
   end
 
   def compare_requirements?
@@ -47,7 +55,8 @@ class TemplateVersionPolicy < ApplicationPolicy
           .where(requirement_templates: { discarded_at: nil })
           .where.not(status: "deprecated")
 
-      if user.super_admin? || user.review_manager? || user.regional_review_manager?
+      if user.super_admin? || user.review_manager? ||
+           user.regional_review_manager?
         template_versions
       else
         template_versions.where(status: "published")

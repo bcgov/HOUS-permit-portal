@@ -1,4 +1,6 @@
-class CreateMechanicalEnergyUseIntensityReferences < ActiveRecord::Migration[7.1]
+class CreateMechanicalEnergyUseIntensityReferences < ActiveRecord::Migration[
+  7.1
+]
   def change
     create_table :mechanical_energy_use_intensity_references, id: :uuid do |t|
       t.int4range :hdd

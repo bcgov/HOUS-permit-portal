@@ -21,14 +21,18 @@ class ExternalPermitApplicationService
   #                 }>>
   #   }>
   def formatted_submission_data_for_external_use
-    unless self.permit_application.submission_data.present? && self.permit_application.submission_data["data"].present?
+    unless self.permit_application.submission_data.present? &&
+             self.permit_application.submission_data["data"].present?
       return {}
     end
 
-    cloned_submission_data = self.permit_application.submission_data["data"].deep_dup
+    cloned_submission_data =
+      self.permit_application.submission_data["data"].deep_dup
 
     # formats single_contact submissions into array of contact objects, similar to the multi_contact submissions
-    process_single_contact_submission_data_to_common_format!(cloned_submission_data)
+    process_single_contact_submission_data_to_common_format!(
+      cloned_submission_data
+    )
 
     formatted_submission_data = {}
 
@@ -57,7 +61,7 @@ class ExternalPermitApplicationService
             requirement_block_code: requirement_block["sku"],
             name: requirement_block["name"],
             description: requirement_block["description"],
-            requirements: [],
+            requirements: []
           }
         end
 
@@ -94,12 +98,13 @@ class ExternalPermitApplicationService
           name: requirement["label"],
           requirement_code: requirement["requirement_code"],
           type: requirement["input_type"],
-          value: formatted_value,
+          value: formatted_value
         }
       end
     end
 
-    remaining_energy_step_code_submission = form_remaining_energy_step_code_submission_data
+    remaining_energy_step_code_submission =
+      form_remaining_energy_step_code_submission_data
 
     if remaining_energy_step_code_submission.present?
       formatted_submission_data.merge!(remaining_energy_step_code_submission)
@@ -109,11 +114,16 @@ class ExternalPermitApplicationService
   end
 
   def get_requirement_block_json(requirement_block_id)
-    self.permit_application.template_version.requirement_blocks_json[requirement_block_id]
+    self.permit_application.template_version.requirement_blocks_json[
+      requirement_block_id
+    ]
   end
 
   def get_raw_h2k_files
-    return nil unless permit_application.step_code.present? && !permit_application.step_code.data_entries.empty?
+    unless permit_application.step_code.present? &&
+             !permit_application.step_code.data_entries.empty?
+      return nil
+    end
 
     permit_application
       .step_code
@@ -127,7 +137,7 @@ class ExternalPermitApplicationService
           name: data_entry.h2k_file_name,
           type: data_entry.h2k_file_type,
           size: data_entry.h2k_file_size,
-          url: data_entry.h2k_file_url,
+          url: data_entry.h2k_file_url
         }
       end
       .compact
@@ -171,11 +181,15 @@ class ExternalPermitApplicationService
         # create a new key and value pair, to collect the fragmented single_contact field values into a single array,
         # with one contact object.
 
-        contact_submissions_to_merge[formatted_requirement_key] = [{}] unless contact_submissions_to_merge[
+        contact_submissions_to_merge[formatted_requirement_key] = [
+          {}
+        ] unless contact_submissions_to_merge[
           formatted_requirement_key
         ].present?
 
-        contact_submissions_to_merge[formatted_requirement_key].first[contact_property_key] = submitted_value
+        contact_submissions_to_merge[formatted_requirement_key].first[
+          contact_property_key
+        ] = submitted_value
 
         # delete the original single_contact key value pair from the submission data
         submission_data[section_key].delete(submitted_field_key)
@@ -229,7 +243,7 @@ class ExternalPermitApplicationService
           name: file_data&.dig("metadata", "filename"),
           type: file_data["type"],
           size: file_data["size"],
-          url: file_model.file_url,
+          url: file_model.file_url
         }
       end
       .compact
@@ -243,7 +257,9 @@ class ExternalPermitApplicationService
     return nil unless latest_submission_version.present?
 
     checklist_document =
-      latest_submission_version.supporting_documents.find_by(data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY)
+      latest_submission_version.supporting_documents.find_by(
+        data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY
+      )
 
     return nil unless checklist_document.present?
 
@@ -258,8 +274,8 @@ class ExternalPermitApplicationService
         name: checklist_document.file_name,
         type: checklist_document.file_type,
         size: checklist_document.file_size,
-        url: checklist_document.file_url,
-      },
+        url: checklist_document.file_url
+      }
     ]
 
     {
@@ -273,9 +289,9 @@ class ExternalPermitApplicationService
           name: "Energy step code documents",
           requirement_code: "energy_step_code_documents",
           type: :file,
-          value: file_values,
-        },
-      ],
+          value: file_values
+        }
+      ]
     }
   end
 end

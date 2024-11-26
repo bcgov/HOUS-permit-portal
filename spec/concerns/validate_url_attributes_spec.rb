@@ -86,7 +86,9 @@ RSpec.describe ValidateUrlAttributes, type: :model do
         dummy_model.url = "https://www.example.com"
         dummy_model.another_url = "not_a_url"
         expect(dummy_model).not_to be_valid
-        expect(dummy_model.errors[:another_url]).to include("must be a valid URL")
+        expect(dummy_model.errors[:another_url]).to include(
+          "must be a valid URL"
+        )
       end
     end
   end

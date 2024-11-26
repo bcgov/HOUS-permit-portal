@@ -1,6 +1,12 @@
 class TemplateVersionBlueprint < Blueprinter::Base
   identifier :id
-  fields :status, :deprecation_reason, :created_at, :updated_at, :version_date, :label, :first_nations
+  fields :status,
+         :deprecation_reason,
+         :created_at,
+         :updated_at,
+         :version_date,
+         :label,
+         :first_nations
 
   field :version_date do |template_version|
     # Parse version date in BC time

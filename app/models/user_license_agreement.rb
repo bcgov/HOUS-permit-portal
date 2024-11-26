@@ -14,6 +14,8 @@ class UserLicenseAgreement < ApplicationRecord
   def user_eula_variant_matches_agreement_variant
     return if user.blank? || agreement.blank?
 
-    errors.add(:agreement, "variant must match user's eula_variant") unless user.eula_variant == agreement.variant
+    unless user.eula_variant == agreement.variant
+      errors.add(:agreement, "variant must match user's eula_variant")
+    end
   end
 end

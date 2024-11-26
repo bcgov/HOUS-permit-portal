@@ -4,7 +4,10 @@ class AutomatedCompliance::HistoricSite < AutomatedCompliance::Base
       raise Errors::GeometryError if permit_application.pid.blank?
 
       # extraction of parcel data can be done via LTSA base
-      attributes = Wrappers::LtsaParcelMapBc.new.historic_site_by_pid(pid: permit_application.pid)
+      attributes =
+        Wrappers::LtsaParcelMapBc.new.historic_site_by_pid(
+          pid: permit_application.pid
+        )
 
       raise Errors::GeometryError if attributes.nil?
 

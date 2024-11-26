@@ -16,7 +16,12 @@ class OmniauthUserResolver
 
   private
 
-  OMNIAUTH_PROVIDERS = { idir: "idir", bceid: "bceidboth", bceid_business: "bceidbusiness", bceid_basic: "bceidbasic" }
+  OMNIAUTH_PROVIDERS = {
+    idir: "idir",
+    bceid: "bceidboth",
+    bceid_business: "bceidbusiness",
+    bceid_basic: "bceidbasic"
+  }
 
   def resolve_user
     if should_promote_user?
@@ -48,7 +53,7 @@ class OmniauthUserResolver
         omniauth_provider:,
         omniauth_uid:,
         omniauth_email:,
-        omniauth_username:,
+        omniauth_username:
       )
     # skip confirmation until user has a chance to add/verify their notification email
     u.skip_confirmation_notification!
@@ -64,7 +69,7 @@ class OmniauthUserResolver
       omniauth_provider:,
       omniauth_uid:,
       omniauth_email:,
-      omniauth_username:,
+      omniauth_username:
     )
     invited_user.accept_invitation! if invited_user.valid?
   end
@@ -83,7 +88,11 @@ class OmniauthUserResolver
     @provider ||=
       case raw_info.identity_provider
       when OMNIAUTH_PROVIDERS[:bceid]
-        raw_info.bceid_business_guid ? OMNIAUTH_PROVIDERS[:bceid_business] : OMNIAUTH_PROVIDERS[:bceid_basic]
+        if raw_info.bceid_business_guid
+          OMNIAUTH_PROVIDERS[:bceid_business]
+        else
+          OMNIAUTH_PROVIDERS[:bceid_basic]
+        end
       else
         raw_info.identity_provider
       end

@@ -232,6 +232,7 @@ const options = {
           acknowledgeAndDismiss: "Acknowledge and dismiss",
           markedForRemoval: 'Click "Save changes" to confirm removal',
           proceed: "Proceed",
+          copyNoun: "Copy",
         },
         notification: {
           title: "Notifications",
@@ -481,7 +482,7 @@ const options = {
           viewedOn: "Viewed on",
           seeBestPractices_CTA: "See best practices",
           seeBestPractices_link:
-            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-best-practices",
+            "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub#practices",
           searchKnowledge_CTA: "Ask a question",
           searchKnowledge_link:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub-search",
@@ -524,9 +525,9 @@ const options = {
           },
           new: {
             locationHeading: "Location for permit",
-            forFirstNations: "Is this permit for First Nations lands?",
             permitTypeHeading: "Permit type",
             workTypeHeading: "Work type",
+            forFirstNations: "Is this permit application on <1>First Nation Registered Land</1>?",
             applicationDisclaimerInstruction:
               "Before you submit a building permit application, please ensure your proposed building siting and design complies with:",
             applicationDisclaimers: [
@@ -564,14 +565,19 @@ const options = {
               "You confirm that the information you provided was completed to the best of your knowledge and ability",
             yourReference: "For reference, your BC Building Permit Hub Application # is {{ number }}",
             noContactsAvailable:
-              "Sorry, the Building Permit Hub team is collaborating to produce customized permit applications.",
+              "This jurisdiction is not ready to accept applications through this tool yet. Please check with your local jurisdiction.",
             whatsNext:
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found for this address. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found. Please select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
+            needToKnow: "What you need to know",
+            disclaimer1:
+              "You can use this website to submit a permit application for your building project. This website checks if your application meets some codes, but approval isn’t automatic.",
+            disclaimer2:
+              "After you’ve submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           },
           edit: {
             saveDraft: "Save and finish later",
@@ -669,6 +675,7 @@ const options = {
             edit: {
               title: "Edit requirement block",
               options: "Options",
+              copy: "Copy this block",
               removeConfirmationModal: {
                 title: "Confirm you want to archive this requirement block.",
                 body: "Archiving this requirement blocks will remove it from all draft templates. This action cannot be undone.",
@@ -821,7 +828,8 @@ const options = {
         },
         stepCode: {
           title: "Step code auto-compliance tool",
-          subTitle: "Automatically generate your BC Energy Step Code compliance report",
+          subTitle:
+            "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
           checklistGuide: "See checklist guide",
           helpLink:
             "https://www2.gov.bc.ca/gov/content/housing-tenancy/building-or-renovating/permits/building-permit-hub/29065",
@@ -1475,7 +1483,7 @@ const options = {
             descriptionHelpText:
               "Provide some context for review managers and administrators on what kinds of buildings this permit is meant for.",
             createButton: "Create template",
-            firstNationsLand: "This permit is intended <1>only for First Nations land</1>",
+            firstNationsLand: "This permit is intended only for <1>First Nation Registered Land</1>",
             copyExisting: "Copy from existing template of this permit and work type if available",
           },
           versionSidebar: {
@@ -1556,12 +1564,21 @@ const options = {
               description:
                 "Local jurisdictions can change building permit applications to fit their needs by adding elective fields and offering submitters practical tips. This helps make the application forms reflect the distinct regulations, standards, and requirements of each jurisdiction, so applicants provide the correct information needed by their area.",
               tipLabel: "Tip for submitters (optional)",
+              filterLabel: "Search electives",
+              sortLabel: "Sort by",
+              filterPlaceholder: "Search electives",
+              sortOptions: {
+                labelAsc: "Elective (A-Z)",
+                labelDesc: "Elective (Z-A)",
+                reasonAsc: "Reason (A-Z)",
+                reasonDesc: "Reason (Z-A)",
+              },
               manageFieldsButton: "Manage elective field(s)",
               resetToDefaults: "Reset to defaults",
               selectFieldsTitle: "Select elective fields",
               electiveFormFields: "Elective form fields",
               addSelectedButton: "Add selected",
-              reason: "Reason",
+              reason: "Reason:",
               reasonLabels: {
                 placeholder: "Select a reason",
                 bylaw: "Bylaw",
@@ -1638,6 +1655,13 @@ const options = {
             title: "Export energy step code configuration by jurisdiction",
             filename: "Energy step code configuration by jurisdiction",
           },
+          applicationMetrics: {
+            name: "Basic Application metrics for all jurisdictions",
+            description:
+              "Submitted and draft application metrics by jurisdiction and type, excluding submissions created by employee accounts",
+            title: "Basic Application metrics for all jurisdictions",
+            filename: "Basic Application metrics for all jurisdictions",
+          },
           columnHeaders: {
             name: "Name",
             description: "Description",
@@ -1648,6 +1672,7 @@ const options = {
             createExternalApiKey: "Create new API key",
             enabled: "Enabled",
             disabled: "Disabled",
+            accessDocs: "Access the API Documentation",
             table: {
               heading: "API keys",
             },

@@ -8,7 +8,6 @@
   },
   "devDependencies": {
     "@chakra-ui/cli": "^2.4.1",
-    "@prettier/plugin-ruby": "^4.0.2",
     "@types/leaflet": "^1.9.8",
     "@types/node": "^20.12.2",
     "@types/quill": "^2.0.14",
@@ -30,7 +29,7 @@
     "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "vite": "^5.1.7",
+    "vite": "^5.4.9",
     "vite-plugin-ruby": "^5.0.0"
   },
   "dependencies": {
@@ -98,7 +97,7 @@
     "generate-pdf": " node public/vite-ssr/ssr.js"
   },
   "lint-staged": {
-    "*.{js,css,md,rb,ts,tsx}": [
+    "*.{js,css,md,ts,tsx}": [
       "prettier --write"
     ],
     "*.rb": [

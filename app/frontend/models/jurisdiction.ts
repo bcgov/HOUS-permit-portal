@@ -5,7 +5,7 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
+import { EEnergyStep, EJurisdictionExternalApiState, EZeroCarbonStep } from "../types/enums"
 import { IContact, IPermitTypeRequiredStep, IPermitTypeSubmissionContact, TLatLngTuple } from "../types/types"
 import { ExternalApiKeyModel } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
@@ -38,6 +38,10 @@ export const JurisdictionModel = types
     mapPosition: types.frozen<TLatLngTuple>(),
     mapZoom: types.maybeNull(types.number),
     externalApiEnabled: types.optional(types.boolean, false),
+    externalApiState: types.optional(
+      types.enumeration(Object.values(EJurisdictionExternalApiState)),
+      EJurisdictionExternalApiState.gOff
+    ),
     submissionInboxSetUp: types.boolean,
     permitTypeRequiredSteps: types.array(types.frozen<IPermitTypeRequiredStep>()),
   })
@@ -172,6 +176,7 @@ export const JurisdictionModel = types
 
       if (response.ok) {
         self.externalApiEnabled = !!response.data?.data?.externalApiEnabled
+        self.externalApiState = response.data?.data?.externalApiState
       }
       return response.ok
     }),

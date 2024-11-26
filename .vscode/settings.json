@@ -10,5 +10,13 @@
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "rubyLsp.formatter": "syntax_tree"
+  "rubyLsp.formatter": "syntax_tree",
+  "ruby.useBundler": true,
+  "ruby.lint": {
+    "rubocop": {
+      "useBundler": true,
+      "lint": true,
+      "rails": true
+    }
+  }
 }

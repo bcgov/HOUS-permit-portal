@@ -16,7 +16,11 @@ module TraverseDataJson
           find_file_fields_and_transform!(value, files, &block)
         when Array
           # If the value is an array, iterate through its elements
-          value.each { |item| find_file_fields_and_transform!(item, files, &block) if item.is_a?(Hash) }
+          value.each do |item|
+            if item.is_a?(Hash)
+              find_file_fields_and_transform!(item, files, &block)
+            end
+          end
         else
           # do nothing for remaining
         end
@@ -31,8 +35,14 @@ module TraverseDataJson
     #requirements may have nesting (like general contact, etc),  but in our purpose we skip this
     #TODO: explore performanc edifference to move this straight into jsonb functions
     data_hash["components"]
-      .map { |section_json| section_json["components"].map { |blocks_json| blocks_json["components"].flatten }.flatten }
+      .map do |section_json|
+        section_json["components"]
+          .map { |blocks_json| blocks_json["components"].flatten }
+          .flatten
+      end
       .flatten
-      .reduce({}) { |obj, requirement| obj.merge({ requirement["key"] => requirement }) }
+      .reduce({}) do |obj, requirement|
+        obj.merge({ requirement["key"] => requirement })
+      end
   end
 end

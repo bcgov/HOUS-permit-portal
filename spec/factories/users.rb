@@ -47,7 +47,7 @@ FactoryBot.define do
           :jurisdiction_membership,
           context.jurisdictions_count,
           user: user,
-          jurisdiction: context.jurisdiction,
+          jurisdiction: context.jurisdiction
         )
         user.reload
       end

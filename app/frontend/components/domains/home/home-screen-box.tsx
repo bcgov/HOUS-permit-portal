@@ -1,9 +1,8 @@
-import { BoxProps, Flex, Heading, Text } from "@chakra-ui/react"
+import { BoxProps, Flex, Heading, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
 import { CaretRight } from "@phosphor-icons/react"
 import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
-import { SectionBox } from "./section-box"
 
 interface IHomeScreenBoxProps extends BoxProps {
   icon: ReactNode
@@ -17,25 +16,45 @@ export const HomeScreenBox = ({ icon, title, description, href, linkText, ...res
   const { t } = useTranslation()
 
   return (
-    <SectionBox {...rest}>
+    <LinkBox
+      as="section"
+      borderRadius="lg"
+      borderWidth={1}
+      borderColor="border.light"
+      p={6}
+      w="full"
+      className="jumbo-buttons"
+      position="relative"
+      transition="border-color 200ms ease-out, background-color 200ms ease-out"
+      _hover={{
+        borderColor: "theme.blueAlt",
+        backgroundColor: "theme.BlueLight",
+      }}
+      {...rest}
+    >
       <Flex direction={{ base: "column", md: "row" }} gap={8} align="center">
         <Flex direction="column" gap={3} flex={1}>
-          <Flex color="text.link">
+          <Flex align="center" color="text.link">
             {icon}
-            <Heading as="h3" ml={2}>
+            <Heading as="h3" ml={2} mb={0} size="md">
               {title}
             </Heading>
           </Flex>
-          <Text ml={8} fontSize="sm">
+          <Text ml={8} fontSize="sm" color="gray.600">
             {description}
           </Text>
         </Flex>
-        <RouterLinkButton to={href} variant="tertiary" rightIcon={<CaretRight size={16} />} position="static">
-          <Text as="span" fontWeight="bold" fontSize="lg" color="text.link">
-            {linkText || t("ui.manage")}
-          </Text>
-        </RouterLinkButton>
+        <LinkOverlay
+          as={RouterLinkButton}
+          to={href}
+          variant="link"
+          rightIcon={<CaretRight size={16} />}
+          fontWeight="bold"
+          fontSize="lg"
+        >
+          {linkText || t("ui.manage")}
+        </LinkOverlay>
       </Flex>
-    </SectionBox>
+    </LinkBox>
   )
 }

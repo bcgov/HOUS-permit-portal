@@ -3,7 +3,12 @@ class RequirementBlock < ApplicationRecord
   include Discard::Model
 
   sanitizable :display_description
-  searchkick searchable: %i[name requirement_labels associations configurations],
+  searchkick searchable: %i[
+               name
+               requirement_labels
+               associations
+               configurations
+             ],
              word_start: %i[name requirement_labels associations configurations]
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
@@ -17,7 +22,7 @@ class RequirementBlock < ApplicationRecord
   enum reviewer_role: { any: 0 }, _prefix: true
 
   validates :sku, uniqueness: true, presence: true
-  validates :name, uniqueness: true, presence: true
+  validates :name, presence: true, uniqueness: { scope: :first_nations }
   validates :display_name, presence: true
   validate :validate_step_code_dependencies
   validate :validate_requirements_conditional
@@ -38,7 +43,7 @@ class RequirementBlock < ApplicationRecord
       requirement_labels: requirements.pluck(:label),
       associations: association_list,
       configurations: configurations_search_list,
-      discarded: discarded_at.present?,
+      discarded: discarded_at.present?
     }
   end
 
@@ -55,7 +60,7 @@ class RequirementBlock < ApplicationRecord
       description: display_description,
       collapsible: true,
       collapsed: false,
-      components: components_form_json(section_key),
+      components: components_form_json(section_key)
     }
   end
 
@@ -63,7 +68,9 @@ class RequirementBlock < ApplicationRecord
     optional_block = requirements.all? { |req| !req.required }
     requirement_map = requirements.map { |r| r.to_form_json(key(section_key)) }
 
-    requirement_map.push(optional_block_confirmation_requirement(section_key)) if optional_block
+    if optional_block
+      requirement_map.push(optional_block_confirmation_requirement(section_key))
+    end
 
     requirement_map
   end
@@ -75,13 +82,16 @@ class RequirementBlock < ApplicationRecord
       type: "checkbox",
       custom_class: "optional-block-confirmation-checkbox",
       validate: {
-        required: true,
+        required: true
       },
       input: true,
-      label: I18n.t("formio.requirement_block.optional_block_confirmation_requirement_label"),
+      label:
+        I18n.t(
+          "formio.requirement_block.optional_block_confirmation_requirement_label"
+        ),
       widget: {
-        type: "input",
-      },
+        type: "input"
+      }
     }
   end
 
@@ -97,26 +107,37 @@ class RequirementBlock < ApplicationRecord
 
       next unless conditional.present?
 
-      if [conditional["when"], conditional["eq"], conditional["show"]].any?(&:blank?)
-        errors.add(:input_options, "conditional must have when, eq, and show")
+      if [conditional["when"], conditional["eq"]].any?(&:blank?) ||
+           [conditional["show"], conditional["hide"]].all?(&:blank?)
+        errors.add(
+          :input_options,
+          "conditional must have when and eq, and one of show or hide"
+        )
         break
       end
 
-      if requirements.find { |r| r.requirement_code == conditional["when"] }.blank?
-        errors.add(:input_options, "conditional 'when' field must be a requirement code in the same requirement block")
+      if requirements
+           .find { |r| r.requirement_code == conditional["when"] }
+           .blank?
+        errors.add(
+          :input_options,
+          "conditional 'when' field must be a requirement code in the same requirement block"
+        )
         break
       end
     end
   end
 
   def validate_step_code_dependencies
-    has_energy_step_code = requirements.any? { |req| req.input_type_energy_step_code? }
+    has_energy_step_code =
+      requirements.any? { |req| req.input_type_energy_step_code? }
 
     return unless has_energy_step_code
 
     has_all_dependencies =
       Requirement::ENERGY_STEP_CODE_REQUIRED_DEPENDENCY_CODES.all? do |dependency_code|
-        requirements.count { |req| req.requirement_code == dependency_code } == 1
+        requirements.count { |req| req.requirement_code == dependency_code } ==
+          1
       end
 
     return if has_all_dependencies
@@ -155,7 +176,8 @@ class RequirementBlock < ApplicationRecord
     # With UUIDs it shouldn't be needed, but have a max retry count
     # to be safe. This is to prevent infinite loops in case of a bug.
     while RequirementBlock.exists?(sku: self.sku) && retry_count < 5
-      self.sku = "#{parameterized_name}_#{retry_count > 3 ? SecureRandom.uuid : SecureRandom.hex(3)}"
+      self.sku =
+        "#{parameterized_name}_#{retry_count > 3 ? SecureRandom.uuid : SecureRandom.hex(3)}"
 
       retry_count += 1
     end

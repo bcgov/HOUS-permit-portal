@@ -1,8 +1,13 @@
 class Jurisdiction < ApplicationRecord
   extend FriendlyId
   friendly_id :qualified_name, use: :slugged
+  include JurisdictionExternalApiState
 
-  BASE_INCLUDES = %i[permit_type_submission_contacts contacts permit_type_required_steps]
+  BASE_INCLUDES = %i[
+    permit_type_submission_contacts
+    contacts
+    permit_type_required_steps
+  ]
 
   include ActionView::Helpers::SanitizeHelper
   searchkick searchable: %i[name reverse_qualified_name qualified_name],
@@ -17,7 +22,8 @@ class Jurisdiction < ApplicationRecord
   has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_template_version_customizations
-  has_many :template_versions, through: :jurisdiction_template_version_customizations
+  has_many :template_versions,
+           through: :jurisdiction_template_version_customizations
   has_many :requirement_templates, through: :template_versions
   has_many :permit_type_submission_contacts
   has_many :external_api_keys, dependent: :destroy
@@ -31,15 +37,18 @@ class Jurisdiction < ApplicationRecord
   before_validation :normalize_locality_type
   before_validation :normalize_name
   before_validation :set_type_based_on_locality
+
   before_save :sanitize_html_fields
 
-  after_save :create_integration_mappings_async, if: :saved_change_to_external_api_enabled?
   after_create :create_permit_type_required_steps
 
   accepts_nested_attributes_for :contacts
   accepts_nested_attributes_for :permit_type_submission_contacts,
                                 allow_destroy: true,
-                                reject_if: proc { |attributes| attributes["email"].blank? }
+                                reject_if:
+                                  proc { |attributes|
+                                    attributes["email"].blank?
+                                  }
 
   accepts_nested_attributes_for :permit_type_required_steps, allow_destroy: true
 
@@ -75,14 +84,21 @@ class Jurisdiction < ApplicationRecord
   end
 
   def self.locality_types
-    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(:locality_type)
+    find_by_sql("SELECT DISTINCT locality_type FROM jurisdictions").pluck(
+      :locality_type
+    )
   end
 
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
     name = attributes["MUNICIPALITY"]
     regional_district_name = attributes["REGIONAL_DISTRICT"]
 
-    named_params = { fields: %w[reverse_qualified_name qualified_name], misspellings: { edit_distance: 1 } }
+    named_params = {
+      fields: %w[reverse_qualified_name qualified_name],
+      misspellings: {
+        edit_distance: 1
+      }
+    }
     return(
       SubDistrict.search(name, **named_params).first ||
         RegionalDistrict.search(regional_district_name, **named_params).first
@@ -101,12 +117,17 @@ class Jurisdiction < ApplicationRecord
       reviewers_size: reviewers_size,
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
-      submission_inbox_set_up: submission_inbox_set_up,
+      submission_inbox_set_up: submission_inbox_set_up
     }
   end
 
   def self.custom_titleize_locality_type(locality_type)
-    locality_type.split.map { |word| %w[the of].include?(word.downcase) ? word.downcase : word.capitalize }.join(" ")
+    locality_type
+      .split
+      .map do |word|
+        %w[the of].include?(word.downcase) ? word.downcase : word.capitalize
+      end
+      .join(" ")
   end
 
   def qualifier
@@ -139,10 +160,16 @@ class Jurisdiction < ApplicationRecord
 
   def submission_inbox_set_up
     # preload all of the permit_types and contacts for efficiency
-    permit_types = PermitType.all.to_a
-    contacts = permit_type_submission_contacts.where.not(email: nil).where.not(confirmed_at: nil).to_a
+    permit_types = PermitType.enabled.to_a
+    contacts =
+      permit_type_submission_contacts
+        .where.not(email: nil)
+        .where.not(confirmed_at: nil)
+        .to_a
 
-    permit_types.all? { |permit_type| contacts.any? { |contact| contact.permit_type_id == permit_type.id } }
+    permit_types.all? do |permit_type|
+      contacts.any? { |contact| contact.permit_type_id == permit_type.id }
+    end
   end
 
   def self.class_for_locality_type(locality_type)
@@ -157,6 +184,14 @@ class Jurisdiction < ApplicationRecord
     external_api_keys.active
   end
 
+  def enabled_permit_type_required_steps()
+    permit_type_required_steps.joins(:permit_type).where(
+      permit_classifications: {
+        enabled: true
+      }
+    )
+  end
+
   def permit_type_required_steps_by_classification(permit_type = nil)
     return PermitTypeRequiredStep.none unless permit_type
 
@@ -166,7 +201,8 @@ class Jurisdiction < ApplicationRecord
   def create_integration_mappings
     return unless external_api_enabled?
 
-    existing_mapping_template_ids = integration_mappings.pluck(:template_version_id)
+    existing_mapping_template_ids =
+      integration_mappings.pluck(:template_version_id)
 
     relevant_template_versions =
       TemplateVersion
@@ -187,30 +223,21 @@ class Jurisdiction < ApplicationRecord
 
   private
 
-  def create_integration_mappings_async
-    return unless external_api_enabled?
-
-    if Rails.env.test?
-      ModelCallbackJob.new.perform(self.class.name, id, "create_integration_mappings")
-    else
-      ModelCallbackJob.perform_async(self.class.name, id, "create_integration_mappings")
-    end
-  end
-
   def create_permit_type_required_steps
     PermitType.all.each do |permit_type|
       permit_type_required_steps.create(
         permit_type:,
         energy_step_required: ENV["MIN_ENERGY_STEP"],
         zero_carbon_step_required: ENV["MIN_ZERO_CARBON_STEP"],
-        default: true,
+        default: true
       )
     end
   end
 
   def sanitize_html_fields
     attributes.each do |name, value|
-      self[name] = sanitize(value) if name.ends_with?("_html") && will_save_change_to_attribute?(name)
+      self[name] = sanitize(value) if name.ends_with?("_html") &&
+        will_save_change_to_attribute?(name)
     end
   end
 

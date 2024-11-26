@@ -4,7 +4,7 @@ class ZipfileJob
                   queue: :file_processing,
                   on_conflict: {
                     client: :log,
-                    server: :reject,
+                    server: :reject
                   }
 
   def self.lock_args(args)
@@ -23,8 +23,13 @@ class ZipfileJob
       WebsocketBroadcaster.push_update_to_relevant_users(
         permit_application.notifiable_users.pluck(:id),
         Constants::Websockets::Events::PermitApplication::DOMAIN,
-        Constants::Websockets::Events::PermitApplication::TYPES[:update_supporting_documents],
-        PermitApplicationBlueprint.render_as_hash(permit_application.reload, { view: :supporting_docs_update }),
+        Constants::Websockets::Events::PermitApplication::TYPES[
+          :update_supporting_documents
+        ],
+        PermitApplicationBlueprint.render_as_hash(
+          permit_application.reload,
+          { view: :supporting_docs_update }
+        )
       )
     end
   end

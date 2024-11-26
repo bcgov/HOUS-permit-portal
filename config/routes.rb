@@ -8,11 +8,11 @@ Rails.application.routes.draw do
     Sidekiq::Web.use Rack::Auth::Basic do |username, password|
       ActiveSupport::SecurityUtils.secure_compare(
         ::Digest::SHA256.hexdigest(username),
-        ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_USERNAME"]),
+        ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_USERNAME"])
       ) &
         ActiveSupport::SecurityUtils.secure_compare(
           ::Digest::SHA256.hexdigest(password),
-          ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_PASSWORD"]),
+          ::Digest::SHA256.hexdigest(ENV["SIDEKIQ_PASSWORD"])
         )
     end
   end
@@ -27,17 +27,17 @@ Rails.application.routes.draw do
   scope module: :api, path: :api do
     devise_for :users,
                defaults: {
-                 format: :json,
+                 format: :json
                },
                path: "",
                path_names: {
                  sign_in: "login",
-                 sign_out: "logout",
+                 sign_out: "logout"
                },
                controllers: {
                  sessions: "api/sessions",
                  invitations: "api/invitations",
-                 omniauth_callbacks: "api/omniauth_callbacks",
+                 omniauth_callbacks: "api/omniauth_callbacks"
                }
 
     devise_scope :user do
@@ -60,36 +60,54 @@ Rails.application.routes.draw do
     end
 
     resources :notifications, only: %i[index] do
-      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
+      post "reset_last_read",
+           on: :collection,
+           to: "notifications#reset_last_read"
     end
 
     resources :notifications, only: %i[index] do
-      post "reset_last_read", on: :collection, to: "notifications#reset_last_read"
+      post "reset_last_read",
+           on: :collection,
+           to: "notifications#reset_last_read"
     end
 
     resources :requirement_templates, only: %i[show create destroy update] do
       post "search", on: :collection, to: "requirement_templates#index"
       post "schedule", to: "requirement_templates#schedule", on: :member
-      post "force_publish_now", to: "requirement_templates#force_publish_now", on: :member
+      post "force_publish_now",
+           to: "requirement_templates#force_publish_now",
+           on: :member
       patch "restore", on: :member
-      post "template_versions/:id/unschedule", on: :collection, to: "requirement_templates#unschedule_template_version"
+      post "template_versions/:id/unschedule",
+           on: :collection,
+           to: "requirement_templates#unschedule_template_version"
     end
 
     resources :template_versions, only: %i[index show] do
-      get "compare_requirements", to: "template_versions#compare_requirements", on: :member
-      get "download_requirement_summary_csv", to: "template_versions#download_summary_csv", on: :member
+      get "compare_requirements",
+          to: "template_versions#compare_requirements",
+          on: :member
+      get "download_requirement_summary_csv",
+          to: "template_versions#download_summary_csv",
+          on: :member
 
       member do
         resources :jurisdictions, only: [] do
           get "jurisdiction_template_version_customization",
-              to: "template_versions#show_jurisdiction_template_version_customization"
+              to:
+                "template_versions#show_jurisdiction_template_version_customization"
           post "jurisdiction_template_version_customization",
-               to: "template_versions#create_or_update_jurisdiction_template_version_customization"
+               to:
+                 "template_versions#create_or_update_jurisdiction_template_version_customization"
           post "copy_jurisdiction_template_version_customization",
-               to: "template_versions#copy_jurisdiction_template_version_customization"
-          get "download_customization_csv", to: "template_versions#download_customization_csv"
-          get "download_customization_json", to: "template_versions#download_customization_json"
-          get "integration_mapping", to: "template_versions#show_integration_mapping"
+               to:
+                 "template_versions#copy_jurisdiction_template_version_customization"
+          get "download_customization_csv",
+              to: "template_versions#download_customization_csv"
+          get "download_customization_json",
+              to: "template_versions#download_customization_json"
+          get "integration_mapping",
+              to: "template_versions#show_integration_mapping"
         end
       end
     end
@@ -99,8 +117,12 @@ Rails.application.routes.draw do
     resources :jurisdictions, only: %i[index update show create] do
       post "search", on: :collection, to: "jurisdictions#index"
       post "users/search", on: :member, to: "jurisdictions#search_users"
-      post "permit_applications/search", on: :member, to: "jurisdictions#search_permit_applications"
-      patch "update_external_api_enabled", on: :member, to: "jurisdictions#update_external_api_enabled"
+      post "permit_applications/search",
+           on: :member,
+           to: "jurisdictions#search_permit_applications"
+      patch "update_external_api_enabled",
+            on: :member,
+            to: "jurisdictions#update_external_api_enabled"
       get "locality_type_options", on: :collection
       get "jurisdiction_options", on: :collection
     end
@@ -122,20 +144,35 @@ Rails.application.routes.draw do
     end
 
     resources :permit_applications, only: %i[create update show] do
-      post "generate_missing_pdfs", on: :member, to: "permit_applications#generate_missing_pdfs"
-      post "permit_collaborations", on: :member, to: "permit_applications#create_permit_collaboration"
-      post "permit_block_status", on: :member, to: "permit_applications#create_or_update_permit_block_status"
+      post "generate_missing_pdfs",
+           on: :member,
+           to: "permit_applications#generate_missing_pdfs"
+      post "permit_collaborations",
+           on: :member,
+           to: "permit_applications#create_permit_collaboration"
+      post "permit_block_status",
+           on: :member,
+           to: "permit_applications#create_or_update_permit_block_status"
       delete "permit_collaborations/remove_collaborator_collaborations",
              on: :member,
              to: "permit_applications#remove_collaborator_collaborations"
-      post "permit_collaborations/invite", on: :member, to: "permit_applications#invite_new_collaborator"
+      post "permit_collaborations/invite",
+           on: :member,
+           to: "permit_applications#invite_new_collaborator"
       post "search", on: :collection, to: "permit_applications#index"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
       patch "upload_supporting_document", on: :member
       patch "update_version", on: :member
-      patch "revision_requests", on: :member, to: "permit_applications#update_revision_requests"
-      post "revision_requests/finalize", on: :member, to: "permit_applications#finalize_revision_requests"
+      patch "revision_requests",
+            on: :member,
+            to: "permit_applications#update_revision_requests"
+      post "revision_requests/finalize",
+           on: :member,
+           to: "permit_applications#finalize_revision_requests"
+      get "download_application_metrics_csv",
+          on: :collection,
+          to: "permit_applications#download_application_metrics_csv"
     end
 
     resources :permit_collaborations, only: %i[destroy] do
@@ -145,7 +182,9 @@ Rails.application.routes.draw do
     patch "profile", to: "users#profile"
 
     resources :users, only: %i[] do
-      get "current_user/license_agreements", on: :collection, to: "users#license_agreements"
+      get "current_user/license_agreements",
+          on: :collection,
+          to: "users#license_agreements"
     end
     resources :users, only: %i[destroy update] do
       patch "restore", on: :member
@@ -160,7 +199,9 @@ Rails.application.routes.draw do
 
     resources :step_codes, only: %i[index create destroy], shallow: true do
       resources :step_code_checklists, only: %i[index show update]
-      get "download_step_code_summary_csv", on: :collection, to: "step_codes#download_step_code_summary_csv"
+      get "download_step_code_summary_csv",
+          on: :collection,
+          to: "step_codes#download_step_code_summary_csv"
     end
 
     post "tags/search", to: "tags#index", as: :tags_search
@@ -169,7 +210,9 @@ Rails.application.routes.draw do
     get "storage/s3/download" => "storage#download"
     delete "storage/s3/delete" => "storage#delete"
 
-    mount Shrine.uppy_s3_multipart(:cache) => "/storage/s3/multipart" if SHRINE_USE_S3
+    if SHRINE_USE_S3
+      mount Shrine.uppy_s3_multipart(:cache) => "/storage/s3/multipart"
+    end
     resources :site_configuration, only: [] do
       get :show, on: :collection
       put :update, on: :collection
@@ -194,7 +237,8 @@ Rails.application.routes.draw do
         post "search", on: :collection, to: "permit_applications#index"
         collection do
           resources :versions, as: "template_versions", only: [] do
-            get "integration_mapping", to: "permit_applications#show_integration_mapping"
+            get "integration_mapping",
+                to: "permit_applications#show_integration_mapping"
           end
         end
       end
@@ -210,5 +254,7 @@ Rails.application.routes.draw do
   get "/*path",
       to: "home#index",
       format: false,
-      constraints: ->(req) { !req.path.include?("/rails") && !req.path.start_with?("/public") }
+      constraints: ->(req) do
+        !req.path.include?("/rails") && !req.path.start_with?("/public")
+      end
 end

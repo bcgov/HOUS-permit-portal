@@ -4,7 +4,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::Energy::TEDI.new(
       checklist: step_code.pre_construction_checklist,
-      step: step,
+      step: step
     )
   end
 
@@ -23,8 +23,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
           building_volume: 624.9,
           proposed_gshl: 44.11,
           ref_gshl: 62.35,
-          hdd: 2851,
-        },
+          hdd: 2851
+        }
       ]
     end
 
@@ -42,8 +42,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
           building_volume: 624.9,
           proposed_gshl: 44.11,
           ref_gshl: 62.35,
-          hdd: 2851,
-        },
+          hdd: 2851
+        }
       ]
     end
 
@@ -62,8 +62,8 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
           building_volume: 624.9,
           proposed_gshl: 61.11,
           ref_gshl: ref_gshl,
-          hdd: 2851,
-        },
+          hdd: 2851
+        }
       ]
     end
 
@@ -83,7 +83,9 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::TEDI do
 
     context "where the compliance path is not 9.36.5" do
       before :each do
-        allow(step_code.pre_construction_checklist).to receive(:compliance_path).and_return(:step_code)
+        allow(step_code.pre_construction_checklist).to receive(
+          :compliance_path
+        ).and_return(:step_code)
       end
 
       it "sets tedi_hlr_percent to zero" do

@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   PASSWORD_REGEX = /\A(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).{8,64}\z/
-  searchkick searchable: %i[first_name last_name email], word_start: %i[first_name last_name email]
+  searchkick searchable: %i[first_name last_name email],
+             word_start: %i[first_name last_name email]
 
   include Devise::JWT::RevocationStrategies::Allowlist
   include Discard::Model
@@ -17,7 +18,14 @@ class User < ApplicationRecord
          omniauth_providers: %i[keycloak],
          jwt_revocation_strategy: self
 
-  enum role: { submitter: 0, review_manager: 1, reviewer: 2, super_admin: 3, regional_review_manager: 4 }, _default: 0
+  enum role: {
+         submitter: 0,
+         review_manager: 1,
+         reviewer: 2,
+         super_admin: 3,
+         regional_review_manager: 4
+       },
+       _default: 0
 
   # https://github.com/waiting-for-dev/devise-jwt
   self.skip_session_storage = %i[http_auth params_auth]
@@ -25,13 +33,25 @@ class User < ApplicationRecord
   # Associations
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :jurisdictions, through: :jurisdiction_memberships
+  has_many :integration_mapping_notifications,
+           as: :notifiable,
+           dependent: :destroy
 
-  has_many :permit_applications, foreign_key: "submitter_id", dependent: :destroy
-  has_many :applied_jurisdictions, through: :permit_applications, source: :jurisdiction
-  has_many :license_agreements, class_name: "UserLicenseAgreement", dependent: :destroy
+  has_many :permit_applications,
+           foreign_key: "submitter_id",
+           dependent: :destroy
+  has_many :applied_jurisdictions,
+           through: :permit_applications,
+           source: :jurisdiction
+  has_many :license_agreements,
+           class_name: "UserLicenseAgreement",
+           dependent: :destroy
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :collaborators, as: :collaboratorable, dependent: :destroy
-  has_many :collaborations, foreign_key: "user_id", class_name: "Collaborator", dependent: :destroy
+  has_many :collaborations,
+           foreign_key: "user_id",
+           class_name: "Collaborator",
+           dependent: :destroy
   has_one :preference, dependent: :destroy
   accepts_nested_attributes_for :preference
 
@@ -51,7 +71,8 @@ class User < ApplicationRecord
   attr_accessor :collaboration_invitation # this is needed to signal that a registration invitation is for collaboration when sending the email
 
   after_discard { destroy_jurisdiction_collaborator }
-  after_save :create_jurisdiction_collaborator, if: :saved_change_to_discarded_at
+  after_save :create_jurisdiction_collaborator,
+             if: :saved_change_to_discarded_at
 
   def confirmation_required?
     false
@@ -63,7 +84,7 @@ class User < ApplicationRecord
       reviewer: "employee",
       review_manager: "employee",
       regional_review_manager: "employee",
-      super_admin: nil,
+      super_admin: nil
     }[
       role.to_sym
     ]
@@ -84,7 +105,7 @@ class User < ApplicationRecord
       email: email,
       jurisdiction_ids: jurisdictions.pluck(:id),
       discarded: discarded_at.present?,
-      last_sign_in_at: last_sign_in_at,
+      last_sign_in_at: last_sign_in_at
     }
   end
 
@@ -120,7 +141,9 @@ class User < ApplicationRecord
   end
 
   def set_collaboration_invitation(permit_collaboration)
-    self.collaboration_invitation = { permit_collaboration: permit_collaboration }
+    self.collaboration_invitation = {
+      permit_collaboration: permit_collaboration
+    }
   end
 
   def create_jurisdiction_collaborator
@@ -156,7 +179,7 @@ class User < ApplicationRecord
       enable_in_app_new_template_version_publish_notification: true,
       enable_email_new_template_version_publish_notification: true,
       enable_in_app_customization_update_notification: true,
-      enable_email_customization_update_notification: true,
+      enable_email_customization_update_notification: true
     ).save
   end
 
@@ -172,21 +195,36 @@ class User < ApplicationRecord
   end
 
   def confirmed_user_has_fields
-    errors.add(:user, "Confirmed user must have first_name") unless !confirmed? || first_name.present?
-    errors.add(:user, "Confirmed user must have last_name") unless !confirmed? || last_name.present?
-    errors.add(:user, "Confirmed user must have email") unless !confirmed? || email.present?
+    unless !confirmed? || first_name.present?
+      errors.add(:user, "Confirmed user must have first_name")
+    end
+    unless !confirmed? || last_name.present?
+      errors.add(:user, "Confirmed user must have last_name")
+    end
+    unless !confirmed? || email.present?
+      errors.add(:user, "Confirmed user must have email")
+    end
   end
 
   def jurisdiction_must_belong_to_correct_roles
-    errors.add(:jurisdictions, :reviewers_only) if jurisdictions.any? && !review_staff?
+    if jurisdictions.any? && !review_staff?
+      errors.add(:jurisdictions, :reviewers_only)
+    end
   end
 
   def unique_omniauth_uid
     return unless omniauth_uid.present?
-    existing_user = User.where.not(omniauth_uid: nil).find_by(omniauth_uid:, omniauth_provider:)
+    existing_user =
+      User
+        .where.not(omniauth_uid: nil)
+        .find_by(omniauth_uid:, omniauth_provider:)
     return unless existing_user && existing_user != self
     if !super_admin?
-      errors.add(:base, :bceid_taken, jurisdiction: existing_user.jurisdictions.first&.name)
+      errors.add(
+        :base,
+        :bceid_taken,
+        jurisdiction: existing_user.jurisdictions.first&.name
+      )
     elsif super_admin?
       errors.add(:base, :idir_taken)
     end

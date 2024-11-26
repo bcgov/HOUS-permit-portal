@@ -10,15 +10,18 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  Flex,
   FormControl,
   FormLabel,
+  Input,
   Select,
+  Spacer,
   Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { FormProvider, useController, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { getEnabledElectiveReasonOptions } from "../../../../../constants"
@@ -120,7 +123,7 @@ export const JurisdictionRequirementBlockEditSidebar = observer(function Jurisdi
             </Text>
           </DrawerHeader>
 
-          <DrawerBody px={8}>
+          <DrawerBody px={8} py={0}>
             <FormProvider {...formMethods}>
               {showManageFieldsView ? (
                 <ManageElectiveFieldsView
@@ -175,7 +178,7 @@ const MainView = ({
   const watchedEnabledElectiveFieldIds = watch("enabledElectiveFieldIds") ?? []
 
   return (
-    <Stack as={"section"} w={"full"} spacing={6}>
+    <Stack as={"section"} w={"full"} spacing={6} h="full">
       <Text color={"text.secondary"} fontSize={"sm"}>
         {t("digitalBuildingPermits.edit.requirementBlockSidebar.description")}
       </Text>
@@ -246,6 +249,10 @@ const ManageElectiveFieldsView = ({
     existingEnabledElectiveFieldReasons ?? {}
   )
 
+  // New state variables for filtering and sorting
+  const [filterText, setFilterText] = useState<string>("")
+  const [sortOption, setSortOption] = useState<string>("labelAsc")
+
   const removeReason = (fieldId: string) => {
     setEnabledFieldReasons((prev) => {
       const newReasons = { ...prev }
@@ -268,64 +275,161 @@ const ManageElectiveFieldsView = ({
   }
 
   const isAddValid = enabledFieldIds.every((id) => !!enabledFieldReasons[id])
-  return (
-    <Stack as={"section"} w={"full"} spacing={6} mt={7}>
-      <Text color={"text.secondary"} fontWeight={700}>
-        {t("digitalBuildingPermits.edit.requirementBlockSidebar.selectFieldsTitle")}
-      </Text>
-      <Stack w={"full"} spacing={4}>
-        {electiveFields.map((requirementField) => {
-          const enabled = enabledFieldIds.includes(requirementField.id)
-          return (
-            <Stack key={requirementField.id} mb="8">
-              <Stack
-                flexDir={"row"}
-                spacing={2}
-                borderRadius={"md"}
-                border={"1px solid"}
-                borderColor={"border.light"}
-                bg={"theme.blueLight"}
-                px={4}
-                py={2}
-              >
-                <Checkbox
-                  borderColor={"border.input"}
-                  isChecked={enabled}
-                  onChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
-                />
-                <Text fontWeight={700}>{requirementField.label}</Text>
-              </Stack>
-              <FormControl alignSelf={"flex-end"} maxW={"200px"} isRequired={enabled}>
-                <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</FormLabel>
-                <Select
-                  value={enabledFieldReasons[requirementField.id]}
-                  placeholder={t("digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder")}
-                  onChange={(e) => onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)}
-                >
-                  {getEnabledElectiveReasonOptions().map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-            </Stack>
-          )
-        })}
-      </Stack>
 
-      <ButtonGroup size={"md"} justifyContent={"flex-start"} gap={6} pb="6">
-        <Button
-          variant={"primary"}
-          onClick={() => onAddFields([...new Set(enabledFieldIds)], enabledFieldReasons)}
-          isDisabled={!isAddValid}
+  // Filtering and sorting logic using useMemo for performance optimization
+  const filteredAndSortedFields = useMemo(() => {
+    // Filter electiveFields based on filterText
+    const filtered = electiveFields.filter((field) => field.label.toLowerCase().includes(filterText.toLowerCase()))
+
+    // Sort based on sortOption
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortOption) {
+        case "labelAsc":
+          return a.label.localeCompare(b.label)
+        case "labelDesc":
+          return b.label.localeCompare(a.label)
+        case "reasonAsc":
+          // Handle cases where reason might be undefined
+          const reasonA = enabledFieldReasons[a.id] || ""
+          const reasonB = enabledFieldReasons[b.id] || ""
+          return reasonA.localeCompare(reasonB)
+        case "reasonDesc":
+          const reasonADesc = enabledFieldReasons[a.id] || ""
+          const reasonBDesc = enabledFieldReasons[b.id] || ""
+          return reasonBDesc.localeCompare(reasonADesc)
+        default:
+          return 0
+      }
+    })
+
+    return sorted
+  }, [electiveFields, filterText, sortOption, enabledFieldReasons])
+
+  return (
+    <>
+      <Stack
+        direction={"row"}
+        spacing={4}
+        align="center"
+        w="full"
+        py={4}
+        my={4}
+        top={0}
+        position="sticky"
+        zIndex={10}
+        bg="greys.white"
+        borderTop="1px solid"
+        borderColor="border.light"
+      >
+        {/* Filter Text Box */}
+        <FormControl w="full">
+          <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.filterLabel")}</FormLabel>
+          <Input
+            placeholder={t("digitalBuildingPermits.edit.requirementBlockSidebar.filterPlaceholder")}
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+          />
+        </FormControl>
+
+        {/* Sort Dropdown */}
+        <FormControl w="full">
+          <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.sortLabel")}</FormLabel>
+          <Select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
+            <option value="labelAsc">
+              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.labelAsc")}
+            </option>
+            <option value="labelDesc">
+              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.labelDesc")}
+            </option>
+            <option value="reasonAsc">
+              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.reasonAsc")}
+            </option>
+            <option value="reasonDesc">
+              {t("digitalBuildingPermits.edit.requirementBlockSidebar.sortOptions.reasonDesc")}
+            </option>
+          </Select>
+        </FormControl>
+      </Stack>
+      <Stack as={"section"} w={"full"} spacing={6} mt={7} h="full">
+        <Text color={"text.secondary"} fontWeight={700}>
+          {t("digitalBuildingPermits.edit.requirementBlockSidebar.selectFieldsTitle")}
+        </Text>
+
+        <Stack w={"full"} spacing={4}>
+          {filteredAndSortedFields.map((requirementField) => {
+            const enabled = enabledFieldIds.includes(requirementField.id)
+            return (
+              <Stack key={requirementField.id} mb="8">
+                <Box
+                  flexDir={"column"}
+                  borderRadius={"md"}
+                  border={"1px solid"}
+                  borderColor={"border.light"}
+                  bg={"theme.blueLight"}
+                  px={4}
+                  py={6}
+                  gap={2}
+                >
+                  <Flex align="start" gap={2}>
+                    <Checkbox
+                      borderColor={"border.input"}
+                      isChecked={enabled}
+                      onChange={(e) => onFieldEnableChange(requirementField.id, e.target.checked)}
+                    />
+                    <Box>
+                      <Text fontWeight={700}>{requirementField.label}</Text>
+                      {enabled && (
+                        <FormControl maxW={"200px"} isRequired={enabled} mt={2}>
+                          <FormLabel>{t("digitalBuildingPermits.edit.requirementBlockSidebar.reason")}</FormLabel>
+                          <Select
+                            bg="greys.white"
+                            value={enabledFieldReasons[requirementField.id] || ""}
+                            placeholder={t(
+                              "digitalBuildingPermits.edit.requirementBlockSidebar.reasonLabels.placeholder"
+                            )}
+                            onChange={(e) =>
+                              onReasonChange(requirementField.id, e.target.value as EEnabledElectiveFieldReason)
+                            }
+                          >
+                            {getEnabledElectiveReasonOptions().map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Box>
+                  </Flex>
+                </Box>
+              </Stack>
+            )
+          })}
+        </Stack>
+        <Spacer />
+
+        <ButtonGroup
+          size={"md"}
+          py={4}
+          gap={6}
+          bottom={0}
+          position="sticky"
+          bg="greys.white"
+          borderTop="1px solid"
+          borderColor="border.light"
         >
-          {t("digitalBuildingPermits.edit.requirementBlockSidebar.addSelectedButton")}
-        </Button>
-        <Button variant={"secondary"} onClick={onCancel}>
-          {t("ui.cancel")}
-        </Button>
-      </ButtonGroup>
-    </Stack>
+          <Button
+            variant={"primary"}
+            onClick={() => onAddFields([...new Set(enabledFieldIds)], enabledFieldReasons)}
+            isDisabled={!isAddValid}
+          >
+            {t("digitalBuildingPermits.edit.requirementBlockSidebar.addSelectedButton")}
+          </Button>
+          <Button variant={"secondary"} onClick={onCancel}>
+            {t("ui.cancel")}
+          </Button>
+        </ButtonGroup>
+      </Stack>
+    </>
   )
 }

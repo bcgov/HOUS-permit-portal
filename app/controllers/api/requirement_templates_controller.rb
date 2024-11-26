@@ -1,7 +1,8 @@
 class Api::RequirementTemplatesController < Api::ApplicationController
   include Api::Concerns::Search::RequirementTemplates
 
-  before_action :set_requirement_template, only: %i[show destroy restore update schedule force_publish_now]
+  before_action :set_requirement_template,
+                only: %i[show destroy restore update schedule force_publish_now]
   before_action :set_template_version, only: %i[unschedule_template_version]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -14,9 +15,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      meta: {
                        total_pages: @search.total_pages,
                        total_count: @search.total_count,
-                       current_page: @search.current_page,
+                       current_page: @search.current_page
                      },
-                     blueprint: RequirementTemplateBlueprint,
+                     blueprint: RequirementTemplateBlueprint
                    }
   end
 
@@ -25,7 +26,12 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
     render_success @requirement_template,
                    nil,
-                   { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                   {
+                     blueprint: RequirementTemplateBlueprint,
+                     blueprint_opts: {
+                       view: :extended
+                     }
+                   }
   end
 
   def create
@@ -35,18 +41,21 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       found_template =
         RequirementTemplate.find_by(
           permit_type_id: requirement_template_params[:permit_type_id],
-          activity_id: requirement_template_params[:activity_id],
+          activity_id: requirement_template_params[:activity_id]
         )
       if found_template.nil?
         authorize :requirement_template, :create?
         render_error("misc.not_found_error", status: :not_found) and return
       end
       @requirement_template =
-        RequirementTemplateCopyService.new(found_template).build_requirement_template_from_existing(
-          requirement_template_params,
-        )
+        RequirementTemplateCopyService.new(
+          found_template
+        ).build_requirement_template_from_existing(requirement_template_params)
     else
-      @requirement_template = RequirementTemplate.new(requirement_template_params.except(:copy_existing))
+      @requirement_template =
+        RequirementTemplate.new(
+          requirement_template_params.except(:copy_existing)
+        )
     end
 
     authorize @requirement_template
@@ -57,7 +66,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     else
       render_error "requirement_template.create_error",
                    message_opts: {
-                     error_message: @requirement_template.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_template.errors.full_messages.join(", ")
                    }
     end
   end
@@ -68,11 +78,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     if @requirement_template.update(requirement_template_params)
       render_success @requirement_template,
                      "requirement_template.update_success",
-                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
     else
       render_error "requirement_template.update_error",
                    message_opts: {
-                     error_message: @requirement_template.errors.full_messages.join(", "),
+                     error_message:
+                       @requirement_template.errors.full_messages.join(", ")
                    }
     end
   end
@@ -84,16 +100,23 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       unless @requirement_template.update(requirement_template_params)
         render_error "requirement_template.schedule_error",
                      message_opts: {
-                       error_message: @requirement_template.errors.full_messages.join(", "),
+                       error_message:
+                         @requirement_template.errors.full_messages.join(", ")
                      }
       end
 
       begin
         scheduled_template_version =
-          TemplateVersioningService.schedule!(@requirement_template, Date.parse(schedule_params))
+          TemplateVersioningService.schedule!(
+            @requirement_template,
+            Date.parse(schedule_params)
+          )
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
-        render_error "requirement_template.schedule_error", message_opts: { error_message: e.message }
+        render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message: e.message
+                     }
         raise ActiveRecord::Rollback
       end
 
@@ -102,7 +125,12 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
       render_success @requirement_template,
                      "requirement_template.schedule_success",
-                     { blueprint: RequirementTemplateBlueprint, blueprint_opts: { view: :extended } }
+                     {
+                       blueprint: RequirementTemplateBlueprint,
+                       blueprint_opts: {
+                         view: :extended
+                       }
+                     }
     end
   end
 
@@ -121,7 +149,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       end
 
       begin
-        published_template_version = TemplateVersioningService.force_publish_now!(@requirement_template)
+        published_template_version =
+          TemplateVersioningService.force_publish_now!(@requirement_template)
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         error_message = e.message
@@ -140,11 +169,14 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        blueprint: RequirementTemplateBlueprint,
                        blueprint_opts: {
                          view: :extended,
-                         published_template_version: published_template_version,
-                       },
+                         published_template_version: published_template_version
+                       }
                      }
     else
-      render_error "requirement_template.force_publish_now_error", message_opts: { error_message: error_message }
+      render_error "requirement_template.force_publish_now_error",
+                   message_opts: {
+                     error_message: error_message
+                   }
     end
   end
 
@@ -152,9 +184,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     authorize @template_version, policy_class: RequirementTemplatePolicy
 
     begin
-      template_version = TemplateVersioningService.unschedule!(@template_version, current_user)
+      template_version =
+        TemplateVersioningService.unschedule!(@template_version, current_user)
     rescue StandardError => e
-      render_error "requirement_template.template_unschedule_error", message_opts: { error_message: e.message }
+      render_error "requirement_template.template_unschedule_error",
+                   message_opts: {
+                     error_message: e.message
+                   }
     end
 
     render_success @template_version,
@@ -165,7 +201,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def destroy
     authorize @requirement_template
     if @requirement_template.discard
-      render_success(@requirement_template, "requirement_template.destroy_success")
+      render_success(
+        @requirement_template,
+        "requirement_template.destroy_success"
+      )
     else
       render_error "requirement_template.destroy_error"
     end
@@ -174,7 +213,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   def restore
     authorize @requirement_template
     if @requirement_template.update(discarded_at: nil)
-      render_success(@requirement_template, "requirement_template.restore_success")
+      render_success(
+        @requirement_template,
+        "requirement_template.restore_success"
+      )
     else
       render_error "requirement_template.restore_error", {}
     end
@@ -191,7 +233,9 @@ class Api::RequirementTemplatesController < Api::ApplicationController
         :published_template_version,
         :last_three_deprecated_template_versions,
         :scheduled_template_versions,
-        requirement_template_sections: [template_section_blocks: [requirement_block: :requirements]],
+        requirement_template_sections: [
+          template_section_blocks: [requirement_block: :requirements]
+        ]
       ).find(params[:id])
   end
 
@@ -212,13 +256,20 @@ class Api::RequirementTemplatesController < Api::ApplicationController
           :name,
           :position,
           :_destroy,
-          template_section_blocks_attributes: %i[id requirement_block_id position _destroy],
-        ],
+          template_section_blocks_attributes: %i[
+            id
+            requirement_block_id
+            position
+            _destroy
+          ]
+        ]
       )
 
     # This is a workaround needed to validate step code related errors
     if permitted_params[:requirement_template_sections_attributes].present?
-      permitted_params[:requirement_template_sections_attributes_copy] = permitted_params[
+      permitted_params[
+        :requirement_template_sections_attributes_copy
+      ] = permitted_params[
         requirement_template_sections_attributes: :requirements
       ].deep_dup
     end

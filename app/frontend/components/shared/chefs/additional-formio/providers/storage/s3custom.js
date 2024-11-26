@@ -25,7 +25,6 @@ const s3custom = function Provider(formio) {
       groupId,
       abortCallback
     ) => {
-      import.meta.env.DEV && console.log("[DEV] file uploading with options", fileKey, options)
       try {
         const presignedUploadResponse = await uploadFile(file, fileName, progressCallback)
 

@@ -5,7 +5,8 @@ A_REINVITED_USER = "a reinvited user"
 AN_EXISTING_USER = "an existing user"
 AN_INVITED_SUBMITTER = "an invited submitter"
 AN_EXISTING_REGIONAL_RM = "an existing regional review manager"
-A_REVIEW_STAFF_INVITED_AS_A_REGIONAL_RM = "a review staff invited as a regional review manager"
+A_REVIEW_STAFF_INVITED_AS_A_REGIONAL_RM =
+  "a review staff invited as a regional review manager"
 
 RSpec.shared_examples AN_INVITED_USER do
   it "creates a new user" do
@@ -24,11 +25,15 @@ end
 
 RSpec.shared_examples AN_EXISTING_REGIONAL_RM do
   it "adds the existing regional RM to the new jurisdiction" do
-    expect { subject.call }.to change { existing_reviewer.reload.jurisdictions.count }
+    expect { subject.call }.to change {
+      existing_reviewer.reload.jurisdictions.count
+    }
   end
 
   it "notifies the existing regional RM that they were added to the new jurisdiction" do
-    expect(PermitHubMailer).to receive(:new_jurisdiction_membership).and_call_original
+    expect(PermitHubMailer).to receive(
+      :new_jurisdiction_membership
+    ).and_call_original
     subject.call
   end
 
@@ -39,13 +44,17 @@ end
 
 RSpec.shared_examples A_REVIEW_STAFF_INVITED_AS_A_REGIONAL_RM do
   it "converts the existing review staff to a regional RM" do
-    expect { subject.call }.to change { existing_reviewer.reload.regional_review_manager? }.to(true)
+    expect { subject.call }.to change {
+      existing_reviewer.reload.regional_review_manager?
+    }.to(true)
   end
 end
 
 RSpec.shared_examples A_REINVITED_USER do
   it "reinvites the existing user" do
-    expect { subject.call }.to change { existing_reviewer.reload.invitation_sent_at }
+    expect { subject.call }.to change {
+      existing_reviewer.reload.invitation_sent_at
+    }
     subject.call
   end
 
@@ -61,7 +70,9 @@ end
 
 RSpec.shared_examples AN_EXISTING_USER do
   it "does not invite the user" do
-    expect { subject.call }.not_to change { existing_reviewer.reload.invitation_sent_at }
+    expect { subject.call }.not_to change {
+      existing_reviewer.reload.invitation_sent_at
+    }
     subject.call
   end
 

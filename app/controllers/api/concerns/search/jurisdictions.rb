@@ -9,26 +9,46 @@ module Api::Concerns::Search::Jurisdictions
       per_page:
         (
           if jurisdiction_search_params[:page]
-            (jurisdiction_search_params[:per_page] || Kaminari.config.default_per_page)
+            (
+              jurisdiction_search_params[:per_page] ||
+                Kaminari.config.default_per_page
+            )
           else
             nil
           end
-        ),
+        )
     }
 
     # Conditionally add the `where` clause
-    search_params[:where] = jurisdiction_where_clause unless jurisdiction_where_clause.nil?
-    @search = Jurisdiction.search(jurisdiction_query, **search_params, includes: Jurisdiction::BASE_INCLUDES)
+    search_params[
+      :where
+    ] = jurisdiction_where_clause unless jurisdiction_where_clause.nil?
+    @search =
+      Jurisdiction.search(
+        jurisdiction_query,
+        **search_params,
+        includes: Jurisdiction::BASE_INCLUDES
+      )
   end
 
   private
 
   def jurisdiction_search_params
-    params.permit(:query, :page, :per_page, filters: [:submission_inbox_set_up], sort: %i[field direction])
+    params.permit(
+      :query,
+      :page,
+      :per_page,
+      filters: [:submission_inbox_set_up],
+      sort: %i[field direction]
+    )
   end
 
   def jurisdiction_query
-    jurisdiction_search_params[:query].present? ? jurisdiction_search_params[:query] : "*"
+    if jurisdiction_search_params[:query].present?
+      jurisdiction_search_params[:query]
+    else
+      "*"
+    end
   end
 
   def jurisdiction_order

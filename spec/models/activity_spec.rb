@@ -27,7 +27,10 @@ RSpec.describe Activity, type: :model do
   describe "#image_url" do
     it "returns the correct image URL" do
       activity = create(:activity)
-      expected_url = ActionController::Base.helpers.asset_path("images/permit_classifications/#{activity.code}.png")
+      expected_url =
+        ActionController::Base.helpers.asset_path(
+          "images/permit_classifications/#{activity.code}.png"
+        )
       expect(activity.image_url).to eq(expected_url)
     end
   end

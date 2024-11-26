@@ -1,12 +1,7 @@
 export default {
-  plugins: ["prettier-plugin-organize-imports", "@prettier/plugin-ruby"],
+  plugins: ["prettier-plugin-organize-imports"],
   printWidth: 120,
   requirePragma: false,
-  rubyArrayLiteral: true,
-  rubyHashLabel: true,
-  rubyModifier: true,
-  rubySingleQuote: false,
-  rubyToProc: true,
   tabWidth: 2,
   trailingComma: "es5",
   semi: false,

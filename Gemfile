@@ -1,9 +1,9 @@
 source "https://rubygems.org"
 
-ruby "3.2.2"
+ruby "3.2.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.1.3.1"
+gem "rails", "~> 7.1.4.1"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
@@ -117,7 +117,10 @@ group :development do
   gem "syntax_tree-haml", "~> 4.0"
   gem "syntax_tree-rbs", "~> 1.0"
   gem "letter_opener", "~> 1.8"
-  gem 'rails-erd', '~> 1.5'
+  gem "rails-erd", "~> 1.5"
+  gem "rubocop", "~> 1.67", require: false
+  gem "rubocop-rails", "~> 2.26", require: false
+  gem "solargraph", "~> 0.50.0"
 end
 
 gem "faraday-multipart", "~> 1.0"

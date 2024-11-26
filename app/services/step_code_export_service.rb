@@ -9,12 +9,21 @@ class StepCodeExportService
         permit_types.each do |pt|
           jurisdiction_name = j.qualified_name
           permit_type = pt.name
-          permit_type_required_steps = j.permit_type_required_steps_by_classification(pt)
+          permit_type_required_steps =
+            j.permit_type_required_steps_by_classification(pt)
           permit_type_required_steps.each do |jtsc|
             energy_step_required = jtsc.energy_step_required
             zero_carbon_step_required = jtsc.zero_carbon_step_required
-            enabled = energy_step_required.positive? || zero_carbon_step_required.positive?
-            csv << [jurisdiction_name, permit_type, enabled, energy_step_required, zero_carbon_step_required]
+            enabled =
+              energy_step_required.present? ||
+                zero_carbon_step_required.present?
+            csv << [
+              jurisdiction_name,
+              permit_type,
+              enabled,
+              energy_step_required,
+              zero_carbon_step_required
+            ]
           end
         end
       end

@@ -99,12 +99,26 @@ puts "Seeding contacts..."
 Jurisdiction.all.each do |j|
   j
     .permit_type_submission_contacts
-    .where(email: "#{j.name.parameterize}@laterolabs.com", permit_type: permit_type1)
-    .first_or_create!(email: "#{j.name.parameterize}@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type1)
+    .where(
+      email: "#{j.name.parameterize}@laterolabs.com",
+      permit_type: permit_type1
+    )
+    .first_or_create!(
+      email: "#{j.name.parameterize}@laterolabs.com",
+      confirmed_at: Time.now,
+      permit_type: permit_type1
+    )
   j
     .permit_type_submission_contacts
-    .where(email: "#{j.name.parameterize}@laterolabs.com", permit_type: permit_type2)
-    .first_or_create!(email: "#{j.name.parameterize}@laterolabs.com", confirmed_at: Time.now, permit_type: permit_type2)
+    .where(
+      email: "#{j.name.parameterize}@laterolabs.com",
+      permit_type: permit_type2
+    )
+    .first_or_create!(
+      email: "#{j.name.parameterize}@laterolabs.com",
+      confirmed_at: Time.now,
+      permit_type: permit_type2
+    )
 end
 if PermitApplication.first.blank?
   jurisdictions
@@ -119,7 +133,7 @@ if PermitApplication.first.blank?
             department: "Department #{n}",
             email: "contact_#{n}_#{jurisdiction.id}@example.com",
             phone: "604-456-7802",
-            contactable: jurisdiction,
+            contactable: jurisdiction
           )
         end
         jurisdiction.reload
@@ -127,7 +141,7 @@ if PermitApplication.first.blank?
           jurisdiction.permit_type_submission_contacts.create!(
             email: jurisdiction.contacts.first.email,
             confirmed_at: Time.now,
-            permit_type: permit_type1,
+            permit_type: permit_type1
           )
         end
       end
@@ -147,7 +161,7 @@ if PermitApplication.first.blank?
             email: "user_contact_#{n}_#{user.id}@example.com",
             address: "Address #{n}",
             phone: "604-456-7802",
-            contactable: user,
+            contactable: user
           )
         end
       end
@@ -155,10 +169,22 @@ if PermitApplication.first.blank?
   Contact.reindex
   puts "Seeding requirement templates..."
   # Create RequirementTemplate records
-  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type1)
-  RequirementTemplate.find_or_create_by!(activity: activity1, permit_type: permit_type2)
-  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type1)
-  RequirementTemplate.find_or_create_by!(activity: activity2, permit_type: permit_type2)
+  RequirementTemplate.find_or_create_by!(
+    activity: activity1,
+    permit_type: permit_type1
+  )
+  RequirementTemplate.find_or_create_by!(
+    activity: activity1,
+    permit_type: permit_type2
+  )
+  RequirementTemplate.find_or_create_by!(
+    activity: activity2,
+    permit_type: permit_type1
+  )
+  RequirementTemplate.find_or_create_by!(
+    activity: activity2,
+    permit_type: permit_type2
+  )
 
   RequirementTemplate.reindex
 
@@ -169,7 +195,9 @@ if PermitApplication.first.blank?
   puts "Seeding requirements..."
   RequirementsFromXlsxSeeder.seed
   if Rails.env.development?
-    PermitClassification.find_by_code("medium_residential").update(enabled: true)
+    PermitClassification.find_by_code("medium_residential").update(
+      enabled: true
+    )
     RequirementsFromXlsxSeeder.seed_medium
   end
 
@@ -189,10 +217,11 @@ if PermitApplication.first.blank?
       submitter_id: submitters.sample.id,
       full_address: "123 Address st",
       pid: "999999999",
-      jurisdiction_id: index.even? ? jurisdictions.first(10).sample.id : north_van.id,
+      jurisdiction_id:
+        index.even? ? jurisdictions.first(10).sample.id : north_van.id,
       activity_id: template_version.activity.id,
       permit_type_id: template_version.permit_type.id,
-      template_version: template_version,
+      template_version: template_version
     )
   end
   # Seed a North Vancouver Example
@@ -220,7 +249,7 @@ if PermitApplication.first.blank?
       permit_type_id: template_version.permit_type.id,
       full_address: full_address,
       template_version: template_version,
-      pid: pid,
+      pid: pid
     )
   end
 end
@@ -232,7 +261,7 @@ TemplateVersion
   .each do |template_version|
     JurisdictionTemplateVersionCustomization.find_or_create_by!(
       jurisdiction: north_van,
-      template_version: template_version,
+      template_version: template_version
     ) do |customization|
       # any other data to add
     end
@@ -243,3 +272,16 @@ EulaUpdater.run
 
 puts "Seeding default revision reasons..."
 RevisionReasonSeeder.seed
+
+# invite a usable super admin
+# safeguard for development only
+if Rails.env.development?
+  email = "usable+super_admin@example.com"
+  User.invite!(email: email) do |u|
+    u.skip_confirmation_notification!
+    u.role = :super_admin
+    u.first_name = "Super"
+    u.last_name = "Admin"
+    u.save
+  end
+end

@@ -16,7 +16,9 @@
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
-Dir[File.expand_path(File.join(File.dirname(__FILE__), "support", "**", "*.rb"))].each { |f| require f }
+Dir[
+  File.expand_path(File.join(File.dirname(__FILE__), "support", "**", "*.rb"))
+].each { |f| require f }
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -96,7 +98,9 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
-  config.before(:each) { Sidekiq::Worker.respond_to?(:clear_all) && Sidekiq::Worker.clear_all }
+  config.before(:each) do
+    Sidekiq::Worker.respond_to?(:clear_all) && Sidekiq::Worker.clear_all
+  end
 
   config.before(:suite) do
     # reindex models
@@ -111,5 +115,7 @@ RSpec.configure do |config|
     Searchkick.disable_callbacks
   end
 
-  config.around(:each, search: true) { |example| Searchkick.callbacks(nil) { example.run } }
+  config.around(:each, search: true) do |example|
+    Searchkick.callbacks(nil) { example.run }
+  end
 end

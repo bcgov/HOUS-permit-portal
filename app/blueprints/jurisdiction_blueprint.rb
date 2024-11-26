@@ -19,16 +19,31 @@ class JurisdictionBlueprint < Blueprinter::Base
            :map_zoom,
            :regional_district_name,
            :created_at,
+           :submission_inbox_set_up,
            :updated_at,
-           :external_api_enabled,
-           :submission_inbox_set_up
+           :external_api_state
 
+    field :external_api_enabled do |jurisdiction, options|
+      jurisdiction.external_api_enabled?
+    end
     association :contacts, blueprint: ContactBlueprint
-    association :permit_type_submission_contacts, blueprint: PermitTypeSubmissionContactBlueprint
-    association :permit_type_required_steps, blueprint: PermitTypeRequiredStepBlueprint
+    association :permit_type_submission_contacts,
+                blueprint: PermitTypeSubmissionContactBlueprint
+    association :permit_type_required_steps,
+                blueprint: PermitTypeRequiredStepBlueprint
+
+    association :permit_type_required_steps,
+                blueprint:
+                  PermitTypeRequiredStepBlueprint do |jurisdiction, _options|
+      jurisdiction.enabled_permit_type_required_steps
+    end
   end
 
   view :minimal do
-    fields :qualified_name, :external_api_enabled, :submission_inbox_set_up
+    fields :qualified_name, :submission_inbox_set_up, :external_api_state
+
+    field :external_api_enabled do |jurisdiction, options|
+      jurisdiction.external_api_enabled?
+    end
   end
 end

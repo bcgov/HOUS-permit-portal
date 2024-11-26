@@ -13,7 +13,9 @@ module ValidateUrlAttributes
 
       begin
         uri = URI.parse(value)
-        errors.add(attr_name, "must be a valid URL") unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+        unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+          errors.add(attr_name, "must be a valid URL")
+        end
       rescue URI::InvalidURIError
         errors.add(attr_name, "must be a valid URL")
       end
