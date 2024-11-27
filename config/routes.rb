@@ -213,7 +213,8 @@ Rails.application.routes.draw do
 
     resources :end_user_license_agreement, only: %i[index]
 
-    resources :step_codes, only: %i[index create destroy], shallow: true do
+    resources :step_codes, only: %i[index destroy], shallow: true do
+      post :part_9, to: "step_code/part_9#create", on: :collection
       resources :step_code_checklists, only: %i[index show update]
       get "download_step_code_summary_csv",
           on: :collection,

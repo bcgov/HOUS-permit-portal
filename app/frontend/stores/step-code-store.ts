@@ -4,17 +4,18 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { IStepCode, StepCodeModel } from "../models/step-code"
+import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
+import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
 import { EEnergyStep, EZeroCarbonStep } from "../types/enums"
-import { IStepCodeSelectOptions } from "../types/types"
+import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 
 export const StepCodeStoreModel = types
   .model("StepCodeStore", {
-    stepCodesMap: types.map(StepCodeModel),
-    selectOptions: types.frozen<IStepCodeSelectOptions>(),
+    stepCodesMap: types.map(types.union(Part9StepCodeModel, Part3StepCodeModel)),
     isLoaded: types.maybeNull(types.boolean),
-    currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
+    selectOptions: types.frozen<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>(),
+    currentStepCode: types.maybeNull(types.reference(types.union(Part9StepCodeModel, Part3StepCodeModel))),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -45,7 +46,7 @@ export const StepCodeStoreModel = types
         checklistsMap,
       })
     },
-    setCurrentStepCode(stepCode?: IStepCode) {
+    setCurrentStepCode(stepCode?: IPart9StepCode | IPart3StepCode) {
       self.currentStepCode = stepCode
     },
     fetchStepCodes: flow(function* () {
@@ -56,8 +57,8 @@ export const StepCodeStoreModel = types
       }
       self.isLoaded = true
     }),
-    createStepCode: flow(function* (values) {
-      const response = yield self.environment.api.createStepCode(values)
+    createPart9StepCode: flow(function* (values) {
+      const response = yield self.environment.api.createPart9StepCode(values)
       if (response.ok) {
         self.mergeUpdate(response.data.data, "stepCodesMap")
         self.currentStepCode = response.data.data.id

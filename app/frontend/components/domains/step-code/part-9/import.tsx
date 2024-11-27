@@ -11,7 +11,7 @@ import { CompliancePathSelect } from "./compliance-path-select"
 
 export const H2KImport = function StepCodeH2kImport() {
   const {
-    stepCodeStore: { createStepCode },
+    stepCodeStore: { createPart9StepCode },
   } = useMst()
   const { permitApplicationId } = useParams()
 
@@ -51,7 +51,7 @@ export const H2KImport = function StepCodeH2kImport() {
   }
 
   const onSubmit = async (values) => {
-    await createStepCode(values)
+    await createPart9StepCode(values)
     // setStep(2)
     // navigate(`${stepCode.id}/checklists/${stepCode.preConstructionChecklist.id}`)
   }
