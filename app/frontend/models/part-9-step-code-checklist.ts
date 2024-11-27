@@ -20,9 +20,9 @@ function preProcessor(snapshot) {
   }
 }
 
-export const StepCodeChecklistModel = types.snapshotProcessor(
+export const Part9StepCodeChecklistModel = types.snapshotProcessor(
   types
-    .model("StepCodeChecklistModel", {
+    .model("Part9StepCodeChecklistModel", {
       id: types.identifier,
       isLoaded: types.maybeNull(types.boolean),
       stage: types.enumeration<EStepCodeChecklistStage[]>(Object.values(EStepCodeChecklistStage)),
@@ -123,4 +123,4 @@ export const StepCodeChecklistModel = types.snapshotProcessor(
   { preProcessor }
 )
 
-export interface IStepCodeChecklist extends Instance<typeof StepCodeChecklistModel> {}
+export interface IPart9StepCodeChecklist extends Instance<typeof Part9StepCodeChecklistModel> {}

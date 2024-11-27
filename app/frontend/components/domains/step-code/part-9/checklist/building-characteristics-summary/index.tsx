@@ -1,7 +1,7 @@
 import { VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { ChecklistSection } from "../shared/checklist-section"
 import { DynamicCharacteristicsGrid } from "./dynamic-characteristics-grid"
 import { i18nPrefix } from "./i18n-prefix"

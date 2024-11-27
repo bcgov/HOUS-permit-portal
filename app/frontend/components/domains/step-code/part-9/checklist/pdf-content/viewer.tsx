@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { PDFContent } from "."
 import { usePermitApplication } from "../../../../../../hooks/resources/use-permit-application"
+import { IStepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../../../../../models/permit-application"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 
 interface IProps {

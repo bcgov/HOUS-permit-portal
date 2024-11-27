@@ -446,3 +446,89 @@ export enum ELandingTemplateKeys {
   SmallScale = "small_scale_requirement_template_id",
   // FourPlus = "four_plus_template_version_id",
 }
+
+export enum EClimateZone {
+  zone4 = "zone_4",
+  zone5 = "zone_5",
+  zone6 = "zone_6",
+  zone7a = "zone_7a",
+  zone7b = "zone_7b",
+  zone8 = "zone_8",
+}
+
+export enum EBaselinePerformanceRequirement {
+  step2NECB = "step_2_necb",
+  ASHRAE = "ashrae",
+  percentBetterAshrae = "%_better_ashrae",
+  NECB = "necb",
+  percentBetterNECB = "%_better_necb",
+}
+
+export enum EPart3StepCodeSoftware {
+  IESVE = "ies_ve",
+  energyPlus = "energy_plus",
+  designBuilder = "design_builder",
+  openStudio = "open_studio",
+  eQuest = "e_quest",
+  DOE2Other = "doe_2_other",
+  PHPP = "phpp",
+  other = "other",
+}
+
+export enum EHeatingSystemPlant {
+  none = "none",
+  noCentralPlant = "no_central_plant",
+  airSourceHeatPump = "air_source_heat_pump",
+  groundSourceHeatPump = "ground_source_heat_pump",
+  airSourceVRF = "air_source_vrf",
+  groundSourceVRF = "ground_source_vrf",
+  gasBoiler = "gas_boiler",
+  districtSystem = "district_system",
+  other = "other",
+}
+
+export enum EHeatingSystemType {
+  electricBaseboard = "electric_baseboard",
+  hydronicBasebaord = "hydronic_basebaord",
+  hydronicFanCoils = "hydronic_fan_coils",
+  VAVReheat = "vav_reheat",
+  airSourceHeatPump = "air_source_heat_pump",
+  VRFUnits = "vrf_units",
+  radiantFloorCooling = "radiant_floor_cooling",
+  gasFiredRooftop = "gas_fired_rooftop",
+  electricResistanceRooftop = "electric_resistance_rooftop",
+  heatPumpRooftop = "heat_pump_rooftop",
+  other = "other",
+}
+
+export enum ECoolingSystemPlant {
+  none = "none",
+  airCooledChiller = "air_cooled_chiller",
+  waterCooledChiller = "water_cooled_chiller",
+  airSourceHeatPump = "air_source_heat_pump",
+  groundSourceHeatPump = "ground_source_heat_pump",
+  airSourceVRF = "air_source_vrf",
+  groundSourceVRF = "ground_source_vrf",
+  other = "other",
+}
+
+export enum ECoolingSystemType {
+  ptac = "ptac",
+  hydronicFanCoils = "hydronic_fan_coils",
+  hydronicBaseboards = "hydronic_baseboards",
+  VRFUnits = "vrf_units",
+  radiantFloorCeiling = "radiant_floor_ceiling",
+  notApplicable = "not_applicable",
+  other = "other",
+}
+
+export enum EDHWSystemType {
+  heatPumpSpaceHeating = "heat_pump_space_heating",
+  airSourceHeatPump = "air_source_heat_pump",
+  groundSourcHeatPump = "ground_source_heat_pump",
+  gasSpaceHeating = "gas_space_heating",
+  gas = "gas",
+  suiteElectric = "suite_electric",
+  suiteGas = "suite_gas",
+  other = "other",
+}

@@ -21,8 +21,6 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
       t.string :simulation_weather_file
       t.decimal :above_grade_wall_area
       t.decimal :window_to_wall_area_ratio
-      t.decimal :vertical_facade_to_floor_area_ratio
-      t.decimal :window_to_floor_area_ratio
       t.decimal :design_airtightness
       t.decimal :tested_airtightness
       t.decimal :modelled_infiltration_rate
