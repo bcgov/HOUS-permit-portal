@@ -1,6 +1,7 @@
-import { Button, Container, Flex, FormControl, FormLabel, Heading } from "@chakra-ui/react"
+import { Button, Checkbox, CheckboxGroup, Collapse, Container, Flex, FormControl, FormLabel, Heading, IconButton, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
+import React, { useState } from "react"
+import { Funnel, CaretDown } from "@phosphor-icons/react"
 import { useTranslation } from "react-i18next"
 import { useFlashQueryParam } from "../../../hooks/use-flash-query-param"
 import { useQuery } from "../../../hooks/use-query"
@@ -18,6 +19,7 @@ import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
 import { PermitApplicationStatusTabs } from "../../shared/permit-applications/permit-application-status-tabs"
 import { SortSelect } from "../../shared/select/selectors/sort-select"
+import { StatusFilter } from "../permit-application/status-filter"
 
 interface IPermitApplicationIndexScreenProps {}
 
@@ -44,6 +46,11 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
 
   const requirementTemplateId = query.get("requirementTemplateId")
   const templateVersionId = query.get("templateVersionId")
+  const [isOpen, setIsOpen] = useState(false)
+  
+  const toggleFilter = () => {
+    setIsOpen(!isOpen);
+  }
 
   useSearch(permitApplicationStore, [
     requirementTemplateId || "",
@@ -82,6 +89,10 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
                   {t("ui.resetFilters")}
                 </Button>
               )}
+              <Button  variant="tertiary" leftIcon={<Funnel />} rightIcon={<CaretDown />} onClick={toggleFilter}>
+              {t("ui.filter")}
+              </Button>
+              <StatusFilter isOpen={isOpen}></StatusFilter>
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
                 <ModelSearchInput searchModel={permitApplicationStore} />
