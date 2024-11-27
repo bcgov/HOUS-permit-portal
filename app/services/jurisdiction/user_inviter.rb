@@ -21,18 +21,17 @@ class Jurisdiction::UserInviter
         User
           .where.not(role: :submitter)
           .find_by(email: user_params[:email].strip)
-      is_regional_rm =
-        user&.regional_review_manager? ||
-          (user && user_params[:role].to_sym == :regional_review_manager)
-
-      if user.present? && !user.discarded? && user.confirmed? &&
-           (!is_regional_rm || user.super_admin?)
-        self.results[:email_taken] << user
-      elsif user && is_regional_rm &&
-            jurisdiction_id = user_params[:jurisdiction_id]
-        if !user.regional_review_manager?
-          user.update(role: :regional_review_manager)
-        end
+      is_invitable_role_param =
+        inviter.invitable_roles.include?(user_params[:role].to_s)
+      regional_rm_selected =
+        user_params[:role].to_sym == :regional_review_manager
+      if user.present? && user.confirmed? &&
+           (!regional_rm_selected || user.super_admin?)
+        results[:email_taken] << user
+      elsif user.present? && !user.discarded? && regional_rm_selected &&
+            is_invitable_role_param &&
+            (jurisdiction_id = user_params[:jurisdiction_id])
+        user.update(role: :regional_review_manager)
         membership =
           user
             .jurisdiction_memberships
@@ -47,18 +46,18 @@ class Jurisdiction::UserInviter
             end
         # The purpose of touch is to allow the jurisdiction to be obtained in the user blueprint invited_user view
         membership.touch
-        user.invite!(inviter) if !user.confirmed?
-        self.results[:invited] << user
+        user.invite!(inviter) unless user.confirmed?
+        results[:invited] << user
       else
         reinvited = user.present?
-        is_invitable_role =
-          inviter.invitable_roles.include?(user_params[:role].to_s)
         if reinvited
-          user.update(role: user_params[:role].to_sym) if is_invitable_role
+          if is_invitable_role_param
+            user.update(role: user_params[:role].to_sym)
+          end
           user.skip_confirmation_notification!
           user.invite!(inviter)
-          self.results[:reinvited] << user
-        elsif is_invitable_role
+          results[:reinvited] << user
+        elsif is_invitable_role_param
           jurisdiction_id =
             user_params.delete(:jurisdiction_id) ||
               inviter.jurisdictions.pluck(:id)
@@ -75,7 +74,7 @@ class Jurisdiction::UserInviter
           user.save!
           user.invite!(inviter)
 
-          self.results[:invited] << user
+          results[:invited] << user
         end
       end
     end
