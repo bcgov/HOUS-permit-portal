@@ -37,12 +37,13 @@ import { compareSubmissionData } from "../utils/formio-helpers"
 import { convertResourceArrayToRecord } from "../utils/utility-functions"
 import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
+import { Part3StepCodeModel } from "./part-3-step-code"
+import { Part9StepCodeModel } from "./part-9-step-code"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
 import { IActivity, IPermitType } from "./permit-classification"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
-import { StepCodeModel } from "./step-code"
 import { TemplateVersionModel } from "./template-version"
 import { IUser, UserModel } from "./user"
 
@@ -73,7 +74,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedTabIndex: types.optional(types.number, 0),
       createdAt: types.Date,
       updatedAt: types.Date,
-      stepCode: types.maybeNull(types.reference(StepCodeModel)),
+      stepCode: types.maybeNull(types.reference(types.union(Part9StepCodeModel, Part3StepCodeModel))),
       supportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       allSubmissionVersionCompletedSupportingDocuments: types.maybeNull(types.frozen<IDownloadableFile[]>()),
       zipfileSize: types.maybeNull(types.number),

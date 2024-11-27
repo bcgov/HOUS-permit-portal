@@ -8,12 +8,12 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
+import { IStepCode } from "../../models/part-9-step-code"
+import { IStepCodeChecklist } from "../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
 import { IRequirementTemplate } from "../../models/requirement-template"
-import { IStepCode } from "../../models/step-code"
-import { IStepCodeChecklist } from "../../models/step-code-checklist"
 import { ITemplateVersion } from "../../models/template-version"
 import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
@@ -574,8 +574,8 @@ export class Api {
     return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
   }
 
-  async createStepCode(stepCode: IStepCode) {
-    return this.client.post<ApiResponse<IStepCode>>("/step_codes", { stepCode })
+  async createPart9StepCode(stepCode: IStepCode) {
+    return this.client.post<ApiResponse<IStepCode>>("/step_codes/part_9", { stepCode })
   }
 
   async deleteStepCode(id: string) {

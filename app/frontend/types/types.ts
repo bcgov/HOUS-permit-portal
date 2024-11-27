@@ -6,6 +6,7 @@ import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  EBaselinePerformanceRequirement,
   ECollaborationType,
   ECollaboratorType,
   EDoorsPerformanceType,
@@ -232,7 +233,7 @@ interface IStepCodeBuildingCharacteristicSummarySelectOptions {
   fossilFuelsPresence: EFossilFuelsPresence[]
 }
 
-export interface IStepCodeSelectOptions {
+export interface IPart9ChecklistSelectOptions {
   compliancePaths: EStepCodeCompliancePath[]
   airtightnessValues: EStepCodeAirtightnessValue[]
   epcTestingTargetTypes: EStepCodeEPCTestingTargetType[]
@@ -242,6 +243,8 @@ export interface IStepCodeSelectOptions {
   energySteps: EEnergyStep[]
   zeroCarbonSteps: EZeroCarbonStep[]
 }
+
+export interface IPart3ChecklistSelectOptions {}
 
 export interface IRequirementBlockCustomization {
   tip?: string
@@ -548,3 +551,40 @@ export type TVisibility =
   | EVisibilityValues
   | `${EVisibilityValues},${EVisibilityValues}`
   | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`
+export interface IBaselineOccupancy {
+  modelledFloorArea: string
+  performanceRequirement: EBaselinePerformanceRequirement
+  percentBetterRequirement?: string
+  requirementSource?: string
+}
+export interface IStepCodeOccupancy {
+  modelledFloorArea: string
+  energyStepRequired: EEnergyStep
+  zeroCarbonStepRequired: EZeroCarbonStep
+  requirementSource?: string
+}
+
+export interface IFuelType {
+  name: string
+  description: string
+  emissionsFactor: string
+  source: string
+}
+
+export interface IEnergyOutput {
+  fuelType: string
+  annualEnergy: string
+  name: string
+}
+
+export interface IMakeUpAirFuel {
+  fuelType: string
+  percentOfLoad: number
+}
+
+export interface IDocumentReference {
+  name: string
+  documentName: string
+  dateIssued: string
+  preparedBy: string
+}
