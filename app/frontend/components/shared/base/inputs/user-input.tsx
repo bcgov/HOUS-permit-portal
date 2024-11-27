@@ -24,10 +24,11 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
   const emailWatch = watch(`users.${index}.email`)
 
   const { userStore } = useMst()
-  const { reinvitedEmails, invitedEmails, takenEmails } = userStore
+  const { reinvitedEmails, invitedEmails, takenEmails, failedEmails } = userStore
   const reinvited = reinvitedEmails?.includes(emailWatch)
   const invited = invitedEmails?.includes(emailWatch)
   const taken = takenEmails?.includes(emailWatch)
+  const failed = failedEmails?.includes(emailWatch)
 
   return (
     <Flex bg="greys.grey03" p={4} borderRadius="md" flexWrap="wrap">
@@ -86,13 +87,20 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
               {taken && (
                 <IInviteResultTag
                   bg="semantic.errorLight"
+                  text={t("user.inviteTakenError")}
+                  icon={<WarningCircle size={20} />}
+                />
+              )}
+              {failed && (
+                <IInviteResultTag
+                  bg="semantic.errorLight"
                   text={t("user.inviteError")}
                   icon={<WarningCircle size={20} />}
                 />
               )}
             </>
           )}
-          {!invited && !taken && !reinvited && remove && !isSubmitting && (
+          {!invited && !taken && !reinvited && !failed && remove && !isSubmitting && (
             <Button onClick={() => remove(index)} variant="tertiary" leftIcon={<X size={16} />}>
               {t("ui.remove")}
             </Button>

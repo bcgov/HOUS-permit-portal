@@ -1495,7 +1495,8 @@ const options = {
           inviteSuccess: "Invite sent!",
           reinvite: "Re-invite",
           reinviteSuccess: "Invite re-sent!",
-          inviteError: "Email taken",
+          inviteTakenError: "Email taken",
+          inviteError: "Invite error",
           takenErrorTitle: "Some of these emails already belong to existing users",
           takenErrorDescription:
             "One or more of the requested users have an existing account. Please ask them to change their email on their current account. You can then re-invite them into your local jurisdiction.",
