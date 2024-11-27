@@ -23,6 +23,8 @@ module Api::Concerns::Search::Jurisdictions
     search_params[
       :where
     ] = jurisdiction_where_clause unless jurisdiction_where_clause.nil?
+    search_data_fields = Jurisdiction::SEARCH_DATA_FIELDS
+    search_params[:fields] = current_user && current_user.role == "super_admin" ?  search_data_fields : search_data_fields - [:review_manager_emails]
     @search =
       Jurisdiction.search(
         jurisdiction_query,
