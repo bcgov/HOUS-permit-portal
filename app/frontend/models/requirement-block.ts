@@ -20,7 +20,7 @@ export const RequirementBlockModel = types
     requirements: types.array(RequirementModel),
     associations: types.array(types.string),
     description: types.maybeNull(types.string),
-    visibility: types.enumeration(Object.values(EVisibility)),
+    visibility: types.optional(types.enumeration(Object.values(EVisibility)), EVisibility.any),
     displayDescription: types.maybeNull(types.string),
     sku: types.string,
     createdAt: types.Date,
