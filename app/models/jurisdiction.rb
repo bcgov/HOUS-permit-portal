@@ -10,11 +10,40 @@ class Jurisdiction < ApplicationRecord
   ]
 
   include ActionView::Helpers::SanitizeHelper
-  searchkick searchable: %i[name reverse_qualified_name qualified_name, review_manager_emails],
-             word_start: %i[name reverse_qualified_name qualified_name, review_manager_emails],
-             text_start: %i[name reverse_qualified_name qualified_name, review_manager_emails]
+  searchkick searchable: %i[
+               name
+               reverse_qualified_name
+               qualified_name,
+               review_manager_emails
+             ],
+             word_start: %i[
+               name
+               reverse_qualified_name
+               qualified_name,
+               review_manager_emails
+             ],
+             text_start: %i[
+               name
+               reverse_qualified_name
+               qualified_name,
+               review_manager_emails
+             ]
 
-  SEARCH_DATA_FIELDS = %i[qualified_name reverse_qualified_name regional_district_name name type updated_at review_managers_size reviewers_size permit_applications_size user_ids submission_inbox_set_up created_at review_manager_emails]
+  SEARCH_DATA_FIELDS = %i[
+    qualified_name
+    reverse_qualified_name
+    regional_district_name
+    name
+    type
+    updated_at
+    review_managers_size
+    reviewers_size
+    permit_applications_size
+    user_ids
+    submission_inbox_set_up
+    created_at
+  ]
+  SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = [:review_manager_emails]
   # Associations
   has_one :preference
   has_many :permit_applications
