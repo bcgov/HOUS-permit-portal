@@ -10,9 +10,9 @@ class Jurisdiction < ApplicationRecord
   ]
 
   include ActionView::Helpers::SanitizeHelper
-  searchkick searchable: %i[name reverse_qualified_name qualified_name],
-             word_start: %i[name reverse_qualified_name qualified_name],
-             text_start: %i[name reverse_qualified_name qualified_name]
+  searchkick searchable: %i[name reverse_qualified_name qualified_name, review_manager_emails],
+             word_start: %i[name reverse_qualified_name qualified_name, review_manager_emails],
+             text_start: %i[name reverse_qualified_name qualified_name, review_manager_emails]
 
   # Associations
   has_one :preference
@@ -74,6 +74,10 @@ class Jurisdiction < ApplicationRecord
     users&.kept&.review_manager
   end
 
+  def review_manager_emails
+    review_managers&.pluck(:email)
+  end
+
   def reviewers
     users&.kept&.reviewer
   end
@@ -130,7 +134,8 @@ class Jurisdiction < ApplicationRecord
       permit_applications_size: permit_applications_size,
       user_ids: users.pluck(:id),
       submission_inbox_set_up: submission_inbox_set_up,
-      created_at: created_at
+      created_at: created_at,
+      review_manager_emails: review_manager_emails
     }
   end
 
