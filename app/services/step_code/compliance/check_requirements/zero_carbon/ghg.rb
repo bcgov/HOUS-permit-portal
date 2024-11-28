@@ -9,6 +9,9 @@ class StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG < StepCode::Compl
 
   def total_ghg_requirement
     @total_ghg_requirement ||=
-      StepCode::References::ZERO_CARBON_REFERENCES.dig(step, :total_carbon)
+      StepCode::Part9::References::ZERO_CARBON_REFERENCES.dig(
+        step,
+        :total_carbon
+      )
   end
 end

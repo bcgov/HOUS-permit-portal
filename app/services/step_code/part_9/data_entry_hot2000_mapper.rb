@@ -1,4 +1,4 @@
-class StepCode::DataEntryHot2000Mapper
+class StepCode::Part9::DataEntryHot2000Mapper
   attr_reader :xml
 
   def initialize(xml:)
@@ -7,7 +7,6 @@ class StepCode::DataEntryHot2000Mapper
 
   def mapped_attributes
     %i[
-      stage
       model
       version
       weather_location
@@ -51,10 +50,6 @@ class StepCode::DataEntryHot2000Mapper
   end
 
   private
-
-  def stage
-    :proposed
-  end
 
   def model
     xml.at("HouseFile/Application/Name").text
