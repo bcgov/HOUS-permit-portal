@@ -201,7 +201,7 @@ class User < ApplicationRecord
   def reindex_jurisdiction_review_manager_email
     return unless jurisdictions.any?
 
-    jurisdictions.reindex if (saved_change_to_role? || destroyed? || new_record? || saved_change_to_email?) && role == "review_manager"
+    jurisdictions.reindex if (saved_change_to_role? || destroyed? || new_record? || saved_change_to_email?) && (review_manager? || regional_review_manager?)
   end
 
   def refresh_search_index
