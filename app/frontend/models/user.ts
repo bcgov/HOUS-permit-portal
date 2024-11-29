@@ -1,3 +1,4 @@
+import { t } from "i18next"
 import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -83,6 +84,16 @@ export const UserModel = types
         self.jurisdictions.find((j) => j.id == self.rootStore.uiStore.currentlySelectedJurisdictionId) ||
         self.jurisdictions[0]
       )
+    },
+    get omniauthProviderLabel() {
+      const keys = {
+        idir: "idir",
+        bceidbasic: "bceidbasic",
+        bceidbusiness: "bceidbusiness",
+        [import.meta.env.VITE_BCSC_PROVIDER_KEY]: "bcsc",
+      }
+      // @ts-ignore
+      return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
     },
   }))
   .actions((self) => ({
