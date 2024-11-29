@@ -51,6 +51,8 @@ export const useIntegrationMapping = ({
 
           if (!integrationMapping) {
             setError(new Error(errorMessage))
+          } else {
+            setError(null)
           }
         } catch (e) {
           setError(e instanceof Error ? e : new Error(errorMessage))

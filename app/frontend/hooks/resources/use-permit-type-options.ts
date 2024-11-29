@@ -19,6 +19,8 @@ export function usePermitTypeOptions() {
 
           if (!permitTypeOptions) {
             throw new Error(t("errors.fetchPermitTypeOptions"))
+          } else {
+            setError(null)
           }
 
           setPermitTypeOptions(permitTypeOptions)

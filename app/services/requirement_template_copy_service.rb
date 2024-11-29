@@ -44,8 +44,10 @@ class RequirementTemplateCopyService
           )
 
         # Associate existing requirement blocks with the new section
-        section.requirement_blocks.each do |block|
-          new_section.requirement_blocks << block
+        section.requirement_blocks&.each do |block|
+          if block.allowed_in(requirement_template)
+            new_section.requirement_blocks << block
+          end
         end
         new_section.save
       end
