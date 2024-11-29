@@ -73,6 +73,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
 
     before do
       sign_in super_admin
+      Jurisdiction.reindex
     end
 
     context "searching with review manager email" do
@@ -94,7 +95,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       it "should give me the associtated jurisdictions for that regional review manager" do
         post :index,
           params: {
-              query: "review_manager@example.com",
+              query: "regional_review_manager@example.com",
               page: 1,
               per_page: 10
             }
@@ -130,7 +131,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
       it "should not give me the associtated jurisdictions for that regional review manager" do
         post :index,
           params: {
-              query: "review_manager@example.com",
+              query: "regional_review_manager@example.com",
               page: 1,
               per_page: 10
             }
