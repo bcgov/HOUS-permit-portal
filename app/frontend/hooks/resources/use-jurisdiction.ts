@@ -54,11 +54,17 @@ export const useJurisdiction = () => {
       try {
         if (isUUID(jurisdictionId)) {
           const jurisdiction = await fetchJurisdiction(jurisdictionId)
-          jurisdiction && setCurrentJurisdiction(jurisdictionId)
+          if (jurisdiction) {
+            setError(null)
+            setCurrentJurisdiction(jurisdictionId)
+          }
         } else {
           //assume slug
           const jurisdiction = await fetchJurisdiction(jurisdictionId)
-          jurisdiction && setCurrentJurisdictionBySlug(jurisdictionId)
+          if (jurisdiction) {
+            setError(null)
+            setCurrentJurisdictionBySlug(jurisdictionId)
+          }
         }
       } catch (e) {
         console.error(e.message)
