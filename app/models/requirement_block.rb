@@ -41,6 +41,14 @@ class RequirementBlock < ApplicationRecord
 
   after_discard { template_section_blocks.destroy_all }
 
+  def allowed_in(requirement_template)
+    if requirement_template.early_access?
+      %i[any early_access].include?(visibility)
+    else
+      %i[any live].include?(visibility)
+    end
+  end
+
   def sections
     requirement_template_sections
   end
