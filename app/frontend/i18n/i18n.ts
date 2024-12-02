@@ -133,6 +133,7 @@ const options = {
         },
         ui: {
           okay: "Okay",
+          filter: "Filter",
           until: "til",
           reorder: "Reorder",
           delete: "Delete",
@@ -535,6 +536,9 @@ const options = {
             number: "Application #",
             pin: "PIN",
             jurisdiction: "Jurisdiction",
+          },
+          filterMenu: {
+            collaborating: "Collaborating",
           },
           new: {
             locationHeading: "Location for permit",

@@ -151,6 +151,10 @@ export enum EPermitApplicationReviewerSortFields {
   submittedAt = "submitted_at",
 }
 
+export enum EPermitApplicationSortCollaboratingFields {
+  collaborating = "collaborating",
+}
+
 export enum ESortDirection {
   ascending = "asc",
   descending = "desc",

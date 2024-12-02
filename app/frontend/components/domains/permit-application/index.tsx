@@ -19,7 +19,7 @@ import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationCard } from "../../shared/permit-applications/permit-application-card"
 import { PermitApplicationStatusTabs } from "../../shared/permit-applications/permit-application-status-tabs"
 import { SortSelect } from "../../shared/select/selectors/sort-select"
-import { StatusFilter } from "../permit-application/status-filter"
+import { PermitApplicationFiltersMenu } from "./permit-application-filters-menu"
 
 interface IPermitApplicationIndexScreenProps {}
 
@@ -46,11 +46,9 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
 
   const requirementTemplateId = query.get("requirementTemplateId")
   const templateVersionId = query.get("templateVersionId")
-  const [isOpen, setIsOpen] = useState(false)
   
-  const toggleFilter = () => {
-    setIsOpen(!isOpen);
-  }
+  
+
 
   useSearch(permitApplicationStore, [
     requirementTemplateId || "",
@@ -89,10 +87,11 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
                   {t("ui.resetFilters")}
                 </Button>
               )}
-              <Button  variant="tertiary" leftIcon={<Funnel />} rightIcon={<CaretDown />} onClick={toggleFilter}>
-              {t("ui.filter")}
-              </Button>
-              <StatusFilter isOpen={isOpen}></StatusFilter>
+              <PermitApplicationFiltersMenu 
+                searchModel={permitApplicationStore}
+                i18nPrefix="permitApplication"
+              >
+              </PermitApplicationFiltersMenu>
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
                 <ModelSearchInput searchModel={permitApplicationStore} />
