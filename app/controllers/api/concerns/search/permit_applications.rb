@@ -16,6 +16,7 @@ module Api::Concerns::Search::PermitApplications
       ],
       where: permit_application_where_clause,
       page: permit_application_search_params[:page],
+      hasCollaborator: permit_application_search_params[:hasCollaborator],
       per_page:
         (
           if permit_application_search_params[:page]
@@ -40,6 +41,7 @@ module Api::Concerns::Search::PermitApplications
       :query,
       :page,
       :per_page,
+      :hasCollaborator,
       filters: [:requirement_template_id, :template_version_id, { status: [] }],
       sort: %i[field direction]
     )
@@ -65,7 +67,7 @@ module Api::Concerns::Search::PermitApplications
 
   def permit_application_where_clause
     filters = permit_application_search_params[:filters]
-
+    hasCollaborator = permit_application_search_params[:hasCollaborator]
     # Add the submitter ID if the user is a submitter. Necessary even with search auth filtering for consisent pagination
     # Only add the jurisdiction_id condition if @jurisdiction is present
     where =
@@ -77,6 +79,10 @@ module Api::Concerns::Search::PermitApplications
         }
       else
         { user_ids_with_submission_edit_permissions: current_user.id }
+      end
+    where = 
+      if @hasCollaborator  
+        { has_collaborator: current_user.id }  
       end
     where[:sandbox_id] = current_sandbox&.id if !current_user.super_admin?
 

@@ -76,6 +76,7 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       applySort(sort: ISort<TSortField>) {
         setQueryParam("sortDirection", sort.direction)
         setQueryParam("sortField", sort.field as string)
+        setQueryParam("hasCollaborator", sort.hasCollaborator)
         self.sort = sort
       },
       clearSort() {
