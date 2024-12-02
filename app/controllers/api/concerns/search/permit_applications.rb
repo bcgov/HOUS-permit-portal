@@ -16,7 +16,7 @@ module Api::Concerns::Search::PermitApplications
       ],
       where: permit_application_where_clause,
       page: permit_application_search_params[:page],
-      hasCollaborator: permit_application_search_params[:hasCollaborator],
+      has_collaborator: permit_application_search_params[:hasCollaborator],
       per_page:
         (
           if permit_application_search_params[:page]

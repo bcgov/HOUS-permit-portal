@@ -9,7 +9,6 @@ import {
   Menu,
   MenuButton,
   MenuList,
-  MenuItem,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,7 +20,6 @@ interface ISearchSortProps {
   searchModel: ISearch;
   i18nPrefix: string;
   sortFields: string[];
-  isOpen: boolean;
 }
 
 export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = ({
@@ -33,7 +31,7 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = ({
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const options = Object.values(EPermitApplicationSortCollaboratingFields); 
   const [isOpen, setIsOpen] = useState(false)
-  const { applySort, fetchData, sort } = searchModel
+  const { applySort, fetchData } = searchModel
 
   const handleCheckboxChange = (newSelectedOptions: string[]) => {
     setSelectedOptions(newSelectedOptions);
