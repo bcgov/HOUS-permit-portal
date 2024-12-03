@@ -2,8 +2,6 @@ module Api::Concerns::Search::PermitApplications
   extend ActiveSupport::Concern
 
   def perform_permit_application_search
-    puts permit_application_search_params[:filters]
-    puts 'HelloWORLD################################'
     search_conditions = {
       order: permit_application_order,
       match: :word_start,

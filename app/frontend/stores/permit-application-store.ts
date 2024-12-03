@@ -89,7 +89,6 @@ export const PermitApplicationStoreModel = types
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
     setHasCollaboratorFilter(value: boolean) {
-      debugger
       setQueryParam("hasCollaborator", value.toString())
       self.hasCollaboratorFilter = value
     },
