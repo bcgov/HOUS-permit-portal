@@ -89,6 +89,7 @@ export const PermitApplicationStoreModel = types
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
     },
     setHasCollaboratorFilter(value: boolean) {
+      debugger
       setQueryParam("hasCollaborator", value.toString())
       self.hasCollaboratorFilter = value
     },
@@ -104,7 +105,8 @@ export const PermitApplicationStoreModel = types
               url.searchParams.delete(param);
             });
             window.history.replaceState(null, "", url.toString());      
-        } 
+        }
+      self.searchPermitApplications()   
     },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
@@ -298,7 +300,6 @@ export const PermitApplicationStoreModel = types
       if (opts?.reset) {
         self.resetPages()
       }
-      debugger
       const searchParams = {
         query: self.query,
         sort: self.sort,
