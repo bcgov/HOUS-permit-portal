@@ -365,12 +365,6 @@ export enum EEnergyStepCodeDependencyRequirementCode {
   energyStepCodeH2000File = "energy_step_code_h2000_file",
 }
 
-export enum EOmniauthProvider {
-  idir = "idir",
-  basicBceid = "bceidbasic",
-  businessBceid = "bceidbusiness",
-}
-
 export enum EAutoComplianceModule {
   DigitalSealValidator = "DigitalSealValidator",
   ParcelInfoExtractor = "ParcelInfoExtractor",

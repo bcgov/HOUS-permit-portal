@@ -66,6 +66,7 @@ class User < ApplicationRecord
   validate :jurisdiction_must_belong_to_correct_roles
   validate :confirmed_user_has_fields
   validate :unique_omniauth_uid
+  validate :omniauth_provider_appropriate_for_role
   validate :single_jurisdiction, unless: :regional_review_manager?
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
@@ -167,6 +168,21 @@ class User < ApplicationRecord
   end
 
   private
+
+  def omniauth_provider_appropriate_for_role
+    return unless omniauth_provider.present?
+
+    valid_providers = {
+      submitter: ["bceidbasic", "bceidbusiness", ENV["VITE_BCSC_PROVIDER_KEY"]],
+      super_admin: ["idir"],
+      reviewer: %w[bceidbasic bceidbusiness],
+      review_manager: %w[bceidbasic bceidbusiness],
+      regional_review_manager: %w[bceidbasic bceidbusiness]
+    }
+    return if valid_providers[role.to_sym].include?(omniauth_provider)
+
+    errors.add(:omniauth_provider, "Invalid for role")
+  end
 
   def destroy_jurisdiction_collaborator
     return unless discarded?
