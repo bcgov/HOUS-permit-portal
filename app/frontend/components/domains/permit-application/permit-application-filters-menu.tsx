@@ -49,7 +49,6 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer
             p={4}
             zIndex={1}
           >
-            <CheckboxGroup>
               <Flex direction="column">
                 <Checkbox
                   isChecked={!!hasCollaboratorFilter}
@@ -59,9 +58,8 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer
                   {t(`${i18nPrefix}.filterMenu.collaborating`)}
                 </Checkbox>
               </Flex>
-            </CheckboxGroup>
             <Divider borderColor="greys.grey03" my={4} />
-            <Button size="sm" variant="tertiary" onClick={resetFilters()}>
+            <Button size="sm" variant="tertiary" onClick={resetFilters}>
               {t("ui.reset")}
             </Button>
           </MenuList>
