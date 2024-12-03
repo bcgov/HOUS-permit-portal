@@ -216,8 +216,7 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
     context "when user is unauthenticated" do
       it "returns an unauthorized error" do
         get :index, params: { query: "", page: 1, per_page: 20 }
-        # Unauthorized triggers redirect
-        expect(response).to have_http_status(302)
+        expect(response).to have_http_status(401)
       end
     end
   end

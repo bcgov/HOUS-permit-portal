@@ -18,6 +18,8 @@ services:
   app:
     image: hous-permit-portal-dev:latest
     pull_policy: "never"
+    tty: true
+    stdin_open: true
     build:
       context: .
       dockerfile: ./devops/docker/app/Dockerfile.dev
@@ -55,6 +57,8 @@ services:
   sidekiq:
     image: hous-permit-portal-dev:latest
     pull_policy: "never"
+    tty: true
+    stdin_open: true
     working_dir: /app
     env_file: .env.docker_compose
     volumes:

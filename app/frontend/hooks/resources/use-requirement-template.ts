@@ -23,8 +23,11 @@ export const useRequirementTemplate = () => {
     ;(async () => {
       try {
         const isSuccess = await requirementTemplateStore.fetchRequirementTemplate(requirementTemplateId)
-
-        !isSuccess && setError(new Error(t("errors.fetchRequirementTemplate")))
+        if (isSuccess) {
+          setError(null)
+        } else {
+          setError(new Error(t("errors.fetchRequirementTemplate")))
+        }
       } catch (e) {
         setError(e instanceof Error ? e : new Error(t("errors.fetchRequirementTemplate")))
       }

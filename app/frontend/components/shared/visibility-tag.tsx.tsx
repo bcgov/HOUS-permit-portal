@@ -6,10 +6,10 @@ import { EVisibility } from "../../types/enums"
 import { toCamelCase } from "../../utils/utility-functions"
 
 interface IVisibilityTagProps {
-  visibility: EVisibility
+  visibility?: EVisibility
 }
 
-export const VisibilityTag = ({ visibility }: IVisibilityTagProps) => {
+export const VisibilityTag = ({ visibility = EVisibility.any }: IVisibilityTagProps) => {
   const { t } = useTranslation()
 
   const backgroundColors = {

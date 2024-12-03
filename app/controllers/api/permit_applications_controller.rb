@@ -429,7 +429,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def set_permit_application
     @permit_application =
-      PermitApplication.for_sandbox(current_sandbox).find(params[:id])
+      if current_user.super_admin?
+        PermitApplication.find(params[:id])
+      else
+        PermitApplication.for_sandbox(current_sandbox).find(params[:id])
+      end
   end
 
   def permit_application_params # params for submitters

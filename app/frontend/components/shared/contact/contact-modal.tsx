@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
 import { INPUT_CONTACT_KEYS } from "../../../stores/contact-store"
 import { IContact, IOption } from "../../../types/types"
-import { convertPhoneNumberToFormioFormat } from "../../../utils/utility-functions"
+import { convertPhoneNumberToFormioFormat, isSafari } from "../../../utils/utility-functions"
 import { ContactSelect } from "../select/selectors/contact-select"
 
 export interface IContactModalProps extends Partial<ReturnType<typeof useDisclosure>> {
@@ -56,7 +56,19 @@ export const ContactModal: React.FC<IContactModalProps> = ({
         updateContactInSubmissionDatagrid(requirementPrefix, index, option.value)
       }
     }
+
+    // Save the current scroll position. This is for a hack to fix odd
+    // scroll to bottom behaviour on safari
+    const scrollPosition = window.scrollY
+
     onClose()
+
+    // Restore the scroll position after closing
+    if (isSafari) {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition)
+      }, 100)
+    }
   }
 
   const updateContactInSubmissionSection = (requirementKey: string, contact: IContact) => {

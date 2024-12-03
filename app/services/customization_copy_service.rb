@@ -64,7 +64,7 @@ class CustomizationCopyService
   )
     merged_blocks = to_blocks.deep_dup
 
-    from_blocks.each do |block_id, changes|
+    from_blocks&.each do |block_id, changes|
       merged_blocks[block_id] ||= {}
 
       merged_blocks[block_id]["tip"] = changes["tip"] if include_tips

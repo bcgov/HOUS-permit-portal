@@ -18,10 +18,10 @@ deployments:
         includeCommand: false
         resources:
           requests:
-            cpu: 100m
+            cpu: 300m
             memory: 256Mi
           limits:
-            cpu: 200m
+            cpu: 750m
             memory: 512Mi
   - process: worker
     replicaCount: 1
@@ -36,7 +36,7 @@ deployments:
             cpu: 100m
             memory: 256Mi
           limits:
-            cpu: 150m
+            cpu: 250m
             memory: 512Mi
   - process: anycable-rpc
     replicaCount: 1

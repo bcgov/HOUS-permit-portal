@@ -124,9 +124,8 @@ class TemplateVersioningService
     requirement_template
   )
     unless requirement_template.type == EarlyAccessRequirementTemplate.name
-      raise TemplateVersionPublishError.new(
-              "Cannot create early access version for a non-early access requirement template"
-            )
+      raise TemplateVersionPublishError,
+            "Cannot create early access version for a non-early access requirement template"
     end
 
     attributes = {
@@ -141,7 +140,9 @@ class TemplateVersioningService
       version_date: Date.current,
       status: "published"
     }
-    requirement_template.reload if requirement_template.id.present?
+    if requirement_template.id.present?
+      requirement_template.reload_published_template_version
+    end
     version =
       requirement_template.published_template_version ||
         requirement_template.template_versions.build
@@ -155,13 +156,11 @@ class TemplateVersioningService
       return template_version
     end
 
-    skip_date_check =
-      skip_date_check && (ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true")
+    skip_date_check &&= (ENV["ENABLE_TEMPLATE_FORCE_PUBLISH"] == "true")
 
-    if template_version.version_date > Date.current && (!skip_date_check)
-      raise TemplateVersionPublishError.new(
-              "Version cannot be published before it's scheduled date"
-            )
+    if template_version.version_date > Date.current && !skip_date_check
+      raise TemplateVersionPublishError,
+            "Version cannot be published before it's scheduled date"
     end
 
     ActiveRecord::Base.transaction do
@@ -169,10 +168,9 @@ class TemplateVersioningService
 
       deprecate_versions_before_template(template_version)
 
-      if !template_version.save
-        raise TemplateVersionPublishError.new(
-                template_version.errors.full_messages.join(", ")
-              )
+      unless template_version.save
+        raise TemplateVersionPublishError,
+              template_version.errors.full_messages.join(", ")
       end
 
       previous_version = template_version.previous_version
@@ -187,7 +185,7 @@ class TemplateVersioningService
             customization,
             template_version
           )
-        rescue => e
+        rescue StandardError => e
           # we want to know if an error is happening
           # but don't want to fail the whole publish process because of it
           Rails.logger.error(
@@ -202,7 +200,7 @@ class TemplateVersioningService
       )
     end
 
-    return template_version
+    template_version
   end
 
   def self.update_draft_permit_with_new_template_version(permit_application)

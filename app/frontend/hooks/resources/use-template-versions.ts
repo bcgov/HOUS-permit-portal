@@ -37,7 +37,11 @@ export const useTemplateVersions = ({
       try {
         const isSuccess = await fetchTemplateVersions(activityId, status, earlyAccess, isPublic)
 
-        !isSuccess && setError(new Error(errorMessage))
+        if (isSuccess) {
+          setError(null)
+        } else {
+          setError(new Error(errorMessage))
+        }
       } catch (e) {
         setError(e instanceof Error ? e : new Error(errorMessage))
       }

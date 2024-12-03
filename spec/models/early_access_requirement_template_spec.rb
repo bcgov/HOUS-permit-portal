@@ -61,6 +61,7 @@ RSpec.describe EarlyAccessRequirementTemplate, type: :model do
         end
 
         it "is invalid" do
+          subject.reload
           expect(subject).to_not be_valid
         end
       end
@@ -88,6 +89,7 @@ RSpec.describe EarlyAccessRequirementTemplate, type: :model do
         end
 
         it "is invalid" do
+          subject.reload
           expect(subject).not_to be_valid
           expect(subject.errors[:template_versions]).to include(
             I18n.t(
@@ -107,6 +109,7 @@ RSpec.describe EarlyAccessRequirementTemplate, type: :model do
         end
 
         it "is invalid" do
+          subject.reload
           expect(subject).not_to be_valid
           expect(subject.errors[:template_versions]).to include(
             I18n.t(

@@ -2,11 +2,11 @@
 require "rails_helper"
 
 RSpec.describe Api::RequirementTemplatesController, type: :controller do
-  let(:super_admin) { create(:user, :super_admin) }
-  let(:activity) { create(:activity) }
-  let(:permit_type) { create(:permit_type) }
-  let(:other_activity) { create(:activity) }
-  let(:other_permit_type) { create(:permit_type) }
+  let!(:super_admin) { create(:user, :super_admin) }
+  let!(:activity) { create(:activity) }
+  let!(:permit_type) { create(:permit_type, code: :high_residential) }
+  let!(:other_activity) { create(:activity, code: :demolition) }
+  let!(:other_permit_type) { create(:permit_type) }
 
   # Move the sign_in into specific contexts to avoid affecting all tests
   # before { sign_in super_admin }
@@ -368,6 +368,177 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
             "The user is not authorized to do this action"
           )
         end
+      end
+    end
+  end
+
+  describe "PATCH #update" do
+    let(:requirement_template) do
+      create(
+        :live_requirement_template_with_sections,
+        description: "Original Description",
+        first_nations: false,
+        activity: activity,
+        permit_type: permit_type
+      )
+    end
+
+    let(:valid_attributes) do
+      {
+        description: "Updated Description",
+        first_nations: true,
+        activity_id: other_activity.id,
+        permit_type_id: other_permit_type.id,
+        requirement_template_sections_attributes: [
+          {
+            id: requirement_template.requirement_template_sections.first.id,
+            name: "Updated Section",
+            position: 1
+          }
+        ]
+      }
+    end
+
+    let(:invalid_attributes) { { activity_id: nil, permit_type_id: nil } }
+
+    context "when the user is authenticated as a super admin" do
+      before { sign_in super_admin }
+
+      context "with valid parameters" do
+        it "updates the requirement template and returns a success response" do
+          patch :update,
+                params: {
+                  id: requirement_template.id,
+                  requirement_template: valid_attributes
+                }
+
+          expect(response).to have_http_status(:success)
+          expect(json_response).to include("meta", "data")
+          expect(json_response["data"]["description"]).to eq(
+            "Updated Description"
+          )
+          expect(json_response["data"]["first_nations"]).to be_truthy
+          expect(json_response["data"]["activity"]["id"]).to eq(
+            other_activity.id
+          )
+          expect(json_response["data"]["permit_type"]["id"]).to eq(
+            other_permit_type.id
+          )
+          expect(
+            json_response["data"]["requirement_template_sections"].first["name"]
+          ).to eq("Updated Section")
+
+          # Verify that the changes are persisted in the database
+          requirement_template.reload
+          expect(requirement_template.description).to eq("Updated Description")
+          expect(requirement_template.first_nations).to be_truthy
+          expect(requirement_template.activity_id).to eq(other_activity.id)
+          expect(requirement_template.permit_type_id).to eq(
+            other_permit_type.id
+          )
+          expect(
+            requirement_template.requirement_template_sections.first.name
+          ).to eq("Updated Section")
+        end
+      end
+
+      context "with invalid parameters" do
+        it "does not update the requirement template and returns an error response" do
+          patch :update,
+                params: {
+                  id: requirement_template.id,
+                  requirement_template: invalid_attributes
+                }
+
+          expect(response).to have_http_status(:bad_request)
+          expect(json_response["meta"]["message"]["message"]).to eq(
+            "Activity must exist, Permit type must exist"
+          )
+
+          # Ensure that the description was not updated
+          requirement_template.reload
+          expect(requirement_template.description).to eq("Original Description")
+        end
+      end
+
+      context "when updating an early access requirement template" do
+        let(:early_access_template) do
+          create(
+            :early_access_requirement_template,
+            description: "Early Access Original",
+            first_nations: false,
+            activity: activity,
+            permit_type: permit_type
+          )
+        end
+
+        let(:early_access_attributes) do
+          { nickname: "Early Access Updated Nickname", first_nations: true }
+        end
+
+        it "reloads the requirement template after update" do
+          patch :update,
+                params: {
+                  id: early_access_template.id,
+                  requirement_template: early_access_attributes
+                }
+
+          expect(response).to have_http_status(:success)
+          expect(json_response["data"]["nickname"]).to eq(
+            "Early Access Updated Nickname"
+          )
+
+          # Verify that the template is reloaded and changes are persisted
+          early_access_template.reload
+          expect(early_access_template.nickname).to eq(
+            "Early Access Updated Nickname"
+          )
+          expect(early_access_template.first_nations).to be_truthy
+        end
+      end
+    end
+
+    context "when the user is not authenticated" do
+      # before { sign_out :user }
+
+      it "denies access and returns a forbidden response" do
+        patch :update,
+              params: {
+                id: requirement_template.id,
+                requirement_template: valid_attributes
+              }
+        expect(response).to have_http_status(:unauthorized)
+
+        expect(response.body).to eq(
+          "You need to sign in or sign up before continuing."
+        )
+
+        # Ensure that the description was not updated
+        requirement_template.reload
+        expect(requirement_template.description).to eq("Original Description")
+      end
+    end
+
+    context "when the user is authenticated but not authorized" do
+      let(:regular_user) { create(:user, :submitter) }
+
+      before { sign_in regular_user }
+
+      it "denies access and returns a forbidden response" do
+        patch :update,
+              params: {
+                id: requirement_template.id,
+                requirement_template: valid_attributes
+              }
+
+        expect(response).to have_http_status(:forbidden)
+        expect(json_response["meta"]["message"]["message"]).to eq(
+          "The user is not authorized to do this action"
+        )
+
+        # Ensure that the description was not updated
+        requirement_template.reload
+        expect(requirement_template.description).to eq("Original Description")
       end
     end
   end

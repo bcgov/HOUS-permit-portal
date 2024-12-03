@@ -26,8 +26,6 @@ class EarlyAccessRequirementTemplate < RequirementTemplate
   #         foreign_key: "large_scale_requirement_template_id",
   #         dependent: :nullify
 
-  after_save :maintain_published_early_access_version
-
   validate :valid_template_version_status
 
   validate :public_cannot_be_false_if_any_site_configuration_exists
