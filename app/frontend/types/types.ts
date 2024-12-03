@@ -588,3 +588,41 @@ export interface IDocumentReference {
   dateIssued: string
   preparedBy: string
 }
+
+export interface IPart3NavLink {
+  key: TPart3NavLinkKey
+  location: string
+  subLinks: IPart3NavLink[]
+  section?: string
+}
+export interface IPart3NavSection {
+  key: TPart3NavSectionKey
+  navLinks: IPart3NavLink[]
+}
+
+export interface IPart3SectionCompletionStatus {
+  start: boolean
+  projectDetails: boolean
+  buildingDetails: boolean
+  baselineOccupancies: boolean
+  baselineDetails: boolean
+  districtEnergy: boolean
+  fuelTypes: boolean
+  additionalFuelTypes: boolean
+  baselinePerformance: boolean
+  stepCodeOccupancies: boolean
+  stepCodePerformanceRequirements: boolean
+  modelledOutputs: boolean
+  renewableEnergy: boolean
+  overheatingRequirements: boolean
+  projectAdjustments: boolean
+  documentReferences: boolean
+  performanceCharacteristics: boolean
+  hvac: boolean
+  contact: boolean
+  requirementsSummary: boolean
+  stepCodeSummary: boolean
+}
+
+export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
+export type TPart3NavSectionKey = "overview" | "compliance" | "results"

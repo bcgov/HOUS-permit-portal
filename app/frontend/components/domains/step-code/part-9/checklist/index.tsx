@@ -6,7 +6,7 @@ import * as R from "ramda"
 import React, { Suspense, useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
-import { useMst } from "../../../../../setup/root"
+import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
 import { BuildingCharacteristicsSummary } from "./building-characteristics-summary"
 import { CompletedBy } from "./completed-by"
@@ -18,9 +18,7 @@ import { StepNotMetWarning } from "./shared/step-not-met-warning"
 import { ZeroCarbonStepCodeCompliance } from "./zero-carbon-step-code-compliance"
 
 export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
-  const {
-    stepCodeStore: { currentStepCode: stepCode },
-  } = useMst()
+  const { stepCode } = usePart9StepCode()
   const { permitApplicationId } = useParams()
   const checklist = stepCode.preConstructionChecklist
   const navigate = useNavigate()
@@ -31,8 +29,8 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
 
   useEffect(() => {
     const fetch = async () => await checklist.load()
-    !checklist.isLoaded && fetch()
-  }, [checklist.isLoaded])
+    checklist && !checklist.isLoaded && fetch()
+  }, [checklist?.isLoaded])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -42,7 +40,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
   const { handleSubmit, reset } = formMethods
 
   const onSubmit = async (values) => {
-    const result = await stepCode.updateStepCodeChecklist(
+    const result = await stepCode.updateChecklist(
       checklist.id,
       R.mergeRight(values, { stepRequirementId: checklist.stepRequirementId })
     )
