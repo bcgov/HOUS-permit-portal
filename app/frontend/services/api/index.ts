@@ -8,8 +8,10 @@ import { IExternalApiKey } from "../../models/external-api-key"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
-import { IStepCode } from "../../models/part-9-step-code"
-import { IStepCodeChecklist } from "../../models/part-9-step-code-checklist"
+import { IPart3StepCode } from "../../models/part-3-step-code"
+import { IPart3StepCodeChecklist } from "../../models/part-3-step-code-checklist"
+import { IPart9StepCode } from "../../models/part-9-step-code"
+import { IPart9StepCodeChecklist } from "../../models/part-9-step-code-checklist"
 import { IPermitApplication } from "../../models/permit-application"
 import { IActivity, IPermitType } from "../../models/permit-classification"
 import { IPermitCollaboration } from "../../models/permit-collaboration"
@@ -570,16 +572,20 @@ export class Api {
     )
   }
 
-  async fetchStepCodes() {
-    return this.client.get<ApiResponse<IStepCode[]>>("/step_codes")
+  async fetchPart9StepCodes() {
+    return this.client.get<ApiResponse<(IPart9StepCode | IPart3StepCode)[]>>("/part_9_building/step_codes")
   }
 
-  async createPart9StepCode(stepCode: IStepCode) {
-    return this.client.post<ApiResponse<IStepCode>>("/step_codes/part_9", { stepCode })
+  async createPart3StepCode(stepCode: IPart3StepCode) {
+    return this.client.post<ApiResponse<IPart3StepCode>>("/part_3_building/step_codes", { stepCode })
+  }
+
+  async createPart9StepCode(stepCode: IPart9StepCode) {
+    return this.client.post<ApiResponse<IPart9StepCode>>("/part_9_building/step_codes", { stepCode })
   }
 
   async deleteStepCode(id: string) {
-    return this.client.delete<ApiResponse<IStepCode>>(`/step_codes/${id}`)
+    return this.client.delete<ApiResponse<IPart9StepCode | IPart3StepCode>>(`/step_codes/${id}`)
   }
 
   async downloadStepCodeSummaryCsv() {
@@ -590,12 +596,16 @@ export class Api {
     return this.client.get<BlobPart>(`/permit_applications/download_application_metrics_csv`)
   }
 
-  async fetchStepCodeChecklist(id: string) {
-    return this.client.get<ApiResponse<IStepCodeChecklist>>(`/step_code_checklists/${id}`)
+  async fetchPart9Checklist(id: string) {
+    return this.client.get<ApiResponse<IPart9StepCodeChecklist>>(`/part_9_building/checklists/${id}`)
   }
 
-  async updateStepCodeChecklist(id: string, stepCodeChecklist: IStepCodeChecklist) {
-    return this.client.patch<ApiResponse<IStepCode>>(`/step_code_checklists/${id}`, { stepCodeChecklist })
+  async updatePart9Checklist(id: string, stepCodeChecklist: IPart9StepCodeChecklist) {
+    return this.client.patch<ApiResponse<IPart9StepCode>>(`/part_9_building/checklists/${id}`, { stepCodeChecklist })
+  }
+
+  async updatePart3Checklist(checklistId: string, checklist: IPart3StepCodeChecklist) {
+    return this.client.patch<ApiResponse<IPart3StepCode>>(`/part_3_building/checklists/${checklistId}`, { checklist })
   }
 
   async fetchSiteConfiguration() {

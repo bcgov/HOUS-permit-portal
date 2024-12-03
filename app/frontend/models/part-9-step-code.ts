@@ -5,9 +5,12 @@ import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
 
+export const Part9StepCodeType = "Part9StepCode"
+
 export const Part9StepCodeModel = types
   .model("Part9StepCodeModel", {
     id: types.identifier,
+    type: types.literal(Part9StepCodeType),
     checklistsMap: types.map(Part9StepCodeChecklistModel),
   })
   .extend(withEnvironment())
@@ -27,8 +30,8 @@ export const Part9StepCodeModel = types
     },
   }))
   .actions((self) => ({
-    updateStepCodeChecklist: flow(function* (id, values) {
-      const response = yield self.environment.api.updateStepCodeChecklist(id, values)
+    updateChecklist: flow(function* (id, values) {
+      const response = yield self.environment.api.updatePart9Checklist(id, values)
       if (response.ok) {
         self.mergeUpdate(response.data.data, "checklistsMap")
         return true

@@ -1,4 +1,6 @@
-import { Instance, types } from "mobx-state-tree"
+import { Instance, flow, types } from "mobx-state-tree"
+import * as R from "ramda"
+import { navLinks } from "../components/domains/step-code/part-3/sidebar/nav-sections"
 import { withEnvironment } from "../lib/with-environment"
 import {
   EClimateZone,
@@ -15,7 +17,10 @@ import {
   IEnergyOutput,
   IFuelType,
   IMakeUpAirFuel,
+  IPart3NavLink,
+  IPart3SectionCompletionStatus,
   IStepCodeOccupancy,
+  TPart3NavLinkKey,
 } from "../types/types"
 
 function preProcessor(snapshot) {
@@ -30,6 +35,7 @@ export const Part3StepCodeChecklistModel = types.snapshotProcessor(
     .model("Part3StepCodeChecklistModel", {
       id: types.identifier,
       isLoaded: types.maybeNull(types.boolean),
+      sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
       // permit application info
       projectName: types.maybeNull(types.string),
       projectIdentifier: types.maybeNull(types.string),
@@ -94,8 +100,29 @@ export const Part3StepCodeChecklistModel = types.snapshotProcessor(
       completedByOrganizationName: types.maybeNull(types.string),
     })
     .extend(withEnvironment())
-    .views((self) => ({}))
-    .actions((self) => ({})),
+    .views((self) => ({
+      isComplete(key: TPart3NavLinkKey): boolean {
+        return self.sectionCompletionStatus[key]
+      },
+    }))
+    .views((self) => ({
+      get currentNavLink(): IPart3NavLink | undefined {
+        return navLinks.find((l) => !self.isComplete(l.key))
+      },
+    }))
+    .actions((self) => ({
+      completeSection: flow(function* (key: TPart3NavLinkKey) {
+        let updatedStatus = R.clone(self.sectionCompletionStatus)
+        updatedStatus[key] = true
+        const response = yield self.environment.api.updatePart3Checklist(self.id, {
+          sectionCompletionStatus: updatedStatus,
+        })
+        if (response.ok) {
+          self.sectionCompletionStatus = updatedStatus
+          return true
+        }
+      }),
+    })),
   { preProcessor }
 )
 
