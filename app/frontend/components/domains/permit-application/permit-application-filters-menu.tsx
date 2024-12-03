@@ -1,5 +1,3 @@
-// Filename: PermitApplicationFiltersMenu.tsx
-
 import {
   Button,
   Checkbox,
@@ -13,36 +11,32 @@ import {
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Funnel, CaretDown } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
 import { ISearch } from "../../../lib/create-search-model";
-import { EPermitApplicationSortCollaboratingFields } from "../../../types/enums";
+import { useMst } from "../../../setup/root";
 
 interface ISearchSortProps {
-  searchModel: ISearch;
   i18nPrefix: string;
   sortFields: string[];
 }
 
-export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = ({
-  searchModel,
+export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer(({
   i18nPrefix,
   sortFields,
 }: ISearchSortProps) => {
   const { t } = useTranslation();
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const options = Object.values(EPermitApplicationSortCollaboratingFields); 
+  const {permitApplicationStore} = useMst()
+  const {hasCollaboratorFilter, setHasCollaboratorFilter, searchPermitApplications, resetFilters} = permitApplicationStore
   const [isOpen, setIsOpen] = useState(false)
-  const { applySort, fetchData } = searchModel
 
-  const handleCheckboxChange = (newSelectedOptions: string[]) => {
-    setSelectedOptions(newSelectedOptions);
-    applySort({
-      hasCollaborator: newSelectedOptions,
-    })
-    fetchData()
+  const handleCheckboxChange = (newHasCollaborator: boolean) => {
+     setHasCollaboratorFilter(newHasCollaborator);
+    searchPermitApplications()
   };
 
   const handleClear = () => {
-    setSelectedOptions([]);
+    resetFilters()
+    searchPermitApplications()
   };
 
   const toggleMenu = () => {
@@ -57,23 +51,22 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = ({
         </MenuButton>
         <MenuList
           bg="greys.white"
-          border="2px solid"
-          borderColor="border.base"
+          border="1px solid"
+          borderColor="border.light"
           borderRadius="sm"
           boxShadow="md"
           p={4}
           zIndex={1}
         >
-          <CheckboxGroup
-            value={selectedOptions}
-            onChange={handleCheckboxChange}
-          >
+          <CheckboxGroup>
             <Flex direction="column">
-              {options.map((option) => (
-                <Checkbox key={option} value={option} mb={2}>
-                  {t(`${i18nPrefix}.filterMenu.${option}`)}
+              {hasCollaboratorFilter?.toString()}
+                <Checkbox 
+                checked={!!hasCollaboratorFilter}
+                onChange={(e) => handleCheckboxChange(!!e.target.checked)}  
+                mb={2}>
+                  {t(`${i18nPrefix}.filterMenu.collaborating`)}
                 </Checkbox>
-              ))}
             </Flex>
           </CheckboxGroup>
           <Divider borderColor="greys.grey03" my={4} />
@@ -84,4 +77,4 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = ({
       </Menu>
     </Flex>
   );
-};
+});

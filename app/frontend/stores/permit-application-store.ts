@@ -42,6 +42,7 @@ export const PermitApplicationStoreModel = types
       ]),
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.maybeNull(types.string),
+      hasCollaboratorFilter: types.maybeNull(types.boolean),
     }),
     createSearchModel<EPermitApplicationSortFields>("searchPermitApplications", "setPermitApplicationFilters")
   )
@@ -86,6 +87,24 @@ export const PermitApplicationStoreModel = types
       self.currentPermitApplication = permitApplicationId
       self.currentPermitApplication &&
         self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
+    },
+    setHasCollaboratorFilter(value: boolean) {
+      setQueryParam("hasCollaborator", value.toString())
+      self.hasCollaboratorFilter = value
+    },
+    resetFilters() {
+      self.hasCollaboratorFilter = false
+      self.templateVersionIdFilter = null
+      self.requirementTemplateIdFilter = null
+      if (typeof window !== "undefined")
+         {        
+            const url = new URL(window.location.href);
+            const staticParams = [ "templateVersionId", "requirementTemplateId", "hasCollaborator"];
+            staticParams.forEach((param) => {
+              url.searchParams.delete(param);
+            });
+            window.history.replaceState(null, "", url.toString());      
+        } 
     },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
@@ -279,6 +298,7 @@ export const PermitApplicationStoreModel = types
       if (opts?.reset) {
         self.resetPages()
       }
+      debugger
       const searchParams = {
         query: self.query,
         sort: self.sort,
@@ -288,6 +308,7 @@ export const PermitApplicationStoreModel = types
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
           requirementTemplateId: self.requirementTemplateIdFilter,
+          hasCollaborator: self.hasCollaboratorFilter, 
         },
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
@@ -327,10 +348,12 @@ export const PermitApplicationStoreModel = types
       const statusFilter = queryParams.get("status")?.split(",") as TFilterableStatus[]
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")
+      const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
 
       self.setStatusFilter(statusFilter)
       self.requirementTemplateIdFilter = requirementTemplateIdFilter
       self.templateVersionIdFilter = templateVersionIdFilter
+      self.hasCollaboratorFilter = hasCollaboratorFilter
     },
 
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {

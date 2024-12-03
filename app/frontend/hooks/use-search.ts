@@ -32,7 +32,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     const visibility = queryParams.get("visibility") as TVisibility
     const sortDirection = queryParams.get("sortDirection") as ESortDirection
     const sortField = queryParams.get("sortField")
-    const hasCollaborator = queryParams.get("hasCollaborator")
+  
 
     if (query) searchModel.setQuery(decodeURIComponent(query))
     if (currentPage) {
@@ -43,9 +43,7 @@ export const useSearch = (searchModel: ISearch, dependencyArray: any[] = []) => 
     if (countPerPage) searchModel.setCountPerPage(parseInt(decodeURIComponent(countPerPage)))
     if (showArchived) searchModel.setShowArchived(parseBoolean(showArchived))
     if (visibility) searchModel.setVisibility(visibility)
-    if (hasCollaborator) {
-      searchModel.applySort({ hasCollaborator: hasCollaborator })
-    }
+    
     if (sortDirection && sortField) {
       searchModel.applySort({ direction: sortDirection, field: sortField })
     } else {
