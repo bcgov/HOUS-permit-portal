@@ -23,11 +23,6 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer
       searchPermitApplications()
     }
 
-    const handleClear = () => {
-      resetFilters()
-      searchPermitApplications()
-    }
-
     const toggleMenu = () => {
       setIsOpen(!isOpen)
     }
@@ -56,9 +51,8 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer
           >
             <CheckboxGroup>
               <Flex direction="column">
-                {hasCollaboratorFilter?.toString()}
                 <Checkbox
-                  checked={!!hasCollaboratorFilter}
+                  isChecked={!!hasCollaboratorFilter}
                   onChange={(e) => handleCheckboxChange(!!e.target.checked)}
                   mb={2}
                 >
@@ -67,7 +61,7 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer
               </Flex>
             </CheckboxGroup>
             <Divider borderColor="greys.grey03" my={4} />
-            <Button size="sm" variant="tertiary" onClick={handleClear}>
+            <Button size="sm" variant="tertiary" onClick={resetFilters()}>
               {t("ui.reset")}
             </Button>
           </MenuList>
