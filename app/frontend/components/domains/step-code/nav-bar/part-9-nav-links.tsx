@@ -4,20 +4,19 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { useMst } from "../../../../setup/root"
+import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { EStepCodeChecklistStatus } from "../../../../types/enums"
 import { RestartConfirmationModal } from "../part-9/restart-confirmation-modal"
 
 export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
-  const { stepCodeStore } = useMst()
-  const { currentStepCode } = stepCodeStore
-  const checklist = currentStepCode?.preConstructionChecklist
+  const { stepCode } = usePart9StepCode()
+  const checklist = stepCode?.preConstructionChecklist
   const navigate = useNavigate()
   const { handleSubmit, register, formState } = useForm()
   const { isValid, isSubmitting } = formState
 
   const onComplete = async (values) => {
-    await currentStepCode.updateStepCodeChecklist(checklist.id, values)
+    await stepCode.updateChecklist(checklist.id, values)
   }
 
   const handleSave = async () => {
@@ -32,7 +31,7 @@ export const Part9NavLinks = observer(function Part9StepCodeNavLinks() {
         {t("stepCode.checklistGuide")}
       </Button> */}
 
-      {stepCodeStore.currentStepCode ? (
+      {checklist ? (
         <>
           <RestartConfirmationModal />
           <Button variant="secondary" onClick={handleSave}>

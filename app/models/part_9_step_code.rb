@@ -11,7 +11,11 @@ class Part9StepCode < StepCode
   accepts_nested_attributes_for :pre_construction_checklist
 
   before_create :set_plan_fields
-  validate :requires_plan_document
+  # validate :requires_plan_document
+
+  def blueprint
+    Part9StepCodeBlueprint
+  end
 
   def step_requirements
     all =

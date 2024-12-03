@@ -1,16 +1,4 @@
 class Api::StepCodesController < Api::ApplicationController
-  def index
-    @step_codes = policy_scope(StepCode)
-    render_success @step_codes,
-                   nil,
-                   {
-                     blueprint: StepCodeBlueprint,
-                     meta: {
-                       select_options: Part9StepCode::Checklist.select_options
-                     }
-                   }
-  end
-
   # DELETE /api/step_codes/:id
   def destroy
     @step_code = StepCode.find(params[:id])

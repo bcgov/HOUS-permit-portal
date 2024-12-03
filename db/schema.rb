@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_14_212505) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_27_205040) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -376,6 +376,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_14_212505) do
     t.string "submitted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "section_completion_status"
     t.index ["step_code_id"],
             name: "index_part_3_step_code_checklists_on_step_code_id"
   end
@@ -388,6 +389,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_14_212505) do
     t.integer "stage", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "building_type"
+    t.integer "compliance_path"
+    t.text "completed_by"
+    t.datetime "completed_at"
+    t.text "completed_by_company"
+    t.text "completed_by_phone"
+    t.text "completed_by_address"
+    t.text "completed_by_email"
+    t.text "completed_by_service_organization"
+    t.text "energy_advisor_id"
     t.boolean "site_visit_completed"
     t.boolean "site_visit_date"
     t.integer "testing_pressure"
@@ -401,19 +412,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_14_212505) do
     t.text "home_state"
     t.integer "compliance_status"
     t.text "notes"
-    t.integer "status", default: 0, null: false
-    t.string "builder"
-    t.uuid "step_requirement_id"
-    t.integer "building_type"
-    t.integer "compliance_path"
-    t.string "completed_by"
-    t.datetime "completed_at"
-    t.string "completed_by_company"
-    t.string "completed_by_phone"
-    t.string "completed_by_address"
-    t.string "completed_by_email"
-    t.string "completed_by_service_organization"
-    t.text "energy_advisor_id"
     t.decimal "hvac_consumption"
     t.decimal "dwh_heating_consumption"
     t.decimal "ref_hvac_consumption"
@@ -422,6 +420,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_14_212505) do
     t.integer "epc_calculation_testing_target_type"
     t.boolean "epc_calculation_compliance"
     t.boolean "codeco"
+    t.integer "status", default: 0, null: false
+    t.string "builder"
+    t.uuid "step_requirement_id"
     t.index ["status"], name: "index_part_9_step_code_checklists_on_status"
     t.index ["step_code_id"],
             name: "index_part_9_step_code_checklists_on_step_code_id"
