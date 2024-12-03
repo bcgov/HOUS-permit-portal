@@ -2,7 +2,7 @@ import { Grid, GridItem, Radio, RadioGroup, Tag } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../models/step-code-checklist"
+import { IStepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { i18nPrefix } from "./i18n-prefix"
 
 interface IProps {

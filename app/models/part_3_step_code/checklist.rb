@@ -43,7 +43,7 @@ class Part3StepCode::Checklist < ApplicationRecord
          air_source_vrf
          ground_source_vrf
          gas_boiler
-         district_sytem
+         district_system
          other
        ],
        _prefix: :heating_plant

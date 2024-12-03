@@ -3,12 +3,12 @@ import { Instance, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { StepCodeChecklistModel } from "./step-code-checklist"
+import { Part9StepCodeChecklistModel } from "./part-9-step-code-checklist"
 
-export const StepCodeModel = types
-  .model("StepCodeModel", {
+export const Part9StepCodeModel = types
+  .model("Part9StepCodeModel", {
     id: types.identifier,
-    checklistsMap: types.map(StepCodeChecklistModel),
+    checklistsMap: types.map(Part9StepCodeChecklistModel),
   })
   .extend(withEnvironment())
   .extend(withRootStore())
@@ -36,4 +36,4 @@ export const StepCodeModel = types
     }),
   }))
 
-export interface IStepCode extends Instance<typeof StepCodeModel> {}
+export interface IPart9StepCode extends Instance<typeof Part9StepCodeModel> {}

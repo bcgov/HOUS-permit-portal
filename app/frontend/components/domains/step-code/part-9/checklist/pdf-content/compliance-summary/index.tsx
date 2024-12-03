@@ -1,7 +1,7 @@
 import { Text, View } from "@react-pdf/renderer"
 import { t } from "i18next"
 import React from "react"
-import { IStepCodeChecklist } from "../../../../../../../models/step-code-checklist"
+import { IStepCodeChecklist } from "../../../../../../../models/part-9-step-code-checklist"
 import { theme } from "../../../../../../../styles/theme"
 import { i18nPrefix } from "../../compliance-summary/i18n-prefix"
 import { Divider } from "../shared/divider"
