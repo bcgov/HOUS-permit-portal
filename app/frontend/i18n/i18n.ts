@@ -829,6 +829,10 @@ const options = {
                 label:
                   "Please use this tool to do your fill in your step code details and it will populate onto the application.",
               },
+              energyStepCodeToolPart3: {
+                label:
+                  "Please use this tool to do your fill in your step code details and it will populate onto the application.",
+              },
               energyStepCodeReportFile: {
                 label: "BC Energy Step Code Compliance Report",
               },
@@ -869,9 +873,10 @@ const options = {
             file: "File upload",
             phone: "Phone",
             email: "E-mail",
-            energyStepCode: "Energy Step Code",
+            energyStepCode: "Energy Step Code Part 9",
             stepCodePackageFile: "Design package file for energy step code",
             pidInfo: "Pid Info",
+            energyStepCodePart3: "Energy Step Code Part 3",
           },
           contactFieldItemLabels: {
             firstName: "First name",
