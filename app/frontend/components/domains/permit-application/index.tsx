@@ -89,8 +89,7 @@ export const PermitApplicationIndexScreen = observer(({}: IPermitApplicationInde
               <PermitApplicationFiltersMenu 
                 searchModel={permitApplicationStore}
                 i18nPrefix="permitApplication"
-              >
-              </PermitApplicationFiltersMenu>
+              />
               <FormControl w="fit-content">
                 <FormLabel>{t("ui.search")}</FormLabel>
                 <ModelSearchInput searchModel={permitApplicationStore} />
