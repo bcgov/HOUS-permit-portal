@@ -17,4 +17,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym "TEUI"
   inflect.acronym "GHG" # Greenhouse Gas
   inflect.acronym "CO2" # Carbon Dioxide
+  inflect.acronym "HDD" # Heading Degree Days
 end

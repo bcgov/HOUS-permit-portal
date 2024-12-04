@@ -22,6 +22,12 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
   end
 
   def checklist_params
-    params.require(:checklist).permit(section_completion_status: {})
+    params.require(:checklist).permit(
+      :building_height,
+      :heating_degree_days,
+      :climate_zone,
+      section_completion_status: {
+      }
+    )
   end
 end
