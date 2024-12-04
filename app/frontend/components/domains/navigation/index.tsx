@@ -255,6 +255,12 @@ const EarlyAccessRequirementsLibraryScreen = lazy(() =>
   }))
 )
 
+const EarlyAccessStepCodeScreen = lazy(() =>
+  import("../super-admin/early-access/step-code").then((module) => ({
+    default: module.EarlyAccessStepCodeScreen,
+  }))
+)
+
 const AcceptInvitationScreen = lazy(() =>
   import("../users/accept-invitation-screen").then((module) => ({ default: module.AcceptInvitationScreen }))
 )
@@ -349,6 +355,7 @@ const AppRoutes = observer(() => {
         path="/early-access/requirement-templates/:requirementTemplateId/edit"
         element={<EditEarlyAccessRequirementTemplateScreen />}
       />
+      <Route path="/early-access/step-code" element={<EarlyAccessStepCodeScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
       <Route path="/template-versions/:templateVersionId" element={<TemplateVersionScreen />} />
@@ -547,6 +554,7 @@ const AppRoutes = observer(() => {
           element={currentUser?.isSuperAdmin ? <JurisdictionIndexScreen /> : <LimitedJurisdictionIndexScreen />}
         />
         <Route path="/jurisdictions/:jurisdictionId" element={<JurisdictionScreen />} />
+        <Route path="/part-9-step-code" element={<Part9StepCodeForm />} />
         <Route path="/part-3-step-code" element={<RedirectScreen path="start" />} />
         <Route path="/part-3-step-code/:section" element={<Part3StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />

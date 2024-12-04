@@ -15,3 +15,9 @@ send_batched_integration_mapping_notifications:
   class: "SendBatchedIntegrationMappingNotificationsJob"
   queue: default
   active_job: false
+
+clear_early_access_tests:
+cron: "* */6 * * * America/Vancouver" #Runs every 6 hours
+  class: "ClearEarlyAccessJob"
+  queue: default
+  active_job: false

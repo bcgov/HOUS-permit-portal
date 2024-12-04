@@ -26,6 +26,12 @@ export const EarlyAccessScreen = ({}) => {
             icon={<BookOpen size={24} />}
             href="requirements-library"
           />
+          <HomeScreenBox
+            title={t("home.earlyAccess.stepCode.title")}
+            description={t("home.earlyAccess.stepCode.description")}
+            icon={<BookOpen size={24} />}
+            href="step-code"
+          />
         </Flex>
       </Flex>
     </Container>

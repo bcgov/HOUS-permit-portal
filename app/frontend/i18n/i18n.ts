@@ -1338,6 +1338,14 @@ const options = {
               description:
                 "Explore and manage pre-release requirement blocks sets designed for testing within Early Access projects.",
             },
+            stepCode: {
+              title: "Early access step code",
+              description: "Explore step code stand alone",
+              typeHeading: "Step Code Type",
+              accessUrl: "Share URL",
+              part3: "Part 3 Template",
+              part9: "Part 9 Template",
+            },
           },
           configurationManagement: {
             title: "Configuration management",
@@ -2035,6 +2043,7 @@ const options = {
             contact: "Contact us",
             configurationManagement: "Configuration management",
             energyStep: "Energy Step Code requirements",
+            stepCode: "Step Code Preview",
             submissionsInboxSetup: "Submissions inbox setup",
             confirmed: "E-mail confirmed",
             welcome: "Welcome",
