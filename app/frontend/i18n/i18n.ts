@@ -541,8 +541,8 @@ const options = {
             submitToOwn:
               "Make sure you are submitting to a jurisdiction that you have inbox access to so that you can see it.",
             sandboxIdHeading: "Submit into Sandbox",
-            onlyHavePin: "I only have a PIN",
-            dontHavePin: "I don't have a PIN",
+            onlyHavePin: "I don't have a PID or address",
+            dontHavePin: "Hide",
             selectSandboxLabel: "Select a sandbox to submit into",
             firstNationsTitle: "First Nations",
             permitTypeHeading: "Permit type",
@@ -590,7 +590,7 @@ const options = {
               "Upon receipt by the local jurisdiction, you will be notified via email or phone of any updates to your application's status or if additional documentation is required.",
             emailed:
               "A confirmation email has also been sent to the applicant and the {{ jurisdictionName }} building permit office",
-            pinRequired: "PID not found or unavailable. Please select a PIN and jurisdiction below:",
+            pinRequired: "PID not found or unavailable. Please optionally select a PIN and jurisdiction below:",
             pinVerified: "PIN is verified.",
             pinUnableToVerify: "Unable to verify PIN, please confirm and proceed as applicable.",
             needToKnow: "What you need to know",
