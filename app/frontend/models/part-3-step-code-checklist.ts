@@ -1,4 +1,4 @@
-import { Instance, flow, types } from "mobx-state-tree"
+import { Instance, applySnapshot, flow, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { navLinks } from "../components/domains/step-code/part-3/sidebar/nav-sections"
 import { withEnvironment } from "../lib/with-environment"
@@ -41,8 +41,8 @@ export const Part3StepCodeChecklistModel = types
       types.enumeration<EBuildingCodeVersion[]>(Object.values(EBuildingCodeVersion))
     ),
     // location details
-    buildingHeight: types.maybeNull(types.string),
-    heatingDegreeDays: types.maybeNull(types.string),
+    buildingHeight: types.maybeNull(types.number),
+    heatingDegreeDays: types.maybeNull(types.number),
     climateZone: types.maybeNull(types.enumeration<EClimateZone[]>(Object.values(EClimateZone))),
     // user input fields
     fuelTypes: types.array(types.frozen<IFuelType>()),
@@ -109,12 +109,18 @@ export const Part3StepCodeChecklistModel = types
     completeSection: flow(function* (key: TPart3NavLinkKey) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)
       updatedStatus[key] = true
-      console.log("*** updated status", updatedStatus)
       const response = yield self.environment.api.updatePart3Checklist(self.id, {
         sectionCompletionStatus: updatedStatus,
       })
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
+        return true
+      }
+    }),
+    update: flow(function* (values) {
+      const response = yield self.environment.api.updatePart3Checklist(self.id, values)
+      if (response.ok) {
+        applySnapshot(self, response.data.data)
         return true
       }
     }),
