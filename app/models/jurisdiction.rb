@@ -14,22 +14,19 @@ class Jurisdiction < ApplicationRecord
                name
                reverse_qualified_name
                qualified_name
-               review_manager_emails
-               regional_review_manager_emails
+               manager_emails
               ],
              word_start: %i[
                name
                reverse_qualified_name
                qualified_name
-               review_manager_emails
-               regional_review_manager_emails
+               manager_emails
              ],
              text_start: %i[
                name
                reverse_qualified_name
                qualified_name
-               review_manager_emails
-               regional_review_manager_emails
+               manager_emails
              ]
 
   SEARCH_DATA_FIELDS = %i[
@@ -46,7 +43,7 @@ class Jurisdiction < ApplicationRecord
     submission_inbox_set_up
     created_at
   ]
-  SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[review_manager_emails regional_review_manager_emails]
+  SUPER_ADMIN_ADDITIONAL_DATA_FIELDS = %i[manager_emails]
   # Associations
   has_one :preference
   has_many :permit_applications
@@ -107,8 +104,8 @@ class Jurisdiction < ApplicationRecord
     users&.kept&.review_manager
   end
 
-  def review_manager_emails
-    review_managers&.pluck(:email)
+  def manager_emails
+    [review_managers&.pluck(:email), regional_review_manager_emails].flatten.compact
   end
 
   def regional_review_manager_emails
@@ -172,8 +169,7 @@ class Jurisdiction < ApplicationRecord
       user_ids: users.pluck(:id),
       submission_inbox_set_up: submission_inbox_set_up,
       created_at: created_at,
-      review_manager_emails: review_manager_emails,
-      regional_review_manager_emails: regional_review_manager_emails
+      manager_emails: manager_emails
     }
   end
 
