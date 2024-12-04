@@ -2,7 +2,7 @@ class CreatePart3StepCodeTables < ActiveRecord::Migration[7.1]
   def change
     create_table :part_3_step_code_checklists, id: :uuid do |t|
       t.references :step_code, foreign_key: :true, type: :uuid
-      t.decimal :building_height
+      t.integer :building_height
       t.integer :building_code_version
       t.integer :heating_degree_days
       t.integer :climate_zone

@@ -1,4 +1,4 @@
-import { Center, Container, Flex, Show } from "@chakra-ui/react"
+import { Center, Container, Flex, FormLabel, Show } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
@@ -103,3 +103,6 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
     </RemoveScroll>
   )
 })
+
+// base styles for step code form
+FormLabel.defaultProps = { fontWeight: "bold" }

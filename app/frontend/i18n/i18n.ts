@@ -992,6 +992,28 @@ const options = {
                 BCBC_2018_rev_1: "BCBC 2018 Revision 1",
               },
             },
+            locationDetails: {
+              heading: "Building and location details",
+              instructions: "Set key parameters for your project.",
+              aboveGradeStories: {
+                label: "Number of above grade stories",
+                hint: "Include half-storeys and relevant below-grade storeys",
+              },
+              hdd: {
+                label: "Heating degree days below 18°C",
+                hint: "HDD is specified by the AHJ",
+              },
+              climateZone: "Climate zone",
+              climateZones: {
+                zone_4: "Zone 4",
+                zone_5: "Zone 5",
+                zone_6: "Zone 6",
+                zone_7a: "Zone 7A",
+                zone_7b: "Zone 7B",
+                zone_8: "Zone 8",
+              },
+              cta: "Save and continue",
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:

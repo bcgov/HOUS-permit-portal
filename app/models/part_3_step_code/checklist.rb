@@ -116,4 +116,9 @@ class Part3StepCode::Checklist < ApplicationRecord
       [:total_energy]
     end
   end
+
+  def heating_degree_days
+    self[:heating_degree_days].presence ||
+      step_code.jurisdiction_heating_degree_days
+  end
 end

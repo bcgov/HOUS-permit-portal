@@ -109,7 +109,7 @@ interface IFieldProps extends FormControlProps {
 const Field = function Field({ label, value, ...props }: IFieldProps) {
   return (
     <FormControl mb={{ base: 0, xl: 4 }} {...props}>
-      <FormLabel fontWeight="bold">{label}</FormLabel>
+      <FormLabel>{label}</FormLabel>
       <Input isDisabled value={value} textOverflow="ellipsis" />
     </FormControl>
   )
