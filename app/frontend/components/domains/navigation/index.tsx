@@ -80,6 +80,9 @@ const JurisdictionSubmissionInboxScreen = lazy(() =>
 const JurisdictionUserIndexScreen = lazy(() =>
   import("../jurisdictions/users").then((module) => ({ default: module.JurisdictionUserIndexScreen }))
 )
+const EditJurisdictionScreen = lazy(() =>
+  import("../jurisdictions/edit-jurisdiction-screen").then((module) => ({ default: module.EditJurisdictionScreen }))
+)
 const LandingScreen = lazy(() => import("../landing").then((module) => ({ default: module.LandingScreen })))
 const ContactScreen = lazy(() => import("../misc/contact-screen").then((module) => ({ default: module.ContactScreen })))
 const PermitApplicationIndexScreen = lazy(() =>
@@ -362,6 +365,7 @@ const AppRoutes = observer(() => {
   const adminOrManagerRoutes = (
     <>
       <Route path="/jurisdictions/:jurisdictionId/users" element={<JurisdictionUserIndexScreen />} />
+      <Route path="/jurisdictions/:jurisdictionId/update" element={<EditJurisdictionScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/users/invite" element={<InviteScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/export-templates" element={<ExportTemplatesScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/api-settings" element={<ExternalApiKeysIndexScreen />}>
