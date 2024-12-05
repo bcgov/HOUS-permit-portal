@@ -6,17 +6,28 @@ RSpec.describe Api::UsersController, type: :controller do
   let(:super_admin) { create(:user, :super_admin) }
   let(:submitter) { create(:user, :submitter) }
 
-  before do
-    # Assuming you're using Devise for authentication
-    sign_in super_admin
-  end
-
   # Helper method to parse JSON responses
   def json_response
     JSON.parse(response.body)
   end
 
+  def profile_params(user, params)
+    {
+      user: {
+          first_name: params[:first_name] || user.first_name,
+          last_name: params[:last_name] || user.last_name,
+          certified: params[:certified] || user.certified,
+          department: params[:department] || user.department
+      }
+    }
+  end
+
   describe "GET #super_admins" do
+    before do
+      # Assuming you're using Devise for authentication
+      sign_in super_admin
+    end
+
     let!(:super_admins) { create_list(:user, 3, :super_admin) }
 
     context "when the user is authorized" do
@@ -58,5 +69,29 @@ RSpec.describe Api::UsersController, type: :controller do
         )
       end
     end
+  end
+
+  describe "login with Review manager" do
+    let(:jurisdiction) { create(:sub_district) }
+    let!(:review_manager) do
+      create(:user, :review_manager, jurisdiction: jurisdiction)
+    end
+
+    before do
+      sign_in review_manager
+    end
+
+    context "when we try to update the department" do
+      it "department should be updated in DB " do
+        patch :profile, params: profile_params(review_manager, {department: "Department"})
+        expect(review_manager.reload.department).to eq "Department"
+      end
+
+      it "department should come in the response" do
+        patch :profile, params: profile_params(review_manager, {department: "Department1"})
+        expect(json_response.dig("data", "department")).to eq "Department1"
+      end
+    end
+
   end
 end
