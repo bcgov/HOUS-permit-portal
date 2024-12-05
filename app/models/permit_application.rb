@@ -49,7 +49,6 @@ class PermitApplication < ApplicationRecord
   # Custom validation
 
   validate :jurisdiction_has_matching_submission_contact
-  validate :pid_or_pin_presence
   validates :nickname, presence: true
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
@@ -691,17 +690,6 @@ class PermitApplication < ApplicationRecord
         :jurisdiction,
         I18n.t(
           "activerecord.errors.models.permit_application.attributes.jurisdiction.no_contact"
-        )
-      )
-    end
-  end
-
-  def pid_or_pin_presence
-    if pin.blank? && pid.blank?
-      errors.add(
-        :base,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.pid_or_pin"
         )
       )
     end
