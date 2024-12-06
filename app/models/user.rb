@@ -172,6 +172,11 @@ class User < ApplicationRecord
     manager?
   end
 
+  # Override active_for_authentication? to check if the user is discarded
+  def active_for_authentication?
+    super && !discarded?
+  end
+
   private
 
   def omniauth_provider_appropriate_for_role
