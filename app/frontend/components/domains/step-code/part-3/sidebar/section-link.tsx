@@ -1,11 +1,23 @@
 import { Flex, Text } from "@chakra-ui/react"
-import { CircleDashed } from "@phosphor-icons/react"
+import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
+import { t } from "i18next"
+import * as R from "ramda"
 import React from "react"
-import { useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
+import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { IPart3NavLink } from "../../../../../types/types"
 import { RouterLink } from "../../../../shared/navigation/router-link"
+
+interface IProps {
+  navLink: IPart3NavLink
+}
 
 export const SectionLink = function StepCodeSidebarSectionLink({ navLink, ...rest }) {
   const { section } = useParams()
+  const { stepCode } = usePart3StepCode()
+  const { checklist } = stepCode
+  const { pathname } = useLocation()
+  let baseUrl = R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
 
   const isActive = section == navLink.location
   const activeProps = isActive
@@ -18,7 +30,7 @@ export const SectionLink = function StepCodeSidebarSectionLink({ navLink, ...res
     : {}
 
   return (
-    <RouterLink to={`/part-3-step-code/${navLink.location}`} textDecoration="none" _hover={{ textDecoration: "none" }}>
+    <RouterLink to={`${baseUrl}/${navLink.location}`} textDecoration="none" _hover={{ textDecoration: "none" }}>
       <Flex
         align="center"
         pl={6}
@@ -32,14 +44,13 @@ export const SectionLink = function StepCodeSidebarSectionLink({ navLink, ...res
         {...rest}
       >
         <Flex flex="none">
-          {/* TODO: complete/incomplete status */}
-          {/* {completedSections.start ? ( */}
-          {/* <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} /> */}
-          {/* ) : ( */}
-          <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />
-          {/* )}{" "} */}
+          {checklist.isComplete(navLink.key) ? (
+            <CheckCircle color="var(--chakra-colors-semantic-success)" size={18} />
+          ) : (
+            <CircleDashed color="var(--chakra-colors-greys-grey01)" size={18} />
+          )}
         </Flex>
-        <Text>{navLink.title}</Text>
+        <Text>{t(`stepCode.part3.sidebar.${navLink.key}`)}</Text>
       </Flex>
     </RouterLink>
   )

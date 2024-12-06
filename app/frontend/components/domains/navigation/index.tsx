@@ -464,7 +464,7 @@ const AppRoutes = observer(() => {
           />
           <Route
             path="/permit-applications/:permitApplicationId/edit/part-3-step-code"
-            element={<RedirectScreen path="start" />}
+            element={<Part3StepCodeForm />}
           />
           <Route
             path="/permit-applications/:permitApplicationId/edit/part-3-step-code/:section"

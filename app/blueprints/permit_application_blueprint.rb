@@ -86,7 +86,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
       )
     end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
-    association :step_code, blueprint: StepCodeBlueprint
+    association :step_code, blueprint: ->(step_code) { step_code.blueprint }
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base

@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { RemoveScroll } from "react-remove-scroll"
+import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
@@ -17,15 +18,15 @@ import { Title } from "./title"
 
 export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   const {
-    stepCodeStore: { isLoaded, fetchStepCodes, currentStepCode },
+    stepCodeStore: { isLoaded, fetchPart9StepCodes },
   } = useMst()
-
+  const { stepCode } = usePart9StepCode()
   const { currentPermitApplication } = usePermitApplication()
 
   const { t } = useTranslation()
 
   useEffect(() => {
-    const fetch = async () => await fetchStepCodes()
+    const fetch = async () => await fetchPart9StepCodes()
     !isLoaded && fetch()
   }, [isLoaded])
 
@@ -54,7 +55,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
             <Container maxW="container.lg">
               <FloatingHelpDrawer top="24" />
               <Container my={10} maxW="780px" px={0}>
-                {!currentStepCode ? (
+                {!stepCode ? (
                   <VStack spacing={8} align="start" w="full" pb={20}>
                     <Title />
                     <Info />

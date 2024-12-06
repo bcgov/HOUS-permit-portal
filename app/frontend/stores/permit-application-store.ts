@@ -84,8 +84,8 @@ export const PermitApplicationStoreModel = types
   .actions((self) => ({
     setCurrentPermitApplication(permitApplicationId) {
       self.currentPermitApplication = permitApplicationId
-      self.currentPermitApplication &&
-        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode)
+      self.currentPermitApplication?.stepCode &&
+        self.rootStore.stepCodeStore.setCurrentStepCode(self.currentPermitApplication.stepCode.id)
     },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
