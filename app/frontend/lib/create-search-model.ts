@@ -1,7 +1,7 @@
 import { flow, Instance, types } from "mobx-state-tree"
 import { ESortDirection } from "../types/enums"
 import { ISort, TVisibility } from "../types/types"
-import { setQueryParam } from "../utils/utility-functions"
+import { parseBoolean, setQueryParam } from "../utils/utility-functions"
 
 interface IFetchOptions {
   reset?: boolean
@@ -114,8 +114,29 @@ export const createSearchModel = <TSortField, TFetchOptions extends IFetchOption
       }),
       resetAll() {
         self.resetPages()
-        self.applySort(null)
+        self.clearSort()
         self.setQuery(null)
+      },
+      syncWithUrl() {
+        const queryParams = new URLSearchParams(location.search)
+        const query = queryParams.get("query")
+        const currentPage = queryParams.get("currentPage")
+        const countPerPage = queryParams.get("countPerPage")
+        const showArchived = queryParams.get("showArchived")
+        const visibility = queryParams.get("visibility") as TVisibility
+        const sortDirection = queryParams.get("sortDirection") as ESortDirection
+        const sortField = queryParams.get("sortField")
+
+        self.query = query ? decodeURIComponent(query) : null
+
+        self.currentPage = currentPage ? parseInt(decodeURIComponent(currentPage)) : 1
+
+        self.countPerPage = countPerPage ? parseInt(decodeURIComponent(countPerPage)) : 10
+        self.showArchived = showArchived ? parseBoolean(showArchived) : false
+        self.visibility = visibility
+        self.sort = sortDirection && sortField ? { direction: sortDirection, field: sortField as TSortField } : null
+
+        self.setFilters(queryParams)
       },
     }))
 

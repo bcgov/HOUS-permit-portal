@@ -63,7 +63,8 @@ export function setQueryParam(key: string, value: string | string[]) {
     searchParams.set(key, value)
   }
   const stringParams = searchParams.toString()
-  window.history.replaceState({}, "", `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`)
+  const newUrl = `${window.location.pathname}${stringParams ? "?" + stringParams : ""}`
+  window.history.replaceState({}, "", newUrl)
 }
 
 export function isMultiOptionRequirement(requirementType: ERequirementType): boolean {

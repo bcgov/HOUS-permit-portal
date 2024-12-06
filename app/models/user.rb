@@ -167,6 +167,16 @@ class User < ApplicationRecord
     end
   end
 
+  def promotable_to_regional_rm?
+    # may double-promote existing RRMs with more jurisdictions
+    manager?
+  end
+
+  # Override active_for_authentication? to check if the user is discarded
+  def active_for_authentication?
+    super && !discarded?
+  end
+
   private
 
   def omniauth_provider_appropriate_for_role
@@ -238,11 +248,13 @@ class User < ApplicationRecord
 
   def unique_omniauth_uid
     return unless omniauth_uid.present?
+
     existing_user =
       User
         .where.not(omniauth_uid: nil)
         .find_by(omniauth_uid:, omniauth_provider:)
     return unless existing_user && existing_user != self
+
     if !super_admin?
       errors.add(
         :base,
@@ -256,6 +268,7 @@ class User < ApplicationRecord
 
   def single_jurisdiction
     return if jurisdictions.count <= 1
+
     errors.add(:base, :single_jurisdiction)
   end
 

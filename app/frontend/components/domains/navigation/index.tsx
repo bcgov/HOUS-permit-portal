@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import React, { Suspense, lazy, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { FlashMessage } from "../../shared/base/flash-message"
@@ -330,6 +331,8 @@ const AppRoutes = observer(() => {
       navigate(afterLoginPath)
     }
   }, [afterLoginPath, loggedIn])
+
+  useSyncPathWithStore()
 
   const superAdminOnlyRoutes = (
     <>

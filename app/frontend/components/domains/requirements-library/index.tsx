@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
-import { ToggleArchivedButton } from "../../shared/buttons/show-archived-button"
+import { ToggleArchivedButton } from "../../shared/buttons/toggle-archived-button"
 import { RequirementBlocksTable } from "./requirement-blocks-table"
 import { RequirementsBlockModal } from "./requirements-block-modal"
 

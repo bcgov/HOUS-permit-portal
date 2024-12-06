@@ -42,6 +42,9 @@ export const UserStoreModel = types
     get takenEmails(): string[] {
       return self.invitationResponse?.data?.emailTaken?.map((user) => user.email) || []
     },
+    get failedEmails(): string[] {
+      return self.invitationResponse?.data?.failed?.map((obj) => obj.email) || []
+    },
     getSortColumnHeader(field: EUserSortFields) {
       //@ts-ignore
       return t(`user.fields.${toCamelCase(field)}`)
