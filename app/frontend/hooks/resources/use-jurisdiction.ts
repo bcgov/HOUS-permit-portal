@@ -44,8 +44,18 @@ export const useJurisdiction = () => {
     if (currentUser?.isRegionalReviewManager && currentUser?.jurisdiction?.id != jurisdictionId) {
       const originalPath = findMatchingPathTemplate(pathname)
       if (!originalPath) return
+
+      // Get the existing query params
+      const existingQuery = window.location.search
+
+      // Generate the new path
       const path = generatePath(originalPath, { jurisdictionId: currentUser.jurisdiction.slug })
-      navigate(path, { replace: true })
+
+      // Append the existing query params to the new path
+      const newPathWithQuery = `${path}${existingQuery}`
+
+      // Navigate to the new path while preserving query params
+      navigate(newPathWithQuery, { replace: true })
     }
   }, [currentUser?.jurisdiction])
 
