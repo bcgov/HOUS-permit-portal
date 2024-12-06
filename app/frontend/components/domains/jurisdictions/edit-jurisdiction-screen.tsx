@@ -20,9 +20,7 @@ export type TEditJurisdictionFormData = {
   name: string
 }
 
-interface IEditJurisdictionScreenProps {}
-
-export const EditJurisdictionScreen = observer(({}: IEditJurisdictionScreenProps) => {
+export const EditJurisdictionScreen = observer(() => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
   const getDefaults = () => ({ name: currentJurisdiction?.name })
