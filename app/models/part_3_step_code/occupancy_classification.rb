@@ -15,9 +15,5 @@ class Part3StepCode::OccupancyClassification < ApplicationRecord
        ]
   enum occupancy_type: %i[baseline step_code], _suffix: :occupancy
 
-  validates :performance_requirement, presence: true, if: :baseline_occupancy?
-  validates :energy_step_required, presence: true, if: :step_code_occupancy?
-  validates :zero_carbon_step_required,
-            presence: true,
-            if: :step_code_occupancy?
+  validates :key, presence: true, uniqueness: { scope: :checklist_id }
 end

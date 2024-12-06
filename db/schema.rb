@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_04_184650) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_06_005741) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -317,6 +317,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_04_184650) do
     t.datetime "updated_at", null: false
     t.index ["checklist_id"],
             name: "index_occupancy_classifications_on_checklist_id"
+    t.index %w[key checklist_id],
+            name: "index_occupancy_classifications_on_key_and_checklist_id",
+            unique: true
   end
 
   create_table "part_3_step_code_checklists",

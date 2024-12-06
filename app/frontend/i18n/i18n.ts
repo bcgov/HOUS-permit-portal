@@ -924,6 +924,7 @@ const options = {
         stepCode: {
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
+            errorTitle: "There is a problem",
             sidebar: {
               overview: "Overview",
               start: "Start page",
@@ -994,16 +995,22 @@ const options = {
             },
             locationDetails: {
               heading: "Building and location details",
+              errorDescription: "",
               instructions: "Set key parameters for your project.",
               aboveGradeStories: {
                 label: "Number of above grade stories",
                 hint: "Include half-storeys and relevant below-grade storeys",
+                error: "Enter the number of above grade stories for this project.",
               },
               hdd: {
                 label: "Heating degree days below 18°C",
                 hint: "HDD is specified by the AHJ",
+                error: "Enter the heating degree days below 18°C for this project.",
               },
-              climateZone: "Climate zone",
+              climateZone: {
+                label: "Climate zone",
+                error: "Select the climate zone for this project.",
+              },
               climateZones: {
                 zone_4: "Zone 4",
                 zone_5: "Zone 5",
@@ -1013,6 +1020,71 @@ const options = {
                 zone_8: "Zone 8",
               },
               cta: "Save and continue",
+            },
+            baselineOccupancies: {
+              heading: "Occupancy classifications for buildings with a baseline",
+              instructions:
+                "Building projects with occupancy classifications subject to Step 2 (NECB Part 8) requirements or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model.<br /><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
+              isRelevant: "Does your project include any of the these occupancy classifications?",
+              disabledCtaTooltip: "Please select an occupancy",
+              cta: "Save and continue",
+              occupancies: {
+                label: "Which occupancy classifications apply to this building? Select all that apply:",
+                error: "Select the occupancy classifications from the list that are in this building.",
+              },
+              occupancyKeys: {
+                performing_arts_assembly: "<strong>A1</strong> Assembly (viewing performance arts)",
+                other_assembly: "<strong>A2</strong> Assembly (not elsewhere categorized)",
+                arena_assembly: "<strong>A3</strong> Assembly (arena)",
+                open_air_assembly: "<strong>A4</strong> Assembly (occupants in open air)",
+                detention: "<strong>B1</strong> Detention",
+                treatment: "<strong>B2</strong> Treatment",
+                care: "<strong>B3</strong> Care",
+                high_hazard_industrial: "<strong>F1</strong> High-hazard industrial",
+                medium_hazard_industrial: "<strong>F2</strong> Medium-hazard industrial",
+                low_hazard_industrial: "<strong>F3</strong> Low-hazard industrial",
+              },
+            },
+            baselineDetails: {
+              heading: "Baseline comparison details",
+              instructions:
+                "Enter the baseline comparison details for each occupancy classification subject to Step 2 (NECB Part 8) requirements or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code.",
+              modelledFloorArea: {
+                label: "What is the modelled floor area for {{occupancyName}} in square metres?",
+                units: "m<sup>2</sup>",
+                error: "Enter the modelled floor area for {{occupancyName}}.",
+              },
+              performanceRequirement: {
+                label: "What is the performance requirement for {{occupancyName}}?",
+                error: "Select the performance requirement for {{occupancyName}}.",
+              },
+              isCustomRequirement:
+                "Does the authority having jurisdiction (AHJ) require higher performance than BC Building Code minimums for {{occupancyName}}?",
+              requirementSource: {
+                label: "What is the source of this performance requirement?",
+                hint: "If this project’s authority having jurisdiction requires higher performance than BC minimums, enter the bylaw, policy, or document(s) that dictate this project’s energy requirements. ",
+                error: "Enter the requirement source for {{occupancyName}}.",
+              },
+              cta: "Save and continue",
+            },
+            performanceRequirements: {
+              step_2_necb: "Step 2 (NECB)",
+              ashrae: "ASHRAE 90.1",
+              "%_better_ashrae": "Percent (%) better than ASHRAE 90.1",
+              necb: "NECB",
+              "%_better_necb": "Percent (%) better than NECB",
+            },
+            baselineOccupancyKeys: {
+              performing_arts_assembly: "A1 Assembly (viewing performance arts)",
+              other_assembly: "A2 Assembly (not elsewhere categorized)",
+              arena_assembly: "A3 Assembly (arena)",
+              open_air_assembly: "A4 Assembly (occupants in open air)",
+              detention: "B1 Detention",
+              treatment: "B2 Treatment",
+              care: "B3 Care",
+              high_hazard_industrial: "F1 High-hazard industrial",
+              medium_hazard_industrial: "F2 Medium-hazard industrial",
+              low_hazard_industrial: "F3 Low-hazard industrial",
             },
           },
           title: "Step code auto-compliance tool",

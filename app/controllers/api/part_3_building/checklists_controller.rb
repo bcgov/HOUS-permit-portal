@@ -27,7 +27,16 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :heating_degree_days,
       :climate_zone,
       section_completion_status: {
-      }
+      },
+      baseline_occupancies_attributes: %i[
+        _destroy
+        id
+        key
+        modelled_floor_area
+        performance_requirement
+        percent_better_requirement
+        requirement_source
+      ]
     )
   end
 end
