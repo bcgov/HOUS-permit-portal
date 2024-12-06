@@ -6,6 +6,7 @@ import { BaselineOccupancy } from "./baseline-occupancy"
 import { DistrictEnergy } from "./district-energy"
 import { FuelTypes } from "./fuel-types"
 import { LocationDetails } from "./location-details"
+import { ModelledOutputs } from "./modelled-outputs"
 import { ProjectDetails } from "./project-details"
 import { StartPage } from "./start-page"
 
@@ -27,5 +28,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <BaselineOccupancy />
     case "fuel-types":
       return <FuelTypes />
+    case "modelled-outputs":
+      return <ModelledOutputs />
   }
 })

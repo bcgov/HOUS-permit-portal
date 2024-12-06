@@ -1014,6 +1014,21 @@ const options = {
               },
               cta: "Save and continue",
             },
+            modelledOutputs: {
+              heading: "Modelled outputs for entire building",
+              description:
+                "Enter the annual energy consumption by end use and fuel type in kWh. For end uses served by multiple fuels or fuel mixtures, enter as separate end uses. If you need additional use types, you can add additional rows to the table.",
+              energyOutputsTable: {
+                column: {
+                  use: "Use",
+                  annualEnergy: "Annual energy (kWh)",
+                  fuelType: "Fuel type",
+                  emissionsFactor: "Emissions factor (kgCO2e/kWh)",
+                  emissions: "Emissions (kgCO2e)",
+                },
+                addUseType: "Add use type",
+              },
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:
