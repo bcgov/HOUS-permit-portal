@@ -3,7 +3,16 @@ class Part3StepCode::Checklist < ApplicationRecord
 
   belongs_to :step_code, optional: true
 
-  has_many :occupancy_classifications
+  has_many :occupancy_classifications, dependent: :destroy
+  has_many :baseline_occupancies,
+           -> { where(occupancy_type: :baseline) },
+           class_name: "Part3StepCode::OccupancyClassification"
+  accepts_nested_attributes_for :baseline_occupancies, allow_destroy: true
+  has_many :step_code_occupancies,
+           -> { where(occupancy_type: :step_code) },
+           class_name: "Part3StepCode::OccupancyClassification"
+  accepts_nested_attributes_for :step_code_occupancies, allow_destroy: true
+
   has_many :fuel_types
   has_many :make_up_air_fuels
   has_many :document_references

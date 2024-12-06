@@ -4,7 +4,6 @@ import {
   FormControl,
   FormControlProps,
   FormLabel,
-  Heading,
   Input,
   InputGroup,
   InputLeftElement,
@@ -19,6 +18,7 @@ import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { SectionHeading } from "./shared/section-heading"
 
 export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails() {
   const i18nPrefix = "stepCode.part3.projectDetails"
@@ -39,14 +39,12 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
 
   return (
     <>
-      <Flex direction="column" gap={2} pb={4}>
-        <Heading as="h2" fontSize="2xl" variant="yellowline">
-          {t(`${i18nPrefix}.heading`)}
-        </Heading>
+      <Flex direction="column" gap={2} pb={6}>
+        <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
         <Text fontSize="md">{t(`${i18nPrefix}.instructions`)}</Text>
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Flex direction="column" gap={{ base: 6, xl: 2 }} pb={4}>
+        <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
           <Field label={t(`${i18nPrefix}.name`)} value={checklist.projectName} />
           <Flex gap={{ base: 6, xl: 6 }} direction={{ base: "column", xl: "row" }}>
             <FormControl width={{ base: "auto", xl: "430px" }}>
@@ -79,7 +77,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             label={t(`${i18nPrefix}.version`)}
             value={t(`${i18nPrefix}.buildingCodeVersions.${checklist.buildingCodeVersion}`)}
           />
-          <Flex direction="column" gap={2} pb={4}>
+          <Flex direction="column" gap={2}>
             <Text fontSize="md" fontWeight="bold">
               {t(`${i18nPrefix}.confirm`)}
             </Text>
@@ -108,7 +106,7 @@ interface IFieldProps extends FormControlProps {
 
 const Field = function Field({ label, value, ...props }: IFieldProps) {
   return (
-    <FormControl mb={{ base: 0, xl: 4 }} {...props}>
+    <FormControl {...props}>
       <FormLabel>{label}</FormLabel>
       <Input isDisabled value={value} textOverflow="ellipsis" />
     </FormControl>

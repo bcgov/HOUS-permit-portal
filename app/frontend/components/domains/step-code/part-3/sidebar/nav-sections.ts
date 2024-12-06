@@ -25,7 +25,7 @@ export const navLinks: IPart3NavLink[] = [
     subLinks: [
       {
         key: "baselineDetails",
-        location: "details",
+        location: "baseline-details",
         subLinks: [],
       },
     ],
@@ -146,11 +146,25 @@ export const navSections: IPart3NavSection[] = [
 ]
 
 export const defaultSectionCompletionStatus = {
-  start: false,
-  projectDetails: false,
-  energySetup: false,
-  districtEnergy: false,
-  baselineOccupancies: false,
-  baselineDetails: false,
-  fuelTypes: false,
+  start: { complete: false, relevant: true },
+  projectDetails: { complete: false, relevant: true },
+  locationDetails: { complete: false, relevant: true },
+  baselineOccupancies: { complete: false, relevant: true },
+  baselineDetails: { complete: false, relevant: false },
+  districtEnergy: { complete: false, relevant: true },
+  fuelTypes: { complete: false, relevant: true },
+  additionalFuelTypes: { complete: false, relevant: false },
+  baselinePerformance: { complete: false, relevant: false },
+  stepCodeOccupancies: { complete: false, relevant: true },
+  stepCodePerformanceRequirements: { complete: false, relevant: false },
+  modelledOutputs: { complete: false, relevant: true },
+  renewableEnergy: { complete: false, relevant: true },
+  overheatingRequirements: { complete: false, relevant: true },
+  projectAdjustments: { complete: false, relevant: true },
+  documentReferences: { complete: false, relevant: true },
+  performanceCharacteristics: { complete: false, relevant: true },
+  hvac: { complete: false, relevant: true },
+  contact: { complete: false, relevant: true },
+  requirementsSummary: { complete: false, relevant: true },
+  stepCodeSummary: { complete: false, relevant: true },
 }

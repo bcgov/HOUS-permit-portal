@@ -1,4 +1,4 @@
-import { Center, Container, Flex, FormLabel, Show } from "@chakra-ui/react"
+import { Center, Flex, FormLabel, Show } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React, { Suspense, useEffect } from "react"
@@ -90,11 +90,20 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
                   <Sidebar />
                 </Flex>
               </Show>
-              <Flex direction="column" flex={1} pos="sticky" overflow="auto" top={0}>
+              <Flex
+                direction="column"
+                flex={1}
+                pos="sticky"
+                overflow="auto"
+                top={0}
+                pl={{ base: 0, xl: 20 }}
+                pt={{ base: 0, xl: 20 }}
+                pb={{ base: 0, xl: 10 }}
+              >
                 <FloatingHelpDrawer top="24" zIndex={1} />
-                <Container flex={1} my={10} maxW={{ base: "none", xl: "780px" }} px={{ base: 6, xl: 0 }} py={3}>
+                <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>
                   <FormSection />
-                </Container>
+                </Flex>
               </Flex>
             </Flex>
           )}
