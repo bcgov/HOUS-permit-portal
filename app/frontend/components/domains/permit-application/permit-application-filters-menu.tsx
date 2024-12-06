@@ -11,7 +11,7 @@ interface ISearchSortProps {
 }
 
 export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer(
-  ({ i18nPrefix, sortFields }: ISearchSortProps) => {
+  ({  sortFields }: ISearchSortProps) => {
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { hasCollaboratorFilter, setHasCollaboratorFilter, searchPermitApplications, resetFilters } =
@@ -55,7 +55,7 @@ export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer
                   onChange={(e) => handleCheckboxChange(!!e.target.checked)}
                   mb={2}
                 >
-                  {t(`${i18nPrefix}.filterMenu.collaborating`)}
+                  {t(`permitApplication.filterMenu.collaborating`)}
                 </Checkbox>
               </Flex>
             <Divider borderColor="greys.grey03" my={4} />
