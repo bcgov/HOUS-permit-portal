@@ -25,32 +25,29 @@ interface IEditJurisdictionScreenProps {}
 export const EditJurisdictionScreen = observer(({}: IEditJurisdictionScreenProps) => {
   const { t } = useTranslation()
   const { currentJurisdiction, error } = useJurisdiction()
-  const { jurisdictionStore } = useMst()
- // const { currentJurisdiction } = jurisdictionStore
-  
   const getDefaults = () => ({ name: currentJurisdiction?.name })
   
   const formMethods = useForm<TEditJurisdictionFormData>({
     mode: "onChange",
-    defaultValues: { name: currentJurisdiction?.name },
+    defaultValues: getDefaults(),
   })
-  const { handleSubmit, formState, control, watch } = formMethods
+  const { handleSubmit, formState, control, watch, reset } = formMethods
   const { isSubmitting } = formState
-  const nameWatch = watch('name')
   const navigate = useNavigate()
 
   const onSubmit = async (formData) => {
-    console.log(formData);
-    //await update(formData)
+    const submissionData = { ...formData }
+    await currentJurisdiction.update(submissionData)
   }
 
+  useEffect(() => {
+    reset(getDefaults())
+  }, [currentJurisdiction?.id])
   
    if (error) return <ErrorScreen error={error} />
   
   return (
     <Container maxW="container.lg" p={8} as="main">
-      {nameWatch}
-      {/* {currentJurisdiction?.name} */}
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack alignItems={"flex-start"} spacing={5} w={"full"} h={"full"}>
@@ -68,7 +65,7 @@ export const EditJurisdictionScreen = observer(({}: IEditJurisdictionScreenProps
                 >
                   <Flex gap={8}>
                     <Box w="100%">
-                      {/* <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required /> */}
+                      <TextFormControl label={t("jurisdiction.new.nameLabel")} fieldName={"name"} required />
                     </Box>
                   </Flex>
                 </Flex>
