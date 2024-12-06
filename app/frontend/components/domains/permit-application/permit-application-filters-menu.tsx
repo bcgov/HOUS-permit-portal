@@ -5,13 +5,8 @@ import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../setup/root"
 
-interface ISearchSortProps {
-  i18nPrefix: string
-  sortFields: string[]
-}
 
-export const PermitApplicationFiltersMenu: React.FC<ISearchSortProps> = observer(
-  ({  sortFields }: ISearchSortProps) => {
+export const PermitApplicationFiltersMenu = observer(() => {
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { hasCollaboratorFilter, setHasCollaboratorFilter, searchPermitApplications, resetFilters } =
