@@ -1261,8 +1261,22 @@ const options = {
                 fail: "This building does not comply with overheating criteria. Worst case suite/zone overheating hours are over the limit.",
               },
             },
+            modelledOutputs: {
+              heading: "Modelled outputs for entire building",
+              description:
+                "Enter the annual energy consumption by end use and fuel type in kWh. For end uses served by multiple fuels or fuel mixtures, enter as separate end uses. If you need additional use types, you can add additional rows to the table.",
+              energyOutputsTable: {
+                column: {
+                  use: "Use",
+                  annualEnergy: "Annual energy (kWh)",
+                  fuelType: "Fuel type",
+                  emissionsFactor: "Emissions factor (kgCO2e/kWh)",
+                  emissions: "Emissions (kgCO2e)",
+                },
+                addUseType: "Add use type",
+              },
+            },
           },
-
           title: "Step code auto-compliance tool",
           subTitle:
             "You can use this tool to generate your BC Energy Step Code Compliance Report. Approval is not automatic. After you've submitted your application, local officials will review it. They may ask you to fix issues or show that your application meets requirements before approving it.",
