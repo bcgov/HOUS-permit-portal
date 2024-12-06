@@ -456,6 +456,22 @@ export enum EClimateZone {
   zone8 = "zone_8",
 }
 
+export enum EBuildingCodeVersion {
+  BCBC2002 = "BCBC_2024",
+  BCBC2018Rev5 = "BCBC_2018_rev_5",
+  BCBC2018Rev4 = "BCBC_2018_rev_4",
+  BCBC2018Rev3 = "BCBC_2018_rev_3",
+  BCBC2018Rev2 = "BCBC_2018_rev_2",
+  BCBC2018Rev1 = "BCBC_2018_rev_1",
+}
+
+export enum EProjectStage {
+  newDraft = "new_draft",
+  newlySubmitted = "newly_submitted",
+  revisionsRequested = "revisions_requested",
+  resubmitted = "resubmitted",
+}
+
 export enum EBaselinePerformanceRequirement {
   step2NECB = "step_2_necb",
   ASHRAE = "ashrae",

@@ -14,8 +14,7 @@ interface IProps {
 
 export const SectionLink = function StepCodeSidebarSectionLink({ navLink, ...rest }) {
   const { section } = useParams()
-  const { stepCode } = usePart3StepCode()
-  const { checklist } = stepCode
+  const { checklist } = usePart3StepCode()
   const { pathname } = useLocation()
   let baseUrl = R.pipe(R.split("/"), R.dropLast(1), R.join("/"))(pathname)
 

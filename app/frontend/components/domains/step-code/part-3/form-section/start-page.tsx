@@ -10,9 +10,7 @@ import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step
 
 export const StartPage = observer(function Part3StepCodeFormStartPage() {
   const i18nPrefix = "stepCode.part3.startPage"
-  const {
-    stepCode: { checklist },
-  } = usePart3StepCode()
+  const { checklist } = usePart3StepCode()
   const navigate = useNavigate()
   const location = useLocation()
 

@@ -10,12 +10,10 @@ export const Part3NavLinks = function Part3StepCodeNavLinks() {
         {t("stepCode.checklistGuide")}
       </Button> */}
 
-      <>
-        <Button variant="secondary">{t("stepCode.saveAndGoBack")}</Button>
-        <Button variant="primary" type="submit">
-          {t("stepCode.markAsComplete")}
-        </Button>
-      </>
+      <Button variant="secondary">{t("stepCode.saveAndGoBack")}</Button>
+      <Button variant="primary" type="submit">
+        {t("stepCode.markAsComplete")}
+      </Button>
     </HStack>
   )
 }

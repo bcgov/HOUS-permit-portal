@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_27_205040) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_03_165751) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -457,6 +457,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_27_205040) do
     t.datetime "revisions_requested_at", precision: nil
     t.boolean "first_nations", default: false
     t.uuid "sandbox_id"
+    t.datetime "newly_submitted_at", precision: nil
     t.index ["activity_id"], name: "index_permit_applications_on_activity_id"
     t.index ["jurisdiction_id"],
             name: "index_permit_applications_on_jurisdiction_id"
