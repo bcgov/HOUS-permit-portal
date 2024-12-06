@@ -7,6 +7,7 @@ import { DistrictEnergy } from "./district-energy"
 import { FuelTypes } from "./fuel-types"
 import { AdditionalFuelTypes } from "./fuel-types/additional-fuel-types"
 import { LocationDetails } from "./location-details"
+import { ModelledOutputs } from "./modelled-outputs"
 import { ProjectDetails } from "./project-details"
 import { StartPage } from "./start-page"
 
@@ -30,5 +31,7 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <FuelTypes />
     case "additional-fuel-types":
       return <AdditionalFuelTypes />
+    case "modelled-outputs":
+      return <ModelledOutputs />
   }
 })
