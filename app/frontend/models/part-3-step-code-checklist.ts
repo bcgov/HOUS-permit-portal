@@ -14,6 +14,7 @@ import {
   EProjectStage,
 } from "../types/enums"
 import {
+  DeepPartial,
   IBaselineOccupancy,
   IDocumentReference,
   IEnergyOutput,
@@ -97,7 +98,10 @@ export const Part3StepCodeChecklistModel = types
   .extend(withEnvironment())
   .views((self) => ({
     isComplete(key: TPart3NavLinkKey): boolean {
-      return self.sectionCompletionStatus[key]
+      return self.sectionCompletionStatus[key]?.complete
+    },
+    isRelevant(key: TPart3NavLinkKey): boolean {
+      return self.sectionCompletionStatus[key]?.relevant
     },
   }))
   .views((self) => ({
@@ -108,7 +112,18 @@ export const Part3StepCodeChecklistModel = types
   .actions((self) => ({
     completeSection: flow(function* (key: TPart3NavLinkKey) {
       let updatedStatus = R.clone(self.sectionCompletionStatus)
-      updatedStatus[key] = true
+      updatedStatus[key] = { complete: true, relevant: true }
+      const response = yield self.environment.api.updatePart3Checklist(self.id, {
+        sectionCompletionStatus: updatedStatus,
+      })
+      if (response.ok) {
+        self.sectionCompletionStatus = updatedStatus
+        return true
+      }
+    }),
+    bulkUpdateCompletionStatus: flow(function* (updatedSections: DeepPartial<IPart3SectionCompletionStatus>) {
+      let updatedStatus = R.clone(self.sectionCompletionStatus)
+      updatedStatus = R.mergeDeepRight(updatedStatus, updatedSections) as IPart3SectionCompletionStatus
       const response = yield self.environment.api.updatePart3Checklist(self.id, {
         sectionCompletionStatus: updatedStatus,
       })

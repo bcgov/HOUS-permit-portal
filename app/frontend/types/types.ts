@@ -6,6 +6,7 @@ import { IRequirement } from "../models/requirement"
 import {
   EAutoComplianceModule,
   EAutoComplianceType,
+  EBaselineOccupancyKey,
   EBaselinePerformanceRequirement,
   ECollaborationType,
   ECollaboratorType,
@@ -34,6 +35,12 @@ import {
   EWindowsGlazedDoorsPerformanceType,
   EZeroCarbonStep,
 } from "./enums"
+
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>
+    }
+  : T
 
 export type TLatLngTuple = [number, number]
 
@@ -551,13 +558,17 @@ export type TVisibility =
   | EVisibilityValues
   | `${EVisibilityValues},${EVisibilityValues}`
   | `${EVisibilityValues},${EVisibilityValues},${EVisibilityValues}`
+
 export interface IBaselineOccupancy {
+  id?: string
+  key: EBaselineOccupancyKey
   modelledFloorArea: string
   performanceRequirement: EBaselinePerformanceRequirement
   percentBetterRequirement?: string
   requirementSource?: string
 }
 export interface IStepCodeOccupancy {
+  id?: string
   modelledFloorArea: string
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
@@ -600,28 +611,33 @@ export interface IPart3NavSection {
   navLinks: IPart3NavLink[]
 }
 
+export interface IPart3SectionCompletionStatusEntry {
+  complete: boolean
+  relevant: boolean
+}
+
 export interface IPart3SectionCompletionStatus {
-  start: boolean
-  projectDetails: boolean
-  locationDetails: boolean
-  baselineOccupancies: boolean
-  baselineDetails: boolean
-  districtEnergy: boolean
-  fuelTypes: boolean
-  additionalFuelTypes: boolean
-  baselinePerformance: boolean
-  stepCodeOccupancies: boolean
-  stepCodePerformanceRequirements: boolean
-  modelledOutputs: boolean
-  renewableEnergy: boolean
-  overheatingRequirements: boolean
-  projectAdjustments: boolean
-  documentReferences: boolean
-  performanceCharacteristics: boolean
-  hvac: boolean
-  contact: boolean
-  requirementsSummary: boolean
-  stepCodeSummary: boolean
+  start: IPart3SectionCompletionStatusEntry
+  projectDetails: IPart3SectionCompletionStatusEntry
+  locationDetails: IPart3SectionCompletionStatusEntry
+  baselineOccupancies: IPart3SectionCompletionStatusEntry
+  baselineDetails: IPart3SectionCompletionStatusEntry
+  districtEnergy: IPart3SectionCompletionStatusEntry
+  fuelTypes: IPart3SectionCompletionStatusEntry
+  additionalFuelTypes: IPart3SectionCompletionStatusEntry
+  baselinePerformance: IPart3SectionCompletionStatusEntry
+  stepCodeOccupancies: IPart3SectionCompletionStatusEntry
+  stepCodePerformanceRequirements: IPart3SectionCompletionStatusEntry
+  modelledOutputs: IPart3SectionCompletionStatusEntry
+  renewableEnergy: IPart3SectionCompletionStatusEntry
+  overheatingRequirements: IPart3SectionCompletionStatusEntry
+  projectAdjustments: IPart3SectionCompletionStatusEntry
+  documentReferences: IPart3SectionCompletionStatusEntry
+  performanceCharacteristics: IPart3SectionCompletionStatusEntry
+  hvac: IPart3SectionCompletionStatusEntry
+  contact: IPart3SectionCompletionStatusEntry
+  requirementsSummary: IPart3SectionCompletionStatusEntry
+  stepCodeSummary: IPart3SectionCompletionStatusEntry
 }
 
 export type TPart3NavLinkKey = keyof IPart3SectionCompletionStatus
