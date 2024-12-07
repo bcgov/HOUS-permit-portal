@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
+import { SectionHeading } from "./shared/section-heading"
 
 export const StartPage = observer(function Part3StepCodeFormStartPage() {
   const i18nPrefix = "stepCode.part3.startPage"
@@ -25,9 +26,7 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
 
   return (
     <Flex direction="column" gap={6}>
-      <Heading as="h2" fontSize="2xl" variant="yellowline">
-        {t(`${i18nPrefix}.heading`)}
-      </Heading>
+      <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
       <Text fontSize="md">{t(`${i18nPrefix}.description`)}</Text>
       <Flex direction="column" gap={4} p={4} bg="theme.blueLight" color="theme.blueAlt" rounded="lg">
         <Heading as="h4" fontSize="lg">

@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useParams } from "react-router-dom"
 import { BaselineOccupancies } from "./baseline-occupancies"
-import { BaselineOccupancy } from "./baseline-occupancy"
+import { BaselineDetails } from "./baseline-occupancies/baseline-details"
 import { DistrictEnergy } from "./district-energy"
 import { FuelTypes } from "./fuel-types"
 import { LocationDetails } from "./location-details"
@@ -23,8 +23,8 @@ export const FormSection = observer(function Part3StepCodeFormSection() {
       return <DistrictEnergy />
     case "baseline-occupancies":
       return <BaselineOccupancies />
-    case "details":
-      return <BaselineOccupancy />
+    case "baseline-details":
+      return <BaselineDetails />
     case "fuel-types":
       return <FuelTypes />
   }

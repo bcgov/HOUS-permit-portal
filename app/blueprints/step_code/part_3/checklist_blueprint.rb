@@ -32,4 +32,7 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
         checklist.heating_degree_days
       )
   end
+
+  association :baseline_occupancies,
+              blueprint: StepCode::Part3::BaselineOccupancyBlueprint
 end

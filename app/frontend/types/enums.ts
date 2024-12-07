@@ -472,6 +472,19 @@ export enum EProjectStage {
   resubmitted = "resubmitted",
 }
 
+export enum EBaselineOccupancyKey {
+  performingArtsAssembly = "performing_arts_assembly",
+  otherAssembly = "other_assembly",
+  arenaAssembly = "arena_assembly",
+  openAirassembly = "open_air_assembly",
+  detention = "detention",
+  treatment = "treatment",
+  care = "care",
+  highHazardindustrial = "high_hazard_industrial",
+  mediumHazardIndustrial = "medium_hazard_industrial",
+  lowHazardIndustrial = "low_hazard_industrial",
+}
+
 export enum EBaselinePerformanceRequirement {
   step2NECB = "step_2_necb",
   ASHRAE = "ashrae",
