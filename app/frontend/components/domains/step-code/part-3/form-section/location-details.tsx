@@ -36,7 +36,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
       climateZone: checklist.climateZone,
     },
   })
-  const { isLoading, isValid, isSubmitted, errors } = formState
+  const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
     const updated = await checklist.update(values)
@@ -114,7 +114,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
               )}
             />
           </FormControl>
-          <Button type="submit" variant="primary" isLoading={isLoading} isDisabled={isLoading}>
+          <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
             {t(`${i18nPrefix}.cta`)}
           </Button>
         </Flex>
