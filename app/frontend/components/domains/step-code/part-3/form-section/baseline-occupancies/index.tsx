@@ -44,7 +44,7 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
     },
   })
 
-  const { isLoading, isValid, isSubmitted, errors } = formState
+  const { isSubmitting, isValid, isSubmitted, errors } = formState
 
   const onSubmit = async (values) => {
     if (!isValid) return
@@ -158,13 +158,13 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
                 />
               </FormControl>
               <FormControl>
-                <Button type="submit" variant="primary" isLoading={isLoading} isDisabled={isLoading}>
+                <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
                   {t(`${i18nPrefix}.cta`)}
                 </Button>
               </FormControl>
             </>
           ) : isRelevant == "no" ? (
-            <Button type="submit" variant="primary" isLoading={isLoading} isDisabled={isLoading}>
+            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
               {t(`${i18nPrefix}.cta`)}
             </Button>
           ) : null}

@@ -36,6 +36,14 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         performance_requirement
         percent_better_requirement
         requirement_source
+      ],
+      fuel_types_attributes: %i[
+        _destroy
+        id
+        key
+        description
+        emissions_factor
+        source
       ]
     )
   end

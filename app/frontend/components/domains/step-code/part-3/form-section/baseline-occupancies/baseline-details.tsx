@@ -39,7 +39,7 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
   })
   const { handleSubmit, formState, reset } = formMethods
 
-  const { isLoading, isValid, isSubmitted } = formState
+  const { isSubmitting, isValid, isSubmitted } = formState
 
   const onSubmit = async (values) => {
     if (!isValid) return
@@ -90,7 +90,7 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
                 </AccordionItem>
               ))}
             </Accordion>
-            <Button type="submit" variant="primary" isLoading={isLoading} isDisabled={isLoading}>
+            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
               {t(`${i18nPrefix}.cta`)}
             </Button>
           </Flex>

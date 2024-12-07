@@ -8,6 +8,7 @@ import {
   ECoolingSystemPlant,
   ECoolingSystemType,
   EDHWSystemType,
+  EFuelType,
   EHeatingSystemPlant,
   EHeatingSystemType,
   EPart3StepCodeSoftware,
@@ -102,6 +103,9 @@ export const Part3StepCodeChecklistModel = types
     },
     isRelevant(key: TPart3NavLinkKey): boolean {
       return self.sectionCompletionStatus[key]?.relevant
+    },
+    get districtEnergyFuelType(): IFuelType | undefined {
+      return self.fuelTypes.find((ft) => ft.key == EFuelType.districtEnergy)
     },
   }))
   .views((self) => ({

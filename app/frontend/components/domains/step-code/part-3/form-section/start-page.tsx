@@ -16,7 +16,7 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
   const location = useLocation()
 
   const { handleSubmit, formState } = useForm()
-  const { isLoading } = formState
+  const { isSubmitting } = formState
 
   const onSubmit = async () => {
     await checklist.completeSection("start")
@@ -44,7 +44,7 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
         </Box>
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Button type="submit" variant="primary" isLoading={isLoading} isDisabled={isLoading}>
+        <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
           {t(`${i18nPrefix}.cta`)}
         </Button>
       </form>

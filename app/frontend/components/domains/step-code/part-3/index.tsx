@@ -97,8 +97,8 @@ export const Part3StepCodeForm = observer(function Part3StepCodeForm() {
                 overflow="auto"
                 top={0}
                 pl={{ base: 0, xl: 20 }}
-                pt={{ base: 0, xl: 20 }}
-                pb={{ base: 0, xl: 10 }}
+                pt={20}
+                pb={10}
               >
                 <FloatingHelpDrawer top="24" zIndex={1} />
                 <Flex direction="column" flex={1} maxW="780px" px={6} py={3}>

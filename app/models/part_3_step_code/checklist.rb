@@ -14,6 +14,8 @@ class Part3StepCode::Checklist < ApplicationRecord
   accepts_nested_attributes_for :step_code_occupancies, allow_destroy: true
 
   has_many :fuel_types
+  accepts_nested_attributes_for :fuel_types, allow_destroy: true
+
   has_many :make_up_air_fuels
   has_many :document_references
   has_many :reference_energy_outputs,
