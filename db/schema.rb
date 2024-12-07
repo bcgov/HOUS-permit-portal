@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_03_165751) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_04_184650) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -264,6 +264,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_03_165751) do
     t.string "slug"
     t.integer "map_zoom"
     t.string "external_api_state", default: "g_off", null: false
+    t.integer "heating_degree_days"
     t.index ["prefix"], name: "index_jurisdictions_on_prefix", unique: true
     t.index ["regional_district_id"],
             name: "index_jurisdictions_on_regional_district_id"
@@ -323,7 +324,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_03_165751) do
                default: -> { "gen_random_uuid()" },
                force: :cascade do |t|
     t.uuid "step_code_id"
-    t.decimal "building_height"
+    t.integer "building_height"
     t.integer "building_code_version"
     t.integer "heating_degree_days"
     t.integer "climate_zone"
@@ -342,8 +343,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_03_165751) do
     t.string "simulation_weather_file"
     t.decimal "above_grade_wall_area"
     t.decimal "window_to_wall_area_ratio"
-    t.decimal "vertical_facade_to_floor_area_ratio"
-    t.decimal "window_to_floor_area_ratio"
     t.decimal "design_airtightness"
     t.decimal "tested_airtightness"
     t.decimal "modelled_infiltration_rate"
