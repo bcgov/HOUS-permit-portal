@@ -1091,6 +1091,25 @@ const options = {
               medium_hazard_industrial: "F2 Medium-hazard industrial",
               low_hazard_industrial: "F3 Low-hazard industrial",
             },
+            districtEnergy: {
+              heading: "District energy system",
+              isRelevant: "Is this project connected to a district energy system?",
+              description: {
+                label: "Name or description of district energy system",
+                error: "Enter name or description of district energy system.",
+              },
+              emissionsFactor: {
+                label: "Emissions factor (in kgCo<sub>2e</sub>/kWh)",
+                hint: "The emissions factor for all systems or equipment powered by the system's energy",
+                error: "Enter emissions factor.",
+              },
+              source: {
+                label: "Reference for source of emissions factor value",
+                hint: "Provide actual district energy system information, or details as indicated by applicable AHJ bylaw or policy",
+                error: "Enter reference for source of emissions factor value.",
+              },
+              cta: "Save and continue",
+            },
           },
           title: "Step code auto-compliance tool",
           subTitle:

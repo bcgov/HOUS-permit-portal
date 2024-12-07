@@ -568,3 +568,15 @@ export enum EDHWSystemType {
   suiteGas = "suite_gas",
   other = "other",
 }
+
+export enum EFuelType {
+  electricity = "electricity",
+  naturalGas = "natural_gas",
+  districtEnergy = "district_energy",
+  propane = "propane",
+  lightFuelOil = "light_fuel_oil",
+  heavyFuelOil = "heavy_fuel_oil",
+  dieselFuel = "diesel_fuel",
+  woodFuel = "wood_fuel",
+  other = "other",
+}
