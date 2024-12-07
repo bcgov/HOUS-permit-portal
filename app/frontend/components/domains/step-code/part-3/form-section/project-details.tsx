@@ -29,7 +29,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
   const location = useLocation()
 
   const { handleSubmit, formState } = useForm()
-  const { isLoading } = formState
+  const { isSubmitting } = formState
 
   const onSubmit = async () => {
     await checklist.completeSection("projectDetails")
@@ -81,7 +81,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
             <Text fontSize="md" fontWeight="bold">
               {t(`${i18nPrefix}.confirm`)}
             </Text>
-            <Button type="submit" variant="primary" isLoading={isLoading} isDisabled={isLoading}>
+            <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
               {t(`${i18nPrefix}.cta`)}
             </Button>
           </Flex>

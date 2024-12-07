@@ -14,6 +14,7 @@ import {
   EEnabledElectiveFieldReason,
   EEnergyStep,
   EFossilFuelsPresence,
+  EFuelType,
   EHotWaterPerformanceType,
   EJurisdictionTypes,
   ENotificationActionType,
@@ -574,9 +575,9 @@ export interface IStepCodeOccupancy {
   zeroCarbonStepRequired: EZeroCarbonStep
   requirementSource?: string
 }
-
 export interface IFuelType {
-  name: string
+  id?: string
+  key: EFuelType
   description: string
   emissionsFactor: string
   source: string
