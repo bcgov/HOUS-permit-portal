@@ -8,7 +8,7 @@ class StepCode::Part3::V0::Requirements::References::ClimateZone
     "zone_8" => 8000
   }
 
-  def self.value(zone)
-    LOOKUP[zone]
+  def self.value(hdd)
+    LOOKUP.find { |_zone, hdd_limit| hdd <= hdd_limit }&.first
   end
 end
