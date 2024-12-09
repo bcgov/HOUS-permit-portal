@@ -6,12 +6,10 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  ListItem,
   Radio,
   RadioGroup,
-  SimpleGrid,
   Stack,
-  UnorderedList,
+  Text,
 } from "@chakra-ui/react"
 import { ErrorMessage } from "@hookform/error-message"
 import { t } from "i18next"
@@ -22,25 +20,24 @@ import { Controller, useForm } from "react-hook-form"
 import { Trans } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
-import { EBaselineOccupancyKey } from "../../../../../../types/enums"
 import { CustomMessageBox } from "../../../../../shared/base/custom-message-box"
 import { SectionHeading } from "../shared/section-heading"
 
-export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOccupancies() {
-  const i18nPrefix = "stepCode.part3.baselineOccupancies"
+export const FuelTypes = observer(function Part3StepCodeFormFuelTypes() {
+  const i18nPrefix = "stepCode.part3.fuelTypes"
   const { checklist } = usePart3StepCode()
 
   const [isRelevant, setIsRelevant] = useState(
-    !R.isEmpty(checklist.baselineOccupancies) ? "yes" : checklist.isComplete("baselineOccupancies") && "no"
+    !R.isEmpty(checklist.uncommonFuelTypes) ? "yes" : checklist.isComplete("fuelTypes") && "no"
   )
 
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { handleSubmit, formState, control, reset } = useForm({
+  const { handleSubmit, formState, resetField, reset, control } = useForm({
     mode: "onSubmit",
     defaultValues: {
-      baselineOccupancies: checklist.baselineOccupancies.map((oc) => oc.key),
+      fuelTypes: checklist.uncommonFuelTypes.map((ft) => ft.key),
     },
   })
 
@@ -50,49 +47,49 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
     if (!isValid) return
 
     if (isRelevant == "no") {
-      // update the checklist to remove baseline occupancies if there are any
+      // update the checklist to remove custom fuel types if there are any
       const updated =
-        R.isEmpty(checklist.baselineOccupancies) ||
+        R.isEmpty(checklist.uncommonFuelTypes) ||
         (await checklist.update({
-          baseline_occupancies_attributes: checklist.baselineOccupancies.map((oc) => ({ id: oc.id, _destroy: true })),
+          fuelTypesAttributes: checklist.uncommonFuelTypes.map((ft) => ({ id: ft.id, _destroy: true })),
         }))
       if (updated) {
         await checklist.bulkUpdateCompletionStatus({
-          baselineOccupancies: { complete: true },
-          baselineDetails: { relevant: false },
+          fuelTypes: { complete: true },
+          additionalFuelTypes: { relevant: false },
         })
       } else {
         return
       }
     } else {
       // create new selections, keep existing selections, delete removed selections
-      const newSelections = values.baselineOccupancies
-        .filter((ocKey) => !checklist.baselineOccupancies.map((oc) => oc.key).includes(ocKey))
+      const newSelections = values.fuelTypes
+        .filter((ocKey) => !checklist.uncommonFuelTypes.map((oc) => oc.key).includes(ocKey))
         .map((ocKey) => ({ key: ocKey }))
-      const existingSelections = checklist.baselineOccupancies
-        .filter((oc) => values.baselineOccupancies.includes(oc.key))
+      const existingSelections = checklist.uncommonFuelTypes
+        .filter((oc) => values.fuelTypes.includes(oc.key))
         .map((oc) => ({ id: oc.id }))
-      const deletedSelections = checklist.baselineOccupancies
-        .filter((oc) => !values.baselineOccupancies.includes(oc.key))
+      const deletedSelections = checklist.uncommonFuelTypes
+        .filter((oc) => !values.fuelTypes.includes(oc.key))
         .map((oc) => ({ id: oc.id, _destroy: true }))
 
-      values.baselineOccupanciesAttributes = [...newSelections, ...existingSelections, ...deletedSelections]
-      delete values.baselineOccupancies
+      values.fuelTypesAttributes = [...newSelections, ...existingSelections, ...deletedSelections]
+      delete values.fuelTypes
 
       const updated = await checklist.update(values)
       if (updated) {
         await checklist.bulkUpdateCompletionStatus({
-          baselineOccupancies: { complete: true },
-          baselineDetails: { relevant: true },
+          fuelTypes: { complete: true },
+          additionalFuelTypes: { relevant: !R.isEmpty(checklist.otherFuelTypes) },
         })
       } else {
         return
       }
     }
 
-    const nextSectionPath = isRelevant == "yes" ? "baseline-details" : "district-energy"
+    const nextSectionPath = !R.isEmpty(checklist.otherFuelTypes) ? "additional-fuel-types" : "baseline-performance"
 
-    navigate(location.pathname.replace("baseline-occupancies", nextSectionPath))
+    navigate(location.pathname.replace("fuel-types", nextSectionPath))
   }
 
   useEffect(() => {
@@ -102,19 +99,20 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
     }
   }, [isValid])
 
+  useEffect(() => {
+    if (isRelevant == "no") {
+      resetField("fuelTypes")
+    }
+  }, [isRelevant])
+
   return (
     <>
       <Flex direction="column" gap={2} pb={6}>
         {!isValid && isSubmitted && <CustomMessageBox title={t("stepCode.part3.errorTitle")} status="error" />}
         <SectionHeading>{t(`${i18nPrefix}.heading`)}</SectionHeading>
-        <Trans
-          i18nKey={`${i18nPrefix}.instructions`}
-          components={{
-            ul: <UnorderedList ml={0} pl={6} />,
-            li: <ListItem mb={0} />,
-            strong: <strong />,
-          }}
-        />
+        <Text fontSize="md">
+          <Trans i18nKey={`${i18nPrefix}.instructions`} components={{ br: <br /> }} />
+        </Text>
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex direction="column" gap={{ base: 6, xl: 6 }} pb={4}>
@@ -134,28 +132,28 @@ export const BaselineOccupancies = observer(function Part3StepCodeFormBaselineOc
           {isRelevant == "yes" ? (
             <>
               <FormControl>
-                <FormLabel pb={1}>{t(`${i18nPrefix}.occupancies.label`)}</FormLabel>
+                <FormLabel pb={1}>{t(`${i18nPrefix}.fuelTypes.label`)}</FormLabel>
                 <FormHelperText mb={1} mt={0} color="semantic.error">
-                  <ErrorMessage errors={errors} name="baselineOccupancies" />
+                  <ErrorMessage errors={errors} name="fuelTypes" />
                 </FormHelperText>
                 <Controller
-                  name="baselineOccupancies"
-                  rules={{ required: t(`${i18nPrefix}.occupancies.error`) }}
+                  name="fuelTypes"
+                  rules={{ required: t(`${i18nPrefix}.fuelTypes.error`) }}
                   control={control}
                   render={({ field: { onChange, value } }) => (
                     <CheckboxGroup defaultValue={value} onChange={onChange}>
-                      <SimpleGrid columns={2} spacing={1}>
-                        {Object.values(EBaselineOccupancyKey).map((key) => (
+                      <Flex direction="column">
+                        {Object.values(checklist.uncommonFuelTypeKeys).map((key) => (
                           <Checkbox key={key} value={key}>
                             <Trans
-                              i18nKey={`${i18nPrefix}.occupancyKeys.${key}`}
+                              i18nKey={`${i18nPrefix}.fuelTypeKeys.${key}`}
                               components={{
                                 strong: <strong />,
                               }}
                             />
                           </Checkbox>
                         ))}
-                      </SimpleGrid>
+                      </Flex>
                     </CheckboxGroup>
                   )}
                 />

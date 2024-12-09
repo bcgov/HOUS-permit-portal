@@ -82,7 +82,7 @@ export const ProjectDetails = observer(function Part3StepCodeFormProjectDetails(
               {t(`${i18nPrefix}.confirm`)}
             </Text>
             <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t(`${i18nPrefix}.cta`)}
+              {t("stepCode.part3.cta")}
             </Button>
           </Flex>
           <Text fontSize="md">
