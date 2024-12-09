@@ -44,6 +44,14 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
         description
         emissions_factor
         source
+      ],
+      modelled_energy_outputs_attributes: %i[
+        _destroy
+        id
+        fuel_type_id
+        use_type
+        name
+        annual_energy
       ]
     )
   end

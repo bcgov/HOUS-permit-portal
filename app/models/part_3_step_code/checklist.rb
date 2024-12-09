@@ -23,7 +23,9 @@ class Part3StepCode::Checklist < ApplicationRecord
            class_name: "Part3StepCode::EnergyOutput"
   has_many :modelled_energy_outputs,
            -> { where(source: :modelled) },
-           class_name: "Part3StepCode::EnergyOutput"
+           class_name: "Part3StepCode::EnergyOutput",
+           dependent: :destroy
+  accepts_nested_attributes_for :modelled_energy_outputs, allow_destroy: true
 
   delegate :building_permit_number,
            :nickname,
