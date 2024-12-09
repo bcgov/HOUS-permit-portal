@@ -25,7 +25,8 @@ class UserBlueprint < Blueprinter::Base
            :created_at,
            :confirmation_sent_at,
            :discarded_at,
-           :last_sign_in_at
+           :last_sign_in_at,
+           :department
     association :preference, blueprint: PreferenceBlueprint
   end
 

@@ -28,6 +28,7 @@ export const UserModel = types
     lastSignInAt: types.maybeNull(types.Date),
     eulaAccepted: types.maybeNull(types.boolean),
     invitedByEmail: types.maybeNull(types.string),
+    department: types.maybeNull(types.string),
     preference: types.frozen<IPreference>(),
     invitedToJurisdiction: types.maybeNull(types.frozen<IJurisdiction>()),
     licenseAgreements: types.maybeNull(types.frozen<ILicenseAgreement[]>()),

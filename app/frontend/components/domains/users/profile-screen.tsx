@@ -48,13 +48,14 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
     currentUser.unconfirmedEmail || (currentUser.isUnconfirmed && currentUser.confirmationSentAt)
 
   const getDefaults = () => {
-    const { firstName, lastName, nickname, certified, organization, preference } = currentUser
+    const { firstName, lastName, nickname, certified, organization, preference, department } = currentUser
     return {
       firstName,
       lastName,
       certified,
       organization,
       preferenceAttributes: preference,
+      department
     }
   }
   const formMethods = useForm({
@@ -199,6 +200,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                     </Link>
                   </Text>
                 </Alert>
+              )}
+              { currentUser.isReviewStaff && (
+                <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
+                  <TextFormControl label={t("user.department")} fieldName="department" required />
+                </Flex>
               )}
             </Section>
 
