@@ -164,7 +164,7 @@ export const RequirementForm = observer(
 
     const handleOpenStepCode = async (_event) => {
       await triggerSave?.()
-      navigate("step-code", { state: { enableStepCodeRoute: true } })
+      navigate("part-9-step-code")
     }
 
     const handleOpenContactAutofill = async (event) => {
