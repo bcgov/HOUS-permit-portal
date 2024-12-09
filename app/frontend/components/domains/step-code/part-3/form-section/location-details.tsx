@@ -115,7 +115,7 @@ export const LocationDetails = observer(function Part3StepCodeFormLocationDetail
             />
           </FormControl>
           <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-            {t(`${i18nPrefix}.cta`)}
+            {t("stepCode.part3.cta")}
           </Button>
         </Flex>
       </form>
