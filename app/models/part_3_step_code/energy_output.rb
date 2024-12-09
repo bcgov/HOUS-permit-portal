@@ -4,8 +4,18 @@ class Part3StepCode::EnergyOutput < ApplicationRecord
   belongs_to :checklist
   belongs_to :fuel_type
 
-  # We only require the name if the use type is other as it's user defined
-  validates :name, presence: true, if: -> { use_type == "other" }
+  # Validate name presence for 'other' type and ensure it's name is unique within the checklist
+  # This is because 'other' energy outputs are user defined
+  validates :name, presence: true, if: -> { other? }
+  validates :name, uniqueness: { scope: :checklist_id }, if: -> { other? }
+
+  # Validate use_type uniqueness within checklist, except for 'other' use type as it's user defined
+  # and it's uniqueness is determined by the name instead of the use_type
+  validates :use_type,
+            uniqueness: {
+              scope: :checklist_id
+            },
+            unless: -> { other? }
 
   enum source: %i[modelled reference]
   enum use_type: {
