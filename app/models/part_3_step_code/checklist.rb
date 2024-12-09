@@ -13,7 +13,7 @@ class Part3StepCode::Checklist < ApplicationRecord
            class_name: "Part3StepCode::OccupancyClassification"
   accepts_nested_attributes_for :step_code_occupancies, allow_destroy: true
 
-  has_many :fuel_types
+  has_many :fuel_types, dependent: :destroy
   accepts_nested_attributes_for :fuel_types, allow_destroy: true
 
   has_many :make_up_air_fuels
