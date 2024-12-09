@@ -925,6 +925,7 @@ const options = {
           part3: {
             title: "Energy and Zero Carbon Step Codes for Step 3 Buildings",
             errorTitle: "There is a problem",
+            cta: "Save and continue",
             sidebar: {
               overview: "Overview",
               start: "Start page",
@@ -1019,7 +1020,6 @@ const options = {
                 zone_7b: "Zone 7B",
                 zone_8: "Zone 8",
               },
-              cta: "Save and continue",
             },
             baselineOccupancies: {
               heading: "Occupancy classifications for buildings with a baseline",
@@ -1027,7 +1027,6 @@ const options = {
                 "Building projects with occupancy classifications subject to Step 2 (NECB Part 8) requirements or Subsection 10.2.2.1.(1)(a) or (b) of Division B of the BC Building Code must provide certain details to compare against a baseline energy model.<br /><br/>These occupancy classifications are:<br /><br /><ul><li><strong>A1</strong> Assembly (viewing performing arts)</li><li><strong>A2</strong> Assembly (not elsewhere categorized)</li><li><strong>A3</strong> Assembly (area)</li><li><strong>B1</strong> Detention</li><li><strong>B2</strong> Treatment</li><li><strong>B3</strong> Care</li><li><strong>F1</strong> High-hazard industrial</li><li><strong>F2</strong> Medium-hazard industrial</li><li><strong>F3</strong> Low-hazard industrial</li></ul>",
               isRelevant: "Does your project include any of the these occupancy classifications?",
               disabledCtaTooltip: "Please select an occupancy",
-              cta: "Save and continue",
               occupancies: {
                 label: "Which occupancy classifications apply to this building? Select all that apply:",
                 error: "Select the occupancy classifications from the list that are in this building.",
@@ -1065,7 +1064,6 @@ const options = {
                 hint: "If this project’s authority having jurisdiction requires higher performance than BC minimums, enter the bylaw, policy, or document(s) that dictate this project’s energy requirements. ",
                 error: "Enter the requirement source for {{occupancyName}}.",
               },
-              cta: "Save and continue",
             },
             performanceRequirements: {
               step_2_necb: "Step 2 (NECB)",
@@ -1103,7 +1101,51 @@ const options = {
                 hint: "Provide actual district energy system information, or details as indicated by applicable AHJ bylaw or policy",
                 error: "Enter reference for source of emissions factor value.",
               },
-              cta: "Save and continue",
+            },
+            fuelTypes: {
+              heading: "Fuel types",
+              instructions:
+                "If your project uses fuel types other than electricity, natural gas, or district energy, you can provide details about them here. <br /><br />These additional fuel types are not listed in the BC Building Code. They are provided as a reference that can be used for compliance with the Zero Carbon Step Code at the discretion of the Authority Having Jurisdiction (AHJ).",
+              isRelevant:
+                "Does this project use any fuel types other than electricity, natural gas, or district energy?",
+              fuelTypes: {
+                label: "Fuel types used in this project other than electricity, natural gas, or district energy",
+                error: "Select the fuel types from the list that are used by this building.",
+              },
+              fuelTypeKeys: {
+                electricity: "Electricity",
+                natural_gas: "Natural Gas",
+                district_energy: "District Energy",
+                propane: "Propane",
+                light_fuel_oil: "Light fuel oil (standard)",
+                heavy_fuel_oil: "Heavy fuel oil",
+                diesel_fuel: "Diesel fuel (standard)",
+                wood_fuel: "Wood fuel",
+                other: "Other fuel type(s) not listed here",
+              },
+            },
+            additionalFuelTypes: {
+              heading: "Additional fuel types",
+              instructions:
+                "If your project uses other fuel types, you can enter them below. These fuel types are not included in the BC Building Code. The Authority Having Jurisdiction (AHJ) will decide if they meet the requirements of the Zero Carbon Step Code.<br/><br/>For your reference, emissions factors for some fuels have been imported from <download>National Inventory Report 1990-2020: Greenhouse Gas Sources and Sinks in Canada – Part 2. En81-4- 2020-2-eng.pdf</download>",
+              description: {
+                label: "Fuel type",
+                hint: "Enter only one fuel type, additional types can be added later",
+                error: "Enter the fuel type description",
+              },
+              emissionsFactor: {
+                label: "Emissions factor for this fuel type (in kgCO<sub>2e</sub>/kWh)",
+                hint: "The emissions factor for all systems or equipment powered by the system's energy",
+                error: "Enter the emissions factor for this fuel type",
+              },
+              source: {
+                label: "Reference for source of emissions factor value",
+                hint: "The name of the document where this emissions factor value was found",
+                error: "Enter the reference source of the emissions factor value.",
+              },
+              addMore: {
+                label: "Do you need to add any other fuel types?",
+              },
             },
           },
           title: "Step code auto-compliance tool",

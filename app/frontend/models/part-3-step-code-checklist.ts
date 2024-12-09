@@ -107,8 +107,20 @@ export const Part3StepCodeChecklistModel = types
     get districtEnergyFuelType(): IFuelType | undefined {
       return self.fuelTypes.find((ft) => ft.key == EFuelType.districtEnergy)
     },
+    get defaultFuelTypeKeys(): EFuelType[] {
+      return [EFuelType.electricity, EFuelType.naturalGas, EFuelType.districtEnergy]
+    },
   }))
   .views((self) => ({
+    get uncommonFuelTypeKeys(): EFuelType[] {
+      return Object.values(EFuelType).filter((key) => !R.includes(key, self.defaultFuelTypeKeys))
+    },
+    get uncommonFuelTypes(): IFuelType[] {
+      return self.fuelTypes.filter((ft) => !R.includes(ft.key, self.defaultFuelTypeKeys))
+    },
+    get otherFuelTypes(): IFuelType[] {
+      return self.fuelTypes.filter((ft) => ft.key == EFuelType.other)
+    },
     get currentNavLink(): IPart3NavLink | undefined {
       return navLinks.find((l) => !self.isComplete(l.key))
     },

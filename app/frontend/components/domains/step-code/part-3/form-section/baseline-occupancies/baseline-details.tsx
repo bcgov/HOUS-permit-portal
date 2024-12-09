@@ -91,7 +91,7 @@ export const BaselineDetails = observer(function Part3StepCodeFormBaselineDetail
               ))}
             </Accordion>
             <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-              {t(`${i18nPrefix}.cta`)}
+              {t("stepCode.part3.cta")}
             </Button>
           </Flex>
         </form>

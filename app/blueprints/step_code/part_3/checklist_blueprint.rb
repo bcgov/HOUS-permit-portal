@@ -35,5 +35,9 @@ class StepCode::Part3::ChecklistBlueprint < Blueprinter::Base
 
   association :baseline_occupancies,
               blueprint: StepCode::Part3::BaselineOccupancyBlueprint
-  association :fuel_types, blueprint: StepCode::Part3::FuelTypeBlueprint
+  association :fuel_types,
+              blueprint:
+                StepCode::Part3::FuelTypeBlueprint do |checklist, _options|
+    checklist.fuel_types + Part3StepCode::FuelType.defaults
+  end
 end
