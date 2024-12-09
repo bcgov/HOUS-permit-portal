@@ -201,7 +201,7 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
                   </Text>
                 </Alert>
               )}
-              { (currentUser.isReviewer || currentUser.isReviewManager || currentUser.isRegionalReviewManager) && (
+              { currentUser.isReviewStaff && (
                 <Flex gap={{ base: 4, md: 6 }} direction={{ base: "column", md: "row" }}>
                   <TextFormControl label={t("user.department")} fieldName="department" required />
                 </Flex>
