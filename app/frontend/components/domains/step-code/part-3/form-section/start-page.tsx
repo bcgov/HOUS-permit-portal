@@ -45,7 +45,7 @@ export const StartPage = observer(function Part3StepCodeFormStartPage() {
       </Flex>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Button type="submit" variant="primary" isLoading={isSubmitting} isDisabled={isSubmitting}>
-          {t(`${i18nPrefix}.cta`)}
+          {t("stepCode.part3.cta")}
         </Button>
       </form>
     </Flex>
