@@ -1,7 +1,7 @@
-import { Button, Grid, GridProps, Input, Text } from "@chakra-ui/react"
+import { Button, Grid, GridProps, Input, InputProps, Text } from "@chakra-ui/react"
 import { Plus } from "@phosphor-icons/react"
 import { computed } from "mobx"
-import { isEmpty } from "ramda"
+import { observer } from "mobx-react-lite"
 import React, { useCallback, useMemo } from "react"
 import { FieldArrayWithId, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
@@ -9,6 +9,7 @@ import { IMpdelledEnergyOutputChecklistForm } from "."
 import { usePart3StepCode } from "../../../../../../hooks/resources/use-part-3-step-code"
 import { EFuelType } from "../../../../../../types/enums"
 import { IFuelType } from "../../../../../../types/types"
+import { formattedStringToNumber, numberToFormattedString } from "../../../../../../utils/utility-functions"
 import FuelTypeSelect from "../../../../../shared/select/selectors/fuel-type-select"
 import { GridColumnHeader } from "../../../part-9/checklist/shared/grid/column-header"
 import { GridData } from "../../../part-9/checklist/shared/grid/data"
@@ -17,11 +18,20 @@ import { GridRowHeader } from "../../../part-9/checklist/shared/grid/row-header"
 interface IProps extends Partial<GridProps> {}
 
 const i18nPrefix = "stepCode.part3.modelledOutputs.energyOutputsTable"
+const sharedInputProps: Partial<InputProps> = {
+  textAlign: "center",
+  w: "114.5px",
+}
+const disabledInputProps: Partial<InputProps> = {
+  isDisabled: true,
+  isReadOnly: true,
+  ...sharedInputProps,
+}
 
 /**
  * Grid component for displaying modelled energy outputs and emissions calculations
  */
-export const ModelledEnergyOutputsGrid = ({ ...rest }: IProps) => {
+export const ModelledEnergyOutputsGrid = observer(({ ...rest }: IProps) => {
   const { t } = useTranslation()
   const { stepCode } = usePart3StepCode()
   const availableFuelTypes = useMemo(
@@ -93,7 +103,7 @@ export const ModelledEnergyOutputsGrid = ({ ...rest }: IProps) => {
   return (
     <Grid
       w="full"
-      templateColumns={`repeat(5, minmax(147px, auto))`}
+      templateColumns={`repeat(5, minmax(auto, 147px))`}
       borderWidth={1}
       borderTopWidth={0}
       borderX={0}
@@ -146,30 +156,18 @@ export const ModelledEnergyOutputsGrid = ({ ...rest }: IProps) => {
                 value={
                   fuelTypeIdsToAnnualEnergy[fuelType.id]?.toLocaleString?.("en-CA", { maximumFractionDigits: 3 }) ?? ""
                 }
-                isReadOnly
-                isDisabled
-                textAlign="center"
-                w="114.5px"
+                {...disabledInputProps}
               />
             </GridData>
             <GridData colSpan={1}>
-              <Input
-                value={getFuelTypeById(fuelType.id)?.emissionsFactor ?? ""}
-                isReadOnly
-                isDisabled
-                textAlign="center"
-                w="114.5px"
-              />
+              <Input value={getFuelTypeById(fuelType.id)?.emissionsFactor ?? ""} {...disabledInputProps} />
             </GridData>
-            <GridData colSpan={1}>
+            <GridData colSpan={1} borderRightWidth={1}>
               <Input
                 value={
                   fuelTypeIdsToEmissions[fuelType.id]?.toLocaleString?.("en-CA", { maximumFractionDigits: 3 }) ?? ""
                 }
-                isReadOnly
-                isDisabled
-                textAlign="center"
-                w="114.5px"
+                {...disabledInputProps}
               />
             </GridData>
           </React.Fragment>
@@ -181,13 +179,13 @@ export const ModelledEnergyOutputsGrid = ({ ...rest }: IProps) => {
         {t(`${i18nPrefix}.totalAnnualEnergy`)}
       </GridRowHeader>
       <GridData colSpan={2}>
-        <Input value={formattedTotalAnnualEnergy} isReadOnly isDisabled textAlign="center" w="114.5px" />
+        <Input value={formattedTotalAnnualEnergy} {...disabledInputProps} />
       </GridData>
       <GridRowHeader colSpan={1} fontWeight="bold" fontSize="sm">
         {t(`${i18nPrefix}.totalEmissions`)}
       </GridRowHeader>
       <GridData colSpan={1} borderRightWidth={1}>
-        <Input value={formattedTotalEmissions} isReadOnly isDisabled textAlign="center" w="114.5px" />
+        <Input value={formattedTotalEmissions} {...disabledInputProps} />
       </GridData>
     </Grid>
   )
@@ -195,7 +193,7 @@ export const ModelledEnergyOutputsGrid = ({ ...rest }: IProps) => {
   function handleAddUseType() {
     console.log("add use type")
   }
-}
+})
 
 interface IModelledEnergyOutputRowProps {
   index: number
@@ -241,15 +239,12 @@ const ModelledEnergyOutputRow = ({
   const selectedFuelType = useMemo(() => getFuelTypeById(fuelTypeId), [fuelTypeId, getFuelTypeById])
 
   const formattedAnnualEnergy = useMemo(() => {
-    return typeof annualEnergy === "number" ? annualEnergy.toLocaleString("en-CA", { maximumFractionDigits: 3 }) : ""
+    return numberToFormattedString(annualEnergy)
   }, [annualEnergy])
 
   const handleChangeAnnualEnergy = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const rawValue = e.target.value.replace(/,/g, "")
-      const value = isEmpty(rawValue) ? 0 : Number(rawValue)
-
-      onChangeAnnualEnergy(typeof value === "number" && !isNaN(value) ? value : 0)
+      onChangeAnnualEnergy(formattedStringToNumber(e.target.value))
     },
     [onChangeAnnualEnergy]
   )
@@ -281,7 +276,7 @@ const ModelledEnergyOutputRow = ({
         <Text>{t(`${i18nPrefix}.useTypes.${field.useType}`)}</Text>
       </GridData>
       <GridData>
-        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} textAlign="center" min={0} />
+        <Input value={formattedAnnualEnergy} onChange={handleChangeAnnualEnergy} min={0} {...sharedInputProps} />
       </GridData>
       <GridData>
         <FuelTypeSelect
@@ -302,13 +297,11 @@ const ModelledEnergyOutputRow = ({
       <GridData>
         <Input
           value={emissionFactor?.toLocaleString("en-CA", { maximumFractionDigits: 3 }) ?? ""}
-          textAlign="center"
-          isReadOnly
-          isDisabled
+          {...disabledInputProps}
         />
       </GridData>
       <GridData borderRightWidth={1}>
-        <Input value={calculatedEmissionsText ?? ""} isReadOnly isDisabled textAlign="center" />
+        <Input value={calculatedEmissionsText ?? ""} {...disabledInputProps} />
       </GridData>
     </React.Fragment>
   )

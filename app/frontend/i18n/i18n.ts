@@ -1307,6 +1307,16 @@ const options = {
                 totalAnnualEnergy: "Total annual energy",
                 totalEmissions: "Total annual emissions",
               },
+              annualEnergyWholeBuildingTable: {
+                tableHeader: "Annual energy for calculations (whole building)",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI (kWh)",
+                annualCoolingEnergyDemand: "Annual cooling energy demand for CEDI (kWh)",
+              },
+              stepCodeBuildingPortionsTable: {
+                tableHeader: "Step code building portions",
+                annualThermalEnergyDemand: "Annual thermal energy demand for TEDI",
+                kwhM2: "(kWh/(m2⋅year))",
+              },
             },
           },
           title: "Step code auto-compliance tool",

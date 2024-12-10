@@ -29,6 +29,8 @@ class Api::Part3Building::ChecklistsController < Api::ApplicationController
       :ref_annual_thermal_energy_demand,
       :generated_electricity,
       :overheating_hours,
+      :total_annual_thermal_energy_demand,
+      :step_code_annual_thermal_energy_demand,
       section_completion_status: {
       },
       baseline_occupancies_attributes: %i[
