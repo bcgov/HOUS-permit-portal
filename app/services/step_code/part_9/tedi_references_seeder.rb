@@ -1,4 +1,4 @@
-class StepCode::TEDIReferencesSeeder
+class StepCode::Part9::TEDIReferencesSeeder
   def self.seed!
     file_name = "#{Rails.root}/db/templates/tedi_references.xlsx"
     if File.exist?(file_name)

@@ -1,10 +1,12 @@
 require "rails_helper"
 
-RSpec.describe StepCode, type: :model do
+RSpec.describe Part9StepCode, type: :model do
   # We do not enforce that permit_applications must be present to reserve room for step code model with no permit application, therefore we do not do it { should belong_to(:permit_application) }
 
   let!(:permit_application) { create(:permit_application) }
-  let!(:step_code) { build(:step_code, permit_application: permit_application) }
+  let!(:step_code) do
+    build(:part_9_step_code, permit_application: permit_application)
+  end
 
   before :each do
     allow(permit_application).to receive(:step_code_plan_field) {

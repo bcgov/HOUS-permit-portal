@@ -121,12 +121,17 @@ class ExternalPermitApplicationService
 
   def get_raw_h2k_files
     unless permit_application.step_code.present? &&
-             !permit_application.step_code.data_entries.empty?
+             !permit_application
+               .step_code
+               .pre_construction_checklist
+               .data_entries
+               .empty?
       return nil
     end
 
     permit_application
       .step_code
+      .pre_construction_checklist
       .data_entries
       .map do |data_entry|
         url = data_entry.h2k_file_url

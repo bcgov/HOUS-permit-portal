@@ -1,6 +1,13 @@
 RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG do
   let(:step) { 3 }
-  let!(:step_code) { create(:step_code, data_entries_attributes:) }
+  let!(:step_code) do
+    create(
+      :part_9_step_code,
+      pre_construction_checklist_attributes: {
+        data_entries_attributes:
+      }
+    )
+  end
   subject(:compliance_checker) do
     StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG.new(
       checklist: step_code.pre_construction_checklist,
@@ -18,13 +25,11 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           electrical_consumption: 0,
           natural_gas_consumption: 0,
           propane_consumption: 0
         },
         {
-          stage: :proposed,
           electrical_consumption: 0,
           natural_gas_consumption: 0,
           propane_consumption: 0
@@ -39,13 +44,11 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           electrical_consumption: 45.53,
           natural_gas_consumption: 0.02,
           propane_consumption: 0
         },
         {
-          stage: :proposed,
           electrical_consumption: 45.93,
           natural_gas_consumption: 0.02,
           propane_consumption: 0
@@ -60,7 +63,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG do
     let(:data_entries_attributes) do
       [
         {
-          stage: :proposed,
           electrical_consumption: 145.53,
           natural_gas_consumption: 32.02,
           propane_consumption: 99.38,
@@ -68,7 +70,6 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::GHG do
           district_energy_ef: 32.3
         },
         {
-          stage: :proposed,
           electrical_consumption: 425.93,
           natural_gas_consumption: 33.02,
           propane_consumption: 98.32,

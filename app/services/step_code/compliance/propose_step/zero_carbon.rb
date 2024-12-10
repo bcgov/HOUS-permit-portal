@@ -1,10 +1,10 @@
 class StepCode::Compliance::ProposeStep::ZeroCarbon < StepCode::Compliance::ProposeStep::Base
   def min_step
-    @min_step ||= ENV["MIN_ZERO_CARBON_STEP"].to_i
+    @min_step ||= ENV["PART_9_MIN_ZERO_CARBON_STEP"].to_i
   end
 
   def max_step
-    @max_step ||= ENV["MAX_ZERO_CARBON_STEP"].to_i
+    @max_step ||= ENV["PART_9_MAX_ZERO_CARBON_STEP"].to_i
   end
 
   def checkers

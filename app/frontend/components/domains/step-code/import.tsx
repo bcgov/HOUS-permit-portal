@@ -31,8 +31,7 @@ export const H2KImport = function StepCodeH2kImport() {
     mode: "onChange",
     defaultValues: {
       permitApplicationId,
-      preConstructionChecklistAttributes: { compliancePath: null },
-      dataEntriesAttributes: [dataEntryAttributes],
+      preConstructionChecklistAttributes: { compliancePath: null, dataEntriesAttributes: [dataEntryAttributes] },
     },
   })
 
@@ -40,7 +39,7 @@ export const H2KImport = function StepCodeH2kImport() {
   const { isValid, isSubmitting } = formState
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "dataEntriesAttributes",
+    name: "preConstructionChecklistAttributes.dataEntriesAttributes",
   })
 
   const handleAddData = () => {
@@ -64,7 +63,7 @@ export const H2KImport = function StepCodeH2kImport() {
       const presignedData = await uploadFile(file, file.name)
 
       setValue(
-        `dataEntriesAttributes.${index}.h2kFile`,
+        `preConstructionChecklistAttributes.dataEntriesAttributes.${index}.h2kFile`,
         {
           id: presignedData?.key.replace(/^cache\//, ""),
           storage: "cache",
@@ -78,9 +77,12 @@ export const H2KImport = function StepCodeH2kImport() {
         { shouldValidate: true }
       )
 
-      clearErrors(`dataEntriesAttributes.${index}.h2kLocal`)
+      clearErrors(`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.h2kLocal`)
     } catch (e) {
-      setError(`dataEntriesAttributes.${index}.h2kLocal`, { type: "manual", message: "Failed to upload file." })
+      setError(`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.h2kLocal`, {
+        type: "manual",
+        message: "Failed to upload file.",
+      })
     } finally {
       setIsUploading({ ...isUploading, [index]: false })
     }
@@ -113,7 +115,7 @@ export const H2KImport = function StepCodeH2kImport() {
                   <FileFormControl
                     inputProps={{ key: field.id, borderWidth: 0, p: 0 }}
                     label={t("stepCode.import.selectFile")}
-                    fieldName={`dataEntriesAttributes.${index}.h2kLocal`}
+                    fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.h2kLocal`}
                     required
                     onChange={(e) => {
                       onUploadFile(e, index)
@@ -137,12 +139,12 @@ export const H2KImport = function StepCodeH2kImport() {
                     <NumberFormControl
                       key={field.id}
                       label={t("stepCode.import.districtEnergyEF")}
-                      fieldName={`dataEntriesAttributes.${index}.districtEnergyEf`}
+                      fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.districtEnergyEf`}
                     />
                     <NumberFormControl
                       inputProps={{ key: field.id }}
                       label={t("stepCode.import.districtEnergyConsumption")}
-                      fieldName={`dataEntriesAttributes.${index}.districtEnergyConsumption`}
+                      fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.districtEnergyConsumption`}
                     />
                   </HStack>
                 </VStack>
@@ -150,12 +152,12 @@ export const H2KImport = function StepCodeH2kImport() {
                   <NumberFormControl
                     inputProps={{ key: field.id }}
                     label={t("stepCode.import.otherGhgEf")}
-                    fieldName={`dataEntriesAttributes.${index}.otherGhgEf`}
+                    fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.otherGhgEf`}
                   />
                   <NumberFormControl
                     inputProps={{ key: field.id }}
                     label={t("stepCode.import.otherGhgConsumption")}
-                    fieldName={`dataEntriesAttributes.${index}.otherGhgConsumption`}
+                    fieldName={`preConstructionChecklistAttributes.dataEntriesAttributes.${index}.otherGhgConsumption`}
                   />
                 </HStack>
               </VStack>

@@ -1,18 +1,13 @@
-class StepCodeDataEntry < ApplicationRecord
+class Part9StepCode::DataEntry < ApplicationRecord
+  self.table_name = "step_code_data_entries"
+
   include H2kFileUploader.Attachment(:h2k_file)
 
-  belongs_to :step_code
-
-  enum stage: %i[proposed as_built]
-
-  before_create :set_stage
-
-  def set_stage
-    self.stage = :proposed
-  end
+  belongs_to :checklist, class_name: "Part9StepCode::Checklist"
+  delegate :stage, to: :checklist
 
   def h2k_file_id
-    h2k_file_data.dig("id")
+    h2k_file_data["id"]
   end
 
   def h2k_file_size

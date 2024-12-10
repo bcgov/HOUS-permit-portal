@@ -1,4 +1,4 @@
-class StepCode::References
+class StepCode::Part9::References
   ZERO_CARBON_REFERENCES = {
     1 => {
       total_carbon: nil,

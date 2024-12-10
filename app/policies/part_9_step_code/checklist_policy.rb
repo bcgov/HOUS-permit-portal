@@ -1,4 +1,4 @@
-class StepCodeChecklistPolicy < ApplicationPolicy
+class Part9StepCode::ChecklistPolicy < ApplicationPolicy
   def show?
     record.step_code.submitter == user || user.review_staff?
   end
