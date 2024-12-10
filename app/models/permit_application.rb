@@ -54,6 +54,7 @@ class PermitApplication < ApplicationRecord
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
   validate :sandbox_belongs_to_jurisdiction
+  validate :template_version_of_live_template
 
   delegate :qualified_name, to: :jurisdiction, prefix: true
   delegate :name, to: :jurisdiction, prefix: true
@@ -256,7 +257,7 @@ class PermitApplication < ApplicationRecord
 
   def current_published_template_version
     # this will eventually be different, if there is a new version it should notify the user
-    RequirementTemplate.published_requirement_template_version(
+    LiveRequirementTemplate.published_requirement_template_version(
       activity,
       permit_type,
       first_nations
@@ -712,6 +713,14 @@ class PermitApplication < ApplicationRecord
 
     unless jurisdiction.sandboxes.include?(sandbox)
       errors.add(:sandbox, "must belong to the jurisdiction")
+    end
+  end
+
+  def template_version_of_live_template
+    return unless template_version.present?
+
+    unless template_version.live?
+      errors.add(:template_version, "must be for a live requirement template")
     end
   end
 end
